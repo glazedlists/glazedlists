@@ -65,7 +65,9 @@ public class XmlBrowser {
             // convert the XML into an EventList, then a TreeList
             SortedList<Tag> sortedList = new SortedList<Tag>(eventList, null);
             FilterList<Tag> filteredList = new FilterList<Tag>(sortedList, matcherEditor);
-            TreeList<Tag> treeList = new TreeList<Tag>(filteredList, new TagTreeFormat());
+
+            DefaultExternalExpansionProvider<Tag> expansionProvider = new DefaultExternalExpansionProvider<Tag>(TreeList.NODES_START_COLLAPSED); 
+            TreeList<Tag> treeList = new TreeList<Tag>(filteredList, new TagTreeFormat(), expansionProvider);
 
             // display the XML in a tree table
             String[] columnFields = new String[] { "qName", "text" };

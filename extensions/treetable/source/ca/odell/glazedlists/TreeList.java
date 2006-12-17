@@ -295,9 +295,16 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      */
     public void setExpanded(int visibleIndex, boolean expanded) {
         Node<E> toExpand = data.get(visibleIndex, VISIBLE_NODES).get();
+        expansionProvider.setExpanded(toExpand.getElement(), toExpand.path, expanded);
         setExpanded(toExpand, expanded);
     }
 
+    /**
+     * Internally control the expanded/collapsed state of a node without
+     * reporting the change to the external {@llink ExpansionProvider}. This
+     * is useful when expand/collapsed state changes as nodes are split and
+     * merged due to tree structure changes.
+     */
     private void setExpanded(Node<E> toExpand, boolean expanded) {
 
         // if we're already in the desired state, give up!
