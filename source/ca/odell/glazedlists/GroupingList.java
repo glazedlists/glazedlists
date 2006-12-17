@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-// the Glazed Lists' change objects
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.impl.Grouper;
 import ca.odell.glazedlists.impl.adt.barcode2.Element;
@@ -17,13 +16,13 @@ import java.util.List;
 /**
  * A grouping list contains elements which are themselves Lists. Those Lists
  * are infact elements of the source list which have been grouped together into
- * a List. The logic of how to group the source elements into groups is specified
- * via a Comparator. Elements for which the Comparator returns 0 are guaranteed
- * to be contained within the same group within this GroupingList. This implies
+ * a List. The logic of how to group the source elements is specified via a
+ * Comparator. Elements for which the Comparator returns 0 are guaranteed to be
+ * contained within the same group within this GroupingList. This implies
  * that source elements may only participate in a single group within this
  * GroupingList.
  *
- * <p> Further transformations may be layered on top of this GroupingList to
+ * <p>Further transformations may be layered on top of this GroupingList to
  * transform the group lists into any other desirable form.
  *
  * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
@@ -46,10 +45,10 @@ import java.util.List;
  */
 public final class GroupingList<E> extends TransformedList<E, List<E>> {
 
-    /** The GroupLists defined by the comparator. They are stored in an IndexedTree so their indices can be quickly updated. */
+    /** The GroupLists defined by the comparator. They are stored in an SimpleTree so their indices can be quickly updated. */
     private SimpleTree<GroupList> groupLists = new SimpleTree<GroupList>();
 
-    /** the grouping service manages creating and deleting groups */
+    /** The Grouper manages creating and deleting groups. */
     private final Grouper<E> grouper;
 
     /**
@@ -68,7 +67,7 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
      * @param source the {@link EventList} containing elements to be grouped
      * @param comparator the {@link Comparator} used to determine groupings
      */
-    public GroupingList(EventList<E> source, Comparator<E> comparator) {
+    public GroupingList(EventList<E> source, Comparator<? super E> comparator) {
         this(new SortedList<E>(source, comparator), comparator, null);
     }
 
@@ -81,19 +80,34 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
      * @param dummyParameter dummy parameter to differentiate between the different
      *      {@link GroupingList} constructors.
      */
-    private GroupingList(SortedList<E> source, Comparator<E> comparator, Void dummyParameter) {
+    private GroupingList(SortedList<E> source, Comparator<? super E> comparator, Void dummyParameter) {
         super(source);
 
         // the grouper handles changes to the SortedList
-        GrouperClient grouperClient = new GrouperClient();
-        this.grouper = new Grouper<E>(source, grouperClient);
+        this.grouper = new Grouper<E>(source, new GrouperClient());
 
         // initialize the tree of GroupLists
-        for(int i = 0; i < grouper.getBarcode().colourSize(Grouper.UNIQUE); i++) {
-            grouperClient.insertGroupList(i);
-        }
+        rebuildGroupListTreeFromBarcode(this.grouper);
 
         source.addListEventListener(this);
+    }
+
+    /**
+     * After the barcode has been updated in response to a change in the
+     * grouping {@link Comparator}, this method is used to rebuild the tree of
+     * GroupLists which map those GroupLists to their overall indices.
+     */
+    private void rebuildGroupListTreeFromBarcode(Grouper<E> grouper) {
+        // clear the contents of the GroupList tree
+        groupLists.clear();
+
+        // fetch our GrouperClient
+        final GrouperClient grouperClient = (GrouperClient) grouper.getClient();
+
+        // build the tree of GroupLists from the barcode
+        for (int i = 0, n = grouper.getBarcode().colourSize(Grouper.UNIQUE); i < n; i++) {
+            grouperClient.insertGroupList(i);
+        }
     }
 
     /**
@@ -140,6 +154,17 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
         }
     }
 
+    /**
+     * Change the {@link Comparator} which determines the groupings presented
+     * by this List. A <tt>null</tt> <code>comparator</code> is the same as
+     * passing {@link GlazedLists#comparableComparator()} as the argument.
+     * 
+     * @param comparator the {@link Comparator} used to determine groupings
+     */
+    public void setComparator(Comparator<? super E> comparator) {
+        ((SortedList<E>) this.source).setComparator(comparator == null ? (Comparator) GlazedLists.comparableComparator() : comparator);
+    }
+
     /** {@inheritDoc} */
     public int size() {
         return grouper.getBarcode().colourSize(Grouper.UNIQUE);
@@ -158,10 +183,36 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
     /** {@inheritDoc} */
     public void listChanged(ListEvent<E> listChanges) {
         updates.beginEvent(true);
-        grouper.listChanged(listChanges);
+
+        // check if this ListEvent was caused due to a change in the
+        // Comparator that creates the groups
+        final SortedList<E> sortedSource = (SortedList<E>) source;
+        final Comparator<? super E> sourceComparator = sortedSource.getComparator();
+        if (sourceComparator != grouper.getComparator()) {
+            // when the grouping comparator is changed in the source list, let
+            // the grouper know so we can rebuild our groups and short circuit
+            // the normal delegation to grouper
+
+            // record the impending removal of all groups before adjusting the barcode
+            for (int i = 0, n = size(); i < n; i++)
+                updates.elementDeleted(0, get(i));
+
+            // adjust the Comparator used by the Grouper (which will change the barcode)
+            grouper.setComparator(sourceComparator);
+
+            // rebuild the tree which maps GroupLists to indices (so the tree matches the new barcode)
+            rebuildGroupListTreeFromBarcode(grouper);
+
+            // insert all new groups (represented by the newly formed barcode)
+            updates.addInsert(0, size() - 1);
+            
+        } else {
+            grouper.listChanged(listChanges);
+        }
         updates.commitEvent();
     }
 
+    /** {@inheritDoc} */
     public List<E> get(int index) {
         return this.groupLists.get(index).get();
     }
@@ -221,11 +272,14 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
      */
     private class GroupList extends AbstractList<E> {
 
-        /** The node within {@link groupLists} that records the index of this GroupList within the GroupingList. */
+        /**
+         * The node within {@link GroupingList#groupLists} that records the
+         * index of this GroupList within the GroupingList.
+         */
         private Element<GroupList> treeNode;
 
         /**
-         * Attach the IndexedTreeNode that tracks this GroupLists position to the
+         * Attach the Element that tracks this GroupLists position to the
          * GroupList itself so it can look up its own position.
          */
         private void setTreeNode(Element<GroupList> treeNode) {

@@ -11,9 +11,10 @@ import java.util.Comparator;
 import java.util.LinkedList;
 
 /**
- * This helper class manages the groups created by dividing up a {@link SortedList}
- * using a {@link Comparator}. This class uses a delegate interface {@link Client}
- * to fire the appropriate events as groups are inserted, updated and changed.
+ * This helper class manages the groups created by dividing up a
+ * {@link SortedList} using a {@link Comparator}. This class uses a delegate
+ * interface {@link Client} to fire the appropriate events as groups are
+ * inserted, updated and changed.
  *
  * @author James Lemieux
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
@@ -55,8 +56,8 @@ public class Grouper<E> {
     private Barcode barcode;
 
     /**
-     * Create a new {@link ca.odell.glazedlists.impl.Grouper} that manages groups for the
-     * specified {@link ca.odell.glazedlists.SortedList}.
+     * Create a new {@link Grouper} that manages groups for the
+     * specified {@link SortedList}.
      */
     public Grouper(SortedList<E> sortedList, Client client) {
         this.sortedList = sortedList;
@@ -85,6 +86,13 @@ public class Grouper<E> {
      */
     public Comparator<? super E> getComparator() {
         return comparator;
+    }
+
+    /**
+     * Get the client which is notified of group changes.
+     */
+    public Client getClient() {
+        return client;
     }
 
     /**
@@ -333,13 +341,13 @@ public class Grouper<E> {
         /**
          * Handle the structure of a group changing.
          *
-         * @param index the location in the source {@link ca.odell.glazedlists.SortedList} that
+         * @param index the location in the source {@link SortedList} that
          *      was inserted, updated or deleted.
-         * @param groupIndex the corresponding group that the {@link ca.odell.glazedlists.SortedList}
+         * @param groupIndex the corresponding group that the {@link SortedList}
          *      element now belongs to, or belonged to in the case of
-         *      {@link ca.odell.glazedlists.event.ListEvent.DELETE} events.
-         * @param groupChangeType one of {@link ca.odell.glazedlists.event.ListEvent#INSERT},
-         *      {@link ca.odell.glazedlists.event.ListEvent#UPDATE} or {@link ca.odell.glazedlists.event.ListEvent#DELETE} signalling
+         *      {@link ListEvent#DELETE} events.
+         * @param groupChangeType one of {@link ListEvent#INSERT},
+         *      {@link ListEvent#UPDATE} or {@link ListEvent#DELETE} signalling
          *      what happened to the group in response to this element change.
          *      This is potentially different from what happened to the original
          *      list element.
@@ -347,10 +355,10 @@ public class Grouper<E> {
          *      impacting the current group for this element. Sometimes multiple
          *      groups will be effected, in which case only a single callback will
          *      be the primary callback.
-         * @param elementChangeType the change type that caused this event. Sometimes
-         *      an {@link ListEvent.UPDATE} event will cause a group to become inserted
-         *      or deleted, in which case the elementChangeType represents the original
-         *      event type.
+         * @param elementChangeType the change type that caused this  Sometimes
+         *      an {@link ListEvent#UPDATE} event will cause a group to become
+         *      inserted or deleted, in which case the elementChangeType
+         *      represents the original event type.
          */
         public void groupChanged(int index, int groupIndex, int groupChangeType, boolean primary, int elementChangeType);
     }

@@ -98,7 +98,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         // with the current limitations of the Glazed Lists ListEventAssembler.
         // What we really need here is the ability to fire an event that contains
         // both reordering and structure change information.
-        updates.beginEvent(false);
+        updates.beginEvent();
 
         // remove all
         updates.addDelete(0, size() - 1);
@@ -430,7 +430,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         /** a list of {@link Separator}s, one for each separator in the list */
         private SimpleTree<GroupSeparator> separators;
 
-        /** the number of elements to show in each group, such as 0, 5, or {@link Integer.MAX_VALUE} */
+        /** the number of elements to show in each group, such as 0, 5, or {@link Integer#MAX_VALUE} */
         private int defaultLimit;
 
         /**
@@ -663,7 +663,6 @@ public class SeparatorList<E> extends TransformedList<E, E> {
                         insertedSeparators.add(collapsedGroupStartIndex + shiftGroupIndex, SEPARATOR, 1);
                         updates.addInsert(collapsedGroupStartIndex + shiftGroupIndex);
                         //String now = insertedSeparators.toString();
-                        index++;
                         //System.out.println("Changed from " + was + " to " + now);
                     }
                 }
@@ -721,7 +720,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
             }
 
             /**
-             * Set the {@link IndexedTreeNode} that this {@link Separator} can
+             * Set the {@link Element} that this {@link Separator} can
              * use to find its index in the overall list of {@link Separator}s;
              */
             public void setNode(Element<GroupSeparator> node) {

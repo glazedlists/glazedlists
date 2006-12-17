@@ -4,9 +4,9 @@ import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import junit.framework.TestCase;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Arrays;
 
 public class GroupingListTest extends TestCase {
 
@@ -445,9 +445,46 @@ public class GroupingListTest extends TestCase {
         EventList<List<String>> testList = new GroupingList<String>(source, String.CASE_INSENSITIVE_ORDER);
     }
 
+    /**
+     * Test the replacement of the grouping Comparator.
+     */
+    public void testSetComparator() {
+        final BasicEventList<String> source = new BasicEventList<String>();
+        final GroupingList<String> groupingList = new GroupingList<String>(source, new FirstLetterComparator());
+
+        source.add("Black");
+        source.add("Blind");
+        source.add("Bling");
+
+        assertEquals(1, groupingList.size());
+        assertEquals(Arrays.asList(new String[] {"Black", "Blind", "Bling"}), groupingList.get(0));
+
+        groupingList.setComparator(new LastLetterComparator());
+        assertEquals(3, groupingList.size());
+        assertEquals(Arrays.asList(new String[] {"Blind"}), groupingList.get(0));
+        assertEquals(Arrays.asList(new String[] {"Bling"}), groupingList.get(1));
+        assertEquals(Arrays.asList(new String[] {"Black"}), groupingList.get(2));
+
+        groupingList.setComparator(new FirstLetterComparator());
+        assertEquals(1, groupingList.size());
+        assertEquals(Arrays.asList(new String[] {"Black", "Blind", "Bling"}), groupingList.get(0));
+
+        groupingList.setComparator(null);
+        assertEquals(3, groupingList.size());
+        assertEquals(Arrays.asList(new String[] {"Black"}), groupingList.get(0));
+        assertEquals(Arrays.asList(new String[] {"Blind"}), groupingList.get(1));
+        assertEquals(Arrays.asList(new String[] {"Bling"}), groupingList.get(2));
+    }
+
     private static class FirstLetterComparator implements Comparator<String> {
         public int compare(String o1, String o2) {
             return o1.charAt(0) - o2.charAt(0);
+        }
+    }
+
+    private static class LastLetterComparator implements Comparator<String> {
+        public int compare(String o1, String o2) {
+            return o1.charAt(o1.length()-1) - o2.charAt(o2.length()-1);
         }
     }
 }
