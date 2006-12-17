@@ -451,6 +451,8 @@ public class GroupingListTest extends TestCase {
     public void testSetComparator() {
         final BasicEventList<String> source = new BasicEventList<String>();
         final GroupingList<String> groupingList = new GroupingList<String>(source, new FirstLetterComparator());
+        ListConsistencyListener<List<String>> listConsistencyListener = ListConsistencyListener.install(groupingList);
+        listConsistencyListener.setPreviousElementTracked(false);
 
         source.add("Black");
         source.add("Blind");
