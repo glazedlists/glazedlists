@@ -24,10 +24,17 @@ import java.util.*;
  */
 public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
+    /** An {@link ExpansionProvider} with a simple policy: all nodes start expanded. */
+    public static final ExpansionProvider NODES_START_EXPANDED = new DefaultExpansionProvider(true);
+    /** An {@link ExpansionProvider} with a simple policy: all nodes start collapsed. */
+    public static final ExpansionProvider NODES_START_COLLAPSED = new DefaultExpansionProvider(false);
+
+
     private static final FunctionList.Function NO_OP_FUNCTION = new NoOpFunction();
 
     /** determines the layout of new nodes as they are created */
-    private static final NewNodeStateProvider DEFAULT_NEW_NODE_STATE_PROVIDER = new DefaultNewNodeStateProvider();
+    private ExpansionProvider<E> expansionProvider;
+
 
     /** node colors define where it is in the source and where it is here */
     private static final ListToByteCoder BYTE_CODER = new ListToByteCoder(Arrays.asList(new String[] { "R", "V", "r", "v" }));
@@ -67,34 +74,47 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * convenient if you're data is not already in a natural tree ordering,
      * ie. siblings are not already adjacent.
      */
-    public TreeList(EventList<E> source, Format<E> format, Comparator<E> comparator) {
-        this(source, format, comparatorToNodeComparator(comparator, format), null);
+    public TreeList(EventList<E> source, Format<E> format, Comparator<E> comparator, ExpansionProvider<E> expansionProvider) {
+        this(source, format, comparatorToNodeComparator(comparator, format), null, expansionProvider);
     }
     /** hack extra Comparator so we can build the nodeComparator only once. */
-    private TreeList(EventList<E> source, Format<E> format, NodeComparator<E> nodeComparator, Void unusedParameterForSortFirst) {
-        this(new SortedList<Node<E>>(new FunctionList<E, Node<E>>(source, new ElementToTreeNodeFunction<E>(format), NO_OP_FUNCTION), nodeComparator), format, nodeComparator);
+    private TreeList(EventList<E> source, Format<E> format, NodeComparator<E> nodeComparator, Void unusedParameterForSortFirst, ExpansionProvider<E> expansionProvider) {
+        this(new SortedList<Node<E>>(new FunctionList<E, Node<E>>(source, new ElementToTreeNodeFunction<E>(format), NO_OP_FUNCTION), nodeComparator), format, nodeComparator, expansionProvider);
     }
+
+    /** @deprecated */
+    public TreeList(EventList<E> source, Format<E> format) {
+        this(source, format, NODES_START_EXPANDED);
+    }
+    /** @deprecated */
+    public TreeList(EventList<E> source, Format<E> format, Comparator<E> comparator) {
+        this(source, format, comparator, NODES_START_EXPANDED);
+    }
+
 
     /**
      * Create a new TreeList that adds hierarchy to the specified source list.
      * This constructor does not sort the elements.
      */
-    public TreeList(EventList<E> source, Format<E> format) {
-        this(new FunctionList<E, Node<E>>(source, new ElementToTreeNodeFunction<E>(format), NO_OP_FUNCTION), format, comparatorToNodeComparator((Comparator)GlazedLists.comparableComparator(), format));
+    public TreeList(EventList<E> source, Format<E> format, ExpansionProvider<E> expansionProvider) {
+        this(new FunctionList<E, Node<E>>(source, new ElementToTreeNodeFunction<E>(format), NO_OP_FUNCTION), format, comparatorToNodeComparator((Comparator)GlazedLists.comparableComparator(), format), expansionProvider);
     }
     /** master Constructor that takes a FunctionList or a SortedList(FunctionList) */
-    private TreeList(EventList<Node<E>> source, Format<E> format, NodeComparator<E> nodeComparator) {
+    private TreeList(EventList<Node<E>> source, Format<E> format, NodeComparator<E> nodeComparator, ExpansionProvider<E> expansionProvider) {
         super(source);
         this.format = format;
         this.nodeComparator = nodeComparator;
+        this.expansionProvider = expansionProvider;
 
         // insert the new elements like they were adds
         NodeAttacher nodeAttacher = new NodeAttacher(false);
         for(int i = 0; i < super.source.size(); i++) {
             Node<E> node = super.source.get(i);
-            node.element = data.add(i, REAL_NODES, VISIBLE_REAL, node, 1);
-            nodeAttacher.attach(node);
+            addNode(node, HIDDEN_REAL, expansionProvider, i);
+            nodeAttacher.nodesToAttach.appendNewlyInserted(node);
         }
+        // attach siblings and parent nodes
+        nodeAttacher.attachAll();
 
         assert(isValid());
 
@@ -447,11 +467,8 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         /** the index of the changed node, which is where parent nodes shall be inserted */
         private int index;
 
-        /**
-         * reuse the CloneStateNewNodeStateProvider to save expensive <code>new</code> calls.
-         * Note that this cannot be static because it is stateful.
-         */
-        private CloneStateNewNodeStateProvider<E> cloneStateNewNodeStateProvider = new CloneStateNewNodeStateProvider<E>();
+        /** provide expand/collapsed state for nodes that are inserted or split */
+        private ExpansionProvider<E> expansionProvider;
 
         public NodeAttacher(boolean fireEvents) {
             this.fireEvents = fireEvents;
@@ -459,7 +476,9 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
         public void attachAll() {
             while(!nodesToAttach.isEmpty()) {
-                attach(nodesToAttach.removeFirst());
+                Node<E> changed = nodesToAttach.removeFirst();
+                boolean newlyInserted = nodesToAttach.isNewlyInserted(changed);
+                attach(changed, newlyInserted);
             }
         }
 
@@ -471,13 +490,21 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
          * <li>firing an 'insert' event for such parents and siblings
          *
          * @param changed the node to attach parents and siblings to
+         * @param newlyInserted <code>true</code> if this node is a brand-new
+         *      node in the tree, or <code>false</code> if we're reattaching an
+         *      existing node. This has significant consequences for the logic that
+         *      manages expanded state and repairing siblings.
          * @return <code>true</code> if changes were made to the tree
          */
-        private void attach(Node<E> changed) {
+        private void attach(Node<E> changed, boolean newlyInserted) {
             current = changed;
 
-            // record the expanded/collapsed state of this node's path
-            cloneStateNewNodeStateProvider.setNodeToPrototype(current);
+            // prepare the expand/collapsed state of created nodes
+            if(newlyInserted) {
+                expansionProvider = TreeList.this.expansionProvider;
+            } else {
+                expansionProvider = new CloneStateNewNodeStateProvider<E>(current);
+            }
 
             // prepare state for attaching the node
             index = data.indexOfNode(current.element, ALL_NODES);
@@ -486,7 +513,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
             // make sure the following node is repaired, as it might have become
             // separated from its siblings or parent by the insertion of this node
-            if(nodesToAttach.isNewlyInserted(current)) {
+            if(newlyInserted) {
                 Node<E> follower = current.next();
                 if(follower != null) {
                     nodesToAttach.prependPotentiallySplit(follower);
@@ -563,8 +590,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         private void createAndAttachParent() {
             Node<E> parent = current.describeParent();
             if(parent != null) {
-                cloneStateNewNodeStateProvider.initialize(parent);
-                parent.element = data.add(index, ALL_NODES, HIDDEN_VIRTUAL, parent, 1);
+                addNode(parent, HIDDEN_VIRTUAL, expansionProvider, index);
             }
             attachParent(parent, null);
         }
@@ -773,7 +799,8 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
         // insert the node as hidden by default - if we need to show this node,
         // we'll change its state later and fire an 'insert' event then
-        inserted.element = data.add(indexOfNearestAncestorByValue + 1, ALL_NODES, HIDDEN_REAL, inserted, 1);
+        // TODO(jessewilson): do we need to worry about parent nodes being initialized incorrectly?
+        addNode(inserted, HIDDEN_REAL, expansionProvider, indexOfNearestAncestorByValue + 1);
         return inserted;
     }
 
@@ -1036,37 +1063,68 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     }
 
     /**
-     * Prepare the state of node as it is created.
+     * Provide the expand/collapse state of nodes.
+     *
+     * <p>This interface will be consulted when nodes are inserted. Whenever
+     * the expanded/collapsed state of an element is changed, this provider
+     * is notified. It is not strictly necessary for implementors to record the
+     * expand/collapsed state of all nodes, since {@link TreeList} caches
+     * node state internally.
      */
-    private interface NewNodeStateProvider<E> {
+    public interface ExpansionProvider<E> {
         /**
-         * Initialize the node. The only legal state to set is whether the
-         * node is expanded.
+         * Determine the specified element's initial expand/collapse state.
+         *
+         * @param element the newly inserted  (or unfiltered etc.) value
+         * @param path the tree path of the element, from root to the value.
+         * @return <code>true</code> if the specified node's children shall be
+         *      visible, or <code>false</code> if they should be hidden.
          */
-        void initialize(Node<E> value);
+        boolean isExpanded(E element, List<E> path);
+
+        /**
+         * Notifies this handler that the specified element's expand/collapse
+         * state has changed.
+         */
+        void setExpanded(E element, List<E> path, boolean expanded);
     }
 
     /**
      * The default state provider, that starts all nodes off as expanded.
      */
-    private static class DefaultNewNodeStateProvider<E> implements NewNodeStateProvider<E> {
-        /** {@inheritDoc} */
-        public void initialize(Node<E> value) {
-            value.expanded = true;
+    private static class DefaultExpansionProvider<E> implements ExpansionProvider<E> {
+        private boolean expanded;
+        public DefaultExpansionProvider(boolean expanded) {
+            this.expanded = expanded;
         }
+        public boolean isExpanded(E element, List<E> path) {
+            return expanded;
+        }
+        public void setExpanded(E element, List<E> path, boolean expanded) {
+            // do nothing
+        }
+    }
+
+    /**
+     * Prepare the state of the node and insert it into the datastore. It will
+     * still be necessary to attach parent and sibling nodes.
+     */
+    private void addNode(Node<E> node, byte nodeColor, ExpansionProvider<E> expansionProvider, int realIndex) {
+        node.expanded = expansionProvider.isExpanded(node.getElement(), node.path);
+        node.element = data.add(realIndex, ALL_NODES, nodeColor, node, 1);
     }
 
     /**
      * A node state provider that clones the state from another subtree. This
      * is useful when a node tree gets split.
      */
-    private static class CloneStateNewNodeStateProvider<E> implements NewNodeStateProvider<E> {
+    private static class CloneStateNewNodeStateProvider<E> implements ExpansionProvider<E> {
         private boolean[] expandedStateByDepth;
         /**
          * Save the expanded state of nodes. This is necessary because the state of
          * {@code nodeToPrototype} is subject to change.
          */
-        public void setNodeToPrototype(Node<E> nodeToPrototype) {
+        public CloneStateNewNodeStateProvider(Node<E> nodeToPrototype) {
             expandedStateByDepth = new boolean[nodeToPrototype.pathLength()];
 
             // walk up the tree to the root, saving ancestor's expanded state
@@ -1080,9 +1138,11 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 }
             }
         }
-        /** {@inheritDoc} */
-        public void initialize(Node<E> value) {
-            value.expanded = expandedStateByDepth[value.pathLength() - 1];
+        public boolean isExpanded(E element, List<E> path) {
+            return expandedStateByDepth[path.size() - 1];
+        }
+        public void setExpanded(E element, List<E> path, boolean expanded) {
+            // do nothing
         }
     }
 

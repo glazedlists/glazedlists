@@ -1322,4 +1322,78 @@ public class TreeListTest extends TestCase {
                 "LLM",
         });
     }
+
+    public void testCollapsedByDefaultOnInsert() {
+        BasicEventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat(), TreeList.NODES_START_COLLAPSED);
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.addAll(Arrays.asList(new String[] {
+                "ABC",
+                "ABD",
+                "EFG",
+        }));
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "E",
+        });
+        treeList.setExpanded(0, true);
+        treeList.setExpanded(1, true);
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "ABD",
+                "E",
+        });
+    }
+
+    public void testCollapsedByDefaultOnCreate() {
+        BasicEventList<String> source = new BasicEventList<String>();
+        source.addAll(Arrays.asList(new String[] {
+                "ABC",
+                "ABD",
+                "EFG",
+        }));
+
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat(), TreeList.NODES_START_COLLAPSED);
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "E",
+        });
+        treeList.setExpanded(0, true);
+        treeList.setExpanded(1, true);
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "ABD",
+                "E",
+        });
+    }
+
+    public void testCollapsedByDefaultForSplits() {
+        BasicEventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat(), TreeList.NODES_START_COLLAPSED);
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.addAll(Arrays.asList(new String[] {
+                "ABCD",
+                "ABCE",
+        }));
+        treeList.setExpanded(0, true);
+        source.add(1, "EFGH");
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "E",
+                "A",
+                "AB",
+        });
+    }
 }
