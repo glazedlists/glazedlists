@@ -66,7 +66,7 @@ public class XmlBrowser {
             SortedList<Tag> sortedList = new SortedList<Tag>(eventList, null);
             FilterList<Tag> filteredList = new FilterList<Tag>(sortedList, matcherEditor);
 
-            DefaultExternalExpansionProvider<Tag> expansionProvider = new DefaultExternalExpansionProvider<Tag>(TreeList.NODES_START_COLLAPSED); 
+            DefaultExternalExpansionModel<Tag> expansionProvider = new DefaultExternalExpansionModel<Tag>(TreeList.NODES_START_COLLAPSED);
             TreeList<Tag> treeList = new TreeList<Tag>(filteredList, new TagTreeFormat(), expansionProvider);
 
             // display the XML in a tree table

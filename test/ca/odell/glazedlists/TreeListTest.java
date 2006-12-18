@@ -1397,7 +1397,7 @@ public class TreeListTest extends TestCase {
 
     public void testInsertParentWithVisibleChildGetsExpandedState() {
         BasicEventList<String> source = new BasicEventList<String>();
-        DefaultExternalExpansionProvider<String> expansionProvider = new DefaultExternalExpansionProvider<String>(TreeList.NODES_START_EXPANDED);
+        DefaultExternalExpansionModel<String> expansionProvider = new DefaultExternalExpansionModel<String>(TreeList.NODES_START_EXPANDED);
         TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat(), expansionProvider);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);

@@ -3,43 +3,42 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import ca.odell.glazedlists.TreeList.ExpansionProvider;
+import ca.odell.glazedlists.TreeList.ExpansionModel;
 import ca.odell.glazedlists.TreeList;
 
 import java.util.Map;
 import java.util.List;
-import java.util.IdentityHashMap;
 import java.util.HashMap;
 
 
 /**
- * An {@link ExpansionProvider} that uses a {@link Map} to remember
+ * An {@link ExpansionModel} that uses a {@link Map} to remember
  * the expanded/collapsed state of elements.
  *
  * TODO(jessewilson): USE WEAK REFERENCES
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class DefaultExternalExpansionProvider<E> implements ExpansionProvider<E> {
+public class DefaultExternalExpansionModel<E> implements ExpansionModel<E> {
 
     /** keep track of the expanded state of each element, by its identity */
     private HashMap<E,Boolean> elementsExpandedStates = new HashMap<E,Boolean>();
 
-    /** the {@link ExpansionProvider} to delegate to for unknown elements */
-    private ExpansionProvider<E> defaultsProvider;
+    /** the {@link ExpansionModel} to delegate to for unknown elements */
+    private ExpansionModel<E> defaultsModel;
 
-    public DefaultExternalExpansionProvider(ExpansionProvider<E> defaultsProvider) {
-        this.defaultsProvider = defaultsProvider;
+    public DefaultExternalExpansionModel(ExpansionModel<E> defaultsModel) {
+        this.defaultsModel = defaultsModel;
     }
 
-    public DefaultExternalExpansionProvider() {
+    public DefaultExternalExpansionModel() {
         this(TreeList.NODES_START_EXPANDED);
     }
 
     public boolean isExpanded(E element, List<E> path) {
         Boolean expanded = elementsExpandedStates.get(element);
         if(expanded == null) {
-            expanded = Boolean.valueOf(defaultsProvider.isExpanded(element, path));
+            expanded = Boolean.valueOf(defaultsModel.isExpanded(element, path));
             setExpanded(element, path, expanded.booleanValue());
         }
         return expanded.booleanValue();
