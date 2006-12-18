@@ -83,11 +83,11 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         this(new SortedList<Node<E>>(new FunctionList<E, Node<E>>(source, new ElementToTreeNodeFunction<E>(format), NO_OP_FUNCTION), nodeComparator), format, nodeComparator, expansionProvider);
     }
 
-    /** @deprecated */
+    /** @deprecated use the constructor that takes an {@link ExpansionProvider} */
     public TreeList(EventList<E> source, Format<E> format) {
         this(source, format, NODES_START_EXPANDED);
     }
-    /** @deprecated */
+    /** @deprecated use the constructor that takes an {@link ExpansionProvider} */
     public TreeList(EventList<E> source, Format<E> format, Comparator<E> comparator) {
         this(source, format, comparator, NODES_START_EXPANDED);
     }
