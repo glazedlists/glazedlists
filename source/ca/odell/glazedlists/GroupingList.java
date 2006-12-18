@@ -87,7 +87,7 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
         this.grouper = new Grouper<E>(source, new GrouperClient());
 
         // initialize the tree of GroupLists
-        rebuildGroupListTreeFromBarcode(this.grouper);
+        rebuildGroupListTreeFromBarcode();
 
         source.addListEventListener(this);
     }
@@ -97,7 +97,7 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
      * grouping {@link Comparator}, this method is used to rebuild the tree of
      * GroupLists which map those GroupLists to their overall indices.
      */
-    private void rebuildGroupListTreeFromBarcode(Grouper<E> grouper) {
+    private void rebuildGroupListTreeFromBarcode() {
         // clear the contents of the GroupList tree
         groupLists.clear();
 
@@ -156,13 +156,15 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
 
     /**
      * Change the {@link Comparator} which determines the groupings presented
-     * by this List. A <tt>null</tt> <code>comparator</code> is the same as
-     * passing {@link GlazedLists#comparableComparator()} as the argument.
-     * 
-     * @param comparator the {@link Comparator} used to determine groupings
+     * by this List
+     *
+     * @param comparator the {@link Comparator} used to determine groupings;
+     *      <tt>null</tt> will be treated as {@link GlazedLists#comparableComparator()}
      */
     public void setComparator(Comparator<? super E> comparator) {
-        ((SortedList<E>) this.source).setComparator(comparator == null ? (Comparator) GlazedLists.comparableComparator() : comparator);
+        if (comparator == null)
+            comparator = (Comparator) GlazedLists.comparableComparator();
+        ((SortedList<E>) this.source).setComparator(comparator);
     }
 
     /** {@inheritDoc} */
@@ -200,7 +202,7 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
             grouper.setComparator(sourceComparator);
 
             // rebuild the tree which maps GroupLists to indices (so the tree matches the new barcode)
-            rebuildGroupListTreeFromBarcode(grouper);
+            rebuildGroupListTreeFromBarcode();
 
             // insert all new groups (represented by the newly formed barcode)
             updates.addInsert(0, size() - 1);
