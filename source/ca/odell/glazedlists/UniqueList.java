@@ -113,6 +113,19 @@ public final class UniqueList<E> extends TransformedList<E, E> {
         }
     }
 
+    /**
+     * Change the {@link Comparator} which determines the unique elements
+     * of this List.
+     *
+     * @param comparator the {@link Comparator} used to determine groupings;
+     *      <tt>null</tt> will be treated as {@link GlazedLists#comparableComparator()}
+     */
+    public void setComparator(Comparator<? super E> comparator) {
+        if (comparator == null)
+            comparator = (Comparator) GlazedLists.comparableComparator();
+        ((SortedList<E>) this.source).setComparator(comparator);
+    }
+
     /** {@inheritDoc} */
     public int size() {
         return grouper.getBarcode().colourSize(Grouper.UNIQUE);
@@ -206,7 +219,29 @@ public final class UniqueList<E> extends TransformedList<E, E> {
     /** {@inheritDoc} */
     public void listChanged(ListEvent<E> listChanges) {
         updates.beginEvent(true);
-        grouper.listChanged(listChanges);
+
+        // check if this ListEvent was caused due to a change in the
+        // Comparator that defines uniqueness
+        final SortedList<E> sortedSource = (SortedList<E>) source;
+        final Comparator<? super E> sourceComparator = sortedSource.getComparator();
+        if (sourceComparator != grouper.getComparator()) {
+            // when the uniquifying comparator is changed in the source list, let
+            // the grouper know so we can rebuild our uniqueness barcode from scratch
+
+            // record the impending removal of all current unique elements before adjusting the barcode
+            for (int i = 0, n = size(); i < n; i++)
+                updates.elementDeleted(0, get(i));
+
+            // adjust the Comparator used by the Grouper (which will change the barcode)
+            grouper.setComparator(sourceComparator);
+
+            // insert all new unique values (represented by the newly formed barcode)
+            updates.addInsert(0, size() - 1);
+
+        } else {
+            grouper.listChanged(listChanges);
+        }
+
         updates.commitEvent();
     }
 
