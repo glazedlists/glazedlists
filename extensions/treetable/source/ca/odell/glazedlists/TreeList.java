@@ -642,6 +642,13 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 currentSibling.parent = parent;
             }
 
+            // force the parent node to be expanded if it's child is visible.
+            // this is necessary only when the parent is a new node and the
+            // expansionProvider provided a collapsed state for a node with children
+            if(parent != null && !parent.expanded && current.isVisible()) {
+                parent.expanded = true;
+            }
+
             // now the current node has shifted up to the parent node
             incrementCurrent();
         }
