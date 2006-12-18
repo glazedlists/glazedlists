@@ -18,6 +18,9 @@ import java.util.*;
  */
 public class GlazedListsTests {
 
+    private static final Comparator<String> FIRST_LETTER_COMPARATOR = new FirstLetterComparator();
+    private static final Comparator<String> LAST_LETTER_COMPARATOR = new LastLetterComparator();
+
     /**
      * A dummy constructor to prevent instantiation of this class
      */
@@ -132,6 +135,34 @@ public class GlazedListsTests {
         }
         public boolean matches(Number value) {
             return value.intValue() >= minimum;
+        }
+    }
+
+    /**
+     * Returns a comparator for comparing Strings based solely on their first
+     * character. <code>null</code> Strings are not tolerated and the
+     * Comparator will throw {@link NullPointerException}.
+     */
+    public static Comparator<String> getFirstLetterComparator() {
+        return FIRST_LETTER_COMPARATOR;
+    }
+    private static class FirstLetterComparator implements Comparator<String> {
+        public int compare(String o1, String o2) {
+            return o1.charAt(0) - o2.charAt(0);
+        }
+    }
+
+    /**
+     * Returns a comparator for comparing Strings based solely on their last
+     * character. <code>null</code> Strings are not tolerated and the
+     * Comparator will throw {@link NullPointerException}.
+     */
+    public static Comparator<String> getLastLetterComparator() {
+        return LAST_LETTER_COMPARATOR;
+    }
+    private static class LastLetterComparator implements Comparator<String> {
+        public int compare(String o1, String o2) {
+            return o1.charAt(o1.length()-1) - o2.charAt(o2.length()-1);
         }
     }
 

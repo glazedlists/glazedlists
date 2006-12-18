@@ -1477,4 +1477,37 @@ public class UniqueListTest extends TestCase {
         assertEquals(2, consistencyListener.getEventCount());
         assertEquals(1, consistencyListener.getChangeCount(1));
     }
+
+    /**
+     * Test the replacement of the grouping Comparator.
+     */
+    public void testSetComparator() {
+        final BasicEventList<String> source = new BasicEventList<String>();
+        final UniqueList<String> uniqueList = new UniqueList<String>(source, GlazedListsTests.getFirstLetterComparator());
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(uniqueList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.add("Black");
+        source.add("Blind");
+        source.add("Bling");
+
+        assertEquals(1, uniqueList.size());
+        assertEquals("Black", uniqueList.get(0));
+
+        uniqueList.setComparator(GlazedListsTests.getLastLetterComparator());
+        assertEquals(3, uniqueList.size());
+        assertEquals("Blind", uniqueList.get(0));
+        assertEquals("Bling", uniqueList.get(1));
+        assertEquals("Black", uniqueList.get(2));
+
+        uniqueList.setComparator(GlazedListsTests.getFirstLetterComparator());
+        assertEquals(1, uniqueList.size());
+        assertEquals("Black", uniqueList.get(0));
+
+        uniqueList.setComparator(null);
+        assertEquals(3, uniqueList.size());
+        assertEquals("Black", uniqueList.get(0));
+        assertEquals("Blind", uniqueList.get(1));
+        assertEquals("Bling", uniqueList.get(2));
+    }
 }
