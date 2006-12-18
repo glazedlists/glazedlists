@@ -3,31 +3,27 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import ca.odell.glazedlists.TreeList.ExpansionModel;
-import ca.odell.glazedlists.TreeList;
-
 import java.util.Map;
 import java.util.List;
 import java.util.HashMap;
 
-
 /**
- * An {@link ExpansionModel} that uses a {@link Map} to remember
+ * An {@link TreeList.ExpansionModel} that uses a {@link Map} to remember
  * the expanded/collapsed state of elements.
  *
  * TODO(jessewilson): USE WEAK REFERENCES
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class DefaultExternalExpansionModel<E> implements ExpansionModel<E> {
+public class DefaultExternalExpansionModel<E> implements TreeList.ExpansionModel<E> {
 
     /** keep track of the expanded state of each element, by its identity */
     private HashMap<E,Boolean> elementsExpandedStates = new HashMap<E,Boolean>();
 
-    /** the {@link ExpansionModel} to delegate to for unknown elements */
-    private ExpansionModel<E> defaultsModel;
+    /** the {@link TreeList.ExpansionModel} to delegate to for unknown elements */
+    private TreeList.ExpansionModel<E> defaultsModel;
 
-    public DefaultExternalExpansionModel(ExpansionModel<E> defaultsModel) {
+    public DefaultExternalExpansionModel(TreeList.ExpansionModel<E> defaultsModel) {
         this.defaultsModel = defaultsModel;
     }
 
