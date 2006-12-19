@@ -22,7 +22,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
+public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
     /** An {@link ExpansionModel} with a simple policy: all nodes start expanded. */
     public static final ExpansionModel NODES_START_EXPANDED = new DefaultExpansionModel(true);
@@ -55,6 +55,11 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     /** an {@link EventList} of {@link Node}s with the structure of the tree. */
     private EventList<Node<E>> nodesList = null;
 
+    /** the source {@link EventList} before intermediate transformations */
+    private EventList<E> sourceElements;
+    /** the source {@link FunctionList}, wrapping elements into nodes */
+    private FunctionList<E,Node<E>> sourceNodes;
+
     /**
      * All the tree data is stored in this tree.
      *
@@ -74,38 +79,26 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * convenient if you're data is not already in a natural tree ordering,
      * ie. siblings are not already adjacent.
      */
-    public TreeList(EventList<E> source, Format<E> format, Comparator<E> comparator, ExpansionModel<E> expansionModel) {
-        this(source, format, comparatorToNodeComparator(comparator, format), null, expansionModel);
+    public TreeList(EventList<E> source, Format<E> format, ExpansionModel<E> expansionModel, Comparator<E> comparator) {
+        this(new InitializationData<E>(source, format, comparator, expansionModel));
     }
-    /** hack extra Comparator so we can build the nodeComparator only once. */
-    private TreeList(EventList<E> source, Format<E> format, NodeComparator<E> nodeComparator, Void unusedParameterForSortFirst, ExpansionModel<E> expansionModel) {
-        // TODO: store a reference to FunctionList, so we can dispose() it later!
-        this(new SortedList<Node<E>>(new FunctionList<E, Node<E>>(source, new ElementToTreeNodeFunction<E>(format), NO_OP_FUNCTION), nodeComparator), format, nodeComparator, expansionModel);
-    }
-
-    /** @deprecated use the constructor that takes an {@link ExpansionModel} */
-    public TreeList(EventList<E> source, Format<E> format) {
-        this(source, format, NODES_START_EXPANDED);
-    }
-    /** @deprecated use the constructor that takes an {@link ExpansionModel} */
-    public TreeList(EventList<E> source, Format<E> format, Comparator<E> comparator) {
-        this(source, format, comparator, NODES_START_EXPANDED);
-    }
-
 
     /**
      * Create a new TreeList that adds hierarchy to the specified source list.
      * This constructor does not sort the elements.
      */
     public TreeList(EventList<E> source, Format<E> format, ExpansionModel<E> expansionModel) {
-        this(new FunctionList<E, Node<E>>(source, new ElementToTreeNodeFunction<E>(format), NO_OP_FUNCTION), format, comparatorToNodeComparator((Comparator)GlazedLists.comparableComparator(), format), expansionModel);
+        this(new InitializationData<E>(source, format, null, expansionModel));
     }
+
     /** master Constructor that takes a FunctionList or a SortedList(FunctionList) */
-    private TreeList(EventList<Node<E>> source, Format<E> format, NodeComparator<E> nodeComparator, ExpansionModel<E> expansionModel) {
-        super(source);
-        this.format = format;
-        this.nodeComparator = nodeComparator;
-        this.expansionModel = expansionModel;
+    private TreeList(InitializationData<E> initializationData) {
+        super(initializationData.getSource());
+        this.format = initializationData.format;
+        this.nodeComparator = initializationData.nodeComparator;
+        this.expansionModel = initializationData.expansionModel;
+        this.sourceElements = initializationData.sourceElements;
+        this.sourceNodes = initializationData.sourceNodes;
 
         // insert the new elements like they were adds
         NodeAttacher nodeAttacher = new NodeAttacher(false);
@@ -120,6 +113,55 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         assert(isValid());
 
         super.source.addListEventListener(this);
+    }
+
+    /** @deprecated use the constructor that takes an {@link ExpansionModel} */
+    public TreeList(EventList<E> source, Format<E> format) {
+        this(new InitializationData<E>(source, format, null, NODES_START_EXPANDED));
+        
+    }
+
+    /** @deprecated use the constructor that takes an {@link ExpansionModel} */
+    public TreeList(EventList<E> source, Format<E> format, Comparator<E> comparator) {
+        this(new InitializationData<E>(source, format, comparator, NODES_START_EXPANDED));
+    }
+
+    /**
+     * Helper class for managing various amounts of transitional
+     * objects required by the class constructor.
+     */
+    private static class InitializationData<E> {
+        private final Format<E> format;
+        private final ExpansionModel<E> expansionModel;
+        private final NodeComparator<E> nodeComparator;
+
+        private final EventList<E> sourceElements;
+        private final FunctionList<E,Node<E>> sourceNodes;
+        private final SortedList<Node<E>> sortedList;
+
+        public InitializationData(EventList<E> sourceElements, Format<E> format, Comparator<E> comparator, ExpansionModel<E> expansionModel) {
+            this.format = format;
+            this.expansionModel = expansionModel;
+
+            this.sourceElements = sourceElements;
+            this.sourceNodes = new FunctionList<E,Node<E>>(sourceElements, new ElementToTreeNodeFunction<E>(format), NO_OP_FUNCTION);
+            if(comparator != null) {
+                this.nodeComparator = comparatorToNodeComparator(comparator, format);
+                this.sortedList = new SortedList<Node<E>>(sourceNodes, nodeComparator);
+            } else {
+                this.nodeComparator = comparatorToNodeComparator((Comparator)GlazedLists.comparableComparator(), format);
+                this.sortedList = null;
+            }
+        }
+
+        /**
+         * @return the EventList to be wrapped directly by the {@link TreeList}. This varies
+         *      depending on whether this tree is sorted or unsorted.
+         */
+        public EventList<Node<E>> getSource() {
+            if(sortedList != null) return sortedList;
+            return sourceNodes;
+        }
     }
 
     /**
@@ -248,7 +290,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * @param treeFormat
      */
     public void setTreeFormat(Format<E> treeFormat) {
-        // todo implement this
+        // sourceNodes.setFunction(new ElementToTreeNodeFunction<E>(treeFormat));
     }
 
     /**
@@ -814,7 +856,6 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
         // insert the node as hidden by default - if we need to show this node,
         // we'll change its state later and fire an 'insert' event then
-        // TODO(jessewilson): do we need to worry about parent nodes being initialized incorrectly?
         addNode(inserted, HIDDEN_REAL, expansionModel, indexOfNearestAncestorByValue + 1);
         return inserted;
     }
@@ -1201,6 +1242,7 @@ public class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
         public NodeComparator(Comparator<E> comparator, Format<E> format) {
             if(comparator == null) throw new IllegalArgumentException();
+            if(format == null) throw new IllegalArgumentException();
             this.comparator = comparator;
             this.format = format;
         }
