@@ -179,6 +179,29 @@ public class FunctionListTest extends TestCase {
         }
     }
 
+    private static class IntegerToCardinalityString implements FunctionList.Function<Integer,String> {
+        public String evaluate(Integer value) {
+            switch (value.intValue()) {
+                case 0: return "0th";
+                case 1: return "1st";
+                case 2: return "2nd";
+                case 9: return "9th";
+                default: throw new IllegalArgumentException("Unexpected value: " + value);
+            }
+        }
+    }
+
+    private static class CardinalityStringToInteger implements FunctionList.Function<String,Integer> {
+        public Integer evaluate(String value) {
+            if ("0th" == value) return ZERO;
+            if ("1st" == value) return ONE;
+            if ("2nd" == value) return TWO;
+            if ("9th" == value) return NINE;
+
+            throw new IllegalArgumentException("Unexpected value: " + value);
+        }
+    }
+
     private static class AdvancedIntegerToString extends IntegerToString implements FunctionList.AdvancedFunction<Integer,String> {
         private int reevaluateCount = 0;
         private int disposeCount = 0;
@@ -214,5 +237,65 @@ public class FunctionListTest extends TestCase {
         source.setComparator(GlazedLists.comparableComparator());
 
         assertEquals(3, consistencyListener.getEventCount());
+    }
+
+    public void testSetForwardFunction() {
+        // establish a control for this test case with the normal Function
+        EventList<Integer> source = new BasicEventList<Integer>();
+        FunctionList<Integer, String> intsToStrings = new FunctionList<Integer, String>(source, new IntegerToString());
+        ListConsistencyListener.install(intsToStrings);
+        
+        source.add(ZERO);
+        assertEquals("0", intsToStrings.get(0));
+
+        intsToStrings.setForwardFunction(new IntegerToCardinalityString());
+        assertEquals("0th", intsToStrings.get(0));
+
+        source.add(NINE);
+        assertEquals("9th", intsToStrings.get(1));
+
+        intsToStrings.setForwardFunction(new IntegerToString());
+        assertEquals("0", intsToStrings.get(0));
+        assertEquals("9", intsToStrings.get(1));
+
+        try {
+            intsToStrings.setForwardFunction(null);
+            fail("failed to receive IllegalArgumentException for null forward function");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+    }
+
+    public void testSetReverseFunction() {
+        // establish a control for this test case with the normal Function
+        EventList<Integer> source = new BasicEventList<Integer>();
+        FunctionList<Integer, String> intsToStrings = new FunctionList<Integer, String>(source, new IntegerToString(), new StringToInteger());
+        ListConsistencyListener.install(intsToStrings);
+
+        source.add(ZERO);
+        assertEquals("0", intsToStrings.get(0));
+        intsToStrings.set(0, "1");
+        assertEquals(ONE, source.get(0));
+
+        intsToStrings.setForwardFunction(new IntegerToCardinalityString());
+        assertEquals("1st", intsToStrings.get(0));
+        try {
+            intsToStrings.set(0, "2nd");
+            fail("failed to throw IllegalArgumentException when using out-of-date reverse function");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        intsToStrings.setReverseFunction(new CardinalityStringToInteger());
+        intsToStrings.set(0, "2nd");
+        assertEquals(TWO, source.get(0));
+
+        intsToStrings.setReverseFunction(null);
+        try {
+            intsToStrings.set(0, "9th");
+            fail("failed to throw IllegalStateException when using a null reverse function to write thru a FunctionList");
+        } catch (IllegalStateException e) {
+            // expected
+        }
     }
 }

@@ -6,7 +6,6 @@ package ca.odell.glazedlists;
 import ca.odell.glazedlists.event.ListEvent;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -14,11 +13,11 @@ import java.util.List;
  * source list to an element stored at the same index in this FunctionList.
  * The logic of precisely how to transform the source elements is contained
  * within a {@link Function} that must be supplied at the time of construction
- * and can never be changed. This {@link Function} is called the forward
- * function because it creates elements in this {@link FunctionList} from
- * elements that have been added or mutated within the source list. The forward
- * function may be an implementation of either {@link Function} or
- * {@link AdvancedFunction}.
+ * but can be changed afterward using {@link #setForwardFunction}. This
+ * {@link Function} is called the forward function because it creates elements
+ * in this {@link FunctionList} from elements that have been added or mutated
+ * within the source list. The forward function may be an implementation of
+ * either {@link Function} or {@link AdvancedFunction}.
  *
  * <p>An optional reverse {@link Function} which is capable of mapping the
  * elements of this FunctionList back to the corresponding source element may
@@ -69,10 +68,10 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
     private final List<E> mappedElements;
 
     /** The Function that maps source elements to FunctionList elements. */
-    private final AdvancedFunction<S,E> forward;
+    private AdvancedFunction<S,E> forward;
 
     /** The Function that maps FunctionList elements back to source elements. It may be null. */
-    private final Function<E,S> reverse;
+    private Function<E,S> reverse;
 
     /**
      * Construct a {@link FunctionList} which stores the result of transforming
@@ -108,23 +107,16 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
     public FunctionList(EventList<S> source, Function<S,E> forward, Function<E,S> reverse) {
         super(source);
 
-        if (forward == null)
-            throw new IllegalArgumentException("forward Function may not be null");
-
-        // wrap the forward function in an adapter to the AdvancedFunction interface it is isn't yet
-        if (forward instanceof AdvancedFunction)
-            this.forward = (AdvancedFunction<S,E>) forward;
-        else
-            this.forward = new AdvancedFunctionAdapter<S,E>(forward);
-        this.reverse = reverse;
+        updateForwardFunction(forward);
+        setReverseFunction(reverse);
 
         // save a reference to the source elements
         this.sourceElements = new ArrayList<S>(source);
 
         // map all of the elements within source
         this.mappedElements = new ArrayList<E>(source.size());
-        for (Iterator<S> iter = source.iterator(); iter.hasNext();) {
-            this.mappedElements.add(forward(iter.next()));
+        for (int i = 0, n = source.size(); i < n; i++) {
+            this.mappedElements.add(forward(source.get(i)));
         }
 
         source.addListEventListener(this);
@@ -168,6 +160,45 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
     }
 
     /**
+     * Changes the {@link Function} that evaluates source elements to produce
+     * mapped elements. Calling this method with a different
+     * <code>forward</code> Function will cause all elements in this
+     * FunctionList to be reevaluated.
+     *
+     * <p>Callers of this method typically also want to update the reverse
+     * function using {@link #setReverseFunction} if one exists.
+     */
+    public void setForwardFunction(Function<S,E> forward) {
+        updateForwardFunction(forward);
+
+        updates.beginEvent(true);
+
+        // remap all of the elements within source
+        for (int i = 0, n = source.size(); i < n; i++) {
+            final E oldValue = this.mappedElements.set(i, forward(source.get(i)));
+            updates.elementUpdated(i, oldValue);
+        }
+
+        updates.commitEvent();
+    }
+
+    /**
+     * A convenience method to run a null check on the given
+     * <code>forward</code> Function and to wrap it in a delegating
+     * implementation of the {@link AdvancedFunction} interface as needed.
+     */
+    private void updateForwardFunction(Function<S,E> forward) {
+        if (forward == null)
+            throw new IllegalArgumentException("forward Function may not be null");
+
+        // wrap the forward function in an adapter to the AdvancedFunction interface if necessary
+        if (forward instanceof AdvancedFunction)
+            this.forward = (AdvancedFunction<S,E>) forward;
+        else
+            this.forward = new AdvancedFunctionAdapter<S,E>(forward);
+    }
+
+    /**
      * Returns the {@link Function} which maps source elements to elements
      * stored within this {@link FunctionList}. The {@link Function} is
      * guaranteed to be non-null.
@@ -181,10 +212,27 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
     }
 
     /**
+     * Changes the {@link Function} that evaluates FunctionList elements to
+     * produce the original source element with which it corresponds. The
+     * reverse Function will be used in all subsequent calls to:
+     *
+     * <ul>
+     *   <li> {@link #add(Object)}
+     *   <li> {@link #add(int, Object)}
+     *   <li> {@link #set(int, Object)}
+     * </ul>
+     *
+     * This method should typically be called at the same time the forward
+     * function is changed using {@link #setForwardFunction}.
+     */
+    public void setReverseFunction(Function<E,S> reverse) {
+        this.reverse = reverse;
+    }
+
+    /**
      * Returns the {@link Function} which maps elements stored within this
-     * {@link FunctionList} to elements within the source list or
-     * <code>null</code> if no such {@link Function} was specified at
-     * construction.
+     * {@link FunctionList} back to elements within the source list or
+     * <code>null</code> if no such {@link Function} was specified.
      */
     public Function<E,S> getReverseFunction() {
         return reverse;
