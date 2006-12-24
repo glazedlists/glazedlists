@@ -7,8 +7,8 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * @see ca.odell.glazedlists.gui.AbstractTableComparatorChooser.SINGLE_COLUMN
- * @see ca.odell.glazedlists.gui.AbstractTableComparatorChooser.MULTIPLE_COLUMN_MOUSE
+ * @see ca.odell.glazedlists.gui.AbstractTableComparatorChooser#SINGLE_COLUMN
+ * @see ca.odell.glazedlists.gui.AbstractTableComparatorChooser#MULTIPLE_COLUMN_MOUSE
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */

@@ -140,7 +140,7 @@ public final class JEventListPanel<E> extends JPanel {
          */
         private void delete(int index) {
             // remove the components
-            JComponent[] elementComponents = (JComponent[])components.get(index);
+            JComponent[] elementComponents = components.get(index);
             for(int c = 0; c < elementComponents.length; c++) {
                 if(elementComponents[c] == null) continue;
                 remove(elementComponents[c]);
@@ -158,7 +158,7 @@ public final class JEventListPanel<E> extends JPanel {
          */
         private void update(int index) {
             // get the old components
-            JComponent[] oldElementComponents = (JComponent[])components.get(index);
+            JComponent[] oldElementComponents = components.get(index);
 
             // get the new components
             E element = swingSource.get(index);

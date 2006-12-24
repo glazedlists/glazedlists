@@ -38,10 +38,6 @@ class StartServer implements Runnable {
     
     /**
      * Runs the specified task.
-     *
-     * @param selector the selector being shared by all connections.
-     * @return true unless the server shall shutdown due to a shutdown request or
-     *      an unrecoverable failure.
      */
     public void run() {
         try {

@@ -1,4 +1,4 @@
-/* Glazed Lists                                                 (c) 2003-2005 */
+/* Glazed Lists                                                 (c) 2003-2006 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.adt.gnutrove;
@@ -34,7 +34,7 @@ import java.util.Random;
  * Created: Sat Dec 29 14:21:12 2001
  *
  * @author Eric D. Friedman
- * @version $Id: TIntArrayList.java,v 1.1 2006-04-12 04:35:14 jessewilson Exp $
+ * @version $Id: TIntArrayList.java,v 1.2 2006-12-24 09:03:51 jplemieux Exp $
  */
 public class TIntArrayList implements Cloneable {
 

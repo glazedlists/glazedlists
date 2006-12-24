@@ -4,7 +4,6 @@
 package ca.odell.glazedlists.impl.testing;
 
 import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 
 /**
  * A MatcherEditor for minimum Number values.

@@ -17,5 +17,4 @@ public interface ValueCallback {
      * Handles a value being completely loaded into memory and ready to read.
      */
     public void valueLoaded(Chunk member, Bufferlo value);
-    
 }

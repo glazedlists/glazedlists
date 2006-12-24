@@ -708,10 +708,7 @@ public class J2SE14ReadWriteLock implements ReadWriteLock, java.io.Serializable 
          * lock if it is available, whether or not other threads are
          * currently waiting for the write lock.  This &quot;barging&quot;
          * behavior can be useful in certain circumstances, even
-         * though it breaks fairness. If you want to honor the
-         * fairness setting for this lock, then use {@link
-         * #tryLock(long, TimeUnit) tryLock(0, TimeUnit.SECONDS) }
-         * which is almost equivalent (it also detects interruption).
+         * though it breaks fairness.
          *
          * <p> If the current thread already holds this lock then the
          * hold count is incremented by one and the method returns
@@ -770,7 +767,7 @@ public class J2SE14ReadWriteLock implements ReadWriteLock, java.io.Serializable 
         /**
          * Queries if this write lock is held by the current thread.
          * Identical in effect to {@link
-         * ReentrantReadWriteLock#isWriteLockedByCurrentThread}.
+         * java.util.concurrent.locks.ReentrantReadWriteLock#isWriteLockedByCurrentThread}.
          *
          * @return {@code true} if the current thread holds this lock and
          *	   {@code false} otherwise
