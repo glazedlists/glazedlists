@@ -325,7 +325,7 @@ public class EventListTest extends TestCase {
     public void testGlazedListsEventListUsingVarArgs() {
         // make sure they have different backing stores
         EventList<String> eventList = GlazedLists.eventListOf(new String[] {"A", "B"});
-        assertEquals(Arrays.asList("A", "B"), eventList);
+        assertEquals(Arrays.asList(new String[] {"A", "B"}), eventList);
 
         // make sure null is supported
         EventList<String> empty = GlazedLists.eventListOf((String[]) null);

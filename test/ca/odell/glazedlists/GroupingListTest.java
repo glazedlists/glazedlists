@@ -275,7 +275,7 @@ public class GroupingListTest extends TestCase {
     }
 
     public void testGroupListRemove() {
-        EventList<String> sourceList = GlazedLists.eventListOf("A", "B", "B", "C", "C", "C");
+        EventList<String> sourceList = GlazedLists.eventListOf(new String[] {"A", "B", "B", "C", "C", "C"});
         GroupingList<String> groupList = new GroupingList<String>(sourceList);
 
         assertEquals(GlazedListsTests.stringToList("A"), groupList.get(0));
