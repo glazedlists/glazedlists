@@ -83,7 +83,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
             assertTrue(Hibernate.isInitialized(u.getNickNames()));
             u.getNickNames().addListEventListener(listener);
         }
-
+        assertEquals(PersistentEventList.class, u.getNickNames().getClass());
         // test manipulating list
         u.getNickNames().remove(1);
         u.getNickNames().add(1, "Headbanger");
@@ -173,7 +173,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
             assertFalse(Hibernate.isInitialized(u.getEmailAddresses()));
             assertEquals(0, listener.getCountAndReset());
 
-            // trigger initialization        
+            // trigger initialization
             assertEquals(2, u.getEmailAddresses().size());
             assertTrue(Hibernate.isInitialized(u.getEmailAddresses()));
             // ATTENTION: Hibernate calls add and set for each list element
@@ -183,7 +183,8 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
             assertTrue(Hibernate.isInitialized(u.getEmailAddresses()));
             u.getEmailAddresses().addListEventListener(listener);
         }
-
+        assertEquals(PersistentEventList.class, u.getEmailAddresses().getClass());
+        
         // test manipulating list
         u.getEmailAddresses().remove(1);
         u.getEmailAddresses().add(1, new Email("admin@web.de"));

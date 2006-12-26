@@ -23,7 +23,7 @@
         <list name="emailAddresses" table="USER_EMAIL" cascade="all, delete-orphan"
             collection-type="ca.odell.glazedlists.hibernate.EventListType">
             <key column="USER_ID"/>
-            <list-index column="DISPLAY_ORDER" base="1"/>
+            <list-index column="DISPLAY_ORDER"/>
             <one-to-many class="Email"/>
         </list>
     </class>

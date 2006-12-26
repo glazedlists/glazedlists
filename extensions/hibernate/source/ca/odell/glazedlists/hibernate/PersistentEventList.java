@@ -12,6 +12,7 @@ import org.hibernate.collection.PersistentList;
 import org.hibernate.engine.SessionImplementor;
 import org.hibernate.persister.collection.CollectionPersister;
 
+
 /**
  * A Hibernate persistent wrapper for an {@link EventList}. Underlying
  * collection implementation is {@link BasicEventList}.
@@ -47,9 +48,21 @@ public final class PersistentEventList extends PersistentList implements EventLi
 
     /** {@inheritDoc} */
     public void beforeInitialize(CollectionPersister persister) {
-        if (this.list == null) throw new IllegalStateException("'list' member is undefined");
+        checkList();
+    }
+    
+    /** {@inheritDoc} */
+    public void beforeInitialize(CollectionPersister persister, int anticipatedSize) {
+        checkList();        
     }
 
+    /** 
+     * Helper method for checking the state of the list member. 
+     */
+    private void checkList() {
+        if (this.list == null) throw new IllegalStateException("'list' member is undefined");
+    }
+    
     /** {@inheritDoc} */
     public void addListEventListener(ListEventListener listChangeListener) {
         ((EventList) list).addListEventListener(listChangeListener);
