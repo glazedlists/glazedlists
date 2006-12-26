@@ -43,6 +43,11 @@ public class EventListType implements UserCollectionType {
     public Object instantiate() {
         return new BasicEventList();
     }
+
+    /** {@inheritDoc} */
+    public Object instantiate(int anticipatedSize) {
+        return new BasicEventList(anticipatedSize);
+    }
     
     /** {@inheritDoc} */
     public PersistentCollection instantiate(SessionImplementor session,
