@@ -46,7 +46,7 @@ public class EventListType implements UserCollectionType {
 
     /** {@inheritDoc} */
     public Object instantiate(int anticipatedSize) {
-        return new BasicEventList(anticipatedSize);
+        return anticipatedSize < 0 ? new BasicEventList() : new BasicEventList(anticipatedSize);
     }
     
     /** {@inheritDoc} */
