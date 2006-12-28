@@ -23,8 +23,24 @@ public final class TextMatchers {
     /** The single instance of the {@link StringLengthComparator}. */
     private static final Comparator<String> LENGTH_COMPARATOR = new StringLengthComparator();
 
-    /** {@inheritDoc} */
-    public static <E> boolean matches(List<String> filterStrings, TextFilterator<E> filterator, TextSearchStrategy[] filterStrategies, E element) {
+    /**
+     * Execute the logic that determines whether the given <code>element</code>
+     * is matched by all of the given <code>filterStrategies</code>. An optional
+     * <code>filterator</code> can be supplied which is responsible for
+     * extracting all of the filter strings from the given <code>element</code>.
+     * The given <code>filterStrings</code> is passed into this method simply
+     * to avoid reallocating a new List object each time this method is called.
+     * The caller may and should recycle the <code>filterStrings</code> List.
+     *
+     * @param filterStrings a recyclable List into which the filter Strings can stored
+     * @param filterator the logic capable of extracting filtering Strings from the <code>element</code>
+     * @param filterStrategies the optimized logic for locating given search text within the <code>filterStrings</code>
+     * @param element the list element on which we are text filtering
+     * @return <tt>true</tt> if all <code>filterStrategies</code> located
+     *      matching text within the <code>filterStrings</code> extracted from
+     *      the given <code>element</code>
+     */
+    public static <E> boolean matches(List<String> filterStrings, TextFilterator<? super E> filterator, SearchTerm[] searchTerms, TextSearchStrategy[] filterStrategies, E element) {
         // populate the strings for this object
         filterStrings.clear();
         if(filterator == null) {
@@ -38,20 +54,41 @@ public final class TextMatchers {
         for(int f = 0; f < filterStrategies.length; f++) {
             // get the text search strategy for the current filter
             TextSearchStrategy textSearchStrategy = filterStrategies[f];
+            SearchTerm searchTerm = searchTerms[f];
 
-            // search through all fields for the current filter
-            for(int c = 0; c < filterStrings.size(); c++) {
-                Object filterString = filterStrings.get(c);
-                // the call to .toString() appears redundant, but is not, since we
-                // are backwards compatible with old behaviour which allows arbitrary
-                // objects in the filterStrings list
-                if(filterString != null && textSearchStrategy.indexOf(filterString.toString()) != -1) {
-                    continue filters;
+            if(searchTerm.isNegated()) {
+                // search through all fields for the current filter
+                for(int i = 0, n = filterStrings.size(); i < n; i++) {
+                    Object filterString = filterStrings.get(i);
+                    // the call to .toString() appears redundant, but is not, since we
+                    // are backwards compatible with old behaviour which allows arbitrary
+                    // objects in the filterStrings list
+
+                    // if a match was found, then we have violated the negated search term
+                    if(filterString != null && textSearchStrategy.indexOf(filterString.toString()) != -1)
+                        return false;
                 }
+
+                // the text for the negated search term could not be located, so it is a match!
+
+            } else {
+                // search through all fields for the current filter
+                for(int i = 0, n = filterStrings.size(); i < n; i++) {
+                    Object filterString = filterStrings.get(i);
+                    // the call to .toString() appears redundant, but is not, since we
+                    // are backwards compatible with old behaviour which allows arbitrary
+                    // objects in the filterStrings list
+
+                    // if a match was found, then proceed to the next filter string
+                    if(filterString != null && textSearchStrategy.indexOf(filterString.toString()) != -1)
+                        continue filters;
+                }
+
+                // no field matched this filter
+                return false;
             }
-            // no field matched this filter
-            return false;
         }
+
         // all filters have been matched
         return true;
     }
@@ -64,17 +101,17 @@ public final class TextMatchers {
      * @param strategy the strategy for mapping a character
      * @return mapped versions of the filter Strings
      */
-    public static String[] mapFilters(String[] filters, TextSearchStrategy.Factory strategy) {
+    public static SearchTerm[] mapSearchTerms(SearchTerm[] filters, TextSearchStrategy.Factory strategy) {
         // if something other than the "normalized latin strategy" is used, return the filters untouched
         if (strategy != TextMatcherEditor.NORMALIZED_STRATEGY)
             return filters;
 
         final char[] mapper = GlazedListsImpl.getLatinDiacriticsStripper();
-        final String[] mappedFilters = new String[filters.length];
+        final SearchTerm[] mappedFilters = new SearchTerm[filters.length];
 
         // map the filter Strings by running each character through the characterMap
         for (int i = 0; i < filters.length; i++) {
-            final String filter = filters[i];
+            final String filter = filters[i].getText();
             final char[] mappedFilter = new char[filter.length()];
 
             // map each character in the filter
@@ -84,7 +121,7 @@ public final class TextMatchers {
             }
 
             // record the mapped filter
-            mappedFilters[i] = new String(mappedFilter);
+            mappedFilters[i] = filters[i].newSearchTerm(new String(mappedFilter));
         }
 
         return mappedFilters;
@@ -291,4 +328,64 @@ public final class TextMatchers {
         return isFilterRelaxed(newFilter, oldFilter);
     }
 
+    /**
+     * Parse the given <code>text</code> and produce an array of
+     * {@link SearchTerm} objects that describe text to match as well as
+     * details about the way it should be used.
+     */
+    public static SearchTerm[] parse(String text) {
+        final List<SearchTerm> searchTerms = new ArrayList<SearchTerm>();
+
+        StringBuffer searchTermText = new StringBuffer();
+        boolean negated = false, required = false, insideTerm = false, insideQuotedTerm = false;
+
+        // step through the text one character at a time
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+
+            if (insideTerm) {
+                // determine if the current character signifies the end of the term text
+                final boolean endOfTerm = c == '"' || (!insideQuotedTerm && Character.isWhitespace(c));
+
+                if (endOfTerm) {
+                    // record the current SearchTerm
+                    searchTerms.add(new SearchTerm(searchTermText.toString(), negated, required));
+
+                    // reset the state for collecting the next SearchTerm
+                    searchTermText = new StringBuffer();
+                    negated = required = insideTerm = insideQuotedTerm = false;
+
+                } else {
+                    searchTermText.append(c);
+                }
+
+            } else {
+                // clear the state and continue searching for the next term
+                if (Character.isWhitespace(c)) {
+                    negated = required = insideTerm = insideQuotedTerm = false;
+                    continue;
+                }
+
+                switch (c) {
+                    // quotes mean a term has started and contains no text yet
+                    case '"': insideTerm = true; insideQuotedTerm = true; break;
+
+                    // plus means the term that immediately follows is required
+                    case '+': required = true; break;
+
+                    // minus means the term that immediately follows must NOT be found
+                    case '-': negated = true; break;
+
+                    // any other character is the first character in a new SearchTerm
+                    default: searchTermText.append(c); insideTerm = true; break;
+                }
+            }
+        }
+
+        // if a SearchTerm is left hanging, use it as well
+        if (searchTermText.length() > 0)
+            searchTerms.add(new SearchTerm(searchTermText.toString(), negated, required));
+
+        return searchTerms.toArray(new SearchTerm[searchTerms.size()]);
+    }
 }

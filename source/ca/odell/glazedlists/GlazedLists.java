@@ -247,7 +247,7 @@ public final class GlazedLists {
 
     // TextFilterators // // // // // // // // // // // // // // // // // // //
 
-    private static StringTextFilterator stringTextFilterator = null;
+    private static TextFilterator<Object> stringTextFilterator = null;
 
     /**
      * Creates a {@link TextFilterator} that searches the given JavaBean
@@ -285,7 +285,7 @@ public final class GlazedLists {
      * Creates a {@link TextFilterator} that searches against an Object's
      * {@link Object#toString() toString()} value.
      */
-    public static TextFilterator toStringTextFilterator() {
+    public static TextFilterator<Object> toStringTextFilterator() {
         if(stringTextFilterator == null) stringTextFilterator = new StringTextFilterator();
         return stringTextFilterator;
     }

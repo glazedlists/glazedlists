@@ -7,6 +7,7 @@ import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.impl.filter.TextMatcher;
+import ca.odell.glazedlists.impl.filter.SearchTerm;
 import ca.odell.glazedlists.impl.swing.ComboBoxPopupLocationFix;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.Matchers;
@@ -371,7 +372,7 @@ public final class AutoCompleteSupport<E> {
      * @param filterator extracts searchable text strings from each item
      * @param format converts combobox elements into strings and vice versa
      */
-    private AutoCompleteSupport(JComboBox comboBox, EventList<E> items, TextFilterator<E> filterator, Format format) {
+    private AutoCompleteSupport(JComboBox comboBox, EventList<E> items, TextFilterator<? super E> filterator, Format format) {
         this.comboBox = comboBox;
         this.originalComboBoxEditable = comboBox.isEditable();
         this.originalModel = comboBox.getModel();
@@ -387,7 +388,7 @@ public final class AutoCompleteSupport<E> {
         this.doNotTogglePopup = !isTableCellEditor;
 
         // build the ComboBoxModel capable of filtering its values
-        this.filterMatcherEditor = new TextMatcherEditor<E>(filterator == null ? new DefaultTextFilterator() : filterator);
+        this.filterMatcherEditor = new TextMatcherEditor(filterator == null ? new DefaultTextFilterator() : filterator);
         this.filterMatcherEditor.setMode(TextMatcherEditor.STARTS_WITH);
         this.filteredItems = new FilterList<E>(items, this.filterMatcherEditor);
         this.comboBoxModel = new AutoCompleteComboBoxModel(this.filteredItems);
@@ -649,7 +650,7 @@ public final class AutoCompleteSupport<E> {
      * @throws IllegalStateException if this method is called from any Thread
      *      other than the Swing Event Dispatch Thread
      */
-    public static <E> AutoCompleteSupport<E> install(JComboBox comboBox, EventList<E> items, TextFilterator<E> filterator) {
+    public static <E> AutoCompleteSupport<E> install(JComboBox comboBox, EventList<E> items, TextFilterator<? super E> filterator) {
         return install(comboBox, items, filterator, null);
     }
 
@@ -708,7 +709,7 @@ public final class AutoCompleteSupport<E> {
      * @throws IllegalStateException if this method is called from any Thread
      *      other than the Swing Event Dispatch Thread
      */
-    public static <E> AutoCompleteSupport<E> install(JComboBox comboBox, EventList<E> items, TextFilterator<E> filterator, Format format) {
+    public static <E> AutoCompleteSupport<E> install(JComboBox comboBox, EventList<E> items, TextFilterator<? super E> filterator, Format format) {
         checkAccessThread();
 
         final Component editorComponent = comboBox.getEditor().getEditorComponent();
@@ -772,7 +773,7 @@ public final class AutoCompleteSupport<E> {
      * Returns the {@link TextFilterator} that extracts searchable strings from
      * each item in the {@link ComboBoxModel}.
      */
-    public TextFilterator<E> getTextFilterator() {
+    public TextFilterator<? super E> getTextFilterator() {
         return this.filterMatcherEditor.getFilterator();
     }
 
@@ -1039,7 +1040,7 @@ public final class AutoCompleteSupport<E> {
         if (prefix.length() == 0)
             filterMatcher = Matchers.trueMatcher();
         else
-            filterMatcher = new TextMatcher<String>(new String[] {prefix}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH, getTextMatchingStrategy());
+            filterMatcher = new TextMatcher<String>(new SearchTerm[] {new SearchTerm(prefix)}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH, getTextMatchingStrategy());
     }
 
     /**
@@ -1070,7 +1071,7 @@ public final class AutoCompleteSupport<E> {
         // determine if our value is empty
         final boolean prefixIsEmpty = "".equals(value);
 
-        final Matcher<String> valueMatcher = new TextMatcher<String>(new String[] {value}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH, getTextMatchingStrategy());
+        final Matcher<String> valueMatcher = new TextMatcher<String>(new SearchTerm[] {new SearchTerm(value)}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH, getTextMatchingStrategy());
 
         String partialMatchTerm = null;
 

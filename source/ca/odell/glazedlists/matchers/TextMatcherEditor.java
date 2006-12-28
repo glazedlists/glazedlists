@@ -109,7 +109,7 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
     private static final String[] EMPTY_FILTER = new String[0];
 
     /** the filterator is used as an alternative to implementing the TextFilterable interface */
-    private final TextFilterator<E> filterator;
+    private final TextFilterator<? super E> filterator;
 
     /** one of {@link #CONTAINS} or {@link #STARTS_WITH} */
     private int mode = CONTAINS;
@@ -137,14 +137,14 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      *      object in the <code>source</code>; <code>null</code> indicates the
      *      list elements implement {@link TextFilterable}
      */
-    public TextMatcherEditor(TextFilterator<E> filterator) {
+    public TextMatcherEditor(TextFilterator<? super E> filterator) {
         this.filterator = filterator;
     }
 
     /**
      * Get the filterator used to extract Strings from the matched elements.
      */
-    public TextFilterator<E> getFilterator() {
+    public TextFilterator<? super E> getFilterator() {
         return filterator;
     }
 
@@ -163,17 +163,19 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
         this.mode = mode;
 
         // if no filter text exists, no Matcher change is necessary
-        if (getCurrentFilter().length == 0)
+        final TextMatcher<E> currentTextMatcher = getCurrentTextMatcher();
+        if (currentTextMatcher == null)
             return;
 
         if (mode == STARTS_WITH) {
             // CONTAINS -> STARTS_WITH is a constraining change
-            fireConstrained(new TextMatcher<E>(getCurrentFilter(), filterator, mode, strategy));
+            fireConstrained(currentTextMatcher.newMode(mode));
         } else {
             // STARTS_WITH -> CONTAINS is a relaxing change
-            fireRelaxed(new TextMatcher<E>(getCurrentFilter(), filterator, mode, strategy));
+            fireRelaxed(currentTextMatcher.newMode(mode));
         }
     }
+
     /**
      * Returns the behaviour mode for this {@link TextMatcherEditor}.
      *
@@ -197,10 +199,11 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
         this.strategy = (TextSearchStrategy.Factory)strategy;
 
         // if no filter text exists, no Matcher change is necessary
-        if (getCurrentFilter().length == 0)
+        final TextMatcher<E> currentTextMatcher = getCurrentTextMatcher();
+        if (currentTextMatcher == null)
             return;
 
-        fireChanged(new TextMatcher<E>(getCurrentFilter(), filterator, mode, strategy));
+        fireChanged(currentTextMatcher.newStrategy(strategy));
     }
     /**
      * Returns the character comparison strategy for this {@link TextMatcherEditor}.
@@ -213,12 +216,24 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
     }
 
     /**
+     * Return the current Matcher if it is a {@link TextMatcher} or
+     * <code>null</code> if no current Matcher exists or is something other
+     * than a {@link TextMatcher}.
+     */
+    private TextMatcher<E> getCurrentTextMatcher() {
+        if (currentMatcher instanceof TextMatcher)
+            return ((TextMatcher<E>) currentMatcher);
+
+        return null;
+    }
+
+    /**
      * Returns the filter that was last produced from this editor or an empty
      * filter if one doesn't exist.
      */
-    private String[] getCurrentFilter() {
+    private String[] getCurrentSearchTermStrings() {
         if (currentMatcher instanceof TextMatcher)
-            return ((TextMatcher<E>) currentMatcher).getFilters();
+            return ((TextMatcher<E>) currentMatcher).getSearchTermStrings();
 
         return EMPTY_FILTER;
     }
@@ -230,7 +245,7 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      * @param newFilters the {@link String}s representing all of the filter values
      */
     public void setFilterText(String[] newFilters) {
-        final String[] oldFilters = getCurrentFilter();
+        final String[] oldFilters = getCurrentSearchTermStrings();
         newFilters = TextMatchers.normalizeFilters(newFilters);
 
         // fire the event only as necessary
@@ -243,8 +258,13 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
             return;
         }
 
+        // wrap the filter Strings within default SearchTerm objects
+        final SearchTerm[] searchTerms = new SearchTerm[newFilters.length];
+        for (int i = 0; i < searchTerms.length; i++)
+            searchTerms[i] = new SearchTerm(newFilters[i]);
+
         // classify the change in filter and apply the new filter to this list
-        final TextMatcher<E> matcher = new TextMatcher<E>(newFilters, filterator, mode, strategy);
+        final TextMatcher<E> matcher = new TextMatcher<E>(searchTerms, filterator, mode, strategy);
 
         if (TextMatchers.isFilterRelaxed(oldFilters, newFilters))
             fireRelaxed(matcher);

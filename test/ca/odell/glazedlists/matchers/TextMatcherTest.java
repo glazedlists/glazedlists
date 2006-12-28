@@ -3,11 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.matchers;
 
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.TextFilterator;
-import ca.odell.glazedlists.impl.filter.StringTextFilterator;
+import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.impl.filter.TextMatchers;
 import junit.framework.TestCase;
 
@@ -15,11 +11,11 @@ import java.util.*;
 
 public class TextMatcherTest extends TestCase {
 
-    private List<Object> numbers = Arrays.asList(new Object[] {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"});
+    private List<String> numbers = Arrays.asList(new String[] {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"});
 
-    private List<Object> monotonicAlphabet = Arrays.asList(new Object[] {"0", "01", "012", "0123", "01234", "012345", "0123456", "01234567", "012345678", "0123456789"});
+    private List<String> monotonicAlphabet = Arrays.asList(new String[] {"0", "01", "012", "0123", "01234", "012345", "0123456", "01234567", "012345678", "0123456789"});
 
-    private List<Object> dictionary = Arrays.asList(new Object[] {"act", "actor", "enact", "reactor"});
+    private List<String> dictionary = Arrays.asList(new String[] {"act", "actor", "enact", "reactor"});
 
     public void testNormalizeValue() {
         assertTrue(Arrays.equals(new String[0], TextMatchers.normalizeFilters(new String[0])));
@@ -91,8 +87,8 @@ public class TextMatcherTest extends TestCase {
     }
 
     public void testConstrainingFilter() {
-        TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
-        FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
+        TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
+        FilterList<String> list = new FilterList<String>(new BasicEventList<String>(), textMatcherEditor);
 
         list.addAll(numbers);
         assertEquals(list, numbers);
@@ -147,8 +143,8 @@ public class TextMatcherTest extends TestCase {
 //	}
 
 	public void testRelaxingFilter() {
-        TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
-        FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
+        TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
+        FilterList<String> list = new FilterList<String>(new BasicEventList<String>(), textMatcherEditor);
 
         list.addAll(numbers);
 
@@ -177,8 +173,8 @@ public class TextMatcherTest extends TestCase {
     }
 
     public void testRelaxAndConstrainFilter() {
-        TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
-        FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
+        TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
+        FilterList<String> list = new FilterList<String>(new BasicEventList<String>(), textMatcherEditor);
 
         list.addAll(monotonicAlphabet);
 
@@ -220,8 +216,8 @@ public class TextMatcherTest extends TestCase {
     }
 
     public void testClearFilter() {
-        TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
-        FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
+        TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
+        FilterList<String> list = new FilterList<String>(new BasicEventList<String>(), textMatcherEditor);
 
         list.addAll(numbers);
 
@@ -261,8 +257,8 @@ public class TextMatcherTest extends TestCase {
     }
 
     public void testChangeMode() {
-        TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
-        FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
+        TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
+        FilterList<String> list = new FilterList<String>(new BasicEventList<String>(), textMatcherEditor);
         list.addAll(monotonicAlphabet);
 
         textMatcherEditor.setFilterText(new String[] {"789"});
@@ -289,8 +285,8 @@ public class TextMatcherTest extends TestCase {
     }
 
     public void testChangeModeNotifications() {
-        TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
-        FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
+        TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
+        FilterList<String> list = new FilterList<String>(new BasicEventList<String>(), textMatcherEditor);
         list.addAll(monotonicAlphabet);
 
         final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
@@ -323,8 +319,8 @@ public class TextMatcherTest extends TestCase {
     }
 
     public void testChangeStrategyNotifications() {
-        TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
-        FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
+        TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
+        FilterList<String> list = new FilterList<String>(new BasicEventList<String>(), textMatcherEditor);
         list.addAll(monotonicAlphabet);
 
         final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
@@ -362,9 +358,9 @@ public class TextMatcherTest extends TestCase {
      */
     public void testFilterBeforeAndAfter() {
         // set up
-        EventList<Object> unfilteredList = new BasicEventList<Object>();
-        TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
-        FilterList<Object> filteredList = new FilterList<Object>(unfilteredList, textMatcherEditor);
+        EventList<String> unfilteredList = new BasicEventList<String>();
+        TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
+        FilterList<String> filteredList = new FilterList<String>(unfilteredList, textMatcherEditor);
 
         // apply a filter
         String filter = "7";
@@ -401,9 +397,9 @@ public class TextMatcherTest extends TestCase {
     public void testFilterDynamic() {
         // set up
         Random random = new Random();
-        EventList<Object> unfilteredList = new BasicEventList<Object>();
-        TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
-        FilterList<Object> filteredList = new FilterList<Object>(unfilteredList, textMatcherEditor);
+        EventList<String> unfilteredList = new BasicEventList<String>();
+        TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
+        FilterList<String> filteredList = new FilterList<String>(unfilteredList, textMatcherEditor);
 
         // apply a filter
         String filter = "5";
@@ -445,9 +441,9 @@ public class TextMatcherTest extends TestCase {
     public void testFilterWritable() {
         // set up
         Random random = new Random();
-        EventList<Object> unfilteredList = new BasicEventList<Object>();
-        TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
-        FilterList<Object> filteredList = new FilterList<Object>(unfilteredList, textMatcherEditor);
+        EventList<String> unfilteredList = new BasicEventList<String>();
+        TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
+        FilterList<String> filteredList = new FilterList<String>(unfilteredList, textMatcherEditor);
 
         // apply a filter
         String filter = "5";
@@ -455,7 +451,7 @@ public class TextMatcherTest extends TestCase {
 
         // apply various operations to a list of strings
         for(int i = 0; i < 4000; i++) {
-            List<Object> list;
+            List<String> list;
             if(random.nextBoolean()) list = filteredList;
             else list = unfilteredList;
             int operation = random.nextInt(4);
@@ -483,8 +479,8 @@ public class TextMatcherTest extends TestCase {
     }
 
     public void testNormalizedLatinStrategy() {
-        TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
-        FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
+        TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
+        FilterList<String> list = new FilterList<String>(new BasicEventList<String>(), textMatcherEditor);
 
         list.add("r\u00e9sum\u00e9");
         list.add("Bj\u00f6rk");

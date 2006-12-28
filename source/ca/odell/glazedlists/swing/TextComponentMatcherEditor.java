@@ -81,7 +81,7 @@ public class TextComponentMatcherEditor<E> extends TextMatcherEditor<E> {
      * @throws IllegalArgumentException if the <code>textComponent</code>
      *      is not a {@link JTextField} and non-live filtering is specified.
      */
-    public TextComponentMatcherEditor(JTextComponent textComponent, TextFilterator<E> textFilterator, boolean live) {
+    public TextComponentMatcherEditor(JTextComponent textComponent, TextFilterator<? super E> textFilterator, boolean live) {
         this(textComponent, textComponent.getDocument(), textFilterator, live);
     }
 
@@ -96,7 +96,7 @@ public class TextComponentMatcherEditor<E> extends TextMatcherEditor<E> {
      *      <code>null</code> then all filtered objects are expected to
      *      implement {@link ca.odell.glazedlists.TextFilterable}.
      */
-    public TextComponentMatcherEditor(Document document, TextFilterator<E> textFilterator) {
+    public TextComponentMatcherEditor(Document document, TextFilterator<? super E> textFilterator) {
         this(null, document, textFilterator, true);
     }
 
@@ -104,7 +104,7 @@ public class TextComponentMatcherEditor<E> extends TextMatcherEditor<E> {
      * This private constructor implements the actual construction work and thus
      * ensures that all public constructors agree on the construction logic.
      */
-    private TextComponentMatcherEditor(JTextComponent textComponent, Document document, TextFilterator<E> textFilterator, boolean live) {
+    private TextComponentMatcherEditor(JTextComponent textComponent, Document document, TextFilterator<? super E> textFilterator, boolean live) {
         super(textFilterator);
 
         this.textComponent = textComponent;

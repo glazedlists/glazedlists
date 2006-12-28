@@ -3,17 +3,17 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.matchers;
 
-import junit.framework.TestCase;
-import ca.odell.glazedlists.impl.filter.StringTextFilterator;
-import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.GlazedLists;
+import junit.framework.TestCase;
 
 public class UnicodeTextMatcherEditorTest extends TestCase {
 
     public void testUnicodeStrategy() {
-        TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
+        TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
         textMatcherEditor.setStrategy(GlazedListsICU4J.UNICODE_TEXT_SEARCH_STRATEGY);
-        FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
+        FilterList<String> list = new FilterList<String>(new BasicEventList<String>(), textMatcherEditor);
 
         list.add(null);
         list.add("");
@@ -66,10 +66,10 @@ public class UnicodeTextMatcherEditorTest extends TestCase {
     }
 
     public void testUnicodeStrategy_StartsWith_FixMe() {
-        TextMatcherEditor<Object> textMatcherEditor = new TextMatcherEditor<Object>(new StringTextFilterator());
+        TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
         textMatcherEditor.setStrategy(GlazedListsICU4J.UNICODE_TEXT_SEARCH_STRATEGY);
         textMatcherEditor.setMode(TextMatcherEditor.STARTS_WITH);
-        FilterList<Object> list = new FilterList<Object>(new BasicEventList<Object>(), textMatcherEditor);
+        FilterList<String> list = new FilterList<String>(new BasicEventList<String>(), textMatcherEditor);
 
         list.add("Ru\u00dfland"); // Ru�land
 
