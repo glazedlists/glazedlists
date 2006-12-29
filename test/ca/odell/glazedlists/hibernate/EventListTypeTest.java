@@ -9,6 +9,7 @@ import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -76,8 +77,8 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
             // trigger initialization        
             assertEquals(2, u.getNickNames().size());
             assertTrue(Hibernate.isInitialized(u.getNickNames()));
-            // ATTENTION: Hibernate calls add and set for each list element
-            assertEquals(4, listener.getCountAndReset());
+            // ATTENTION: no events should occur during initialization by Hibernate
+            assertEquals(0, listener.getCountAndReset());
         } else {
             // collection should be initialized
             assertTrue(Hibernate.isInitialized(u.getNickNames()));
@@ -176,8 +177,8 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
             // trigger initialization
             assertEquals(2, u.getEmailAddresses().size());
             assertTrue(Hibernate.isInitialized(u.getEmailAddresses()));
-            // ATTENTION: Hibernate calls add and set for each list element
-            assertEquals(4, listener.getCountAndReset());
+            // ATTENTION: no events should occur during initialization by Hibernate
+            assertEquals(0, listener.getCountAndReset());
         } else {
             // collection should be initialized
             assertTrue(Hibernate.isInitialized(u.getEmailAddresses()));
@@ -223,7 +224,125 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
         t.commit();
         s.close();
     }
+    
+    /**
+     * Tests a lazy loaded, many-to-many association with entity collection. 
+     */
+    public void testLazyManyToManyAssociation() {
+        doTestManyToManyAssociation(true);
+    }
 
+    /**
+     * Tests an eager loaded, one-to-many, unidirectional association with entity collection. 
+     */
+    public void testEagerManyToManyAssociation() {
+        doTestManyToManyAssociation(false);
+    }
+
+    /**
+     * Runs tests for a many-to-many association
+     * @param lazy indicates lazy or eager loading of collection
+     */
+    private void doTestManyToManyAssociation(boolean lazy) {
+        // create user with roles and persist
+        User u = createAndPersistUserWithRoles();
+
+        // load user and roles in new session
+        Session s = openSession();
+        Transaction t = s.beginTransaction();
+
+        // test that roles are saved in DB
+        List roles = s.createCriteria(Role.class).list();
+        assertEquals(2, roles.size());
+
+        // load saved user again
+        u = loadUser(s, lazy);
+        assertTrue(u != null);
+
+        final GlazedListsTests.ListEventCounter<Role> listener = new GlazedListsTests.ListEventCounter<Role>();
+
+        if (lazy) {
+            // lazy collection still uninitialized
+            assertFalse(Hibernate.isInitialized(u.getRoles()));
+            // call EventList methods            
+            u.getRoles().addListEventListener(listener);
+            u.getRoles().removeListEventListener(listener);
+            u.getRoles().addListEventListener(listener);
+            u.getRoles().getReadWriteLock();
+            u.getRoles().getPublisher();
+
+            // lazy collection should still be uninitialized
+            assertFalse(Hibernate.isInitialized(u.getRoles()));
+            assertEquals(0, listener.getCountAndReset());
+
+            // extra lazy collection should still be uninitialzed
+            assertFalse(u.getRoles().isEmpty());
+            assertEquals(2, u.getRoles().size());
+            assertEquals("Guest", u.getRoles().get(0).getName());
+            assertFalse(Hibernate.isInitialized(u.getRoles()));
+
+            // trigger initialization
+            u.getRoles().iterator();
+            assertTrue(Hibernate.isInitialized(u.getRoles()));
+            // ATTENTION: no events should occur during initialization by Hibernate
+            assertEquals(0, listener.getCountAndReset());
+        } else {
+            // collection should be initialized
+            assertTrue(Hibernate.isInitialized(u.getRoles()));
+            u.getRoles().addListEventListener(listener);
+        }
+        assertEquals(PersistentEventList.class, u.getRoles().getClass());
+        
+        // test manipulating list
+        u.getRoles().remove(1);
+        u.getRoles().add(1, new Role("Developer"));
+        u.getRoles().remove(0);
+
+        t.commit();
+        s.close();
+        assertEquals(3, listener.getCountAndReset());
+
+        s = openSession();
+        t = s.beginTransaction();
+        u = loadUser(s, lazy);
+
+        assertEquals(1, u.getRoles().size());
+        assertEquals("Developer", u.getRoles().get(0).getName());
+        u.getRoles().addListEventListener(listener);
+        u.getRoles().clear();
+        assertEquals(1, listener.getCountAndReset());
+        assertEquals(0, u.getRoles().size());
+        assertTrue(Hibernate.isInitialized(u.getRoles()));        
+        roles = s.createCriteria(Role.class).list();
+        assertEquals(3, roles.size());
+        assertEquals("Developer", ((Role) roles.get(2)).getName());
+
+        // delete user
+        s.delete(u);
+        
+        // delete roles
+        for (Iterator iter = roles.iterator(); iter.hasNext();) {
+            final Role role = (Role) iter.next();
+            s.delete(role);
+        }
+                
+        t.commit();
+        s.close();
+
+        // no user should be found
+        s = openSession();
+        t = s.beginTransaction();
+        u = loadUser(s, lazy);
+        assertEquals(u, null);
+
+        // no roles should be found
+        roles = s.createCriteria(Role.class).list();
+        assertEquals(0, roles.size());
+        
+        t.commit();
+        s.close();
+    }
+    
     /**
      * Creates and persists an example user with emial addresses.
      */
@@ -255,11 +374,27 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
         s.close();
         return u;
     }
+    
+    /**
+     * Creates and persists an example user with roles.
+     */
+    private User createAndPersistUserWithRoles() {
+        // create user with roles and persist
+        Session s = openSession();
+        Transaction t = s.beginTransaction();
+        User u = new User("admin");
+        u.addRole(new Role("Guest"));
+        u.addRole(new Role("Administrator"));
+        s.persist(u);
+        t.commit();
+        s.close();
+        return u;
+    }
 
     /**
      * Loads the example user.
      * 
-     * @param lazy <code>true</code>, if emails shoud be lazy loaded, <code>false</code> otherwise
+     * @param lazy <code>true</code>, if collections shoud be lazy loaded, <code>false</code> otherwise
      */
     private User loadUser(Session s, boolean lazy) {
         if (lazy) {
@@ -268,6 +403,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
             return (User) s.createCriteria(User.class)
             	.setFetchMode("emailAddresses", FetchMode.JOIN)
                 .setFetchMode("nickNames", FetchMode.JOIN)
+                .setFetchMode("roles", FetchMode.JOIN)
             	.uniqueResult();
         }
     }

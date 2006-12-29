@@ -8,7 +8,11 @@
 -->
 
 <hibernate-mapping package="ca.odell.glazedlists.hibernate">
-
+<!-- 
+    <typedef name="MyEventListType" class="ca.odell.glazedlists.hibernate.EventListType">
+        <param name="category">Test</param>
+    </typedef>
+ -->    
     <class name="User" table="`USERS`">
         <id name="userName" column="USERNAME"/>
         <!-- mapping a value collection -->
@@ -26,6 +30,13 @@
             <list-index column="DISPLAY_ORDER"/>
             <one-to-many class="Email"/>
         </list>
+        <!-- mapping a many-to-many entity association -->
+        <list name="roles" table="USER_ROLE" cascade="save-update" access="field" lazy="extra"
+            collection-type="ca.odell.glazedlists.hibernate.EventListType">
+            <key column="USERNAME"/>
+            <list-index column="DISPLAY_ORDER"/>
+            <many-to-many class="Role" column="ROLE_ID"/>
+        </list>
     </class>
 
     <class name="Email" table="EMAIL">
@@ -33,6 +44,17 @@
             <generator class="native"/>
         </id>
         <property name="address"/>
+    </class>
+
+    <class name="Role" table="`ROLES`">
+        <id name="id" column="ROLE_ID">
+            <generator class="native"/>
+        </id>
+        <property name="name"/>
+        <bag name="users" table="USER_ROLE" inverse="true" cascade="save-update" access="field">
+            <key column="ROLE_ID"/>
+            <many-to-many class="User" column="USERNAME"/>
+        </bag>
     </class>
 
 </hibernate-mapping>

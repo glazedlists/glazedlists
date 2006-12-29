@@ -22,6 +22,9 @@ public class User {
     /** List of email addresses. */
     private EventList<Email> emailAddresses = new BasicEventList<Email>();
 
+    /** List of roles. */
+    private EventList<Role> roles = new BasicEventList<Role>();
+
     /**
      * Default constructor for hibernate.
      */
@@ -81,8 +84,22 @@ public class User {
         nickNames.add(nickName);
     }
 
-    public void removedNickName(String nickName) {
+    public void removeNickName(String nickName) {
         nickNames.remove(nickName);
+    }
+    
+    public EventList<Role> getRoles() {
+        return roles;
+    }
+    
+    public void addRole(Role role) {
+        roles.add(role);
+        role.addUser(this);
+    }
+
+    public void removeRole(Role role) {
+        roles.remove(role);
+        role.removeUser(this);
     }
     
 }

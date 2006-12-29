@@ -12,6 +12,9 @@ import org.hibernate.collection.PersistentList;
 import org.hibernate.engine.SessionImplementor;
 import org.hibernate.persister.collection.CollectionPersister;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * A Hibernate persistent wrapper for an {@link EventList}. Underlying
@@ -24,6 +27,9 @@ public final class PersistentEventList extends PersistentList implements EventLi
 
     private static final long serialVersionUID = 0L;
 
+    /** Keep a redundant list of the ListEventListeners. */
+    private List<ListEventListener> listenerList = new ArrayList<ListEventListener>(); 
+    
     /**
      * Constructor with session.
      * 
@@ -48,24 +54,20 @@ public final class PersistentEventList extends PersistentList implements EventLi
 
     /** {@inheritDoc} */
     public void beforeInitialize(CollectionPersister persister) {
-        checkList();
+        beforeInitialize();
     }
     
     /** {@inheritDoc} */
     public void beforeInitialize(CollectionPersister persister, int anticipatedSize) {
-        checkList();        
-    }
-
-    /** 
-     * Helper method for checking the state of the list member. 
-     */
-    private void checkList() {
-        if (this.list == null) throw new IllegalStateException("'list' member is undefined");
+        beforeInitialize();
     }
     
     /** {@inheritDoc} */
-    public void addListEventListener(ListEventListener listChangeListener) {
-        ((EventList) list).addListEventListener(listChangeListener);
+    public boolean afterInitialize() {
+        final boolean result = super.afterInitialize();
+        // turn on event notification after initialization
+        addAllListeners();
+        return result;
     }
 
     /** {@inheritDoc} */
@@ -79,7 +81,43 @@ public final class PersistentEventList extends PersistentList implements EventLi
     }
 
     /** {@inheritDoc} */
-    public void removeListEventListener(ListEventListener listChangeListener) {
-        ((EventList) list).removeListEventListener(listChangeListener);
+    public void addListEventListener(ListEventListener listChangeListener) {        
+        ((EventList) list).addListEventListener(listChangeListener);
+        listenerList.add(listChangeListener);
     }
+    
+    /** {@inheritDoc} */
+    public void removeListEventListener(ListEventListener listChangeListener) {        
+        ((EventList) list).removeListEventListener(listChangeListener);
+        listenerList.remove(listChangeListener);
+    }
+
+    /**
+     * Helper method to prepare initialization of EventList, e.g. disable event notification. 
+     */
+    private void beforeInitialize() {
+        assert !wasInitialized() : "PersistentEventList is already initialized";
+        if (this.list == null) throw new IllegalStateException("'list' member is undefined");        
+        // disable event notification during initialization
+        removeAllListeners();        
+    }
+
+    /**
+     * Removes all listeners from the wrapped EventList.
+     */
+    private void removeAllListeners() {
+        for (int i = 0, n = listenerList.size(); i < n; i++) {
+            ((EventList) list).removeListEventListener(listenerList.get(i));    
+        }
+    }
+    
+    /**
+     * Adds all listeners to the wrapped EventList.
+     */
+    private void addAllListeners() {
+        for (int i = 0, n = listenerList.size(); i < n; i++) {
+            ((EventList) list).addListEventListener(listenerList.get(i));    
+        }
+    }
+    
 }
