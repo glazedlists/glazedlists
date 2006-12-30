@@ -5,6 +5,8 @@ package ca.odell.glazedlists.hibernate;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
@@ -12,24 +14,21 @@ import org.hibernate.collection.PersistentList;
 import org.hibernate.engine.SessionImplementor;
 import org.hibernate.persister.collection.CollectionPersister;
 
-import java.util.ArrayList;
-import java.util.List;
-
-
 /**
  * A Hibernate persistent wrapper for an {@link EventList}. Underlying
  * collection implementation is {@link BasicEventList}.
  * 
  * @author Bruce Alspaugh
  * @author Holger Brands
+ * @author James Lemieux
  */
-public final class PersistentEventList extends PersistentList implements EventList {
+public final class PersistentEventList extends PersistentList implements EventList, ListEventListener {
 
     private static final long serialVersionUID = 0L;
 
-    /** Keep a redundant list of the ListEventListeners. */
-    private List<ListEventListener> listenerList = new ArrayList<ListEventListener>(); 
-    
+    /** the change event and notification system */
+    protected final ListEventAssembler updates;
+
     /**
      * Constructor with session.
      * 
@@ -37,8 +36,13 @@ public final class PersistentEventList extends PersistentList implements EventLi
      */
     public PersistentEventList(SessionImplementor session) {
         super(session);
+
+        final EventList delegate = new BasicEventList();
+
         // instantiate list here to avoid NullPointerExceptions with lazy loading
-        list = new BasicEventList();
+        updates = new ListEventAssembler(this, delegate.getPublisher());
+        delegate.addListEventListener(this);
+        list = delegate;
     }
 
     /**
@@ -49,7 +53,10 @@ public final class PersistentEventList extends PersistentList implements EventLi
      */
     public PersistentEventList(SessionImplementor session, EventList newList) {
         super(session, newList);
-        if (newList == null) throw new IllegalArgumentException("EventList parameter must not be null");
+        if (newList == null) throw new IllegalArgumentException("EventList parameter may not be null");
+
+        updates = new ListEventAssembler(this, newList.getPublisher());
+        newList.addListEventListener(this);
     }
 
     /** {@inheritDoc} */
@@ -62,11 +69,27 @@ public final class PersistentEventList extends PersistentList implements EventLi
         beforeInitialize();
     }
     
+    /**
+     * Helper method to prepare initialization of EventList, e.g. disable event notification.
+     */
+    private void beforeInitialize() {
+        assert !wasInitialized() : "PersistentEventList is already initialized";
+        if (this.list == null) throw new IllegalStateException("'list' member is undefined");
+
+        // start a new ListEvent that will collect all changes due to
+        // initialization and fire a single uber-ListEvent describing the net
+        // result of initialization when it is committed in afterInitialize()
+        updates.beginEvent(true);
+    }
+
     /** {@inheritDoc} */
     public boolean afterInitialize() {
         final boolean result = super.afterInitialize();
-        // turn on event notification after initialization
-        addAllListeners();
+
+        // commit the uber ListEvent started in beginInitialize() that reflects
+        // the net effect of initializing this PersistentEventList
+        updates.commitEvent();
+
         return result;
     }
 
@@ -82,42 +105,16 @@ public final class PersistentEventList extends PersistentList implements EventLi
 
     /** {@inheritDoc} */
     public void addListEventListener(ListEventListener listChangeListener) {        
-        ((EventList) list).addListEventListener(listChangeListener);
-        listenerList.add(listChangeListener);
+        updates.addListEventListener(listChangeListener);
     }
     
     /** {@inheritDoc} */
     public void removeListEventListener(ListEventListener listChangeListener) {        
-        ((EventList) list).removeListEventListener(listChangeListener);
-        listenerList.remove(listChangeListener);
+        updates.removeListEventListener(listChangeListener);
     }
 
-    /**
-     * Helper method to prepare initialization of EventList, e.g. disable event notification. 
-     */
-    private void beforeInitialize() {
-        assert !wasInitialized() : "PersistentEventList is already initialized";
-        if (this.list == null) throw new IllegalStateException("'list' member is undefined");        
-        // disable event notification during initialization
-        removeAllListeners();        
+    /** {@inheritDoc} */
+    public void listChanged(ListEvent listChanges) {
+        updates.forwardEvent(listChanges);
     }
-
-    /**
-     * Removes all listeners from the wrapped EventList.
-     */
-    private void removeAllListeners() {
-        for (int i = 0, n = listenerList.size(); i < n; i++) {
-            ((EventList) list).removeListEventListener(listenerList.get(i));    
-        }
-    }
-    
-    /**
-     * Adds all listeners to the wrapped EventList.
-     */
-    private void addAllListeners() {
-        for (int i = 0, n = listenerList.size(); i < n; i++) {
-            ((EventList) list).addListEventListener(listenerList.get(i));    
-        }
-    }
-    
 }

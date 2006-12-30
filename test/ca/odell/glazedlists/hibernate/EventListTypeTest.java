@@ -31,7 +31,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
      * Tests a lazy loaded value collection.
      */
     public void testLazyValueCollection() {
-        doTestValueCollection(true);        
+        doTestValueCollection(true);
     }
 
     /**
@@ -56,7 +56,8 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
 
         // load saved user again
         u = loadUser(s, lazy);
-        assertTrue(u != null);
+        
+        assertNotNull(u);
 
         final GlazedListsTests.ListEventCounter<String> listener = new GlazedListsTests.ListEventCounter<String>();
 
@@ -77,8 +78,8 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
             // trigger initialization        
             assertEquals(2, u.getNickNames().size());
             assertTrue(Hibernate.isInitialized(u.getNickNames()));
-            // ATTENTION: no events should occur during initialization by Hibernate
-            assertEquals(0, listener.getCountAndReset());
+            // ATTENTION: one event should occur after initialization by Hibernate
+            assertEquals(1, listener.getCountAndReset());
         } else {
             // collection should be initialized
             assertTrue(Hibernate.isInitialized(u.getNickNames()));
@@ -156,7 +157,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
 
         // load saved user again
         u = loadUser(s, lazy);
-        assertTrue(u != null);
+        assertNotNull(u);
 
         final GlazedListsTests.ListEventCounter<Email> listener = new GlazedListsTests.ListEventCounter<Email>();
 
@@ -178,7 +179,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
             assertEquals(2, u.getEmailAddresses().size());
             assertTrue(Hibernate.isInitialized(u.getEmailAddresses()));
             // ATTENTION: no events should occur during initialization by Hibernate
-            assertEquals(0, listener.getCountAndReset());
+            assertEquals(1, listener.getCountAndReset());
         } else {
             // collection should be initialized
             assertTrue(Hibernate.isInitialized(u.getEmailAddresses()));
@@ -215,7 +216,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
         s = openSession();
         t = s.beginTransaction();
         u = loadUser(s, lazy);
-        assertEquals(u, null);
+        assertNull(u);
 
         // no emails should be found
         emails = s.createCriteria(Email.class).list();
@@ -257,7 +258,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
 
         // load saved user again
         u = loadUser(s, lazy);
-        assertTrue(u != null);
+        assertNotNull(u);
 
         final GlazedListsTests.ListEventCounter<Role> listener = new GlazedListsTests.ListEventCounter<Role>();
 
@@ -285,7 +286,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
             u.getRoles().iterator();
             assertTrue(Hibernate.isInitialized(u.getRoles()));
             // ATTENTION: no events should occur during initialization by Hibernate
-            assertEquals(0, listener.getCountAndReset());
+            assertEquals(1, listener.getCountAndReset());
         } else {
             // collection should be initialized
             assertTrue(Hibernate.isInitialized(u.getRoles()));
@@ -309,8 +310,11 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
         assertEquals(1, u.getRoles().size());
         assertEquals("Developer", u.getRoles().get(0).getName());
         u.getRoles().addListEventListener(listener);
+
+        final int expectedNumListEvents = Hibernate.isInitialized(u.getRoles()) ? 1 : 2;
+
         u.getRoles().clear();
-        assertEquals(1, listener.getCountAndReset());
+        assertEquals(expectedNumListEvents, listener.getCountAndReset());
         assertEquals(0, u.getRoles().size());
         assertTrue(Hibernate.isInitialized(u.getRoles()));        
         roles = s.createCriteria(Role.class).list();
@@ -397,14 +401,17 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
      * @param lazy <code>true</code>, if collections shoud be lazy loaded, <code>false</code> otherwise
      */
     private User loadUser(Session s, boolean lazy) {
+        final User u;
         if (lazy) {
-            return (User) s.createCriteria(User.class).uniqueResult();
+            u = (User) s.createCriteria(User.class).uniqueResult();
         } else {
-            return (User) s.createCriteria(User.class)
+            u = (User) s.createCriteria(User.class)
             	.setFetchMode("emailAddresses", FetchMode.JOIN)
                 .setFetchMode("nickNames", FetchMode.JOIN)
                 .setFetchMode("roles", FetchMode.JOIN)
             	.uniqueResult();
         }
+
+        return u;
     }
 }
