@@ -3,6 +3,10 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.hibernate;
 
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import org.hibernate.FetchMode;
 import org.hibernate.Hibernate;
@@ -346,6 +350,38 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
         t.commit();
         s.close();
     }
+
+    /**
+     * Tests behaviour when Hibernate wraps an EventList.
+     */
+    public void testListWrapOnSave_FixMe() {
+        // create user with nicknames and persist
+        Session s = openSession();
+        Transaction t = s.beginTransaction();
+        User u = new User("admin");
+        final ListEventSourceHandler handler1 = new ListEventSourceHandler();
+        u.getNickNames().addListEventListener(handler1);
+        u.addNickName("Hacker");
+        u.addNickName("Maestro");
+        assertEquals(BasicEventList.class, u.getNickNames().getClass());
+        s.persist(u);
+        // Hibernate has wrapped the BasicEventList with a PersistentEventList using
+        // EventListType.wrap(...)
+        assertEquals(PersistentEventList.class, u.getNickNames().getClass());
+        t.commit();
+        s.close();
+        final ListEventSourceHandler handler2 = new ListEventSourceHandler();
+        u.getNickNames().addListEventListener(handler2);        
+        u.addNickName("Tricky");
+        // delete user again
+        s = openSession();
+        t = s.beginTransaction();
+        s.delete(u);
+        t.commit();
+        s.close();
+        // compare list event source, should be the same
+        assertTrue(handler1.source == handler2.source);        
+    }
     
     /**
      * Creates and persists an example user with emial addresses.
@@ -413,5 +449,21 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
         }
 
         return u;
+    }
+    
+    /**
+     * Helper class for capturing source list of list events
+     */
+    private static class ListEventSourceHandler implements ListEventListener {
+        public EventList source;
+        
+        /** {@inheritDoc} */
+        public void listChanged(ListEvent listChanges) {
+            if (source == null) {
+                source = listChanges.getSourceList();
+            } else if (source != listChanges.getSourceList()) {
+                    throw new IllegalStateException("SourceList changed");
+            }
+        }        
     }
 }
