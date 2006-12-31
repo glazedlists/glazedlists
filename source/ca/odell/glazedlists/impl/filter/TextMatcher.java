@@ -8,8 +8,7 @@ import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Matcher for matching text.
@@ -52,7 +51,7 @@ public class TextMatcher<E> implements Matcher<E> {
      */
     public TextMatcher(SearchTerm[] searchTerms, TextFilterator<? super E> filterator, int mode, Object strategy) {
         this.filterator = filterator;
-        this.searchTerms = TextMatchers.mapSearchTerms(searchTerms, (TextSearchStrategy.Factory)strategy);
+        this.searchTerms = TextMatchers.normalizeSearchTerms(searchTerms, (TextSearchStrategy.Factory)strategy);
         this.mode = mode;
         this.strategy = strategy;
 
@@ -64,12 +63,23 @@ public class TextMatcher<E> implements Matcher<E> {
     }
 
     /**
-     * Returns the behaviour mode for this {@link TextMatcher}.
+     * Returns the behaviour mode which indicates where to locate the search
+     * terms for a successful match.
      *
      * @return one of {@link TextMatcherEditor#CONTAINS}, {@link TextMatcherEditor#STARTS_WITH}
      */
     public int getMode() {
         return mode;
+    }
+
+    /**
+     * Returns the strategy which indicates what kind of algorithm to use when determining a match.
+     *
+     * @return one of {@link TextMatcherEditor#IDENTICAL_STRATEGY}, {@link TextMatcherEditor#NORMALIZED_STRATEGY} or
+     *      {@link ca.odell.glazedlists.matchers.GlazedListsICU4J#UNICODE_TEXT_SEARCH_STRATEGY}
+     */
+    public Object getStrategy() {
+        return strategy;
     }
 
     /**
@@ -83,11 +93,10 @@ public class TextMatcher<E> implements Matcher<E> {
      * Returns the search term strings matched by this {@link TextMatcher}.
      */
     public String[] getSearchTermStrings() {
-        final SearchTerm[] terms = getSearchTerms();
-        final String[] strings = new String[terms.length];
+        final String[] strings = new String[searchTerms.length];
 
-        for (int i = 0; i < terms.length; i++)
-            strings[i] = terms[i].getText();
+        for (int i = 0; i < searchTerms.length; i++)
+            strings[i] = searchTerms[i].getText();
 
         return strings;
     }
@@ -129,6 +138,35 @@ public class TextMatcher<E> implements Matcher<E> {
     private static TextSearchStrategy selectTextSearchStrategy(SearchTerm filter, int mode, TextSearchStrategy.Factory strategy) {
         final TextSearchStrategy result = strategy.create(mode, filter.getText());
         result.setSubtext(filter.getText());
+        return result;
+    }
+
+    /**
+     * TextMatcher objects are considered equal if they agree on the mode,
+     * strategy, and set of SearchTerms.
+     */
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TextMatcher that = (TextMatcher) o;
+
+        Set<SearchTerm> thisSearchTerms = new HashSet<SearchTerm>(Arrays.asList(searchTerms));
+        Set<SearchTerm> thatSearchTerms = new HashSet<SearchTerm>(Arrays.asList(that.searchTerms));
+
+        if (mode != that.mode) return false;
+        if (!thisSearchTerms.equals(thatSearchTerms)) return false;
+        if (!strategy.equals(that.strategy)) return false;
+
+        return true;
+    }
+
+    /** @inheritDoc */
+    public int hashCode() {
+        int result;
+        result = mode;
+        result = 31 * result + strategy.hashCode();
+        result = 31 * result + new HashSet<SearchTerm>(Arrays.asList(searchTerms)).hashCode();
         return result;
     }
 }

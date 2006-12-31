@@ -220,22 +220,12 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      * <code>null</code> if no current Matcher exists or is something other
      * than a {@link TextMatcher}.
      */
-    private TextMatcher<E> getCurrentTextMatcher() {
+    protected TextMatcher<E> getCurrentTextMatcher() {
+        final Matcher<E> currentMatcher = getMatcher();
         if (currentMatcher instanceof TextMatcher)
             return ((TextMatcher<E>) currentMatcher);
 
         return null;
-    }
-
-    /**
-     * Returns the filter that was last produced from this editor or an empty
-     * filter if one doesn't exist.
-     */
-    private String[] getCurrentSearchTermStrings() {
-        if (currentMatcher instanceof TextMatcher)
-            return ((TextMatcher<E>) currentMatcher).getSearchTermStrings();
-
-        return EMPTY_FILTER;
     }
 
     /**
@@ -245,32 +235,48 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      * @param newFilters the {@link String}s representing all of the filter values
      */
     public void setFilterText(String[] newFilters) {
-        final String[] oldFilters = getCurrentSearchTermStrings();
-        newFilters = TextMatchers.normalizeFilters(newFilters);
-
-        // fire the event only as necessary
-        if (TextMatchers.isFilterEqual(oldFilters, newFilters))
-            return;
-
-        // classify the change in filter and apply the new filter to this list
-        if (newFilters.length == 0) {
-            fireMatchAll();
-            return;
-        }
-
-        // wrap the filter Strings within default SearchTerm objects
+        // wrap the filter Strings with SearchTerm objects
         final SearchTerm[] searchTerms = new SearchTerm[newFilters.length];
         for (int i = 0; i < searchTerms.length; i++)
             searchTerms[i] = new SearchTerm(newFilters[i]);
 
-        // classify the change in filter and apply the new filter to this list
-        final TextMatcher<E> matcher = new TextMatcher<E>(searchTerms, filterator, mode, strategy);
+        // adjust the TextMatcher
+        setTextMatcher(new TextMatcher<E>(searchTerms, getFilterator(), getMode(), getStrategy()));
+    }
 
-        if (TextMatchers.isFilterRelaxed(oldFilters, newFilters))
-            fireRelaxed(matcher);
-        else if (TextMatchers.isFilterConstrained(oldFilters, newFilters))
-            fireConstrained(matcher);
+    /**
+     * This method replaces the current Matcher in this TextMatcherEditor with
+     * the <code>newMatcher</code> if it is different. If the current Matcher
+     * is also a TextMatcher then many comparisons between the two in order to
+     * determine if the new Matcher is a strict constrainment or relaxation of
+     * the current TextMatcher.
+     *
+     * @param newMatcher the new TextMatcher which defines the text filtering
+     *      logic
+     */
+    protected void setTextMatcher(TextMatcher<E> newMatcher) {
+        final TextMatcher<E> oldMatcher = getCurrentTextMatcher();
+
+        // fire the event only as necessary
+        if (newMatcher.equals(oldMatcher))
+            return;
+
+        // if the newMatcher does not have any search terms then it
+        // automatically matches
+        if (newMatcher.getSearchTerms().length == 0) {
+            if (!isCurrentlyMatchingAll())
+                fireMatchAll();
+            return;
+        }
+
+        // this is the case when the current Matcher is not a TextMatcher
+        if (isCurrentlyMatchingAll())
+            fireConstrained(newMatcher);
+        else if (TextMatchers.isMatcherRelaxed(oldMatcher, newMatcher))
+            fireRelaxed(newMatcher);
+        else if (TextMatchers.isMatcherConstrained(oldMatcher, newMatcher))
+            fireConstrained(newMatcher);
         else
-            fireChanged(matcher);
+            fireChanged(newMatcher);
     }
 }

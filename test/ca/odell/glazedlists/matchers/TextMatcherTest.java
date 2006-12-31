@@ -4,6 +4,7 @@
 package ca.odell.glazedlists.matchers;
 
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.impl.filter.TextMatcher;
 import ca.odell.glazedlists.impl.filter.TextMatchers;
 import junit.framework.TestCase;
 
@@ -16,75 +17,6 @@ public class TextMatcherTest extends TestCase {
     private List<String> monotonicAlphabet = Arrays.asList(new String[] {"0", "01", "012", "0123", "01234", "012345", "0123456", "01234567", "012345678", "0123456789"});
 
     private List<String> dictionary = Arrays.asList(new String[] {"act", "actor", "enact", "reactor"});
-
-    public void testNormalizeValue() {
-        assertTrue(Arrays.equals(new String[0], TextMatchers.normalizeFilters(new String[0])));
-        assertTrue(Arrays.equals(new String[0], TextMatchers.normalizeFilters(new String[] {null, ""})));
-        assertTrue(Arrays.equals(new String[] {"x"}, TextMatchers.normalizeFilters(new String[] {"x", null, ""})));
-        assertTrue(Arrays.equals(new String[] {"x", "Y", "z"}, TextMatchers.normalizeFilters(new String[] {null, "", "x", null, "", "Y", null, "", "z", null, ""})));
-        assertTrue(Arrays.equals(new String[] {"xyz"}, TextMatchers.normalizeFilters(new String[] {null, "", "x", null, "", "xy", null, "", "xyz", null, ""})));
-        assertTrue(Arrays.equals(new String[] {"xyz"}, TextMatchers.normalizeFilters(new String[] {null, "", "xyz", null, "", "xy", null, "", "x", null, ""})));
-        assertTrue(Arrays.equals(new String[] {"xyz"}, TextMatchers.normalizeFilters(new String[] {null, "", "xy", null, "", "xyz", null, "", "x", null, ""})));
-        assertTrue(Arrays.equals(new String[] {"xyz"}, TextMatchers.normalizeFilters(new String[] {null, "", "xyz", null, "", "xyz", null, "", "xyz", null, ""})));
-        assertTrue(Arrays.equals(new String[] {"blackened"}, TextMatchers.normalizeFilters(new String[] {"black", "blackened"})));
-        assertTrue(Arrays.equals(new String[] {"this"}, TextMatchers.normalizeFilters(new String[] {"this", "his"})));
-
-        assertTrue(Arrays.equals(new String[] {"blackened", "this"}, TextMatchers.normalizeFilters(new String[] {"blackened", "this"})));
-        assertTrue(Arrays.equals(new String[] {"blackened", "this"}, TextMatchers.normalizeFilters(new String[] {"this", "blackened"})));
-    }
-
-    public void testIsFilterRelaxed() {
-        // removing last filter term
-        assertTrue(TextMatchers.isFilterRelaxed(new String[] {"x"}, new String[0]));
-        // shortening filter term
-        assertTrue(TextMatchers.isFilterRelaxed(new String[] {"xx"}, new String[] {"x"}));
-        // removing filter term
-        assertTrue(TextMatchers.isFilterRelaxed(new String[] {"xx", "y"}, new String[] {"xx"}));
-        // removing filter term
-        assertTrue(TextMatchers.isFilterRelaxed(new String[] {"xx", "y"}, new String[] {"y"}));
-        // removing and shorterning filter term
-        assertTrue(TextMatchers.isFilterRelaxed(new String[] {"xx", "y"}, new String[] {"x"}));
-        // shortening filter term by multiple characters
-        assertTrue(TextMatchers.isFilterRelaxed(new String[] {"xyz"}, new String[] {"x"}));
-        // shortening filter term
-        assertTrue(TextMatchers.isFilterRelaxed(new String[] {"xyz"}, new String[] {"xy"}));
-
-        assertFalse(TextMatchers.isFilterRelaxed(new String[0], new String[] {"abc"}));
-        assertFalse(TextMatchers.isFilterRelaxed(new String[] {""}, new String[] {"abc"}));
-        assertFalse(TextMatchers.isFilterRelaxed(new String[] {"xyz"}, new String[] {"abc"}));
-        assertFalse(TextMatchers.isFilterRelaxed(new String[] {"xyz"}, new String[] {"xyz", "abc"}));
-        assertFalse(TextMatchers.isFilterRelaxed(new String[] {"xyz"}, new String[] {"xyz", "xy", "x"}));
-        assertFalse(TextMatchers.isFilterRelaxed(new String[] {"xyz", ""}, new String[] {"xyz"}));
-        assertFalse(TextMatchers.isFilterRelaxed(new String[] {"xyz", ""}, new String[] {"xyz", "xyz"}));
-    }
-
-    public void testIsFilterEqual() {
-        assertTrue(TextMatchers.isFilterEqual(new String[0], new String[0]));
-        assertTrue(TextMatchers.isFilterEqual(new String[] {"x"}, new String[] {"x"}));
-        assertTrue(TextMatchers.isFilterEqual(new String[] {"x", "y"}, new String[] {"x", "y"}));
-    }
-
-    public void testIsFilterConstrained() {
-        // adding the first filter term
-        assertTrue(TextMatchers.isFilterConstrained(new String[0], new String[] {"x"}));
-        // lengthening filter term
-        assertTrue(TextMatchers.isFilterConstrained(new String[] {"x"}, new String[] {"xx"}));
-        // adding filter term
-        assertTrue(TextMatchers.isFilterConstrained(new String[] {"x"}, new String[] {"x", "y"}));
-        // lengthening filter term by multiple characters
-        assertTrue(TextMatchers.isFilterConstrained(new String[] {"x"}, new String[] {"xyz"}));
-        // lengthening multi character filter term
-        assertTrue(TextMatchers.isFilterConstrained(new String[] {"xy"}, new String[] {"xyz"}));
-        // removing search terms but covering the old with a single new
-        assertTrue(TextMatchers.isFilterConstrained(new String[] {"xyz", "xy", "x"}, new String[] {"xyzz"}));
-
-        assertFalse(TextMatchers.isFilterConstrained(new String[] {"abc"}, new String[0]));
-        assertFalse(TextMatchers.isFilterConstrained(new String[] {"abc"}, new String[] {""}));
-        assertFalse(TextMatchers.isFilterConstrained(new String[] {"xyz"}, new String[] {"abc"}));
-        assertFalse(TextMatchers.isFilterConstrained(new String[] {"xyz", "abc"}, new String[] {"xyz"}));
-        assertFalse(TextMatchers.isFilterConstrained(new String[] {"xyz"}, new String[] {"xyz", ""}));
-        assertFalse(TextMatchers.isFilterConstrained(new String[] {"xyz", "xyz"}, new String[] {"xyz", ""}));
-    }
 
     public void testConstrainingFilter() {
         TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
@@ -100,47 +32,6 @@ public class TextMatcherTest extends TestCase {
         assertEquals(Arrays.asList(new Object[] {"0"}), list);
 		counter.assertCounterState(0, 0, 0, 1, 0);
     }
-
-
-//	public void testLogicInversion() {
-//        TextMatcherEditor textMatcherEditor = new TextMatcherEditor(new StringTextFilterator());
-//		textMatcherEditor.setLogicInverted(true);
-//		FilterList list = new FilterList(new BasicEventList(), textMatcherEditor);
-//
-//        list.addAll(monotonicAlphabet);
-//
-//        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
-//        textMatcherEditor.addMatcherEditorListener(counter);
-//
-//		// Make sure it includes everything to start with (no filter)
-//		assertEquals(monotonicAlphabet.size(), list.size());
-//
-//		textMatcherEditor.setFilterText(new String[] {"9"});		// constrained
-//		assertEquals(monotonicAlphabet.size() - 1, list.size());
-//		counter.assertCounterState(0, 0, 0, 1, 0);
-//		counter.resetCounterState();
-//
-//		textMatcherEditor.setFilterText(new String[] {"1"});		// changed
-//		assertEquals(1, list.size());
-//		counter.assertCounterState(0, 0, 1, 0, 0);
-//		counter.resetCounterState();
-//
-//		// Go back to normal logic. Should now match all but 1
-//		textMatcherEditor.setLogicInverted(false);
-//		assertEquals(monotonicAlphabet.size() - 1, list.size());
-//		counter.assertCounterState(0, 0, 1, 0, 0);
-//		counter.resetCounterState();
-//
-//		// Return to inverted
-//		textMatcherEditor.setLogicInverted(true);
-//		counter.assertCounterState(0, 0, 1, 0, 0);
-//		counter.resetCounterState();
-//
-//		// Clear it
-//		textMatcherEditor.setFilterText(null);
-//		assertEquals(monotonicAlphabet.size(), list.size());
-//		counter.assertCounterState(1, 0, 0, 0, 0);
-//	}
 
 	public void testRelaxingFilter() {
         TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
@@ -533,6 +424,42 @@ public class TextMatcherTest extends TestCase {
         textMatcherEditor.setFilterText(new String[] {"aaaaaaceeeeiiiinooooouuuuyAAAAAACEEEEIIIINOOOOOUUUUYY"});
         assertEquals(1, list.size());
         assertEquals(uberString, list.get(0));
+    }
+
+    public void testTextMatcherEquals() {
+        TextMatcher<String> matcherA = new TextMatcher<String>(TextMatchers.parse("a b c"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.CONTAINS, TextMatcherEditor.IDENTICAL_STRATEGY);
+
+        TextMatcher<String> matcherB = new TextMatcher<String>(TextMatchers.parse("c b a"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.CONTAINS, TextMatcherEditor.IDENTICAL_STRATEGY);
+        assertTrue(matcherA.equals(matcherB));
+        assertTrue(matcherB.equals(matcherA));
+
+        matcherB = new TextMatcher<String>(TextMatchers.parse("\"c\" \"b\" \"a\""), GlazedLists.toStringTextFilterator(), TextMatcherEditor.CONTAINS, TextMatcherEditor.IDENTICAL_STRATEGY);
+        assertTrue(matcherA.equals(matcherB));
+        assertTrue(matcherB.equals(matcherA));
+
+        matcherB = new TextMatcher<String>(TextMatchers.parse("a b"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.CONTAINS, TextMatcherEditor.IDENTICAL_STRATEGY);
+        assertFalse(matcherA.equals(matcherB));
+        assertFalse(matcherB.equals(matcherA));
+
+        matcherB = new TextMatcher<String>(TextMatchers.parse("a b c d"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.CONTAINS, TextMatcherEditor.IDENTICAL_STRATEGY);
+        assertFalse(matcherA.equals(matcherB));
+        assertFalse(matcherB.equals(matcherA));
+
+        matcherB = new TextMatcher<String>(TextMatchers.parse("a b c"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH, TextMatcherEditor.IDENTICAL_STRATEGY);
+        assertFalse(matcherA.equals(matcherB));
+        assertFalse(matcherB.equals(matcherA));
+
+        matcherB = new TextMatcher<String>(TextMatchers.parse("a b c"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.CONTAINS, TextMatcherEditor.NORMALIZED_STRATEGY);
+        assertFalse(matcherA.equals(matcherB));
+        assertFalse(matcherB.equals(matcherA));
+
+        matcherB = new TextMatcher<String>(TextMatchers.parse("+a b c"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.CONTAINS, TextMatcherEditor.IDENTICAL_STRATEGY);
+        assertFalse(matcherA.equals(matcherB));
+        assertFalse(matcherB.equals(matcherA));
+
+        matcherB = new TextMatcher<String>(TextMatchers.parse("-a b c"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.CONTAINS, TextMatcherEditor.IDENTICAL_STRATEGY);
+        assertFalse(matcherA.equals(matcherB));
+        assertFalse(matcherB.equals(matcherA));
     }
 
     /**

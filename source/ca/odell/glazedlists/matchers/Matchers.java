@@ -9,6 +9,8 @@ import ca.odell.glazedlists.impl.matchers.*;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.lang.reflect.Array;
 
 /**
  * A factory for creating Matchers.
@@ -145,6 +147,20 @@ public final class Matchers {
             }
         }
         return changed;
+    }
+
+    /**
+     * Return a new array containing only the <code>items</code> that satisfy
+     * the <code>matcher</code>.
+     *
+     * @param items the array of Objects to search
+     * @param matcher the criteria for considering an element a match
+     * @return a new array containing only the <code>items</code> that satisfy
+     *      the <code>matcher</code>
+     */
+    public static <E> E[] select(E[] items, Matcher<? super E> matcher) {
+        final Collection<? super E> selections = select(Arrays.asList(items), matcher);
+        return selections.toArray((E[]) Array.newInstance(items.getClass().getComponentType(), selections.size()));
     }
 
     /**

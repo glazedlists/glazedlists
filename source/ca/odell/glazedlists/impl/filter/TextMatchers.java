@@ -4,14 +4,14 @@
 package ca.odell.glazedlists.impl.filter;
 
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
+import ca.odell.glazedlists.matchers.Matchers;
+import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.TextFilterable;
 import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.GlazedLists;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 
 /**
  * Common services required when implementing a Matcher that performs text
@@ -20,8 +20,14 @@ import java.util.Collections;
  * @author James Lemieux
  */
 public final class TextMatchers {
-    /** The single instance of the {@link StringLengthComparator}. */
-    private static final Comparator<String> LENGTH_COMPARATOR = new StringLengthComparator();
+    /** A Comparator that orders SearchTerms according to the length of their text. */
+    private static final Comparator<SearchTerm> SEARCHTERM_LENGTH_COMPARATOR = new SearchTermLengthComparator();
+
+    /** A Matcher that only accepts non-negated SearchTerms. */
+    private static final Matcher<SearchTerm> NON_NEGATED_MATCHER = Matchers.beanPropertyMatcher(SearchTerm.class, "negated", Boolean.FALSE);
+
+    /** A Matcher that only accepts negated SearchTerms. */
+    private static final Matcher<SearchTerm> NEGATED_MATCHER = Matchers.beanPropertyMatcher(SearchTerm.class, "negated", Boolean.TRUE);
 
     /**
      * Execute the logic that determines whether the given <code>element</code>
@@ -34,6 +40,7 @@ public final class TextMatchers {
      *
      * @param filterStrings a recyclable List into which the filter Strings can stored
      * @param filterator the logic capable of extracting filtering Strings from the <code>element</code>
+     * @param searchTerms SearchTerm objects defining each piece of search text as well as metadata about the text
      * @param filterStrategies the optimized logic for locating given search text within the <code>filterStrings</code>
      * @param element the list element on which we are text filtering
      * @return <tt>true</tt> if all <code>filterStrategies</code> located
@@ -94,111 +101,73 @@ public final class TextMatchers {
     }
 
     /**
-     * This convenience function maps each of the <code>filters</code> by
-     * running each of their characters through the <code>characterMap</code>.
-     *
-     * @param filters the filter Strings to be mapped
-     * @param strategy the strategy for mapping a character
-     * @return mapped versions of the filter Strings
-     */
-    public static SearchTerm[] mapSearchTerms(SearchTerm[] filters, TextSearchStrategy.Factory strategy) {
-        // if something other than the "normalized latin strategy" is used, return the filters untouched
-        if (strategy != TextMatcherEditor.NORMALIZED_STRATEGY)
-            return filters;
-
-        final char[] mapper = GlazedListsImpl.getLatinDiacriticsStripper();
-        final SearchTerm[] mappedFilters = new SearchTerm[filters.length];
-
-        // map the filter Strings by running each character through the characterMap
-        for (int i = 0; i < filters.length; i++) {
-            final String filter = filters[i].getText();
-            final char[] mappedFilter = new char[filter.length()];
-
-            // map each character in the filter
-            for (int j = 0; j < filter.length(); j++) {
-                char c = filter.charAt(j);
-                mappedFilter[j] = c < mapper.length ? mapper[c] : c;
-            }
-
-            // record the mapped filter
-            mappedFilters[i] = filters[i].newSearchTerm(new String(mappedFilter));
-        }
-
-        return mappedFilters;
-    }
-
-    /**
-     * This convenience method returns a copy of the <code>filterStrings</code>
+     * This convenience method returns a copy of the <code>searchTerms</code>
      * with null and <code>""</code> values removed. It also removes irrelevant
      * search filters which are filters strings that do not add to the
-     * precision of the string filtering. It also orders the search filters in
-     * order of descending length so that the longest, most discriminating
-     * filters occur near the start of the array.
+     * precision of the string filtering. It also orders the search filters by
+     * length so that the most discriminating filters occur near the start of
+     * the array.
      *
-     * <p>For example, if <code>filterStrings</code> contained both
-     * <code>"black"</code> and <code>"blackened"</code> then this method's
-     * return value would not contain <code>"black"</code> since
-     * <code>"blackened"</code> is a more precise search term that contains
-     * <code>"black"</code>.
+     * The <code>negated</code> flag indicates whether the
+     * <code>searchTerms</code> must be present (negated == false) or absent
+     * (negated == true) in the target text for the SearchTerm to be considered
+     * a match.
      *
-     * <p>Similarly, <code>"this"</code> and <code>"his"</code> would prune
-     * <code>"his"</code> since <code>"his"</code> is less precise than
-     * <code>"this"</code> and thus adds no filtering value.
+     * <p>For example, if <code>searchTerms</code> contained both
+     * <code>"black"</code> and <code>"blackened"</code> then the return value
+     * would not contain <code>"black"</code> since <code>"blackened"</code> is
+     * a more precise search term that contains <code>"black"</code>.
      *
      * <p>If <code>{"this", "blackened"}</code> are passed into this method as
-     * the filter strings, they'll be returned as
+     * the <code>searchTerms</code>, they'll be returned as
      * <code>{"blackened", "this"}</code> since <code>"blackened"</code> is
      * longer and thus faster to search for (via Boyer Moore) than the shorter
      * filter string, <code>"this"</code>.
      *
-     * @param filterStrings an array of Strings to normalize
-     * @return a copy of the minimal array of <code>filterStrings</code> in
+     * @param searchTerms an array of Strings to normalize
+     * @param negated <tt>true</tt> if the searchTerms are all negated and must
+     *      be absent in the target text; <tt>false</tt> if they are not negated
+     *      and thus should be present in the target text
+     * @return a copy of the minimal array of <code>searchTerms</code> in
      *      the order of longest to shortest
      */
-    public static String[] normalizeFilters(String[] filterStrings) {
-        // flags to indicate the valid and minimal filters
-        final boolean[] minimalFilter = new boolean[filterStrings.length];
+    private static List<SearchTerm> normalizeSearchTerms(List<SearchTerm> searchTerms, boolean negated) {
+        List<SearchTerm> result = new ArrayList<SearchTerm>(searchTerms);
 
-        // count the number of valid (non-null and non-empty) filters
-        int validFilters = 0;
-        for(int i = 0; i < filterStrings.length; i++) {
-            if(filterStrings[i] != null && filterStrings[i].length() > 0) {
-                validFilters++;
-                minimalFilter[i] = true;
-            }
+        // filter out null and 0-length SearchTerms - they have no filtering value
+        for(Iterator<SearchTerm> i = result.iterator(); i.hasNext();) {
+            SearchTerm searchTerm = i.next();
+            if(searchTerm == null || searchTerm.getText().length() == 0)
+                i.remove();
         }
 
         // remove the filters that are not minimal (i.e. "blackened" removes "black")
-        for(int i = 0; i < minimalFilter.length; i++) {
-            if(minimalFilter[i]) {
+        for(int i = 0; i < result.size(); i++) {
+            SearchTerm termI = result.get(i);
 
-                // attempt to search for another minimal filter that contains
-                // minimalFilter[i] to prove that minimalFilter[i] is not
-                // a *required* filter string
-                for(int j = 0; j < minimalFilter.length; j++) {
-                    if(minimalFilter[j] && i != j && filterStrings[j].indexOf(filterStrings[i]) != -1) {
-                        minimalFilter[i] = false;
-                        validFilters--;
+            // attempt to find another SearchTerm that contains termI to prove
+            // that one of termI or termJ is unnecessary
+            for(int j = 0; j < result.size(); j++) {
+                SearchTerm termJ = result.get(j);
+
+                if(i != j && termJ.getText().indexOf(termI.getText()) != -1) {
+                    if(negated) {
+                        if(termJ.isRequired()) continue;
+                        result.remove(j);
+                    } else {
+                        if(termI.isRequired()) continue;
+                        result.remove(i);
                         break;
                     }
                 }
             }
         }
 
-        // extract all valid filters into a List
-        final List<String> minimalFilters = new ArrayList<String>(validFilters);
-        for(int i = 0, j = 0; j < validFilters; i++) {
-            if(minimalFilter[i]) {
-                minimalFilters.add(filterStrings[i]);
-                j++;
-            }
-        }
-
         // order the elements of the list according to their lengths
         // so the most discriminating filter strings are considered first
-        Collections.sort(minimalFilters, LENGTH_COMPARATOR);
+        Collections.sort(result, negated ? GlazedLists.reverseComparator(SEARCHTERM_LENGTH_COMPARATOR) : SEARCHTERM_LENGTH_COMPARATOR);
 
-        return minimalFilters.toArray(new String[validFilters]);
+        return result;
     }
 
     /**
@@ -215,14 +184,14 @@ public final class TextMatchers {
      * <code>filter2</code> is meaningless. A filter of <code>"abc"</code> is
      * logically equal to a filter of <code>"abc", "abc"</code>.
      *
-     * @param oldFilters an array of {@link #normalizeFilters(String[]) normalized}
-     *      filter Strings.
-     * @param newFilters another array of {@link #normalizeFilters(String[]) normalized}
-     *      filter Strings.
+     * @param oldFilters an array of {@link #normalizeSearchTerms normalized}
+     *      filter Strings
+     * @param newFilters another array of {@link # normalizeSearchTerms normalized}
+     *      filter Strings
      * @return <tt>true</tt> if <code>filter1</code> is the same logical filter
      *      as <code>filter2</code>; <tt>false</tt> otherwise
      */
-    public static boolean isFilterEqual(final String[] oldFilters, final String[] newFilters) {
+    static boolean isFilterEqual(final String[] oldFilters, final String[] newFilters) {
         // each new filter value must have a precise match with an old filter
         // value for the text filters to be considered equal
         newFiltersCoveredByOld:
@@ -280,14 +249,14 @@ public final class TextMatchers {
      *       <tt>true</tt> then <code>isFilterRelaxed(o, n)</code> will return
      *       <tt>false</tt>.
      *
-     * @param oldFilters an array of {@link #normalizeFilters(String[]) normalized}
-     *      filter Strings.
-     * @param newFilters another array of {@link #normalizeFilters(String[]) normalized}
-     *      filter Strings.
+     * @param oldFilters an array of {@link #normalizeSearchTerms normalized}
+     *      filter Strings
+     * @param newFilters another array of {@link # normalizeSearchTerms normalized}
+     *      filter Strings
      * @return <tt>true</tt> if <code>newFilter</code> is a relaxed version of
      *      <code>oldFilter</code>; <tt>false</tt> otherwise
      */
-    public static boolean isFilterRelaxed(final String[] oldFilters, final String[] newFilters) {
+    static boolean isFilterRelaxed(final String[] oldFilters, final String[] newFilters) {
         // ensure each new filter value has a counterpart in the old filter value that
         // contains it (and thus the new filter value is covered by the old filter value)
         newFiltersCoveredByOld:
@@ -316,22 +285,73 @@ public final class TextMatchers {
      * <code>isFilterRelaxed(newFilter, oldFilter)</code>. See
      * {@link #isFilterRelaxed} for a description of why that holds.
      *
-     * @param oldFilter an array of {@link #normalizeFilters(String[]) normalized}
-     *      filter Strings.
-     * @param newFilter another array of {@link #normalizeFilters(String[]) normalized}
-     *      filter Strings.
+     * @param oldFilter an array of {@link #normalizeSearchTerms normalized}
+     *      filter Strings
+     * @param newFilter another array of {@link # normalizeSearchTerms normalized}
+     *      filter Strings
      * @return <tt>true</tt> if <code>newFilter</code> is a constrained version
      *      of <code>oldFilter</code>; <tt>false</tt> otherwise
      * @see #isFilterRelaxed
      */
-    public static boolean isFilterConstrained(String[] oldFilter, String[] newFilter) {
+    static boolean isFilterConstrained(String[] oldFilter, String[] newFilter) {
         return isFilterRelaxed(newFilter, oldFilter);
+    }
+
+    /**
+     * This convenience function maps each of the <code>filters</code> by
+     * running each of their characters through the <code>characterMap</code>.
+     * It also removes unnecessary SearchTerms which are not marked as
+     * required.
+     *
+     * @param filters the filter Strings to be normalized
+     * @param strategy the strategy for mapping a character
+     * @return mapped versions of the filter Strings
+     */
+    public static SearchTerm[] normalizeSearchTerms(SearchTerm[] filters, TextSearchStrategy.Factory strategy) {
+        // if the "normalized latin strategy" is used, strip the diacritics
+        if (strategy == TextMatcherEditor.NORMALIZED_STRATEGY) {
+            final char[] mapper = GlazedListsImpl.getLatinDiacriticsStripper();
+            final SearchTerm[] mappedFilters = new SearchTerm[filters.length];
+
+            // map the filter Strings by running each character through the characterMap
+            for (int i = 0; i < filters.length; i++) {
+                final String filter = filters[i].getText();
+                final char[] mappedFilter = new char[filter.length()];
+
+                // map each character in the filter
+                for (int j = 0; j < filter.length(); j++) {
+                    char c = filter.charAt(j);
+                    mappedFilter[j] = c < mapper.length ? mapper[c] : c;
+                }
+
+                // record the mapped filter
+                mappedFilters[i] = filters[i].newSearchTerm(new String(mappedFilter));
+            }
+
+            filters = mappedFilters;
+        }
+
+        // fetch all negated and non-negated SearchTerm object into two different Lists
+        final List<SearchTerm> negatedUnrequiredSearchTerms = Arrays.asList((SearchTerm[]) Matchers.select(filters, NEGATED_MATCHER));
+        final List<SearchTerm> nonNegatedUnrequiredSearchTerms = Arrays.asList((SearchTerm[]) Matchers.select(filters, NON_NEGATED_MATCHER));
+
+        // reassemble a super List of all normalized (necessary) SearchTerms
+        final Collection<SearchTerm> allSearchTerms = new ArrayList<SearchTerm>(filters.length);
+        allSearchTerms.addAll(normalizeSearchTerms(negatedUnrequiredSearchTerms, true));
+        allSearchTerms.addAll(normalizeSearchTerms(nonNegatedUnrequiredSearchTerms, false));
+
+        // return the normalized SearchTerms as an array
+        return allSearchTerms.toArray(new SearchTerm[allSearchTerms.size()]);
     }
 
     /**
      * Parse the given <code>text</code> and produce an array of
      * {@link SearchTerm} objects that describe text to match as well as
-     * details about the way it should be used.
+     * metadata about the way it should be used.
+     *
+     * @param text the raw text entered by a user
+     * @return SearchTerm an object encapsulating a single raw search term as
+     *      well as metadata related to the use of the SearchTerm
      */
     public static SearchTerm[] parse(String text) {
         final List<SearchTerm> searchTerms = new ArrayList<SearchTerm>();
@@ -387,5 +407,80 @@ public final class TextMatchers {
             searchTerms.add(new SearchTerm(searchTermText.toString(), negated, required));
 
         return searchTerms.toArray(new SearchTerm[searchTerms.size()]);
+    }
+
+    /**
+     * A convenience function to extract the text out of each SearchTerm and
+     * return them in a parallel array.
+     */
+    private static String[] getFilterStrings(SearchTerm[] searchTerms) {
+        final String[] filterStrings = new String[searchTerms.length];
+
+        for (int i = 0; i < searchTerms.length; i++)
+            filterStrings[i] = searchTerms[i].getText();
+
+        return filterStrings;
+    }
+
+    /**
+     * A method to determine if <code>newMatcher</code> is an absolute
+     * constrainment of <code>oldMatcher</code>, meaning it is guaranteed to
+     * match the same or fewer items than the <code>oldMatcher</code>.
+     *
+     * @param oldMatcher the old TextMatcher being replaced
+     * @param newMatcher the new TextMatcher to be used
+     * @return <tt>true</tt> iff the <code>newMatcher</code> is guaranteed to
+     *      match the same or fewer items than <code>oldMatcher</code>
+     */
+    public static boolean isMatcherConstrained(TextMatcher oldMatcher, TextMatcher newMatcher) {
+        // if the mode or strategy differs it cannot be considered a strict constrainment
+        if (oldMatcher.getMode() != newMatcher.getMode()) return oldMatcher.getMode() == TextMatcherEditor.CONTAINS;
+        if (oldMatcher.getStrategy() != newMatcher.getStrategy()) return false;
+
+        // now we must test the filter strings to determine if they agree it is a constrainment
+        final String[] negatedOldFilters = getFilterStrings(Matchers.select(oldMatcher.getSearchTerms(), NEGATED_MATCHER));
+        final String[] negatedNewFilters = getFilterStrings(Matchers.select(newMatcher.getSearchTerms(), NEGATED_MATCHER));
+
+        final boolean negatedFiltersAreEqual = isFilterEqual(negatedOldFilters, negatedNewFilters);
+
+        // if negated SearchTerms exist and are not constrained, short-circuit
+        if (!negatedFiltersAreEqual && !isFilterConstrained(negatedOldFilters, negatedNewFilters))
+            return false;
+
+        final String[] nonNegatedOldFilters = getFilterStrings(Matchers.select(oldMatcher.getSearchTerms(), NON_NEGATED_MATCHER));
+        final String[] nonNegatedNewFilters = getFilterStrings(Matchers.select(newMatcher.getSearchTerms(), NON_NEGATED_MATCHER));
+
+        final boolean nonNegatedFiltersAreEqual = isFilterEqual(nonNegatedOldFilters, nonNegatedNewFilters);
+
+        // if non-negated SearchTerms exist and are not constrained, short-circuit
+        if (!nonNegatedFiltersAreEqual && !isFilterConstrained(nonNegatedOldFilters, nonNegatedNewFilters))
+            return false;
+
+        // base the return value on whether any filters were actually found - equal TextMatchers are not considered constrained
+        return !negatedFiltersAreEqual || !nonNegatedFiltersAreEqual;
+    }
+
+    /**
+     * A method to determine if <code>newMatcher</code> is an absolute
+     * relaxation of <code>oldMatcher</code>, meaning it is guaranteed to
+     * match the same or more items than the <code>oldMatcher</code>.
+     *
+     * @param oldMatcher the old TextMatcher being replaced
+     * @param newMatcher the new TextMatcher to be used
+     * @return <tt>true</tt> iff the <code>newMatcher</code> is guaranteed to
+     *      match the same or more items than <code>oldMatcher</code>
+     */
+    public static boolean isMatcherRelaxed(TextMatcher oldMatcher, TextMatcher newMatcher) {
+        return isMatcherConstrained(newMatcher, oldMatcher);
+    }
+
+    /**
+     * This Comparator orders {@link SearchTerm}s in descending order by their text lengths.
+     */
+    private static final class SearchTermLengthComparator implements Comparator<SearchTerm> {
+        /** {@inheritDoc} */
+        public int compare(SearchTerm a, SearchTerm b) {
+            return b.getText().length() - a.getText().length();
+        }
     }
 }

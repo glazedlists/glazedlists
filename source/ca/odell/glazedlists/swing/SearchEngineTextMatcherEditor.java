@@ -70,10 +70,7 @@ public class SearchEngineTextMatcherEditor<E> extends TextMatcherEditor<E> {
      */
     private void refilter() {
         final SearchTerm[] filterTerms = TextMatchers.parse(textField.getText());
-        final TextMatcher<E> newMatcher = new TextMatcher<E>(filterTerms, getFilterator(), getMode(), getStrategy());
-
-        // for now, fire a change event each and every time
-        fireChanged(newMatcher);
+        setTextMatcher(new TextMatcher<E>(filterTerms, getFilterator(), getMode(), getStrategy()));
     }
 
     /**

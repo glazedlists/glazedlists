@@ -91,6 +91,20 @@ public abstract class AbstractMatcherEditor<E> implements MatcherEditor<E> {
         this.fireChangedMatcher(new MatcherEditor.Event<E>(this, Event.MATCH_NONE, this.currentMatcher));
     }
 
+    /**
+     * Returns <tt>true</tt> if the current matcher will match everything.
+     */
+    protected final boolean isCurrentlyMatchingAll() {
+        return this.currentMatcher == Matchers.trueMatcher();
+    }
+
+    /**
+     * Returns <tt>true</tt> if the current matcher will match nothing.
+     */
+    protected final boolean isCurrentlyMatchingNone() {
+        return this.currentMatcher == Matchers.falseMatcher();
+    }
+
     protected final void fireChangedMatcher(MatcherEditor.Event<E> event) {
         // Guaranteed to return a non-null array
         final Object[] listeners = this.listenerList.getListenerList();
