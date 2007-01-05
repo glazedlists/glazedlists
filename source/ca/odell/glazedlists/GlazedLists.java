@@ -167,7 +167,7 @@ public final class GlazedLists {
     /**
      * Creates a chain of {@link Comparator}s that applies the provided
      * {@link Comparator}s in the sequence specified until differences or
-     * absoulute equality.is determined.
+     * absolute equality is determined.
      */
     public static <T> Comparator<T> chainComparators(List<Comparator<T>> comparators) {
         return new ComparatorChain<T>(comparators);
