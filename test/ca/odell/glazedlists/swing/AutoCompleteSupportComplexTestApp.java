@@ -175,6 +175,9 @@ public class AutoCompleteSupportComplexTestApp {
     /** A checkbox to toggle whether the {@link #autoCompleteSupport} selects the editors text when gaining focus. */
     private final JCheckBox selectTextOnFocusGainCheckBox = new JCheckBox();
 
+    /** A checkbox to toggle whether the {@link #autoCompleteSupport} hides the popup menu when losing focus. */
+    private final JCheckBox hidesPopupOnFocusLostCheckBox = new JCheckBox();
+
     /** The ButtonGroup to which all Look & Feel radio buttons belong. */
     private final ButtonGroup lafMenuGroup = new ButtonGroup();
 
@@ -213,14 +216,17 @@ public class AutoCompleteSupportComplexTestApp {
         rebuildContentPane();
 
         // initialize the tweaker panel
-        correctsCaseCheckBox.addActionListener(new AutoCompleteSupportComplexTestApp.CorrectCaseActionHandler());
+        correctsCaseCheckBox.addActionListener(new CorrectCaseActionHandler());
         correctsCaseCheckBox.setSelected(autoCompleteSupport.getCorrectsCase());
 
-        strictModeCheckBox.addActionListener(new AutoCompleteSupportComplexTestApp.StrictModeActionHandler());
+        strictModeCheckBox.addActionListener(new StrictModeActionHandler());
         strictModeCheckBox.setSelected(autoCompleteSupport.isStrict());
 
-        selectTextOnFocusGainCheckBox.addActionListener(new AutoCompleteSupportComplexTestApp.SelectTextOnFocusGainActionHandler());
+        selectTextOnFocusGainCheckBox.addActionListener(new SelectTextOnFocusGainActionHandler());
         selectTextOnFocusGainCheckBox.setSelected(autoCompleteSupport.getSelectsTextOnFocusGain());
+
+        hidesPopupOnFocusLostCheckBox.addActionListener(new HidePopupOnFocusLostActionHandler());
+        hidesPopupOnFocusLostCheckBox.setSelected(autoCompleteSupport.getHidesPopupOnFocusLost());
 
         frame.pack();
         frame.setLocationRelativeTo(null);
@@ -338,6 +344,12 @@ public class AutoCompleteSupportComplexTestApp {
         }
     }
 
+    private class HidePopupOnFocusLostActionHandler implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            autoCompleteSupport.setHidesPopupOnFocusLost(hidesPopupOnFocusLostCheckBox.isSelected());
+        }
+    }
+
     private class FilterModeActionHandler implements ActionListener {
         private final int mode;
 
@@ -376,8 +388,11 @@ public class AutoCompleteSupportComplexTestApp {
         panel.add(new JLabel("Select Text on Focus Gain:"), new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
         panel.add(selectTextOnFocusGainCheckBox,            new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
-        panel.add(new JLabel("Filter Mode:"),               new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
-        panel.add(filterModePanel,                          new GridBagConstraints(1, 3, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(new JLabel("Hide Popup on Focus Lost:"),  new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
+        panel.add(hidesPopupOnFocusLostCheckBox,            new GridBagConstraints(1, 3, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+
+        panel.add(new JLabel("Filter Mode:"),               new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
+        panel.add(filterModePanel,                          new GridBagConstraints(1, 4, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
         return panel;
     }

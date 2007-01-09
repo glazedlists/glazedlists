@@ -103,9 +103,12 @@ import java.util.List;
  * terms.<br><br></p>
  *
  * <strong>ComboBoxEditor Focus</strong>
- * <p>When the ComboBoxEditor gains focus it selects the text it contains if
- * {@link #getSelectsTextOnFocusGain()} returns <tt>true</tt>; otherwise it
- * does nothing.<br><br></p>
+ * <ol>
+ *   <li> the text in the ComboBoxEditor is selected if
+ *        {@link #getSelectsTextOnFocusGain()} returns <tt>true</tt>
+ *   <li> the JPopupMenu is hidden when the ComboBoxEditor loses focus if
+ *        {@link #getHidesPopupOnFocusLost()} returns <tt>true</tt>
+ * </ol>
  *
  * <strong>Extracting String Values</strong>
  * <p>Each value in the ComboBoxModel must be converted to a String for many
@@ -147,6 +150,7 @@ import java.util.List;
  *   <li> {@link #setCorrectsCase(boolean)}
  *   <li> {@link #setStrict(boolean)}
  *   <li> {@link #setSelectsTextOnFocusGain(boolean)}
+ *   <li> {@link #setHidesPopupOnFocusLost(boolean)}
  *   <li> {@link #setFilterMode(int)}
  * </ul>
  *
@@ -179,6 +183,14 @@ public final class AutoCompleteSupport<E> {
      * editor gains focus; <tt>false</tt> otherwise.
      */
     private boolean selectsTextOnFocusGain = true;
+
+    /**
+     * <tt>true</tt> if the {@link #popupMenu} should <strong>always</strong>
+     * be hidden when the {@link #comboBoxEditor} loses focus; <tt>false</tt>
+     * if the default behaviour should be preserved. This exists to provide a
+     * reasonable alternative to the strange default behaviour in JComboBox.
+     */
+    private boolean hidesPopupOnFocusLost = true;
 
     //
     // These are member variables for convenience
@@ -280,7 +292,7 @@ public final class AutoCompleteSupport<E> {
     private final KeyListener strictModeBackspaceHandler = new AutoCompleteKeyHandler();
 
     /** Handles selecting the text in the comboBoxEditorComponent when it gains focus. */
-    private final FocusListener selectTextOnFocusGainHandler = new SelectTextOnFocusGainHandler();
+    private final FocusListener selectTextOnFocusGainHandler = new ComboBoxEditorFocusHandler();
 
 
     //
@@ -885,6 +897,31 @@ public final class AutoCompleteSupport<E> {
         checkAccessThread();
 
         this.selectsTextOnFocusGain = selectsTextOnFocusGain;
+    }
+
+    /**
+     * Returns <tt>true</tt> if the popup menu is hidden whenever the combo
+     * box editor loses focus; <tt>false</tt> otherwise.
+     */
+    public boolean getHidesPopupOnFocusLost() {
+        return hidesPopupOnFocusLost;
+    }
+    /**
+     * If <code>hidesPopupOnFocusLost</code> is <tt>true</tt>, then the popup
+     * menu of the combo box is <strong>always</strong> hidden whenever the
+     * combo box editor loses focus. If it is <tt>false</tt> the default
+     * behaviour is preserved. In practice this means that if focus is lost
+     * because of a MouseEvent, the behaviour is reasonable, but if focus is
+     * lost because of a KeyEvent (e.g. tabbing to the next focusable component)
+     * then the popup menu remains visible.
+     *
+     * @throws IllegalStateException if this method is called from any Thread
+     *      other than the Swing Event Dispatch Thread
+     */
+    public void setHidesPopupOnFocusLost(boolean hidesPopupOnFocusLost) {
+        checkAccessThread();
+
+        this.hidesPopupOnFocusLost = hidesPopupOnFocusLost;
     }
 
     /**
@@ -1663,12 +1700,20 @@ public final class AutoCompleteSupport<E> {
      * To emulate Firefox behaviour, all text in the ComboBoxEditor is selected
      * from beginning to end when the ComboBoxEditor gains focus if the value
      * returned from {@link AutoCompleteSupport#getSelectsTextOnFocusGain()}
-     * allows this behaviour.
+     * allows this behaviour. In addition, the JPopupMenu is hidden when the
+     * ComboBoxEditor loses focus if the value returned from
+     * {@link AutoCompleteSupport#getHidesPopupOnFocusLost()} allows this
+     * behaviour.
      */
-    private class SelectTextOnFocusGainHandler extends FocusAdapter {
+    private class ComboBoxEditorFocusHandler extends FocusAdapter {
         public void focusGained(FocusEvent e) {
             if (getSelectsTextOnFocusGain())
                 comboBoxEditorComponent.select(0, comboBoxEditorComponent.getText().length());
+        }
+
+        public void focusLost(FocusEvent e) {
+            if (comboBox.isPopupVisible() && getHidesPopupOnFocusLost())
+                comboBox.setPopupVisible(false);
         }
     }
 
