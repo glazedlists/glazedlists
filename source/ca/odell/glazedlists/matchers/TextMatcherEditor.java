@@ -106,8 +106,6 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
         }
     }
 
-    private static final String[] EMPTY_FILTER = new String[0];
-
     /** the filterator is used as an alternative to implementing the TextFilterable interface */
     private final TextFilterator<? super E> filterator;
 
@@ -236,9 +234,9 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      */
     public void setFilterText(String[] newFilters) {
         // wrap the filter Strings with SearchTerm objects
-        final SearchTerm[] searchTerms = new SearchTerm[newFilters.length];
+        final SearchTerm<E>[] searchTerms = new SearchTerm[newFilters.length];
         for (int i = 0; i < searchTerms.length; i++)
-            searchTerms[i] = new SearchTerm(newFilters[i]);
+            searchTerms[i] = new SearchTerm<E>(newFilters[i]);
 
         // adjust the TextMatcher
         setTextMatcher(new TextMatcher<E>(searchTerms, getFilterator(), getMode(), getStrategy()));
@@ -251,8 +249,7 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      * determine if the new Matcher is a strict constrainment or relaxation of
      * the current TextMatcher.
      *
-     * @param newMatcher the new TextMatcher which defines the text filtering
-     *      logic
+     * @param newMatcher new TextMatcher which defines the text filtering logic
      */
     protected void setTextMatcher(TextMatcher<E> newMatcher) {
         final TextMatcher<E> oldMatcher = getCurrentTextMatcher();

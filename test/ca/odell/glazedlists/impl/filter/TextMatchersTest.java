@@ -4,10 +4,13 @@
 package ca.odell.glazedlists.impl.filter;
 
 import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.swing.SearchEngineTextMatcherEditor;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import junit.framework.TestCase;
 
 import java.util.Arrays;
+import java.util.Set;
+import java.util.HashSet;
 
 public class TextMatchersTest extends TestCase {
 
@@ -179,10 +182,57 @@ public class TextMatchersTest extends TestCase {
         checkFilterTerm(terms[1], "boo", false, false);
     }
 
+    public void testParseFields() {
+        SearchEngineTextMatcherEditor.Field<String> blahField = new SearchEngineTextMatcherEditor.Field<String>("blah", GlazedLists.toStringTextFilterator());
+        SearchEngineTextMatcherEditor.Field<String> burpField = new SearchEngineTextMatcherEditor.Field<String>("burp", GlazedLists.toStringTextFilterator());
+
+        Set<SearchEngineTextMatcherEditor.Field<String>> fields = new HashSet<SearchEngineTextMatcherEditor.Field<String>>();
+        fields.add(blahField);
+        fields.add(burpField);
+
+        SearchTerm[] terms = TextMatchers.parse("blah:burp");
+        assertEquals(1, terms.length);
+        checkFilterTerm(terms[0], "blah:burp", false, false, null);
+
+        terms = TextMatchers.parse("\"blah:stuff\"", fields);
+        assertEquals(1, terms.length);
+        checkFilterTerm(terms[0], "blah:stuff", false, false, null);
+
+        terms = TextMatchers.parse("blah:burp", fields);
+        assertEquals(1, terms.length);
+        checkFilterTerm(terms[0], "burp", false, false, blahField);
+
+        terms = TextMatchers.parse("blah:stuff burp:blech", fields);
+        assertEquals(2, terms.length);
+        checkFilterTerm(terms[0], "stuff", false, false, blahField);
+        checkFilterTerm(terms[1], "blech", false, false, burpField);
+
+        terms = TextMatchers.parse("blah: stuff burp: blech", fields);
+        assertEquals(2, terms.length);
+        checkFilterTerm(terms[0], "stuff", false, false, null);
+        checkFilterTerm(terms[1], "blech", false, false, null);
+
+        terms = TextMatchers.parse("blah:\" stuff burp: blech \"", fields);
+        assertEquals(1, terms.length);
+        checkFilterTerm(terms[0], " stuff burp: blech ", false, false, blahField);
+
+        terms = TextMatchers.parse("blah:burp:blech", fields);
+        assertEquals(1, terms.length);
+        checkFilterTerm(terms[0], "burp:blech", false, false, blahField);
+
+        terms = TextMatchers.parse("blah: burp:", fields);
+        assertEquals(0, terms.length);
+    }
+
     private void checkFilterTerm(SearchTerm term, String text, boolean negated, boolean required) {
+        checkFilterTerm(term, text, negated, required, null);
+    }
+
+    private void checkFilterTerm(SearchTerm term, String text, boolean negated, boolean required, SearchEngineTextMatcherEditor.Field field) {
         assertEquals(text, term.getText());
         assertEquals(negated, term.isNegated());
         assertEquals(required, term.isRequired());
+        assertSame(field, term.getField());
     }
 
     public void testNormalizeSearchTerms() {

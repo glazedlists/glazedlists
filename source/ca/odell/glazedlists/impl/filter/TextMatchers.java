@@ -10,6 +10,7 @@ import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.TextFilterable;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.swing.SearchEngineTextMatcherEditor;
 
 import java.util.*;
 
@@ -47,26 +48,42 @@ public final class TextMatchers {
      *      matching text within the <code>filterStrings</code> extracted from
      *      the given <code>element</code>
      */
-    public static <E> boolean matches(List<String> filterStrings, TextFilterator<? super E> filterator, SearchTerm[] searchTerms, TextSearchStrategy[] filterStrategies, E element) {
-        // populate the strings for this object
-        filterStrings.clear();
-        if(filterator == null) {
-            ((TextFilterable)element).getFilterStrings(filterStrings);
-        } else {
-            filterator.getFilterStrings(filterStrings, element);
-        }
+    public static <E> boolean matches(List<String> filterStrings, TextFilterator<? super E> filterator, SearchTerm<E>[] searchTerms, TextSearchStrategy[] filterStrategies, E element) {
+        boolean filterStringsPopulated = false;
 
         // ensure each filter matches at least one field
         filters:
         for(int f = 0; f < filterStrategies.length; f++) {
             // get the text search strategy for the current filter
             TextSearchStrategy textSearchStrategy = filterStrategies[f];
-            SearchTerm searchTerm = searchTerms[f];
+            SearchTerm<E> searchTerm = searchTerms[f];
+            final SearchEngineTextMatcherEditor.Field searchTermField = searchTerm.getField();
+
+            // if the SearchTerm has a Field, use its TextFilterator to extract the filterStrings
+            final List<String> strings;
+            if (searchTermField != null) {
+                strings = searchTerm.getFieldFilterStrings();
+                // populate the strings for this object using the SearchTerm's TextFilterator
+                strings.clear();
+                searchTermField.getTextFilterator().getFilterStrings(strings, element);
+            } else {
+                if (!filterStringsPopulated) {
+                    // populate the strings for this object
+                    filterStrings.clear();
+                    if(filterator == null) {
+                        ((TextFilterable)element).getFilterStrings(filterStrings);
+                    } else {
+                        filterator.getFilterStrings(filterStrings, element);
+                    }
+                    filterStringsPopulated = true;
+                }
+                strings = filterStrings;
+            }
 
             if(searchTerm.isNegated()) {
                 // search through all fields for the current filter
-                for(int i = 0, n = filterStrings.size(); i < n; i++) {
-                    Object filterString = filterStrings.get(i);
+                for(int i = 0, n = strings.size(); i < n; i++) {
+                    Object filterString = strings.get(i);
                     // the call to .toString() appears redundant, but is not, since we
                     // are backwards compatible with old behaviour which allows arbitrary
                     // objects in the filterStrings list
@@ -80,8 +97,8 @@ public final class TextMatchers {
 
             } else {
                 // search through all fields for the current filter
-                for(int i = 0, n = filterStrings.size(); i < n; i++) {
-                    Object filterString = filterStrings.get(i);
+                for(int i = 0, n = strings.size(); i < n; i++) {
+                    Object filterString = strings.get(i);
                     // the call to .toString() appears redundant, but is not, since we
                     // are backwards compatible with old behaviour which allows arbitrary
                     // objects in the filterStrings list
@@ -344,6 +361,10 @@ public final class TextMatchers {
         return allSearchTerms.toArray(new SearchTerm[allSearchTerms.size()]);
     }
 
+    public static SearchTerm[] parse(String text) {
+        return parse(text, Collections.EMPTY_SET);
+    }
+
     /**
      * Parse the given <code>text</code> and produce an array of
      * {@link SearchTerm} objects that describe text to match as well as
@@ -353,35 +374,60 @@ public final class TextMatchers {
      * @return SearchTerm an object encapsulating a single raw search term as
      *      well as metadata related to the use of the SearchTerm
      */
-    public static SearchTerm[] parse(String text) {
-        final List<SearchTerm> searchTerms = new ArrayList<SearchTerm>();
+    public static <E> SearchTerm<E>[] parse(String text, Set<SearchEngineTextMatcherEditor.Field<E>> fields) {
+        final List<SearchTerm<E>> searchTerms = new ArrayList<SearchTerm<E>>();
+
+        // map each field name to the corresponding field
+        final Map<String, SearchEngineTextMatcherEditor.Field<E>> fieldMap = new HashMap<String, SearchEngineTextMatcherEditor.Field<E>>();
+        for (Iterator<SearchEngineTextMatcherEditor.Field<E>> f = fields.iterator(); f.hasNext();) {
+            SearchEngineTextMatcherEditor.Field<E> field = f.next();
+            fieldMap.put(field.getName(), field);
+        }
 
         StringBuffer searchTermText = new StringBuffer();
+        SearchEngineTextMatcherEditor.Field<E> field = null;
         boolean negated = false, required = false, insideTerm = false, insideQuotedTerm = false;
 
         // step through the text one character at a time
         for (int i = 0; i < text.length(); i++) {
-            char c = text.charAt(i);
+            final char c = text.charAt(i);
 
             if (insideTerm) {
                 // determine if the current character signifies the end of the term text
                 final boolean endOfTerm = c == '"' || (!insideQuotedTerm && Character.isWhitespace(c));
 
                 if (endOfTerm) {
-                    // record the current SearchTerm
-                    searchTerms.add(new SearchTerm(searchTermText.toString(), negated, required));
+                    if (searchTermText.length() > 0) {
+                        // record the current SearchTerm
+                        searchTerms.add(new SearchTerm<E>(searchTermText.toString(), negated, required, field));
+                    }
 
                     // reset the state for collecting the next SearchTerm
                     searchTermText = new StringBuffer();
+                    field = null;
                     negated = required = insideTerm = insideQuotedTerm = false;
 
                 } else {
+                    // if a colon is encountered and a field does not yet exist,
+                    // check if the colon signifies the end of a known field name
+                    if (c == ':' && field == null && !insideQuotedTerm) {
+                        field = fieldMap.get(searchTermText.toString());
+
+                        // if a field was located, clear the searchTermText as it contains the field name
+                        if (field != null) {
+                            searchTermText = new StringBuffer();
+                            negated = required = insideTerm = insideQuotedTerm = false;
+                            continue;
+                        }
+                    }
+
                     searchTermText.append(c);
                 }
 
             } else {
                 // clear the state and continue searching for the next term
                 if (Character.isWhitespace(c)) {
+                    field = null;
                     negated = required = insideTerm = insideQuotedTerm = false;
                     continue;
                 }
@@ -404,7 +450,7 @@ public final class TextMatchers {
 
         // if a SearchTerm is left hanging, use it as well
         if (searchTermText.length() > 0)
-            searchTerms.add(new SearchTerm(searchTermText.toString(), negated, required));
+            searchTerms.add(new SearchTerm<E>(searchTermText.toString(), negated, required, field));
 
         return searchTerms.toArray(new SearchTerm[searchTerms.size()]);
     }

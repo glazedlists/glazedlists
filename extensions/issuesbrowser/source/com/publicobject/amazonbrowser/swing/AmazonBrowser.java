@@ -28,6 +28,8 @@ import java.beans.PropertyChangeListener;
 import java.net.URL;
 import java.util.List;
 import java.util.Comparator;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * An AmazonBrowser is a program for searching and viewing products from amazon.com.
@@ -120,7 +122,12 @@ public class AmazonBrowser implements Runnable {
         filterFieldLabel.setForeground(Color.WHITE);
 
         filterField = new JTextField(10);
-        final MatcherEditor<Item> filterFieldMatcherEditor = new TextComponentMatcherEditor<Item>(filterField, new ItemTextFilterator());
+        final SearchEngineTextMatcherEditor<Item> filterFieldMatcherEditor = new SearchEngineTextMatcherEditor<Item>(filterField, new ItemTextFilterator());
+
+        final Set<SearchEngineTextMatcherEditor.Field<Item>> filterFields = new HashSet<SearchEngineTextMatcherEditor.Field<Item>>();
+        filterFields.add(new SearchEngineTextMatcherEditor.Field<Item>("title", new TitleTextFilterator()));
+        filterFields.add(new SearchEngineTextMatcherEditor.Field<Item>("director", new DirectorTextFilterator()));
+        filterFieldMatcherEditor.setFields(filterFields);
 
         // sort the original items list
         final EventList<Item> swingThreadProxyList = GlazedListsSwing.swingThreadProxyList(itemEventList);
@@ -270,6 +277,18 @@ public class AmazonBrowser implements Runnable {
                 c.setForeground(Color.BLACK);
             }
             return c;
+        }
+    }
+
+    private static final class TitleTextFilterator implements TextFilterator<Item> {
+        public void getFilterStrings(List<String> baseList, Item element) {
+            baseList.add(element.getItemAttributes().getTitle());
+        }
+    }
+
+    private static final class DirectorTextFilterator implements TextFilterator<Item> {
+        public void getFilterStrings(List<String> baseList, Item element) {
+            baseList.add(element.getItemAttributes().getDirector());
         }
     }
 }
