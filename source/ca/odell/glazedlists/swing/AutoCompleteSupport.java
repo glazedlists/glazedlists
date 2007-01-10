@@ -173,8 +173,8 @@ public final class AutoCompleteSupport<E> {
     private boolean correctsCase = true;
 
     /**
-     * <tt>true</tt> if the user can specify values that do not appear in the
-     * ComboBoxModel; <tt>false</tt> otherwise.
+     * <tt>false</tt> if the user can specify values that do not appear in the
+     * ComboBoxModel; <tt>true</tt> otherwise.
      */
     private boolean strict = false;
 
@@ -188,7 +188,9 @@ public final class AutoCompleteSupport<E> {
      * <tt>true</tt> if the {@link #popupMenu} should <strong>always</strong>
      * be hidden when the {@link #comboBoxEditor} loses focus; <tt>false</tt>
      * if the default behaviour should be preserved. This exists to provide a
-     * reasonable alternative to the strange default behaviour in JComboBox.
+     * reasonable alternative to the strange default behaviour in JComboBox in
+     * which the tab key will advance focus to the next focusable component and
+     * leave the JPopupMenu visible.
      */
     private boolean hidesPopupOnFocusLost = true;
 
@@ -830,8 +832,8 @@ public final class AutoCompleteSupport<E> {
         return strict;
     }
     /**
-     * If <code>strict</code> is <tt>true</tt>, the user can specify values not
-     * appearing within the ComboBoxModel. If it is <tt>false</tt> each
+     * If <code>strict</code> is <tt>false</tt>, the user can specify values
+     * not appearing within the ComboBoxModel. If it is <tt>true</tt> each
      * keystroke must continue to match some value in the ComboBoxModel or it
      * will be discarded.
      *
