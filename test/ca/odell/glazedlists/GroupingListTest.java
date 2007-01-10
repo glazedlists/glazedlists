@@ -377,7 +377,7 @@ public class GroupingListTest extends TestCase {
      * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=326">Issue 326</a>
      */
     public void testStaleGroupHandling() {
-        final BasicEventList<String> source = new BasicEventList<String>();
+        final EventList<String> source = new BasicEventList<String>();
         final GroupingList<String> groupingList = new GroupingList<String>(source);
 
         source.addAll(GlazedListsTests.stringToList("AAABBBCCC"));
@@ -396,7 +396,7 @@ public class GroupingListTest extends TestCase {
     }
 
     public void testWriteThroughGroupListElement() {
-        final BasicEventList<String> source = new BasicEventList<String>();
+        final EventList<String> source = new BasicEventList<String>();
         final GroupingList<String> groupingList = new GroupingList<String>(source, GlazedListsTests.getFirstLetterComparator());
 
         source.addAll(GlazedListsTests.delimitedStringToList("Jesse James Jodie Mark Mariusz"));
@@ -449,7 +449,7 @@ public class GroupingListTest extends TestCase {
      * Test the replacement of the grouping Comparator.
      */
     public void testSetComparator() {
-        final BasicEventList<String> source = new BasicEventList<String>();
+        final EventList<String> source = new BasicEventList<String>();
         final GroupingList<String> groupingList = new GroupingList<String>(source, GlazedListsTests.getFirstLetterComparator());
         ListConsistencyListener<List<String>> listConsistencyListener = ListConsistencyListener.install(groupingList);
         listConsistencyListener.setPreviousElementTracked(false);
@@ -476,5 +476,34 @@ public class GroupingListTest extends TestCase {
         assertEquals(Arrays.asList(new String[] {"Black"}), groupingList.get(0));
         assertEquals(Arrays.asList(new String[] {"Blind"}), groupingList.get(1));
         assertEquals(Arrays.asList(new String[] {"Bling"}), groupingList.get(2));
+    }
+
+    public void testIndexOfGroup() {
+        final EventList<String> source = new BasicEventList<String>();
+        final GroupingList<String> groupingList = new GroupingList<String>(source, GlazedListsTests.getFirstLetterComparator());
+
+        source.add("Bart");
+        source.add("Brent");
+        source.add("Brisket");
+
+        source.add("Jackal");
+        source.add("Jackalope");
+        source.add("Juggernaut");
+
+        source.add("Rib");
+        source.add("Rub");
+        source.add("Rubber");
+
+        assertEquals(-1, groupingList.indexOfGroup("Ambrose"));
+        assertEquals(0, groupingList.indexOfGroup("Bilbo"));
+        assertEquals(-1, groupingList.indexOfGroup("Cardiac"));
+
+        assertEquals(-1, groupingList.indexOfGroup("Ignatius"));
+        assertEquals(1, groupingList.indexOfGroup("Jargon"));
+        assertEquals(-1, groupingList.indexOfGroup("Korn"));
+
+        assertEquals(-1, groupingList.indexOfGroup("Uranus"));
+        assertEquals(2, groupingList.indexOfGroup("Rusty"));
+        assertEquals(-1, groupingList.indexOfGroup("Steve"));
     }
 }

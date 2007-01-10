@@ -111,6 +111,30 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
     }
 
     /**
+     * Return the index of the group to which the <code>groupElement</code>
+     * would belong if it were hypothetically added to the source list. Note
+     * that <code>groupElement</code> does <strong>NOT</strong> have to exist
+     * in a group. This method is essentially a convenient way to locate a
+     * group based on a prototypical element of that group.
+     *
+     * @param groupElement a prototype element of the group to locate
+     * @return the index of the group that would contain <code>groupElement</code>
+     *      if it were added to the source list or <code>-1</code> if no
+     *      currently existing group would contain the <code>groupElement</code>
+     */
+    public int indexOfGroup(E groupElement) {
+        // determine where the groupElement would be positioned in the source List
+        final int sourceIndex = ((SortedList<E>) source).sortIndex(groupElement);
+
+        // if the groupElement is not a member of the group, return -1
+        if (sourceIndex == source.size() || grouper.getComparator().compare(source.get(sourceIndex), groupElement) != 0)
+            return -1;
+
+        // return the index of the group that includes the element at the source index
+        return grouper.getBarcode().getColourIndex(sourceIndex, Grouper.UNIQUE);
+    }
+
+    /**
      * Handle changes to the grouping list groups.
      */
     private class GrouperClient implements Grouper.Client {
@@ -164,12 +188,7 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
     public void setComparator(Comparator<? super E> comparator) {
         if (comparator == null)
             comparator = (Comparator) GlazedLists.comparableComparator();
-        ((SortedList<E>) this.source).setComparator(comparator);
-    }
-
-    /** {@inheritDoc} */
-    public int size() {
-        return grouper.getBarcode().colourSize(Grouper.UNIQUE);
+        ((SortedList<E>) source).setComparator(comparator);
     }
 
     /** {@inheritDoc} */
@@ -215,14 +234,14 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
 
     /** {@inheritDoc} */
     public List<E> get(int index) {
-        return this.groupLists.get(index).get();
+        return groupLists.get(index).get();
     }
 
     /** {@inheritDoc} */
     public List<E> remove(int index) {
         if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot remove at " + index + " on list of size " + size());
 
-        final List<E> removed = (List<E>)this.get(index);
+        final List<E> removed = (List<E>) get(index);
 
         // make a copy of the list to return
         final List<E> result = new ArrayList<E>(removed);
@@ -238,8 +257,8 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
 
         updates.beginEvent(true);
 
-        final List<E> result = (List<E>)this.remove(index);
-        this.add(index, value);
+        final List<E> result = (List<E>) remove(index);
+        add(index, value);
 
         updates.commitEvent();
 
@@ -260,8 +279,13 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
     }
 
     /** {@inheritDoc} */
+    public int size() {
+        return grouper.getBarcode().colourSize(Grouper.UNIQUE);
+    }
+
+    /** {@inheritDoc} */
     public void dispose() {
-        ((SortedList) this.source).dispose();
+        ((SortedList) source).dispose();
         super.dispose();
     }
 
@@ -315,37 +339,37 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
         }
 
         private int getSourceIndex(int index) {
-            return this.getStartIndex() + index;
+            return getStartIndex() + index;
         }
 
         /** {@inheritDoc} */
         public E set(int index, E element) {
-            return source.set(this.getSourceIndex(index), element);
+            return source.set(getSourceIndex(index), element);
         }
 
         /** {@inheritDoc} */
         public E get(int index) {
-            return source.get(this.getSourceIndex(index));
+            return source.get(getSourceIndex(index));
         }
 
         /** {@inheritDoc} */
         public int size() {
-            return this.getEndIndex() - this.getStartIndex();
+            return getEndIndex() - getStartIndex();
         }
 
         /** {@inheritDoc} */
         public void clear() {
-            source.subList(this.getStartIndex(), this.getEndIndex()).clear();
+            source.subList(getStartIndex(), getEndIndex()).clear();
         }
 
         /** {@inheritDoc} */
         public E remove(int index) {
-            return source.remove(this.getSourceIndex(index));
+            return source.remove(getSourceIndex(index));
         }
 
         /** {@inheritDoc} */
         public void add(int index, E element) {
-            source.add(this.getSourceIndex(index), element);
+            source.add(getSourceIndex(index), element);
         }
     }
 }
