@@ -473,13 +473,13 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             }
         }
 
-        // blow away obsolete virtual leaf nodes now that we can know for sure
-        // if they're obsolete this doesn't depend on the siblings & parents to be attached
-        deleteObsoleteVirtualLeaves(nodesToVerify);
-
         // second pass: walk through all the changed nodes and attach parents
         // and siblings, plus fire events for all the inserted or updated nodes.
         nodeAttacher.attachAll();
+
+        // blow away obsolete virtual leaf nodes now that we can know for sure
+        // if they're obsolete this doesn't depend on the siblings & parents to be attached
+        deleteObsoleteVirtualLeaves(nodesToVerify);
 
         // blow away obsolete parent nodes now that we can know for sure if they're obsolete
         deleteObsoleteVirtualParents(nodesToVerify);
@@ -962,9 +962,6 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 // we've already deleted this parent, we're done
                 if(node.element == null) continue deleteObsoleteLeaves;
                 // this node now has children, don't delete it
-                // todo: create a test case where isLeaf fails, instead we want hasChildByValue() or something
-                // todo: that might still pass, because the parent will be recreated. In that case we should
-                // todo: cleverly make sure the parent node's expand/collapse state is unchanged
                 if(!node.isLeaf()) continue deleteObsoleteLeaves;
 
                 // if this virtual node has no children, then it's obsolete and
@@ -1410,6 +1407,13 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
          * is no such node.
          */
         private Node<E> next() {
+            // TODO(jessewilson): this check prevents us from failing when the data
+            // is inconstent. We don't like this check since it's broken that we need
+            // to do it, instead we should be throwing IllegalStateException
+            if(element == null) {
+                return null;
+            }
+
             Element<Node<E>> next = element.next();
             return (next == null) ? null : next.get();
         }
@@ -1545,6 +1549,9 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         int lastPathLengthSeen = 0;
         for(int i = 0; i < data.size(ALL_NODES); i++) {
             Node<E> node = data.get(i, ALL_NODES).get();
+
+            // all nodes must have elements
+            assert(node.element != null);
 
             // path lengths should only grow by one from one child to the next
             assert(node.pathLength() <= lastPathLengthSeen + 1);

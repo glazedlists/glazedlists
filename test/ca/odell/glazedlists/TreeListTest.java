@@ -1415,4 +1415,30 @@ public class TreeListTest extends TestCase {
                 "ABD",
         });
     }
+
+    /**
+     * Validate that a virtual parent's state is maintained even if all the
+     * children are deleted new children inserted in a single event.
+     */
+    public void testDeleteAndReinsertLeafRetainsParentState_FixMe() {
+        ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
+
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+
+        source.beginEvent(false);
+            source.add("ABC");
+        source.commitEvent();
+
+        treeList.setExpanded(1, false);
+
+        source.beginEvent(false);
+            source.remove(0);
+            source.add("ABD");
+        source.commitEvent();
+
+        assertFalse(treeList.isExpanded(1));
+    }
 }
