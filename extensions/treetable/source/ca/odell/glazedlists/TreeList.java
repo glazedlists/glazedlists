@@ -688,7 +688,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             // this is necessary only when the parent is a new node and the
             // expansionModel provided a collapsed state for a node with children
             if(parent != null && !parent.expanded && current.isVisible()) {
-                parent.expanded = true;
+                setExpanded(parent, true);
             }
 
             // now the current node has shifted up to the parent node
@@ -713,7 +713,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                             updates.addInsert(visibleIndex);
                         }
 
-                        // an updated node
+                    // an updated node
                     } else {
                         int visibleIndex = data.indexOfNode(current.element, VISIBLE_NODES);
                         if(fireEvents) {

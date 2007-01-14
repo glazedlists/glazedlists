@@ -1443,7 +1443,8 @@ public class TreeListTest extends TestCase {
     }
 
     /**
-     *
+     * Make sure the expansion model provides the correct visibility
+     * for new nodes that whose child nodes are already exist.
      */
     public void testExpansionModelWithInsertedNodes() {
         BasicEventList<String> source = new BasicEventList<String>();
