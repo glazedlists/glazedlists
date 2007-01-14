@@ -1558,7 +1558,9 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             lastPathLengthSeen = node.pathLength();
 
             // the node's visibility should be consistent with its parent nodes expanded state
-            assert(isVisibilityValid(node));
+            if(!isVisibilityValid(node)) {
+                throw new IllegalStateException();
+            }
 
             // the virtual flag should be consistent with the node color
             if(node.virtual) {

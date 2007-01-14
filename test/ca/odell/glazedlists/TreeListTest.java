@@ -1420,7 +1420,7 @@ public class TreeListTest extends TestCase {
      * Validate that a virtual parent's state is maintained even if all the
      * children are deleted new children inserted in a single event.
      */
-    public void testDeleteAndReinsertLeafRetainsParentState_FixMe() {
+    public void testDeleteAndReinsertLeafRetainsParentState() {
         ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
 
         TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
@@ -1440,5 +1440,27 @@ public class TreeListTest extends TestCase {
         source.commitEvent();
 
         assertFalse(treeList.isExpanded(1));
+    }
+
+    /**
+     *
+     */
+    public void testExpansionModelWithInsertedNodes() {
+        BasicEventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat(), TreeList.NODES_START_COLLAPSED);
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.add(0, "pmmu");
+        source.add(0, "pmmu");
+
+        treeList.setExpanded(0, true);
+        treeList.setExpanded(1, true);
+        treeList.setExpanded(2, true);
+
+        source.addAll(1, Arrays.asList(new String[] {
+                "pmm",
+                "pmmp",
+        }));
     }
 }
