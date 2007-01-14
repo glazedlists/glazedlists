@@ -340,6 +340,8 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         Node<E> toExpand = data.get(visibleIndex, VISIBLE_NODES).get();
         expansionModel.setExpanded(toExpand.getElement(), toExpand.path, expanded);
         setExpanded(toExpand, expanded);
+
+        assert(isValid());
     }
 
     /**
@@ -400,8 +402,6 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             }
             updates.commitEvent();
         }
-
-        assert(isValid());
     }
 
     /**
@@ -520,16 +520,26 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         /** provide expand/collapsed state for nodes that are inserted or split */
         private ExpansionModel<E> expansionModel;
 
+        /** expand newly-inserted parent nodes when we discover a visible child */
+        private List<Node<E>> nodesToExpand = new ArrayList<Node<E>>();
+
         public NodeAttacher(boolean fireEvents) {
             this.fireEvents = fireEvents;
         }
 
         public void attachAll() {
+            // attach nodes
             while(!nodesToAttach.isEmpty()) {
                 Node<E> changed = nodesToAttach.removeFirst();
                 boolean newlyInserted = nodesToAttach.isNewlyInserted(changed);
                 attach(changed, newlyInserted);
             }
+
+            // fix up the expanded states
+            for(Iterator<Node<E>> i = nodesToExpand.iterator(); i.hasNext(); ) {
+                setExpanded(i.next(), true);
+            }
+            nodesToExpand.clear();
         }
 
         /**
@@ -688,8 +698,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             // this is necessary only when the parent is a new node and the
             // expansionModel provided a collapsed state for a node with children
             if(parent != null && !parent.expanded && current.isVisible()) {
-                // setExpanded(parent, true);
-                parent.expanded = true;
+                nodesToExpand.add(parent);
             }
 
             // now the current node has shifted up to the parent node

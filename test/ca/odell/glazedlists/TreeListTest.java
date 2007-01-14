@@ -1464,4 +1464,65 @@ public class TreeListTest extends TestCase {
                 "pmmp",
         }));
     }
+
+    /**
+     * Make sure the expansion model provides the correct visibility
+     * for new nodes that whose child nodes are already exist.
+     */
+    public void testInsertCollapsedParentWithExpandedChild() {
+        ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
+
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat(), TreeList.NODES_START_COLLAPSED);
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.beginEvent(false);
+            source.add(0, "pmmu");
+            source.add(1, "pmmu");
+        source.commitEvent();
+
+        treeList.setExpanded(0, true);
+        treeList.setExpanded(1, true);
+        treeList.setExpanded(2, true);
+
+        source.beginEvent(false);
+            source.add(1, "pmm");
+            source.add(2, "pmmp");
+            source.add(4, "pmms");
+        source.commitEvent();
+    }
+
+    /**
+     * We originally had an assert() in the setExpaneded(Node) method, which failed
+     * because we would call it in the process of fixing the tree. This validates that
+     * the setExpanded() method can work while the tree is still changing.
+     */
+    public void testExpandingParentWhileTreeIsInvalid() {
+        ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
+
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat(), TreeList.NODES_START_COLLAPSED);
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.beginEvent(false);
+            source.add(0, "abc");
+            source.add(1, "abe");
+            source.add(2, "bbc");
+            source.add(3, "bbe");
+        source.commitEvent();
+
+        treeList.setExpanded(0, true);
+        treeList.setExpanded(1, true);
+        treeList.setExpanded(4, true);
+        treeList.setExpanded(5, true);
+
+        source.beginEvent(false);
+            source.add(1, "ab");
+            source.add(2, "abd");
+            source.add(4, "abf");
+            source.add(6, "bb");
+            source.add(7, "bbd");
+            source.add(9, "bbf");
+        source.commitEvent();
+    }
 }
