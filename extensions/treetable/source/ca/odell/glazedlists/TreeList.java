@@ -688,7 +688,8 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             // this is necessary only when the parent is a new node and the
             // expansionModel provided a collapsed state for a node with children
             if(parent != null && !parent.expanded && current.isVisible()) {
-                setExpanded(parent, true);
+                // setExpanded(parent, true);
+                parent.expanded = true;
             }
 
             // now the current node has shifted up to the parent node
