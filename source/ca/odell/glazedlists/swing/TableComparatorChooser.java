@@ -360,6 +360,11 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
          * Renders the header in the default way but with the addition of an icon.
          */
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            // if column index is negative, just call the delegate renderer
+            // this is a special case for JideTable with nested table columns
+            if (column < 0)
+                return delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            
             final Icon sortIcon = icons[getSortingStyle(column)];
             final Component rendered;
 

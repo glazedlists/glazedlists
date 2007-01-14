@@ -243,7 +243,7 @@ public class EventTableModelTest extends SwingTestCase {
 
         // prepare the table for sorting and rendering its header
         JTable table = new JTable(tableModel);
-        TableComparatorChooser<Color> tableComparatorChooser = new TableComparatorChooser<Color>(table, sortedColors, false);
+        TableComparatorChooser<Color> tableComparatorChooser = TableComparatorChooser.install(table, sortedColors, false);
         TableCellRenderer headerRenderer = table.getTableHeader().getDefaultRenderer();
 
         // sort by each column in sequence
@@ -252,6 +252,15 @@ public class EventTableModelTest extends SwingTestCase {
         clickColumnHeader(table, 1);
         assertEquals(Arrays.asList(new Color[] { Color.RED, Color.GREEN, Color.BLUE }), sortedColors);
 
+        // make sure we can still paint the header cells
+        headerRenderer.getTableCellRendererComponent(table, tableModel.getColumnName(0), false, false, 0, 0);
+        // make sure we can handle negative indexes 
+        final Component rendered = headerRenderer.getTableCellRendererComponent(table, tableModel.getColumnName(0), false, false, -1, -1);
+        // no sort icon expected
+        if (rendered instanceof JLabel) {
+            assertNull(((JLabel) rendered).getIcon());
+        }
+        
         // uninstall the table comparator chooser and make sure no ill effects are left behind
         tableComparatorChooser.dispose();
         headerRenderer = table.getTableHeader().getDefaultRenderer();
@@ -277,7 +286,7 @@ public class EventTableModelTest extends SwingTestCase {
         headerRenderer.getTableCellRendererComponent(table, tableModel.getColumnName(0), false, false, 0, 2);
 
         // try out the new table for sorting
-        tableComparatorChooser = new TableComparatorChooser<Color>(table, sortedColors, false);
+        tableComparatorChooser = TableComparatorChooser.install(table, sortedColors, false);
         sortedColors.setComparator(null);
         assertEquals(Arrays.asList(new Color[] { Color.RED, Color.GREEN, Color.BLUE,  }), sortedColors);
         clickColumnHeader(table, 0);
