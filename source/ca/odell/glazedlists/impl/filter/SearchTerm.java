@@ -3,10 +3,11 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.filter;
 
+import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.swing.SearchEngineTextMatcherEditor;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A SearchTerm object stores metadata around a single piece of text to be
@@ -68,6 +69,8 @@ public final class SearchTerm<E> {
      * that is negated and required according to the given booleans.
      */
     public SearchTerm(String text, boolean negated, boolean required, SearchEngineTextMatcherEditor.Field<E> field) {
+        if (text == null)
+            throw new IllegalArgumentException("text may not be null");
         this.text = text;
         this.negated = negated;
         this.required = required;
@@ -119,6 +122,50 @@ public final class SearchTerm<E> {
      */
     public SearchTerm<E> newSearchTerm(String text) {
         return new SearchTerm<E>(text, isNegated(), isRequired(), getField());
+    }
+
+    /**
+     * Returns <tt>true</tt> if the given <code>term</code> is
+     * <strong>guaranteed</strong> to match fewer text strings than this
+     * SearchTerm; <tt>false</tt> otherwise. This method is the mirror opposite
+     * of {@link #isRelaxation(SearchTerm)}.
+     *
+     * @param term the SearchTerm to be tested for constrainment
+     * @return <tt>true</tt> if the given <code>term</code> is
+     *      <strong>guaranteed</strong> to match fewer text strings than this
+     *      SearchTerm; <tt>false</tt> otherwise
+     *
+     * @see #isRelaxation(SearchTerm)
+     */
+    boolean isConstrainment(SearchTerm term) {
+        // if they're negated state doesn't match then we cannot really compare these search terms
+        if (isNegated() != term.isNegated()) return false;
+
+        // if they have a field that doesn't match then we cannot really compare these search terms
+        if (!GlazedListsImpl.equal(getField(), term.getField())) return false;
+
+        // if the text is equal then no strict constrainment exists
+        if (getText().equals(term.getText())) return false;
+
+        // otherwise constrainment is determined by whether we can locate one's test within the other
+        return isNegated() ? term.getText().indexOf(getText()) != -1 : getText().indexOf(term.getText()) != -1;
+    }
+
+    /**
+     * Returns <tt>true</tt> if the given <code>term</code> is
+     * <strong>guaranteed</strong> to match more text strings than this
+     * SearchTerm; <tt>false</tt> otherwise. This method is the mirror opposite
+     * of {@link #isConstrainment(SearchTerm)}.
+     *
+     * @param term the SearchTerm to be tested for constrainment
+     * @return <tt>true</tt> if the given <code>term</code> is
+     *      <strong>guaranteed</strong> to match more text strings than this
+     *      SearchTerm; <tt>false</tt> otherwise
+     *
+     * @see #isRelaxation(SearchTerm)
+     */
+    boolean isRelaxation(SearchTerm term) {
+        return term.isConstrainment(this);
     }
 
     /** @inheritDoc */

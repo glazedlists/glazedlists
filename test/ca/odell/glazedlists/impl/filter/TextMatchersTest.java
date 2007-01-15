@@ -11,6 +11,7 @@ import junit.framework.TestCase;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Collections;
 
 public class TextMatchersTest extends TestCase {
 
@@ -265,6 +266,20 @@ public class TextMatchersTest extends TestCase {
         assertTrue(Arrays.equals(searchTerms("-this -blackened"), normalizedSearchTerms("-this -blackened")));
     }
 
+    public void testNormalizeFieldfulSearchTerms() {
+        SearchEngineTextMatcherEditor.Field<String> blahField = new SearchEngineTextMatcherEditor.Field<String>("blah", GlazedLists.toStringTextFilterator());
+        SearchEngineTextMatcherEditor.Field<String> burpField = new SearchEngineTextMatcherEditor.Field<String>("burp", GlazedLists.toStringTextFilterator());
+
+        Set<SearchEngineTextMatcherEditor.Field<String>> fields = new HashSet<SearchEngineTextMatcherEditor.Field<String>>();
+        fields.add(blahField);
+        fields.add(burpField);
+
+        assertTrue(Arrays.equals(searchTerms("-blah:cola", fields), normalizedSearchTerms("-blah:cola", fields)));
+        assertTrue(Arrays.equals(searchTerms("-blah:cola XX", fields), normalizedSearchTerms("-blah:cola X XX", fields)));
+        assertTrue(Arrays.equals(searchTerms("-blah:cola cocacola", fields), normalizedSearchTerms("cola cocacola -blah:cola", fields)));
+        assertTrue(Arrays.equals(searchTerms("-blah:cola -law cocacola", fields), normalizedSearchTerms("-law -lawyer cola cocacola -blah:cola", fields)));
+    }
+
     public void testNormalizeRequiredSearchTerms() {
         assertTrue(Arrays.equals(searchTerms("+"), normalizedSearchTerms("+")));
         assertTrue(Arrays.equals(searchTerms("+x"), normalizedSearchTerms("+x")));
@@ -286,59 +301,6 @@ public class TextMatchersTest extends TestCase {
         assertTrue(Arrays.equals(searchTerms("-black \"jail house\""), normalizedSearchTerms("jail \"jail house\" -black -\"black knight\"")));
         assertTrue(Arrays.equals(searchTerms("-black +-\"black knight\" +jail \"jail house\""), normalizedSearchTerms("+jail \"jail house\" -black +-\"black knight\"")));
         assertTrue(Arrays.equals(searchTerms("-lamb -horse -alligator raccoon bird cat"), normalizedSearchTerms("bird cat raccoon -horse -lamb -alligator")));
-    }
-
-    public void testIsFilterRelaxed() {
-        // removing last filter term
-        assertTrue(TextMatchers.isFilterRelaxed(new String[] {"x"}, new String[0]));
-        // shortening filter term
-        assertTrue(TextMatchers.isFilterRelaxed(new String[] {"xx"}, new String[] {"x"}));
-        // removing filter term
-        assertTrue(TextMatchers.isFilterRelaxed(new String[] {"xx", "y"}, new String[] {"xx"}));
-        // removing filter term
-        assertTrue(TextMatchers.isFilterRelaxed(new String[] {"xx", "y"}, new String[] {"y"}));
-        // removing and shorterning filter term
-        assertTrue(TextMatchers.isFilterRelaxed(new String[] {"xx", "y"}, new String[] {"x"}));
-        // shortening filter term by multiple characters
-        assertTrue(TextMatchers.isFilterRelaxed(new String[] {"xyz"}, new String[] {"x"}));
-        // shortening filter term
-        assertTrue(TextMatchers.isFilterRelaxed(new String[] {"xyz"}, new String[] {"xy"}));
-
-        assertFalse(TextMatchers.isFilterRelaxed(new String[0], new String[] {"abc"}));
-        assertFalse(TextMatchers.isFilterRelaxed(new String[] {""}, new String[] {"abc"}));
-        assertFalse(TextMatchers.isFilterRelaxed(new String[] {"xyz"}, new String[] {"abc"}));
-        assertFalse(TextMatchers.isFilterRelaxed(new String[] {"xyz"}, new String[] {"xyz", "abc"}));
-        assertFalse(TextMatchers.isFilterRelaxed(new String[] {"xyz"}, new String[] {"xyz", "xy", "x"}));
-        assertFalse(TextMatchers.isFilterRelaxed(new String[] {"xyz", ""}, new String[] {"xyz"}));
-        assertFalse(TextMatchers.isFilterRelaxed(new String[] {"xyz", ""}, new String[] {"xyz", "xyz"}));
-    }
-
-    public void testIsFilterEqual() {
-        assertTrue(TextMatchers.isFilterEqual(new String[0], new String[0]));
-        assertTrue(TextMatchers.isFilterEqual(new String[] {"x"}, new String[] {"x"}));
-        assertTrue(TextMatchers.isFilterEqual(new String[] {"x", "y"}, new String[] {"x", "y"}));
-    }
-
-    public void testIsFilterConstrained() {
-        // adding the first filter term
-        assertTrue(TextMatchers.isFilterConstrained(new String[0], new String[] {"x"}));
-        // lengthening filter term
-        assertTrue(TextMatchers.isFilterConstrained(new String[] {"x"}, new String[] {"xx"}));
-        // adding filter term
-        assertTrue(TextMatchers.isFilterConstrained(new String[] {"x"}, new String[] {"x", "y"}));
-        // lengthening filter term by multiple characters
-        assertTrue(TextMatchers.isFilterConstrained(new String[] {"x"}, new String[] {"xyz"}));
-        // lengthening multi character filter term
-        assertTrue(TextMatchers.isFilterConstrained(new String[] {"xy"}, new String[] {"xyz"}));
-        // removing search terms but covering the old with a single new
-        assertTrue(TextMatchers.isFilterConstrained(new String[] {"xyz", "xy", "x"}, new String[] {"xyzz"}));
-
-        assertFalse(TextMatchers.isFilterConstrained(new String[] {"abc"}, new String[0]));
-        assertFalse(TextMatchers.isFilterConstrained(new String[] {"abc"}, new String[] {""}));
-        assertFalse(TextMatchers.isFilterConstrained(new String[] {"xyz"}, new String[] {"abc"}));
-        assertFalse(TextMatchers.isFilterConstrained(new String[] {"xyz", "abc"}, new String[] {"xyz"}));
-        assertFalse(TextMatchers.isFilterConstrained(new String[] {"xyz"}, new String[] {"xyz", ""}));
-        assertFalse(TextMatchers.isFilterConstrained(new String[] {"xyz", "xyz"}, new String[] {"xyz", ""}));
     }
 
     public void testMatcherConstrainedAndRelaxed() {
@@ -368,17 +330,37 @@ public class TextMatchersTest extends TestCase {
         assertTrue(TextMatchers.isMatcherConstrained(textMatcher(""), textMatcher("-black")));
         assertFalse(TextMatchers.isMatcherRelaxed(textMatcher(""), textMatcher("-black")));
 
-        assertTrue(TextMatchers.isMatcherConstrained(textMatcher("-black"), textMatcher("-blackened")));
-        assertFalse(TextMatchers.isMatcherRelaxed(textMatcher("-black"), textMatcher("-blackened")));
+        assertFalse(TextMatchers.isMatcherConstrained(textMatcher("-black"), textMatcher("-blackened")));
+        assertTrue(TextMatchers.isMatcherRelaxed(textMatcher("-black"), textMatcher("-blackened")));
 
-        assertFalse(TextMatchers.isMatcherConstrained(textMatcher("-blackened"), textMatcher("-black")));
-        assertTrue(TextMatchers.isMatcherRelaxed(textMatcher("-blackened"), textMatcher("-black")));
+        assertTrue(TextMatchers.isMatcherConstrained(textMatcher("-blackened"), textMatcher("-black")));
+        assertFalse(TextMatchers.isMatcherRelaxed(textMatcher("-blackened"), textMatcher("-black")));
 
         assertFalse(TextMatchers.isMatcherConstrained(textMatcher("-black"), textMatcher("")));
         assertTrue(TextMatchers.isMatcherRelaxed(textMatcher("-black"), textMatcher("")));
 
         assertTrue(TextMatchers.isMatcherConstrained(textMatcher("-black"), textMatcher("-black -white")));
         assertFalse(TextMatchers.isMatcherRelaxed(textMatcher("-black"), textMatcher("-black -white")));
+    }
+
+    public void testMatcherConstrainedAndRelaxedWithFields() {
+        SearchEngineTextMatcherEditor.Field<String> blahField = new SearchEngineTextMatcherEditor.Field<String>("blah", GlazedLists.toStringTextFilterator());
+        SearchEngineTextMatcherEditor.Field<String> burpField = new SearchEngineTextMatcherEditor.Field<String>("burp", GlazedLists.toStringTextFilterator());
+
+        Set<SearchEngineTextMatcherEditor.Field<String>> fields = new HashSet<SearchEngineTextMatcherEditor.Field<String>>();
+        fields.add(blahField);
+        fields.add(burpField);
+
+        final TextMatcher blackBlahMatcher = textMatcher("blah:black", Collections.singleton(blahField));
+        final TextMatcher blackBurpMatcher = textMatcher("burp:black", Collections.singleton(burpField));
+
+        assertFalse(blackBlahMatcher.equals(blackBurpMatcher));
+        assertFalse(TextMatchers.isMatcherRelaxed(blackBlahMatcher, blackBurpMatcher));
+        assertFalse(TextMatchers.isMatcherConstrained(blackBlahMatcher, blackBurpMatcher));
+
+        assertTrue(blackBlahMatcher.equals(textMatcher("blah:black", Collections.singleton(blahField))));
+        assertFalse(TextMatchers.isMatcherRelaxed(blackBlahMatcher, blackBlahMatcher));
+        assertFalse(TextMatchers.isMatcherConstrained(blackBurpMatcher, blackBurpMatcher));
     }
 
     public void testMatcherConstrainedWithModeDifferences() {
@@ -407,11 +389,23 @@ public class TextMatchersTest extends TestCase {
         return TextMatchers.normalizeSearchTerms(searchTerms(text), (TextSearchStrategy.Factory) TextMatcherEditor.IDENTICAL_STRATEGY);
     }
 
+    private SearchTerm[] normalizedSearchTerms(String text, Set<SearchEngineTextMatcherEditor.Field<String>> fields) {
+        return TextMatchers.normalizeSearchTerms(searchTerms(text, fields), (TextSearchStrategy.Factory) TextMatcherEditor.IDENTICAL_STRATEGY);
+    }
+
     private SearchTerm[] searchTerms(String text) {
         return textMatcher(text).getSearchTerms();
     }
 
+    private SearchTerm[] searchTerms(String text, Set<SearchEngineTextMatcherEditor.Field<String>> fields) {
+        return textMatcher(text, fields).getSearchTerms();
+    }
+
     private TextMatcher<String> textMatcher(String text) {
         return new TextMatcher<String>(TextMatchers.parse(text), GlazedLists.toStringTextFilterator(), TextMatcherEditor.CONTAINS, TextMatcherEditor.IDENTICAL_STRATEGY);
+    }
+
+    private TextMatcher<String> textMatcher(String text, Set<SearchEngineTextMatcherEditor.Field<String>> fields) {
+        return new TextMatcher<String>(TextMatchers.parse(text, fields), GlazedLists.toStringTextFilterator(), TextMatcherEditor.CONTAINS, TextMatcherEditor.IDENTICAL_STRATEGY);
     }
 }

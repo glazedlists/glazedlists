@@ -30,6 +30,12 @@ public final class TextMatchers {
     /** A Matcher that only accepts negated SearchTerms. */
     private static final Matcher<SearchTerm> NEGATED_MATCHER = Matchers.beanPropertyMatcher(SearchTerm.class, "negated", Boolean.TRUE);
 
+    /** A Matcher that only accepts SearchTerms with null Fields. */
+    private static final Matcher<SearchTerm> NO_FIELD_MATCHER = Matchers.beanPropertyMatcher(SearchTerm.class, "negated", null);
+
+    /** A Matcher that only accepts SearchTerms without null Fields. */
+    private static final Matcher<SearchTerm> FIELD_MATCHER = Matchers.invert(NO_FIELD_MATCHER);
+
     /**
      * Execute the logic that determines whether the given <code>element</code>
      * is matched by all of the given <code>filterStrategies</code>. An optional
@@ -188,133 +194,6 @@ public final class TextMatchers {
     }
 
     /**
-     * By default, text filters are considered to be equal if:
-     *
-     * <ol>
-     *   <li> <code>filter1</code> and <code>filter2</code> are both
-     *        non-null arrays of {@link String} objects
-     *   <li> <code>filter1</code> is fully covered by <code>filter2</code>
-     *   <li> <code>filter2</code> is fully covered by <code>filter1</code>
-     * </ol>
-     *
-     * Note: the number of filter values in <code>filter1</code> or
-     * <code>filter2</code> is meaningless. A filter of <code>"abc"</code> is
-     * logically equal to a filter of <code>"abc", "abc"</code>.
-     *
-     * @param oldFilters an array of {@link #normalizeSearchTerms normalized}
-     *      filter Strings
-     * @param newFilters another array of {@link # normalizeSearchTerms normalized}
-     *      filter Strings
-     * @return <tt>true</tt> if <code>filter1</code> is the same logical filter
-     *      as <code>filter2</code>; <tt>false</tt> otherwise
-     */
-    static boolean isFilterEqual(final String[] oldFilters, final String[] newFilters) {
-        // each new filter value must have a precise match with an old filter
-        // value for the text filters to be considered equal
-        newFiltersCoveredByOld:
-        for(int i = 0; i < newFilters.length; i++) {
-            for(int j = 0; j < oldFilters.length; j++) {
-                if(oldFilters[j].equals(newFilters[i])) continue newFiltersCoveredByOld;
-            }
-            return false;
-        }
-
-        // each old filter value must have a precise match with a new filter
-        // value for the text filters to be considered equal
-        oldFiltersCoveredByNew:
-        for(int i = 0; i < oldFilters.length; i++) {
-            for(int j = 0; j < newFilters.length; j++) {
-                if(newFilters[j].equals(oldFilters[i])) continue oldFiltersCoveredByNew;
-            }
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * By default, text filters are considered to be relaxed if:
-     *
-     * <ol>
-     *   <li> <code>oldFilter</code> and <code>newFilter</code> are both
-     *        non-null arrays of {@link String} objects.
-     *
-     *   <li> for each value, n[i], in <code>newFilter</code> there is a value
-     *        o[j], in <code>oldFilter</code>, for which
-     *        <code>o[j].indexOf(n[i])</code> is <tt>&gt; &nbsp; -1</tt>. This is
-     *        a modified notion of Set coverage. This requirement stipulates
-     *        that <code>newFilter</code> must be covered by
-     *        <code>oldFilter</code>.
-     *
-     *   <li> there exists a value, o[i], in <code>oldFilter</code> for which
-     *        there is <strong>NO</strong> value, n[j], in
-     *        <code>newFilter</code> that satisifies
-     *        <code>o[i].indexOf(n[j]) &gt; &nbsp; -1</code>. This is a modified
-     *        notion of full Set coverage. This requirement stipulates that
-     *        <code>oldFilter</code> must <strong>NOT</strong> be
-     *        <strong>fully</strong> covered by <code>newFilter</code>. This
-     *        requirement prevents filters that are equal from being considered
-     *        relaxed.
-     * </ol>
-     *
-     * <p>Note: filter relaxing and filter constraining are considered inverses of
-     *       each other. For any <code>newFilter</code>, n, and
-     *       <code>oldFilter</code>, o, <code>isFilterRelaxed(o, n)</code>
-     *       returning <tt>true</tt> implies
-     *       <code>isFilterConstrained(o, n)</code> will return <tt>false</tt>.
-     *       Similarly, if <code>isFilterConstrained(o, n)</code> returns
-     *       <tt>true</tt> then <code>isFilterRelaxed(o, n)</code> will return
-     *       <tt>false</tt>.
-     *
-     * @param oldFilters an array of {@link #normalizeSearchTerms normalized}
-     *      filter Strings
-     * @param newFilters another array of {@link # normalizeSearchTerms normalized}
-     *      filter Strings
-     * @return <tt>true</tt> if <code>newFilter</code> is a relaxed version of
-     *      <code>oldFilter</code>; <tt>false</tt> otherwise
-     */
-    static boolean isFilterRelaxed(final String[] oldFilters, final String[] newFilters) {
-        // ensure each new filter value has a counterpart in the old filter value that
-        // contains it (and thus the new filter value is covered by the old filter value)
-        newFiltersCoveredByOld:
-        for(int i = 0; i < newFilters.length; i++) {
-            for(int j = 0; j < oldFilters.length; j++) {
-                if(oldFilters[j].indexOf(newFilters[i]) != -1) continue newFiltersCoveredByOld;
-            }
-            return false;
-        }
-
-        // search for an old filter value has no counterpart in the new filter value that
-        // contains it (and thus the old filter value is not covered by the new filter value)
-        oldFiltersNotCoveredByNew:
-        for(int i = 0; i < oldFilters.length; i++) {
-            for(int j = 0; j < newFilters.length; j++) {
-                if(newFilters[j].indexOf(oldFilters[i]) != -1) continue oldFiltersNotCoveredByNew;
-            }
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * This method simply returns the result of
-     * <code>isFilterRelaxed(newFilter, oldFilter)</code>. See
-     * {@link #isFilterRelaxed} for a description of why that holds.
-     *
-     * @param oldFilter an array of {@link #normalizeSearchTerms normalized}
-     *      filter Strings
-     * @param newFilter another array of {@link # normalizeSearchTerms normalized}
-     *      filter Strings
-     * @return <tt>true</tt> if <code>newFilter</code> is a constrained version
-     *      of <code>oldFilter</code>; <tt>false</tt> otherwise
-     * @see #isFilterRelaxed
-     */
-    static boolean isFilterConstrained(String[] oldFilter, String[] newFilter) {
-        return isFilterRelaxed(newFilter, oldFilter);
-    }
-
-    /**
      * This convenience function maps each of the <code>filters</code> by
      * running each of their characters through the <code>characterMap</code>.
      * It also removes unnecessary SearchTerms which are not marked as
@@ -349,20 +228,21 @@ public final class TextMatchers {
         }
 
         // fetch all negated and non-negated SearchTerm object into two different Lists
-        final List<SearchTerm> negatedUnrequiredSearchTerms = Arrays.asList((SearchTerm[]) Matchers.select(filters, NEGATED_MATCHER));
-        final List<SearchTerm> nonNegatedUnrequiredSearchTerms = Arrays.asList((SearchTerm[]) Matchers.select(filters, NON_NEGATED_MATCHER));
+        final SearchTerm[] nonNullFieldSearchTerms = Matchers.select(filters, NO_FIELD_MATCHER);
+        final SearchTerm[] nullFieldSearchTerms = Matchers.select(filters, FIELD_MATCHER);
+
+        // fetch all negated and non-negated SearchTerm object into two different Lists
+        final List<SearchTerm> negatedUnrequiredSearchTerms = Arrays.asList((SearchTerm[]) Matchers.select(nullFieldSearchTerms, NEGATED_MATCHER));
+        final List<SearchTerm> nonNegatedUnrequiredSearchTerms = Arrays.asList((SearchTerm[]) Matchers.select(nullFieldSearchTerms, NON_NEGATED_MATCHER));
 
         // reassemble a super List of all normalized (necessary) SearchTerms
         final Collection<SearchTerm> allSearchTerms = new ArrayList<SearchTerm>(filters.length);
+        allSearchTerms.addAll(Arrays.asList(nonNullFieldSearchTerms));
         allSearchTerms.addAll(normalizeSearchTerms(negatedUnrequiredSearchTerms, true));
         allSearchTerms.addAll(normalizeSearchTerms(nonNegatedUnrequiredSearchTerms, false));
 
         // return the normalized SearchTerms as an array
         return allSearchTerms.toArray(new SearchTerm[allSearchTerms.size()]);
-    }
-
-    public static SearchTerm[] parse(String text) {
-        return parse(text, Collections.EMPTY_SET);
     }
 
     /**
@@ -371,6 +251,23 @@ public final class TextMatchers {
      * metadata about the way it should be used.
      *
      * @param text the raw text entered by a user
+     * @return SearchTerm an object encapsulating a single raw search term as
+     *      well as metadata related to the use of the SearchTerm
+     */
+    public static SearchTerm[] parse(String text) {
+        return parse(text, Collections.EMPTY_SET);
+    }
+
+    /**
+     * Parse the given <code>text</code> and produce an array of
+     * {@link SearchTerm} objects that describe text to match as well as
+     * metadata about the way it should be used. When parsing the text, the
+     * given Set of {@link SearchEngineTextMatcherEditor.Field} objects
+     * should be considered to detect when the user has entered a
+     * field-specific SearchTerm.
+     *
+     * @param text the raw text entered by a user
+     * @param fields a Set of objects describing each field that can be independently matched
      * @return SearchTerm an object encapsulating a single raw search term as
      *      well as metadata related to the use of the SearchTerm
      */
@@ -389,7 +286,7 @@ public final class TextMatchers {
         boolean negated = false, required = false, insideTerm = false, insideQuotedTerm = false;
 
         // step through the text one character at a time
-        for (int i = 0; i < text.length(); i++) {
+        for (int i = 0, n = text.length(); i < n; i++) {
             final char c = text.charAt(i);
 
             if (insideTerm) {
@@ -456,22 +353,9 @@ public final class TextMatchers {
     }
 
     /**
-     * A convenience function to extract the text out of each SearchTerm and
-     * return them in a parallel array.
-     */
-    private static String[] getFilterStrings(SearchTerm[] searchTerms) {
-        final String[] filterStrings = new String[searchTerms.length];
-
-        for (int i = 0; i < searchTerms.length; i++)
-            filterStrings[i] = searchTerms[i].getText();
-
-        return filterStrings;
-    }
-
-    /**
      * A method to determine if <code>newMatcher</code> is an absolute
      * constrainment of <code>oldMatcher</code>, meaning it is guaranteed to
-     * match the same or fewer items than the <code>oldMatcher</code>.
+     * match fewer items than the <code>oldMatcher</code>.
      *
      * @param oldMatcher the old TextMatcher being replaced
      * @param newMatcher the new TextMatcher to be used
@@ -479,37 +363,37 @@ public final class TextMatchers {
      *      match the same or fewer items than <code>oldMatcher</code>
      */
     public static boolean isMatcherConstrained(TextMatcher oldMatcher, TextMatcher newMatcher) {
-        // if the mode or strategy differs it cannot be considered a strict constrainment
-        if (oldMatcher.getMode() != newMatcher.getMode()) return oldMatcher.getMode() == TextMatcherEditor.CONTAINS;
+        // equal TextMatchers are never considered constrained or relaxed
+        if (oldMatcher.equals(newMatcher)) return false;
+
+        // if the strategies don't match we cannot report a constrainment
         if (oldMatcher.getStrategy() != newMatcher.getStrategy()) return false;
 
-        // now we must test the filter strings to determine if they agree it is a constrainment
-        final String[] negatedOldFilters = getFilterStrings(Matchers.select(oldMatcher.getSearchTerms(), NEGATED_MATCHER));
-        final String[] negatedNewFilters = getFilterStrings(Matchers.select(newMatcher.getSearchTerms(), NEGATED_MATCHER));
-
-        final boolean negatedFiltersAreEqual = isFilterEqual(negatedOldFilters, negatedNewFilters);
-
-        // if negated SearchTerms exist and are not constrained, short-circuit
-        if (!negatedFiltersAreEqual && !isFilterConstrained(negatedOldFilters, negatedNewFilters))
+        // if the mode went from STARTS_WITH to CONTAINS the TextMatcher cannot be a constrainment
+        if (oldMatcher.getMode() == TextMatcherEditor.STARTS_WITH && newMatcher.getMode() == TextMatcherEditor.CONTAINS)
             return false;
 
-        final String[] nonNegatedOldFilters = getFilterStrings(Matchers.select(oldMatcher.getSearchTerms(), NON_NEGATED_MATCHER));
-        final String[] nonNegatedNewFilters = getFilterStrings(Matchers.select(newMatcher.getSearchTerms(), NON_NEGATED_MATCHER));
+        // extract the SearchTerms for comparison
+        final SearchTerm[] oldTerms = oldMatcher.getSearchTerms();
+        final SearchTerm[] newTerms = newMatcher.getSearchTerms();
 
-        final boolean nonNegatedFiltersAreEqual = isFilterEqual(nonNegatedOldFilters, nonNegatedNewFilters);
-
-        // if non-negated SearchTerms exist and are not constrained, short-circuit
-        if (!nonNegatedFiltersAreEqual && !isFilterConstrained(nonNegatedOldFilters, nonNegatedNewFilters))
+        // we search the newTerms to locate an oldTerm whose matching power isn't covered
+        oldTermsCoveredByNew:
+        for (int i = 0; i < oldTerms.length; i++) {
+            for (int j = 0; j < newTerms.length; j++) {
+                if (newTerms[j].equals(oldTerms[i])) continue oldTermsCoveredByNew;
+                if (newTerms[j].isConstrainment(oldTerms[i])) continue oldTermsCoveredByNew;
+            }
             return false;
+        }
 
-        // base the return value on whether any filters were actually found - equal TextMatchers are not considered constrained
-        return !negatedFiltersAreEqual || !nonNegatedFiltersAreEqual;
+        return true;
     }
 
     /**
      * A method to determine if <code>newMatcher</code> is an absolute
      * relaxation of <code>oldMatcher</code>, meaning it is guaranteed to
-     * match the same or more items than the <code>oldMatcher</code>.
+     * match more items than the <code>oldMatcher</code>.
      *
      * @param oldMatcher the old TextMatcher being replaced
      * @param newMatcher the new TextMatcher to be used
