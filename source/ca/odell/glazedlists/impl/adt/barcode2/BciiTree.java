@@ -43,7 +43,7 @@ import java.util.List;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class BciiTree<V> {
+public class BciiTree/*[ TYPELIST_START ]*/ <T0,T1> /*[ TYPELIST_END ]*/ {
 
     /*[ COLORED_START ]*/
     /** the colors in the tree, used for printing purposes only */
@@ -51,7 +51,7 @@ public class BciiTree<V> {
     /*[ COLORED_END ]*/
 
     /** the tree's root, or <code>null</code> for an empty tree */
-    private BciiNode<V> root = null;
+    private /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ root = null;
 
     /**
      * a list to add all nodes to that must be removed from
@@ -59,21 +59,21 @@ public class BciiTree<V> {
      * which allows us a chance to do rotations without losing our position
      * in the tree.
      */
-    private final List<BciiNode<V>> zeroQueue = new ArrayList<BciiNode<V>>();
+    private final List</*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/> zeroQueue = new ArrayList</*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/>();
 
     /**
      * The comparator to use when performing ordering operations on the tree.
      * Sometimes this tree will not be sorted, so in such situations this
      * comparator will not be used.
      */
-    private final Comparator<? super V> comparator;
+    private final Comparator<? super T0> comparator;
 
     /**
      * @param coder specifies the node colors
      * @param comparator the comparator to use when ordering values within the
      *      tree. If this tree is unsorted, use the one-argument constructor.
      */
-    public BciiTree/**/(/*[ COLORED_START ]*/ ListToByteCoder coder, /*[ COLORED_END ]*/ Comparator<? super V> comparator) {
+    public BciiTree/**/(/*[ COLORED_START ]*/ ListToByteCoder coder, /*[ COLORED_END ]*/ Comparator<? super T0> comparator) {
         /*[ COLORED_START ]*/  if(coder == null) throw new NullPointerException("Coder cannot be null."); /*[ COLORED_END ]*/
         if(comparator == null) throw new NullPointerException("Comparator cannot be null.");
 
@@ -94,7 +94,7 @@ public class BciiTree<V> {
     }
     /*[ COLORED_END ]*/
 
-    public Comparator<? super V> getComparator() {
+    public Comparator<? super T0> getComparator() {
         return comparator;
     }
 
@@ -105,17 +105,17 @@ public class BciiTree<V> {
      * <p>This method is an hotspot, so its crucial that it run as efficiently
      * as possible.
      */
-    public Element<V> get(int index /*[ COLORED_START ]*/, byte indexColors /*[ COLORED_END ]*/) {
+    public Element<T0> get(int index /*[ COLORED_START ]*/, byte indexColors /*[ COLORED_END ]*/) {
         if(root == null) throw new IndexOutOfBoundsException();
 
         // go deep, looking for our node of interest
-        BciiNode<V> node = root;
+        /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ node = root;
         while(true) {
             assert(node != null);
             assert(index >= 0);
 
             // recurse on the left
-            BciiNode<V> nodeLeft = node.left;
+            /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ nodeLeft = node.left;
             int leftSize = nodeLeft != null ? nodeLeft./*[ COLORED_START(count1) ]*/ size(indexColors) /*[ COLORED_END ]*/ : 0;
             if(index < leftSize) {
                 node = nodeLeft;
@@ -155,7 +155,7 @@ public class BciiTree<V> {
      *      unless the size parameter is 0, in which case the result is always
      *      <code>null</code>.
      */
-    public Element<V> add(int index, /*[ COLORED_START ]*/ byte indexColors, byte color, /*[ COLORED_END ]*/ V value, int size) {
+    public Element<T0> add(int index, /*[ COLORED_START ]*/ byte indexColors, byte color, /*[ COLORED_END ]*/ T0 value, int size) {
         assert(index >= 0);
         assert(index <= size(/*[ COLORED_START ]*/ indexColors /*[ COLORED_END ]*/));
         assert(size >= 0);
@@ -163,11 +163,11 @@ public class BciiTree<V> {
         if(this.root == null) {
             if(index != 0) throw new IndexOutOfBoundsException();
 
-            this.root = new BciiNode<V>(/*[ COLORED_START ]*/ color, /*[ COLORED_END ]*/ size, value, null);
+            this.root = new /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/(/*[ COLORED_START ]*/ color, /*[ COLORED_END ]*/ size, value, null);
             assert(valid());
             return this.root;
         } else {
-            BciiNode<V> inserted = insertIntoSubtree(root, index, /*[ COLORED_START ]*/ indexColors, color, /*[ COLORED_END ]*/ value, size);
+            /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ inserted = insertIntoSubtree(root, index, /*[ COLORED_START ]*/ indexColors, color, /*[ COLORED_END ]*/ value, size);
             assert(valid());
             return inserted;
         }
@@ -185,19 +185,19 @@ public class BciiTree<V> {
      * @return the inserted node, or the modified node if this insert simply
      *      increased the size of an existing node.
      */
-    private BciiNode<V> insertIntoSubtree(BciiNode<V> parent, int index, /*[ COLORED_START ]*/ byte indexColors, byte color, /*[ COLORED_END ]*/ V value, int size) {
+    private /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ insertIntoSubtree(/*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ parent, int index, /*[ COLORED_START ]*/ byte indexColors, byte color, /*[ COLORED_END ]*/ T0 value, int size) {
         while(true) {
             assert(parent != null);
             assert(index >= 0);
 
             // figure out the layout of this node
-            BciiNode<V> parentLeft = parent.left;
+            /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ parentLeft = parent.left;
             int parentLeftSize = parentLeft != null ? parentLeft./*[ COLORED_START(count1) ]*/ size(indexColors) /*[ COLORED_END ]*/ : 0;
             int parentRightStartIndex = parentLeftSize + /*[ NODE_SIZE(parent, indexColors) EXAMPLE_START ]*/ parent.nodeSize(indexColors) /*[ EXAMPLE_END ]*/;
 
             // the first thing we want to try is to merge this value into the
             // current node, since that's the cheapest thing to do:
-            if(/*[ WIDE_NODES_START(false &&) WIDE_NODES_END ]*/ /*[ COLORED_START ]*/ color == parent.color &&  /*[ COLORED_END ]*/ value == parent.value && value != null) {
+            if(/*[ WIDE_NODES_START(false &&) WIDE_NODES_END ]*/ /*[ COLORED_START ]*/ color == parent.color &&  /*[ COLORED_END ]*/ value == parent.t0 && value != null) {
                 if(index >= parentLeftSize && index <= parentRightStartIndex) {
                     /*[ WIDE_NODES_START ]*/ parent.size += size; /*[ WIDE_NODES_END ]*/
                     fixCountsThruRoot(parent, /*[ COLORED_START ]*/ color, /*[ COLORED_END ]*/ size);
@@ -209,7 +209,7 @@ public class BciiTree<V> {
             if(index <= parentLeftSize) {
                 // as a new left child
                 if(parentLeft == null) {
-                    BciiNode<V> inserted = new BciiNode<V>(/*[ COLORED_START ]*/ color, /*[ COLORED_END ]*/ size, value, parent);
+                    /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ inserted = new /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/(/*[ COLORED_START ]*/ color, /*[ COLORED_END ]*/ size, value, parent);
                     parent.left = inserted;
                     fixCountsThruRoot(parent, /*[ COLORED_START ]*/ color, /*[ COLORED_END ]*/ size);
                     fixHeightPostChange(parent, false);
@@ -229,8 +229,8 @@ public class BciiTree<V> {
                 /*[ WIDE_NODES_START ]*/ parent.size -= parentRightHalfSize; /*[ WIDE_NODES_END ]*/
                 fixCountsThruRoot(parent, /*[ COLORED_START ]*/ parent.color, /*[ COLORED_END ]*/ -parentRightHalfSize);
                 // insert as null first to make sure this doesn't get merged back
-                Element<V> inserted = insertIntoSubtree(parent, index, /*[ COLORED_START ]*/ indexColors, parent.color, /*[ COLORED_END ]*/ null, parentRightHalfSize);
-                inserted.set(parent.value);
+                Element<T0> inserted = insertIntoSubtree(parent, index, /*[ COLORED_START ]*/ indexColors, parent.color, /*[ COLORED_END ]*/ null, parentRightHalfSize);
+                inserted.set(parent.t0);
 
                 // recalculate parentRightStartIndex, since that should have
                 // changed by now. this will then go on to insert on the right
@@ -241,11 +241,11 @@ public class BciiTree<V> {
             right: {
                 int parentSize = parent./*[ COLORED_START(count1) ]*/ size(indexColors) /*[ COLORED_END ]*/;
                 assert(index <= parentSize);
-                BciiNode<V> parentRight = parent.right;
+                /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ parentRight = parent.right;
 
                 // as a right child
                 if(parentRight == null) {
-                    BciiNode<V> inserted = new BciiNode<V>(/*[ COLORED_START ]*/ color, /*[ COLORED_END ]*/ size, value, parent);
+                    /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ inserted = new /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/(/*[ COLORED_START ]*/ color, /*[ COLORED_END ]*/ size, value, parent);
                     parent.right = inserted;
                     fixCountsThruRoot(parent, /*[ COLORED_START ]*/ color, /*[ COLORED_END ]*/ size);
                     fixHeightPostChange(parent, false);
@@ -271,15 +271,15 @@ public class BciiTree<V> {
      *      unless the size parameter is 0, in which case the result is always
      *      <code>null</code>.
      */
-    public Element<V> addInSortedOrder(byte color, V value, int size) {
+    public Element<T0> addInSortedOrder(byte color, T0 value, int size) {
         assert(size >= 0);
 
         if(this.root == null) {
-            this.root = new BciiNode<V>(/*[ COLORED_START ]*/ color, /*[ COLORED_END ]*/ size, value, null);
+            this.root = new /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/(/*[ COLORED_START ]*/ color, /*[ COLORED_END ]*/ size, value, null);
             assert(valid());
             return this.root;
         } else {
-            BciiNode<V> inserted = insertIntoSubtreeInSortedOrder(root, /*[ COLORED_START ]*/ color, /*[ COLORED_END ]*/ value, size);
+            /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ inserted = insertIntoSubtreeInSortedOrder(root, /*[ COLORED_START ]*/ color, /*[ COLORED_END ]*/ value, size);
             assert(valid());
             return inserted;
         }
@@ -293,7 +293,7 @@ public class BciiTree<V> {
      * @return the inserted node, or the modified node if this insert simply
      *      increased the size of an existing node.
      */
-    private BciiNode<V> insertIntoSubtreeInSortedOrder(BciiNode<V> parent, /*[ COLORED_START ]*/ byte color, /*[ COLORED_END ]*/ V value, int size) {
+    private /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ insertIntoSubtreeInSortedOrder(/*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ parent, /*[ COLORED_START ]*/ byte color, /*[ COLORED_END ]*/ T0 value, int size) {
         while(true) {
             assert(parent != null);
 
@@ -301,21 +301,21 @@ public class BciiTree<V> {
             // unsorted nodes in the tree. we just look for a neighbour (ie next)
             // that is sorted, and compare with that
             int sortSide;
-            for(BciiNode<V> currentFollower = parent; true; currentFollower = next(currentFollower)) {
+            for(/*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ currentFollower = parent; true; currentFollower = next(currentFollower)) {
                 // we've hit the end of the list, assume the element is on the left side
                 if(currentFollower == null) {
                     sortSide = -1;
                     break;
                 // we've found a comparable node, use it
                 } else if(currentFollower.sorted == Element.SORTED) {
-                    sortSide = comparator.compare(value, currentFollower.value);
+                    sortSide = comparator.compare(value, currentFollower.t0);
                     break;
                 }
             }
 
             // the first thing we want to try is to merge this value into the
             // current node, since that's the cheapest thing to do:
-            if(/*[ WIDE_NODES_START(false &&) WIDE_NODES_END ]*/ sortSide == 0 && /*[ COLORED_START ]*/ color == parent.color && /*[ COLORED_END ]*/ value == parent.value && value != null) {
+            if(/*[ WIDE_NODES_START(false &&) WIDE_NODES_END ]*/ sortSide == 0 && /*[ COLORED_START ]*/ color == parent.color && /*[ COLORED_END ]*/ value == parent.t0 && value != null) {
                 /*[ WIDE_NODES_START ]*/ parent.size += size; /*[ WIDE_NODES_END ]*/
                 fixCountsThruRoot(parent, /*[ COLORED_START ]*/ color, /*[ COLORED_END ]*/ size);
                 return parent;
@@ -327,11 +327,11 @@ public class BciiTree<V> {
             insertOnLeft = insertOnLeft || sortSide == 0 && parent.left == null;
             insertOnLeft = insertOnLeft || sortSide == 0 && parent.right != null && parent.left.height < parent.right.height;
             if(insertOnLeft) {
-                BciiNode<V> parentLeft = parent.left;
+                /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ parentLeft = parent.left;
 
                 // as a new left child
                 if(parentLeft == null) {
-                    BciiNode<V> inserted = new BciiNode<V>(/*[ COLORED_START ]*/ color, /*[ COLORED_END ]*/ size, value, parent);
+                    /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ inserted = new /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/(/*[ COLORED_START ]*/ color, /*[ COLORED_END ]*/ size, value, parent);
                     parent.left = inserted;
                     fixCountsThruRoot(parent, /*[ COLORED_START ]*/ color, /*[ COLORED_END ]*/ size);
                     fixHeightPostChange(parent, false);
@@ -343,13 +343,13 @@ public class BciiTree<V> {
                     continue;
                 }
 
-            // ...or on the right
+                // ...or on the right
             } else {
-                BciiNode<V> parentRight = parent.right;
+                /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ parentRight = parent.right;
 
                 // as a right child
                 if(parentRight == null) {
-                    BciiNode<V> inserted = new BciiNode<V>(/*[ COLORED_START ]*/ color, /*[ COLORED_END ]*/ size, value, parent);
+                    /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ inserted = new /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/(/*[ COLORED_START ]*/ color, /*[ COLORED_END ]*/ size, value, parent);
                     parent.right = inserted;
                     fixCountsThruRoot(parent, /*[ COLORED_START ]*/ color, /*[ COLORED_END ]*/ size);
                     fixHeightPostChange(parent, false);
@@ -368,7 +368,7 @@ public class BciiTree<V> {
      * to the root. The counts of the specified color are adjusted by delta
      * (which may be positive or negative).
      */
-    private final void fixCountsThruRoot(BciiNode<V> node, /*[ COLORED_START ]*/ byte color, /*[ COLORED_END ]*/ int delta) {
+    private final void fixCountsThruRoot(/*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ node, /*[ COLORED_START ]*/ byte color, /*[ COLORED_END ]*/ int delta) {
         /*[ GENERATED_CODE_START
         forloop(`i', 0, VAR_LAST_COLOR_INDEX, `m4_ifelse(VAR_COLOUR_COUNT,`1',`for( ; node != null; node = node.parent) node.'counti(i)` += delta;
         ', `if(color == 'indexToBit(i)`) {
@@ -393,8 +393,8 @@ public class BciiTree<V> {
     /**
      * Change the color of the specified element.
      */
-    public final void setColor(Element<V> element, byte color) {
-        BciiNode<V> node = (BciiNode<V>)element;
+    public final void setColor(Element<T0> element, byte color) {
+        BciiNode node = (BciiNode)element;
         byte oldColor  = node.getColor();
         if(oldColor == color) return;
 
@@ -418,7 +418,7 @@ public class BciiTree<V> {
      *      the opposite side of the tree, whereas on an insert we only delete
      *      as far as necessary.
      */
-    private final void fixHeightPostChange(BciiNode<V> node, boolean allTheWayToRoot) {
+    private final void fixHeightPostChange(/*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ node, boolean allTheWayToRoot) {
 
         // update the height
         for(; node != null; node = node.parent) {
@@ -471,11 +471,11 @@ public class BciiTree<V> {
      *
      * @return the new root of the subtree
      */
-    private final BciiNode<V> rotateLeft(BciiNode<V> subtreeRoot) {
+    private final /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ rotateLeft(/*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ subtreeRoot) {
         assert(subtreeRoot.left != null);
         // subtreeRoot is D
         // newSubtreeRoot is B
-        BciiNode<V> newSubtreeRoot = subtreeRoot.left;
+        /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ newSubtreeRoot = subtreeRoot.left;
 
         // modify the links between nodes
         // attach C as a child of to D
@@ -508,11 +508,11 @@ public class BciiTree<V> {
 
         return newSubtreeRoot;
     }
-    private final BciiNode<V> rotateRight(BciiNode<V> subtreeRoot) {
+    private final /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ rotateRight(/*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ subtreeRoot) {
         assert(subtreeRoot.right != null);
         // subtreeRoot is D
         // newSubtreeRoot is B
-        BciiNode<V> newSubtreeRoot = subtreeRoot.right;
+        /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ newSubtreeRoot = subtreeRoot.right;
 
         // modify the links between nodes
         // attach C as a child of to D
@@ -549,8 +549,8 @@ public class BciiTree<V> {
     /**
      * Remove the specified element from the tree outright.
      */
-    public void remove(Element<V> element) {
-        BciiNode<V> node = (BciiNode<V>)element;
+    public void remove(Element<T0> element) {
+        /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ node = (/*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/)element;
         /*[ WIDE_NODES_START ]*/ assert(node.size > 0); /*[ WIDE_NODES_END ]*/
         assert(root != null);
 
@@ -593,7 +593,7 @@ public class BciiTree<V> {
      */
     private void drainZeroQueue() {
         for(int i = 0, size = zeroQueue.size(); i < size; i++) {
-            BciiNode<V> node = zeroQueue.get(i);
+            /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ node = zeroQueue.get(i);
             /*[ WIDE_NODES_START ]*/ assert(node.size == 0); /*[ WIDE_NODES_END ]*/
 
             if(node.right == null) {
@@ -612,13 +612,13 @@ public class BciiTree<V> {
      * remove any nodes of size zero, that's up to the caller to do after by
      * removing all nodes in the zeroQueue from the tree.
      */
-    private void removeFromSubtree(BciiNode<V> node, int index, /*[ COLORED_START ]*/ byte indexColors, /*[ COLORED_END ]*/ int size) {
+    private void removeFromSubtree(/*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ node, int index, /*[ COLORED_START ]*/ byte indexColors, /*[ COLORED_END ]*/ int size) {
         while(size > 0) {
             assert(node != null);
             assert(index >= 0);
 
             // figure out the layout of this node
-            BciiNode<V> nodeLeft = node.left;
+            /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ nodeLeft = node.left;
             int leftSize = nodeLeft != null ? nodeLeft./*[ COLORED_START(count1) ]*/ size(indexColors) /*[ COLORED_END ]*/ : 0;
 
             // delete on the left first
@@ -630,7 +630,7 @@ public class BciiTree<V> {
                     removeFromSubtree(nodeLeft, index, /*[ COLORED_START ]*/ indexColors, /*[ COLORED_END ]*/ toRemove);
                     size -= toRemove;
                     leftSize -= toRemove;
-                // we can do our full delete on the left side
+                    // we can do our full delete on the left side
                 } else {
                     node = nodeLeft;
                     continue;
@@ -665,19 +665,19 @@ public class BciiTree<V> {
      * the replacement node should have its height set first before this method
      * is called.
      */
-    private void replaceChild(BciiNode<V> node, BciiNode<V> replacement) {
-        BciiNode<V> nodeParent = node.parent;
+    private void replaceChild(/*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ node, /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ replacement) {
+        /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ nodeParent = node.parent;
 
         // replace the root
         if(nodeParent == null) {
             assert(node == root);
             root = replacement;
 
-        // replace on the left
+            // replace on the left
         } else if(nodeParent.left == node) {
             nodeParent.left = replacement;
 
-        // replace on the right
+            // replace on the right
         } else if(nodeParent.right == node) {
             nodeParent.right = replacement;
         }
@@ -699,13 +699,13 @@ public class BciiTree<V> {
      *
      * @return the replacement node
      */
-    private BciiNode<V> replaceEmptyNodeWithChild(BciiNode<V> toReplace) {
+    private /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ replaceEmptyNodeWithChild(/*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ toReplace) {
         /*[ WIDE_NODES_START ]*/ assert(toReplace.size == 0); /*[ WIDE_NODES_END ]*/
         assert(toReplace.left != null);
         assert(toReplace.right != null);
 
         // find the rightmost child on the leftside
-        BciiNode<V> replacement = toReplace.left;
+        /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ replacement = toReplace.left;
         while(replacement.right != null) {
             replacement = replacement.right;
         }
@@ -740,7 +740,7 @@ public class BciiTree<V> {
      * @return the element that was updated. This is non-null unless the size
      *      parameter is 0, in which case the result is always <code>null</code>.
      */
-    public Element<V> set(int index, /*[ COLORED_START ]*/ byte indexColors, byte color, /*[ COLORED_END ]*/ V value, int size) {
+    public Element<T0> set(int index, /*[ COLORED_START ]*/ byte indexColors, byte color, /*[ COLORED_END ]*/ T0 value, int size) {
         remove(index, /*[ COLORED_START ]*/ indexColors, /*[ COLORED_END ]*/ size);
         return add(index, /*[ COLORED_START ]*/ indexColors, color, /*[ COLORED_END ]*/ value, size);
     }
@@ -762,8 +762,8 @@ public class BciiTree<V> {
      * <p>This method is an hotspot, so its crucial that it run as efficiently
      * as possible.
      */
-    public int indexOfNode(Element<V> element, byte colorsOut) {
-        BciiNode<V> node = (BciiNode<V>)element;
+    public int indexOfNode(Element<T0> element, byte colorsOut) {
+        /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ node = (/*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/)element;
 
         // count all elements left of this node
         int index = node.left != null ? node.left./*[ COLORED_START(count1) ]*/ size(colorsOut) /*[ COLORED_END ]*/ : 0;
@@ -791,12 +791,12 @@ public class BciiTree<V> {
      *     element x in this tree such that
      *     <code>BciiTree.getComparator().compare(x, element) == 0</code>.
      */
-    public int indexOfValue(V element, boolean firstIndex, boolean simulated, byte colorsOut) {
+    public int indexOfValue(T0 element, boolean firstIndex, boolean simulated, byte colorsOut) {
         int result = 0;
         boolean found = false;
 
         // go deep, looking for our node of interest
-        BciiNode<V> node = root;
+        /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ node = root;
         while(true) {
             if(node == null) {
                 if(found && !firstIndex) result--;
@@ -812,7 +812,7 @@ public class BciiTree<V> {
                 node = node.left;
                 continue;
             }
-            BciiNode<V> nodeLeft = node.left;
+            /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ nodeLeft = node.left;
 
             // the result is in the centre
             if(comparison == 0) {
@@ -844,20 +844,20 @@ public class BciiTree<V> {
         int result = 0;
 
         // go deep, looking for our node of interest
-        BciiNode<V> node = root;
+        /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ node = root;
         while(true) {
             assert(node != null);
             assert(index >= 0);
 
             // figure out the layout of this node
-            BciiNode<V> nodeLeft = node.left;
+            /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ nodeLeft = node.left;
             int leftSize = nodeLeft != null ? nodeLeft./*[ COLORED_START(count1) ]*/ size(indexColors) /*[ COLORED_END ]*/ : 0;
 
             // recurse on the left
             if(index < leftSize) {
                 node = nodeLeft;
                 continue;
-            // increment by the count on the left
+                // increment by the count on the left
             } else {
                 if(nodeLeft != null) result += nodeLeft./*[ COLORED_START(count1) ]*/ size(colorsOut) /*[ COLORED_END ]*/;
                 index -= leftSize;
@@ -870,13 +870,13 @@ public class BciiTree<V> {
 
                 if(/*[ COLORED_START(true) ]*/ (colorsOut & node.color) > 0 /*[ COLORED_END ]*/) {
                     result += index;
-                // we're on a node of a different color, return the previous node of the requested color
+                    // we're on a node of a different color, return the previous node of the requested color
                 } else {
                     result -= 1;
                 }
                 return result;
 
-            // increment by the count in the centre
+                // increment by the count in the centre
             } else {
                 result += /*[ NODE_SIZE(node, colorsOut) EXAMPLE_START ]*/ node.nodeSize(colorsOut) /*[ EXAMPLE_END ]*/;
                 index -= size;
@@ -912,7 +912,7 @@ public class BciiTree<V> {
 
         // print it flattened, like a list of colors
         StringBuffer result = new StringBuffer();
-        for(BciiNode<V> n = firstNode(); n != null; n = next(n)) {
+        for(BciiNode n = firstNode(); n != null; n = next(n)) {
             Object color = coder.getColors().get(colorAsIndex(n.color));
             for(/*[ WIDE_NODES_START(true) ]*/ int i = 0; i < n.size; i++/*[ WIDE_NODES_END ]*/) {
                 result.append(color);
@@ -926,18 +926,18 @@ public class BciiTree<V> {
     /**
      * Find the next node in the tree, working from left to right.
      */
-    public static <V> BciiNode<V> next(BciiNode<V> node) {
+    public static /*[ TYPELIST_START ]*/ <T0,T1> /*[ TYPELIST_END ]*/ /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ next(/*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ node) {
         // if this node has a right subtree, it's the leftmost node in that subtree
         if(node.right != null) {
-            BciiNode<V> child = node.right;
+            /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ child = node.right;
             while(child.left != null) {
                 child = child.left;
             }
             return child;
 
-        // otherwise its the nearest ancestor where I'm in the left subtree
+            // otherwise its the nearest ancestor where I'm in the left subtree
         } else {
-            BciiNode<V> ancestor = node;
+            /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ ancestor = node;
             while(ancestor.parent != null && ancestor.parent.right == ancestor) {
                 ancestor = ancestor.parent;
             }
@@ -949,18 +949,18 @@ public class BciiTree<V> {
     /**
      * Find the previous node in the tree, working from right to left.
      */
-    public static <V> BciiNode<V> previous(BciiNode<V> node) {
+    public static /*[ TYPELIST_START ]*/ <T0,T1> /*[ TYPELIST_END ]*/ /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ previous(/*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ node) {
         // if this node has a left subtree, it's the rightmost node in that subtree
         if(node.left != null) {
-            BciiNode<V> child = node.left;
+            /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ child = node.left;
             while(child.right != null) {
                 child = child.right;
             }
             return child;
 
-        // otherwise its the nearest ancestor where I'm in the right subtree
+            // otherwise its the nearest ancestor where I'm in the right subtree
         } else {
-            BciiNode<V> ancestor = node;
+            /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ ancestor = node;
             while(ancestor.parent != null && ancestor.parent.left == ancestor) {
                 ancestor = ancestor.parent;
             }
@@ -971,10 +971,10 @@ public class BciiTree<V> {
     /**
      * Find the leftmost child in this subtree.
      */
-    BciiNode<V> firstNode() {
+    /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ firstNode() {
         if(root == null) return null;
 
-        BciiNode<V> result = root;
+        /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ result = root;
         while(result.left != null) {
             result = result.left;
         }
@@ -986,7 +986,7 @@ public class BciiTree<V> {
      */
     private boolean valid() {
         // walk through all nodes in the tree, looking for something invalid
-        for(BciiNode<V> node = firstNode(); node != null; node = next(node)) {
+        for(/*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ node = firstNode(); node != null; node = next(node)) {
             // sizes (counts) are valid
 
             /*[ GENERATED_CODE_START

@@ -47,6 +47,15 @@ import java.util.NoSuchElementException;
    
 
 
+# multiple values
+
+
+
+
+
+
+
+
 
 */
 /*[ BEGIN_M4_JAVA ]*/   
@@ -62,7 +71,7 @@ import java.util.NoSuchElementException;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class SimpleTreeIterator<V> {
+public class SimpleTreeIterator <  T0>   {
 
      
     int count1;
@@ -70,11 +79,11 @@ public class SimpleTreeIterator<V> {
     
      
 
-    private SimpleTree<V> tree;
-    private SimpleNode<V> node;
+    private SimpleTree <  T0>   tree;
+    private SimpleNode <  T0>   node;
     private int index;
 
-    public SimpleTreeIterator/**/(SimpleTree<V> tree) {
+    public SimpleTreeIterator/**/(SimpleTree <  T0>   tree) {
         this(tree, 0, (byte)0);
     }
 
@@ -85,13 +94,13 @@ public class SimpleTreeIterator<V> {
      * @param nextIndex the index to be returned after calling {@link #next next()}.
      * @param nextIndexColors the colors to interpret nextIndex in terms of
      */
-    public SimpleTreeIterator/**/(SimpleTree<V> tree, int nextIndex, byte nextIndexColors) {
+    public SimpleTreeIterator/**/(SimpleTree <  T0>   tree, int nextIndex, byte nextIndexColors) {
         this.tree = tree;
 
         // if the start is, we need to find the node in the tree
         if(nextIndex != 0) {
             int currentIndex = nextIndex - 1;
-            this.node = (SimpleNode<V>)tree.get(currentIndex   );
+            this.node = ( SimpleNode <  T0>  )tree.get(currentIndex   );
 
             // find the counts
              
@@ -119,8 +128,8 @@ public class SimpleTreeIterator<V> {
      * The iterators will be backed by the same tree but maintain
      * separate cursors into the tree.
      */
-    public SimpleTreeIterator<V> copy() {
-        SimpleTreeIterator<V> result = new SimpleTreeIterator<V>(tree);
+    public SimpleTreeIterator <  T0>   copy() {
+        SimpleTreeIterator <  T0>   result = new SimpleTreeIterator <  T0>  (tree);
 
          
         result.count1 = this.count1;
@@ -295,11 +304,11 @@ public class SimpleTreeIterator<V> {
         return nodeStartIndex(  )
                 + nodeSize(  );
     }
-    public V value() {
+    public T0 value() {
         if(node == null) throw new IllegalStateException();
         return node.get();
     }
-    public Element<V> node() {
+    public Element<T0> node() {
         if(node == null) throw new IllegalStateException();
         return node;
     }

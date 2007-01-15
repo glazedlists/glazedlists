@@ -50,6 +50,15 @@ import java.util.List;
    
 
 
+# multiple values
+
+
+
+
+
+
+
+
 
 */
 /*[ BEGIN_M4_JAVA ]*/   
@@ -59,9 +68,9 @@ import java.util.List;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class FourColorTreeAsList<V> extends AbstractList<V> {
+public class FourColorTreeAsList <  T0>   extends AbstractList<T0> {
 
-    private final FourColorTree<V> tree;
+    private final FourColorTree <  T0>   tree;
 
      
     private final byte colors;
@@ -74,7 +83,7 @@ public class FourColorTreeAsList<V> extends AbstractList<V> {
     /**
      * Create a new {@link FourColorTreeAsList} adapting the specified tree.
      */
-    public FourColorTreeAsList/**/(FourColorTree<V> tree) {
+    public FourColorTreeAsList/**/(FourColorTree tree) {
         this(tree, tree.getCoder().colorsToByte(tree.getCoder().getColors()), (byte)1);
     }
       
@@ -84,7 +93,7 @@ public class FourColorTreeAsList<V> extends AbstractList<V> {
      * of the specified tree. Inserted elements via {@link #add} will be of the
      * specified color.
      */
-    public FourColorTreeAsList/**/(FourColorTree<V> tree   , byte colors, byte color   ) {
+    public FourColorTreeAsList/**/(FourColorTree <  T0>   tree   , byte colors, byte color   ) {
         this.tree = tree;
          
         this.colors = colors;
@@ -93,25 +102,25 @@ public class FourColorTreeAsList<V> extends AbstractList<V> {
     }
 
     /** {@inheritDoc} */
-    public V get(int index) {
+    public T0 get(int index) {
         return tree.get(index  , colors   ).get();
     }
 
     /** {@inheritDoc} */
-    public void add(int index, V element) {
+    public void add(int index, T0 element) {
         tree.add(index,   colors, color,    element, 1);
     }
 
     /** {@inheritDoc} */
-    public V set(int index, V element) {
-        V replaced = get(index);
+    public T0 set(int index, T0 element) {
+        T0 replaced = get(index);
         tree.set(index,   colors, color,    element, 1);
         return replaced;
     }
 
     /** {@inheritDoc} */
-    public V remove(int index) {
-        V removed = get(index);
+    public T0 remove(int index) {
+        T0 removed = get(index);
         tree.remove(index,   colors,    1);
         return removed;
     }

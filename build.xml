@@ -892,6 +892,7 @@
             <arg line="--prefix-builtins"/>
             <arg line="-DVAR_COLOUR_COUNT=4"/>
             <arg line="-DVAR_WIDE_NODES=true"/>
+            <arg line="-DVAR_TYPE_COUNT=1"/>
             <srcfile/>
             <fileset dir="${basedir}" includes="source/ca/odell/glazedlists/impl/adt/barcode2/Bcii*.java"/>
             <mapper refid="bcii_to_fourcolorintermediate"/>
@@ -907,6 +908,7 @@
             <arg line="-DBciiNode=FourColorNode"/>
             <arg line="-DBciiTreeAsList=FourColorTreeAsList"/>
             <arg line="-DBciiTreeIterator=FourColorTreeIterator"/>
+            <arg line="-DCOMMAPLACEHOLDER=,"/>
             <srcfile/>
             <fileset dir="${basedir}" includes="source/ca/odell/glazedlists/impl/adt/barcode2/FourColor*.java_intermediate"/>
             <mapper refid="fourcolorintermediate_to_fourcolor"/>
@@ -921,6 +923,7 @@
             <arg line="--prefix-builtins"/>
             <arg line="-DVAR_COLOUR_COUNT=1"/>
             <arg line="-DVAR_WIDE_NODES=false"/>
+            <arg line="-DVAR_TYPE_COUNT=1"/>
             <srcfile/>
             <fileset dir="${basedir}" includes="source/ca/odell/glazedlists/impl/adt/barcode2/Bcii*.java"/>
             <mapper refid="bcii_to_simpleintermediate"/>
@@ -936,6 +939,7 @@
             <arg line="-DBciiNode=SimpleNode"/>
             <arg line="-DBciiTreeAsList=SimpleTreeAsList"/>
             <arg line="-DBciiTreeIterator=SimpleTreeIterator"/>
+            <arg line="-DCOMMAPLACEHOLDER=,"/>
             <srcfile/>
             <fileset dir="${basedir}" includes="source/ca/odell/glazedlists/impl/adt/barcode2/Simple*.java_intermediate"/>
             <mapper refid="simpleintermediate_to_simple"/>

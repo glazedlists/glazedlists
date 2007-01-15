@@ -48,6 +48,15 @@ import java.util.List;
    
 
 
+# multiple values
+
+
+
+
+
+
+
+
 
 */
 /*[ BEGIN_M4_JAVA ]*/   
@@ -57,9 +66,9 @@ import java.util.List;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class SimpleTreeAsList<V> extends AbstractList<V> {
+public class SimpleTreeAsList <  T0>   extends AbstractList<T0> {
 
-    private final SimpleTree<V> tree;
+    private final SimpleTree <  T0>   tree;
 
       
 
@@ -70,31 +79,31 @@ public class SimpleTreeAsList<V> extends AbstractList<V> {
      * of the specified tree. Inserted elements via {@link #add} will be of the
      * specified color.
      */
-    public SimpleTreeAsList/**/(SimpleTree<V> tree   ) {
+    public SimpleTreeAsList/**/(SimpleTree <  T0>   tree   ) {
         this.tree = tree;
           
     }
 
     /** {@inheritDoc} */
-    public V get(int index) {
+    public T0 get(int index) {
         return tree.get(index   ).get();
     }
 
     /** {@inheritDoc} */
-    public void add(int index, V element) {
+    public void add(int index, T0 element) {
         tree.add(index,    element, 1);
     }
 
     /** {@inheritDoc} */
-    public V set(int index, V element) {
-        V replaced = get(index);
+    public T0 set(int index, T0 element) {
+        T0 replaced = get(index);
         tree.set(index,    element, 1);
         return replaced;
     }
 
     /** {@inheritDoc} */
-    public V remove(int index) {
-        V removed = get(index);
+    public T0 remove(int index) {
+        T0 removed = get(index);
         tree.remove(index,    1);
         return removed;
     }

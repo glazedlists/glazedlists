@@ -49,6 +49,15 @@ import java.util.NoSuchElementException;
    
 
 
+# multiple values
+
+
+
+
+
+
+
+
 
 */
 /*[ BEGIN_M4_JAVA ]*/   
@@ -64,7 +73,7 @@ import java.util.NoSuchElementException;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class FourColorTreeIterator<V> {
+public class FourColorTreeIterator <  T0>   {
 
      
     int count1;
@@ -75,11 +84,11 @@ public class FourColorTreeIterator<V> {
     
      
 
-    private FourColorTree<V> tree;
-    private FourColorNode<V> node;
+    private FourColorTree <  T0>   tree;
+    private FourColorNode <  T0>   node;
     private int index;
 
-    public FourColorTreeIterator/**/(FourColorTree<V> tree) {
+    public FourColorTreeIterator/**/(FourColorTree <  T0>   tree) {
         this(tree, 0, (byte)0);
     }
 
@@ -90,13 +99,13 @@ public class FourColorTreeIterator<V> {
      * @param nextIndex the index to be returned after calling {@link #next next()}.
      * @param nextIndexColors the colors to interpret nextIndex in terms of
      */
-    public FourColorTreeIterator/**/(FourColorTree<V> tree, int nextIndex, byte nextIndexColors) {
+    public FourColorTreeIterator/**/(FourColorTree <  T0>   tree, int nextIndex, byte nextIndexColors) {
         this.tree = tree;
 
         // if the start is, we need to find the node in the tree
         if(nextIndex != 0) {
             int currentIndex = nextIndex - 1;
-            this.node = (FourColorNode<V>)tree.get(currentIndex  , nextIndexColors   );
+            this.node = ( FourColorNode <  T0>  )tree.get(currentIndex  , nextIndexColors   );
 
             // find the counts
              
@@ -130,8 +139,8 @@ public class FourColorTreeIterator<V> {
      * The iterators will be backed by the same tree but maintain
      * separate cursors into the tree.
      */
-    public FourColorTreeIterator<V> copy() {
-        FourColorTreeIterator<V> result = new FourColorTreeIterator<V>(tree);
+    public FourColorTreeIterator <  T0>   copy() {
+        FourColorTreeIterator <  T0>   result = new FourColorTreeIterator <  T0>  (tree);
 
          
         result.count1 = this.count1;
@@ -332,11 +341,11 @@ public class FourColorTreeIterator<V> {
         return nodeStartIndex(  colors   )
                 + nodeSize(  colors   );
     }
-    public V value() {
+    public T0 value() {
         if(node == null) throw new IllegalStateException();
         return node.get();
     }
-    public Element<V> node() {
+    public Element<T0> node() {
         if(node == null) throw new IllegalStateException();
         return node;
     }

@@ -50,6 +50,15 @@ import java.util.List;
    
 
 
+# multiple values
+
+
+
+
+
+
+
+
 
 */
 /*[ BEGIN_M4_JAVA ]*/   
@@ -66,7 +75,7 @@ import java.util.List;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-class FourColorNode<V> implements Element<V> {
+class  FourColorNode <  T0>   implements Element<T0> {
 
     /** the number of elements of each color in this subtree */
      
@@ -83,9 +92,12 @@ class FourColorNode<V> implements Element<V> {
     byte color;
       
 
-
     /** the node's value */
-    V value;
+     
+    T0 t0;
+    
+    
+     
 
      
     /** the size of this node */
@@ -94,7 +106,7 @@ class FourColorNode<V> implements Element<V> {
 
     /** values for managing the node within the tree */
     byte height;
-    FourColorNode<V> left, right, parent;
+     FourColorNode <  T0>   left, right, parent;
 
     /** whether this node is consistent in the sorting order */
     int sorted = SORTED;
@@ -108,7 +120,7 @@ class FourColorNode<V> implements Element<V> {
      * @param parent the parent node in the tree, or <code>null</code> for the
      *      root node.
      */
-    public FourColorNode/**/(  byte color,    int size, V value, FourColorNode/**/<V> parent) {
+    public FourColorNode/**/(  byte color,    int size, T0 value,  FourColorNode <  T0>   parent) {
          
         assert(FourColorTree.colorAsIndex(color) >= 0 && FourColorTree.colorAsIndex(color) < 7);
         this.color = color;
@@ -116,7 +128,7 @@ class FourColorNode<V> implements Element<V> {
          
         this.size = size;
           
-        this.value = value;
+        this.t0 = value;
         this.height = 1;
         this.parent = parent;
 
@@ -133,16 +145,24 @@ class FourColorNode<V> implements Element<V> {
     /**
      * Get the value of this element.
      */
-    public V get() {
-        return value;
+    public T0 get() {
+        return t0;
     }
 
     /**
      * Set the value of this element.
      */
-    public void set(V value) {
-        this.value = value;
+    public void set(T0 value) {
+        this.t0 = value;
     }
+
+    /** access the node's values */
+     
+    public T0 get0() { return t0; }
+    public void set0(T0 value) { this.t0 = value; }
+    
+    
+     
 
     /**
      * Get the color of this element.
@@ -256,12 +276,12 @@ class FourColorNode<V> implements Element<V> {
         }
           out.append(colors.get(FourColorTree.colorAsIndex(color)));   
           out.append(" [").append(size).append("]");   
-        if(value != null) {
+        if(t0 != null) {
             out.append(": ");
-            if(value instanceof FourColorNode) {
+            if(t0 instanceof FourColorNode) {
                 out.append("<Node>");
             } else {
-                out.append(value);
+                out.append(t0);
             }
         }
         out.append("\n");
@@ -289,12 +309,12 @@ class FourColorNode<V> implements Element<V> {
     }
 
     /** {@inheritDoc} */
-    public Element<V> next() {
+    public Element<T0> next() {
         return FourColorTree.next(this);
     }
 
     /** {@inheritDoc} */
-    public Element<V> previous() {
+    public Element<T0> previous() {
         return FourColorTree.previous(this);
     }
 }

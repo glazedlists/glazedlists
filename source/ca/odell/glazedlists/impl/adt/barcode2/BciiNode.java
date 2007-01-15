@@ -24,7 +24,7 @@ import java.util.List;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-class BciiNode<V> implements Element<V> {
+class /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ implements Element<T0> {
 
     /** the number of elements of each color in this subtree */
     /*[ GENERATED_CODE_START
@@ -42,9 +42,15 @@ class BciiNode<V> implements Element<V> {
     byte color;
     /*[ COLORED_END ]*/
 
-
     /** the node's value */
-    V value;
+    /*[ GENERATED_CODE_START
+    forloop(`i', 0, VAR_LAST_TYPE_INDEX, `Ti(i) ti(i);
+    ')
+    GENERATED_CODE_END
+    EXAMPLE_START ]*/
+    T0 t0;
+    T1 t1;
+    /*[ EXAMPLE_END ]*/
 
     /*[ WIDE_NODES_START ]*/
     /** the size of this node */
@@ -53,7 +59,7 @@ class BciiNode<V> implements Element<V> {
 
     /** values for managing the node within the tree */
     byte height;
-    BciiNode<V> left, right, parent;
+    /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ left, right, parent;
 
     /** whether this node is consistent in the sorting order */
     int sorted = SORTED;
@@ -67,7 +73,7 @@ class BciiNode<V> implements Element<V> {
      * @param parent the parent node in the tree, or <code>null</code> for the
      *      root node.
      */
-    public BciiNode/**/(/*[ COLORED_START ]*/ byte color, /*[ COLORED_END ]*/ int size, V value, BciiNode/**/<V> parent) {
+    public BciiNode/**/(/*[ COLORED_START ]*/ byte color, /*[ COLORED_END ]*/ int size, T0 value, /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ parent) {
         /*[ COLORED_START ]*/
         assert(BciiTree.colorAsIndex(color) >= 0 && BciiTree.colorAsIndex(color) < 7);
         this.color = color;
@@ -75,7 +81,7 @@ class BciiNode<V> implements Element<V> {
         /*[ WIDE_NODES_START(assert(size == 1);) ]*/
         this.size = size;
         /*[ WIDE_NODES_END ]*/
-        this.value = value;
+        this.t0 = value;
         this.height = 1;
         this.parent = parent;
 
@@ -94,16 +100,25 @@ class BciiNode<V> implements Element<V> {
     /**
      * Get the value of this element.
      */
-    public V get() {
-        return value;
+    public T0 get() {
+        return t0;
     }
 
     /**
      * Set the value of this element.
      */
-    public void set(V value) {
-        this.value = value;
+    public void set(T0 value) {
+        this.t0 = value;
     }
+
+    /** access the node's values */
+    /*[ GENERATED_CODE_START
+    forloop(`i', 0, VAR_LAST_TYPE_INDEX, ``public T''i ``get''i``() { return t''i``; }
+    public void set''i``(T''i`` value) { this.t''i ``= value; }
+    '')
+    GENERATED_CODE_END
+    EXAMPLE_START ]*/
+    /*[ EXAMPLE_END ]*/
 
     /**
      * Get the color of this element.
@@ -223,12 +238,12 @@ class BciiNode<V> implements Element<V> {
         }
         /*[ COLORED_START ]*/ out.append(colors.get(BciiTree.colorAsIndex(color))); /*[ COLORED_END ]*/
         /*[ WIDE_NODES_START ]*/ out.append(" [").append(size).append("]"); /*[ WIDE_NODES_END ]*/
-        if(value != null) {
+        if(t0 != null) {
             out.append(": ");
-            if(value instanceof BciiNode) {
+            if(t0 instanceof BciiNode) {
                 out.append("<Node>");
             } else {
-                out.append(value);
+                out.append(t0);
             }
         }
         out.append("\n");
@@ -256,12 +271,12 @@ class BciiNode<V> implements Element<V> {
     }
 
     /** {@inheritDoc} */
-    public Element<V> next() {
+    public Element<T0> next() {
         return BciiTree.next(this);
     }
 
     /** {@inheritDoc} */
-    public Element<V> previous() {
+    public Element<T0> previous() {
         return BciiTree.previous(this);
     }
 }

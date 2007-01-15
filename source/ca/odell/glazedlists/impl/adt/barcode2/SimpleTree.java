@@ -51,6 +51,15 @@ import java.util.List;
    
 
 
+# multiple values
+
+
+
+
+
+
+
+
 
 */
 /*[ BEGIN_M4_JAVA ]*/   
@@ -83,12 +92,12 @@ import java.util.List;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class SimpleTree<V> {
+public class SimpleTree <  T0>   {
 
       
 
     /** the tree's root, or <code>null</code> for an empty tree */
-    private SimpleNode<V> root = null;
+    private  SimpleNode <  T0>   root = null;
 
     /**
      * a list to add all nodes to that must be removed from
@@ -96,21 +105,21 @@ public class SimpleTree<V> {
      * which allows us a chance to do rotations without losing our position
      * in the tree.
      */
-    private final List<SimpleNode<V>> zeroQueue = new ArrayList<SimpleNode<V>>();
+    private final List< SimpleNode <  T0>  > zeroQueue = new ArrayList< SimpleNode <  T0>  >();
 
     /**
      * The comparator to use when performing ordering operations on the tree.
      * Sometimes this tree will not be sorted, so in such situations this
      * comparator will not be used.
      */
-    private final Comparator<? super V> comparator;
+    private final Comparator<? super T0> comparator;
 
     /**
      * @param coder specifies the node colors
      * @param comparator the comparator to use when ordering values within the
      *      tree. If this tree is unsorted, use the one-argument constructor.
      */
-    public SimpleTree/**/(   Comparator<? super V> comparator) {
+    public SimpleTree/**/(   Comparator<? super T0> comparator) {
           
         if(comparator == null) throw new NullPointerException("Comparator cannot be null.");
 
@@ -127,7 +136,7 @@ public class SimpleTree<V> {
 
       
 
-    public Comparator<? super V> getComparator() {
+    public Comparator<? super T0> getComparator() {
         return comparator;
     }
 
@@ -138,17 +147,17 @@ public class SimpleTree<V> {
      * <p>This method is an hotspot, so its crucial that it run as efficiently
      * as possible.
      */
-    public Element<V> get(int index   ) {
+    public Element<T0> get(int index   ) {
         if(root == null) throw new IndexOutOfBoundsException();
 
         // go deep, looking for our node of interest
-        SimpleNode<V> node = root;
+         SimpleNode <  T0>   node = root;
         while(true) {
             assert(node != null);
             assert(index >= 0);
 
             // recurse on the left
-            SimpleNode<V> nodeLeft = node.left;
+             SimpleNode <  T0>   nodeLeft = node.left;
             int leftSize = nodeLeft != null ? nodeLeft. count1  : 0;
             if(index < leftSize) {
                 node = nodeLeft;
@@ -188,7 +197,7 @@ public class SimpleTree<V> {
      *      unless the size parameter is 0, in which case the result is always
      *      <code>null</code>.
      */
-    public Element<V> add(int index,    V value, int size) {
+    public Element<T0> add(int index,    T0 value, int size) {
         assert(index >= 0);
         assert(index <= size(  ));
         assert(size >= 0);
@@ -196,11 +205,11 @@ public class SimpleTree<V> {
         if(this.root == null) {
             if(index != 0) throw new IndexOutOfBoundsException();
 
-            this.root = new SimpleNode<V>(   size, value, null);
+            this.root = new  SimpleNode <  T0>  (   size, value, null);
             assert(valid());
             return this.root;
         } else {
-            SimpleNode<V> inserted = insertIntoSubtree(root, index,    value, size);
+             SimpleNode <  T0>   inserted = insertIntoSubtree(root, index,    value, size);
             assert(valid());
             return inserted;
         }
@@ -218,19 +227,19 @@ public class SimpleTree<V> {
      * @return the inserted node, or the modified node if this insert simply
      *      increased the size of an existing node.
      */
-    private SimpleNode<V> insertIntoSubtree(SimpleNode<V> parent, int index,    V value, int size) {
+    private  SimpleNode <  T0>   insertIntoSubtree( SimpleNode <  T0>   parent, int index,    T0 value, int size) {
         while(true) {
             assert(parent != null);
             assert(index >= 0);
 
             // figure out the layout of this node
-            SimpleNode<V> parentLeft = parent.left;
+             SimpleNode <  T0>   parentLeft = parent.left;
             int parentLeftSize = parentLeft != null ? parentLeft. count1  : 0;
             int parentRightStartIndex = parentLeftSize +  1  ;
 
             // the first thing we want to try is to merge this value into the
             // current node, since that's the cheapest thing to do:
-            if( false &&     value == parent.value && value != null) {
+            if( false &&     value == parent.t0 && value != null) {
                 if(index >= parentLeftSize && index <= parentRightStartIndex) {
                       
                     fixCountsThruRoot(parent,    size);
@@ -242,7 +251,7 @@ public class SimpleTree<V> {
             if(index <= parentLeftSize) {
                 // as a new left child
                 if(parentLeft == null) {
-                    SimpleNode<V> inserted = new SimpleNode<V>(   size, value, parent);
+                     SimpleNode <  T0>   inserted = new  SimpleNode <  T0>  (   size, value, parent);
                     parent.left = inserted;
                     fixCountsThruRoot(parent,    size);
                     fixHeightPostChange(parent, false);
@@ -262,8 +271,8 @@ public class SimpleTree<V> {
                   
                 fixCountsThruRoot(parent,    -parentRightHalfSize);
                 // insert as null first to make sure this doesn't get merged back
-                Element<V> inserted = insertIntoSubtree(parent, index,    null, parentRightHalfSize);
-                inserted.set(parent.value);
+                Element<T0> inserted = insertIntoSubtree(parent, index,    null, parentRightHalfSize);
+                inserted.set(parent.t0);
 
                 // recalculate parentRightStartIndex, since that should have
                 // changed by now. this will then go on to insert on the right
@@ -274,11 +283,11 @@ public class SimpleTree<V> {
             right: {
                 int parentSize = parent. count1 ;
                 assert(index <= parentSize);
-                SimpleNode<V> parentRight = parent.right;
+                 SimpleNode <  T0>   parentRight = parent.right;
 
                 // as a right child
                 if(parentRight == null) {
-                    SimpleNode<V> inserted = new SimpleNode<V>(   size, value, parent);
+                     SimpleNode <  T0>   inserted = new  SimpleNode <  T0>  (   size, value, parent);
                     parent.right = inserted;
                     fixCountsThruRoot(parent,    size);
                     fixHeightPostChange(parent, false);
@@ -304,15 +313,15 @@ public class SimpleTree<V> {
      *      unless the size parameter is 0, in which case the result is always
      *      <code>null</code>.
      */
-    public Element<V> addInSortedOrder(byte color, V value, int size) {
+    public Element<T0> addInSortedOrder(byte color, T0 value, int size) {
         assert(size >= 0);
 
         if(this.root == null) {
-            this.root = new SimpleNode<V>(   size, value, null);
+            this.root = new  SimpleNode <  T0>  (   size, value, null);
             assert(valid());
             return this.root;
         } else {
-            SimpleNode<V> inserted = insertIntoSubtreeInSortedOrder(root,    value, size);
+             SimpleNode <  T0>   inserted = insertIntoSubtreeInSortedOrder(root,    value, size);
             assert(valid());
             return inserted;
         }
@@ -326,7 +335,7 @@ public class SimpleTree<V> {
      * @return the inserted node, or the modified node if this insert simply
      *      increased the size of an existing node.
      */
-    private SimpleNode<V> insertIntoSubtreeInSortedOrder(SimpleNode<V> parent,    V value, int size) {
+    private  SimpleNode <  T0>   insertIntoSubtreeInSortedOrder( SimpleNode <  T0>   parent,    T0 value, int size) {
         while(true) {
             assert(parent != null);
 
@@ -334,21 +343,21 @@ public class SimpleTree<V> {
             // unsorted nodes in the tree. we just look for a neighbour (ie next)
             // that is sorted, and compare with that
             int sortSide;
-            for(SimpleNode<V> currentFollower = parent; true; currentFollower = next(currentFollower)) {
+            for( SimpleNode <  T0>   currentFollower = parent; true; currentFollower = next(currentFollower)) {
                 // we've hit the end of the list, assume the element is on the left side
                 if(currentFollower == null) {
                     sortSide = -1;
                     break;
                 // we've found a comparable node, use it
                 } else if(currentFollower.sorted == Element.SORTED) {
-                    sortSide = comparator.compare(value, currentFollower.value);
+                    sortSide = comparator.compare(value, currentFollower.t0);
                     break;
                 }
             }
 
             // the first thing we want to try is to merge this value into the
             // current node, since that's the cheapest thing to do:
-            if( false &&  sortSide == 0 &&    value == parent.value && value != null) {
+            if( false &&  sortSide == 0 &&    value == parent.t0 && value != null) {
                   
                 fixCountsThruRoot(parent,    size);
                 return parent;
@@ -360,11 +369,11 @@ public class SimpleTree<V> {
             insertOnLeft = insertOnLeft || sortSide == 0 && parent.left == null;
             insertOnLeft = insertOnLeft || sortSide == 0 && parent.right != null && parent.left.height < parent.right.height;
             if(insertOnLeft) {
-                SimpleNode<V> parentLeft = parent.left;
+                 SimpleNode <  T0>   parentLeft = parent.left;
 
                 // as a new left child
                 if(parentLeft == null) {
-                    SimpleNode<V> inserted = new SimpleNode<V>(   size, value, parent);
+                     SimpleNode <  T0>   inserted = new  SimpleNode <  T0>  (   size, value, parent);
                     parent.left = inserted;
                     fixCountsThruRoot(parent,    size);
                     fixHeightPostChange(parent, false);
@@ -376,13 +385,13 @@ public class SimpleTree<V> {
                     continue;
                 }
 
-            // ...or on the right
+                // ...or on the right
             } else {
-                SimpleNode<V> parentRight = parent.right;
+                 SimpleNode <  T0>   parentRight = parent.right;
 
                 // as a right child
                 if(parentRight == null) {
-                    SimpleNode<V> inserted = new SimpleNode<V>(   size, value, parent);
+                     SimpleNode <  T0>   inserted = new  SimpleNode <  T0>  (   size, value, parent);
                     parent.right = inserted;
                     fixCountsThruRoot(parent,    size);
                     fixHeightPostChange(parent, false);
@@ -401,7 +410,7 @@ public class SimpleTree<V> {
      * to the root. The counts of the specified color are adjusted by delta
      * (which may be positive or negative).
      */
-    private final void fixCountsThruRoot(SimpleNode<V> node,    int delta) {
+    private final void fixCountsThruRoot( SimpleNode <  T0>   node,    int delta) {
          
         for( ; node != null; node = node.parent) node.count1 += delta;
         
@@ -425,7 +434,7 @@ public class SimpleTree<V> {
      *      the opposite side of the tree, whereas on an insert we only delete
      *      as far as necessary.
      */
-    private final void fixHeightPostChange(SimpleNode<V> node, boolean allTheWayToRoot) {
+    private final void fixHeightPostChange( SimpleNode <  T0>   node, boolean allTheWayToRoot) {
 
         // update the height
         for(; node != null; node = node.parent) {
@@ -478,11 +487,11 @@ public class SimpleTree<V> {
      *
      * @return the new root of the subtree
      */
-    private final SimpleNode<V> rotateLeft(SimpleNode<V> subtreeRoot) {
+    private final  SimpleNode <  T0>   rotateLeft( SimpleNode <  T0>   subtreeRoot) {
         assert(subtreeRoot.left != null);
         // subtreeRoot is D
         // newSubtreeRoot is B
-        SimpleNode<V> newSubtreeRoot = subtreeRoot.left;
+         SimpleNode <  T0>   newSubtreeRoot = subtreeRoot.left;
 
         // modify the links between nodes
         // attach C as a child of to D
@@ -515,11 +524,11 @@ public class SimpleTree<V> {
 
         return newSubtreeRoot;
     }
-    private final SimpleNode<V> rotateRight(SimpleNode<V> subtreeRoot) {
+    private final  SimpleNode <  T0>   rotateRight( SimpleNode <  T0>   subtreeRoot) {
         assert(subtreeRoot.right != null);
         // subtreeRoot is D
         // newSubtreeRoot is B
-        SimpleNode<V> newSubtreeRoot = subtreeRoot.right;
+         SimpleNode <  T0>   newSubtreeRoot = subtreeRoot.right;
 
         // modify the links between nodes
         // attach C as a child of to D
@@ -556,8 +565,8 @@ public class SimpleTree<V> {
     /**
      * Remove the specified element from the tree outright.
      */
-    public void remove(Element<V> element) {
-        SimpleNode<V> node = (SimpleNode<V>)element;
+    public void remove(Element<T0> element) {
+         SimpleNode <  T0>   node = ( SimpleNode <  T0>  )element;
           
         assert(root != null);
 
@@ -600,7 +609,7 @@ public class SimpleTree<V> {
      */
     private void drainZeroQueue() {
         for(int i = 0, size = zeroQueue.size(); i < size; i++) {
-            SimpleNode<V> node = zeroQueue.get(i);
+             SimpleNode <  T0>   node = zeroQueue.get(i);
               
 
             if(node.right == null) {
@@ -619,13 +628,13 @@ public class SimpleTree<V> {
      * remove any nodes of size zero, that's up to the caller to do after by
      * removing all nodes in the zeroQueue from the tree.
      */
-    private void removeFromSubtree(SimpleNode<V> node, int index,    int size) {
+    private void removeFromSubtree( SimpleNode <  T0>   node, int index,    int size) {
         while(size > 0) {
             assert(node != null);
             assert(index >= 0);
 
             // figure out the layout of this node
-            SimpleNode<V> nodeLeft = node.left;
+             SimpleNode <  T0>   nodeLeft = node.left;
             int leftSize = nodeLeft != null ? nodeLeft. count1  : 0;
 
             // delete on the left first
@@ -637,7 +646,7 @@ public class SimpleTree<V> {
                     removeFromSubtree(nodeLeft, index,    toRemove);
                     size -= toRemove;
                     leftSize -= toRemove;
-                // we can do our full delete on the left side
+                    // we can do our full delete on the left side
                 } else {
                     node = nodeLeft;
                     continue;
@@ -672,19 +681,19 @@ public class SimpleTree<V> {
      * the replacement node should have its height set first before this method
      * is called.
      */
-    private void replaceChild(SimpleNode<V> node, SimpleNode<V> replacement) {
-        SimpleNode<V> nodeParent = node.parent;
+    private void replaceChild( SimpleNode <  T0>   node,  SimpleNode <  T0>   replacement) {
+         SimpleNode <  T0>   nodeParent = node.parent;
 
         // replace the root
         if(nodeParent == null) {
             assert(node == root);
             root = replacement;
 
-        // replace on the left
+            // replace on the left
         } else if(nodeParent.left == node) {
             nodeParent.left = replacement;
 
-        // replace on the right
+            // replace on the right
         } else if(nodeParent.right == node) {
             nodeParent.right = replacement;
         }
@@ -706,13 +715,13 @@ public class SimpleTree<V> {
      *
      * @return the replacement node
      */
-    private SimpleNode<V> replaceEmptyNodeWithChild(SimpleNode<V> toReplace) {
+    private  SimpleNode <  T0>   replaceEmptyNodeWithChild( SimpleNode <  T0>   toReplace) {
           
         assert(toReplace.left != null);
         assert(toReplace.right != null);
 
         // find the rightmost child on the leftside
-        SimpleNode<V> replacement = toReplace.left;
+         SimpleNode <  T0>   replacement = toReplace.left;
         while(replacement.right != null) {
             replacement = replacement.right;
         }
@@ -747,7 +756,7 @@ public class SimpleTree<V> {
      * @return the element that was updated. This is non-null unless the size
      *      parameter is 0, in which case the result is always <code>null</code>.
      */
-    public Element<V> set(int index,    V value, int size) {
+    public Element<T0> set(int index,    T0 value, int size) {
         remove(index,    size);
         return add(index,    value, size);
     }
@@ -769,8 +778,8 @@ public class SimpleTree<V> {
      * <p>This method is an hotspot, so its crucial that it run as efficiently
      * as possible.
      */
-    public int indexOfNode(Element<V> element, byte colorsOut) {
-        SimpleNode<V> node = (SimpleNode<V>)element;
+    public int indexOfNode(Element<T0> element, byte colorsOut) {
+         SimpleNode <  T0>   node = ( SimpleNode <  T0>  )element;
 
         // count all elements left of this node
         int index = node.left != null ? node.left. count1  : 0;
@@ -798,12 +807,12 @@ public class SimpleTree<V> {
      *     element x in this tree such that
      *     <code>SimpleTree.getComparator().compare(x, element) == 0</code>.
      */
-    public int indexOfValue(V element, boolean firstIndex, boolean simulated, byte colorsOut) {
+    public int indexOfValue(T0 element, boolean firstIndex, boolean simulated, byte colorsOut) {
         int result = 0;
         boolean found = false;
 
         // go deep, looking for our node of interest
-        SimpleNode<V> node = root;
+         SimpleNode <  T0>   node = root;
         while(true) {
             if(node == null) {
                 if(found && !firstIndex) result--;
@@ -819,7 +828,7 @@ public class SimpleTree<V> {
                 node = node.left;
                 continue;
             }
-            SimpleNode<V> nodeLeft = node.left;
+             SimpleNode <  T0>   nodeLeft = node.left;
 
             // the result is in the centre
             if(comparison == 0) {
@@ -851,20 +860,20 @@ public class SimpleTree<V> {
         int result = 0;
 
         // go deep, looking for our node of interest
-        SimpleNode<V> node = root;
+         SimpleNode <  T0>   node = root;
         while(true) {
             assert(node != null);
             assert(index >= 0);
 
             // figure out the layout of this node
-            SimpleNode<V> nodeLeft = node.left;
+             SimpleNode <  T0>   nodeLeft = node.left;
             int leftSize = nodeLeft != null ? nodeLeft. count1  : 0;
 
             // recurse on the left
             if(index < leftSize) {
                 node = nodeLeft;
                 continue;
-            // increment by the count on the left
+                // increment by the count on the left
             } else {
                 if(nodeLeft != null) result += nodeLeft. count1 ;
                 index -= leftSize;
@@ -877,13 +886,13 @@ public class SimpleTree<V> {
 
                 if( true ) {
                     result += index;
-                // we're on a node of a different color, return the previous node of the requested color
+                    // we're on a node of a different color, return the previous node of the requested color
                 } else {
                     result -= 1;
                 }
                 return result;
 
-            // increment by the count in the centre
+                // increment by the count in the centre
             } else {
                 result +=  1  ;
                 index -= size;
@@ -919,18 +928,18 @@ public class SimpleTree<V> {
     /**
      * Find the next node in the tree, working from left to right.
      */
-    public static <V> SimpleNode<V> next(SimpleNode<V> node) {
+    public static  <  T0>    SimpleNode <  T0>   next( SimpleNode <  T0>   node) {
         // if this node has a right subtree, it's the leftmost node in that subtree
         if(node.right != null) {
-            SimpleNode<V> child = node.right;
+             SimpleNode <  T0>   child = node.right;
             while(child.left != null) {
                 child = child.left;
             }
             return child;
 
-        // otherwise its the nearest ancestor where I'm in the left subtree
+            // otherwise its the nearest ancestor where I'm in the left subtree
         } else {
-            SimpleNode<V> ancestor = node;
+             SimpleNode <  T0>   ancestor = node;
             while(ancestor.parent != null && ancestor.parent.right == ancestor) {
                 ancestor = ancestor.parent;
             }
@@ -942,18 +951,18 @@ public class SimpleTree<V> {
     /**
      * Find the previous node in the tree, working from right to left.
      */
-    public static <V> SimpleNode<V> previous(SimpleNode<V> node) {
+    public static  <  T0>    SimpleNode <  T0>   previous( SimpleNode <  T0>   node) {
         // if this node has a left subtree, it's the rightmost node in that subtree
         if(node.left != null) {
-            SimpleNode<V> child = node.left;
+             SimpleNode <  T0>   child = node.left;
             while(child.right != null) {
                 child = child.right;
             }
             return child;
 
-        // otherwise its the nearest ancestor where I'm in the right subtree
+            // otherwise its the nearest ancestor where I'm in the right subtree
         } else {
-            SimpleNode<V> ancestor = node;
+             SimpleNode <  T0>   ancestor = node;
             while(ancestor.parent != null && ancestor.parent.left == ancestor) {
                 ancestor = ancestor.parent;
             }
@@ -964,10 +973,10 @@ public class SimpleTree<V> {
     /**
      * Find the leftmost child in this subtree.
      */
-    SimpleNode<V> firstNode() {
+     SimpleNode <  T0>   firstNode() {
         if(root == null) return null;
 
-        SimpleNode<V> result = root;
+         SimpleNode <  T0>   result = root;
         while(result.left != null) {
             result = result.left;
         }
@@ -979,7 +988,7 @@ public class SimpleTree<V> {
      */
     private boolean valid() {
         // walk through all nodes in the tree, looking for something invalid
-        for(SimpleNode<V> node = firstNode(); node != null; node = next(node)) {
+        for( SimpleNode <  T0>   node = firstNode(); node != null; node = next(node)) {
             // sizes (counts) are valid
 
              

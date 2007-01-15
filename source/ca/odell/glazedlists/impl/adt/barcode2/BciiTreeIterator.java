@@ -22,7 +22,7 @@ import java.util.NoSuchElementException;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class BciiTreeIterator<V> {
+public class BciiTreeIterator/*[ TYPELIST_START ]*/ <T0,T1> /*[ TYPELIST_END ]*/ {
 
     /*[ GENERATED_CODE_START
     forloop(`i', 0, VAR_LAST_COLOR_INDEX, `int counti(i);
@@ -34,11 +34,11 @@ public class BciiTreeIterator<V> {
     int count4;
     /*[ EXAMPLE_END ]*/
 
-    private BciiTree<V> tree;
-    private BciiNode<V> node;
+    private BciiTree/*[ TYPELIST_START ]*/ <T0,T1> /*[ TYPELIST_END ]*/ tree;
+    private BciiNode/*[ TYPELIST_START ]*/ <T0,T1> /*[ TYPELIST_END ]*/ node;
     private int index;
 
-    public BciiTreeIterator/**/(BciiTree<V> tree) {
+    public BciiTreeIterator/**/(BciiTree/*[ TYPELIST_START ]*/ <T0,T1> /*[ TYPELIST_END ]*/ tree) {
         this(tree, 0, (byte)0);
     }
 
@@ -49,13 +49,13 @@ public class BciiTreeIterator<V> {
      * @param nextIndex the index to be returned after calling {@link #next next()}.
      * @param nextIndexColors the colors to interpret nextIndex in terms of
      */
-    public BciiTreeIterator/**/(BciiTree<V> tree, int nextIndex, byte nextIndexColors) {
+    public BciiTreeIterator/**/(BciiTree/*[ TYPELIST_START ]*/ <T0,T1> /*[ TYPELIST_END ]*/ tree, int nextIndex, byte nextIndexColors) {
         this.tree = tree;
 
         // if the start is, we need to find the node in the tree
         if(nextIndex != 0) {
             int currentIndex = nextIndex - 1;
-            this.node = (BciiNode<V>)tree.get(currentIndex /*[ COLORED_START ]*/, nextIndexColors /*[ COLORED_END ]*/);
+            this.node = (/*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/)tree.get(currentIndex /*[ COLORED_START ]*/, nextIndexColors /*[ COLORED_END ]*/);
 
             // find the counts
             /*[ GENERATED_CODE_START
@@ -93,8 +93,8 @@ public class BciiTreeIterator<V> {
      * The iterators will be backed by the same tree but maintain
      * separate cursors into the tree.
      */
-    public BciiTreeIterator<V> copy() {
-        BciiTreeIterator<V> result = new BciiTreeIterator<V>(tree);
+    public BciiTreeIterator/*[ TYPELIST_START ]*/ <T0,T1> /*[ TYPELIST_END ]*/ copy() {
+        BciiTreeIterator/*[ TYPELIST_START ]*/ <T0,T1> /*[ TYPELIST_END ]*/ result = new BciiTreeIterator/*[ TYPELIST_START ]*/ <T0,T1> /*[ TYPELIST_END ]*/(tree);
 
         /*[ GENERATED_CODE_START
         forloop(`i', 0, VAR_LAST_COLOR_INDEX, `result.counti(i) = this.counti(i);
@@ -306,11 +306,11 @@ public class BciiTreeIterator<V> {
         return nodeStartIndex(/*[ COLORED_START ]*/ colors /*[ COLORED_END ]*/)
                 + nodeSize(/*[ COLORED_START ]*/ colors /*[ COLORED_END ]*/);
     }
-    public V value() {
+    public T0 value() {
         if(node == null) throw new IllegalStateException();
         return node.get();
     }
-    public Element<V> node() {
+    public Element<T0> node() {
         if(node == null) throw new IllegalStateException();
         return node;
     }

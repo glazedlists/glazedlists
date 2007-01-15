@@ -44,3 +44,12 @@ m4_ifelse(VAR_WIDE_NODES,false,`
    m4_define(REFRESH_COUNTS,$1.refreshCounts(); `EXAMPLE_START')
 ')
 
+# multiple values
+m4_define(`VAR_LAST_TYPE_INDEX', `m4_eval(VAR_TYPE_COUNT-1)')
+m4_define(`Ti', `T'$1)
+m4_define(`ti', `t'$1)
+m4_define(NODENAME_START, `BciiNode 'TYPELIST_START)
+m4_define(NODENAME_END, TYPELIST_END)
+m4_define(TYPELIST_START, `<'forloop(`i', 0, VAR_LAST_TYPE_INDEX, ` COMMA_ONE_PLUS(i) Ti(i)')`> M4_COMMENT(')
+m4_define(TYPELIST_END, `)')
+m4_define(COMMA_ONE_PLUS, `m4_ifelse($1,0,,COMMAPLACEHOLDER)')
