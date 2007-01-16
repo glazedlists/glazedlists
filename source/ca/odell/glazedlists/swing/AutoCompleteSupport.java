@@ -1679,11 +1679,19 @@ public final class AutoCompleteSupport<E> {
                 updateFilter();
 
                 // reregister all ActionListeners and then notify them due to the ENTER key
-                registerAllActionListeners(comboBox, this.actionListeners);
-                comboBox.actionPerformed(new ActionEvent(e.getSource(), e.getID(), null));
+
+                // Note: We *must* check for a null ActionListener[]. The reason
+                // is that it is possible to receive a keyReleased() callback
+                // *without* a corresponding keyPressed() callback! It occurs
+                // when focus is transferred away from the ComboBoxEditor and
+                // then the ENTER key transfers focus back to the ComboBoxEditor.
+                if (actionListeners != null) {
+                    registerAllActionListeners(comboBox, actionListeners);
+                    comboBox.actionPerformed(new ActionEvent(e.getSource(), e.getID(), null));
+                }
 
                 // null out our own reference to the ActionListeners
-                this.actionListeners = null;
+                actionListeners = null;
 
                 // reenable Document changes once more
                 doNotChangeDocument = false;
