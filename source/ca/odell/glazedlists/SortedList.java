@@ -242,12 +242,12 @@ public final class SortedList<E> extends TransformedList<E,E> {
                 Element sortedNode = unsortedNode.get();
                 sortedNode.setSorted(Element.PENDING);
                 updateNodes.add(sortedNode);
-                previousValues.add(listChanges.getPreviousValue());
+                previousValues.add(listChanges.getOldValue());
 
             // on delete, delete the index and sorted node
             } else if(changeType == ListEvent.DELETE) {
                 Element<Element> unsortedNode = unsorted.get(unsortedIndex);
-                E deleted = listChanges.getPreviousValue();
+                E deleted = listChanges.getOldValue();
                 unsorted.remove(unsortedNode);
                 int deleteSortedIndex = deleteByUnsortedNode(unsortedNode);
                 updates.elementDeleted(deleteSortedIndex, deleted);

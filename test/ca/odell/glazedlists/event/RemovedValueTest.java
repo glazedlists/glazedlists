@@ -60,7 +60,7 @@ public class RemovedValueTest extends TestCase {
             while(listChanges.next()) {
                 int type = listChanges.getType();
                 if(type == ListEvent.DELETE) {
-                    deleteLog.add(deltasListEvent.getPreviousValue());
+                    deleteLog.add(deltasListEvent.getOldValue());
                 }
             }
         }
@@ -87,11 +87,15 @@ public class RemovedValueTest extends TestCase {
                 int type = listChanges.getType();
                 int index = listChanges.getIndex();
                 if(type == ListEvent.INSERT) {
-                    sourceValues.add(index, source.get(index));
-                    updates.addInsert(index);
+                    // TODO(jessewilson): use updates.getNewValue() instead here
+                    E newValue = source.get(index);
+                    sourceValues.add(index, newValue);
+                    updates.elementInserted(index, newValue);
                 } else if(type == ListEvent.UPDATE) {
-                    sourceValues.set(index, source.get(index));
-                    updates.addUpdate(index);
+                    // TODO(jessewilson): use updates.getNewValue() instead here
+                    E newValue = source.get(index);
+                    E oldValue = sourceValues.set(index, newValue);
+                    updates.elementUpdated(index, oldValue, newValue);
                 } else if(type == ListEvent.DELETE) {
                     E deleted = sourceValues.remove(index);
                     updates.elementDeleted(index, deleted);

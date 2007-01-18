@@ -158,7 +158,7 @@ public class ObservableElementList<E> extends TransformedList<E, E> {
             // unregister a listener on the deleted object
             } else if (changeType == ListEvent.DELETE) {
                 // try to get the previous value through the ListEvent
-                E deleted = listChanges.getPreviousValue();
+                E deleted = listChanges.getOldValue();
                 E deletedElementFromPrivateCopy = this.observedElements.remove(changeIndex);
 
                 // if the ListEvent could give us the previous value, use the value from our private copy of the source
@@ -172,7 +172,7 @@ public class ObservableElementList<E> extends TransformedList<E, E> {
 
             // register/unregister listeners if the value at the changeIndex is now a different object
             } else if (changeType == ListEvent.UPDATE) {
-                E previousValue = listChanges.getPreviousValue();
+                E previousValue = listChanges.getOldValue();
 
                 // if the ListEvent could give us the previous value, use the value from our private copy of the source
                 if (previousValue == ListEvent.UNKNOWN_VALUE)

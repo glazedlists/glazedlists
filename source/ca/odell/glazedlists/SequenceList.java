@@ -213,29 +213,33 @@ public final class SequenceList<E> extends TransformedList<E,E> {
                 final E previousSequenceValue = getPreviousSequenceValue(value);
                 final E nextSequenceValue = getNextSequenceValue(value);
 
-                sequence.add(previousSequenceValue);
-                sequence.add(nextSequenceValue);
-                updates.addInsert(0);
-                updates.addInsert(1);
+                sequence.add(0, previousSequenceValue);
+                updates.elementInserted(0, previousSequenceValue);
+                sequence.add(1, nextSequenceValue);
+                updates.elementInserted(1, nextSequenceValue);
             }
 
             // add the necessary leading sequence values
             final E firstSourceValue = source.get(0);
             while (comparator.compare(firstSourceValue, get(0)) == -1) {
-                updates.addInsert(0);
-                sequence.add(0, sequencer.previous(get(0)));
+                E element = sequencer.previous(get(0));
+                sequence.add(0, element);
+                updates.elementInserted(0, element);
             }
 
             // remove the unnecessary leading sequence values
             while (comparator.compare(get(1), firstSourceValue) == -1) {
-                updates.elementDeleted(0, sequence.remove(0));
+                E oldValue = sequence.remove(0);
+                updates.elementDeleted(0, oldValue);
             }
 
             // add the necessary trailing sequence values
             final E lastSourceValue = source.get(source.size()-1);
             while (comparator.compare(lastSourceValue, get(size()-1)) == 1) {
-                updates.addInsert(size());
-                sequence.add(sequencer.next(get(size()-1)));
+                E element = sequencer.next(get(size() - 1));
+                int index = size();
+                sequence.add(index, element);
+                updates.elementInserted(index, element);
             }
 
             // remove the unnecessary trailing sequence values

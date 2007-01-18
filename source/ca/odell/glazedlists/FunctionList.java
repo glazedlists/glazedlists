@@ -262,23 +262,25 @@ public final class FunctionList<S, E> extends TransformedList<S, E> {
                 final int changeType = listChanges.getType();
 
                 if (changeType == ListEvent.INSERT) {
-                    final S inserted = source.get(changeIndex);
-                    sourceElements.add(changeIndex, inserted);
-                    mappedElements.add(changeIndex, forward(inserted));
-                    updates.addInsert(changeIndex);
+                    final S newValue = source.get(changeIndex);
+                    final E newValueTransformed = forward(newValue);
+                    sourceElements.add(changeIndex, newValue);
+                    mappedElements.add(changeIndex, newValueTransformed);
+                    updates.elementInserted(changeIndex, newValueTransformed);
 
                 } else if (changeType == ListEvent.UPDATE) {
-                    final E replaced = get(changeIndex);
-                    final S updated = source.get(changeIndex);
-                    sourceElements.set(changeIndex, updated);
-                    mappedElements.set(changeIndex, forward(replaced, updated));
-                    updates.elementUpdated(changeIndex, replaced);
+                    final E oldValueTransformed = get(changeIndex);
+                    final S newValue = source.get(changeIndex);
+                    final E newValueTransformed = forward(oldValueTransformed, newValue);
+                    sourceElements.set(changeIndex, newValue);
+                    mappedElements.set(changeIndex, newValueTransformed);
+                    updates.elementUpdated(changeIndex, oldValueTransformed, newValueTransformed);
 
                 } else if (changeType == ListEvent.DELETE) {
-                    final S deletedSource = sourceElements.remove(changeIndex);
-                    final E deletedTransform = mappedElements.remove(changeIndex);
-                    forward.dispose(deletedSource, deletedTransform);
-                    updates.elementDeleted(changeIndex, deletedTransform);
+                    final S oldValue = sourceElements.remove(changeIndex);
+                    final E oldValueTransformed = mappedElements.remove(changeIndex);
+                    forward.dispose(oldValue, oldValueTransformed);
+                    updates.elementDeleted(changeIndex, oldValueTransformed);
                 }
             }
         }

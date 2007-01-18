@@ -171,18 +171,28 @@ public class ListConsistencyListener<E> {
 
                     // verify the index is small enough, and adjust the size
                     if(changeType == ListEvent.INSERT) {
-                        expected.add(changeIndex, source.get(changeIndex));
+                        E inserted = source.get(changeIndex);
+                        expected.add(changeIndex, inserted);
+                        if(previousElementTracked) {
+                            Object reportedNew = listChanges.getNewValue();
+                            // TODO(jessewilson):
+                            // assertTrue(inserted == reportedNew);
+                        }
                     } else if(changeType == ListEvent.DELETE) {
                         Object removed = expected.remove(changeIndex);
                         if(previousElementTracked) {
-                            Object reportedRemoved = listChanges.getPreviousValue();
+                            Object reportedRemoved = listChanges.getOldValue();
                             assertTrue(removed == reportedRemoved);
                         }
                     } else if(changeType == ListEvent.UPDATE) {
-                        Object replaced = expected.set(changeIndex, source.get(changeIndex));
+                        E updated = source.get(changeIndex);
+                        E replaced = expected.set(changeIndex, updated);
                         if(previousElementTracked) {
-                            Object reportedReplaced = listChanges.getPreviousValue();
+                            Object reportedReplaced = listChanges.getOldValue();
                             assertTrue(replaced == reportedReplaced);
+                            // TODO(jessewilson):
+                            // Object reportedNew = listChanges.getNewValue();
+                            // assertTrue(updated == reportedNew);
                         }
                     }
                 }

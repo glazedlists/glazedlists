@@ -142,6 +142,36 @@ public final class ListEventAssembler<E> {
     }
 
     /**
+     * Add to the current ListEvent the insert of the element at
+     * the specified index, with the specified previous value.
+     */
+    public void elementInserted(int index, E newValue) {
+        delegate.elementInserted(index, newValue);
+    }
+    /**
+     * Add to the current ListEvent the update of the element at the specified
+     * index, with the specified previous value.
+     */
+    public void elementUpdated(int index, E oldValue, E newValue) {
+        delegate.elementUpdated(index, oldValue, newValue);
+    }
+    /**
+     * Add to the current ListEvent the removal of the element at the specified
+     * index, with the specified previous value.
+     */
+    public void elementDeleted(int index, E oldValue) {
+        delegate.elementDeleted(index, oldValue);
+    }
+
+    /**
+     * @deprecated replaced with {@link #elementUpdated(int, Object, Object)}.
+     */
+    public void elementUpdated(int index, E oldValue) {
+        elementUpdated(index, oldValue, (E)ListEvent.UNKNOWN_VALUE);
+    }
+
+
+    /**
      * Adds a block of changes to the set of list changes. The change block
      * allows a range of changes to be grouped together for efficiency.
      *
@@ -186,20 +216,6 @@ public final class ListEventAssembler<E> {
      */
     public void addDelete(int startIndex, int endIndex) {
         addChange(ListEvent.DELETE, startIndex, endIndex);
-    }
-    /**
-     * Add to the current ListEvent the removal of the element at the specified
-     * index, with the specified previous value.
-     */
-    public void elementDeleted(int index, E removedValue) {
-        delegate.elementDeleted(index, removedValue);
-    }
-    /**
-     * Add to the current ListEvent the update of the element at the specified
-     * index, with the specified previous value.
-     */
-    public void elementUpdated(int index, E replacedValue) {
-        delegate.elementUpdated(index, replacedValue);
     }
     /**
      * Convenience method for appending a range of updates.
@@ -383,12 +399,17 @@ public final class ListEventAssembler<E> {
         /**
          * Adds a block describing a deleted element.
          */
-        public abstract void elementDeleted(int index, E removedValue);
+        public abstract void elementDeleted(int index, E oldValue);
 
         /**
          * Adds a block describing a replaced element.
          */
-        public abstract void elementUpdated(int index, E replacedValue);
+        public abstract void elementUpdated(int index, E oldValue, E newValue);
+
+        /**
+         * Adds a block describing an intserted element.
+         */
+        public abstract void elementInserted(int index, E newValue);
 
         /**
          * @return <tt>true</tt> if the current atomic change to this list change
@@ -439,13 +460,14 @@ public final class ListEventAssembler<E> {
                 while(listChanges.next()) {
                     int type = listChanges.getType();
                     int index = listChanges.getIndex();
-                    E previous = (E) listChanges.getPreviousValue();
+                    E oldValue = (E) listChanges.getOldValue();
+                    E newValue = (E) listChanges.getNewValue();
                     if(type == ListEvent.INSERT) {
-                        addChange(ListEvent.INSERT, index, index);
+                        elementInserted(index, newValue);
                     } else if(type == ListEvent.UPDATE) {
-                        elementUpdated(index, previous);
+                        elementUpdated(index, oldValue, newValue);
                     } else if(type == ListEvent.DELETE) {
-                        elementDeleted(index, previous);
+                        elementDeleted(index, oldValue);
                     }
                 }
                 listChanges.reset();
@@ -509,13 +531,18 @@ public final class ListEventAssembler<E> {
         }
 
         /** {@inheritDoc} */
-        public void elementDeleted(int index, Object removedValue) {
-            addChange(ListEvent.DELETE, index, index);
+        public void elementInserted(int index, E newValue) {
+            addChange(ListEvent.INSERT, index, index);
         }
 
         /** {@inheritDoc} */
-        public void elementUpdated(int index, E replacedValue) {
+        public void elementUpdated(int index, E oldValue, E newValue) {
             addChange(ListEvent.UPDATE, index, index);
+        }
+
+        /** {@inheritDoc} */
+        public void elementDeleted(int index, E oldValue) {
+            addChange(ListEvent.DELETE, index, index);
         }
 
         public BarcodeListDeltas getListDeltas() {
@@ -592,30 +619,18 @@ public final class ListEventAssembler<E> {
             }
         }
 
+
         /** {@inheritDoc} */
-        public void elementDeleted(int index, E removedValue) {
-            // try the linear holder first
-            if(useListBlocksLinear) {
-                boolean success = blockSequence.addChange(ListEvent.DELETE, index, index + 1, removedValue);
-                if(success) {
-                    return;
-
-                // convert from linear to tree4deltas
-                } else {
-                    listDeltas.addAll(blockSequence);
-                    useListBlocksLinear = false;
-                }
-            }
-
-            // try the good old reliable deltas 2
-            listDeltas.targetDelete(index, index + 1, removedValue);
+        public void elementInserted(int index, E newValue) {
+            // TODO(jessewilson):
+            addChange(ListEvent.INSERT, index, index);
         }
 
         /** {@inheritDoc} */
-        public void elementUpdated(int index, E replacedValue) {
+        public void elementUpdated(int index, E oldValue, E newValue) {
             // try the linear holder first
             if(useListBlocksLinear) {
-                boolean success = blockSequence.addChange(ListEvent.UPDATE, index, index + 1, replacedValue);
+                boolean success = blockSequence.addChange(ListEvent.UPDATE, index, index + 1, oldValue);
                 if(success) {
                     return;
 
@@ -627,7 +642,26 @@ public final class ListEventAssembler<E> {
             }
 
             // try the good old reliable deltas 2
-            listDeltas.targetUpdate(index, index + 1, replacedValue);
+            listDeltas.targetUpdate(index, index + 1, oldValue);
+        }
+
+        /** {@inheritDoc} */
+        public void elementDeleted(int index, E oldValue) {
+            // try the linear holder first
+            if(useListBlocksLinear) {
+                boolean success = blockSequence.addChange(ListEvent.DELETE, index, index + 1, oldValue);
+                if(success) {
+                    return;
+
+                    // convert from linear to tree4deltas
+                } else {
+                    listDeltas.addAll(blockSequence);
+                    useListBlocksLinear = false;
+                }
+            }
+
+            // try the good old reliable deltas 2
+            listDeltas.targetDelete(index, index + 1, oldValue);
         }
 
         public boolean getUseListBlocksLinear() {
@@ -712,13 +746,18 @@ public final class ListEventAssembler<E> {
         }
 
         /** {@inheritDoc} */
-        public void elementDeleted(int index, Object removedValue) {
-            addChange(ListEvent.DELETE, index, index);
+        public void elementInserted(int index, E newValue) {
+            addChange(ListEvent.INSERT, index, index);
         }
 
         /** {@inheritDoc} */
-        public void elementUpdated(int index, Object replacedValue) {
+        public void elementUpdated(int index, E oldValue, E newValue) {
             addChange(ListEvent.UPDATE, index, index);
+        }
+
+        /** {@inheritDoc} */
+        public void elementDeleted(int index, E oldValue) {
+            addChange(ListEvent.DELETE, index, index);
         }
 
         /** {@inheritDoc} */

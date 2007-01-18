@@ -71,7 +71,8 @@ public class RangeList<E> extends TransformedList<E, E> {
         while(listChanges.next()) {
             int changeType = listChanges.getType();
             int changeIndex = listChanges.getIndex();
-            E previous = listChanges.getPreviousValue();
+            E oldValue = listChanges.getOldValue();
+            E newValue = listChanges.getNewValue();
 
             if(changeType == ListEvent.DELETE) {
                 if(changeIndex < currentStartIndex) {
@@ -79,7 +80,7 @@ public class RangeList<E> extends TransformedList<E, E> {
                     currentEndIndex--;
                 } else if(changeIndex < currentEndIndex) {
                     currentEndIndex--;
-                    updates.elementDeleted(changeIndex - currentStartIndex, previous);
+                    updates.elementDeleted(changeIndex - currentStartIndex, oldValue);
                 }
             } else if(changeType == ListEvent.INSERT) {
                 if(changeIndex < currentStartIndex) {
@@ -87,11 +88,11 @@ public class RangeList<E> extends TransformedList<E, E> {
                     currentEndIndex++;
                 } else if(changeIndex < currentEndIndex) {
                     currentEndIndex++;
-                    updates.addInsert(changeIndex - currentStartIndex);
+                    updates.elementInserted(changeIndex - currentStartIndex, newValue);
                 }
             } else if(changeType == ListEvent.UPDATE) {
                 if(changeIndex >= currentStartIndex && changeIndex < currentEndIndex) {
-                    updates.elementUpdated(changeIndex - currentStartIndex, previous);
+                    updates.elementUpdated(changeIndex - currentStartIndex, oldValue, newValue);
                 }
             }
         }

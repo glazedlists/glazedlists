@@ -99,12 +99,17 @@ class Tree4DeltasListEvent<E> extends ListEvent<E> {
         }
     }
 
-    public E getPreviousValue() {
+    public E getOldValue() {
         if(linearIterator != null) {
             return (E)linearIterator.getPreviousValue();
         } else {
             return (E)deltasIterator.getPreviousValue();
         }
+    }
+
+    public E getNewValue() {
+        // TODO(jessewilson):
+        return (E)ListEvent.UNKNOWN_VALUE;
     }
 
     List getBlocks() {

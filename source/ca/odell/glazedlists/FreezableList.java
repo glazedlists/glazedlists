@@ -128,8 +128,8 @@ public final class FreezableList<E> extends TransformedList<E, E> {
         for(int i = 0, size = frozenData.size(); i < size; i++) {
             updates.elementDeleted(0, frozenData.get(i));
         }
-        if(source.size() > 0) {
-            updates.addInsert(0, source.size() - 1);
+        for(int i = 0, size = source.size(); i < size; i++) {
+            updates.elementInserted(0, source.get(i));
         }
 
         // we don't need our frozen data anymore

@@ -328,7 +328,7 @@ public class TransactionList<S> extends TransformedList<S,S> {
 
                 } else if (targetChangeType == Tree4Deltas.NO_CHANGE) {
                     // update the record we have of the value at that index
-                    updates.elementUpdated(deltas.sourceToTarget(sourceIndex), listChanges.getPreviousValue());
+                    updates.elementUpdated(deltas.sourceToTarget(sourceIndex), listChanges.getOldValue());
                 }
 
             } else if (sourceChangeType == ListEvent.DELETE) {
@@ -342,7 +342,7 @@ public class TransactionList<S> extends TransformedList<S,S> {
                     // fetch the transaction's value and the source's value for the index in question
                     final int targetIndex = deltas.sourceToTarget(sourceIndex);
                     final S targetValue = deltas.getTargetValue(targetIndex);
-                    final S sourceValue = listChanges.getPreviousValue();
+                    final S sourceValue = listChanges.getOldValue();
 
                     // ask the policy to arbitrate the conflicting delete and update
                     final Policy.Result policyResult = policy.sourceDeletedTargetUpdated(sourceValue, targetValue);
@@ -364,7 +364,7 @@ public class TransactionList<S> extends TransformedList<S,S> {
 
                 } else if (targetChangeType == Tree4Deltas.NO_CHANGE) {
                     // delete the value from the transaction and broadcast the change
-                    updates.elementDeleted(deltas.sourceToTarget(sourceIndex), listChanges.getPreviousValue());
+                    updates.elementDeleted(deltas.sourceToTarget(sourceIndex), listChanges.getOldValue());
                     deltas.sourceDelete(sourceIndex);
                 }
             }
@@ -385,7 +385,7 @@ public class TransactionList<S> extends TransformedList<S,S> {
     public void add(int index, S element) {
         if (txStarted) {
             updates.beginEvent();
-            updates.addInsert(index);
+            updates.elementInserted(index, element);
             deltas.targetInsert(index, index+1, element);
             updates.commitEvent();
         } else {

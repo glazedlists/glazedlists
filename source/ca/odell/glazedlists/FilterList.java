@@ -200,7 +200,7 @@ public final class FilterList<E> extends TransformedList<E,E> {
 
                     // if this value was not filtered out, it is now so add a change
                     if(filteredIndex != -1) {
-                        E removed = listChanges.getPreviousValue();
+                        E removed = listChanges.getOldValue();
                         updates.elementDeleted(filteredIndex, removed);
                     }
 
@@ -211,13 +211,14 @@ public final class FilterList<E> extends TransformedList<E,E> {
                 } else if(changeType == ListEvent.INSERT) {
 
                     // whether we should add this item
-                    boolean include = currentMatcher.matches(source.get(sourceIndex));
+                    E element = source.get(sourceIndex);
+                    boolean include = currentMatcher.matches(element);
 
                     // if this value should be included, add a change and add the item
                     if(include) {
                         flagList.addBlack(sourceIndex, 1);
                         int filteredIndex = flagList.getBlackIndex(sourceIndex);
-                        updates.addInsert(filteredIndex);
+                        updates.elementInserted(filteredIndex, element);
 
                     // if this value should not be included, just add the item
                     } else {
@@ -237,16 +238,16 @@ public final class FilterList<E> extends TransformedList<E,E> {
                     // if this element is being removed as a result of the change
                     if(wasIncluded && !include) {
                         flagList.setWhite(sourceIndex, 1);
-                        updates.elementDeleted(filteredIndex, listChanges.getPreviousValue());
+                        updates.elementDeleted(filteredIndex, listChanges.getOldValue());
 
                     // if this element is being added as a result of the change
                     } else if(!wasIncluded && include) {
                         flagList.setBlack(sourceIndex, 1);
-                        updates.addInsert(flagList.getBlackIndex(sourceIndex));
+                        updates.elementInserted(flagList.getBlackIndex(sourceIndex), updated);
 
                     // this element is still here
                     } else if(wasIncluded && include) {
-                        updates.elementUpdated(filteredIndex, listChanges.getPreviousValue());
+                        updates.elementUpdated(filteredIndex, listChanges.getOldValue(), updated);
 
                     }
                 }
@@ -332,7 +333,8 @@ public final class FilterList<E> extends TransformedList<E,E> {
         // to black as we go so that flag offsets are correct
         for(BarcodeIterator i = flagList.iterator(); i.hasNextWhite();) {
             i.nextWhite();
-            updates.addInsert(i.getIndex());
+            int index = i.getIndex();
+            updates.elementInserted(index, source.get(index));
         }
         flagList.clear();
         flagList.addBlack(0, source.size());
@@ -353,8 +355,9 @@ public final class FilterList<E> extends TransformedList<E,E> {
         // for all filtered items, see what the change is
         for(BarcodeIterator i = flagList.iterator(); i.hasNextWhite();) {
             i.nextWhite();
-            if(currentMatcher.matches(source.get(i.getIndex()))) {
-                updates.addInsert(i.setBlack());
+            E element = source.get(i.getIndex());
+            if(currentMatcher.matches(element)) {
+                updates.elementInserted(i.setBlack(), element);
             }
         }
 
@@ -412,7 +415,7 @@ public final class FilterList<E> extends TransformedList<E,E> {
 
             // this element is being added as a result of the change
             } else if(!wasIncluded && include) {
-                updates.addInsert(i.setBlack());
+                updates.elementInserted(i.setBlack(), value);
             }
         }
 

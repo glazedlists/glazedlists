@@ -188,12 +188,12 @@ public class ListSelection<E> {
                         // delete selected values
                         if(previouslySelected) {
                             barcode.remove(index, 1);
-                            addSelectedDelete(previousSelectionIndex, listChanges.getPreviousValue());
+                            addSelectedDelete(previousSelectionIndex, listChanges.getOldValue());
 
                         // delete deselected values
                         } else {
                             int deselectedIndex = barcode.getColourIndex(index, deselected);
-                            addDeselectedDelete(deselectedIndex, listChanges.getPreviousValue());
+                            addDeselectedDelete(deselectedIndex, listChanges.getOldValue());
                             barcode.remove(index, 1);
                         }
 
@@ -228,12 +228,12 @@ public class ListSelection<E> {
                     } else if(changeType == ListEvent.UPDATE) {
                         // update a selected value
                         if(previouslySelected) {
-                            addSelectedUpdate(previousSelectionIndex, listChanges.getPreviousValue());
+                            addSelectedUpdate(previousSelectionIndex, listChanges.getOldValue());
 
                         // update a deselected value
                         } else {
                             int deselectedIndex = barcode.getColourIndex(index, deselected);
-                            addDeselectedUpdate(deselectedIndex, listChanges.getPreviousValue());
+                            addDeselectedUpdate(deselectedIndex, listChanges.getOldValue());
                         }
                     }
 

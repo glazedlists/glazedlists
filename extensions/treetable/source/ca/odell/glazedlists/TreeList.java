@@ -391,7 +391,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 if(shouldBeVisible) {
                     setVisible(descendent, true);
                     int insertIndex = data.indexOfNode(descendent.element, VISIBLE_NODES);
-                    updates.addInsert(insertIndex);
+                    updates.elementInserted(insertIndex, descendent.getElement());
 
                 // hide a visible node
                 } else {

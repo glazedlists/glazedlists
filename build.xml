@@ -915,6 +915,37 @@
             <redirector><outputmapper refid="fourcolorintermediate_to_fourcolor"/></redirector>
         </apply>
 
+        <!-- generate the four color two value tree -->
+        <mapper id="bcii_to_fourcolortwovalueintermediate" type="glob"
+           from="source/ca/odell/glazedlists/impl/adt/barcode2/Bcii*.java"
+           to="source/ca/odell/glazedlists/impl/adt/barcode2/FourColorTwoValue*.java_intermediate"/>
+        <apply executable="m4" parallel="false">
+            <arg line="--prefix-builtins"/>
+            <arg line="-DVAR_COLOUR_COUNT=4"/>
+            <arg line="-DVAR_WIDE_NODES=true"/>
+            <arg line="-DVAR_TYPE_COUNT=2"/>
+            <srcfile/>
+            <fileset dir="${basedir}" includes="source/ca/odell/glazedlists/impl/adt/barcode2/Bcii*.java"/>
+            <mapper refid="bcii_to_fourcolortwovalueintermediate"/>
+            <redirector><outputmapper refid="bcii_to_fourcolortwovalueintermediate"/></redirector>
+        </apply>
+
+        <mapper id="fourcolortwovalueintermediate_to_fourcolortwovalue" type="glob"
+           from="source/ca/odell/glazedlists/impl/adt/barcode2/FourColorTwoValue*.java_intermediate"
+           to="source/ca/odell/glazedlists/impl/adt/barcode2/FourColorTwoValue*.java"/>
+        <apply executable="m4" parallel="false">
+            <arg line="--prefix-builtins"/>
+            <arg line="-DBciiTree=FourColorTwoValueTree"/>
+            <arg line="-DBciiNode=FourColorTwoValueNode"/>
+            <arg line="-DBciiTreeAsList=FourColorTwoValueTreeAsList"/>
+            <arg line="-DBciiTreeIterator=FourColorTwoValueTreeIterator"/>
+            <arg line="-DCOMMAPLACEHOLDER=,"/>
+            <srcfile/>
+            <fileset dir="${basedir}" includes="source/ca/odell/glazedlists/impl/adt/barcode2/FourColor*.java_intermediate"/>
+            <mapper refid="fourcolortwovalueintermediate_to_fourcolortwovalue"/>
+            <redirector><outputmapper refid="fourcolortwovalueintermediate_to_fourcolortwovalue"/></redirector>
+        </apply>
+
         <!-- generate the simple tree -->
         <mapper id="bcii_to_simpleintermediate" type="glob"
            from="source/ca/odell/glazedlists/impl/adt/barcode2/Bcii*.java"

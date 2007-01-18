@@ -108,7 +108,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
     public void add(int index, E element) {
         // create the change event
         updates.beginEvent();
-        updates.addInsert(index);
+        updates.elementInserted(index, element);
         // do the actual add
         data.add(index, element);
         // fire the event
@@ -119,7 +119,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
     public boolean add(E element) {
         // create the change event
         updates.beginEvent();
-        updates.addInsert(size());
+        updates.elementInserted(size(), element);
         // do the actual add
         boolean result = data.add(element);
         // fire the event
@@ -139,12 +139,15 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
 
         // create the change event
         updates.beginEvent();
-        updates.addInsert(index, index + collection.size() - 1);
-        // do the actual add
-        boolean result = data.addAll(index, collection);
+        for(Iterator<? extends E> i = collection.iterator(); i.hasNext(); ) {
+            E value = i.next();
+            updates.elementInserted(index, value);
+            data.add(index, value);
+            index++;
+        }
         // fire the event
         updates.commitEvent();
-        return result;
+        return !collection.isEmpty();
     }
 
     /** {@inheritDoc} */

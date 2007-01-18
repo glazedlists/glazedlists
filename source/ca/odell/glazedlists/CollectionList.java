@@ -244,9 +244,10 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
         if(!children.isEmpty()) barcode.addWhite(absoluteIndex + 1, children.size());
 
         // add events
-        if(!children.isEmpty()) {
-            int childIndex = absoluteIndex - parentIndex;
-            updates.addInsert(childIndex, childIndex + children.size() - 1);
+        int childIndex = absoluteIndex - parentIndex;
+        for(int i = 0; i < children.size(); i++) {
+            E element = children.get(i);
+            updates.elementInserted(childIndex, element);
         }
     }
 
@@ -460,9 +461,9 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
 
                 int overallIndex = index + childOffset;
                 switch (type) {
-                    case ListEvent.INSERT: updates.addInsert(overallIndex); break;
-                    case ListEvent.UPDATE: updates.elementUpdated(overallIndex, listChanges.getPreviousValue()); break;
-                    case ListEvent.DELETE: updates.elementDeleted(overallIndex, listChanges.getPreviousValue()); break;
+                    case ListEvent.INSERT: updates.elementInserted(overallIndex, listChanges.getNewValue()); break;
+                    case ListEvent.UPDATE: updates.elementUpdated(overallIndex, listChanges.getOldValue(), listChanges.getNewValue()); break;
+                    case ListEvent.DELETE: updates.elementDeleted(overallIndex, listChanges.getOldValue()); break;
                 }
             }
             updates.commitEvent();

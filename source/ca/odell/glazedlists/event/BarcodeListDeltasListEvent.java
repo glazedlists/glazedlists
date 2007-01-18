@@ -76,7 +76,11 @@ class BarcodeListDeltasListEvent<E> extends ListEvent<E> {
         return iterator.getType();
     }
 
-    public E getPreviousValue() {
+    public E getOldValue() {
+        return (E)ListEvent.UNKNOWN_VALUE;
+    }
+
+    public E getNewValue() {
         return (E)ListEvent.UNKNOWN_VALUE;
     }
 
