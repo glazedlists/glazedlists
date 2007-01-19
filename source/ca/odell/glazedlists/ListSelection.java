@@ -208,32 +208,32 @@ public class ListSelection<E> {
                             if(selectionMode == SINGLE_INTERVAL_SELECTION
                             || selectionMode == MULTIPLE_INTERVAL_SELECTION) {
                                 barcode.add(index, selected, 1);
-                                addSelectedInsert(previousSelectionIndex);
+                                addSelectedInsert(previousSelectionIndex, listChanges.getNewValue());
 
                             // do not select the inserted for single selection and defensive selection
                             } else {
                                 barcode.add(index, deselected, 1);
                                 int deselectedIndex = barcode.getColourIndex(index, deselected);
-                                addDeselectedInsert(deselectedIndex);
+                                addDeselectedInsert(deselectedIndex, listChanges.getNewValue());
                             }
 
                         // add a deselected value
                         } else {
                             barcode.add(index, deselected, 1);
                             int deselectedIndex = barcode.getColourIndex(index, deselected);
-                            addDeselectedInsert(deselectedIndex);
+                            addDeselectedInsert(deselectedIndex, listChanges.getNewValue());
                         }
 
                     // when an element is changed, assume selection stays the same
                     } else if(changeType == ListEvent.UPDATE) {
                         // update a selected value
                         if(previouslySelected) {
-                            addSelectedUpdate(previousSelectionIndex, listChanges.getOldValue());
+                            addSelectedUpdate(previousSelectionIndex, listChanges.getOldValue(), listChanges.getNewValue());
 
                         // update a deselected value
                         } else {
                             int deselectedIndex = barcode.getColourIndex(index, deselected);
-                            addDeselectedUpdate(deselectedIndex, listChanges.getOldValue());
+                            addDeselectedUpdate(deselectedIndex, listChanges.getOldValue(), listChanges.getNewValue());
                         }
                     }
 
@@ -504,10 +504,10 @@ public class ListSelection<E> {
             E value = source.get(index);
             if(color == selected) {
                 addDeselectedDelete(0, value);
-                addSelectedInsert(index);
+                addSelectedInsert(index, value);
             } else {
                 addSelectedDelete(0, value);
-                addDeselectedInsert(index);
+                addDeselectedInsert(index, value);
             }
 
             if(firstAffectedIndex == -1) firstAffectedIndex = index;
@@ -808,9 +808,9 @@ public class ListSelection<E> {
         int selectedIndex = i.set(selected);
         addSelectEvent(selectedIndex, deselectedIndex, value);
     }
-    private void addSelectEvent(int selectIndex, int deselectIndex, E oldValue) {
-        addDeselectedDelete(deselectIndex, oldValue);
-        addSelectedInsert(selectIndex);
+    private void addSelectEvent(int selectIndex, int deselectIndex, E value) {
+        addDeselectedDelete(deselectIndex, value);
+        addSelectedInsert(selectIndex, value);
     }
     private void addDeselectEvent(BarcodeIterator i) {
         E value = source.get(i.getIndex());
@@ -820,32 +820,32 @@ public class ListSelection<E> {
     }
     private void addDeselectEvent(int selectIndex, int deselectIndex, E value) {
         addSelectedDelete(selectIndex, value);
-        addDeselectedInsert(deselectIndex);
+        addDeselectedInsert(deselectIndex, value);
     }
 
-    private void addSelectedInsert(int index){
-        if(selectedList != null) selectedList.updates().addInsert(index);
-        if(selectedToggleList != null) selectedToggleList.updates().addInsert(index);
+    private void addSelectedInsert(int index, E newValue){
+        if(selectedList != null) selectedList.updates().elementInserted(index, newValue);
+        if(selectedToggleList != null) selectedToggleList.updates().elementInserted(index, newValue);
     }
-    private void addSelectedUpdate(int index, E oldValue){
-        if(selectedList != null) selectedList.updates().elementUpdated(index, oldValue);
-        if(selectedToggleList != null) selectedToggleList.updates().elementUpdated(index, oldValue);
+    private void addSelectedUpdate(int index, E oldValue, E newValue){
+        if(selectedList != null) selectedList.updates().elementUpdated(index, oldValue, newValue);
+        if(selectedToggleList != null) selectedToggleList.updates().elementUpdated(index, oldValue, newValue);
     }
     private void addSelectedDelete(int index, E oldValue){
         if(selectedList != null) selectedList.updates().elementDeleted(index, oldValue);
         if(selectedToggleList != null) selectedToggleList.updates().elementDeleted(index, oldValue);
     }
-    private void addDeselectedInsert(int index){
-        if(deselectedList != null) deselectedList.updates().addInsert(index);
-        if(deselectedToggleList != null) deselectedToggleList.updates().addInsert(index);
+    private void addDeselectedInsert(int index, E value){
+        if(deselectedList != null) deselectedList.updates().elementInserted(index, value);
+        if(deselectedToggleList != null) deselectedToggleList.updates().elementInserted(index, value);
     }
     private void addDeselectedDelete(int index, E oldValue){
         if(deselectedList != null) deselectedList.updates().elementDeleted(index, oldValue);
         if(deselectedToggleList != null) deselectedToggleList.updates().elementDeleted(index, oldValue);
     }
-    private void addDeselectedUpdate(int index, E oldValue) {
-        if(deselectedList != null) deselectedList.updates().elementUpdated(index, oldValue);
-        if(deselectedToggleList != null) deselectedToggleList.updates().elementUpdated(index, oldValue);
+    private void addDeselectedUpdate(int index, E oldValue, E newValue) {
+        if(deselectedList != null) deselectedList.updates().elementUpdated(index, oldValue, newValue);
+        if(deselectedToggleList != null) deselectedToggleList.updates().elementUpdated(index, oldValue, newValue);
     }
 
 
