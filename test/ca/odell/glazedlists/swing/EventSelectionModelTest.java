@@ -29,7 +29,7 @@ public class EventSelectionModelTest extends SwingTestCase {
      * Tests that selection survives a sorting.
      */
     public void guiTestSort() {
-        BasicEventList<Comparable> list = new BasicEventList<Comparable>();
+        EventList<Comparable> list = new BasicEventList<Comparable>();
         SortedList<Comparable> sorted = new SortedList<Comparable>(list, null);
         EventSelectionModel<Comparable> eventSelectionModel = new EventSelectionModel<Comparable>(sorted);
         
@@ -56,7 +56,7 @@ public class EventSelectionModelTest extends SwingTestCase {
      * Verifies that the selected index is cleared when the selection is cleared.
      */
     public void guiTestClear() {
-        BasicEventList<String> list = new BasicEventList<String>();
+        EventList<String> list = new BasicEventList<String>();
         EventSelectionModel eventSelectionModel = new EventSelectionModel<String>(list);
 
         // populate the list
@@ -84,8 +84,7 @@ public class EventSelectionModelTest extends SwingTestCase {
      * This test was contributed by: Sergey Bogatyrjov
      */
     public void guiTestSelectionModel() {
-        EventList<Object> source = new BasicEventList<Object>();
-        source.addAll(GlazedListsTests.delimitedStringToList("one two three"));
+        EventList<Object> source = GlazedLists.eventListOf(new Object[] {"one", "two", "three"});
         FilterList<Object> filtered = new FilterList<Object>(source, Matchers.trueMatcher());
 
         // create selection model
@@ -139,9 +138,89 @@ public class EventSelectionModelTest extends SwingTestCase {
         assertEquals(3, atomicList.getReadWriteBlockCount());
     }
 
+    /**
+     * If EventList changes are relegated to indexes AFTER the maxSelectionIndex
+     * then no ListSelectionEvent needs to be fired. This test method verifies
+     * that the expected number of ListSelectionEvents are produced when
+     * inserting and removing at all locations relative to the range of list selections.
+     */
+    public void guiTestFireOnlyNecessaryEvents() {
+        EventList<String> source = GlazedLists.eventListOf(new String[] {"Albert", "Alex", "Aaron", "Brian", "Bruce"});
+
+        // create selection model
+        EventSelectionModel<String> model = new EventSelectionModel<String>(source);
+        ListSelectionChangeCounter counter = new ListSelectionChangeCounter();
+        model.addListSelectionListener(counter);
+
+        // select 2nd element (should produce 1 ListSelectionEvent)
+        model.setSelectionInterval(1, 3);
+        assertEquals(1, counter.getCountAndReset());
+        assertEquals(1, model.getMinSelectionIndex());
+        assertEquals(3, model.getMaxSelectionIndex());
+
+        // inserts and removes before the minSelectionIndex shift the existing selections and thus produce ListSelectionEvents
+        source.add(0, "Bart");
+        assertEquals(1, counter.getCountAndReset());
+        assertEquals(2, model.getMinSelectionIndex());
+        assertEquals(4, model.getMaxSelectionIndex());
+        source.remove(0);
+        assertEquals(1, counter.getCountAndReset());
+        assertEquals(1, model.getMinSelectionIndex());
+        assertEquals(3, model.getMaxSelectionIndex());
+
+        // inserts and removes on the minSelectionIndex shift the existing selections and thus produce ListSelectionEvents
+        source.add(1, "Bart");
+        assertEquals(1, counter.getCountAndReset());
+        assertEquals(2, model.getMinSelectionIndex());
+        assertEquals(4, model.getMaxSelectionIndex());
+        source.remove(1);
+        assertEquals(1, counter.getCountAndReset());
+        assertEquals(1, model.getMinSelectionIndex());
+        assertEquals(3, model.getMaxSelectionIndex());
+
+        // inserts and removes between the minSelectionIndex and maxSelectionIndex change existing selections and thus produce ListSelectionEvents
+        source.add(2, "Bart");
+        assertEquals(1, counter.getCountAndReset());
+        assertEquals(1, model.getMinSelectionIndex());
+        assertEquals(4, model.getMaxSelectionIndex());
+        source.remove(2);
+        assertEquals(1, counter.getCountAndReset());
+        assertEquals(1, model.getMinSelectionIndex());
+        assertEquals(3, model.getMaxSelectionIndex());
+
+        // inserts and removes on the maxSelectionIndex change the existing selections and thus produce ListSelectionEvents
+        source.add(3, "Bart");
+        assertEquals(1, counter.getCountAndReset());
+        assertEquals(1, model.getMinSelectionIndex());
+        assertEquals(4, model.getMaxSelectionIndex());
+        source.remove(3);
+        assertEquals(1, counter.getCountAndReset());
+        assertEquals(1, model.getMinSelectionIndex());
+        assertEquals(3, model.getMaxSelectionIndex());
+
+        // inserts and removes after the maxSelectionIndex do not produce ListSelectionEvents
+        source.add(4, "Bart");
+        assertEquals(0, counter.getCountAndReset());
+        assertEquals(1, model.getMinSelectionIndex());
+        assertEquals(3, model.getMaxSelectionIndex());
+        source.remove(4);
+        assertEquals(0, counter.getCountAndReset());
+        assertEquals(1, model.getMinSelectionIndex());
+        assertEquals(3, model.getMaxSelectionIndex());
+
+        // inserts and removes after the maxSelectionIndex do not produce ListSelectionEvents
+        source.add(5, "Bart");
+        assertEquals(0, counter.getCountAndReset());
+        assertEquals(1, model.getMinSelectionIndex());
+        assertEquals(3, model.getMaxSelectionIndex());
+        source.remove(5);
+        assertEquals(0, counter.getCountAndReset());
+        assertEquals(1, model.getMinSelectionIndex());
+        assertEquals(3, model.getMaxSelectionIndex());
+    }
+    
     public void guiTestDeleteSelectedRows_FixMe() {
-        EventList<String> source = new BasicEventList<String>();
-        source.addAll(GlazedListsTests.delimitedStringToList("one two three"));
+        EventList<String> source = GlazedLists.eventListOf(new String[] {"one", "two", "three"});
 
         // create selection model
         EventSelectionModel<String> model = new EventSelectionModel<String>(source);

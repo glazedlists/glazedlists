@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-// for being a JUnit test case
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import junit.framework.TestCase;
 
@@ -625,8 +624,8 @@ public class ListSelectionTest extends TestCase {
         source.add(new Integer(4));
         source.add(new Integer(5));
 
-        EventList selectedToggler = listSelection.getTogglingSelected();
-        EventList deselectedToggler = listSelection.getTogglingDeselected();
+        EventList<Integer> selectedToggler = listSelection.getTogglingSelected();
+        EventList<Integer> deselectedToggler = listSelection.getTogglingDeselected();
         assertEquals(0, selectedToggler.size());
         selectedToggler.add(source.get(0));
         assertEquals(1, selectedToggler.size());
