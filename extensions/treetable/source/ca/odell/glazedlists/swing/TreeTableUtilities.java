@@ -40,10 +40,6 @@ class TreeTableUtilities {
      *      renderer does not return a TreeTableCellPanel
      */
     static TreeTableCellPanel prepareRenderer(MouseEvent mouseEvent) {
-        // we're going to check if the single click was overtop of the
-        // expand button, and toggle the expansion state of the row if
-        // it was but return false so we don't begin the cell edit
-
         // extract information about the location of the click
         final JTable table = (JTable) mouseEvent.getSource();
         final Point clickPoint = mouseEvent.getPoint();
@@ -57,7 +53,7 @@ class TreeTableUtilities {
         // translate the click to be relative to the cellRect (and thus its rendered component)
         final Rectangle cellRect = table.getCellRect(row, column, true);
 
-        // get the component rendered at the clickPoint
+        // get the component rendered for the cell
         final Component renderedComponent = table.prepareRenderer(table.getCellRenderer(row, column), row, column);
 
         // if the component is not a TreeTableCellPanel, bail early

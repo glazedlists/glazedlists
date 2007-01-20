@@ -437,7 +437,7 @@ public final class TreeTableSupport {
      * other cases (where the mouse click does not toggle expansion), the
      * delegate is allowed to handle the mouse click as normal.
      */
-    private class ExpandAndCollapseMouseListener extends MouseAdapter {
+    private class ExpandAndCollapseMouseListener implements MouseListener {
 
         /** An optional MouseListener to which we delegate after performing our own processing. */
         private final MouseListener delegate;
@@ -446,6 +446,9 @@ public final class TreeTableSupport {
          * Decorate the given <code>delegate</code> with extra functionality.
          */
         public ExpandAndCollapseMouseListener(MouseListener delegate) {
+            if (delegate == null)
+                throw new IllegalArgumentException("delegate may not be null");
+
             this.delegate = delegate;
         }
 
@@ -464,9 +467,6 @@ public final class TreeTableSupport {
             // we're going to check if the single click was overtop of the
             // expander button and toggle the expansion of the row if it was
 
-            final TreeTableCellPanel renderedPanel = TreeTableUtilities.prepareRenderer(me);
-
-            // translate the click to be relative to the cellRect (and thus its rendered component)
             // extract information about the location of the click
             final JTable table = (JTable) me.getSource();
             final Point clickPoint = me.getPoint();
@@ -482,10 +482,11 @@ public final class TreeTableSupport {
             clickPoint.translate(-cellRect.x, -cellRect.y);
 
             // if a left-click occurred over the expand/collapse button
+            final TreeTableCellPanel renderedPanel = TreeTableUtilities.prepareRenderer(me);
             if (SwingUtilities.isLeftMouseButton(me) && renderedPanel != null && renderedPanel.isPointOverExpanderButton(clickPoint)) {
                 treeList.getReadWriteLock().writeLock().lock();
                 try {
-                    // expand/collapse the rowObject if possible
+                    // expand/collapse the row if possible
                     if (treeList.getAllowsChildren(row))
                         TreeTableUtilities.toggleExpansion(table, treeList, row).run();
                 } finally {
@@ -496,9 +497,13 @@ public final class TreeTableSupport {
                 return;
             }
 
-            if (delegate != null)
-                delegate.mousePressed(me);
+            delegate.mousePressed(me);
         }
+
+        public void mouseClicked(MouseEvent me) { delegate.mouseClicked(me); }
+        public void mouseReleased(MouseEvent me) { delegate.mouseReleased(me); }
+        public void mouseEntered(MouseEvent me) { delegate.mouseEntered(me); }
+        public void mouseExited(MouseEvent me) { delegate.mouseExited(me); }
     }
 
     /**
