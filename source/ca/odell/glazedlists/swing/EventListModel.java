@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-// the core Glazed Lists packages
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -16,13 +15,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An EventListModel adapts a EventList to the ListModel interface making it
+ * An EventListModel adapts an EventList to the ListModel interface making it
  * appropriate for use with a {@link JList}. Each element of the list
  * corresponds to an element in the {@link ListModel}.
  *
- * <p>The EventListModel class is <strong>not thread-safe</strong>. Unless otherwise
- * noted, all methods are only safe to be called from the event dispatch thread.
- * To do this programmatically, use {@link SwingUtilities#invokeAndWait(Runnable)}.
+ * <p>The EventListModel class is <strong>not thread-safe</strong>. Unless
+ * otherwise noted, all methods are only safe to be called from the event
+ * dispatch thread. To do this programmatically, use
+ * {@link SwingUtilities#invokeAndWait(Runnable)}.
  * 
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=14">Bug 14</a>
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=146">Bug 146</a>
@@ -35,19 +35,18 @@ import java.util.List;
 public class EventListModel<E> implements ListEventListener<E>, ListModel {
 
     /** the proxy moves events to the Swing Event Dispatch thread */
-    private TransformedList<E, E> swingSource = null;
+    private TransformedList<E, E> swingSource;
 
     /** whom to notify of data changes */
-    private List<ListDataListener> listeners = new ArrayList<ListDataListener>();
+    private final List<ListDataListener> listeners = new ArrayList<ListDataListener>();
 
-    /** whenever a list change covers greater than this many rows, redraw the whole thing */
-    public int changeSizeRepaintAllThreshhold = Integer.MAX_VALUE;
-    
     /** recycle the list data event to prevent unnecessary object creation */
-    protected MutableListDataEvent listDataEvent = new MutableListDataEvent(this);
+    protected final MutableListDataEvent listDataEvent = new MutableListDataEvent(this);
 
     /**
-     * Creates a new widget that renders the specified list.
+     * Creates a new model that contains all objects located in the given
+     * <code>source</code> and reacts to any changes in the given
+     * <code>source</code>.
      */
     public EventListModel(EventList<E> source) {
         // lock the source list for reading since we want to prevent writes
@@ -55,8 +54,6 @@ public class EventListModel<E> implements ListEventListener<E>, ListModel {
         source.getReadWriteLock().readLock().lock();
         try {
             swingSource = GlazedListsSwing.swingThreadProxyList(source);
-
-            // prepare listeners
             swingSource.addListEventListener(this);
         } finally {
             source.getReadWriteLock().readLock().unlock();
@@ -87,9 +84,11 @@ public class EventListModel<E> implements ListEventListener<E>, ListModel {
 
             // create a table model event for this block
             listDataEvent.setRange(startIndex, endIndex);
-            if(changeType == ListEvent.INSERT) listDataEvent.setType(ListDataEvent.INTERVAL_ADDED);
-            else if(changeType == ListEvent.DELETE) listDataEvent.setType(ListDataEvent.INTERVAL_REMOVED);
-            else if(changeType == ListEvent.UPDATE) listDataEvent.setType(ListDataEvent.CONTENTS_CHANGED);
+            switch (changeType) {
+                case ListEvent.INSERT: listDataEvent.setType(ListDataEvent.INTERVAL_ADDED); break;
+                case ListEvent.DELETE: listDataEvent.setType(ListDataEvent.INTERVAL_REMOVED); break;
+                case ListEvent.UPDATE: listDataEvent.setType(ListDataEvent.CONTENTS_CHANGED); break;
+            }
 
             // fire an event to notify all listeners
             fireListDataEvent(listDataEvent);
@@ -158,12 +157,10 @@ public class EventListModel<E> implements ListEventListener<E>, ListModel {
         // notify all listeners about the event
         for(int i = 0, n = listeners.size(); i < n; i++) {
             ListDataListener listDataListener = listeners.get(i);
-            if(listDataEvent.getType() == ListDataEvent.CONTENTS_CHANGED) {
-                listDataListener.contentsChanged(listDataEvent);
-            } else if(listDataEvent.getType() == ListDataEvent.INTERVAL_ADDED) {
-                listDataListener.intervalAdded(listDataEvent);
-            } else if(listDataEvent.getType() == ListDataEvent.INTERVAL_REMOVED) {
-                listDataListener.intervalRemoved(listDataEvent);
+            switch (listDataEvent.getType()) {
+                case ListDataEvent.CONTENTS_CHANGED: listDataListener.contentsChanged(listDataEvent); break;
+                case ListDataEvent.INTERVAL_ADDED: listDataListener.intervalAdded(listDataEvent); break;
+                case ListDataEvent.INTERVAL_REMOVED: listDataListener.intervalRemoved(listDataEvent); break;
             }
         }
     }
@@ -180,7 +177,7 @@ public class EventListModel<E> implements ListEventListener<E>, ListModel {
      * its source {@link EventList} is long-lived.
      * 
      * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
-     * to call any method on a {@link EventListModel} after it has been disposed.
+     * to call any method on an {@link EventListModel} after it has been disposed.
      */
     public void dispose() {
         swingSource.removeListEventListener(this);
