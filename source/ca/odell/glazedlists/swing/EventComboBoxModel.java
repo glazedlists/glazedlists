@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-// the core Glazed Lists packages
 import ca.odell.glazedlists.EventList;
 
 import javax.swing.*;
@@ -12,8 +11,8 @@ import javax.swing.event.ListDataEvent;
 /**
  * A combo box model for displaying Glazed Lists in a combo box.
  *
- * <p>The implementation of setSelection and getSelection is not in any way tied
- * to the contents of the list.
+ * <p>The implementation of {@link #setSelectedItem} and {@link #getSelectedItem}
+ * is not in any way tied to the contents of the list.
  *
  * @see <a href="http://publicobject.com/glazedlists/tutorial/">Glazed Lists Tutorial</a>
  *
@@ -21,12 +20,12 @@ import javax.swing.event.ListDataEvent;
  */
 public class EventComboBoxModel<E> extends EventListModel<E> implements ComboBoxModel {
 
-    /** the currently selected item, should belong to the source list */
+    /** the currently selected item which typically belong to the source list */
     private Object selected;
     
     /**
-     * Creates a new combo box model that displays the specified source list
-     * in the combo box.
+     * Creates a new combo box model that contains the elements of the given
+     * <code>source</code> and tracks further changes made to it.
      */
     public EventComboBoxModel(EventList<E> source) {
         super(source);
@@ -47,6 +46,10 @@ public class EventComboBoxModel<E> extends EventListModel<E> implements ComboBox
      * to the notification process used by the {@link DefaultComboBoxModel}.
      */
     public void setSelectedItem(Object selected) {
+        // if the selected item isn't actually changing values, avoid the work
+        if (this.selected == selected)
+            return;
+
         this.selected = selected;
         listDataEvent.setRange(-1, -1);
         listDataEvent.setType(ListDataEvent.CONTENTS_CHANGED);

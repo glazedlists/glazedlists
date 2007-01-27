@@ -4,14 +4,16 @@
 package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
-import ca.odell.glazedlists.impl.filter.TextMatcher;
 import ca.odell.glazedlists.impl.filter.SearchTerm;
+import ca.odell.glazedlists.impl.filter.TextMatcher;
 import ca.odell.glazedlists.impl.swing.ComboBoxPopupLocationFix;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.Matchers;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
+
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.ListDataEvent;
@@ -19,8 +21,8 @@ import javax.swing.event.ListDataListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.plaf.UIResource;
-import javax.swing.plaf.basic.ComboPopup;
 import javax.swing.plaf.basic.BasicComboBoxEditor;
+import javax.swing.plaf.basic.ComboPopup;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -1092,7 +1094,7 @@ public final class AutoCompleteSupport<E> {
         if (comboBoxModel.getSize() == 0)
             comboBox.hidePopup();
 
-        else if (comboBox.isShowing() && !comboBox.isPopupVisible())
+        else if (comboBox.isShowing() && !comboBox.isPopupVisible() && comboBoxEditorComponent.hasFocus())
             comboBox.showPopup();
     }
 
@@ -1230,7 +1232,7 @@ public final class AutoCompleteSupport<E> {
             final String valueAfterEdit = comboBoxEditorComponent.getText();
 
             // if an autocomplete term could not be found and we're in strict mode, rollback the edit
-            if (isStrict() && findAutoCompleteTerm(valueAfterEdit) == null) {
+            if (isStrict() && findAutoCompleteTerm(valueAfterEdit) == null && !items.isEmpty()) {
                 // indicate the error to the user
                 UIManager.getLookAndFeel().provideErrorFeedback(comboBoxEditorComponent);
 
@@ -1361,7 +1363,7 @@ public final class AutoCompleteSupport<E> {
      * simply wraps the selection to the opposite end of the model.
      *
      * <p>In non-strict mode, the selected index can be -1 (no selection), so we
-     * allow -1 to mean "adjust the value of the ComboBoxEditor to be the users
+     * allow -1 to mean "adjust the value of the ComboBoxEditor to be the user's
      * text" and only wrap to the end of the model when -2 is reached. In short,
      * <code>-1</code> is interpreted as "clear the selected item".
      * <code>-2</code> is interpreted as "the last element".
@@ -1462,37 +1464,71 @@ public final class AutoCompleteSupport<E> {
             final int newItemCount = comboBox.getItemCount();
 
             // if the size of the model didn't change, the popup size won't change
-            if (previousItemCount == newItemCount) return;
+            if (previousItemCount != newItemCount) {
+                final int maxPopupItemCount = comboBox.getMaximumRowCount();
 
-            final int maxPopupItemCount = comboBox.getMaximumRowCount();
+                // if the popup is showing, check if it must be resized
+                if (popupMenu.isShowing()) {
+                    if (comboBox.isShowing()) {
+                        // if either the previous or new item count is less than the max,
+                        // hide and show the popup to recalculate its new height
+                        if (newItemCount < maxPopupItemCount || previousItemCount < maxPopupItemCount) {
+                            // don't bother unfiltering the popup since we'll redisplay the popup immediately
+                            doNotClearFilterOnPopupHide = true;
+                            try {
+                                comboBox.hidePopup();
+                            } finally {
+                                doNotClearFilterOnPopupHide = false;
+                            }
 
-            // if the popup is showing, check if it must be resized
-            if (popupMenu.isShowing()) {
-                if (comboBox.isShowing()) {
-                    // if either the previous or new item count is less than the max,
-                    // hide and show the popup to recalculate its new height
-                    if (newItemCount < maxPopupItemCount || previousItemCount < maxPopupItemCount) {
-                        // don't bother unfiltering the popup since we'll redisplay the popup immediately
-                        doNotClearFilterOnPopupHide = true;
-                        try {
-                            comboBox.hidePopup();
-                        } finally {
-                            doNotClearFilterOnPopupHide = false;
+                            comboBox.showPopup();
                         }
-                        comboBox.showPopup();
+                    } else {
+                        // if the comboBox is not showing, simply hide the popup to avoid:
+                        // "java.awt.IllegalComponentStateException: component must be showing on the screen to determine its location"
+                        // this case can occur when the comboBox is used as a TableCellEditor
+                        // and is uninstalled (removed from the component hierarchy) before
+                        // receiving this callback
+                        comboBox.hidePopup();
                     }
-                } else {
-                    // if the comboBox is not showing, simply hide the popup to avoid:
-                    // "java.awt.IllegalComponentStateException: component must be showing on the screen to determine its location"
-                    // this case can occur when the comboBox is used as a TableCellEditor
-                    // and is uninstalled (removed from the component hierarchy) before
-                    // receiving this callback
-                    comboBox.hidePopup();
                 }
+
+                previousItemCount = newItemCount;
             }
 
-            previousItemCount = newItemCount;
+            // if the comboBoxModel was changed and it wasn't due to the filter changing
+            // (i.e. !doNotChangeDocument) and it wasn't because the user selected a new
+            // selectedItem (i.e. getIndex0() != -1 && e.getIndex1() != -1) then those
+            // changes may have invalidated the invariant that strict mode places on the
+            // text in the JTextField, so we must either:
+            //
+            // a) locate the text within the model (proving that the strict mode invariant still holds)
+            // b) set the text to that of the first element in the model (to reestablish the invariant)
+            if (isStrict() && e.getIndex0() != -1 && e.getIndex1() != -1 && !doNotChangeDocument) {
+                // notice that instead of doing the work directly, we post a Runnable here
+                // to check the strict mode invariant and repair it if it is broken. That's
+                // important. It's necessary because we must let the current ListEvent
+                // finish its broadcast before we attempt to change the filter of the
+                // filteredItems list by setting new text into the comboBoxEditorComponent
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        final String currentText = comboBoxEditorComponent.getText();
+                        String newStrictValue = findAutoCompleteTerm(currentText);
+
+                        // if we did not find the same autocomplete term
+                        if (!currentText.equals(newStrictValue)) {
+                            // select the first item if we could not find an autocomplete term with the currentText
+                            if (newStrictValue == null && !items.isEmpty())
+                                newStrictValue = convertToString(items.get(0));
+
+                            // set the new strict value text into the editor component
+                            comboBoxEditorComponent.setText(newStrictValue);
+                        }
+                    }
+                });
+            }
         }
+
         public void intervalAdded(ListDataEvent e) { contentsChanged(e); }
         public void intervalRemoved(ListDataEvent e) { contentsChanged(e); }
     }
