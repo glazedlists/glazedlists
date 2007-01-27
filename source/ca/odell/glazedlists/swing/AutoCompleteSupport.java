@@ -1459,6 +1459,7 @@ public final class AutoCompleteSupport<E> {
      */
     private class ListDataHandler implements ListDataListener {
         private int previousItemCount = -1;
+        private final Runnable checkStrictModeInvariantRunnable = new CheckStrictModeInvariantRunnable();
 
         public void contentsChanged(ListDataEvent e) {
             final int newItemCount = comboBox.getItemCount();
@@ -1510,27 +1511,29 @@ public final class AutoCompleteSupport<E> {
                 // important. It's necessary because we must let the current ListEvent
                 // finish its broadcast before we attempt to change the filter of the
                 // filteredItems list by setting new text into the comboBoxEditorComponent
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        final String currentText = comboBoxEditorComponent.getText();
-                        String newStrictValue = findAutoCompleteTerm(currentText);
-
-                        // if we did not find the same autocomplete term
-                        if (!currentText.equals(newStrictValue)) {
-                            // select the first item if we could not find an autocomplete term with the currentText
-                            if (newStrictValue == null && !items.isEmpty())
-                                newStrictValue = convertToString(items.get(0));
-
-                            // set the new strict value text into the editor component
-                            comboBoxEditorComponent.setText(newStrictValue);
-                        }
-                    }
-                });
+                SwingUtilities.invokeLater(checkStrictModeInvariantRunnable);
             }
         }
 
         public void intervalAdded(ListDataEvent e) { contentsChanged(e); }
         public void intervalRemoved(ListDataEvent e) { contentsChanged(e); }
+
+        private class CheckStrictModeInvariantRunnable implements Runnable {
+            public void run() {
+                final String currentText = comboBoxEditorComponent.getText();
+                String newStrictValue = findAutoCompleteTerm(currentText);
+
+                // if we did not find the same autocomplete term
+                if (!currentText.equals(newStrictValue)) {
+                    // select the first item if we could not find an autocomplete term with the currentText
+                    if (newStrictValue == null && !items.isEmpty())
+                        newStrictValue = convertToString(items.get(0));
+
+                    // set the new strict value text into the editor component
+                    comboBoxEditorComponent.setText(newStrictValue);
+                }
+            }
+        }
     }
 
     /**
