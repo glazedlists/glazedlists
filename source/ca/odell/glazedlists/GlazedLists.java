@@ -16,6 +16,7 @@ import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.Matchers;
 
+import java.beans.PropertyChangeEvent;
 import java.util.*;
 
 /**
@@ -431,6 +432,32 @@ public final class GlazedLists {
     public static <E> ObservableElementList.Connector<E> beanConnector(Class<E> beanClass) {
         return new JavaBeanEventListConnector<E>(beanClass);
     }
+    
+    /**
+     * Create a new Connector for the {@link ObservableElementList} that works with JavaBeans'
+     * {@link java.beans.PropertyChangeListener}. The methods to add and remove listeners are
+     * detected automatically by examining the bean class and searching for a method prefixed with
+     * "add" or "remove" taking a single {@link java.beans.PropertyChangeListener} argument.
+     * 
+     * <p> The event matcher allows filtering of {@link java.beans.PropertyChangeEvent}s. 
+     * Only matching events are delivered to the ObservableElementList. 
+     * To create a matcher that matches PropertyChangeEvents by property names, you can use
+     * {@link Matchers#propertyEventNameMatcher(boolean, String[])}
+     * 
+     * @param beanClass a class with both
+     *        <code>addPropertyChangeListener(PropertyChangeListener)</code> and
+     *        <code>removePropertyChangeListener(PropertyChangeListener)</code>, or similar
+     *        methods.
+     * @param eventMatcher for matching PropertyChangeEvents that will be delivered to the
+     *        ObservableElementList
+     * @return an ObservableElementList.Connector for the specified class
+     */
+    public static <E> ObservableElementList.Connector<E> beanConnector(Class<E> beanClass,
+            Matcher<PropertyChangeEvent> eventMatcher) {
+        final JavaBeanEventListConnector<E> result = new JavaBeanEventListConnector<E>(beanClass);
+        result.setEventMatcher(eventMatcher);
+        return result;
+    }
 
     /**
      * Create a new Connector for the {@link ObservableElementList} that works with
@@ -445,6 +472,31 @@ public final class GlazedLists {
      */
     public static <E> ObservableElementList.Connector<E> beanConnector(Class<E> beanClass, String addListener, String removeListener) {
         return new JavaBeanEventListConnector<E>(beanClass, addListener, removeListener);
+    }
+    
+    /**
+     * Create a new Connector for the {@link ObservableElementList} that works with
+     * JavaBeans' {@link java.beans.PropertyChangeListener}. The methods to add
+     * and remove listeners are specified by name. Such methods must take a single
+     * {@link java.beans.PropertyChangeListener} argument.
+     *
+     * <p> The event matcher allows filtering of {@link java.beans.PropertyChangeEvent}s. 
+     * Only matching events are delivered to the ObservableElementList.
+     * To create a matcher that matches PropertyChangeEvents by property names, you can use
+     * {@link Matchers#propertyEventNameMatcher(boolean, String[])}
+     * 
+     * @param beanClass a class with both methods as specified.
+     * @param addListener a method name such as "addPropertyChangeListener"
+     * @param removeListener a method name such as "removePropertyChangeListener"
+     * @param eventMatcher for matching PropertyChangeEvents that will be delivered to the
+     *        ObservableElementList
+     * @return an ObservableElementList.Connector for the specified class
+     */
+    public static <E> ObservableElementList.Connector<E> beanConnector(Class<E> beanClass,
+            String addListener, String removeListener, Matcher<PropertyChangeEvent> eventMatcher) {
+        final JavaBeanEventListConnector<E> result = new JavaBeanEventListConnector<E>(beanClass, addListener, removeListener);
+        result.setEventMatcher(eventMatcher);
+        return result;
     }
 
     // Matchers // // // // // // // // // // // // // // // // // // // // //

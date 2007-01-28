@@ -4,6 +4,8 @@
 package ca.odell.glazedlists.impl.beans;
 
 import ca.odell.glazedlists.ObservableElementList;
+import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.matchers.Matchers;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -32,6 +34,9 @@ public class JavaBeanEventListConnector<E> implements ObservableElementList.Conn
     /** The PropertyChangeListener to install on each list element. */
     protected PropertyChangeListener propertyChangeListener = this.createPropertyChangeListener();
 
+    /** Matches PropertyChangeEvents to deliver to the ObservableElementList. */
+    private Matcher<PropertyChangeEvent> eventMatcher = Matchers.trueMatcher();    
+    
     /**
      * Reflection is used to install/uninstall the {@link #propertyChangeListener}
      * on list elements, so we cache the Object[] used in the reflection call
@@ -121,11 +126,11 @@ public class JavaBeanEventListConnector<E> implements ObservableElementList.Conn
     }
 
     /**
-     * Start listening for PropertyChangeEvents from the specified
-     * <code>element</code>. The PropertyChangeListener is installed using
+     * Stop listening for PropertyChangeEvents from the specified
+     * <code>element</code>. The PropertyChangeListener is uninstalled using
      * reflection.
      *
-     * @param element the element to be observed
+     * @param element the observed element
      * @param listener the listener that was installed on the <code>element</code>
      *      in {@link #installListener(Object)}
      * @throws RuntimeException if the reflection call fails to successfully
@@ -147,6 +152,24 @@ public class JavaBeanEventListConnector<E> implements ObservableElementList.Conn
     }
 
     /**
+     * Returns the event matcher. It matches those PropertyChangeEvents, which should be delivered
+     * to the ObservableElementList. In other words, it serves as a filter for PropertyChangeEvents.
+     */
+    public final Matcher<PropertyChangeEvent> getEventMatcher() {
+        return eventMatcher;
+    }
+
+    /**
+     * Sets the event matcher, may not be <code>null</code>. It matches those
+     * PropertyChangeEvents, which should be delivered to the ObservableElementList. In other words,
+     * it serves as a filter for PropertyChangeEvents.
+     */
+    public final void setEventMatcher(Matcher<PropertyChangeEvent> eventMatcher) {
+        if (eventMatcher == null) throw new IllegalArgumentException("Event matcher may not be null."); 
+        this.eventMatcher = eventMatcher;
+    }
+
+    /**
      * A local factory method to produce the PropertyChangeListener which will
      * be installed on list elements.
      */
@@ -155,13 +178,13 @@ public class JavaBeanEventListConnector<E> implements ObservableElementList.Conn
     }
 
     /**
-     * The PropertyChangeListener which notifies the
-     * {@link ObservableElementList} within this Connector of changes to
-     * list elements.
+     * The PropertyChangeListener which notifies the {@link ObservableElementList} within this
+     * Connector of changes to list elements.
      */
     public class PropertyChangeHandler implements PropertyChangeListener {
         public void propertyChange(PropertyChangeEvent event) {
-            ((ObservableElementList) list).elementChanged(event.getSource());
+            if (getEventMatcher().matches(event))
+                ((ObservableElementList) list).elementChanged(event.getSource());
         }
     }
 }

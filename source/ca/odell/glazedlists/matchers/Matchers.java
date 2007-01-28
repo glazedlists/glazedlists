@@ -4,12 +4,14 @@
 package ca.odell.glazedlists.matchers;
 
 import ca.odell.glazedlists.Filterator;
+import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.impl.matchers.*;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.beans.PropertyChangeEvent;
 import java.lang.reflect.Array;
 
 /**
@@ -130,6 +132,26 @@ public final class Matchers {
         return new RangeMatcher<D,E>(start, end, filterator);
     }
 
+    /**
+     * Create a {@link Matcher} that uses the given <code>propertyNames</code> to match
+     * {@link PropertyChangeEvent}s by their property name. The concrete behaviour depends on the
+     * <code>matchPropertyNames</code> parameter. If you want to match property change events
+     * against a known set of property names, use a value of <code>true</code>. Alternatively,
+     * when you specify <code>false</code>, the specified property names will serve as an exclude
+     * list, e.g. if an event matches a specified property name, it will be filtered out.
+     * 
+     * <p>These matchers are especially useful as an event matcher in a bean connector. 
+     * 
+     * @param matchPropertyNames if <code>true</code>, match property change events against the
+     *        specified property names, if <code>false</code> filter them
+     * @param propertyNames the property names to consider
+     * 
+     * @see GlazedLists#beanConnector(Class, Matcher)
+     */
+    public static Matcher<PropertyChangeEvent> propertyEventNameMatcher(boolean matchPropertyNames, String... propertyNames) {
+        return new PropertyEventNameMatcher(matchPropertyNames, propertyNames);
+    }
+    
     /**
      * Iterate through the specified collection and remove all elements
      * that don't match the specified matcher.

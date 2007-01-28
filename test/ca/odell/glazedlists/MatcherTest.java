@@ -1,9 +1,11 @@
 package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.impl.matchers.NotMatcher;
+import ca.odell.glazedlists.impl.matchers.PropertyEventNameMatcher;
 import ca.odell.glazedlists.matchers.*;
 import junit.framework.TestCase;
 
+import java.beans.PropertyChangeEvent;
 import java.util.*;
 
 public class MatcherTest extends TestCase {
@@ -155,6 +157,61 @@ public class MatcherTest extends TestCase {
         assertEquals(true, matcher.matches(null));
     }
 
+    public void testPropertyEventNameMatcher() {
+        try {
+            new PropertyEventNameMatcher(true, (Collection) null);
+            fail("Expected exception for PropertyEventNameMatcher constructor");
+        } catch (IllegalArgumentException ex) {
+            // expected
+        }
+        try {
+            new PropertyEventNameMatcher(true, (String[]) null);
+            fail("Expected exception for PropertyEventNameMatcher constructor");
+        } catch (IllegalArgumentException ex) {
+            // expected
+        }
+        final PropertyChangeEvent event1 = new PropertyChangeEvent(this, "test", "old", "new");
+        final PropertyChangeEvent event2 = new PropertyChangeEvent(this, "test", null, null);
+        final PropertyChangeEvent event3 = new PropertyChangeEvent(this, "hello", "old", "new");
+        final PropertyChangeEvent event4 = new PropertyChangeEvent(this, "hello", null, null);
+        final PropertyChangeEvent event5 = new PropertyChangeEvent(this, null, null, null);
+        
+        Matcher<PropertyChangeEvent> matcher = new PropertyEventNameMatcher(true, new String[] {"test", null});        
+        assertEquals(true, matcher.matches(event1));
+        assertEquals(true, matcher.matches(event2));
+        assertEquals(false, matcher.matches(event3));
+        assertEquals(false, matcher.matches(event4));
+        assertEquals(true, matcher.matches(event5));
+        
+        matcher = new PropertyEventNameMatcher(false, new String[] {"test", null});
+        assertEquals(false, matcher.matches(event1));
+        assertEquals(false, matcher.matches(event2));
+        assertEquals(true, matcher.matches(event3));
+        assertEquals(true, matcher.matches(event4));
+        assertEquals(false, matcher.matches(event5));
+
+        matcher = new PropertyEventNameMatcher(true, new String[] {});
+        assertEquals(false, matcher.matches(event1));
+        assertEquals(false, matcher.matches(event2));
+        assertEquals(false, matcher.matches(event3));
+        assertEquals(false, matcher.matches(event4));
+        assertEquals(false, matcher.matches(event5));
+
+        matcher = new PropertyEventNameMatcher(false, new String[] {});
+        assertEquals(true, matcher.matches(event1));
+        assertEquals(true, matcher.matches(event2));
+        assertEquals(true, matcher.matches(event3));
+        assertEquals(true, matcher.matches(event4));
+        assertEquals(true, matcher.matches(event5));
+
+        matcher = new PropertyEventNameMatcher(true, Arrays.asList(new String[] {"test", null}));        
+        assertEquals(true, matcher.matches(event1));
+        assertEquals(true, matcher.matches(event2));
+        assertEquals(false, matcher.matches(event3));
+        assertEquals(false, matcher.matches(event4));
+        assertEquals(true, matcher.matches(event5));
+    }
+    
     private static class NumberMatcherEditor extends AbstractMatcherEditor<Number> {
         public void setNumber(Number number) {
             this.fireChanged(new NumberMatcher(number));
