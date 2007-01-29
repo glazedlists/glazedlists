@@ -23,13 +23,13 @@ import java.util.EventListener;
 public class JavaBeanEventListConnector<E> implements ObservableElementList.Connector<E> {
 
     /** The method to use when installing a PropertyChangeListener on an object. */
-    private Method addListenerMethod = null;
+    private Method addListenerMethod;
 
     /** The method to use when uninstalling a PropertyChangeListener on an object. */
-    private Method removeListenerMethod = null;
+    private Method removeListenerMethod;
 
     /** The list which contains the elements being observed via this {@link ObservableElementList.Connector}. */
-    private ObservableElementList<? extends E> list = null;
+    private ObservableElementList<? extends E> list;
 
     /** The PropertyChangeListener to install on each list element. */
     protected PropertyChangeListener propertyChangeListener = this.createPropertyChangeListener();
@@ -42,7 +42,7 @@ public class JavaBeanEventListConnector<E> implements ObservableElementList.Conn
      * on list elements, so we cache the Object[] used in the reflection call
      * for a speed increase.
      */
-    private Object[] reflectionParameters = new Object[] {this.propertyChangeListener};
+    private final Object[] reflectionParameters = {propertyChangeListener};
 
     /**
      * The types taken by the methods which add and remove PropertyChangeListeners.
