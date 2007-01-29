@@ -20,6 +20,10 @@ public class JavaBeanEventListConnectorTest extends TestCase {
             new JavaBeanEventListConnector(Object.class);
             fail("Failed to receive RuntimeException for beanClass without add/remove PropertyChangeListener methods");
         } catch (IllegalArgumentException iae) { }
+        try {
+            new JavaBeanEventListConnector(JLabel.class, null);
+            fail("Failed to receive IllegalArgumentException for null event matcher");
+        } catch (IllegalArgumentException iae) { }
 
         new JavaBeanEventListConnector(JComponent.class);
     }
@@ -53,6 +57,11 @@ public class JavaBeanEventListConnectorTest extends TestCase {
         try {
             new JavaBeanEventListConnector(JComponent.class, "addPropertyChangeListener", "removeBOOLBLAH");
             fail("Failed to receive IllegalArgumentException with invalid remove method name");
+        } catch (IllegalArgumentException iae) { }
+
+        try {
+            new JavaBeanEventListConnector(JComponent.class, "addPropertyChangeListener", "removePropertyChangeListener", null);
+            fail("Failed to receive IllegalArgumentException for null event matcher");
         } catch (IllegalArgumentException iae) { }
 
         new JavaBeanEventListConnector(JComponent.class, "addPropertyChangeListener", "removePropertyChangeListener");

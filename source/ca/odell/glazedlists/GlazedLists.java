@@ -439,6 +439,30 @@ public final class GlazedLists {
      * detected automatically by examining the bean class and searching for a method prefixed with
      * "add" or "remove" taking a single {@link java.beans.PropertyChangeListener} argument.
      * 
+     * <p>The <code>propertyNames<code> parameter specifies the set of properties by name whose
+     * {@link java.beans.PropertyChangeEvent}s should be delivered to the ObservableElementList, 
+     * e.g. property change events for properties not contained in the specified 
+     * <code>propertyNames<code> are ignored.
+     * 
+     * @param beanClass a class with both
+     *        <code>addPropertyChangeListener(PropertyChangeListener)</code> and
+     *        <code>removePropertyChangeListener(PropertyChangeListener)</code>, or similar
+     *        methods.
+     * @param propertyNames specifies the properties whose {@link java.beans.PropertyChangeEvent}s
+     *        should be delivered to the ObservableElementList, ignoring the all others
+     * @return an ObservableElementList.Connector for the specified class
+     */
+    public static <E> ObservableElementList.Connector<E> beanConnector(Class<E> beanClass, String... propertyNames) {
+        final Matcher<PropertyChangeEvent> byNameMatcher = Matchers.propertyEventNameMatcher(true, propertyNames);
+        return GlazedLists.beanConnector(beanClass, byNameMatcher);
+    }
+    
+    /**
+     * Create a new Connector for the {@link ObservableElementList} that works with JavaBeans'
+     * {@link java.beans.PropertyChangeListener}. The methods to add and remove listeners are
+     * detected automatically by examining the bean class and searching for a method prefixed with
+     * "add" or "remove" taking a single {@link java.beans.PropertyChangeListener} argument.
+     * 
      * <p> The event matcher allows filtering of {@link java.beans.PropertyChangeEvent}s. 
      * Only matching events are delivered to the ObservableElementList. 
      * To create a matcher that matches PropertyChangeEvents by property names, you can use
@@ -454,9 +478,7 @@ public final class GlazedLists {
      */
     public static <E> ObservableElementList.Connector<E> beanConnector(Class<E> beanClass,
             Matcher<PropertyChangeEvent> eventMatcher) {
-        final JavaBeanEventListConnector<E> result = new JavaBeanEventListConnector<E>(beanClass);
-        result.setEventMatcher(eventMatcher);
-        return result;
+        return new JavaBeanEventListConnector<E>(beanClass, eventMatcher);
     }
 
     /**
@@ -494,9 +516,7 @@ public final class GlazedLists {
      */
     public static <E> ObservableElementList.Connector<E> beanConnector(Class<E> beanClass,
             String addListener, String removeListener, Matcher<PropertyChangeEvent> eventMatcher) {
-        final JavaBeanEventListConnector<E> result = new JavaBeanEventListConnector<E>(beanClass, addListener, removeListener);
-        result.setEventMatcher(eventMatcher);
-        return result;
+        return new JavaBeanEventListConnector<E>(beanClass, addListener, removeListener, eventMatcher);
     }
 
     // Matchers // // // // // // // // // // // // // // // // // // // // //
