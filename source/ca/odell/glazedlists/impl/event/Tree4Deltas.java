@@ -68,11 +68,12 @@ public class Tree4Deltas<E> {
     /**
      * <p>We should consider removing the loop by only setting on removed elements.
      *
-     * @param value the previous value being replaced
+     * @param oldValue the previous value being replaced
+     * @param newValue the new value
      * @param startIndex the first updated element, inclusive
      * @param endIndex the last index, exclusive
      */
-    public void targetUpdate(int startIndex, int endIndex, E value) {
+    public void targetUpdate(int startIndex, int endIndex, E oldValue, E newValue) {
         if(!initialCapacityKnown) ensureCapacity(endIndex);
         for(int i = startIndex; i < endIndex; i++) {
             int overallIndex = tree.convertIndexColor(i, TARGET_INDICES, ALL_INDICES);
@@ -80,7 +81,7 @@ public class Tree4Deltas<E> {
 
             if(horribleHackPreferMostRecentValue) {
                 byte newColor = standingChangeToIndex.getColor() == INSERT ? INSERT : UPDATE;
-                tree.set(overallIndex, ALL_INDICES, newColor, value, 1);
+                tree.set(overallIndex, ALL_INDICES, newColor, oldValue, 1);
                 continue;
             }
 
@@ -91,21 +92,12 @@ public class Tree4Deltas<E> {
 
             // if we're updating an update, the original replaced value stands.
             if(standingChangeToIndex.getColor() == UPDATE) {
-                value = standingChangeToIndex.get();
+                oldValue = standingChangeToIndex.get();
             }
 
             // apply the update to our change description
-            tree.set(overallIndex, ALL_INDICES, UPDATE, value, 1);
+            tree.set(overallIndex, ALL_INDICES, UPDATE, oldValue, 1);
         }
-    }
-
-    /**
-     * @param startIndex the first inserted element, inclusive
-     * @param endIndex the last index, exclusive
-     */
-    public void targetInsert(int startIndex, int endIndex) {
-        if(!initialCapacityKnown) ensureCapacity(endIndex);
-        tree.add(startIndex, TARGET_INDICES, INSERT, (E) ListEvent.UNKNOWN_VALUE, endIndex - startIndex);
     }
 
     /**
@@ -115,11 +107,13 @@ public class Tree4Deltas<E> {
      * when the target doesn't store its value, for example with buffered
      * changes.
      *
-     * @param value the inserted value
+     * @param startIndex the first inserted element, inclusive
+     * @param endIndex the last index, exclusive
+     * @param newValue the inserted value
      */
-    public void targetInsert(int startIndex, int endIndex, E value) {
+    public void targetInsert(int startIndex, int endIndex, E newValue) {
         if(!initialCapacityKnown) ensureCapacity(endIndex);
-        tree.add(startIndex, TARGET_INDICES, INSERT, value, endIndex - startIndex);
+        tree.add(startIndex, TARGET_INDICES, INSERT, newValue, endIndex - startIndex);
     }
 
     /**
@@ -217,14 +211,15 @@ public class Tree4Deltas<E> {
             int blockStart = i.getBlockStart();
             int blockEnd = i.getBlockEnd();
             int type = i.getType();
-            E value = i.getPreviousValue();
+            E oldValue = i.getOldValue();
+            E newValue = i.getNewValue();
 
             if(type == ListEvent.INSERT) {
-                targetInsert(blockStart, blockEnd);
+                targetInsert(blockStart, blockEnd, newValue);
             } else if(type == ListEvent.UPDATE) {
-                targetUpdate(blockStart, blockEnd, value);
+                targetUpdate(blockStart, blockEnd, oldValue, newValue);
             } else if(type == ListEvent.DELETE) {
-                targetDelete(blockStart, blockEnd, value);
+                targetDelete(blockStart, blockEnd, oldValue);
             } else {
                 throw new IllegalStateException();
             }
@@ -302,7 +297,7 @@ public class Tree4Deltas<E> {
             return treeIterator.hasNextNode(CHANGE_INDICES);
         }
 
-        public E getPreviousValue() {
+        public E getOldValue() {
             return treeIterator.node().get();
         }
     }

@@ -206,9 +206,9 @@ public class TransactionList<S> extends TransformedList<S,S> {
                 int index = i.getIndex();
                 int type = i.getType();
                 if(type == ListEvent.INSERT) {
-                    source.add(index, i.getPreviousValue());
+                    source.add(index, i.getOldValue());
                 } else if(type == ListEvent.UPDATE) {
-                    source.set(index, i.getPreviousValue());
+                    source.set(index, i.getOldValue());
                 } else if(type == ListEvent.DELETE) {
                     source.remove(index);
                 }
@@ -301,7 +301,7 @@ public class TransactionList<S> extends TransformedList<S,S> {
 
                     // otherwise an entirely different value has been returned and we must record it as the new transaction value
                     } else {
-                        deltas.targetUpdate(targetIndex, targetIndex+1, resolvedValue);
+                        deltas.targetUpdate(targetIndex, targetIndex+1, resolvedValue, (S)ListEvent.UNKNOWN_VALUE);
                         updates.elementUpdated(targetIndex, targetValue);
                     }
 
@@ -412,8 +412,8 @@ public class TransactionList<S> extends TransformedList<S,S> {
         if (txStarted) {
             updates.beginEvent();
             final S value = get(index);
-            deltas.targetUpdate(index, index+1, element);
-            updates.elementUpdated(index, value);
+            deltas.targetUpdate(index, index+1, element, (S)ListEvent.UNKNOWN_VALUE);
+            updates.elementUpdated(index, value, (S)ListEvent.UNKNOWN_VALUE);
             updates.commitEvent();
             return value;
         } else {

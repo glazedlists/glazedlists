@@ -17,7 +17,7 @@ public class Tree4DeltasTest extends TestCase {
     public void testIterateByBlocks() {
         Tree4Deltas deltas = new Tree4Deltas();
         deltas.reset(10);
-        deltas.targetInsert(3, 6);
+        deltas.targetInsert(3, 6, null);
         deltas.targetDelete(8, 10, ListEvent.UNKNOWN_VALUE);
 
         Tree4Deltas.Iterator iterator = deltas.iterator();
@@ -42,8 +42,8 @@ public class Tree4DeltasTest extends TestCase {
         assertEquals("__________", deltas.toString());
 
         deltas.targetDelete(5, 6, null);
-        deltas.targetInsert(2, 3);
-        deltas.targetUpdate(8, 9, null);
+        deltas.targetInsert(2, 3, null);
+        deltas.targetUpdate(8, 9, null, null);
 
         assertEquals("__+___X__U_", deltas.toString());
 
@@ -59,7 +59,7 @@ public class Tree4DeltasTest extends TestCase {
         deltas.sourceDelete(5);
         assertEquals("__+______", deltas.toString());
 
-        deltas.targetInsert(2, 6);
+        deltas.targetInsert(2, 6, null);
         assertEquals("__+++++______", deltas.toString());
 
         deltas.sourceInsert(8);
@@ -73,7 +73,7 @@ public class Tree4DeltasTest extends TestCase {
 
         deltas.targetDelete(5, 6, null);
         deltas.targetInsert(2, 3, "i");
-        deltas.targetUpdate(8, 9, "u");
+        deltas.targetUpdate(8, 9, "u", null);
         assertEquals("i", deltas.getTargetValue(2));
         assertEquals("u", deltas.getTargetValue(8));
         assertEquals(ListEvent.UNKNOWN_VALUE, deltas.getTargetValue(0));

@@ -293,7 +293,7 @@ public class ListDeltasTest extends TestCase {
     public void testIterateByBlocks() {
         Tree4Deltas deltas = new Tree4Deltas();
         deltas.reset(10);
-        deltas.targetInsert(3, 6);
+        deltas.targetInsert(3, 6, ListEvent.UNKNOWN_VALUE);
 
         Tree4Deltas.Iterator iterator = deltas.iterator();
         assertEquals(true, iterator.hasNextNode());

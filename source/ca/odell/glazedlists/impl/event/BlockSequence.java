@@ -23,15 +23,16 @@ public class BlockSequence<E> {
     private TIntArrayList ends = new TIntArrayList();
     /** the change types */
     private TIntArrayList types = new TIntArrayList();
-    /** the deleted elements */
-    private List<E> elements = new ArrayList<E>();
+    /** the impacted values */
+    private List<E> oldValues = new ArrayList<E>();
+    private List<E> newValues = new ArrayList<E>();
 
     /**
      * @param startIndex the first updated element, inclusive
      * @param endIndex the last index, exclusive
      */
     public boolean update(int startIndex, int endIndex) {
-        return addChange(ListEvent.UPDATE, startIndex, endIndex, (E)ListEvent.UNKNOWN_VALUE);
+        return addChange(ListEvent.UPDATE, startIndex, endIndex, (E)ListEvent.UNKNOWN_VALUE, (E)ListEvent.UNKNOWN_VALUE);
     }
 
     /**
@@ -39,7 +40,7 @@ public class BlockSequence<E> {
      * @param endIndex the last index, exclusive
      */
     public boolean insert(int startIndex, int endIndex) {
-        return addChange(ListEvent.INSERT, startIndex, endIndex, (E)ListEvent.UNKNOWN_VALUE);
+        return addChange(ListEvent.INSERT, startIndex, endIndex, (E)ListEvent.UNKNOWN_VALUE, (E)ListEvent.UNKNOWN_VALUE);
     }
 
     /**
@@ -47,7 +48,7 @@ public class BlockSequence<E> {
      * @param endIndex the last index, exclusive
      */
     public boolean delete(int startIndex, int endIndex) {
-        return addChange(ListEvent.DELETE, startIndex, endIndex, (E)ListEvent.UNKNOWN_VALUE);
+        return addChange(ListEvent.DELETE, startIndex, endIndex, (E)ListEvent.UNKNOWN_VALUE, (E)ListEvent.UNKNOWN_VALUE);
     }
 
     /**
@@ -57,26 +58,29 @@ public class BlockSequence<E> {
      * @return true if the change was successfully applied, or <code>false</code>
      *      if no change was made because this change could not be handled.
      */
-    public boolean addChange(int type, int startIndex, int endIndex, E value) {
+    public boolean addChange(int type, int startIndex, int endIndex, E oldValue, E newValue) {
         // remind ourselves of the most recent change
         int lastType;
         int lastStartIndex;
         int lastEndIndex;
         int lastChangedIndex;
         int size = types.size();
-        Object lastRemovedValue;
+        E lastOldValue;
+        E lastNewValue;
         if(size == 0) {
             lastType = -1;
             lastStartIndex = -1;
             lastEndIndex = 0;
             lastChangedIndex = 0;
-            lastRemovedValue = ListEvent.UNKNOWN_VALUE;
+            lastOldValue = (E)ListEvent.UNKNOWN_VALUE;
+            lastNewValue = (E)ListEvent.UNKNOWN_VALUE;
         } else {
             lastType = types.get(size - 1);
             lastStartIndex = starts.get(size - 1);
             lastEndIndex = ends.get(size - 1);
             lastChangedIndex = (lastType == ListEvent.DELETE) ? lastStartIndex : lastEndIndex;
-            lastRemovedValue = (lastType == ListEvent.DELETE) ? elements.get(size - 1) : ListEvent.UNKNOWN_VALUE;
+            lastOldValue = (lastType == ListEvent.DELETE) ? oldValues.get(size - 1) : (E)ListEvent.UNKNOWN_VALUE;
+            lastNewValue = newValues.get(size - 1);
         }
 
         // this change breaks the linear-ordering requirement, convert
@@ -85,7 +89,7 @@ public class BlockSequence<E> {
             return false;
 
         // concatenate this change on to the previous one
-        } else if(lastChangedIndex == startIndex && lastType == type && value == lastRemovedValue) {
+        } else if(lastChangedIndex == startIndex && lastType == type && oldValue == lastOldValue && newValue == lastNewValue) {
             int newLength = (lastEndIndex - lastStartIndex) + (endIndex - startIndex);
             ends.set(size - 1, lastStartIndex + newLength);
             return true;
@@ -95,7 +99,8 @@ public class BlockSequence<E> {
             starts.add(startIndex);
             ends.add(endIndex);
             types.add(type);
-            elements.add(value);
+            oldValues.add(oldValue);
+            newValues.add(newValue);
             return true;
         }
     }
@@ -108,7 +113,8 @@ public class BlockSequence<E> {
         starts.clear();
         ends.clear();
         types.clear();
-        elements.clear();
+        oldValues.clear();
+        newValues.clear();
     }
 
     public Iterator iterator() {
@@ -185,8 +191,11 @@ public class BlockSequence<E> {
             if(type == -1) throw new IllegalStateException("The ListEvent is not currently in a state to return a type");
             return type;
         }
-        public E getPreviousValue() {
-            return elements.get(blockIndex);
+        public E getOldValue() {
+            return oldValues.get(blockIndex);
+        }
+        public E getNewValue() {
+            return newValues.get(blockIndex);
         }
 
         /**

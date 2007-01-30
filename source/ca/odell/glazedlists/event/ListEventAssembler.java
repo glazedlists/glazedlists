@@ -146,21 +146,21 @@ public final class ListEventAssembler<E> {
      * the specified index, with the specified previous value.
      */
     public void elementInserted(int index, E newValue) {
-        delegate.elementInserted(index, newValue);
+        delegate.addChange(ListEvent.INSERT, index, index, (E)ListEvent.UNKNOWN_VALUE, newValue);
     }
     /**
      * Add to the current ListEvent the update of the element at the specified
      * index, with the specified previous value.
      */
     public void elementUpdated(int index, E oldValue, E newValue) {
-        delegate.elementUpdated(index, oldValue, newValue);
+        delegate.addChange(ListEvent.UPDATE, index, index, oldValue, newValue);
     }
     /**
      * Add to the current ListEvent the removal of the element at the specified
      * index, with the specified previous value.
      */
     public void elementDeleted(int index, E oldValue) {
-        delegate.elementDeleted(index, oldValue);
+        delegate.addChange(ListEvent.DELETE, index, index, oldValue, (E)ListEvent.UNKNOWN_VALUE);
     }
 
     /**
@@ -177,48 +177,66 @@ public final class ListEventAssembler<E> {
      *
      * <p>One or more calls to this method must be prefixed by a call to
      * beginEvent() and followed by a call to commitEvent().
+     *
+     * @deprecated replaced with {@link #elementInserted}, {@link #elementUpdated}
+     *     and {@link #elementDeleted}.
      */
     public void addChange(int type, int startIndex, int endIndex) {
-        delegate.addChange(type, startIndex, endIndex);
+        delegate.addChange(type, startIndex, endIndex, (E)ListEvent.UNKNOWN_VALUE, (E)ListEvent.UNKNOWN_VALUE);
     }
     /**
      * Convenience method for appending a single change of the specified type.
+     *
+     * @deprecated replaced with {@link #elementInserted}, {@link #elementUpdated}
+     *     and {@link #elementDeleted}.
      */
     public void addChange(int type, int index) {
         addChange(type, index, index);
     }
     /**
      * Convenience method for appending a single insert.
+     *
+     * @deprecated replaced with {@link #elementInserted}.
      */
     public void addInsert(int index) {
         addChange(ListEvent.INSERT, index);
     }
     /**
      * Convenience method for appending a single delete.
+     *
+     * @deprecated replaced with {@link #elementDeleted}.
      */
     public void addDelete(int index) {
         addChange(ListEvent.DELETE, index);
     }
     /**
      * Convenience method for appending a single update.
+     *
+     * @deprecated replaced with {@link #elementUpdated}.
      */
     public void addUpdate(int index) {
         addChange(ListEvent.UPDATE, index);
     }
     /**
      * Convenience method for appending a range of inserts.
+     *
+     * @deprecated replaced with {@link #elementInserted}.
      */
     public void addInsert(int startIndex, int endIndex) {
         addChange(ListEvent.INSERT, startIndex, endIndex);
     }
     /**
      * Convenience method for appending a range of deletes.
+     *
+     * @deprecated replaced with {@link #elementDeleted}.
      */
     public void addDelete(int startIndex, int endIndex) {
         addChange(ListEvent.DELETE, startIndex, endIndex);
     }
     /**
      * Convenience method for appending a range of updates.
+     *
+     * @deprecated replaced with {@link #elementUpdated}.
      */
     public void addUpdate(int startIndex, int endIndex) {
         addChange(ListEvent.UPDATE, startIndex, endIndex);
@@ -385,31 +403,18 @@ public final class ListEventAssembler<E> {
             if(!isEventEmpty()) throw new IllegalStateException("Cannot combine reorder with other change events");
             // can't reorder an empty list, see bug 91
             if(reorderMap.length == 0) return;
-            addChange(ListEvent.DELETE, 0, reorderMap.length - 1);
-            addChange(ListEvent.INSERT, 0, reorderMap.length - 1);
+            addChange(ListEvent.DELETE, 0, reorderMap.length - 1, (E)ListEvent.UNKNOWN_VALUE, (E)ListEvent.UNKNOWN_VALUE);
+            addChange(ListEvent.INSERT, 0, reorderMap.length - 1, (E)ListEvent.UNKNOWN_VALUE, (E)ListEvent.UNKNOWN_VALUE);
             this.reorderMap = reorderMap;
         }
 
         /**
          * Adds a block of changes to the set of list changes. The change block
          * allows a range of changes to be grouped together for efficiency.
+         *
+         * @param endIndex the inclusive end index
          */
-        public abstract void addChange(int type, int startIndex, int endIndex);
-
-        /**
-         * Adds a block describing a deleted element.
-         */
-        public abstract void elementDeleted(int index, E oldValue);
-
-        /**
-         * Adds a block describing a replaced element.
-         */
-        public abstract void elementUpdated(int index, E oldValue, E newValue);
-
-        /**
-         * Adds a block describing an intserted element.
-         */
-        public abstract void elementInserted(int index, E newValue);
+        public abstract void addChange(int type, int startIndex, int endIndex, E oldValue, E newValue);
 
         /**
          * @return <tt>true</tt> if the current atomic change to this list change
@@ -462,13 +467,7 @@ public final class ListEventAssembler<E> {
                     int index = listChanges.getIndex();
                     E oldValue = (E) listChanges.getOldValue();
                     E newValue = (E) listChanges.getNewValue();
-                    if(type == ListEvent.INSERT) {
-                        elementInserted(index, newValue);
-                    } else if(type == ListEvent.UPDATE) {
-                        elementUpdated(index, oldValue, newValue);
-                    } else if(type == ListEvent.DELETE) {
-                        elementDeleted(index, oldValue);
-                    }
+                    addChange(type, index, index, oldValue, newValue);
                 }
                 listChanges.reset();
             }
@@ -518,7 +517,7 @@ public final class ListEventAssembler<E> {
             listDeltas.reset(sourceList.size());
         }
 
-        public void addChange(int type, int startIndex, int endIndex) {
+        public void addChange(int type, int startIndex, int endIndex, E oldValue, E newValue) {
             for(int i = startIndex; i <= endIndex; i++) {
                 if(type == ListEvent.INSERT) {
                     listDeltas.add(i);
@@ -528,21 +527,6 @@ public final class ListEventAssembler<E> {
                     listDeltas.remove(startIndex);
                 }
             }
-        }
-
-        /** {@inheritDoc} */
-        public void elementInserted(int index, E newValue) {
-            addChange(ListEvent.INSERT, index, index);
-        }
-
-        /** {@inheritDoc} */
-        public void elementUpdated(int index, E oldValue, E newValue) {
-            addChange(ListEvent.UPDATE, index, index);
-        }
-
-        /** {@inheritDoc} */
-        public void elementDeleted(int index, E oldValue) {
-            addChange(ListEvent.DELETE, index, index);
         }
 
         public BarcodeListDeltas getListDeltas() {
@@ -595,10 +579,10 @@ public final class ListEventAssembler<E> {
         }
 
         /** {@inheritDoc} */
-        public void addChange(int type, int startIndex, int endIndex) {
+        public void addChange(int type, int startIndex, int endIndex, E oldValue, E newValue) {
             // try the linear holder first
             if(useListBlocksLinear) {
-                boolean success = blockSequence.addChange(type, startIndex, endIndex + 1, (E)ListEvent.UNKNOWN_VALUE);
+                boolean success = blockSequence.addChange(type, startIndex, endIndex + 1, oldValue, newValue);
                 if(success) {
                     return;
 
@@ -611,57 +595,12 @@ public final class ListEventAssembler<E> {
 
             // try the good old reliable deltas 2
             if(type == ListEvent.INSERT) {
-                listDeltas.targetInsert(startIndex, endIndex + 1);
+                listDeltas.targetInsert(startIndex, endIndex + 1, newValue);
             } else if(type == ListEvent.UPDATE) {
-                listDeltas.targetUpdate(startIndex, endIndex + 1, (E)ListEvent.UNKNOWN_VALUE);
+                listDeltas.targetUpdate(startIndex, endIndex + 1, oldValue, newValue);
             } else if(type == ListEvent.DELETE) {
-                listDeltas.targetDelete(startIndex, endIndex + 1, (E)ListEvent.UNKNOWN_VALUE);
+                listDeltas.targetDelete(startIndex, endIndex + 1, oldValue);
             }
-        }
-
-
-        /** {@inheritDoc} */
-        public void elementInserted(int index, E newValue) {
-            // TODO(jessewilson):
-            addChange(ListEvent.INSERT, index, index);
-        }
-
-        /** {@inheritDoc} */
-        public void elementUpdated(int index, E oldValue, E newValue) {
-            // try the linear holder first
-            if(useListBlocksLinear) {
-                boolean success = blockSequence.addChange(ListEvent.UPDATE, index, index + 1, oldValue);
-                if(success) {
-                    return;
-
-                // convert from linear to tree4deltas
-                } else {
-                    listDeltas.addAll(blockSequence);
-                    useListBlocksLinear = false;
-                }
-            }
-
-            // try the good old reliable deltas 2
-            listDeltas.targetUpdate(index, index + 1, oldValue);
-        }
-
-        /** {@inheritDoc} */
-        public void elementDeleted(int index, E oldValue) {
-            // try the linear holder first
-            if(useListBlocksLinear) {
-                boolean success = blockSequence.addChange(ListEvent.DELETE, index, index + 1, oldValue);
-                if(success) {
-                    return;
-
-                    // convert from linear to tree4deltas
-                } else {
-                    listDeltas.addAll(blockSequence);
-                    useListBlocksLinear = false;
-                }
-            }
-
-            // try the good old reliable deltas 2
-            listDeltas.targetDelete(index, index + 1, oldValue);
         }
 
         public boolean getUseListBlocksLinear() {
@@ -733,7 +672,7 @@ public final class ListEventAssembler<E> {
         }
 
         /** {@inheritDoc} */
-        public void addChange(int type, int startIndex, int endIndex) {
+        public void addChange(int type, int startIndex, int endIndex, E oldValue, E newValue) {
             // attempt to merge this into the most recent block
             if(atomicLatestBlock != null) {
                 boolean appendSuccess = atomicLatestBlock.append(startIndex, endIndex, type);
@@ -743,21 +682,6 @@ public final class ListEventAssembler<E> {
             // create a new block for the change
             atomicLatestBlock = new Block(startIndex, endIndex, type);
             atomicChangeBlocks.add(atomicLatestBlock);
-        }
-
-        /** {@inheritDoc} */
-        public void elementInserted(int index, E newValue) {
-            addChange(ListEvent.INSERT, index, index);
-        }
-
-        /** {@inheritDoc} */
-        public void elementUpdated(int index, E oldValue, E newValue) {
-            addChange(ListEvent.UPDATE, index, index);
-        }
-
-        /** {@inheritDoc} */
-        public void elementDeleted(int index, E oldValue) {
-            addChange(ListEvent.DELETE, index, index);
         }
 
         /** {@inheritDoc} */

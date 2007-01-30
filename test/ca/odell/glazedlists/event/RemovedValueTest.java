@@ -55,12 +55,10 @@ public class RemovedValueTest extends TestCase {
         List<E> deleteLog = new ArrayList<E>();
 
         public void listChanged(ListEvent<E> listChanges) {
-            Tree4DeltasListEvent<E> deltasListEvent = (Tree4DeltasListEvent<E>)listChanges;
-
             while(listChanges.next()) {
                 int type = listChanges.getType();
                 if(type == ListEvent.DELETE) {
-                    deleteLog.add(deltasListEvent.getOldValue());
+                    deleteLog.add(listChanges.getOldValue());
                 }
             }
         }

@@ -1231,7 +1231,7 @@ public class SortedListTest extends TestCase {
     }
 
 
-    public void testRemovedValueInListEvent_FixMe() {
+    public void testRemovedValueInListEvent() {
         EventList<String> original = new BasicEventList<String>();
         original.addAll(GlazedListsTests.stringToList("LIMPBIZKIT"));
 

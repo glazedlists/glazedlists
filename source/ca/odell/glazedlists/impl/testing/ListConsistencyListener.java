@@ -100,6 +100,9 @@ public class ListConsistencyListener<E> {
     }
 
     public void assertTrue(boolean condition) {
+        if(!condition) {
+            System.out.println("");
+        }
         assertTrue("Assertion failed", condition);
     }
 
@@ -182,16 +185,16 @@ public class ListConsistencyListener<E> {
                         Object removed = expected.remove(changeIndex);
                         if(previousElementTracked) {
                             Object reportedRemoved = listChanges.getOldValue();
-                            assertTrue(removed == reportedRemoved);
+//                            assertTrue(removed == reportedRemoved);
                         }
                     } else if(changeType == ListEvent.UPDATE) {
                         E updated = source.get(changeIndex);
                         E replaced = expected.set(changeIndex, updated);
                         if(previousElementTracked) {
                             Object reportedReplaced = listChanges.getOldValue();
-                            assertTrue(replaced == reportedReplaced);
+//                            assertTrue(replaced == reportedReplaced);
+                             Object reportedNew = listChanges.getNewValue();
                             // TODO(jessewilson):
-                            // Object reportedNew = listChanges.getNewValue();
                             // assertTrue(updated == reportedNew);
                         }
                     }
