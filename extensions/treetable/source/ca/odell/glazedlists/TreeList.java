@@ -1097,7 +1097,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * @return true if the path of possibleAncestor is a proper prefix of
      *      the path of this node.
      */
-    public boolean isAncestorByValue(Node<E> child, Node<E> possibleAncestor) {
+    private boolean isAncestorByValue(Node<E> child, Node<E> possibleAncestor) {
         if(possibleAncestor == null) return true;
         List<E> possibleAncestorPath = possibleAncestor.path;
 
