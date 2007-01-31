@@ -6,10 +6,7 @@ package com.publicobject.issuesbrowser.swing;
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
-import ca.odell.glazedlists.swing.EventComboBoxModel;
-import ca.odell.glazedlists.swing.EventSelectionModel;
-import ca.odell.glazedlists.swing.EventTableModel;
-import ca.odell.glazedlists.swing.TableComparatorChooser;
+import ca.odell.glazedlists.swing.*;
 import com.publicobject.issuesbrowser.*;
 import com.publicobject.misc.Exceptions;
 import com.publicobject.misc.swing.*;
@@ -20,6 +17,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.*;
 import java.net.URL;
@@ -146,7 +145,10 @@ public class IssuesBrowser implements Runnable {
 
         // build the issues table
         issuesTableModel = new EventTableModel<Issue>(separatedIssues, new IssueTableFormat());
-        JSeparatorTable issuesJTable = new JSeparatorTable(issuesTableModel);
+        final TableColumnModel issuesTableColumnModel = new EventTableColumnModel(new BasicEventList<TableColumn>());
+        JSeparatorTable issuesJTable = new JSeparatorTable(issuesTableModel, issuesTableColumnModel);
+        issuesJTable.setAutoCreateColumnsFromModel(true);
+        
         issuesJTable.setSeparatorRenderer(new IssueSeparatorTableCell(separatedIssues));
         issuesJTable.setSeparatorEditor(new IssueSeparatorTableCell(separatedIssues));
         issuesSelectionModel = new EventSelectionModel<Issue>(separatedIssues);

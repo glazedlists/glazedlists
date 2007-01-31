@@ -29,6 +29,14 @@ public class JSeparatorTable extends JTable {
         this.separatorRenderer = getDefaultRenderer(Object.class);
     }
 
+    public JSeparatorTable(EventTableModel tableModel, TableColumnModel tableColumnModel) {
+        super(tableModel, tableColumnModel);
+        setUI(new SpanTableUI());
+
+        // use a toString() renderer for the separator
+        this.separatorRenderer = getDefaultRenderer(Object.class);
+    }
+
     /** {@inheritDoc} */
     public void setModel(TableModel tableModel) {
         if(!(tableModel instanceof EventTableModel)) throw new IllegalArgumentException();
