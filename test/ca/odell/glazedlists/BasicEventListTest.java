@@ -4,9 +4,13 @@
 package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
-import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import ca.odell.glazedlists.util.concurrent.LockFactory;
+import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
+
 import junit.framework.TestCase;
 
 import java.io.IOException;
@@ -81,7 +85,7 @@ public class BasicEventListTest extends TestCase {
      * Strings, and dumped that to bytes.
      */
     public void testVersion20051003() throws IOException, ClassNotFoundException {
-        byte[] serializedBytes = new byte[] {
+        byte[] serializedBytes = {
             -0x54, -0x13,  0x00,  0x05,  0x73,  0x72,  0x00,  0x23,  0x63,  0x61,  0x2e,  0x6f,  0x64,  0x65,  0x6c,  0x6c,
              0x2e,  0x67,  0x6c,  0x61,  0x7a,  0x65,  0x64,  0x6c,  0x69,  0x73,  0x74,  0x73,  0x2e,  0x42,  0x61,  0x73,
              0x69,  0x63,  0x45,  0x76,  0x65,  0x6e,  0x74,  0x4c,  0x69,  0x73,  0x74,  0x43, -0x39,  0x4e,  0x15,  0x12,
@@ -108,6 +112,45 @@ public class BasicEventListTest extends TestCase {
         assertEquals("[O, c, t, o, b, e, r,  , 1, 0, ,,  , 2, 0, 0, 5]", deserialized.toString());
     }
 
+    /**
+     * This test adds 4 BasicEventList<String> to a serialization container
+     * (a simple ArrayList). All 4 BasicEventLists are constructed to share the
+     * SAME Locks and Publisher. The test then serializes/deserializes the
+     * container and ensures that the 4 BasicEventLists still share common
+     * Locks and Publisher, though the identity is not expected or required
+     * to be preserved after deserialization.
+     */
+    public void testSerializableLocksAndPublisher() throws IOException, ClassNotFoundException {
+        // 1. create the Lock and Publisher that will be shared by all BasicEventLists
+        final ReadWriteLock sharedLock = LockFactory.DEFAULT.createReadWriteLock();
+        final ListEventPublisher sharedPublisher = ListEventAssembler.createListEventPublisher();
+
+        // 2. add 4 BasicEventLists to a container, each of which shares a common Publisher and ReadWriteLocks
+        final List<EventList<String>> serializationContainer = new ArrayList<EventList<String>>();
+        for (int i = 0; i < 4; i++) {
+            final EventList<String> eventList = new BasicEventList<String>(sharedPublisher, sharedLock);
+            eventList.add("Test " + i);
+            serializationContainer.add(eventList);
+        }
+
+        // 3. serialize/deserialize the container
+        final List<EventList<String>> serializedCopy = GlazedListsTests.serialize(serializationContainer);
+        assertEquals(serializationContainer, serializedCopy);
+
+        // 4. ensure deserialized lists still share the lock and publisher
+        final ListEventPublisher publisher = serializedCopy.get(0).getPublisher();
+        final ReadWriteLock lock = serializedCopy.get(0).getReadWriteLock();        
+        final CompositeList<String> compositeList = new CompositeList<String>(publisher, lock);
+        for (int i = 0; i < 4; i++) {
+            // explicitly check the identity of the publisher and lock
+            final EventList<String> eventList = serializedCopy.get(i);
+            assertSame(publisher, eventList.getPublisher());
+            assertSame(lock, eventList.getReadWriteLock());
+
+            // as a result, CompositeList should accept the BasicEventList for use
+            compositeList.addMemberList(eventList);
+        }
+    }
 
     /**
      * This listener invokes a static method each time it's target {@link EventList} is changed.

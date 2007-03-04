@@ -4,14 +4,17 @@
 package ca.odell.glazedlists;
 
 // concurrency is similar to java.util.concurrent in J2SE 1.5
+import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEventPublisher;
+import ca.odell.glazedlists.impl.SerializedReadWriteLock;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OptionalDataException;
 import java.io.Serializable;
 import java.util.*;
 
@@ -257,10 +260,18 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
      *     do not will not be serialized. Note that {@link TransformedList}s
      *     such as {@link FilterList} are not {@link Serializable} and will not
      *     be serialized.
+     *
+     * <p>As of March 4, 2007, the wire format was extended to include:
+     * <li>the ListEventPublisher
+     * <li>the ReadWriteLock represented as a {@link SerializedReadWriteLock}
+     * <p>The motivation for this is documented <a
+     * href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=398">here</a>.
+     * Serialization streams with the old format are still readable. Serialization streams with
+     * the new format are not downwards-compatible. 
      */
     private void writeObject(ObjectOutputStream out) throws IOException {
         // 1. The elements to write
-        E[] elements = (E[])data.toArray(new Object[size()]);
+        E[] elements = (E[])data.toArray(new Object[data.size()]);
 
         // 2. The Listeners to write
         List<ListEventListener<E>> serializableListeners = new ArrayList<ListEventListener<E>>(1);
@@ -271,9 +282,11 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
         }
         ListEventListener[] listeners = serializableListeners.toArray(new ListEventListener[serializableListeners.size()]);
 
-        // 3. Write the listeners and elements
+        // 3. Write the elements, listeners, publisher and lock
         out.writeObject(elements);
         out.writeObject(listeners);
+        out.writeObject(getPublisher());
+        out.writeObject(getReadWriteLock());        
     }
 
     /**
@@ -282,18 +295,27 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
      * everything is in place including locks, etc.
      */
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        // 1. Prepare the EventList helper members
-        this.readWriteLock = LockFactory.DEFAULT.createReadWriteLock();
-
-        // 2. Read in the elements
-        E[] elements = (E[])in.readObject();
-        ListEventListener<E>[] listeners = (ListEventListener<E>[])in.readObject();
-
-        // 3. Populate the EventList data
-        this.data = new ArrayList<E>();
+        // 1. Read in the elements
+        final E[] elements = (E[]) in.readObject();
+        // 2. Read in the listeners
+        final ListEventListener<E>[] listeners = (ListEventListener<E>[]) in.readObject();
+        
+        // 3. Try to read the ListEventPublisher and ReadWriteLock according to the new wire format
+        try {
+            this.publisher = (ListEventPublisher) in.readObject();
+            this.updates = new ListEventAssembler<E>(this, publisher);
+            this.readWriteLock = (ReadWriteLock) in.readObject();
+        } catch (OptionalDataException e) {
+            if (e.eof)
+                // reading old serialization stream without publisher and lock
+                this.readWriteLock = LockFactory.DEFAULT.createReadWriteLock();
+            else throw e; 
+        }        
+        // 4. Populate the EventList data
+        this.data = new ArrayList<E>(elements.length);
         this.data.addAll(Arrays.asList(elements));
 
-        // 4. Populate the listeners
+        // 5. Populate the listeners
         for(int i = 0; i < listeners.length; i++) {
             this.updates.addListEventListener(listeners[i]);
         }

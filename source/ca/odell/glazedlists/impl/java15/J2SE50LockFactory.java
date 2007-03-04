@@ -3,10 +3,13 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.java15;
 
+import ca.odell.glazedlists.impl.SerializedReadWriteLock;
 import ca.odell.glazedlists.util.concurrent.Lock;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -31,10 +34,13 @@ public class J2SE50LockFactory implements LockFactory {
  *
  * @author James Lemieux
  */
-final class J2SE50ReadWriteLock implements ReadWriteLock {
+final class J2SE50ReadWriteLock implements ReadWriteLock, Serializable {
 
-    private final Lock readLock;
-    private final Lock writeLock;
+    /** For versioning as a {@link Serializable} */
+    private static final long serialVersionUID = 188277016505951193L;
+    
+    private transient final Lock readLock;
+    private transient final Lock writeLock;
 
     J2SE50ReadWriteLock() {
         final java.util.concurrent.locks.ReadWriteLock delegate = new ReentrantReadWriteLock();
@@ -42,6 +48,11 @@ final class J2SE50ReadWriteLock implements ReadWriteLock {
         this.writeLock = new LockAdapter(delegate.writeLock());
     }
 
+    /** Use a {@link SerializedReadWriteLock} as a placeholder in the serialization stream. */
+    private Object writeReplace() throws ObjectStreamException {
+        return new SerializedReadWriteLock();
+    }
+    
     /**
      * Return the lock used for reading.
      */

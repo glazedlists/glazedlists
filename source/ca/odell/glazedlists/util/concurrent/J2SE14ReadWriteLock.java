@@ -3,6 +3,9 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.util.concurrent;
 
+import ca.odell.glazedlists.impl.SerializedReadWriteLock;
+
+import java.io.ObjectStreamException;
 import java.util.HashMap;
 
 /**
@@ -167,6 +170,11 @@ public class J2SE14ReadWriteLock implements ReadWriteLock, java.io.Serializable 
 
     public Lock writeLock() { return writerLock_; }
     public Lock readLock()  { return readerLock_; }
+
+    /** Use a {@link SerializedReadWriteLock} as placeholder in the serialization stream. */
+    private Object writeReplace() throws ObjectStreamException {
+        return new SerializedReadWriteLock();
+    }
 
     /**
      * Synchronization implementation for ReentrantReadWriteLock.

@@ -6,6 +6,8 @@ package ca.odell.glazedlists.event;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.impl.adt.IdentityMultimap;
 
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -25,25 +27,29 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-final class SequenceDependenciesEventPublisher implements ListEventPublisher {
+final class SequenceDependenciesEventPublisher implements ListEventPublisher, Serializable {
 
+    /** For versioning as a {@link Serializable} */
+    private static final long serialVersionUID = -8228256898169043019L;
+    
     /** keep track of how many times the fireEvent() method is on the stack */
-    private int reentrantFireEventCount = 0;
+    private transient int reentrantFireEventCount;
+    
     /** subject to cleanup when this event is completely distributed */
-    private Map<Object,EventFormat> subjectsToCleanUp = new IdentityHashMap<Object,EventFormat>();
+    private transient final Map<Object,EventFormat> subjectsToCleanUp = new IdentityHashMap<Object,EventFormat>();
 
     /** for proper dependency management, when a listener and subject aren't the same identity */
-    private Map<Object,Object> listenersToRelatedSubjects = new IdentityHashMap<Object,Object>();
+    private transient final Map<Object,Object> listenersToRelatedSubjects = new IdentityHashMap<Object,Object>();
 
     /** the last listener notified, the next one will be beyond it in the list */
-    private int nextToNotify;
+    private transient int nextToNotify;
 
     /**
      * A mix of different subjects and listeners pairs in a deliberate order.
      * We should be careful not to make changes to this list directly and instead
      * create a copy as necessary
      */
-    private List<SubjectAndListener> subjectAndListeners = Collections.EMPTY_LIST;
+    private transient List<SubjectAndListener> subjectAndListeners = Collections.EMPTY_LIST;
 
     /**
      * We use copy-on-write on the listeners list. This is a copy of the
@@ -51,7 +57,12 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher {
      * started. If there is no change going on (reentrantFireEventCount == 0),
      * then this should be null.
      */
-    private List<SubjectAndListener> subjectsAndListenersForCurrentEvent = null;
+    private transient List<SubjectAndListener> subjectsAndListenersForCurrentEvent;
+
+    /** Returns a proper initialized publisher object during deserialization. */
+    private Object readResolve() throws ObjectStreamException {
+        return new SequenceDependenciesEventPublisher();
+    }
 
     /**
      * Rebuild the subject and listeners list so that all required invariants
@@ -68,8 +79,7 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher {
      */
     private List<SubjectAndListener> orderSubjectsAndListeners(List<SubjectAndListener> subjectsAndListeners) {
 
-        // since we're regenerating the subjectAndListeners list, clear it
-        // and re-add the elements
+        // since we're regenerating the subjectAndListeners list, clear it and re-add the elements
         List<SubjectAndListener> result = new ArrayList<SubjectAndListener>();
 
         // HashMaps of unprocessed elements, keyed by both source and target
@@ -190,7 +200,7 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher {
 
         // walk through, adding all the old listeners to the new listeners list,
         // unless a particular listener is slated for removal for some reaosn
-        for(int i = 0; i < subjectAndListeners.size(); i++) {
+        for(int i = 0, n = subjectAndListeners.size(); i < n; i++) {
             final SubjectAndListener originalSubjectAndListener = subjectAndListeners.get(i);
 
             // if we're supposed to remove this listener, skip it
