@@ -148,7 +148,6 @@ import java.util.HashMap;
  *
  * @since 1.5
  * @author Doug Lea
- *
  */
 public class J2SE14ReadWriteLock implements ReadWriteLock, java.io.Serializable  {
     private static final long serialVersionUID = -3463448656717690166L;
@@ -242,9 +241,9 @@ public class J2SE14ReadWriteLock implements ReadWriteLock, java.io.Serializable 
 
         synchronized boolean startRead() {
             Thread t = Thread.currentThread();
-            Object c = readers_.get(t);
+            Integer c = (Integer) readers_.get(t);
             if (c != null) { // already held -- just increment hold count
-                readers_.put(t, new Integer( ( (Integer) (c)).intValue() + 1));
+                readers_.put(t, new Integer(c.intValue() + 1));
                 ++activeReaders_;
                 return true;
             }
@@ -279,12 +278,12 @@ public class J2SE14ReadWriteLock implements ReadWriteLock, java.io.Serializable 
 
         synchronized int endRead() {
             Thread t = Thread.currentThread();
-            Object c = readers_.get(t);
+            Integer c = (Integer) readers_.get(t);
             if (c == null)
                 throw new IllegalMonitorStateException();
             --activeReaders_;
             if (c != IONE) { // more than one hold; decrement count
-                int h = ( (Integer) (c)).intValue() - 1;
+                int h = c.intValue() - 1;
                 Integer ih = (h == 1) ? IONE : new Integer(h);
                 readers_.put(t, ih);
                 return NONE;
