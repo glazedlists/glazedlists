@@ -86,7 +86,7 @@ class ReentrantWriterPreferenceReadWriteLock extends WriterPreferenceReadWriteLo
         Thread t = Thread.currentThread();
         Integer c = readers_.get(t);
         if (c != null) { // already held -- just increment hold count
-            readers_.put(t, new Integer(((Integer)(c)).intValue()+1));
+            readers_.put(t, new Integer(c.intValue()+1));
             ++activeReaders_;
             return true;
         }
@@ -126,7 +126,7 @@ class ReentrantWriterPreferenceReadWriteLock extends WriterPreferenceReadWriteLo
             throw new IllegalMonitorStateException("Attempted to unlock a readlock which was not locked. Please ensure the readlock is always locked and unlocked symmetrically.");
             --activeReaders_;
         if (c != IONE) { // more than one hold; decrement count
-            int h = ((Integer)(c)).intValue()-1;
+            int h = c.intValue()-1;
             Integer ih = (h == 1) ? IONE : new Integer(h);
             readers_.put(t, ih);
             return null;
