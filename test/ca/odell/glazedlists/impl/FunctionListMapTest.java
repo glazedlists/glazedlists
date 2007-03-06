@@ -731,17 +731,21 @@ public class FunctionListMapTest extends TestCase {
         // operation first and the delete second we create a condition where old naive code in
         // FunctionListMap.listChanged would temporarily enter an illegal state and trip the
         // check in FunctionListMap.putInDelegate)
+        //
+        // we also update Bluto to Blimpie in place within the same "transaction"
         source.beginEvent(true);
         source.add(0, "Olive");
         source.set(1, "Blimpie");
         source.remove(3);
         source.commitEvent();
 
+        // ensure the Map is correct
         assertEquals(3, eventMap.size());
-        assertTrue(eventMap.containsKey("B"));
-        assertTrue(eventMap.containsKey("P"));
-        assertTrue(eventMap.containsKey("O"));
+        assertEquals("Olive", eventMap.get("O"));
+        assertEquals("Blimpie", eventMap.get("B"));
+        assertEquals("Popeye", eventMap.get("P"));
 
+        // ensure the source list is correct
         assertEquals("Olive", source.get(0));
         assertEquals("Blimpie", source.get(1));
         assertEquals("Popeye", source.get(2));
