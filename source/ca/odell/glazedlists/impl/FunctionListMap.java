@@ -208,16 +208,40 @@ public class FunctionListMap<K, V> implements Map<K, V>, ListEventListener<V> {
      * entries are updated in this Map by calculating a key using the key
      * function of this Map.
      *
-     * @param listChanges an event describing the changes in the GroupingList
+     * The algorithm in this method operates in 2 passes. The reason for this
+     * is that {@link #putInDelegate} contains a sanity check that ensures we
+     * never enter an illegal state for the map (where a single key maps to two
+     * distinct values). But, complex but valid <code>listChanges</code> may
+     * temporarily break that invariant only to rectify the state at a later
+     * index. (e.g. insert a duplicate value at i and then delete the original
+     * value at i+1)
+     *
+     * By performing all remove operations first in pass 1, we preserve the
+     * ability to check the invariant in pass 2 when additions are processed.
+     * Thus, FunctionListMap remains proactive in locating values which break
+     * the invariant.
+     *
+     * @param listChanges an event describing the changes in the FunctionList
      */
     public void listChanged(ListEvent<V> listChanges) {
-        while (listChanges.next()) {
-            final int changeIndex = listChanges.getIndex();
+        int offset = 0;
 
+        // pass 1: do all remove work (this includes deletes and the front half of updates)
+        while (listChanges.next()) {
             switch (listChanges.getType()) {
-                case ListEvent.INSERT: elementAdded(changeIndex); break;
-                case ListEvent.UPDATE: elementUpdated(changeIndex); break;
-                case ListEvent.DELETE: elementRemoved(changeIndex); break;
+                case ListEvent.DELETE: elementRemoved(listChanges.getIndex() + offset); break;
+                case ListEvent.UPDATE: elementRemoved(listChanges.getIndex() + offset); offset--; break;
+                case ListEvent.INSERT: offset--; break;
+            }
+        }
+
+        listChanges.reset();
+
+        // pass 2: do all add work (this includes inserts and the back half of updates)
+        while (listChanges.next()) {
+            switch (listChanges.getType()) {
+                case ListEvent.UPDATE: elementAdded(listChanges.getIndex()); break;
+                case ListEvent.INSERT: elementAdded(listChanges.getIndex()); break;
             }
         }
     }
@@ -235,25 +259,11 @@ public class FunctionListMap<K, V> implements Map<K, V>, ListEventListener<V> {
     }
 
     /**
-     * Updates the internal data structures to reflect the update of an
-     * element at the given <code>index</code>.
-     */
-    private void elementUpdated(int index) {
-        final V value = valueList.get(index);
-        final K newKey = key(value);
-        final K oldKey = keyList.set(index, newKey);
-
-        delegate.remove(oldKey);
-        putInDelegate(newKey, value);
-    }
-
-    /**
      * Updates the internal data structures to reflect the removal of an
      * element at the given <code>index</code>.
      */
     private void elementRemoved(int index) {
         final K key = keyList.remove(index);
-
         delegate.remove(key);
     }
 

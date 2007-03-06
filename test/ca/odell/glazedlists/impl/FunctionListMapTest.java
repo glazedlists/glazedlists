@@ -643,8 +643,6 @@ public class FunctionListMapTest extends TestCase {
         assertEquals("J", entry.getKey());
         assertEquals("James", entry.getValue());
 
-        final String oldEntryValue = entry.getValue();
-
         entry.setValue("Jesse");
         assertEquals("J", entry.getKey());
         assertEquals("Jesse", entry.getValue());
@@ -710,6 +708,43 @@ public class FunctionListMapTest extends TestCase {
         assertTrue(eventMap.containsKey("O"));
 
         assertNull(eventMap.remove("X"));
+    }
+
+    /**
+     * This testcase highlights another specific use of the Map. If a user
+     * creates some type of batching EventList (like our ExternalNestingEventList)
+     * which allows them to batch up complex ListEvents, then it was possible to
+     * create a ListEvent which temporarily broke the invariant we check for in
+     * FunctionListMap.putInDelegate.
+     */
+    public void testMoveElementInMap() {
+        final ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
+        final Map<String, String> eventMap = GlazedLists.syncEventListToMap(source, new FirstLetterFunction());
+
+        source.beginEvent(true);
+        source.add("Bluto");
+        source.add("Popeye");
+        source.add("Olive");
+        source.commitEvent();
+
+        // move Olive from the last index to the first (by doing the insertion part of the move
+        // operation first and the delete second we create a condition where old naive code in
+        // FunctionListMap.listChanged would temporarily enter an illegal state and trip the
+        // check in FunctionListMap.putInDelegate)
+        source.beginEvent(true);
+        source.add(0, "Olive");
+        source.set(1, "Blimpie");
+        source.remove(3);
+        source.commitEvent();
+
+        assertEquals(3, eventMap.size());
+        assertTrue(eventMap.containsKey("B"));
+        assertTrue(eventMap.containsKey("P"));
+        assertTrue(eventMap.containsKey("O"));
+
+        assertEquals("Olive", source.get(0));
+        assertEquals("Blimpie", source.get(1));
+        assertEquals("Popeye", source.get(2));
     }
 
     private static final class FirstLetterComparator implements Comparator<String> {
