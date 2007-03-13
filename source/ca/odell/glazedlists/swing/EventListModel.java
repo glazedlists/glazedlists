@@ -178,6 +178,8 @@ public class EventListModel<E> implements ListEventListener<E>, ListModel {
      * 
      * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
      * to call any method on an {@link EventListModel} after it has been disposed.
+     * As such, this {@link EventListModel} should be detached from its
+     * corresponding Component <strong>before</strong> it is disposed.
      */
     public void dispose() {
         swingSource.removeListEventListener(this);

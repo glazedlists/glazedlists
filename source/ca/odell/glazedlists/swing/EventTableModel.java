@@ -278,6 +278,8 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
      * 
      * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
      * to call any method on an {@link EventTableModel} after it has been disposed.
+     * As such, this {@link EventTableModel} should be detached from its
+     * corresponding Component <strong>before</strong> it is disposed.
      */
     public void dispose() {
         swingThreadSource.removeListEventListener(this);
