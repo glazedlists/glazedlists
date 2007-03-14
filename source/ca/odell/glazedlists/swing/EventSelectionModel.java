@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-// the core Glazed Lists packages
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ListSelection;
 import ca.odell.glazedlists.TransformedList;
@@ -12,7 +11,6 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -57,7 +55,7 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
     private boolean enabled = true;
 
     /** listeners to notify when the selection changes */
-    private List<ListSelectionListener> listeners = new ArrayList<ListSelectionListener>();
+    private final List<ListSelectionListener> listeners = new ArrayList<ListSelectionListener>();
 
     /** whether there are a series of changes on the way */
     private boolean valueIsAdjusting = false;
@@ -111,7 +109,6 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
     public EventList<E> getSelected() {
         return listSelection.getSelected();
     }
-
 
     /**
      * Gets an {@link EventList} that contains only selected
@@ -172,7 +169,7 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
     }
 
     /**
-     * Gets whether the EventSelectionModel is editable or not.
+     * Returns whether the EventSelectionModel is editable or not.
      */
     public boolean getEnabled() {
         return enabled;
@@ -183,7 +180,6 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
      * {@link ListSelectionEvent}s to registered listeners.
      */
     private class SwingSelectionListener implements ListSelection.Listener {
-
         /** {@inheritDoc} */
         public void selectionChanged(int changeStart, int changeEnd) {
             fireSelectionChanged(changeStart, changeEnd);
@@ -204,11 +200,9 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
         }
 
         // fire the change
-        ListSelectionEvent event = new ListSelectionEvent(this, changeStart, changeFinish, valueIsAdjusting);
-        for(Iterator<ListSelectionListener> i = listeners.iterator(); i.hasNext(); ) {
-            ListSelectionListener listener = i.next();
-            listener.valueChanged(event);
-        }
+        final ListSelectionEvent event = new ListSelectionEvent(this, changeStart, changeFinish, valueIsAdjusting);
+        for (int i = 0, n = listeners.size(); i < n; i++)
+            listeners.get(i).valueChanged(event);
     }
 
     /**
@@ -350,7 +344,7 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
      * Returns true if no indices are selected.
      */
     public boolean isSelectionEmpty() {
-        return (listSelection.getSelected().size() == 0);
+        return listSelection.getSelected().isEmpty();
     }
 
     /**
