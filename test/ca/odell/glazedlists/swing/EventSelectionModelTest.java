@@ -9,6 +9,7 @@ import ca.odell.glazedlists.matchers.Matchers;
 
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.*;
 import java.util.Collections;
 
 /**
@@ -217,6 +218,56 @@ public class EventSelectionModelTest extends SwingTestCase {
         assertEquals(0, counter.getCountAndReset());
         assertEquals(1, model.getMinSelectionIndex());
         assertEquals(3, model.getMaxSelectionIndex());
+    }
+
+    public void guiTestModelChangesProducingSelectionModelEvents() {
+        EventList<String> source = GlazedLists.eventListOf(new String[] {"Albert", "Alex", "Aaron", "Brian", "Bruce"});
+
+        // create EventListModel (data model)
+        EventListModel<String> model = new EventListModel<String>(source);
+
+        // create EventSelectionModel (our selection model)
+        EventSelectionModel<String> eventSelectionModel = new EventSelectionModel<String>(source);
+        ListSelectionChangeCounter eventSelectionModelCounter = new ListSelectionChangeCounter();
+        eventSelectionModel.addListSelectionListener(eventSelectionModelCounter);
+
+        // create DefaultListSelectionModel (SUN's selection model)
+        DefaultListSelectionModel defaultListSelectionModel = new DefaultListSelectionModel();
+        ListSelectionChangeCounter defaultListSelectionModelCounter = new ListSelectionChangeCounter();
+        defaultListSelectionModel.addListSelectionListener(defaultListSelectionModelCounter);
+
+        // create two different JLists (one with EventSelectionModel and one with DefaultListSelectionModel) that share the same data model
+        JList eventList = new JList(model);
+        eventList.setSelectionModel(eventSelectionModel);
+
+        JList defaultList = new JList(model);
+        defaultList.setSelectionModel(defaultListSelectionModel);
+
+        // select the first element in both selection models
+        eventSelectionModel.setSelectionInterval(0, 0);
+        defaultListSelectionModel.setSelectionInterval(0, 0);
+
+        // verify that each selection model broadcasted the selection event
+        assertEquals(1, defaultListSelectionModelCounter.getCountAndReset());
+        assertEquals(1, eventSelectionModelCounter.getCountAndReset());
+
+        // change an element in the model which is selected in the selection models
+        source.set(0, "Bart");
+
+        // selection should not have changed in either selection model
+        assertEquals(0, defaultListSelectionModel.getMinSelectionIndex());
+        assertEquals(0, defaultListSelectionModel.getMaxSelectionIndex());
+        assertEquals(0, defaultListSelectionModel.getLeadSelectionIndex());
+        assertEquals(0, defaultListSelectionModel.getAnchorSelectionIndex());
+
+        assertEquals(0, eventSelectionModel.getMinSelectionIndex());
+        assertEquals(0, eventSelectionModel.getMaxSelectionIndex());
+        assertEquals(0, eventSelectionModel.getLeadSelectionIndex());
+        assertEquals(0, eventSelectionModel.getAnchorSelectionIndex());
+
+        // verify that neither DefaultListSelectionModel nor EventSelectionModel broadcasted a needless event for this model change
+        assertEquals(0, defaultListSelectionModelCounter.getCountAndReset());
+        assertEquals(0, eventSelectionModelCounter.getCountAndReset());
     }
     
     public void guiTestDeleteSelectedRows_FixMe() {
