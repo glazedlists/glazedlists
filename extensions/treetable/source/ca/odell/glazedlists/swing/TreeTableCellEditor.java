@@ -6,7 +6,6 @@ import javax.swing.*;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
@@ -90,7 +89,7 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
         final int depth;
         final boolean isExpanded;
         final boolean hasChildren;
-        final boolean supportsChildren;
+        final boolean allowsChildren;
 
         treeList.getReadWriteLock().readLock().lock();
         try {
@@ -98,13 +97,13 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
             depth = treeList.depth(row);
             isExpanded = treeList.isExpanded(row);
             hasChildren = treeList.hasChildren(row);
-            supportsChildren = treeList.getAllowsChildren(row);
+            allowsChildren = treeList.getAllowsChildren(row);
         } finally {
             treeList.getReadWriteLock().readLock().unlock();
         }
 
         // ask our special component to configure itself for this tree node
-        component.configure(depth, hasChildren, showExpanderForEmptyParent, supportsChildren, isExpanded, c, false);
+        component.configure(depth, hasChildren, showExpanderForEmptyParent, allowsChildren, isExpanded, c, false);
         return component;
     }
 

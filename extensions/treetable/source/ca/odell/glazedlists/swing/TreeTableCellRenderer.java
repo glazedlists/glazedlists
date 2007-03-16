@@ -82,7 +82,7 @@ public class TreeTableCellRenderer implements TableCellRenderer {
         final int depth;
         final boolean isExpanded;
         final boolean hasChildren;
-        final boolean supportsChildren;
+        final boolean allowsChildren;
 
         treeList.getReadWriteLock().readLock().lock();
         try {
@@ -90,13 +90,13 @@ public class TreeTableCellRenderer implements TableCellRenderer {
             depth = treeList.depth(row);
             isExpanded = treeList.isExpanded(row);
             hasChildren = treeList.hasChildren(row);
-            supportsChildren = treeList.getAllowsChildren(row);
+            allowsChildren = treeList.getAllowsChildren(row);
         } finally {
             treeList.getReadWriteLock().readLock().unlock();
         }
 
         // ask our special component to configure itself for this tree node
-        component.configure(depth, hasChildren, showExpanderForEmptyParent, supportsChildren, isExpanded, c, hasFocus);
+        component.configure(depth, hasChildren, showExpanderForEmptyParent, allowsChildren, isExpanded, c, hasFocus);
         return component;
     }
 

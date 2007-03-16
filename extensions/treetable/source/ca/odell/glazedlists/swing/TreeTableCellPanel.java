@@ -73,16 +73,16 @@ class TreeTableCellPanel extends JPanel {
      *
      * @param depth the depth of the tree node in the hierarchy
      * @param hasChildren <tt>true</tt> if the tree node has child elements
-     * @param supportsChildren <tt>true</tt> if the node is of the type that can
-     *      have child elements.
+     * @param allowsChildren <tt>true</tt> if the node is of the type that can
+     *      have child elements
      * @param isExpanded <tt>true</tt> if the node is expanded and its children are thus visible;
      *      <tt>false</tt> if it is collapsed and its children are thus hidden. This argument
      *      only has meaning when <code>isExpandable</code> is true; otherwise it is ignored.
      * @param nodeComponent a Component which displays the data of the tree node
      */
-    public void configure(int depth, boolean hasChildren, boolean showExpanderForEmptyParent, boolean supportsChildren, boolean isExpanded, Component nodeComponent, boolean hasFocus) {
+    public void configure(int depth, boolean hasChildren, boolean showExpanderForEmptyParent, boolean allowsChildren, boolean isExpanded, Component nodeComponent, boolean hasFocus) {
         // if the tree node is expandable, pick an icon for the expander button
-        final boolean showExpanderButton = hasChildren || (supportsChildren && showExpanderForEmptyParent);
+        final boolean showExpanderButton = hasChildren || (allowsChildren && showExpanderForEmptyParent);
         if(showExpanderButton)
             expanderButton.setIcon(UIManager.getIcon(isExpanded ? "Tree.expandedIcon" : "Tree.collapsedIcon"));
 
