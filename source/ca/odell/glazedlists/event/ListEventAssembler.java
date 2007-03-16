@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.event;
 
-// the core Glazed Lists package
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.impl.WeakReferenceProxy;
 import ca.odell.glazedlists.impl.event.Tree4Deltas;
@@ -45,33 +44,15 @@ public final class ListEventAssembler<E> {
      */
     private static final String assemblerName;
 
-    /**
-     * Our strategy for managing dependencies, which we call "publishing".
-     * We support 2 possible strategies:
-     * <li>graphdependencies: for each change, a graph is crawled of listeners
-     *     who require notification and who can be notified. The order of
-     *     notification is done by dynamically analyzing this graph at change
-     *     time.
-     * <li>sequencedependencies: a list is precomputed of the order of notification,
-     *     and listeners are always notified in sequence corresponding to order
-     *     in this list.
-     */
-    private static final String publisherName;
-
     // look up strategies using System properties
     static {
         String assemblerProperty = null;
-        String publisherProperty = null;
         try {
             assemblerProperty = System.getProperty("GlazedLists.ListEventAssemblerDelegate");
-            publisherProperty = System.getProperty("GlazedLists.ListEventPublisher");
         } catch(SecurityException e) {
             // do nothing
         }
-        if(assemblerProperty != null) assemblerName = assemblerProperty;
-        else assemblerName = "treedeltas";
-        if(publisherProperty != null) publisherName = publisherProperty;
-        else publisherName = "sequencedependencies";
+        assemblerName = assemblerProperty != null ? assemblerProperty : "treedeltas";
     }
 
     /**
@@ -94,13 +75,7 @@ public final class ListEventAssembler<E> {
      * to any other {@link EventList}s.
      */
     public static ListEventPublisher createListEventPublisher() {
-        if(publisherName.equals("graphdependencies")) {
-            return new GraphDependenciesListEventPublisher();
-        } else if(publisherName.equals("sequencedependencies")) {
-            return new SequenceDependenciesEventPublisher();
-        } else {
-            throw new IllegalStateException();
-        }
+        return new SequenceDependenciesEventPublisher();
     }
 
     /**
@@ -346,20 +321,7 @@ public final class ListEventAssembler<E> {
 
         protected AssemblerHelper(EventList<E> sourceList, ListEventPublisher publisher) {
             this.sourceList = sourceList;
-            this.publisherAdapter = createPublisherDelegate(publisher);
-        }
-
-        /**
-         * Create a {@link PublisherAdapter} using the current strategy.
-         */
-        private PublisherAdapter<E> createPublisherDelegate(ListEventPublisher publisher) {
-            if(publisherName.equals("graphdependencies")) {
-                return new GraphSequencePublisherAdapter<E>(this, publisher);
-            } else if(publisherName.equals("sequencedependencies")) {
-                return new ListSequencePublisherAdapter<E>(this, publisher);
-            } else {
-                throw new IllegalStateException();
-            }
+            this.publisherAdapter = new ListSequencePublisherAdapter<E>(this, publisher);
         }
 
         /**
@@ -738,132 +700,6 @@ public final class ListEventAssembler<E> {
          * Notify the listeners of the list's changes.
          */
         void fireEvent();
-    }
-
-    /**
-     * Delegate to the classic {@link ListEventPublisher}.
-     */
-    private static class GraphSequencePublisherAdapter<E> implements PublisherAdapter<E> {
-
-        /** the list event assembler being acted upon */
-        private AssemblerHelper<E> assemblerHelper;
-        /** the list that this tracks changes for */
-        private final EventList<E> sourceList;
-
-        /** the sequences that provide a view on this queue */
-        private List<ListEventListener<E>> listeners = new ArrayList<ListEventListener<E>>();
-        private List<ListEvent<E>> listenerEvents = new ArrayList<ListEvent<E>>();
-
-        private final GraphDependenciesListEventPublisher publisher;
-
-        public GraphSequencePublisherAdapter(AssemblerHelper<E> assemblerDelegate, ListEventPublisher publisher) {
-            this.assemblerHelper = assemblerDelegate;
-            this.sourceList = assemblerDelegate.sourceList;
-            this.publisher = (GraphDependenciesListEventPublisher)publisher;
-        }
-
-        /** {@inheritDoc} */
-        public synchronized void addListEventListener(ListEventListener<E> listChangeListener, ListEvent<E> listEvent) {
-            updateListEventListeners(listChangeListener, null, listEvent);
-            publisher.addDependency(sourceList, listChangeListener);
-        }
-
-        /** {@inheritDoc} */
-        public synchronized void removeListEventListener(ListEventListener<E> listChangeListener) {
-            updateListEventListeners(null, listChangeListener, null);
-            publisher.removeDependency(sourceList, listChangeListener);
-        }
-
-        /** {@inheritDoc} */
-        public synchronized List<ListEventListener<E>> getListEventListeners() {
-            return Collections.unmodifiableList(listeners);
-        }
-
-        /**
-         * This method does three things:
-         *
-         * <ol>
-         *   <li> adds the listener <code>toAdd</code> if it is non-null
-         *   <li> removes the listener <code>toRemove</code> if it is non-null
-         *   <li> tests each WeakReferenceProxy to see if its referent
-         *        ListEventListener has been garbage collected, and thus the
-         *        WeakReferenceProxy is able to be unregistered
-         * </ol>
-         *
-         * @param toAdd a ListEventListener to be added, or <code>null</code>
-         * @param toRemove a ListEventListener to be removed, or <code>null</code>
-         */
-        private void updateListEventListeners(ListEventListener<E> toAdd, ListEventListener<E> toRemove, ListEvent<E> listEvent) {
-            // only work on copies of the Lists and swap them in place at the end
-            final List<ListEventListener<E>> listenersCopy = new ArrayList<ListEventListener<E>>(listeners);
-            final List<ListEvent<E>> listenerEventsCopy = new ArrayList<ListEvent<E>>(listenerEvents);
-
-            // a flag to determine whether we found the ListEventListener toRemove
-            boolean toRemoveFound = (toRemove == null);
-
-            for (int i = listenersCopy.size()-1; i >= 0; i--) {
-                final ListEventListener<E> listener = listenersCopy.get(i);
-
-                // if we're supposed to remove this ListEventListener, do so
-                if (listener == toRemove) {
-                    toRemoveFound = true;
-
-                // if the ListEventListener is a WeakReferenceProxy with a null
-                // (i.e. garbage collected) referent, also remove it
-                } else if (listener instanceof WeakReferenceProxy) {
-                    final WeakReferenceProxy weakReferenceProxy = (WeakReferenceProxy) listener;
-                    if (weakReferenceProxy.getReferent() != null) continue;
-                    weakReferenceProxy.dispose();
-
-                // otherwise we should not remove this listener
-                } else {
-                    continue;
-                }
-
-                // remove the listener
-                listenersCopy.remove(i);
-                listenerEventsCopy.remove(i);
-            }
-
-            // sanity check to ensure we found the listener we were asked to remove, if any
-            if (!toRemoveFound)
-                throw new IllegalArgumentException("Cannot remove nonexistent listener " + toRemove);
-
-            // add the listener we were asked to add, if any
-            if (toAdd != null) {
-                listenersCopy.add(toAdd);
-                listenerEventsCopy.add(listEvent);
-            }
-
-            // swap the copies overtop of the real thing
-            listeners = listenersCopy;
-            listenerEvents = listenerEventsCopy;
-        }
-
-        /** {@inheritDoc} */
-        public void fireEvent() {
-            final List<ListEventListener<E>> listenersToNotify;
-            final List<ListEvent<E>> listenerEventsToNotify;
-
-            // grab a consistent snapshot of the parallel lists
-            synchronized(this) {
-                listenersToNotify = listeners;
-                listenerEventsToNotify = listenerEvents;
-            }
-
-            // reset the events before firing them
-            for(Iterator<ListEvent<E>> e = listenerEventsToNotify.iterator(); e.hasNext();) {
-                e.next().reset();
-            }
-
-            // perform the notification on the duplicate list
-            try {
-                publisher.fireEvent(sourceList, listenersToNotify, listenerEventsToNotify);
-            } finally {
-                assemblerHelper.eventPending = false;
-                assemblerHelper.cleanup();
-            }
-        }
     }
 
     /**
