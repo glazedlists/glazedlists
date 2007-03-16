@@ -6,7 +6,6 @@ package com.publicobject.amazonbrowser.swing;
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.swing.*;
 import com.publicobject.amazonbrowser.*;
 import com.publicobject.misc.Exceptions;

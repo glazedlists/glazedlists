@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-// the core Glazed Lists packages
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.TransformedList;
@@ -43,17 +42,21 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
     /** <tt>true</tt> indicates that disposing this TableModel should dispose of the swingThreadSource as well */
     private final boolean disposeSwingThreadSource;
 
-    /** specifies how to render table headers and sort */
-    private TableFormat<E> tableFormat;
+    /** specifies how column data is extracted from each row object */
+    private TableFormat<? super E> tableFormat;
 
     /** reusable table event for broadcasting changes */
     private final MutableTableModelEvent tableModelEvent = new MutableTableModelEvent(this);
 
     /**
-     * Creates a new table that renders the specified list in the specified
-     * format.
+     * Creates a new table model that extracts column data from the given
+     * <code>source</code> using the the given <code>tableFormat</code>.
+     *
+     * @param source the EventList that provides the row objects
+     * @param tableFormat the object responsible for extracting column data
+     *      from the row objects
      */
-    public EventTableModel(EventList<E> source, TableFormat<E> tableFormat) {
+    public EventTableModel(EventList<E> source, TableFormat<? super E> tableFormat) {
         // lock the source list for reading since we want to prevent writes
         // from occurring until we fully initialize this EventTableModel
         source.getReadWriteLock().readLock().lock();
@@ -78,6 +81,7 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
      * <p>Note that the classes which will be obfuscated may not work with
      * reflection. In this case, implement a {@link TableFormat} manually.
      *
+     * @param source the EventList that provides the row objects
      * @param propertyNames an array of property names in the JavaBeans format.
      *      For example, if your list contains Objects with the methods getFirstName(),
      *      setFirstName(String), getAge(), setAge(Integer), then this array should
@@ -90,13 +94,13 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
      *      your table are writable.
      */
     public EventTableModel(EventList<E> source, String[] propertyNames, String[] columnLabels, boolean[] writable) {
-        this(source, (TableFormat<E>) GlazedLists.tableFormat(propertyNames, columnLabels, writable));
+        this(source, GlazedLists.tableFormat(propertyNames, columnLabels, writable));
     }
 
     /**
      * Gets the Table Format.
      */
-    public TableFormat<E> getTableFormat() {
+    public TableFormat<? super E> getTableFormat() {
         return tableFormat;
     }
     /**

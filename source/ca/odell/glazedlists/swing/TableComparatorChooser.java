@@ -7,6 +7,7 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.gui.AbstractTableComparatorChooser;
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
+import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.SortIconFactory;
 import ca.odell.glazedlists.impl.gui.SortingStrategy;
 
@@ -50,6 +51,7 @@ import java.beans.PropertyChangeEvent;
  *
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=4">Bug 4</a>
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=31">Bug 31</a>
+ * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=391">Bug 391</a>
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
@@ -81,7 +83,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      *
      * @deprecated replaced with {@link #install}, which is functionally
      * identical but uses a more fitting name to convey the action that is
-     * performed.
+     * performed and fixes an API flaw by explicitly requiring the TableFormat.
      */
     public TableComparatorChooser(JTable table, SortedList<E> sortedList, boolean multipleColumnSort) {
         this(table, sortedList, multipleColumnSort ? MULTIPLE_COLUMN_MOUSE : SINGLE_COLUMN);
@@ -92,10 +94,26 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      *
      * @deprecated 9/25/06 replaced with {@link #install}, which is functionally
      * identical but uses a more fitting name to convey the action that is
-     * performed.
+     * performed and fixes an API flaw by explicitly requiring the TableFormat.
      */
     public TableComparatorChooser(JTable table, SortedList<E> sortedList, Object strategy) {
-        super(sortedList, ((EventTableModel<E>)table.getModel()).getTableFormat());
+        this(table, sortedList,strategy,((EventTableModel<E>)table.getModel()).getTableFormat()  );
+    }
+
+    /**
+     * Creates and installs a TableComparatorChooser.
+     *
+     * @param table the table with headers that can be clicked on
+     * @param sortedList the sorted list to update
+     * @param strategy an implementations of {@link ca.odell.glazedlists.impl.gui.SortingStrategy}, typically one of
+     *      <ul>
+     *          <li> {@link ca.odell.glazedlists.gui.AbstractTableComparatorChooser#SINGLE_COLUMN}
+     *          <li> {@link ca.odell.glazedlists.gui.AbstractTableComparatorChooser#MULTIPLE_COLUMN_MOUSE}
+     *          <li> {@link ca.odell.glazedlists.gui.AbstractTableComparatorChooser#MULTIPLE_COLUMN_KEYBOARD}
+ * @param tableFormat the TableFormat providing the columns for the table
+     */
+    private TableComparatorChooser(JTable table, SortedList<E> sortedList, Object strategy, TableFormat<? super E> tableFormat) {
+        super(sortedList, tableFormat);
         validateSortingStrategy(strategy);
 
         // save the Swing-specific state
@@ -114,24 +132,16 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
     }
 
     /**
-     * Installs a new TableComparatorChooser that responds to clicks
-     * on the specified table and uses them to sort the specified list.
+     * Installs a new TableComparatorChooser that responds to clicks on the
+     * header of the specified table and uses them to sort the specified
+     * <code>sortedList</code> by delegating to the given <code>strategy</code>
+     * If at any time the table should no longer sort, the behaviour can be
+     * removed calling {@link #dispose()} on the object returned by this method.
      *
-     * @param table the table with headers that can be clicked on
-     * @param sortedList the sorted list to update
-     * @param multipleColumnSort <code>true</code> to sort by multiple columns
-     *      at a time, or <code>false</code> to sort by a single column. Although
-     *      sorting by multiple columns is more powerful, the user interface is
-     *      not as simple and this strategy should only be used where necessary.
-     */
-    public static <E> TableComparatorChooser<E> install(JTable table, SortedList<E> sortedList, boolean multipleColumnSort) {
-        return new TableComparatorChooser<E>(table, sortedList, multipleColumnSort ? MULTIPLE_COLUMN_MOUSE : SINGLE_COLUMN);
-    }
-
-    /**
-     * Installs a new TableComparatorChooser that responds to clicks
-     * on the specified table and uses them to sort the specified list by
-     * delegating to the given <code>strategy</code>.
+     * <p>This method assumes that the JTable is backed by an EventTableModel
+     * and it is from that EventTableModel that the TableFormat should be
+     * extracted. This is, by far, the typical case and so we provide this
+     * simpler install method for convenience.
      *
      * @param table the table with headers that can be clicked on
      * @param sortedList the sorted list to update
@@ -141,9 +151,39 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      *          <li> {@link AbstractTableComparatorChooser#MULTIPLE_COLUMN_MOUSE}
      *          <li> {@link AbstractTableComparatorChooser#MULTIPLE_COLUMN_KEYBOARD}
      *      </ul>
+     * @return TableComparatorChooser object that is responsible for translating
+     *      mouse clicks on the table header into sorting actions on the sortedList.
      */
     public static <E> TableComparatorChooser<E> install(JTable table, SortedList<E> sortedList, Object strategy) {
-        return new TableComparatorChooser<E>(table, sortedList, strategy);
+        return install(table, sortedList, strategy, ((EventTableModel<E>)table.getModel()).getTableFormat());
+    }
+
+    /**
+     * Installs a new TableComparatorChooser that responds to clicks on the
+     * header of the specified table and uses them to sort the specified
+     * <code>sortedList</code> by delegating to the given <code>strategy</code>
+     * If at any time the table should no longer sort, the behaviour can be
+     * removed calling {@link #dispose()} on the object returned by this method.
+     *
+     * <p>This method makes no assumptions about the TableModel implementation
+     * that backs the JTable. As such, it requires the TableFormat as an explicit
+     * parameter and expects the TableFormat to be constant (i.e. never changes)
+     * for the life of the TableComparatorChooser.
+     *
+     * @param table the table with headers that can be clicked on
+     * @param tableFormat the TableFormat providing the columns for the table
+     * @param sortedList the sorted list to update
+     * @param strategy an implementations of {@link SortingStrategy}, typically one of
+     *      <ul>
+     *          <li> {@link AbstractTableComparatorChooser#SINGLE_COLUMN}
+     *          <li> {@link AbstractTableComparatorChooser#MULTIPLE_COLUMN_MOUSE}
+     *          <li> {@link AbstractTableComparatorChooser#MULTIPLE_COLUMN_KEYBOARD}
+     *      </ul>
+     * @return TableComparatorChooser object that is responsible for translating
+     *      mouse clicks on the table header into sorting actions on the sortedList.
+     */
+    public static <E> TableComparatorChooser<E> install(JTable table, SortedList<E> sortedList, Object strategy, TableFormat<? super E> tableFormat) {
+        return new TableComparatorChooser<E>(table, sortedList, strategy, tableFormat);
     }
 
     /**
@@ -164,14 +204,14 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      * Registers the specified {@link ActionListener} to receive notification whenever
      * the {@link JTable} is sorted by this {@link TableComparatorChooser}.
      */
-    public void addSortActionListener(final ActionListener sortActionListener) {
+    public void addSortActionListener(ActionListener sortActionListener) {
         sortListener = AWTEventMulticaster.add(sortListener, sortActionListener);
     }
     /**
      * Deregisters the specified {@link ActionListener} to no longer receive
      * action events.
      */
-    public void removeSortActionListener(final ActionListener sortActionListener) {
+    public void removeSortActionListener(ActionListener sortActionListener) {
         sortListener = AWTEventMulticaster.remove(sortListener, sortActionListener);
     }
 
@@ -289,20 +329,19 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
          * the sorting state of this TableComparatorChooser.
          */
         public void propertyChange(PropertyChangeEvent evt) {
-            if (!(evt.getNewValue() instanceof EventTableModel))
-                throw new IllegalStateException("TableComparatorChooser requires the TableModel to be an EventTableModel at all times, but found: " + evt.getNewValue());
+            // get the two EventTableModels
+            final EventTableModel<E> oldModel = evt.getOldValue() instanceof EventTableModel ? (EventTableModel<E>) evt.getOldValue() : null;
+            final EventTableModel<E> newModel = evt.getNewValue() instanceof EventTableModel ? (EventTableModel<E>) evt.getNewValue() : null;
 
-            // get the two TableModels
-            final EventTableModel<E> oldModel = (EventTableModel<E>) evt.getOldValue();
-            final EventTableModel<E> newModel = (EventTableModel<E>) evt.getNewValue();
+            // stop listening for TableModelEvents in the oldModel and start for the newModel, if possible
+            if (oldModel != null) oldModel.removeTableModelListener(this);
+            if (newModel != null) {
+                newModel.addTableModelListener(this);
 
-            // stop listening for TableModelEvents in the oldModel and start for the newModel
-            oldModel.removeTableModelListener(this);
-            newModel.addTableModelListener(this);
-
-            // the table structure has probably changed due to the new
-            // EventTableModel so we reset the TableFormat (which clears the sorting state)
-            setTableFormat(newModel.getTableFormat());
+                // the table structure has probably changed due to the new EventTableModel
+                // so we reset the TableFormat (which clears the sorting state)
+                setTableFormat(newModel.getTableFormat());
+            }
         }
 
         /**
@@ -310,11 +349,12 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
          * clear the comparators and columns.
          */
         public void tableChanged(TableModelEvent event) {
-            if(event.getFirstRow() == TableModelEvent.HEADER_ROW &&
-               event.getColumn() == TableModelEvent.ALL_COLUMNS) {
-                // the table structure may have changed due to a change in the
-                // table format so we conservatively reset the TableFormat
-                setTableFormat(((EventTableModel<E>)table.getModel()).getTableFormat());
+            if(event.getFirstRow() == TableModelEvent.HEADER_ROW && event.getColumn() == TableModelEvent.ALL_COLUMNS) {
+                if (table.getModel() instanceof EventTableModel) {
+                    // the table structure may have changed due to a change in the table format
+                    // so we conservatively reset the TableFormat on this TableComparatorChooser
+                    setTableFormat(((EventTableModel<E>) table.getModel()).getTableFormat());
+                }
             }
 
             // if the comparator has changed

@@ -52,10 +52,10 @@ public class IssuesBrowser implements Runnable {
     private FilterPanel filterPanel = new FilterPanel(issuesEventList);
 
     /** the currently selected issues */
-    private EventSelectionModel issuesSelectionModel;
+    private EventSelectionModel<Issue> issuesSelectionModel;
 
     /** the TableModel containing the filtered and sorted issues */
-    private EventTableModel issuesTableModel;
+    private EventTableModel<Issue> issuesTableModel;
 
     /** the currently selected issue for which the details are displayed */
     private Issue descriptionIssue;

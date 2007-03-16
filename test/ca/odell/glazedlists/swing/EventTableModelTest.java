@@ -15,6 +15,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Test EventTableModel from the Swing thread.
@@ -49,12 +50,16 @@ public class EventTableModelTest extends SwingTestCase {
         try {
             tableModel.getElementAt(100);
             fail("failed to receive IndexOutOfBoundsException for invalid index");
-        } catch (IndexOutOfBoundsException e) { }
+        } catch (IndexOutOfBoundsException e) {
+            // expected
+        }
 
         try {
             tableModel.getElementAt(-1);
             fail("failed to receive IndexOutOfBoundsException for invalid index");
-        } catch (IndexOutOfBoundsException e) { }
+        } catch (IndexOutOfBoundsException e) {
+            // expected
+        }
     }
 
     /**
@@ -76,12 +81,16 @@ public class EventTableModelTest extends SwingTestCase {
         try {
             tableModel.getValueAt(100, 0);
             fail("failed to receive IndexOutOfBoundsException for invalid index");
-        } catch (IndexOutOfBoundsException e) { }
+        } catch (IndexOutOfBoundsException e) {
+            // expected
+        }
 
         try {
             tableModel.getValueAt(-1, 0);
             fail("failed to receive IndexOutOfBoundsException for invalid index");
-        } catch (IndexOutOfBoundsException e) { }
+        } catch (IndexOutOfBoundsException e) {
+            // expected
+        }
     }
 
     public void guiTestConstructorLocking() throws InterruptedException {
@@ -99,7 +108,7 @@ public class EventTableModelTest extends SwingTestCase {
         final EventList<Integer> delayList = new DelayList<Integer>(atomicList, 50);
 
         // the test: creating the EventTableModel should be atomic and pause the writerThread while it initializes its internal state
-        new EventTableModel(delayList, GlazedLists.tableFormat(new String[0], new String[0]));
+        new EventTableModel<Integer>(delayList, GlazedLists.tableFormat(new String[0], new String[0]));
 
         // wait until the writerThread finishes before asserting the recorded state
         writerThread.join();
@@ -173,7 +182,7 @@ public class EventTableModelTest extends SwingTestCase {
 
         final SortedList<JLabel> sortedLabels = new SortedList<JLabel>(observedLabels, GlazedLists.beanPropertyComparator(JLabel.class, "text"));
 
-        final EventTableModel tableModel = new EventTableModel<JLabel>(sortedLabels, new SaskTableFormat());
+        final EventTableModel<JLabel> tableModel = new EventTableModel<JLabel>(sortedLabels, new SaskTableFormat());
 
         assertEquals(3, tableModel.getRowCount());
         assertEquals("apple", tableModel.getValueAt(0, 0));
@@ -185,6 +194,16 @@ public class EventTableModelTest extends SwingTestCase {
         assertEquals("apple", tableModel.getValueAt(0, 0));
         assertEquals("cherry", tableModel.getValueAt(1, 0));
         assertEquals("orange", tableModel.getValueAt(2, 0));
+    }
+
+    /**
+     * This test ensures the compiler allows us to use a TableFormat of a more
+     * generic type than the actual EventTableModel.
+     */
+    public void guiTestGenericTypeRelationships() {
+        final EventList<DefaultListCellRenderer> source = new BasicEventList<DefaultListCellRenderer>();
+        final TableFormat<JLabel> tableFormat = new SaskTableFormat();
+        new EventTableModel<DefaultListCellRenderer>(source, tableFormat);
     }
 
     /**
@@ -225,16 +244,16 @@ public class EventTableModelTest extends SwingTestCase {
         }
     }
 
+    private static final List<Color> rgb = Arrays.asList(new Color[] { Color.RED, Color.GREEN, Color.BLUE });
+    private static final List<Color> rbg = Arrays.asList(new Color[] { Color.RED, Color.BLUE, Color.GREEN });
+    private static final List<Color> gbr = Arrays.asList(new Color[] { Color.GREEN, Color.BLUE, Color.RED });
+
     /**
      * Perform a quick run through the basics of TableComparatorChooser.
      */
     public void guiTestTableComparatorChooser() {
-
         // build the data
-        EventList<Color> colors = new BasicEventList<Color>();
-        colors.add(Color.RED);
-        colors.add(Color.GREEN);
-        colors.add(Color.BLUE);
+        EventList<Color> colors = GlazedLists.eventList(rgb);
         SortedList<Color> sortedColors = new SortedList<Color>(colors, null);
 
         // build a sorted table and model
@@ -243,14 +262,14 @@ public class EventTableModelTest extends SwingTestCase {
 
         // prepare the table for sorting and rendering its header
         JTable table = new JTable(tableModel);
-        TableComparatorChooser<Color> tableComparatorChooser = TableComparatorChooser.install(table, sortedColors, false);
+        TableComparatorChooser<Color> tableComparatorChooser = TableComparatorChooser.install(table, sortedColors, TableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD);
         TableCellRenderer headerRenderer = table.getTableHeader().getDefaultRenderer();
 
         // sort by each column in sequence
         clickColumnHeader(table, 0);
-        assertEquals(Arrays.asList(new Color[] { Color.RED, Color.BLUE, Color.GREEN }), sortedColors);
+        assertEquals(rbg, sortedColors);
         clickColumnHeader(table, 1);
-        assertEquals(Arrays.asList(new Color[] { Color.RED, Color.GREEN, Color.BLUE }), sortedColors);
+        assertEquals(rgb, sortedColors);
 
         // make sure we can still paint the header cells
         headerRenderer.getTableCellRendererComponent(table, tableModel.getColumnName(0), false, false, 0, 0);
@@ -268,9 +287,9 @@ public class EventTableModelTest extends SwingTestCase {
         // clicking column headers shouldn't change anything after the comparator
         // chooser is disposed
         clickColumnHeader(table, 0);
-        assertEquals(Arrays.asList(new Color[] { Color.RED, Color.GREEN, Color.BLUE }), sortedColors);
+        assertEquals(rgb, sortedColors);
         clickColumnHeader(table, 1);
-        assertEquals(Arrays.asList(new Color[] { Color.RED, Color.GREEN, Color.BLUE }), sortedColors);
+        assertEquals(rgb, sortedColors);
 
         // make sure we can still paint the header cells
         headerRenderer.getTableCellRendererComponent(table, tableModel.getColumnName(0), false, false, 0, 0);
@@ -286,11 +305,11 @@ public class EventTableModelTest extends SwingTestCase {
         headerRenderer.getTableCellRendererComponent(table, tableModel.getColumnName(0), false, false, 0, 2);
 
         // try out the new table for sorting
-        tableComparatorChooser = TableComparatorChooser.install(table, sortedColors, false);
+        TableComparatorChooser.install(table, sortedColors, TableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD);
         sortedColors.setComparator(null);
-        assertEquals(Arrays.asList(new Color[] { Color.RED, Color.GREEN, Color.BLUE,  }), sortedColors);
+        assertEquals(rgb, sortedColors);
         clickColumnHeader(table, 0);
-        assertEquals(Arrays.asList(new Color[] { Color.GREEN, Color.BLUE, Color.RED }), sortedColors);
+        assertEquals(gbr, sortedColors);
     }
 
     /**

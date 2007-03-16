@@ -14,7 +14,7 @@ import java.util.Comparator;
 public class TableColumnComparator<E> implements Comparator<E> {
 
     /** the table format knows to map objects to their fields */
-    private TableFormat<E> tableFormat;
+    private TableFormat<? super E> tableFormat;
 
     /** the field of interest */
     private int column;
@@ -26,7 +26,7 @@ public class TableColumnComparator<E> implements Comparator<E> {
      * Creates a new TableColumnComparator that sorts objects by the specified
      * column using the specified table format.
      */
-    public TableColumnComparator(TableFormat<E> tableFormat, int column) {
+    public TableColumnComparator(TableFormat<? super E> tableFormat, int column) {
         this(tableFormat, column, GlazedLists.comparableComparator());
     }
 
@@ -34,7 +34,7 @@ public class TableColumnComparator<E> implements Comparator<E> {
      * Creates a new TableColumnComparator that sorts objects by the specified
      * column using the specified table format and the specified comparator.
      */
-    public TableColumnComparator(TableFormat<E> tableFormat, int column, Comparator comparator) {
+    public TableColumnComparator(TableFormat<? super E> tableFormat, int column, Comparator comparator) {
         this.column = column;
         this.tableFormat = tableFormat;
         this.comparator = comparator;

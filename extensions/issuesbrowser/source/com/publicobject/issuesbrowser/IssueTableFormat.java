@@ -17,7 +17,7 @@ import java.util.Date;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
-public class IssueTableFormat implements WritableTableFormat, AdvancedTableFormat {
+public class IssueTableFormat implements WritableTableFormat<Object>, AdvancedTableFormat<Object> {
 
     public int getColumnCount() {
         return 8;

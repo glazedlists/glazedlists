@@ -82,7 +82,7 @@ public abstract class AbstractTableComparatorChooser<E> {
     protected SortedList<E> sortedList;
 
     /** the columns to sort over */
-    private TableFormat<E> tableFormat;
+    private TableFormat<? super E> tableFormat;
 
     /** the potentially foreign comparator associated with the sorted list */
     protected Comparator<? super E> sortedListComparator = null;
@@ -94,7 +94,7 @@ public abstract class AbstractTableComparatorChooser<E> {
      * Create a {@link AbstractTableComparatorChooser} that sorts the specified
      * {@link SortedList} over the specified columns.
      */
-    protected AbstractTableComparatorChooser(SortedList<E> sortedList, TableFormat<E> tableFormat) {
+    protected AbstractTableComparatorChooser(SortedList<E> sortedList, TableFormat<? super E> tableFormat) {
         this.sortedList = sortedList;
         this.setTableFormat(tableFormat);
 
@@ -131,7 +131,7 @@ public abstract class AbstractTableComparatorChooser<E> {
      * Adjusts the TableFormat this comparator chooser uses when selecting
      * comparators. Calling this method will clear any active sorting.
      */
-    protected void setTableFormat(TableFormat<E> tableFormat) {
+    protected void setTableFormat(TableFormat<? super E> tableFormat) {
         this.tableFormat = tableFormat;
 
         // handle a change in the layout of our columns
