@@ -175,6 +175,15 @@ public final class GlazedLists {
     }
 
     /**
+     * Creates a chain of {@link Comparator}s that applies the provided
+     * {@link Comparator}s in the sequence specified until differences or
+     * absolute equality is determined.
+     */
+    public static <T> Comparator<T> chainComparators(Comparator<T>... comparators) {
+        return chainComparators(Arrays.asList(comparators));
+    }
+
+    /**
      * Creates a {@link Comparator} that compares {@link Comparable} objects.
      */
     public static Comparator<Comparable> comparableComparator() {
