@@ -175,8 +175,7 @@ public class AmazonBrowser implements Runnable {
         treeList = new TreeList<Item>(filteredItemsList, new ItemTreeFormat(treeCriteriaEditor.getActiveCriteria()), (Comparator)GlazedLists.comparableComparator());
 
         // create a JTable to display the items
-        final TableFormat<Item> itemTableFormat = new ItemTableFormat();
-        itemTableModel = new EventTableModel<Item>(treeList, itemTableFormat);
+        itemTableModel = new EventTableModel<Item>(treeList, new ItemTableFormat());
         itemTableSelectionModel = new EventSelectionModel<Item>(treeList);
         final JTable itemTable = new StripedTable(itemTableModel, null, itemTableSelectionModel);
         JScrollPane itemScrollPane = new JScrollPane(itemTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
