@@ -8,7 +8,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 /**
- * Verifies that EventList matches the List API.
+ * Verifies that TreeList behaves as expected.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
