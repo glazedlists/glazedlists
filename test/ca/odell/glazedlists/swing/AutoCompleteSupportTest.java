@@ -601,14 +601,16 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         ints.add(new Integer(10));  // should be removed by createTableCellEditor(...)
         ints.add(new Integer(0));   // should be removed by createTableCellEditor(...)
 
-        DefaultCellEditor editor = AutoCompleteSupport.createTableCellEditor(new IntegerTableFormat(), ints, 0);
+        AutoCompleteSupport.AutoCompleteCellEditor editor = AutoCompleteSupport.createTableCellEditor(new IntegerTableFormat(), ints, 0);
         JComboBox comboBox = (JComboBox) editor.getComponent();
+        assertSame(comboBox, editor.getAutoCompleteSupport().getComboBox());
         assertSame(ints.get(0), comboBox.getItemAt(0));
         assertSame(ints.get(1), comboBox.getItemAt(1));
         assertSame(ints.get(2), comboBox.getItemAt(2));
 
         editor = AutoCompleteSupport.createTableCellEditor(GlazedLists.reverseComparator(), new IntegerTableFormat(), ints, 0);
         comboBox = (JComboBox) editor.getComponent();
+        assertSame(comboBox, editor.getAutoCompleteSupport().getComboBox());
         assertSame(ints.get(2), comboBox.getItemAt(0));
         assertSame(ints.get(1), comboBox.getItemAt(1));
         assertSame(ints.get(0), comboBox.getItemAt(2));
