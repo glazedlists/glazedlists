@@ -4,31 +4,27 @@
 package com.publicobject.amazonbrowser.swing;
 
 import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import ca.odell.glazedlists.swing.*;
 import com.publicobject.amazonbrowser.*;
 import com.publicobject.misc.Exceptions;
 import com.publicobject.misc.swing.ExceptionHandlerFactory;
 import com.publicobject.misc.swing.GradientPanel;
-import com.publicobject.misc.swing.RoundedBorder;
 import com.publicobject.misc.swing.MacCornerScrollPaneLayoutManager;
+import com.publicobject.misc.swing.RoundedBorder;
 
 import javax.swing.*;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableColumnModel;
+import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
-import java.util.List;
 import java.util.Comparator;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * An AmazonBrowser is a program for searching and viewing products from amazon.com.
@@ -188,7 +184,8 @@ public class AmazonBrowser implements Runnable {
         // add a hierarchical column to the table
         ListConsistencyListener<Item> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
-        TreeTableSupport.install(itemTable, treeList, 2);
+        final TreeTableSupport treeTableSupport = TreeTableSupport.install(itemTable, treeList, 2);
+        treeTableSupport.setDelegateRenderer(new TitleRenderer());
 
         // build a panel for the search panel and results table
         final JPanel panel = new JPanel(new BorderLayout());
@@ -270,10 +267,9 @@ public class AmazonBrowser implements Runnable {
          * which is either a renderer or editor component.
          */
         private Component normalize(Component c, int row) {
-            if (!isRowSelected(row)) {
+            if (!isRowSelected(row))
                 c.setBackground(row % 2 == 0 ? Color.WHITE : AMAZON_SEARCH_LIGHT_BLUE);
-                c.setForeground(Color.BLACK);
-            }
+
             return c;
         }
     }
@@ -287,6 +283,30 @@ public class AmazonBrowser implements Runnable {
     private static final class DirectorTextFilterator implements TextFilterator<Item> {
         public void getFilterStrings(List<String> baseList, Item element) {
             baseList.add(element.getItemAttributes().getDirector());
+        }
+    }
+
+    /**
+     * A special renderer for the Title column (which renders the hierarchy)
+     * which is given access to the hierarchy data for rendering. It uses this
+     * hierarchy data to make all hierarchy text gray and all leaf text black.
+     */
+    private static final class TitleRenderer extends AbstractTreeTableNodeDataRenderer {
+
+        /** The delegate renderer that does most of the rendering. We simply tweak the result. */
+        private TableCellRenderer delegate = new DefaultTableCellRenderer();
+
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            // fetch the component from the delegate renderer
+            final JLabel label = (JLabel) delegate.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+            // selected rows always have white text, otherwise parent nodes are gray and leaf nodes are black
+            if (isSelected)
+                label.setForeground(Color.WHITE);
+            else
+                label.setForeground(hasChildren() ? Color.GRAY : Color.BLACK);
+
+            return label;
         }
     }
 }

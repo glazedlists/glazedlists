@@ -71,20 +71,14 @@ class TreeTableCellPanel extends JPanel {
      *
      * <p>The <strong>nodeComponent</strong> is displayed unmodified.
      *
-     * @param depth the depth of the tree node in the hierarchy
-     * @param hasChildren <tt>true</tt> if the tree node has child elements
-     * @param allowsChildren <tt>true</tt> if the node is of the type that can
-     *      have child elements
-     * @param isExpanded <tt>true</tt> if the node is expanded and its children are thus visible;
-     *      <tt>false</tt> if it is collapsed and its children are thus hidden. This argument
-     *      only has meaning when <code>isExpandable</code> is true; otherwise it is ignored.
+     * @param treeNodeData hierarhical information about the node within the tree
      * @param nodeComponent a Component which displays the data of the tree node
      */
-    public void configure(int depth, boolean hasChildren, boolean showExpanderForEmptyParent, boolean allowsChildren, boolean isExpanded, Component nodeComponent, boolean hasFocus) {
+    public void configure(TreeNodeData treeNodeData, boolean showExpanderForEmptyParent, Component nodeComponent, boolean hasFocus) {
         // if the tree node is expandable, pick an icon for the expander button
-        final boolean showExpanderButton = hasChildren || (allowsChildren && showExpanderForEmptyParent);
+        final boolean showExpanderButton = treeNodeData.hasChildren() || (treeNodeData.allowsChildren() && showExpanderForEmptyParent);
         if(showExpanderButton)
-            expanderButton.setIcon(UIManager.getIcon(isExpanded ? "Tree.expandedIcon" : "Tree.collapsedIcon"));
+            expanderButton.setIcon(UIManager.getIcon(treeNodeData.isExpanded() ? "Tree.expandedIcon" : "Tree.collapsedIcon"));
 
         // assign a default background color to this panel to attempt to remain consistent with the nodeComponent
         super.setBackground(nodeComponent.getBackground());
@@ -104,7 +98,7 @@ class TreeTableCellPanel extends JPanel {
         // configure this panel with the updated space/expander button and the supplied nodeComponent
         // taking care to give the nodeComponent *ALL* excess space (not just its preferred size)
         removeAll();
-        add(getSpacer(showExpanderButton ? depth : depth + 1), TreeTableCellLayout.SPACER);
+        add(getSpacer(showExpanderButton ? treeNodeData.getDepth() : treeNodeData.getDepth() + 1), TreeTableCellLayout.SPACER);
         add(showExpanderButton ? expanderButton : createSpacer(1), TreeTableCellLayout.EXPANDER);
         add(nodeComponent, TreeTableCellLayout.NODE_COMPONENT);
 

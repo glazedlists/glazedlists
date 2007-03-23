@@ -52,6 +52,9 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
     /** Respond to editing changes in the delegate TableCellEditor. */
     private final CellEditorListener delegateListener = new DelegateTableCellEditorListener();
 
+    /** Data describing the hierarchy information of the tree node being edited. */
+    private final MutableTreeNodeData treeNodeData = new MutableTreeNodeData();
+
     /**
      * Decorate the component returned from the <code>delegate</code> with
      * extra components that display the tree nodes location within the tree.
@@ -84,26 +87,26 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
      * {@link TableCellEditor}.
      */
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-        final Component c = delegate.getTableCellEditorComponent(table, value, isSelected, row, column);
-
-        final int depth;
-        final boolean isExpanded;
-        final boolean hasChildren;
-        final boolean allowsChildren;
-
         treeList.getReadWriteLock().readLock().lock();
         try {
             // read information about the tree node from the TreeList
-            depth = treeList.depth(row);
-            isExpanded = treeList.isExpanded(row);
-            hasChildren = treeList.hasChildren(row);
-            allowsChildren = treeList.getAllowsChildren(row);
+            treeNodeData.setDepth(treeList.depth(row));
+            treeNodeData.setExpanded(treeList.isExpanded(row));
+            treeNodeData.setHasChildren(treeList.hasChildren(row));
+            treeNodeData.setAllowsChildren(treeList.getAllowsChildren(row));
         } finally {
             treeList.getReadWriteLock().readLock().unlock();
         }
 
-        // ask our special component to configure itself for this tree node
-        component.configure(depth, hasChildren, showExpanderForEmptyParent, allowsChildren, isExpanded, c, false);
+        // if the delegate editor accepts TreeNodeData, give it
+        if (delegate instanceof TreeTableNodeDataEditor)
+            ((TreeTableNodeDataEditor) delegate).setTreeNodeData(treeNodeData);
+
+        // ask the delegate editor to produce the data component
+        final Component c = delegate.getTableCellEditorComponent(table, value, isSelected, row, column);
+
+        // ask our special component to configure itself for editing this tree node
+        component.configure(treeNodeData, showExpanderForEmptyParent, c, false);
         return component;
     }
 

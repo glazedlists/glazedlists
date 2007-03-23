@@ -49,6 +49,9 @@ public class TreeTableCellRenderer implements TableCellRenderer {
     /** The panel capable of laying out a spacer component, expander button, and data Component to produce the entire tree node display. */
     private final TreeTableCellPanel component = new TreeTableCellPanel();
 
+    /** Data describing the hierarchy information of the tree node being rendered. */
+    private final MutableTreeNodeData treeNodeData = new MutableTreeNodeData();
+
     /**
      * Decorate the component returned from the <code>delegate</code> with
      * extra components that display the tree nodes location within the tree.
@@ -77,26 +80,26 @@ public class TreeTableCellRenderer implements TableCellRenderer {
      * {@link TableCellRenderer}.
      */
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        final Component c = delegate.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-
-        final int depth;
-        final boolean isExpanded;
-        final boolean hasChildren;
-        final boolean allowsChildren;
-
         treeList.getReadWriteLock().readLock().lock();
         try {
             // read information about the tree node from the TreeList
-            depth = treeList.depth(row);
-            isExpanded = treeList.isExpanded(row);
-            hasChildren = treeList.hasChildren(row);
-            allowsChildren = treeList.getAllowsChildren(row);
+            treeNodeData.setDepth(treeList.depth(row));
+            treeNodeData.setExpanded(treeList.isExpanded(row));
+            treeNodeData.setHasChildren(treeList.hasChildren(row));
+            treeNodeData.setAllowsChildren(treeList.getAllowsChildren(row));
         } finally {
             treeList.getReadWriteLock().readLock().unlock();
         }
 
+        // if the delegate renderer accepts TreeNodeData, give it
+        if (delegate instanceof TreeTableNodeDataRenderer)
+            ((TreeTableNodeDataRenderer) delegate).setTreeNodeData(treeNodeData);
+
+        // ask the delegate renderer to produce the data component
+        final Component c = delegate.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
         // ask our special component to configure itself for this tree node
-        component.configure(depth, hasChildren, showExpanderForEmptyParent, allowsChildren, isExpanded, c, hasFocus);
+        component.configure(treeNodeData, showExpanderForEmptyParent, c, hasFocus);
         return component;
     }
 
