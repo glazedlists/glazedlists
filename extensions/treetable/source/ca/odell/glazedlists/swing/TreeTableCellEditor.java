@@ -128,19 +128,29 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
         if (event instanceof MouseEvent) {
             final MouseEvent me = (MouseEvent) event;
 
-            // we're going to check if the single click was overtop of the
-            // node component and give a translated version of the
-            // MouseEvent to the delegate TableCellEditor if it was
+            // we're going to check if the MouseEvent was overtop of the node component
+            // and if it was, ask the node component if it wants a cell edit
 
+            // extract information about the location of the click
+            final JTable table = (JTable) me.getSource();
+            final Point clickPoint = me.getPoint();
+            final int row = table.rowAtPoint(clickPoint);
+            final int column = table.columnAtPoint(clickPoint);
+
+            // translate the clickPoint to be relative to the rendered component
+            final Rectangle cellRect = table.getCellRect(row, column, true);
+            clickPoint.translate(-cellRect.x, -cellRect.y);
+
+            // get the rendered component which we will query about the MouseEvent
             final TreeTableCellPanel renderedPanel = TreeTableUtilities.prepareRenderer(me);
 
             // if the click occurred over the node component
-            if (renderedPanel != null && renderedPanel.isPointOverNodeComponent(me.getPoint())) {
-                // shift the click over by the expand icon and space
+            if (renderedPanel != null && renderedPanel.isPointOverNodeComponent(clickPoint)) {
+                // create a new MouseEvent that is translated over the node component
                 final Rectangle delegateRendererBounds = renderedPanel.getNodeComponent().getBounds();
-                final MouseEvent translatedMouseEvent = new MouseEvent(me.getComponent(), me.getID(), me.getWhen(), me.getModifiers(), me.getX() - delegateRendererBounds.x, me.getY() - delegateRendererBounds.y , me.getClickCount(), me.isPopupTrigger(), me.getButton());
+                final MouseEvent translatedMouseEvent = new MouseEvent(me.getComponent(), me.getID(), me.getWhen(), me.getModifiers(), me.getX() - delegateRendererBounds.x, me.getY() - delegateRendererBounds.y, me.getClickCount(), me.isPopupTrigger(), me.getButton());
 
-                // allow the actual editor to decide
+                // allow the actual node editor to decide
                 return delegate.isCellEditable(translatedMouseEvent);
             }
 

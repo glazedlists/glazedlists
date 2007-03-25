@@ -35,7 +35,7 @@ import java.util.List;
 class TreeTableCellPanel extends JPanel {
 
     /** The border that spaces the delegate component over from the expander button. */
-    static final Border NO_FOCUS_BORDER = BorderFactory.createEmptyBorder(0, 0, 0, 0);
+    private static final Border NO_FOCUS_BORDER = BorderFactory.createEmptyBorder(0, 0, 0, 0);
 
     /** A cache of appropriate spacer components for each depth in the tree. */
     private final List<Component> spacerComponentsCache = new ArrayList<Component>();
