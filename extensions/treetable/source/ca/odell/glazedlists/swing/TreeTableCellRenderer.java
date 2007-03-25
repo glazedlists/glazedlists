@@ -50,7 +50,7 @@ public class TreeTableCellRenderer implements TableCellRenderer {
     private final TreeTableCellPanel component = new TreeTableCellPanel();
 
     /** Data describing the hierarchy information of the tree node being rendered. */
-    private final MutableTreeNodeData treeNodeData = new MutableTreeNodeData();
+    private final TreeNodeData treeNodeData = new TreeNodeData();
 
     /**
      * Decorate the component returned from the <code>delegate</code> with

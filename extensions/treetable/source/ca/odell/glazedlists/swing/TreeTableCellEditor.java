@@ -53,7 +53,7 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
     private final CellEditorListener delegateListener = new DelegateTableCellEditorListener();
 
     /** Data describing the hierarchy information of the tree node being edited. */
-    private final MutableTreeNodeData treeNodeData = new MutableTreeNodeData();
+    private final TreeNodeData treeNodeData = new TreeNodeData();
 
     /**
      * Decorate the component returned from the <code>delegate</code> with
