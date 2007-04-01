@@ -456,17 +456,9 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 nodeAttacher.nodesToAttach.appendNewlyInserted(inserted);
 
             } else if(type == ListEvent.UPDATE) {
-                Node<E> node = data.get(sourceIndex, REAL_NODES).get();
-
-                // shift as necessary, so if the parents are immediately after, they're used
-                if(hasStructurallyChanged(node)) {
-                    deleteAndDetachNode(sourceIndex, nodesToVerify);
-                    Node<E> updated = findOrInsertNode(sourceIndex);
-                    nodeAttacher.nodesToAttach.appendNewlyInserted(updated);
-
-                } else {
-                    nodeAttacher.nodesToAttach.appendNewlyInserted(node);
-                }
+                deleteAndDetachNode(sourceIndex, nodesToVerify);
+                Node<E> updated = findOrInsertNode(sourceIndex);
+                nodeAttacher.nodesToAttach.appendNewlyInserted(updated);
 
             } else if(type == ListEvent.DELETE) {
                 deleteAndDetachNode(sourceIndex, nodesToVerify);
@@ -933,30 +925,6 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     }
 
     /**
-     * Decide whether an node needs to be rebuilt due to a change in its
-     * structural meaning. For example, if it is no longer a parent by value for
-     * its children, or if its no longer a child by value of its parent.
-     *
-     * @return <code>true</code> if the specified node has structurally
-     *      shifted in the tree.
-     */
-    private boolean hasStructurallyChanged(Node<E> node) {
-        // our parent should have a length one less than our length
-        int parentPathLength = node.parent == null ? 0 : node.parent.pathLength();
-        if(parentPathLength != node.pathLength() - 1) {
-            return true;
-        }
-
-        // our previous parent is still our parent, so nothing has changed structurally
-        if(node.parent == null || isAncestorByValue(node, node.parent)) {
-            return false;
-        }
-
-        // something about our parentage has changed
-        return true;
-    }
-
-    /**
      * Delete all virtual parents that no longer have child nodes attached.
      * This method does not depend upon child nodes being properly configured.
      */
@@ -1291,9 +1259,11 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         }
 
         public Node<E> reevaluate(E sourceValue, Node<E> transformedValue) {
-            transformedValue.path.clear();
-            format.getPath(transformedValue.path, sourceValue);
-            return transformedValue;
+            assert(!transformedValue.virtual);
+            Node<E> result = evaluate(sourceValue);
+            // TODO(jessewilson): is this necessary?
+            result.expanded = transformedValue.expanded;
+            return result;
         }
 
         public void dispose(E sourceValue, Node<E> transformedValue) {

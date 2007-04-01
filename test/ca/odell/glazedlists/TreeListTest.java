@@ -1555,11 +1555,22 @@ public class TreeListTest extends TestCase {
         source.add(1, "ABC");
         source.add(2, "ABD");
         source.add(3, "ABE");
+        treeList.setExpanded(2, false);
         treeList.setExpanded(1, false);
         source.set(0, "AB");
+        source.set(1, "ABC");
         assertTreeStructure(treeList, new String[] {
                 "A",
                 "AB",
         });
+        treeList.setExpanded(1, true);
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "ABD",
+                "ABE",
+        });
+        assertFalse(treeList.isExpanded(2));
     }
 }
