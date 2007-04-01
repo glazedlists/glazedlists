@@ -104,8 +104,9 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         NodeAttacher nodeAttacher = new NodeAttacher(false);
         for(int i = 0; i < super.source.size(); i++) {
             Node<E> node = super.source.get(i);
-            addNode(node, HIDDEN_REAL, expansionModel, i);
-            nodeAttacher.nodesToAttach.appendNewlyInserted(node);
+            node.expanded = expansionModel.isExpanded(node.getElement(), node.path);
+            addNode(node, HIDDEN_REAL, i);
+            nodeAttacher.nodesToAttach.queueNodeForAttaching(node, true);
         }
         // attach siblings and parent nodes
         nodeAttacher.attachAll();
@@ -144,7 +145,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             this.expansionModel = expansionModel;
 
             this.sourceElements = sourceElements;
-            this.sourceNodes = new FunctionList<E,Node<E>>(sourceElements, new ElementToTreeNodeFunction<E>(format), NO_OP_FUNCTION);
+            this.sourceNodes = new FunctionList<E,Node<E>>(sourceElements, new ElementToTreeNodeFunction<E>(format, expansionModel), NO_OP_FUNCTION);
             if(comparator != null) {
                 this.nodeComparator = comparatorToNodeComparator(comparator, format);
                 this.sortedList = new SortedList<Node<E>>(sourceNodes, nodeComparator);
@@ -453,12 +454,12 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
             if(type == ListEvent.INSERT) {
                 Node<E> inserted = findOrInsertNode(sourceIndex);
-                nodeAttacher.nodesToAttach.appendNewlyInserted(inserted);
+                nodeAttacher.nodesToAttach.queueNodeForAttaching(inserted, true);
 
             } else if(type == ListEvent.UPDATE) {
                 deleteAndDetachNode(sourceIndex, nodesToVerify);
                 Node<E> updated = findOrInsertNode(sourceIndex);
-                nodeAttacher.nodesToAttach.appendNewlyInserted(updated);
+                nodeAttacher.nodesToAttach.queueNodeForAttaching(updated, false);
 
             } else if(type == ListEvent.DELETE) {
                 deleteAndDetachNode(sourceIndex, nodesToVerify);
@@ -568,7 +569,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             if(newlyInserted) {
                 Node<E> follower = current.next();
                 if(follower != null) {
-                    nodesToAttach.prependPotentiallySplit(follower);
+                    nodesToAttach.queuePrefixForAttaching(follower);
                 }
             }
 
@@ -626,7 +627,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
         private void incrementPredecessor() {
             if(predecessor.siblingAfter != null && predecessor.siblingAfter != current) {
-                nodesToAttach.addInOrder(predecessor.siblingAfter);
+                nodesToAttach.queueOutOfOrderNodeForAttaching(predecessor.siblingAfter);
                 predecessor.siblingAfter.siblingBefore = null;
                 predecessor.siblingAfter = null;
             }
@@ -642,7 +643,8 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         private void createAndAttachParent() {
             Node<E> parent = current.describeParent();
             if(parent != null) {
-                addNode(parent, HIDDEN_VIRTUAL, expansionModel, index);
+                parent.expanded = expansionModel.isExpanded(parent.getElement(), parent.path);
+                addNode(parent, HIDDEN_VIRTUAL, index);
             }
             attachParent(parent, null);
         }
@@ -742,14 +744,21 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         private final NodeIndexComparator nodeIndexComparator = new NodeIndexComparator();
         private final Map<Node<E>,Boolean> newlyInsertedNodes = new IdentityHashMap<Node<E>,Boolean>();
 
-        private void addInOrder(Node<E> node) {
+        /**
+         * Add this node to the queue in order.
+         * @param node
+         */
+        private void queueOutOfOrderNodeForAttaching(Node<E> node) {
             int position = Collections.binarySearch(nodes, node, nodeIndexComparator);
             if(position >= 0) return;
             nodes.add(-position - 1, node);
             assert(isValid());
         }
 
-        private void prependPotentiallySplit(Node<E> node) {
+        /**
+         * Add this node to the beginning of the queue.
+         */
+        private void queuePrefixForAttaching(Node<E> node) {
             if(!nodes.isEmpty()) {
                 if(nodes.get(0) == node) {
                     return;
@@ -760,10 +769,17 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             assert(isValid());
         }
 
-        private void appendNewlyInserted(Node<E> node) {
+        /**
+         * Add this node to the end of the queue.
+         */
+        private void queueNodeForAttaching(Node<E> node, boolean newlyInserted) {
             assert(nodes.isEmpty() || nodeIndexComparator.compare(nodes.get(nodes.size() - 1), node) < 0);
             nodes.add(node);
             newlyInsertedNodes.put(node, Boolean.TRUE);
+            if (newlyInserted) {
+                newlyInsertedNodes.put(node, Boolean.TRUE);
+            }
+
             assert(isValid());
         }
 
@@ -813,7 +829,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      */
     private Node<E> findOrInsertNode(int sourceIndex) {
         Node<E> inserted = source.get(sourceIndex);
-        inserted.reset();
+        inserted.resetDerivedState();
 
         //  bound the range of indices where this node can be inserted. This is
         // all the virtual nodes between our predecessor and follower in the
@@ -858,7 +874,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
         // insert the node as hidden by default - if we need to show this node,
         // we'll change its state later and fire an 'insert' event then
-        addNode(inserted, HIDDEN_REAL, expansionModel, indexOfNearestAncestorByValue + 1);
+        addNode(inserted, HIDDEN_REAL, indexOfNearestAncestorByValue + 1);
         return inserted;
     }
 
@@ -1140,8 +1156,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * Prepare the state of the node and insert it into the datastore. It will
      * still be necessary to attach parent and sibling nodes.
      */
-    private void addNode(Node<E> node, byte nodeColor, ExpansionModel<E> expansionModel, int realIndex) {
-        node.expanded = expansionModel.isExpanded(node.getElement(), node.path);
+    private void addNode(Node<E> node, byte nodeColor, int realIndex) {
         node.element = data.add(realIndex, ALL_NODES, nodeColor, node, 1);
     }
 
@@ -1248,20 +1263,23 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      */
     private static class ElementToTreeNodeFunction<E> implements FunctionList.AdvancedFunction<E, Node<E>> {
         private final Format<E> format;
-        public ElementToTreeNodeFunction(Format<E> format) {
+        private final ExpansionModel<E> expansionModel;
+        public ElementToTreeNodeFunction(Format<E> format, ExpansionModel<E> expansionModel) {
             this.format = format;
+            this.expansionModel = expansionModel;
         }
         public Node<E> evaluate(E sourceValue) {
             // populate the path using the working path as a temporary variable
             List<E> path = new ArrayList<E>();
             format.getPath(path, sourceValue);
-            return new Node<E>(false, path);
+            Node<E> result = new Node<E>(false, path);
+            result.expanded = expansionModel.isExpanded(sourceValue, path);
+            return result;
         }
 
         public Node<E> reevaluate(E sourceValue, Node<E> transformedValue) {
             assert(!transformedValue.virtual);
             Node<E> result = evaluate(sourceValue);
-            // TODO(jessewilson): is this necessary?
             result.expanded = transformedValue.expanded;
             return result;
         }
@@ -1305,7 +1323,6 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
          *      is an error to mutate this path once it has been provided to a node.
          */
         private Node(boolean virtual, List<E> path) {
-            reset();
             this.virtual = virtual;
             this.path = path;
         }
@@ -1315,9 +1332,8 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
          * residual state due to a previous location in the tree, in the event
          * that the node was subject to a reordering event.
          */
-        private void reset() {
+        private void resetDerivedState() {
             virtual = false;
-            expanded = true;
             element = null;
             siblingAfter = null;
             siblingBefore = null;
