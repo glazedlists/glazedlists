@@ -1452,16 +1452,16 @@ public class TreeListTest extends TestCase {
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
-        source.add(0, "pmmu");
-        source.add(0, "pmmu");
+        source.add(0, "PMMU");
+        source.add(0, "PMMU");
 
         treeList.setExpanded(0, true);
         treeList.setExpanded(1, true);
         treeList.setExpanded(2, true);
 
         source.addAll(1, Arrays.asList(new String[] {
-                "pmm",
-                "pmmp",
+                "PMM",
+                "PMMP",
         }));
     }
 
@@ -1477,8 +1477,8 @@ public class TreeListTest extends TestCase {
         listConsistencyListener.setPreviousElementTracked(false);
 
         source.beginEvent(false);
-            source.add(0, "pmmu");
-            source.add(1, "pmmu");
+            source.add(0, "PMMU");
+            source.add(1, "PMMU");
         source.commitEvent();
 
         treeList.setExpanded(0, true);
@@ -1486,9 +1486,9 @@ public class TreeListTest extends TestCase {
         treeList.setExpanded(2, true);
 
         source.beginEvent(false);
-            source.add(1, "pmm");
-            source.add(2, "pmmp");
-            source.add(4, "pmms");
+            source.add(1, "PMM");
+            source.add(2, "PMMP");
+            source.add(4, "PMMS");
         source.commitEvent();
     }
 
@@ -1505,10 +1505,10 @@ public class TreeListTest extends TestCase {
         listConsistencyListener.setPreviousElementTracked(false);
 
         source.beginEvent(false);
-            source.add(0, "abc");
-            source.add(1, "abe");
-            source.add(2, "bbc");
-            source.add(3, "bbe");
+            source.add(0, "ABC");
+            source.add(1, "ABE");
+            source.add(2, "BBC");
+            source.add(3, "BBE");
         source.commitEvent();
 
         treeList.setExpanded(0, true);
@@ -1517,12 +1517,49 @@ public class TreeListTest extends TestCase {
         treeList.setExpanded(5, true);
 
         source.beginEvent(false);
-            source.add(1, "ab");
-            source.add(2, "abd");
-            source.add(4, "abf");
-            source.add(6, "bb");
-            source.add(7, "bbd");
-            source.add(9, "bbf");
+            source.add(1, "AB");
+            source.add(2, "ABD");
+            source.add(4, "ABF");
+            source.add(6, "BB");
+            source.add(7, "BBD");
+            source.add(9, "BBF");
         source.commitEvent();
+    }
+    
+    public void testUpdatingElementMovesIt() {
+        EventList<String> source = new BasicEventList<String>();
+
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat(), TreeList.NODES_START_EXPANDED,
+                String.CASE_INSENSITIVE_ORDER);
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.add(0, "ABC");
+        source.add(1, "BCD");
+        source.add(2, "CDE");
+        source.add(3, "CDF");
+        source.add(4, "DEF");
+
+        source.set(3, "ABD");
+    }
+
+    public void testUpdatingElementsRetainExpandCollapseState() {
+        EventList<String> source = new BasicEventList<String>();
+
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat(), TreeList.NODES_START_EXPANDED,
+                String.CASE_INSENSITIVE_ORDER);
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.add(0, "AB");
+        source.add(1, "ABC");
+        source.add(2, "ABD");
+        source.add(3, "ABE");
+        treeList.setExpanded(1, false);
+        source.set(0, "AB");
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+        });
     }
 }
