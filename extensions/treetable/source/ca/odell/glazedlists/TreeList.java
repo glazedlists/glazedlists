@@ -7,6 +7,7 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.impl.adt.barcode2.Element;
 import ca.odell.glazedlists.impl.adt.barcode2.FourColorTree;
 import ca.odell.glazedlists.impl.adt.barcode2.ListToByteCoder;
+import ca.odell.glazedlists.impl.GlazedListsImpl;
 
 import java.util.*;
 
@@ -150,7 +151,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 this.nodeComparator = comparatorToNodeComparator(comparator, format);
                 this.sortedList = new SortedList<Node<E>>(sourceNodes, nodeComparator);
             } else {
-                this.nodeComparator = comparatorToNodeComparator((Comparator)GlazedLists.comparableComparator(), format);
+                this.nodeComparator = comparatorToNodeComparator((Comparator)GlazedListsImpl.equalsComparator(), format);
                 this.sortedList = null;
             }
         }

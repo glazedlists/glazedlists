@@ -26,7 +26,7 @@ public final class Diff {
      * equality.
      */
     public static <E> void replaceAll(EventList<E> target, List<E> source, boolean updates) {
-        replaceAll(target, source, updates, new EqualsComparator());
+        replaceAll(target, source, updates, (Comparator)GlazedListsImpl.equalsComparator());
     }
 
     /**
@@ -302,17 +302,6 @@ public final class Diff {
 
         public boolean matchPair(int alphaIndex, int betaIndex) {
             return (comparator.compare(alpha.get(alphaIndex), beta.get(betaIndex)) == 0);
-        }
-    }
-
-    /**
-     * This non-symmetric comparator returns 0 if two Objects are equal as
-     * specified by {@link Object#equals(Object)}, or 1 otherwise.
-     */
-    private static class EqualsComparator implements Comparator {
-        public int compare(Object alpha, Object beta) {
-            boolean equal = alpha == null ? beta == null : alpha.equals(beta);
-            return equal ? 0 : 1;
         }
     }
 }

@@ -166,4 +166,18 @@ public final class GlazedListsImpl {
                calendar.get(Calendar.HOUR_OF_DAY) == 0 &&
                calendar.get(Calendar.DATE) == 1;
     }
+
+    /**
+     * Returns a non-symmetric comparator returns 0 if two Objects are equal as
+     * specified by {@link Object#equals(Object)}, or 1 otherwise.
+     */
+    public static Comparator<? extends Object> equalsComparator() {
+        return new EqualsComparator<Object>();
+    }
+    private static class EqualsComparator<T> implements Comparator<T> {
+        public int compare(T alpha, T beta) {
+            boolean equal = alpha == null ? beta == null : alpha.equals(beta);
+            return equal ? 0 : 1;
+        }
+    }
 }
