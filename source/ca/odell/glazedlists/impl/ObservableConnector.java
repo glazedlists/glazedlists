@@ -4,7 +4,6 @@
 package ca.odell.glazedlists.impl;
 
 import ca.odell.glazedlists.ObservableElementList;
-import ca.odell.glazedlists.ObservableElementList.Connector;
 
 import java.util.EventListener;
 import java.util.Observable;
@@ -18,7 +17,7 @@ import java.util.Observer;
  *
  * @author James Lemieux
  */
-public class ObservableConnector<E extends Observable> implements Connector<E>, Observer, EventListener {
+public class ObservableConnector<E extends Observable> implements ObservableElementList.Connector<E>, Observer, EventListener {
 
     /** The list which contains the elements being observed via this {@link ObservableElementList.Connector}. */
     private ObservableElementList<? extends E> list;
