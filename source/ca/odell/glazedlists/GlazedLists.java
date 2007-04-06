@@ -439,7 +439,7 @@ public final class GlazedLists {
      * @return an ObservableElementList.Connector for the specified class
      */
     public static <E> ObservableElementList.Connector<E> beanConnector(Class<E> beanClass) {
-        return new JavaBeanEventListConnector<E>(beanClass);
+        return new BeanConnector<E>(beanClass);
     }
     
     /**
@@ -487,7 +487,7 @@ public final class GlazedLists {
      */
     public static <E> ObservableElementList.Connector<E> beanConnector(Class<E> beanClass,
             Matcher<PropertyChangeEvent> eventMatcher) {
-        return new JavaBeanEventListConnector<E>(beanClass, eventMatcher);
+        return new BeanConnector<E>(beanClass, eventMatcher);
     }
 
     /**
@@ -502,7 +502,7 @@ public final class GlazedLists {
      * @return an ObservableElementList.Connector for the specified class
      */
     public static <E> ObservableElementList.Connector<E> beanConnector(Class<E> beanClass, String addListener, String removeListener) {
-        return new JavaBeanEventListConnector<E>(beanClass, addListener, removeListener);
+        return new BeanConnector<E>(beanClass, addListener, removeListener);
     }
     
     /**
@@ -525,7 +525,19 @@ public final class GlazedLists {
      */
     public static <E> ObservableElementList.Connector<E> beanConnector(Class<E> beanClass,
             String addListener, String removeListener, Matcher<PropertyChangeEvent> eventMatcher) {
-        return new JavaBeanEventListConnector<E>(beanClass, addListener, removeListener, eventMatcher);
+        return new BeanConnector<E>(beanClass, addListener, removeListener, eventMatcher);
+    }
+
+    /**
+     * Create a new Connector for the {@link ObservableElementList} that works
+     * with subclasses of the archaic {@link Observable} base class. Each
+     * element of the ObservableElementList <strong>must</strong> extend the
+     * Observable base class.
+     *
+     * @return an ObservableElementList.Connector for objects that extend {@link Observable}
+     */
+    public static <E extends Observable> ObservableElementList.Connector<E> observableConnector() {
+        return new ObservableConnector<E>();
     }
 
     // Matchers // // // // // // // // // // // // // // // // // // // // //
