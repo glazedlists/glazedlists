@@ -592,6 +592,59 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertSame(GlazedLists.toStringTextFilterator(), support.getTextFilterator());
     }
 
+    /**
+     * This test ensures that editing text works smoothly, particularly w.r.t. the caret position.
+     * Specifically, this test starts with a single dropdown value "foobar", and the initial text
+     * "fobar".
+     *
+     * Positioning the caret at index 2 and typing "o" should:
+     * a) change the text to "foobar"
+     * b) select "foobar" in the model
+     * c) leave the caret at position 3 (i.e. don't move it to the end of the term)
+     *
+     * Typing t should then:
+     * a) change the text to "footbar"
+     * b) clear the selection in the model
+     * c) leave the caret at position 4
+     */
+    public void guiTestExactMatchWhenEditingText() throws BadLocationException {
+        final JComboBox combo = new JComboBox();
+
+        final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
+        final AbstractDocument doc = (AbstractDocument) textField.getDocument();
+
+        final EventList<String> items = new BasicEventList<String>();
+        items.add("foobar");
+
+        AutoCompleteSupport support = AutoCompleteSupport.install(combo, items);
+        final ComboBoxModel model = combo.getModel();
+        assertEquals(TextMatcherEditor.IDENTICAL_STRATEGY, support.getTextMatchingStrategy());
+        doc.replace(0, doc.getLength(), "fobar", null);
+        textField.setCaretPosition(2);
+
+        assertEquals("fobar", textField.getText());
+        assertEquals(2, textField.getCaretPosition());
+        assertEquals(null, model.getSelectedItem());
+
+        // simulate typing "o" to make "foobar", a match
+        doc.insertString(2, "o", null);
+        assertEquals("foobar", textField.getText());
+        assertEquals(3, textField.getCaretPosition());
+        assertEquals("foobar", model.getSelectedItem());
+
+        // simulate typing "t" to make "footbar", a non match
+        doc.insertString(3, "t", null);
+        assertEquals("footbar", textField.getText());
+        assertEquals(4, textField.getCaretPosition());
+        assertEquals(null, model.getSelectedItem());
+
+        // simulate deleting "t" to make "foobar" again, a match
+        doc.remove(3, 1);
+        assertEquals("foobar", textField.getText());
+        assertEquals(3, textField.getCaretPosition());
+        assertEquals("foobar", model.getSelectedItem());
+    }
+
     public void guiTestCreateTableCellEditor() {
         final EventList<Integer> ints = new BasicEventList<Integer>();
         ints.add(new Integer(0));

@@ -1275,6 +1275,12 @@ public final class AutoCompleteSupport<E> {
             // determine if our prefix is empty (in which case we cannot use our filterMatcher to locate an autocompletion term)
             final boolean prefixIsEmpty = "".equals(prefix);
 
+            // record the original caret position in case we don't want to disturb the text (occurs when an exact autocomplete term match is found)
+            final int originalCaretPosition = comboBoxEditorComponent.getCaretPosition();
+
+            // a flag to indicate whether a partial match or exact match exists on the autocomplete term
+            boolean autoCompleteTermIsExactMatch = false;
+
             // search the combobox model for a value that starts with our prefix (called an autocompletion term)
             for (int i = 0, n = comboBoxModel.getSize(); i < n; i++) {
                 String itemString = convertToString(comboBoxModel.getElementAt(i));
@@ -1296,6 +1302,7 @@ public final class AutoCompleteSupport<E> {
                     if (prefix.equals(itemString)) {
                         matchIndex = j;
                         matchString = itemString;
+                        autoCompleteTermIsExactMatch = true;
                         break;
                     }
                 }
@@ -1317,8 +1324,13 @@ public final class AutoCompleteSupport<E> {
                 final boolean silently = isTableCellEditor || GlazedListsImpl.equal(selectedItemBeforeEdit, matchString);
                 selectItem(matchIndex, silently);
 
-                // select the text after the prefix but before the end of the text (it represents the autocomplete text)
-                comboBoxEditorComponent.select(prefix.length(), document.getLength());
+                if (autoCompleteTermIsExactMatch) {
+                    // if the term matched the original text exactly, return the caret to its original location
+                    comboBoxEditorComponent.setCaretPosition(originalCaretPosition);
+                } else {
+                    // select the text after the prefix but before the end of the text (it represents the autocomplete text)
+                    comboBoxEditorComponent.select(prefix.length(), document.getLength());
+                }
 
                 return;
             }
