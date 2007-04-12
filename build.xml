@@ -159,7 +159,6 @@
         <jar destfile="${target.dir}/${jar.file}" update="true" index="true">
 			<fileset dir="${classes.dir}">
                 <exclude name="com/publicobject/**"/>                  <!-- IssuesBrowser -->
-                <exclude name="ca/odell/glazedlists/impl/testing/**"/> <!-- Testing classes -->
             </fileset>
             <fileset dir=".">
 				<include name="resources/**"/>
