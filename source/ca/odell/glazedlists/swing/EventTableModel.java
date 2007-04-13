@@ -18,8 +18,8 @@ import javax.swing.table.TableModel;
 
 /**
  * A {@link TableModel} that holds an {@link EventList}. Each element of the list
- * corresponds to a row in the {@link TableModel}. The columns of the table must
- * be specified using a {@link TableFormat}.
+ * corresponds to a row in the {@link TableModel}. The columns of the table are
+ * specified using a {@link TableFormat}.
  *
  * <p>The EventTableModel class is <strong>not thread-safe</strong>. Unless otherwise
  * noted, all methods are only safe to be called from the event dispatch thread.
@@ -45,7 +45,7 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
     /** specifies how column data is extracted from each row object */
     private TableFormat<? super E> tableFormat;
 
-    /** reusable table event for broadcasting changes */
+    /** reusable TableModelEvent for broadcasting changes */
     private final MutableTableModelEvent tableModelEvent = new MutableTableModelEvent(this);
 
     /**
@@ -104,11 +104,11 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
         return tableFormat;
     }
     /**
-     * Sets this table to be rendered by a different table format. This has
-     * some very important consequences. The selection will be lost - this is
-     * due to the fact that the table formats may have different numbers of
-     * columns, and JTable has no event to specify columns changing without
-     * rows.
+     * Sets the {@link TableFormat} that will extract column data from each
+     * element. This has some very important consequences. Any cell selections
+     * will be lost - this is due to the fact that the TableFormats may have
+     * different numbers of columns, and JTable has no event to specify columns
+     * changing without rows.
      */
     public void setTableFormat(TableFormat<E> tableFormat) {
         this.tableFormat = tableFormat;
@@ -135,9 +135,9 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
 
     /**
      * For implementing the ListEventListener interface. This sends changes
-     * to the table which repaint the table cells. Because this class is backed
-     * by {@link GlazedListsSwing#swingThreadProxyList}, all natural calls to
-     * this method are guaranteed to occur on the Swing EDT.
+     * to the table which repaints the table cells. Because this class is
+     * backed by {@link GlazedListsSwing#swingThreadProxyList}, all natural
+     * calls to this method are guaranteed to occur on the Swing EDT.
      */
     public void listChanged(ListEvent<E> listChanges) {
         // for all changes, one block at a time
@@ -193,16 +193,7 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
 	}
 
     /**
-     * Retrieves the value at the specified location from the table.
-     *
-     * <p>Before every get, we need to validate the row because there may be an
-     * update waiting in the event queue. For example, it is possible that
-     * the source list has been updated by a database thread. Such a change
-     * may have been sent as notification, but after this request in the
-     * event queue. In the case where a row is no longer available, null is
-     * returned. The value returned is insignificant in this case because the
-     * Event queue will very shortly be repainting (or removing) the row
-     * anyway.
+     * Retrieves the value at the specified location of the table.
      */
     public Object getValueAt(int row, int column) {
         swingThreadSource.getReadWriteLock().readLock().lock();
