@@ -4,6 +4,8 @@
 package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.TreeList;
+import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.event.ListEvent;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionListener;
@@ -116,6 +118,13 @@ public final class TreeTableSupport {
      */
     private static final ListSelectionModel NOOP_SELECTION_MODEL = new NoopColumnSelectionModel();
 
+    /**
+     * A ListEventListener that tests whether events are delivered to the
+     * underlying TreeList on the Swing Event Dispath Thread. If they are not,
+     * an {@link IllegalStateException} is thrown to indicate the error.
+     */
+    private static final ListEventListener SWING_THREAD_CHECKER = new EventDispathThreadChecker();
+
     /** The table to decorate with tree table behaviour. */
     private final JTable table;
 
@@ -197,6 +206,9 @@ public final class TreeTableSupport {
         this.table.addKeyListener(arrowKeyListener);
         this.table.addKeyListener(expandAndCollapseKeyListener);
         decorateUIDelegateMouseListener(this.table);
+
+        // verify that all elements on the TreeList arrive on the Swing EDT
+        this.treeList.addListEventListener(SWING_THREAD_CHECKER);
     }
 
     /**
@@ -289,6 +301,9 @@ public final class TreeTableSupport {
     public void uninstall() {
         checkAccessThread();
 
+        // stop verifying that all elements on the TreeList arrive on the Swing EDT
+        treeList.removeListEventListener(SWING_THREAD_CHECKER);
+
         // disable arrow key expansion if it was enabled
         setArrowKeyExpansionEnabled(false);
 
@@ -357,10 +372,11 @@ public final class TreeTableSupport {
      *        hierarchy nodes in the tree rather than adjust cell focus in the
      *        table.</li>
      * 
-     *   <li> The table's column model is replaced with a no-op implementation
-     *        so that column selection and column lead/anchor indexes are NOT
-     *        tracked. Thus, column selection is disabled and there is no cell
-     *        focus adjusted when the left and right arrow keys are used.</li>
+     *   <li> The table column model's selection model is replaced with a no-op
+     *        implementation so that column selection and column lead/anchor
+     *        indexes are NOT tracked. Thus, column selection is disabled and
+     *        there is no cell focus adjusted when the left and right arrow
+     *        keys are used.</li>
      * </ul>
      *
      * <p>If <code>arrowKeyExpansionEnabled</code> is <tt>false</tt> then the
@@ -613,6 +629,23 @@ public final class TreeTableSupport {
             } finally {
                 treeList.getReadWriteLock().writeLock().unlock();
             }
+        }
+    }
+
+    /**
+     * A ListEventListener that exists only to ensure that the TreeList
+     * receives all ListEvents on the Swing Event Dispatch Thread, and not some
+     * other random Thread. This is important because the treetable renderer
+     * and editor read from the TreeList on the Swing EDT and must be able to
+     * guarantee that their reads are atomic.
+     */
+    private static class EventDispathThreadChecker implements ListEventListener {
+        public void listChanged(ListEvent listChanges) {
+            if (!SwingUtilities.isEventDispatchThread())
+                throw new IllegalStateException("TreeTableSupport has detected that its underlying TreeList was changed on a Thread that is NOT the Swing Event Dispatch Thread. " +
+                        "This can cause unreliable results including sporadic exceptions since the TreeList is read from the EDT. Two solutions exist for this problem:\n\n" +
+                        "a) ensure each and every write to the EventList pipeline occurs on the Swing EDT\n" +
+                        "b) wrap the source EventList of TreeList in a Swing Thread Proxy List using GlazedListsSwing.swingThreadProxyList(...) before passing it to the TreeList constructor");
         }
     }
 

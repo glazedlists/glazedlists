@@ -105,6 +105,53 @@ public class TreeTableSupportTest extends SwingTestCase {
         assertNull(editor.getDelegate());
     }
 
+    public void guiTestListEventsArriveOnEDT() throws InterruptedException {
+        // build a TreeList
+        final EventList<String> source = new BasicEventList<String>();
+        final TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+
+        // build a regular JTable around the TreeList
+        final TableFormat<String> itemTableFormat = GlazedLists.tableFormat(new String[] {""}, new String[] {"Column 1"});
+        final EventTableModel<String> model = new EventTableModel<String>(treeList, itemTableFormat);
+        final JTable table = new JTable(model);
+
+        // install TreeTableSupport
+        TreeTableSupport.install(table, treeList, 0);
+
+        final TryToModifyTreeListFromBackgroundThreadRunnable r = new TryToModifyTreeListFromBackgroundThreadRunnable(source);
+        Thread t = new Thread(r);
+        t.start();
+        t.join();
+
+        assertEquals(IllegalStateException.class, r.getRuntimeException().getClass());
+    }
+
+    /**
+     * A Runnable that tries to execute an operation on an EventList and records
+     * any resulting RuntimeException which is expected.
+     */
+    private static class TryToModifyTreeListFromBackgroundThreadRunnable implements Runnable {
+
+        private final EventList<String> list;
+        private RuntimeException runtimeException;
+
+        public TryToModifyTreeListFromBackgroundThreadRunnable(EventList<String> list) {
+            this.list = list;
+        }
+
+        public void run() {
+            try {
+                list.add("this should fail");
+            } catch (RuntimeException re) {
+                runtimeException = re;
+            }
+        }
+
+        public RuntimeException getRuntimeException() {
+            return runtimeException;
+        }
+    }
+
     private static class CharacterTreeFormat implements TreeList.Format<String> {
         public void getPath(List<String> path, String element) {
             for (int i = 0, n = element.length(); i < n; i++)
