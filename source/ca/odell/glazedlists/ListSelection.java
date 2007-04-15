@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-// core glazed lists
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventListener;
@@ -13,17 +12,16 @@ import ca.odell.glazedlists.impl.adt.BarcodeIterator;
 import java.util.*;
 
 /**
- * An {@link EventList} to provide index-based selection features.  This
- * {@link EventList} does not perform a transformation on the source, but
- * instead provides two additional {@link EventList}s:
+ * A class to provide index-based selection features. This class maintains two
+ * lists derived from a single {@link EventList}:
  * <ul>
  *   <li>{@link #getSelected() Selected} - an {@link EventList} that contains only the selected values.</li>
  *   <li>{@link #getDeselected() Deselected} - an {@link EventList} that contains only the deselected values.</li>
  * </ul>
  *
  * <p>This design is intended to allow the sharing of selection logic between
- * both of our supported GUI toolkits as well as being available for use in
- * non-GUI applications and for index-based filtering.
+ * all supported GUI toolkits as well as being available for use in non-GUI
+ * applications and for index-based filtering.
  *
  * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
  * thread ready but not thread safe. See {@link EventList} for an example
