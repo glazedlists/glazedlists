@@ -117,17 +117,6 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         super.source.addListEventListener(this);
     }
 
-    /** @deprecated use the constructor that takes an {@link ExpansionModel} */
-    public TreeList(EventList<E> source, Format<E> format) {
-        this(new InitializationData<E>(source, format, null, NODES_START_EXPANDED));
-        
-    }
-
-    /** @deprecated use the constructor that takes an {@link ExpansionModel} */
-    public TreeList(EventList<E> source, Format<E> format, Comparator<E> comparator) {
-        this(new InitializationData<E>(source, format, comparator, NODES_START_EXPANDED));
-    }
-
     /**
      * Helper class for managing various amounts of transitional
      * objects required by the class constructor.

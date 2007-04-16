@@ -25,7 +25,7 @@ public class TreeTableSupportTest extends SwingTestCase {
     public void guiTestUninstall() {
         // build a TreeList
         final EventList<String> source = new BasicEventList<String>();
-        final TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        final TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
 
         // build a regular JTable around the TreeList
         final String[] propertyNames = {""};
@@ -71,7 +71,7 @@ public class TreeTableSupportTest extends SwingTestCase {
     public void guiTestSetDelegateRendererAndEditor() {
         // build a TreeList
         final EventList<String> source = new BasicEventList<String>();
-        final TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        final TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
 
         // build a regular JTable around the TreeList
         final String[] propertyNames = {""};
@@ -108,7 +108,7 @@ public class TreeTableSupportTest extends SwingTestCase {
     public void guiTestListEventsArriveOnEDT() throws InterruptedException {
         // build a TreeList
         final EventList<String> source = new BasicEventList<String>();
-        final TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat());
+        final TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
 
         // build a regular JTable around the TreeList
         final TableFormat<String> itemTableFormat = GlazedLists.tableFormat(new String[] {""}, new String[] {"Column 1"});
