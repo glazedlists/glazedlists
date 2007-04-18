@@ -36,7 +36,6 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     /** determines the layout of new nodes as they are created */
     private ExpansionModel<E> expansionModel;
 
-
     /** node colors define where it is in the source and where it is here */
     private static final ListToByteCoder BYTE_CODER = new ListToByteCoder(Arrays.asList(new String[] { "R", "V", "r", "v" }));
     private static final byte VISIBLE_REAL = BYTE_CODER.colorToByte("R");
@@ -56,10 +55,8 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     /** an {@link EventList} of {@link Node}s with the structure of the tree. */
     private EventList<Node<E>> nodesList = null;
 
-    /** the source {@link EventList} before intermediate transformations */
-    private EventList<E> sourceElements;
-    /** the source {@link FunctionList}, wrapping elements into nodes */
-    private FunctionList<E,Node<E>> sourceNodes;
+    /** initialization data is only necessary to later dispose the TreeList */
+    private InitializationData<E> initializationData;
 
     /**
      * All the tree data is stored in this tree.
@@ -98,8 +95,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         this.format = initializationData.format;
         this.nodeComparator = initializationData.nodeComparator;
         this.expansionModel = initializationData.expansionModel;
-        this.sourceElements = initializationData.sourceElements;
-        this.sourceNodes = initializationData.sourceNodes;
+        this.initializationData = initializationData;
 
         // insert the new elements like they were adds
         NodeAttacher nodeAttacher = new NodeAttacher(false);
@@ -114,7 +110,18 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
         assert(isValid());
 
-        super.source.addListEventListener(this);
+        source.addListEventListener(this);
+    }
+
+    /** @deprecated use the constructor that takes an {@link ExpansionModel} */
+    public TreeList(EventList<E> source, Format<E> format) {
+        this(new InitializationData<E>(source, format, null, NODES_START_EXPANDED));
+        
+    }
+
+    /** @deprecated use the constructor that takes an {@link ExpansionModel} */
+    public TreeList(EventList<E> source, Format<E> format, Comparator<E> comparator) {
+        this(new InitializationData<E>(source, format, comparator, NODES_START_EXPANDED));
     }
 
     /**
@@ -126,7 +133,6 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         private final ExpansionModel<E> expansionModel;
         private final NodeComparator<E> nodeComparator;
 
-        private final EventList<E> sourceElements;
         private final FunctionList<E,Node<E>> sourceNodes;
         private final SortedList<Node<E>> sortedList;
 
@@ -134,7 +140,6 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             this.format = format;
             this.expansionModel = expansionModel;
 
-            this.sourceElements = sourceElements;
             this.sourceNodes = new FunctionList<E,Node<E>>(sourceElements, new ElementToTreeNodeFunction<E>(format, expansionModel), NO_OP_FUNCTION);
             if(comparator != null) {
                 this.nodeComparator = comparatorToNodeComparator(comparator, format);
@@ -152,6 +157,13 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         public EventList<Node<E>> getSource() {
             if(sortedList != null) return sortedList;
             return sourceNodes;
+        }
+
+        public void dispose() {
+            if(sortedList != null) {
+                sortedList.dispose();
+            }
+            sourceNodes.dispose();
         }
     }
 
@@ -1097,6 +1109,12 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      */
     private boolean valuesEqual(int depth, E a, E b) {
         return nodeComparator.comparator.compare(a, b) == 0;
+    }
+
+    /** {@inheritDoc} */
+    public void dispose() {
+        source.removeListEventListener(this);
+        initializationData.dispose();
     }
 
     /**

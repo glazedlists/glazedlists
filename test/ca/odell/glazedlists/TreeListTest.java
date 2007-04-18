@@ -17,7 +17,7 @@ public class TreeListTest extends TestCase {
     /**
      * Can we build a tree list?
      */
-    public void testCreate() throws Exception {
+    public void testCreateAndDispose() throws Exception {
         BasicEventList<Method> source = new BasicEventList<Method>();
         source.add(List.class.getMethod("add", new Class[] {Object.class}));
         source.add(List.class.getMethod("add", new Class[] {int.class, Object.class}));
@@ -29,7 +29,13 @@ public class TreeListTest extends TestCase {
         source.add(BasicEventList.class.getMethod("add", new Class[] {Object.class}));
         source.add(BasicEventList.class.getMethod("add", new Class[] {int.class, Object.class}));
 
+        // create a sorted treelist
         TreeList treeList = new TreeList(source, new JavaStructureTreeFormat(), TreeList.NODES_START_EXPANDED, GlazedLists.comparableComparator());
+        treeList.dispose();
+
+        // create an unsorted treelist
+        treeList = new TreeList(source, new JavaStructureTreeFormat(), TreeList.NODES_START_EXPANDED);
+        treeList.dispose();
     }
 
     /**
@@ -1525,7 +1531,7 @@ public class TreeListTest extends TestCase {
             source.add(9, "BBF");
         source.commitEvent();
     }
-    
+
     public void testUpdatingElementMovesIt() {
         EventList<String> source = new BasicEventList<String>();
 
