@@ -107,6 +107,19 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
         this.readWriteLock = readWriteLock;
     }
 
+    /**
+     * Creates a {@link BasicEventList} using the specified initial capacity,
+     * {@link ListEventPublisher} and {@link ReadWriteLock}.
+     *
+     * @since 2007-April-19
+     */
+    public BasicEventList(int initialCapacity, ListEventPublisher publisher,
+            ReadWriteLock readWriteLock) {
+        super(publisher);
+        this.data = new ArrayList<E>(initialCapacity);
+        this.readWriteLock = readWriteLock;
+    }
+
     /** {@inheritDoc} */
     public void add(int index, E element) {
         // create the change event

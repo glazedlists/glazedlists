@@ -33,11 +33,12 @@ public final class PersistentEventList extends PersistentList implements EventLi
      * Constructor with session.
      *
      * @param session the session
+     * @param listFactory factory for EventLists
      */
-    public PersistentEventList(SessionImplementor session) {
+    public PersistentEventList(SessionImplementor session, EventListFactory listFactory) {
         super(session);
 
-        final EventList delegate = new BasicEventList();
+        final EventList delegate = listFactory.createEventList();
 
         // instantiate list here to avoid NullPointerExceptions with lazy loading
         updates = new ListEventAssembler(this, delegate.getPublisher());
