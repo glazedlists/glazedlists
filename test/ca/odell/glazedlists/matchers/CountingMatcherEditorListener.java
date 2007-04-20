@@ -54,7 +54,15 @@ public class CountingMatcherEditorListener implements MatcherEditor.Listener {
 		relaxed = 0;
 	}
 
-	/**
+    /**
+     * Returns the total number of changes seen by this listener since the last
+     * time it was reset, regardless of the actual change types.
+     */
+    public int getChangeCount() {
+        return matchAll + matchNone + changed + constrained + relaxed;
+    }
+
+    /**
 	 * Check the change counters match the expected values.
 	 */
 	public void assertCounterState(int matchAll, int matchNone, int changed, int constrained, int relaxed) {

@@ -231,17 +231,17 @@ public class ThreadedMatcherEditorTest extends TestCase {
         counter.assertCounterState(0, 0, 0, 1, 0);
 
         textMatcherEditor.setFilterText(new String[] {"Ja"});
-        // ensure we pause to let the time slice end and the Queue Thread to start and begin processing the "James"
+        // ensure we pause to let the time slice end and the Queue Thread to start and begin processing the "Ja"
         Thread.sleep(SIMULATED_PROCESSING_DELAY_WAIT);
         counter.assertCounterState(0, 0, 0, 1, 1);
 
         textMatcherEditor.setFilterText(new String[] {"Col"});
-        // ensure we pause to let the time slice end and the Queue Thread to start and begin processing the "James"
+        // ensure we pause to let the time slice end and the Queue Thread to start and begin processing the "Col"
         Thread.sleep(SIMULATED_PROCESSING_DELAY_WAIT);
         counter.assertCounterState(0, 0, 1, 1, 1);
 
         textMatcherEditor.setFilterText(new String[] {"Colin"});
-        // ensure we pause to let the time slice end and the Queue Thread to start and begin processing the "James"
+        // ensure we pause to let the time slice end and the Queue Thread to start and begin processing the "Colin"
         Thread.sleep(SIMULATED_PROCESSING_DELAY_WAIT);
         counter.assertCounterState(0, 0, 1, 2, 1);
 
@@ -250,6 +250,10 @@ public class ThreadedMatcherEditorTest extends TestCase {
         // ensure the matching finishes, and then check if each of the methods were fired the expected number of times
         Thread.sleep(SIMULATED_PROCESSING_DELAY_WAIT);
         counter.assertCounterState(1, 0, 1, 2, 1);
+
+        // since we wait for each change to the filter text to clear, we should
+        // expect to find exactly the same number of total changes
+        assertEquals(counter.getChangeCount(), 5);
     }
 
     public void testQueuingAllSorts_WithoutPause() throws InterruptedException {
@@ -266,6 +270,11 @@ public class ThreadedMatcherEditorTest extends TestCase {
         // ensure the matching finishes, and then check if each of the methods were fired the expected number of times
         Thread.sleep(SIMULATED_PROCESSING_DELAY_WAIT);
         Thread.sleep(SIMULATED_PROCESSING_DELAY_WAIT);
-        counter.assertCounterState(1, 0, 0, 0, 0);
+
+        // because of modern multi-core processors, we can't predict EXACTLY
+        // how the ThreadedMatcherEditor combined filters, but we do know that
+        // SOMETHING must have been combined, and thus the number of changes
+        // should be less than the number of times we changed the filter text
+        assertTrue(counter.getChangeCount() < 5);
     }
 }
