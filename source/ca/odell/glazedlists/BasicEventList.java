@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-// concurrency is similar to java.util.concurrent in J2SE 1.5
 import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEventPublisher;
@@ -60,9 +59,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
      * for concurrent access.
      */
     public BasicEventList(ReadWriteLock readWriteLock) {
-        super(null);
-        this.data = new ArrayList<E>();
-        this.readWriteLock = readWriteLock;
+        this(null, readWriteLock);
     }
 
     /**
@@ -70,9 +67,29 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
      * <code>initialCapacity</code>.
      */
     public BasicEventList(int initalCapacity) {
-        super(null);
-        this.data = new ArrayList<E>(initalCapacity);
-        this.readWriteLock = LockFactory.DEFAULT.createReadWriteLock();
+        this(initalCapacity, null, LockFactory.DEFAULT.createReadWriteLock());
+    }
+
+    /**
+     * Creates a {@link BasicEventList} using the specified
+     * {@link ListEventPublisher} and {@link ReadWriteLock}.
+     *
+     * @since 2006-June-12
+     */
+    public BasicEventList(ListEventPublisher publisher, ReadWriteLock readWriteLock) {
+        this(10, publisher, readWriteLock);
+    }
+
+    /**
+     * Creates a {@link BasicEventList} using the specified initial capacity,
+     * {@link ListEventPublisher} and {@link ReadWriteLock}.
+     *
+     * @since 2007-April-19
+     */
+    public BasicEventList(int initialCapacity, ListEventPublisher publisher, ReadWriteLock readWriteLock) {
+        super(publisher);
+        this.data = new ArrayList<E>(initialCapacity);
+        this.readWriteLock = readWriteLock;
     }
 
     /**
@@ -93,31 +110,6 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
         super(null);
         this.data = list;
         this.readWriteLock = LockFactory.DEFAULT.createReadWriteLock();
-    }
-
-    /**
-     * Creates a {@link BasicEventList} using the specified
-     * {@link ListEventPublisher} and {@link ReadWriteLock}.
-     *
-     * @since 2006-June-12
-     */
-    public BasicEventList(ListEventPublisher publisher, ReadWriteLock readWriteLock) {
-        super(publisher);
-        this.data = new ArrayList<E>();
-        this.readWriteLock = readWriteLock;
-    }
-
-    /**
-     * Creates a {@link BasicEventList} using the specified initial capacity,
-     * {@link ListEventPublisher} and {@link ReadWriteLock}.
-     *
-     * @since 2007-April-19
-     */
-    public BasicEventList(int initialCapacity, ListEventPublisher publisher,
-            ReadWriteLock readWriteLock) {
-        super(publisher);
-        this.data = new ArrayList<E>(initialCapacity);
-        this.readWriteLock = readWriteLock;
     }
 
     /** {@inheritDoc} */
