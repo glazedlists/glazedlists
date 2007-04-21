@@ -37,7 +37,7 @@ import java.util.Properties;
  * Hibernate mapping file.
  * 
  * @see #setListFactory(EventListFactory)
- * @see #setListCategory(String)
+ * @see #useListCategory(String)
  * @see #PROPERTYNAME_EVENTLIST_CATEGORY
  * 
  * @author Bruce Alspaugh
@@ -75,16 +75,23 @@ public class EventListType implements UserCollectionType, ParameterizedType {
         if (parameters == null) return;
         final String category = parameters.getProperty(PROPERTYNAME_EVENTLIST_CATEGORY);
         if (category != null) {
-            setListCategory(category);
+            useListCategory(category);
         }
     }
 
     /**
-     * Convenience method to set a list category.
+     * Convenience method to specify the used list category.
      */
-    protected final void setListCategory(String category) {
-        if (category == null) throw new IllegalArgumentException("List category must not be null");
+    protected final void useListCategory(String category) {
         setListFactory(new CategoryEventListFactory(category));
+    }
+
+    /**
+     * Convenience method to specify the used list category and the associated ReadWriteLock and
+     * ListEventPublisher
+     */
+    protected final void useListCategory(String category, ReadWriteLock lock, ListEventPublisher publisher) {
+        setListFactory(new CategoryEventListFactory(category, lock, publisher));
     }
     
     /** {@inheritDoc} */

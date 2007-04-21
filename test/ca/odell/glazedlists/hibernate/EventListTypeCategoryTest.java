@@ -3,7 +3,9 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.hibernate;
 
+import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventPublisher;
+import ca.odell.glazedlists.util.concurrent.LockFactory;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 import org.hibernate.FetchMode;
@@ -27,26 +29,26 @@ public class EventListTypeCategoryTest extends AbstractHibernateTestCase {
     }
 
     /**
-     * Tests a lazy loaded value collection.
+     * Tests a lazy loaded collection.
      */
-    public void testLazyValueCollection() {
-        doTestValueCollection(true);
+    public void testLazyCollection() {
+        doTestCollection(true);
     }
 
     /**
-     * Tests an eager loaded value collection.
+     * Tests an eager loaded collection.
      */
-    public void testEagerValueCollection() {
-        doTestValueCollection(false);        
+    public void testEagerCollection() {
+        doTestCollection(false);
     }
     
     /**
-     * Runs tests for a value collection of Strings.
+     * Runs tests for custom collections. 
      * 
-     * @param lazy indicates lazy or eager loading of nick name collection
+     * @param lazy indicates lazy or eager loading of collections
      */
-    private void doTestValueCollection(boolean lazy) {
-        // create user with email addresses and persist
+    private void doTestCollection(boolean lazy) {
+        // create user and persist
         User u = createAndPersistUser();
 
         // load user in new session
@@ -61,19 +63,24 @@ public class EventListTypeCategoryTest extends AbstractHibernateTestCase {
             // lazy collection still uninitialized
             assertFalse(Hibernate.isInitialized(u.getNickNames()));
             assertFalse(Hibernate.isInitialized(u.getEmailAddresses()));
-
+            assertFalse(Hibernate.isInitialized(u.getRoles()));
+            
             // test ReadWriteLock equality
             ReadWriteLock nickNamesLock = u.getNickNames().getReadWriteLock();
             ReadWriteLock emailLock = u.getEmailAddresses().getReadWriteLock();
             assertEquals(nickNamesLock, emailLock);
+            assertEquals(TestEventListType2.LOCK, u.getRoles().getReadWriteLock());
             
             // test publisher equality
             ListEventPublisher nickNamesPublisher = u.getNickNames().getPublisher();
             ListEventPublisher emailPublisher = u.getEmailAddresses().getPublisher();
             assertEquals(nickNamesPublisher, emailPublisher);
-                        
+            assertEquals(TestEventListType2.PUBLISHER, u.getRoles().getPublisher());
+            
             // lazy collection should still be uninitialized
             assertFalse(Hibernate.isInitialized(u.getNickNames()));
+            assertFalse(Hibernate.isInitialized(u.getEmailAddresses()));
+            assertFalse(Hibernate.isInitialized(u.getRoles()));
 
             // trigger initialization        
             assertEquals(2, u.getNickNames().size());
@@ -85,29 +92,34 @@ public class EventListTypeCategoryTest extends AbstractHibernateTestCase {
             nickNamesLock = u.getNickNames().getReadWriteLock();
             emailLock = u.getEmailAddresses().getReadWriteLock();
             assertEquals(nickNamesLock, emailLock);
+            assertEquals(TestEventListType2.LOCK, u.getRoles().getReadWriteLock());
             
             // test publisher equality again
             nickNamesPublisher = u.getNickNames().getPublisher();
             emailPublisher = u.getEmailAddresses().getPublisher();
             assertEquals(nickNamesPublisher, emailPublisher);
-            
+            assertEquals(TestEventListType2.PUBLISHER, u.getRoles().getPublisher());
         } else {
             // collection should be initialized
             assertTrue(Hibernate.isInitialized(u.getNickNames()));
             assertTrue(Hibernate.isInitialized(u.getEmailAddresses()));
+            assertTrue(Hibernate.isInitialized(u.getRoles()));
             // test ReadWriteLock equality
             final ReadWriteLock nickNamesLock = u.getNickNames().getReadWriteLock();
             final ReadWriteLock emailLock = u.getEmailAddresses().getReadWriteLock();
             assertEquals(nickNamesLock, emailLock);
+            assertEquals(TestEventListType2.LOCK, u.getRoles().getReadWriteLock());
             
             // test publisher equality
             final ListEventPublisher nickNamesPublisher = u.getNickNames().getPublisher();
             final ListEventPublisher emailPublisher = u.getEmailAddresses().getPublisher();
             assertEquals(nickNamesPublisher, emailPublisher);
+            assertEquals(TestEventListType2.PUBLISHER, u.getRoles().getPublisher());
             
         }
         assertEquals(PersistentEventList.class, u.getNickNames().getClass());
         assertEquals(PersistentEventList.class, u.getEmailAddresses().getClass());
+        assertEquals(PersistentEventList.class, u.getRoles().getClass());
         
         // delete user
         s.delete(u);
@@ -119,7 +131,36 @@ public class EventListTypeCategoryTest extends AbstractHibernateTestCase {
         u = loadUser(s, lazy);
         assertEquals(u, null);
         t.commit();
-        s.close();        
+        s.close();
+    }
+    
+    /**
+     * Tests correct list category registration and clearing
+     */
+    public void testListCategories() {
+        final EventListType type = new EventListType();
+        try {
+            type.useListCategory("Test", LockFactory.DEFAULT.createReadWriteLock(),
+                    ListEventAssembler.createListEventPublisher());
+            fail("Expected IllegalStateException");
+        } catch (IllegalStateException ex) {
+            // expected, because category 'Test' is already registered with different values
+        }
+        type.useListCategory("Test");
+        type.useListCategory("Test2");
+        type.useListCategory("Test2", TestEventListType2.LOCK, TestEventListType2.PUBLISHER);
+        CategoryEventListFactory.clearCategoryMapping();
+        
+        type.useListCategory("Test", LockFactory.DEFAULT.createReadWriteLock(),
+                ListEventAssembler.createListEventPublisher());
+        type.useListCategory("Test2");
+        try {
+            type.useListCategory("Test2", TestEventListType2.LOCK, TestEventListType2.PUBLISHER);
+            fail("Expected IllegalStateException");
+        } catch (IllegalStateException ex) {
+            // expected
+        }
+        CategoryEventListFactory.clearCategoryMapping();
     }
     
     /**
@@ -141,6 +182,8 @@ public class EventListTypeCategoryTest extends AbstractHibernateTestCase {
         u.addNickName("Maestro");
         u.getEmailAddresses().add(new Email("admin@hibernate.org"));
         u.getEmailAddresses().add(new Email("admin@gmail.com"));
+        u.addRole(new Role("Guest"));
+        u.addRole(new Role("Administrator"));        
         s.persist(u);
         t.commit();
         s.close();
@@ -171,7 +214,21 @@ public class EventListTypeCategoryTest extends AbstractHibernateTestCase {
     public static final class TestEventListType extends EventListType {
         /** Constructor which sets a list category. */
         public TestEventListType() {
-            setListCategory("Test");
+            useListCategory("Test");
+        }
+    }
+    /**
+     * Custom EventListType to test list categories. 
+     */
+    public static final class TestEventListType2 extends EventListType {
+        /** Lock as constant. */
+        public static final ReadWriteLock LOCK = LockFactory.DEFAULT.createReadWriteLock();
+        /** Publisher as constant. */
+        public static final ListEventPublisher PUBLISHER = ListEventAssembler.createListEventPublisher();
+        
+        /** Constructor which sets a list category. */
+        public TestEventListType2() {
+            useListCategory("Test2", LOCK, PUBLISHER);
         }
     }
     

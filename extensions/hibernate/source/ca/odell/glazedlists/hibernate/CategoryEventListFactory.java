@@ -22,7 +22,7 @@ import java.util.Map;
  * 
  * @author Holger Brands
  */
-final class CategoryEventListFactory implements EventListFactory {
+public final class CategoryEventListFactory implements EventListFactory {
 
     /** Map holding {@link ListInfo} per unique category. */
     private static final Map<String, ListInfo> CATEGORY_MAP = new HashMap<String, ListInfo>();
@@ -31,21 +31,56 @@ final class CategoryEventListFactory implements EventListFactory {
     private String category;
     
     /**
-     * Constructor with list category.
+     * Constructor with list category to use. If the category is not registered yet, it will be
+     * registered with a new ReadWriteLock and ListEventPublisher.
      */
     public CategoryEventListFactory(String category) {
-        setCategory(category);
+        if (category == null) throw new IllegalArgumentException("Category must not be null");
+        this.category = category;
+        registerCategory(category);
+    }
+
+    /**
+     * Constructor with list category, lock and publisher to use. If the category is not registered
+     * yet, it will be registered with the given ReadWriteLock and ListEventPublisher.
+     * 
+     * @throws IllegalStateException if the same category is already registered with different values
+     */
+    public CategoryEventListFactory(String category, ReadWriteLock lock,
+            ListEventPublisher publisher) {
+        if (category == null) throw new IllegalArgumentException("Category must not be null");
+        if (lock == null) throw new IllegalArgumentException("ReadWriteLock must not be null");
+        if (publisher == null) throw new IllegalArgumentException("ListEventPublisher must not be null");
+        this.category = category;
+        registerCategory(category, lock, publisher);
     }
     
     /**
-     * Sets the list category.
+     * Registers a new list category, if not already there.
      */
-    private void setCategory(String newCategory) {
-        if (newCategory == null) throw new IllegalArgumentException("Category must not be null");
-        category = newCategory;
+    private void registerCategory(String newCategory) {
         synchronized (CATEGORY_MAP) {
-            if (!CATEGORY_MAP.containsKey(category)) {
-                CATEGORY_MAP.put(category, new ListInfo());
+            if (!CATEGORY_MAP.containsKey(newCategory)) {
+                CATEGORY_MAP.put(newCategory, new ListInfo());
+            }            
+        }
+    }
+
+    /**
+     * Registers a new list category with the given lock and publisher, if not already there.
+     * 
+     * @throws IllegalStateException if the same category is already registered with different values
+     */
+    private void registerCategory(String newCategory, ReadWriteLock lock, ListEventPublisher publisher) {
+        synchronized (CATEGORY_MAP) {
+            if (CATEGORY_MAP.containsKey(newCategory)) {
+                final ListInfo info = getListInfo();
+                if (!lock.equals(info.lock) || !publisher.equals(info.publisher)) {
+                    throw new IllegalStateException("List category " + newCategory
+                            + " already in use with different lock or publisher");
+                }
+            } else {
+                CATEGORY_MAP.put(newCategory, new ListInfo(lock, publisher));
             }            
         }
     }
@@ -79,6 +114,15 @@ final class CategoryEventListFactory implements EventListFactory {
     }
     
     /**
+     * Helper method to clear the mapping of categories to publisher/lock pairs.
+     */
+    public static void clearCategoryMapping() {
+        synchronized (CATEGORY_MAP) {
+            CATEGORY_MAP.clear();
+        }        
+    }
+    
+    /**
      * Helper class to hold a ReadWriteLock and a ListEventPublisher.
      *  
      * @author Holger Brands
@@ -91,5 +135,10 @@ final class CategoryEventListFactory implements EventListFactory {
             lock = LockFactory.DEFAULT.createReadWriteLock();
             publisher = ListEventAssembler.createListEventPublisher();
         }
+        ListInfo(ReadWriteLock lock, ListEventPublisher publisher) {
+            this.lock = lock; 
+            this.publisher = publisher;
+        }
+        
     }
 }
