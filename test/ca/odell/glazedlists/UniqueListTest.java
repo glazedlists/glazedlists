@@ -1557,4 +1557,45 @@ public class UniqueListTest extends TestCase {
         assertEquals(4, uniqueList.size());
 
     }
+
+    public void testAllPossibleGrouperStateChanges() {
+        ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>(), true);
+        final UniqueList<String> uniqueList = new UniqueList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        ListConsistencyListener.install(uniqueList);
+
+        // insert: new group
+        source.add("A");
+        source.add("C");
+        source.add("E");
+
+        // insert: join a group on the right and left
+        source.add(1, "a");
+        source.add(2, "c");
+        assertEquals(source, GlazedListsTests.stringToList("AacCE"));
+
+        // update: new group before and after
+        source.add(2, "B");
+        source.set(2, "b");
+        assertEquals(source, GlazedListsTests.stringToList("AabcCE"));
+
+        // update: new group from left group and right group
+        source.set(4, "d");
+        source.set(4, "e");
+        source.set(4, "d");
+        assertEquals(source, GlazedListsTests.stringToList("AabcdE"));
+
+        // update: join the left group
+        source.set(2, "A");
+        source.set(4, "c");
+        source.beginEvent(true);
+            source.set(3, "a");
+            source.set(4, "A");
+        source.commitEvent();
+        source.beginEvent(true);
+            source.set(3, "e");
+            source.set(4, "e");
+        source.commitEvent(); // this failure proves a bug in the reporting of previous elements in ListConsistencyListener
+        assertEquals(source, GlazedListsTests.stringToList("AaAeeE"));
+
+    }
 }
