@@ -5,6 +5,7 @@ package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.impl.Grouper;
+import ca.odell.glazedlists.impl.adt.BarcodeIterator;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -102,12 +103,12 @@ public final class UniqueList<E> extends TransformedList<E, E> {
     /**
      * Handle changes to the grouper's groups.
      */
-    private class GrouperClient implements Grouper.Client {
-        public void groupChanged(int index, int groupIndex, int groupChangeType, boolean primary, int elementChangeType) {
+    private class GrouperClient implements Grouper.Client<E> {
+        public void groupChanged(int index, int groupIndex, int groupChangeType, boolean primary, int elementChangeType, E oldValue, E newValue) {
             switch (groupChangeType) {
-                case ListEvent.INSERT: updates.addInsert(groupIndex); break;
-                case ListEvent.UPDATE: updates.addUpdate(groupIndex); break;
-                case ListEvent.DELETE: updates.addDelete(groupIndex); break;
+                case ListEvent.INSERT: updates.elementInserted(groupIndex, newValue); break;
+                case ListEvent.UPDATE: updates.elementUpdated(groupIndex, oldValue, newValue); break;
+                case ListEvent.DELETE: updates.elementDeleted(groupIndex, oldValue); break;
                 default: throw new IllegalStateException("Unrecognized groupChangeType: " + groupChangeType);
             }
         }
@@ -225,18 +226,35 @@ public final class UniqueList<E> extends TransformedList<E, E> {
         final SortedList<E> sortedSource = (SortedList<E>) source;
         final Comparator<? super E> sourceComparator = sortedSource.getComparator();
         if (sourceComparator != grouper.getComparator()) {
-            // when the uniquifying comparator is changed in the source list, let
-            // the grouper know so we can rebuild our uniqueness barcode from scratch
+            if (!listChanges.isReordering()) {
+                throw new IllegalStateException("source comparator changed without reordering!");
+            }
 
-            // record the impending removal of all current unique elements before adjusting the barcode
-            for (int i = 0, n = size(); i < n; i++)
-                updates.elementDeleted(0, get(i));
+            // fire delete events for the existing events.
+            // use the reorder map to find previous values, since everything's moved
+            int[] reorderingMap = listChanges.getReorderMap();
+            int[] reverseReorderingMap = new int[reorderingMap.length];
+            for (int r = 0; r < reorderingMap.length; r++) {
+                reverseReorderingMap[reorderingMap[r]] = r;
+            }
+            for (BarcodeIterator b = grouper.getBarcode().iterator(); b.hasNextBlack(); ) {
+                b.nextBlack();
+                int sourceIndex = b.getIndex();
+                updates.elementDeleted(0, sortedSource.get(reverseReorderingMap[sourceIndex]));
+            }
+            grouper.getBarcode().clear();
 
             // adjust the Comparator used by the Grouper (which will change the barcode)
             grouper.setComparator(sourceComparator);
 
-            // insert all new unique values (represented by the newly formed barcode)
-            updates.addInsert(0, size() - 1);
+            // insert all new unique values using the new barcode
+            int uniqueIndex = 0;
+            for (BarcodeIterator b = grouper.getBarcode().iterator(); b.hasNextBlack(); ) {
+                b.nextBlack();
+                int sourceIndex = b.getIndex();
+                updates.elementInserted(uniqueIndex, sortedSource.get(sourceIndex));
+                uniqueIndex++;
+            }
 
         } else {
             grouper.listChanged(listChanges);

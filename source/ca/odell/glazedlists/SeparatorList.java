@@ -573,8 +573,8 @@ public class SeparatorList<E> extends TransformedList<E, E> {
          * Fire two events, one for the group (the separator) and another for the
          * actual list element.
          */
-        private class GrouperClient implements Grouper.Client {
-            public void groupChanged(int index, int groupIndex, int groupChangeType, boolean primary, int elementChangeType) {
+        private class GrouperClient implements Grouper.Client<E> {
+            public void groupChanged(int index, int groupIndex, int groupChangeType, boolean primary, int elementChangeType, E oldValue, E newValue) {
                 boolean fixSeparatorForInsertGroupUpdateElement = false;
                 // handle the group change first
                 if(groupChangeType == ListEvent.INSERT) {
