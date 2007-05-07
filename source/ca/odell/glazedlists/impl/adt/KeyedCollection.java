@@ -15,6 +15,18 @@ public interface KeyedCollection<T> {
     T insert(Position position, T value);
 
     /**
+     * Returns the largest position that has
+     * been inserted into this collection.
+     */
+    Position last();
+
+    /**
+     * Returns the smallest position that has
+     * been inserted into this collection.
+     */
+    Position first();
+
+    /**
      * Returns the first position that the specified
      * value is stored at.
      *
