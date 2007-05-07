@@ -1,10 +1,6 @@
 package ca.odell.glazedlists.impl.adt;
 
-import ca.odell.glazedlists.GlazedLists;
-
 import junit.framework.TestCase;
-
-import java.util.Comparator;
 
 /**
  * @author jessewilson
