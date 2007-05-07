@@ -12,7 +12,7 @@ public interface KeyedCollection<T> {
      * @returns the previous value at the
      *      specified position.
      */
-    T insert(Position position, T value);
+    void insert(Position position, T value);
 
     /**
      * Returns the largest position that has

@@ -1,8 +1,11 @@
 package ca.odell.glazedlists.impl.adt;
 
 import ca.odell.glazedlists.impl.adt.KeyedCollection.Position;
+import ca.odell.glazedlists.GlazedLists;
 
 import junit.framework.TestCase;
+
+import java.util.Comparator;
 
 /**
  * @author jessewilson
@@ -18,40 +21,26 @@ public class KeyedCollectionTest extends TestCase {
 
     private KeyedCollection<String> collection = null;
 
+    protected void setUp() {
+        collection = new KeyedCollectionForComparableValues<String>((Comparator) GlazedLists.comparableComparator());
+    }
+
+    protected void tearDown() {
+        collection = null;
+    }
+
     public void testSimpleQueries() {
-        String result = collection.insert(a, "alpha");
-        assertNull(result);
+        collection.insert(a, "alpha");
 
         assertEquals(a, collection.find(a, b, "alpha"));
         assertNull(collection.find(a, a, "alpha"));
         assertNull(collection.find(b, c, "alpha"));
-        assertSame(a, collection.first());
-        assertSame(a, collection.last());
 
         collection.insert(b, "beta");
         collection.insert(c, "beta");
         assertEquals(b, collection.find(a, d, "beta"));
         assertEquals(b, collection.find(b, d, "beta"));
         assertEquals(c, collection.find(c, d, "beta"));
-        assertSame(a, collection.first());
-        assertSame(c, collection.last());
-    }
-
-    public void testLastAndFirst() {
-        assertNull(collection.first());
-        assertNull(collection.last());
-
-        collection.insert(c, "alpha");
-        assertSame(c,  collection.first());
-        assertSame(c,  collection.last());
-
-        collection.insert(d, "alpha");
-        assertSame(c,  collection.first());
-        assertSame(d,  collection.last());
-
-        collection.insert(b, "alpha");
-        assertSame(b,  collection.first());
-        assertSame(d,  collection.last());
     }
 
     public void testHeavilyPopulatedCollection() {
@@ -62,24 +51,12 @@ public class KeyedCollectionTest extends TestCase {
         collection.insert(e, "elephant");
         collection.insert(f, "firehouse");
 
-        assertSame(a, collection.first());
-        assertSame(f, collection.last());
-
         assertEquals(a, collection.find(a, f, "alpha"));
         assertEquals(b, collection.find(a, f, "beta"));
         assertEquals(c, collection.find(a, f, "cat"));
         assertEquals(d, collection.find(a, f, "dog"));
         assertEquals(e, collection.find(a, f, "elephant"));
         assertNull(collection.find(a, f, "firehouse"));
-    }
-
-    public void testReplacedValue() {
-        collection.insert(b, "beta");
-        assertEquals("beta", collection.insert(b, "boop"));
-        assertEquals("boop", collection.insert(b, "beep"));
-
-        assertSame(b, collection.first());
-        assertSame(b, collection.last());
     }
 
     public void testInconsistentMinMax() {
