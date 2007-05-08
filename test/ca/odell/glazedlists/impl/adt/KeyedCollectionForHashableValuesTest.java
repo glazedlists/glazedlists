@@ -1,6 +1,7 @@
 package ca.odell.glazedlists.impl.adt;
 
 import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.impl.GlazedListsImpl;
 
 import java.util.Comparator;
 
@@ -12,6 +13,6 @@ public class KeyedCollectionForHashableValuesTest extends AbstractKeyedCollectio
     public static Comparator comparableComparator = (Comparator) GlazedLists.comparableComparator();
 
     public KeyedCollectionForHashableValuesTest() {
-        super(new KeyedCollectionForHashableValues(comparableComparator));
+        super(GlazedListsImpl.keyedCollection(comparableComparator));
     }
 }
