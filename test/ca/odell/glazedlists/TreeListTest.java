@@ -342,46 +342,122 @@ public class TreeListTest extends TestCase {
         listConsistencyListener.setPreviousElementTracked(false);
 
         source.add("A");
+        assertEquals(1, treeList.size());
+        assertEquals(1, treeList.getAllNodesList().size());
+        assertFullTreeStructure(treeList, new String[] {
+                "A",
+        });
+
         treeList.setExpanded(0, false);
+        assertEquals(1, treeList.size());
+        assertEquals(1, treeList.getAllNodesList().size());
+        assertFullTreeStructure(treeList, new String[] {
+                "A",
+        });
+
         source.add("ABC");
         assertEquals(1, treeList.size());
+        assertEquals(3, treeList.getAllNodesList().size());
+        assertFullTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+        });
 
         treeList.setExpanded(0, true);
+        assertEquals(3, treeList.size());
+        assertEquals(3, treeList.getAllNodesList().size());
         assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+        });
+        assertFullTreeStructure(treeList, new String[] {
                 "A",
                 "AB",
                 "ABC",
         });
 
         treeList.setExpanded(1, false);
+        assertEquals(2, treeList.size());
+        assertEquals(3, treeList.getAllNodesList().size());
+
         source.add("AD");
+        assertEquals(3, treeList.size());
+        assertEquals(4, treeList.getAllNodesList().size());
+
         source.addAll(Arrays.asList(new String[] {
                 "ABD",
                 "ABE",
                 "ABF",
                 "ABG",
         }));
-
+        assertEquals(3, treeList.size());
+        assertEquals(8, treeList.getAllNodesList().size());
         assertTreeStructure(treeList, new String[] {
                 "A",
                 "AB",
+                "AD",
+        });
+        assertFullTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "ABD",
+                "ABE",
+                "ABF",
+                "ABG",
                 "AD",
         });
 
         treeList.setExpanded(0, false);
+        assertEquals(1, treeList.size());
+        assertEquals(8, treeList.getAllNodesList().size());
+
         source.addAll(Arrays.asList(new String[] {
                 "ABH",
                 "ABI",
         }));
+        assertEquals(1, treeList.size());
+        assertEquals(10, treeList.getAllNodesList().size());
+
         treeList.setExpanded(0, true);
+        assertEquals(3, treeList.size());
+        assertEquals(10, treeList.getAllNodesList().size());
         assertTreeStructure(treeList, new String[] {
                 "A",
                 "AB",
                 "AD",
         });
+        assertFullTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "ABD",
+                "ABE",
+                "ABF",
+                "ABG",
+                "ABH",
+                "ABI",
+                "AD",
+        });
 
         treeList.setExpanded(1, true);
+        assertEquals(10, treeList.size());
+        assertEquals(10, treeList.getAllNodesList().size());
         assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "ABD",
+                "ABE",
+                "ABF",
+                "ABG",
+                "ABH",
+                "ABI",
+                "AD",
+        });
+        assertFullTreeStructure(treeList, new String[] {
                 "A",
                 "AB",
                 "ABC",
@@ -395,12 +471,30 @@ public class TreeListTest extends TestCase {
         });
 
         treeList.setExpanded(0, false);
+        assertEquals(1, treeList.size());
+        assertEquals(10, treeList.getAllNodesList().size());
+
         source.removeAll(Arrays.asList(new String[] {
                 "ABF",
                 "ABG",
         }));
+        assertEquals(1, treeList.size());
+        assertEquals(8, treeList.getAllNodesList().size());
+
         treeList.setExpanded(0, true);
+        assertEquals(8, treeList.size());
+        assertEquals(8, treeList.getAllNodesList().size());
         assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "ABD",
+                "ABE",
+                "ABH",
+                "ABI",
+                "AD",
+        });
+        assertFullTreeStructure(treeList, new String[] {
                 "A",
                 "AB",
                 "ABC",
@@ -412,20 +506,26 @@ public class TreeListTest extends TestCase {
         });
     }
 
-    public void assertTreeStructure(TreeList<String>treeList, String[] structure) {
+    public void assertTreeStructure(TreeList<String> treeList, String[] structure) {
+        assertEquals(Arrays.asList(structure), nodeListAsString(treeList.getNodesList()));
+    }
+    
+    public void assertFullTreeStructure(TreeList<String> treeList, String[] fullStructure) {
+        assertEquals(Arrays.asList(fullStructure), nodeListAsString(treeList.getAllNodesList()));
+    }
 
-        // convert the list of TreeElements into a list of Strings
-        List<String> treeAsStrings = new ArrayList<String>();
-        for(Iterator<TreeList.Node<String>> i = treeList.getNodesList().iterator(); i.hasNext(); ) {
+    private static List<String> nodeListAsString(List<TreeList.Node<String>> nodeList) {
+        List<String> nodeListAsStrings = new ArrayList<String>();
+        for(Iterator<TreeList.Node<String>> i = nodeList.iterator(); i.hasNext(); ) {
             TreeList.Node<String> node = i.next();
             StringBuffer asString = new StringBuffer(node.path().size());
             for(Iterator<String> n = node.path().iterator(); n.hasNext(); ) {
                 asString.append(n.next());
             }
-            treeAsStrings.add(asString.toString());
+            nodeListAsStrings.add(asString.toString());
         }
 
-        assertEquals(Arrays.asList(structure), treeAsStrings);
+        return nodeListAsStrings;
     }
 
     public void testCollapseExpand() {

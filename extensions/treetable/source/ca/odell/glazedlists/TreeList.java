@@ -56,8 +56,11 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     /** compare nodes by value */
     private final NodeComparator<E> nodeComparator;
 
-    /** an {@link EventList} of {@link Node}s with the structure of the tree. */
-    private EventList<Node<E>> nodesList = null;
+    /** an {@link EventList} of uncollapsed {@link Node}s with the structure of the tree */
+    private EventList<Node<E>> nodesList;
+
+    /** a readonly {@link List} of all {@link Node}s regardless of their collapsed state */
+    private List<Node<E>> allNodesList;
 
     /** initialization data is only necessary to later dispose the TreeList */
     private InitializationData<E> initializationData;
@@ -180,6 +183,17 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             nodesList = new NodesList();
         }
         return nodesList;
+    }
+
+    /**
+     * @return a readonly {@link List} of <strong>all</strong> {@link Node}s in
+     *      the tree regardless of their collapsed state
+     */
+    public List<Node<E>> getAllNodesList() {
+        if(allNodesList == null) {
+            allNodesList = new AllNodesList();
+        }
+        return allNodesList;
     }
 
     /**
@@ -1600,8 +1614,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     }
 
     /**
-     * Convert this {@link TreeList<E>} or {@link Node<E>}s, and expose
-     * it as the raw {@link E elements}s.
+     * Expose the visible tree as an {@link EventList<Node<E>>}.
      */
     private class NodesList extends TransformedList<E,Node<E>> {
 
@@ -1620,6 +1633,19 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
         public void listChanged(ListEvent<E> listChanges) {
             updates.forwardEvent(listChanges);
+        }
+    }
+
+    /**
+     * Expose the entire tree (including collapsed and uncollapsed Node<E>s.
+     */
+    private class AllNodesList extends AbstractList<Node<E>> {
+        public Node<E> get(int index) {
+            return data.get(index, ALL_NODES).get();
+        }
+
+        public int size() {
+            return data.size(ALL_NODES);
         }
     }
 
