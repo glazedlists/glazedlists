@@ -4,10 +4,11 @@
 package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.impl.GlazedListsImpl;
+import ca.odell.glazedlists.impl.adt.KeyedCollection;
 import ca.odell.glazedlists.impl.adt.barcode2.Element;
 import ca.odell.glazedlists.impl.adt.barcode2.FourColorTree;
 import ca.odell.glazedlists.impl.adt.barcode2.ListToByteCoder;
-import ca.odell.glazedlists.impl.GlazedListsImpl;
 
 import java.util.*;
 
@@ -30,6 +31,9 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     /** An {@link ExpansionModel} with a simple policy: all nodes start collapsed. */
     public static final ExpansionModel NODES_START_COLLAPSED = new DefaultExpansionModel(false);
 
+    /** marker values for comparing elements */
+    private static final Element MINIMUM_ELEMENT = new FakeElement();
+    private static final Element MAXIMUM_ELEMENT = new FakeElement();
 
     private static final FunctionList.Function NO_OP_FUNCTION = new NoOpFunction();
 
@@ -450,17 +454,19 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         // and fire events for nodes that shouldn't be hidden
         List<Node<E>> nodesToVerify = new ArrayList<Node<E>>();
         NodeAttacher nodeAttacher = new NodeAttacher(true);
+        FinderInserter finderInserter = new FinderInserter();
+
         while(listChanges.next()) {
             int sourceIndex = listChanges.getIndex();
             int type = listChanges.getType();
 
             if(type == ListEvent.INSERT) {
-                Node<E> inserted = findOrInsertNode(sourceIndex);
+                Node<E> inserted = finderInserter.findOrInsertNode(sourceIndex);
                 nodeAttacher.nodesToAttach.queueNodeForAttaching(inserted, true);
 
             } else if(type == ListEvent.UPDATE) {
                 deleteAndDetachNode(sourceIndex, nodesToVerify);
-                Node<E> updated = findOrInsertNode(sourceIndex);
+                Node<E> updated = finderInserter.findOrInsertNode(sourceIndex);
                 nodeAttacher.nodesToAttach.queueNodeForAttaching(updated, false);
 
             } else if(type == ListEvent.DELETE) {
@@ -821,65 +827,155 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     }
 
     /**
-     * Handle a source insert at the specified index by adding the corresponding
-     * real node, or converting a virtual node to a real node. The real node
-     * is inserted, marked as real and hidden, and returned.
-     *
-     * @param sourceIndex the index of the element in the source list that has
-     *      been inserted
-     * @return the new node, prior to any events fired
+     * Short-lived helper class to finds and inserts nodes into the tree.
+     * Instances of this class should not be reused across ListEvents.
      */
-    private Node<E> findOrInsertNode(int sourceIndex) {
-        Node<E> inserted = source.get(sourceIndex);
-        inserted.resetDerivedState();
+    private class FinderInserter {
 
-        //  bound the range of indices where this node can be inserted. This is
-        // all the virtual nodes between our predecessor and follower in the
-        // source list
-        int predecessorIndex = sourceIndex > 0 ? data.convertIndexColor(sourceIndex - 1, REAL_NODES, ALL_NODES) : -1;
-        int followerIndex = data.size(REAL_NODES) > sourceIndex ? data.convertIndexColor(sourceIndex, REAL_NODES, ALL_NODES) : data.size(ALL_NODES);
+        final KeyedCollection<Element<Node<E>>,List<E>> indicesByValue;
 
-        // prepare to search through the virtual nodes, looking for the node with
-        // the longest common path with the inserted node
-        int indexOfNearestAncestorByValue = predecessorIndex;
-        int lengthOfLongestAncestorCommonPath;
-        if(predecessorIndex >= 0) {
-            Node<E> predecessor = data.get(predecessorIndex, ALL_NODES).get();
-            lengthOfLongestAncestorCommonPath = commonPathLength(inserted, predecessor);
-        } else {
-            lengthOfLongestAncestorCommonPath = 0;
-        }
-
-        // search through the virtual nodes, looking for the node with
-        // the longest common path with the inserted node
-        for(int i = predecessorIndex + 1; i < followerIndex; i++) {
-            Node<E> possibleAncestor = data.get(i, ALL_NODES).get();
-            assert(possibleAncestor.virtual);
-            // if the virtual node is deeper than the inserted node, it isn't be an ancestor
-            if(possibleAncestor.pathLength() > inserted.pathLength()) continue;
-
-            // what's the longest ancestor that we share
-            int commonPathLength = commonPathLength(inserted, possibleAncestor);
-
-            // if the common path is the complete path, then we have a virtual
-            // node that has become real.
-            if(commonPathLength == inserted.pathLength()) {
-                replaceNode(possibleAncestor, inserted, false);
-                return inserted;
-
-            // have we found a new longest common path?
-            } else if(commonPathLength > lengthOfLongestAncestorCommonPath) {
-                lengthOfLongestAncestorCommonPath = commonPathLength;
-                indexOfNearestAncestorByValue = i;
+        public FinderInserter() {
+            if (nodeComparator != null) {
+                this.indicesByValue = GlazedListsImpl.keyedCollection(
+                        new ElementLocationComparator(),
+                        new PathAsListComparator());
+            } else {
+                this.indicesByValue = GlazedListsImpl.keyedCollection(
+                        new ElementLocationComparator());
             }
         }
 
-        // insert the node as hidden by default - if we need to show this node,
-        // we'll change its state later and fire an 'insert' event then
-        addNode(inserted, HIDDEN_REAL, indexOfNearestAncestorByValue + 1);
-        return inserted;
-    }
+        /**
+         * Handle a source insert at the specified index by adding the corresponding
+         * real node, or converting a virtual node to a real node. The real node
+         * is inserted, marked as real and hidden, and returned.
+         *
+         * @param sourceIndex the index of the element in the source list that has
+         *      been inserted
+         * @return the new node, prior to any events fired
+         */
+        private Node<E> findOrInsertNode(int sourceIndex) {
+            Node<E> inserted = source.get(sourceIndex);
+            inserted.resetDerivedState();
+            List<E> insertedPath = inserted.path();
+            final int dataSize = data.size(ALL_NODES);
 
+            //  bound the range of indices where this node can be inserted. This is
+            // all the virtual nodes between our predecessor and follower in the
+            // source list
+            int firstPossibleIndex = sourceIndex > 0
+                    ? data.convertIndexColor(sourceIndex - 1, REAL_NODES, ALL_NODES) + 1
+                    : 0;
+            int lastPossibleIndex = sourceIndex < data.size(REAL_NODES)
+                    ? data.convertIndexColor(sourceIndex, REAL_NODES, ALL_NODES)
+                    : data.size(ALL_NODES);
+            Element<Node<E>> firstPossibleElement = indexToElement(firstPossibleIndex, dataSize);
+            Element<Node<E>> lastPossibleElement = indexToElement(lastPossibleIndex, dataSize);
+
+            // make sure we have all the values available that we need
+            populateIndicesByValue(lastPossibleIndex, firstPossibleIndex);
+
+            // find a virtual node with the exact same value
+            Element<Node<E>> virtualSameElement = indicesByValue.find(firstPossibleElement, lastPossibleElement, insertedPath);
+            if(virtualSameElement != null) {
+                Node<E> virtualSameNode = virtualSameElement.get();
+                if (!virtualSameNode.virtual) {
+                    throw new IllegalStateException();
+                }
+                replaceNode(virtualSameNode, inserted, false);
+                return inserted;
+            }
+
+            // find a virtual node that's an ancestor by value
+            int insertIndex = firstPossibleIndex;
+            for (int i = insertedPath.size() - 1; i >= 0; i--) {
+                List<E> pathOfLengthI = insertedPath.subList(0, i);
+                Element<Node<E>> bestAncestor = indicesByValue.find(firstPossibleElement, lastPossibleElement, pathOfLengthI);
+                if (bestAncestor != null) {
+                    if (!bestAncestor.get().virtual) {
+                        throw new IllegalStateException();
+                    }
+                    insertIndex = data.indexOfNode(bestAncestor, ALL_NODES) + 1;
+                    break;
+                }
+            }
+
+            // insert the node as hidden by default - if we need to show this node,
+            // we'll change its state later and fire an 'insert' event then
+            addNode(inserted, HIDDEN_REAL, insertIndex);
+            return inserted;
+        }
+
+        /**
+         * Convert a possibly-virtual index (such as size, or 0 on an empty list) to
+         * the possibly-element that represents.
+         */
+        private Element<Node<E>> indexToElement(int index, int dataSize) {
+            if (index >= 0 && index < dataSize) return data.get(index, ALL_NODES);
+            else if (index == 0) return MINIMUM_ELEMENT;
+            else if (index == dataSize) return MAXIMUM_ELEMENT;
+            else throw new IllegalArgumentException();
+        }
+
+        private void populateIndicesByValue(int lastNeeded, int firstNeeded) {
+            Element firstAvailableElement = indicesByValue.first();
+            Element lastAvailableElement = indicesByValue.last();
+            int firstAvailable = firstAvailableElement != null
+                    ? data.indexOfNode(firstAvailableElement, ALL_NODES)
+                    : lastNeeded;
+            int lastAvailable = lastAvailableElement != null
+                    ? data.indexOfNode(lastAvailableElement, ALL_NODES)
+                    : firstNeeded;
+
+            // fill in everything between firstNeeded firstAvailable and firstNeeded
+            populate(firstNeeded, firstAvailable);
+            populate(lastAvailable, lastNeeded);
+        }
+
+        /**
+         * Populate the indicesByValue collection with the available virtual nodes.
+         */
+        private void populate(int start, int end) {
+            // we might be able to optimize this loop using element.next() ?
+            for(int i = start; i < end; i++) {
+                Element<Node<E>> element = data.get(i, ALL_NODES);
+                indicesByValue.insert(element, element.get().path());
+            }
+        }
+
+        private class ElementLocationComparator implements Comparator<Element<Node<E>>> {
+            public int compare(Element<Node<E>> a, Element<Node<E>> b) {
+                if (a == b) {
+                    return 0;
+                } else if (a == MINIMUM_ELEMENT || b == MAXIMUM_ELEMENT) {
+                    return -1;
+                } else if (b == MINIMUM_ELEMENT || a == MAXIMUM_ELEMENT) {
+                    return 1;
+                } else {
+                    int aIndex = data.indexOfNode(a, ALL_NODES);
+                    int bIndex = data.indexOfNode(b, ALL_NODES);
+                    return aIndex - bIndex;
+                }
+            }
+        }
+
+        private class PathAsListComparator implements Comparator<List<E>> {
+            public int compare(List<E> a, List<E> b) {
+                // TODO(jessewilson): decrease cut and paste
+                int aPathLength = a.size();
+                int bPathLength = b.size();
+
+                // compare by value first
+                for(int i = 0; i < aPathLength && i < bPathLength; i++) {
+                    int result = nodeComparator.comparator.compare(a.get(i), b.get(i));
+                    if(result != 0) return result;
+                }
+
+                // and path length second
+                return aPathLength - bPathLength;
+            }
+        }
+    }
 
     /**
      * Remove the node at the specified index, firing all the required
@@ -1629,5 +1725,15 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
         // make sure we don't have a trailing sibling
         assert(lastChildSeen == null || lastChildSeen.siblingAfter == null);
+    }
+
+    private static class FakeElement implements Element {
+        public Object get() { return null; }
+        public void set(Object value) { }
+        public byte getColor() { return 0; }
+        public void setSorted(int sorted) { }
+        public int getSorted() { return 0; }
+        public Element next() { return null; }
+        public Element previous() { return null; }
     }
 }

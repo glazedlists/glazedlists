@@ -7,9 +7,11 @@ import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.TreeList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.swing.EventTableModel;
 import ca.odell.glazedlists.swing.TreeTableSupport;
 import ca.odell.glazedlists.swing.GlazedListsSwing;
+import ca.odell.glazedlists.swing.TableComparatorChooser;
 
 import javax.swing.table.TableModel;
 import javax.swing.*;
@@ -44,10 +46,13 @@ public class FileBrowser implements Runnable {
         try {
             EventList<Entry> entries = GlazedListsSwing.swingThreadProxyList(sourceEntries);
 
-            TreeList<Entry> treeList = new TreeList<Entry>(entries, treeFormat, TreeList.NODES_START_EXPANDED, (Comparator) GlazedLists.comparableComparator());
+            SortedList<Entry> sortedEntries = new SortedList<Entry>(entries, null);
+
+            TreeList<Entry> treeList = new TreeList<Entry>(sortedEntries, treeFormat, TreeList.NODES_START_EXPANDED, (Comparator) GlazedLists.comparableComparator());
             TableModel model = new EventTableModel<Entry>(treeList, tableFormat);
             JTable table = new JTable(model);
             TreeTableSupport.install(table, treeList, 0);
+            TableComparatorChooser.install(table, sortedEntries, TableComparatorChooser.SINGLE_COLUMN);
 
             JFrame frame = new JFrame(fileBrowserModel.getRoot().getName());
             frame.setSize(640, 480);

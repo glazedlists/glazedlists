@@ -165,6 +165,39 @@ public class TreeListTest extends TestCase {
         assertEquals(1, treeList.subtreeSize(10, true));
     }
 
+    public void testSetComparator() {
+
+        // try a simple hierarchy
+        BasicEventList<String> source = new BasicEventList<String>();
+        source.add("ABCd");
+        source.add("ABCe");
+        source.add("ABCF");
+        source.add("ABCG");
+        SortedList<String> sortedSource = new SortedList<String>(source, null);
+
+        TreeList<String> treeList = new TreeList<String>(sortedSource, new CharacterTreeFormat(), TreeList.NODES_START_EXPANDED, (Comparator)GlazedLists.comparableComparator());
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "ABCd",
+                "ABCe",
+                "ABCF",
+                "ABCG",
+        });
+
+        sortedSource.setComparator(GlazedLists.reverseComparator());
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC",
+                "ABCe",
+                "ABCd",
+                "ABCF",
+                "ABCG",
+        });
+    }
+
     public void testVirtualParentsAreCleanedUp() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat(), TreeList.NODES_START_EXPANDED, (Comparator)GlazedLists.comparableComparator());
