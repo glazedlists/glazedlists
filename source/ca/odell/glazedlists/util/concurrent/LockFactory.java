@@ -32,30 +32,30 @@ public interface LockFactory {
  */
 class DelegateLockFactory implements LockFactory {
 
-    /** The true JVM specific LockFactory to which we delegate. */
+    /** The true JVM-specific LockFactory to which we delegate. */
     private LockFactory delegate;
 
     DelegateLockFactory() {
         try {
-            // if the J2SE 5.0 ReadWriteLock class can be loaded
+            // if the J2SE 5.0 ReadWriteLock class can be loaded, we're running on a JDK 1.5 VM
             Class.forName("java.util.concurrent.locks.ReadWriteLock");
 
             // and if we can load our J2SE 5.0 LockFactory implementation
             // (i.e. it's not a Glazed Lists 1.4 implementation running on a JDK 1.5 VM)
             // then use the J2SE 5.0 LockFactory implementation
-            this.delegate = (LockFactory) Class.forName("ca.odell.glazedlists.impl.java15.J2SE50LockFactory").newInstance();
+            delegate = (LockFactory) Class.forName("ca.odell.glazedlists.impl.java15.J2SE50LockFactory").newInstance();
 
-        } catch (Exception e) {
-            // otherwise fall back to a J2SE 1.2 LockFactory
-            this.delegate = new J2SE14LockFactory();
+        } catch (Throwable t) {
+            // otherwise fall back to a J2SE 1.4 LockFactory
+            delegate = new J2SE14LockFactory();
         }
     }
 
     public ReadWriteLock createReadWriteLock() {
-        return this.delegate.createReadWriteLock();
+        return delegate.createReadWriteLock();
     }
 
     public Lock createLock() {
-        return this.delegate.createLock();
+        return delegate.createLock();
     }
 }
