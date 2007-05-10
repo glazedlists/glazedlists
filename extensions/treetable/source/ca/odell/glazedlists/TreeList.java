@@ -6,6 +6,7 @@ package ca.odell.glazedlists;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.impl.adt.KeyedCollection;
+import ca.odell.glazedlists.impl.adt.CircularArrayList;
 import ca.odell.glazedlists.impl.adt.barcode2.Element;
 import ca.odell.glazedlists.impl.adt.barcode2.FourColorTree;
 import ca.odell.glazedlists.impl.adt.barcode2.ListToByteCoder;
@@ -110,7 +111,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             Node<E> node = super.source.get(i);
             node.expanded = expansionModel.isExpanded(node.getElement(), node.path);
             addNode(node, HIDDEN_REAL, i);
-            nodeAttacher.nodesToAttach.queueNodeForAttaching(node, true);
+            nodeAttacher.nodesToAttach.queueNewNodeForInserting(node);
         }
         // attach siblings and parent nodes
         nodeAttacher.attachAll();
@@ -189,7 +190,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * @return a readonly {@link List} of <strong>all</strong> {@link Node}s in
      *      the tree regardless of their collapsed state
      */
-    public List<Node<E>> getAllNodesList() {
+    List<Node<E>> getAllNodesList() {
         if(allNodesList == null) {
             allNodesList = new AllNodesList();
         }
@@ -476,12 +477,12 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
             if(type == ListEvent.INSERT) {
                 Node<E> inserted = finderInserter.findOrInsertNode(sourceIndex);
-                nodeAttacher.nodesToAttach.queueNodeForAttaching(inserted, true);
+                nodeAttacher.nodesToAttach.queueNewNodeForInserting(inserted);
 
             } else if(type == ListEvent.UPDATE) {
                 deleteAndDetachNode(sourceIndex, nodesToVerify);
                 Node<E> updated = finderInserter.findOrInsertNode(sourceIndex);
-                nodeAttacher.nodesToAttach.queueNodeForAttaching(updated, false);
+                nodeAttacher.nodesToAttach.queueNewNodeForInserting(updated);
 
             } else if(type == ListEvent.DELETE) {
                 deleteAndDetachNode(sourceIndex, nodesToVerify);
@@ -546,7 +547,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             // attach nodes
             while(!nodesToAttach.isEmpty()) {
                 Node<E> changed = nodesToAttach.removeFirst();
-                boolean newlyInserted = nodesToAttach.isNewlyInserted(changed);
+                boolean newlyInserted = nodesToAttach.getNewlyInsertedAndReset(changed);
                 attach(changed, newlyInserted);
             }
 
@@ -762,9 +763,8 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * order but must process them in increasing order.
      */
     private final class NodesToAttach {
-        private final List<Node<E>> nodes = new ArrayList<Node<E>>();
+        private final List<Node<E>> nodes = new CircularArrayList<Node<E>>();
         private final NodeIndexComparator nodeIndexComparator = new NodeIndexComparator();
-        private final Map<Node<E>,Boolean> newlyInsertedNodes = new IdentityHashMap<Node<E>,Boolean>();
 
         /**
          * Add this node to the queue in order.
@@ -794,13 +794,10 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         /**
          * Add this node to the end of the queue.
          */
-        private void queueNodeForAttaching(Node<E> node, boolean newlyInserted) {
+        private void queueNewNodeForInserting(Node<E> node) {
             assert(nodes.isEmpty() || nodeIndexComparator.compare(nodes.get(nodes.size() - 1), node) < 0);
             nodes.add(node);
-            newlyInsertedNodes.put(node, Boolean.TRUE);
-            if (newlyInserted) {
-                newlyInsertedNodes.put(node, Boolean.TRUE);
-            }
+            node.isNewlyInserted = true;
 
             assert(isValid());
         }
@@ -813,8 +810,10 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             return nodes.remove(0);
         }
 
-        private boolean isNewlyInserted(Node<E> node) {
-            return newlyInsertedNodes.containsKey(node);
+        private boolean getNewlyInsertedAndReset(Node<E> node) {
+            boolean result = node.isNewlyInserted;
+            node.isNewlyInserted = false;
+            return result;
         }
 
         private boolean isValid() {
@@ -887,7 +886,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             Element<Node<E>> lastPossibleElement = indexToElement(lastPossibleIndex, dataSize);
 
             // make sure we have all the values available that we need
-            populateIndicesByValue(lastPossibleIndex, firstPossibleIndex);
+            populateIndicesByValue(firstPossibleIndex, lastPossibleIndex);
 
             // find a virtual node with the exact same value
             Element<Node<E>> virtualSameElement = indicesByValue.find(firstPossibleElement, lastPossibleElement, insertedPath);
@@ -931,19 +930,21 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             else throw new IllegalArgumentException();
         }
 
-        private void populateIndicesByValue(int lastNeeded, int firstNeeded) {
+        private void populateIndicesByValue(int firstNeeded, int lastNeeded) {
+
+            // fill in everything between firstNeeded and firstAvailable
             Element firstAvailableElement = indicesByValue.first();
-            Element lastAvailableElement = indicesByValue.last();
             int firstAvailable = firstAvailableElement != null
                     ? data.indexOfNode(firstAvailableElement, ALL_NODES)
                     : lastNeeded;
+            populate(firstNeeded, firstAvailable);
+
+            // fill in everything between lastAvailable and lastNeeded
+            Element lastAvailableElement = indicesByValue.last();
             int lastAvailable = lastAvailableElement != null
                     ? data.indexOfNode(lastAvailableElement, ALL_NODES)
-                    : firstNeeded;
-
-            // fill in everything between firstNeeded firstAvailable and firstNeeded
-            populate(firstNeeded, firstAvailable);
-            populate(lastAvailable, lastNeeded);
+                    : firstAvailable;
+            populate(lastAvailable + 1, lastNeeded);
         }
 
         /**
@@ -975,7 +976,6 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
         private class PathAsListComparator implements Comparator<List<E>> {
             public int compare(List<E> a, List<E> b) {
-                // TODO(jessewilson): decrease cut and paste
                 int aPathLength = a.size();
                 int bPathLength = b.size();
 
@@ -1434,6 +1434,16 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         private Node<E> parent;
 
         /**
+         * Nodes are temporarily aware if they're brand new nodes that haven't
+         * yet appeared in the tree. These nodes are processed slightly
+         * differently than nodes that already existed in the tree.
+         *
+         * <p>This value should always be false when a change is not in
+         * progress.
+         */
+        private boolean isNewlyInserted = false;
+
+        /**
          * Construct a new node.
          *
          * @param virtual <code>true</code> if this node is initially virtual
@@ -1678,6 +1688,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
             // all nodes must have elements
             assert(node.element != null);
+            assert(!node.isNewlyInserted);
 
             // path lengths should only grow by one from one child to the next
             assert(node.pathLength() <= lastPathLengthSeen + 1);
