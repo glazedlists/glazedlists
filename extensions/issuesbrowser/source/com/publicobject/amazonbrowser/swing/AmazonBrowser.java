@@ -169,7 +169,7 @@ public class AmazonBrowser implements Runnable {
         searchPanel.add(Box.createVerticalStrut(65),  new GridBagConstraints(6, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
         EventList<Item> swingFilteredItemsList = GlazedListsSwing.swingThreadProxyList(filteredItemsList);
-        treeList = new TreeList<Item>(swingFilteredItemsList, new ItemTreeFormat(treeCriteriaEditor.getActiveCriteria()), TreeList.NODES_START_EXPANDED, (Comparator)GlazedLists.comparableComparator());
+        treeList = new TreeList<Item>(swingFilteredItemsList, new ItemTreeFormat(treeCriteriaEditor.getActiveCriteria()), TreeList.NODES_START_EXPANDED);
 
         // create a JTable to display the items
         itemTableModel = new EventTableModel<Item>(treeList, new ItemTableFormat());

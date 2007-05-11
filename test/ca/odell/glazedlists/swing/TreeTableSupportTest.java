@@ -15,10 +15,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import java.awt.event.MouseListener;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class TreeTableSupportTest extends SwingTestCase {
 
@@ -160,6 +157,10 @@ public class TreeTableSupportTest extends SwingTestCase {
 
         public boolean allowsChildren(String element) {
             return true;
+        }
+
+        public Comparator<String> getComparator(int depth) {
+            return (Comparator)GlazedLists.comparableComparator();
         }
     }
 }

@@ -4,6 +4,8 @@
 package com.publicobject.xmlbrowser;
 
 import java.util.List;
+import java.util.Comparator;
+
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.swing.*;
@@ -149,6 +151,10 @@ public class XmlBrowser {
 
         public boolean allowsChildren(Tag element) {
             return true;
+        }
+
+        public Comparator<Tag> getComparator(int depth) {
+            return null;
         }
     }
 

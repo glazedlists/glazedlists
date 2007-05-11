@@ -48,7 +48,7 @@ public class FileBrowser implements Runnable {
 
             SortedList<Entry> sortedEntries = new SortedList<Entry>(entries, null);
 
-            TreeList<Entry> treeList = new TreeList<Entry>(sortedEntries, treeFormat, TreeList.NODES_START_EXPANDED, (Comparator) GlazedLists.comparableComparator());
+            TreeList<Entry> treeList = new TreeList<Entry>(sortedEntries, treeFormat, TreeList.NODES_START_EXPANDED);
             TableModel model = new EventTableModel<Entry>(treeList, tableFormat);
             JTable table = new JTable(model);
             TreeTableSupport.install(table, treeList, 0);
@@ -76,6 +76,10 @@ public class FileBrowser implements Runnable {
         }
         public boolean allowsChildren(Entry element) {
             return element.isDirectory();
+        }
+
+        public Comparator<Entry> getComparator(int depth) {
+            return GlazedLists.comparableComparator();
         }
     }
 

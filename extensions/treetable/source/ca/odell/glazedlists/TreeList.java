@@ -81,23 +81,13 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
     /**
      * Create a new TreeList that adds hierarchy to the specified source list.
-     * This constructor sorts the elements automatically, which is particularly
-     * convenient if you're data is not already in a natural tree ordering,
-     * ie. siblings are not already adjacent.
-     */
-    public TreeList(EventList<E> source, Format<E> format, ExpansionModel<E> expansionModel, Comparator<? super E> comparator) {
-        this(new InitializationData<E>(source, format, expansionModel, comparator));
-    }
-
-    /**
-     * Create a new TreeList that adds hierarchy to the specified source list.
      * This constructor does not sort the elements.
      */
     public TreeList(EventList<E> source, Format<E> format, ExpansionModel<E> expansionModel) {
-        this(new InitializationData<E>(source, format, expansionModel, null));
+        this(new InitializationData<E>(source, format, expansionModel));
     }
 
-    /** master Constructor that takes a FunctionList or a SortedList(FunctionList) */
+    /** master Constructor */
     private TreeList(InitializationData<E> initializationData) {
         super(initializationData.getSource());
         this.format = initializationData.format;
@@ -123,13 +113,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
     /** @deprecated use the constructor that takes an {@link ExpansionModel} */
     public TreeList(EventList<E> source, Format<E> format) {
-        this(new InitializationData<E>(source, format, NODES_START_EXPANDED, null));
-        
-    }
-
-    /** @deprecated use the constructor that takes an {@link ExpansionModel} */
-    public TreeList(EventList<E> source, Format<E> format, Comparator<E> comparator) {
-        this(new InitializationData<E>(source, format, NODES_START_EXPANDED, comparator));
+        this(new InitializationData<E>(source, format, NODES_START_EXPANDED));
     }
 
     /**
@@ -144,18 +128,13 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         private final FunctionList<E,Node<E>> sourceNodes;
         private final SortedList<Node<E>> sortedList;
 
-        public InitializationData(EventList<E> sourceElements, Format<E> format, ExpansionModel<E> expansionModel, Comparator<? super E> comparator) {
+        public InitializationData(EventList<E> sourceElements, Format<E> format, ExpansionModel<E> expansionModel) {
             this.format = format;
             this.expansionModel = expansionModel;
 
             this.sourceNodes = new FunctionList<E,Node<E>>(sourceElements, new ElementToTreeNodeFunction<E>(format, expansionModel), NO_OP_FUNCTION);
-            if(comparator != null) {
-                this.nodeComparator = comparatorToNodeComparator(comparator, format);
-                this.sortedList = new SortedList<Node<E>>(sourceNodes, nodeComparator);
-            } else {
-                this.nodeComparator = comparatorToNodeComparator((Comparator)GlazedListsImpl.equalsComparator(), format);
-                this.sortedList = null;
-            }
+            this.nodeComparator = comparatorToNodeComparator(format);
+            this.sortedList = new SortedList<Node<E>>(sourceNodes, nodeComparator);
         }
 
         /**
@@ -848,14 +827,8 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         final KeyedCollection<Element<Node<E>>,List<E>> indicesByValue;
 
         public FinderInserter() {
-            if (nodeComparator != null) {
-                this.indicesByValue = GlazedListsImpl.keyedCollection(
-                        new ElementLocationComparator(),
-                        new PathAsListComparator());
-            } else {
-                this.indicesByValue = GlazedListsImpl.keyedCollection(
-                        new ElementLocationComparator());
-            }
+            this.indicesByValue = GlazedListsImpl.keyedCollection(
+                    new ElementLocationComparator());
         }
 
         /**
@@ -980,8 +953,10 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 int bPathLength = b.size();
 
                 // compare by value first
-                for(int i = 0; i < aPathLength && i < bPathLength; i++) {
-                    int result = nodeComparator.comparator.compare(a.get(i), b.get(i));
+                for(int d = 0; d < aPathLength && d < bPathLength; d++) {
+                    Comparator<E> comparator = format.getComparator(d);
+                    if (comparator == null) return 0;
+                    int result = comparator.compare(a.get(d), b.get(d));
                     if(result != 0) return result;
                 }
 
@@ -1218,7 +1193,12 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      *     then depth 3 corresponds to the element <code>yarmo.mp4</code>.
      */
     private boolean valuesEqual(int depth, E a, E b) {
-        return nodeComparator.comparator.compare(a, b) == 0;
+        Comparator<E> comparator = format.getComparator(depth);
+        if (comparator != null) {
+            return comparator.compare(a, b) == 0;
+        } else {
+            return GlazedListsImpl.equal(a, b);
+        }
     }
 
     /** {@inheritDoc} */
@@ -1334,24 +1314,23 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
          *      or <code>false</code> if it is always a leaf node.
          */
         public boolean allowsChildren(E element);
+
+        public Comparator<E> getComparator(int depth);
     }
 
     /**
      * Convert the specified {@link Comparator<E>} into a {@link Comparator} for
      * nodes of type E.
      */
-    private static <E> NodeComparator<E> comparatorToNodeComparator(Comparator<? super E> comparator, Format<E> format) {
-        return new NodeComparator<E>(comparator, format);
+    private static <E> NodeComparator<E> comparatorToNodeComparator(Format<E> format) {
+        return new NodeComparator<E>(format);
     }
 
     private static class NodeComparator<E> implements Comparator<Node<E>> {
-        private final Comparator<? super E> comparator;
         private final Format<E> format;
 
-        public NodeComparator(Comparator<? super E> comparator, Format<E> format) {
-            if(comparator == null) throw new IllegalArgumentException();
+        public NodeComparator(Format<E> format) {
             if(format == null) throw new IllegalArgumentException();
-            this.comparator = comparator;
             this.format = format;
         }
 
@@ -1366,8 +1345,10 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             int bEffectiveLength = bPathLength + (bAllowsChildren ? 0 : -1);
 
             // compare by value first
-            for(int i = 0; i < aEffectiveLength && i < bEffectiveLength; i++) {
-                int result = comparator.compare(a.path.get(i), b.path.get(i));
+            for(int d = 0; d < aEffectiveLength && d < bEffectiveLength; d++) {
+                Comparator<E> comparator = format.getComparator(d);
+                if (comparator == null) return 0;
+                int result = comparator.compare(a.path.get(d), b.path.get(d));
                 if(result != 0) return result;
             }
 

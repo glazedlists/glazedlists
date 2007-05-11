@@ -186,17 +186,17 @@ public final class GlazedLists {
     /**
      * Creates a {@link Comparator} that compares {@link Comparable} objects.
      */
-    public static Comparator<Comparable> comparableComparator() {
+    public static <T extends Comparable> Comparator<T> comparableComparator() {
         if(comparableComparator == null) comparableComparator = new ComparableComparator();
-        return comparableComparator;
+        return (Comparator<T>)comparableComparator;
     }
 
     /**
      * Creates a reverse {@link Comparator} that works for {@link Comparable} objects.
      */
-    public static Comparator<Comparable> reverseComparator() {
+    public static <T extends Comparable> Comparator<T> reverseComparator() {
         if(reversedComparable == null) reversedComparable = reverseComparator(comparableComparator());
-        return reversedComparable;
+        return (Comparator<T>)reversedComparable;
     }
 
     /**

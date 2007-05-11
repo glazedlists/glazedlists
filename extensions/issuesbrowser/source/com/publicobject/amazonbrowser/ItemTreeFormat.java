@@ -4,6 +4,7 @@
 package com.publicobject.amazonbrowser;
 
 import ca.odell.glazedlists.TreeList;
+import ca.odell.glazedlists.GlazedLists;
 
 import java.util.*;
 
@@ -49,5 +50,10 @@ public class ItemTreeFormat implements TreeList.Format<Item> {
             path.add(i.next().getPathItem(item));
 
         path.add(item);
+    }
+
+
+    public Comparator<Item> getComparator(int depth) {
+        return (Comparator)GlazedLists.comparableComparator();
     }
 }
