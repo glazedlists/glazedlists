@@ -1315,6 +1315,11 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
          */
         public boolean allowsChildren(E element);
 
+        /**
+         * Returns the comparator used to order path elements of the specified
+         * depth. If enforcing order at this level is not intended, this method
+         * should return <code>null</code>. 
+         */
         public Comparator<E> getComparator(int depth);
     }
 
