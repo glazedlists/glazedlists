@@ -677,10 +677,33 @@ public class GroupingListMultiMapTest extends TestCase {
         runListIteratorMutationTest(jNames.listIterator(3), "J");
     }
 
-    public void testCompilationWithGenerics() {
-        final EventList<String> source = new BasicEventList<String>();
-        FirstLetterFunction f = new FirstLetterFunction();
-        final Map<String, List<String>> eventMap = GlazedLists.syncEventListToMultiMap(source, f);
+    public void testExplicitComparatorForUncomparableValues() {
+        final EventList<UncomparableValue> source = new BasicEventList<UncomparableValue>();
+        final FunctionList.Function<UncomparableValue, UncomparableKey> keyFunction = GlazedLists.beanFunction(UncomparableValue.class, "key");
+        final Map<UncomparableKey, List<UncomparableValue>> eventMap = GlazedLists.syncEventListToMultiMap(source, keyFunction, new UncomparableThingComparator());
+
+        final UncomparableKey key1 = new UncomparableKey("a");
+        final UncomparableKey key2 = new UncomparableKey("b");
+        final UncomparableKey key3 = new UncomparableKey("a");
+        
+        final UncomparableValue value1 = new UncomparableValue(key1);
+        final UncomparableValue value2 = new UncomparableValue(key2);
+        final UncomparableValue value3 = new UncomparableValue(key3);
+
+        source.add(value1);
+        assertEquals(Collections.singletonList(value1), eventMap.get(key1));
+        assertNull(eventMap.get(key2));
+        assertEquals(Collections.singletonList(value1), eventMap.get(key3));
+
+        source.add(value2);
+        assertEquals(Collections.singletonList(value1), eventMap.get(key1));
+        assertEquals(Collections.singletonList(value2), eventMap.get(key2));
+        assertEquals(Collections.singletonList(value1), eventMap.get(key3));
+
+        source.add(value3);
+        assertEquals(Arrays.asList(new Object[] {value1, value3}), eventMap.get(key1));
+        assertEquals(Collections.singletonList(value2), eventMap.get(key2));
+        assertEquals(Arrays.asList(new Object[] {value1, value3}), eventMap.get(key3));
     }
 
     private void runListIteratorMutationTest(ListIterator<String> listIterator, String key) {
@@ -750,6 +773,66 @@ public class GroupingListMultiMapTest extends TestCase {
     private static final class FirstLetterFunction implements FunctionList.Function<String, String> {
         public String evaluate(String sourceValue) {
             return String.valueOf(sourceValue.charAt(0));
+        }
+    }
+
+    public static class UncomparableValue {
+        private final UncomparableKey key;
+
+        public UncomparableValue(UncomparableKey key) {
+            this.key = key;
+        }
+
+        public UncomparableKey getKey() {
+            return key;
+        }
+
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            UncomparableValue that = (UncomparableValue) o;
+
+            if (!key.equals(that.key)) return false;
+
+            return true;
+        }
+
+        public int hashCode() {
+            return key.hashCode();
+        }
+    }
+
+    public static class UncomparableKey {
+        private final String name;
+
+        public UncomparableKey(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            UncomparableKey that = (UncomparableKey) o;
+
+            if (!name.equals(that.name)) return false;
+
+            return true;
+        }
+
+        public int hashCode() {
+            return name.hashCode();
+        }
+    }
+
+    private static class UncomparableThingComparator implements Comparator<UncomparableKey> {
+        public int compare(UncomparableKey o1, UncomparableKey o2) {
+            return o1.getName().compareTo(o2.getName());
         }
     }
 }

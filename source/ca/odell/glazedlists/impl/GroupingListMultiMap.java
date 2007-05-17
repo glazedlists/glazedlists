@@ -33,7 +33,7 @@ import java.util.*;
  *
  * @author James Lemieux
  */
-public class GroupingListMultiMap<K extends Comparable<? extends K>, V> implements Map<K, List<V>>, ListEventListener<List<V>> {
+public class GroupingListMultiMap<K, V> implements Map<K, List<V>>, ListEventListener<List<V>> {
 
     /** The raw values of this Map in an {@link EventList}. */
     private final GroupingList<V> groupingList;
@@ -63,15 +63,20 @@ public class GroupingListMultiMap<K extends Comparable<? extends K>, V> implemen
      *
      * @param source the raw data which has not yet been grouped
      * @param keyFunction the function capable of producing the keys of this
-     *      {@link Map}; the keys themselves are {@link Comparable} and thus
-     *      also determine the content of the {@link List}s which are the
-     *      values of this {@link Map}.
+     *      {@link Map} from each value
+     * @param keyGrouper the comparator that groups together values which
+     *      have the same key according to the given <code>keyFunction</code>
      */
-    public GroupingListMultiMap(EventList<V> source, FunctionList.Function<V, ? extends K> keyFunction) {
+    public GroupingListMultiMap(EventList<V> source, FunctionList.Function<V, ? extends K> keyFunction, Comparator<? super K> keyGrouper) {
+        if (keyFunction == null)
+            throw new IllegalArgumentException("keyFunction may not be null");
+        if (keyGrouper == null)
+            throw new IllegalArgumentException("keyGrouper may not be null");
+
         this.keyFunction = keyFunction;
 
         // construct a GroupingList which groups together the source elements for common keys
-        this.groupingList = new GroupingList<V>(source, new FunctionComparator(keyFunction));
+        this.groupingList = new GroupingList<V>(source, new FunctionComparator(keyFunction, keyGrouper));
 
         // wrap each List in the GroupingList in a layer that enforces the keyFunction constraints for writes
         this.valueList = new FunctionList<List<V>, List<V>>(this.groupingList, new ValueListFunction());
@@ -523,13 +528,14 @@ public class GroupingListMultiMap<K extends Comparable<? extends K>, V> implemen
 
     /**
      * This Comparator first runs each value through a
-     * {@link FunctionList.Function} to produce {@link Comparable} objects
-     * which are then compared to determine a relative ordering.
+     * {@link FunctionList.Function} to produce key objects which are then
+     * compared to determine a relative ordering using the given delegate
+     * {@link Comparator}.
      */
     private final class FunctionComparator implements Comparator<V> {
 
         /** A Comparator that orders {@link Comparable} objects. */
-        private final Comparator<Comparable> delegate = GlazedLists.comparableComparator();
+        private final Comparator<? super K> delegate;
 
         /** A function that extracts {@link Comparable} values from given objects. */
         private final FunctionList.Function<V, ? extends K> function;
@@ -539,16 +545,16 @@ public class GroupingListMultiMap<K extends Comparable<? extends K>, V> implemen
          * <code>function</code> to extract {@link Comparable} values from
          * given objects.
          */
-        FunctionComparator(FunctionList.Function<V, ? extends K> function) {
-            if (function == null) throw new IllegalArgumentException("function may not be null");
+        FunctionComparator(FunctionList.Function<V, ? extends K> function, Comparator<? super K> delegate) {
             this.function = function;
+            this.delegate = delegate;
         }
 
         /** {@inheritDoc} */
         public int compare(V o1, V o2) {
-            final Comparable c1 = function.evaluate(o1);
-            final Comparable c2 = function.evaluate(o2);
-            return delegate.compare(c1, c2);
+            final K k1 = function.evaluate(o1);
+            final K k2 = function.evaluate(o2);
+            return delegate.compare(k1, k2);
         }
     }
 

@@ -659,9 +659,15 @@ public final class GlazedLists {
      * to provide a data structure that guarantees fast O(1) reads.
      *
      * <p>The keys of the MultiMap are determined by evaluating each
-     * <code>source</code> element with the <code>keyMaker</code> function. If
-     * two distinct values, say <code>v1</code> and <code>v2</code> each
-     * produce the key <code>k</code> when they are evaluated by the
+     * <code>source</code> element with the <code>keyMaker</code> function.
+     * This form of the MultiMap requires that the keys produced by the
+     * <code>keyMaker</code> are {@link Comparable} and that the natural
+     * ordering of those keys also defines the grouping of values. If either
+     * of those assumptions are false, consider using
+     * {@link #syncEventListToMultiMap(EventList, FunctionList.Function, Comparator)}.
+     *
+     * <p>If two distinct values, say <code>v1</code> and <code>v2</code> each
+     * produce a common key, <code>k</code>, when they are evaluated by the
      * <code>keyMaker</code> function, then a corresponding entry in the
      * MultiMap will resemble:
      *
@@ -673,7 +679,7 @@ public final class GlazedLists {
      *
      * <p><code>{"Andy", "Arthur", "Jesse", "Holger", "James"}</code>
      *
-     * <p>The MultMap returned by this method would thus resemble:
+     * <p>The MultiMap returned by this method would thus resemble:
      *
      * <p><code>
      * "A" -> {"Andy", "Arthur"}<br>
@@ -690,6 +696,8 @@ public final class GlazedLists {
      *   <li>the mutating methods of {@link Map#values()} and its {@link Iterator}
      *   <li>the mutating methods of {@link Map#entrySet()} and its {@link Iterator}
      *   <li>the {@link Map.Entry#setValue} method
+     *   <li>the mutating methods of {@link Map} itself, including {@link Map#put},
+     *       {@link Map#putAll}, {@link Map#remove}, and {@link Map#clear}
      * </ul>
      *
      * For information on MultiMaps go <a href="http://en.wikipedia.org/wiki/Multimap"/>here</a>.
@@ -704,7 +712,73 @@ public final class GlazedLists {
      *      underlying <code>source</code> {@link EventList}
      */
     public static <K extends Comparable<? extends K>, V> Map<K, List<V>> syncEventListToMultiMap(EventList<V> source, FunctionList.Function<V, ? extends K> keyMaker) {
-        return new GroupingListMultiMap<K, V>(source, keyMaker);
+        return syncEventListToMultiMap(source, keyMaker, comparableComparator());
+    }
+
+    /**
+     * Synchronize the specified {@link EventList} to a MultiMap that is
+     * returned from this method. Each time the {@link EventList} is changed
+     * the MultiMap is updated to reflect the change.
+     *
+     * <p>This can be useful when it is known that an <code>EventList</code>
+     * will experience very few mutations compared to read operation and wants
+     * to provide a data structure that guarantees fast O(1) reads.
+     *
+     * <p>The keys of the MultiMap are determined by evaluating each
+     * <code>source</code> element with the <code>keyMaker</code> function.
+     * This form of the MultiMap makes no assumptions about the keys of the
+     * MultiMap and relies on the given <code>keyGrouper</code> to define the
+     * grouping of values.
+     *
+     * <p>If two distinct values, say <code>v1</code> and <code>v2</code> each
+     * produce a common key, <code>k</code>, when they are evaluated by the
+     * <code>keyMaker</code> function, then a corresponding entry in the
+     * MultiMap will resemble:
+     *
+     * <p><code>k -> {v1, v2}</code>
+     *
+     * <p>For example, assume the <code>keyMaker</code> function returns the
+     * first letter of a name and the <code>source</code> {@link EventList}
+     * contains the names:
+     *
+     * <p><code>{"Andy", "Arthur", "Jesse", "Holger", "James"}</code>
+     *
+     * <p>The MultiMap returned by this method would thus resemble:
+     *
+     * <p><code>
+     * "A" -> {"Andy", "Arthur"}<br>
+     * "H" -> {"Holger"}<br>
+     * "J" -> {"Jesse", "James"}<br>
+     * </code>
+     *
+     * <p>It is important to note that all mutating methods on the {@link Map}
+     * interface "write through" to the backing {@link EventList} as expected.
+     * These mutating methods include:
+     *
+     * <ul>
+     *   <li>the mutating methods of {@link Map#keySet()} and its {@link Iterator}
+     *   <li>the mutating methods of {@link Map#values()} and its {@link Iterator}
+     *   <li>the mutating methods of {@link Map#entrySet()} and its {@link Iterator}
+     *   <li>the {@link Map.Entry#setValue} method
+     *   <li>the mutating methods of {@link Map} itself, including {@link Map#put},
+     *       {@link Map#putAll}, {@link Map#remove}, and {@link Map#clear}
+     * </ul>
+     *
+     * For information on MultiMaps go <a href="http://en.wikipedia.org/wiki/Multimap"/>here</a>.
+     *
+     * @param source the {@link EventList} which provides the master view.
+     *      Each change to this {@link EventList} will be applied to the
+     *      MultiMap
+     * @param keyMaker the {@link FunctionList.Function} which produces a key
+     *      for each value in the <code>source</code>. It is imperative that the
+     *      keyMaker produce <strong>immutable</strong> objects.
+     * @param keyGrouper the {@link Comparator} which groups together values
+     *      that share common keys
+     * @return a MultiMap which remains in sync with changes that occur to the
+     *      underlying <code>source</code> {@link EventList}
+     */
+    public static <K, V> Map<K, List<V>> syncEventListToMultiMap(EventList<V> source, FunctionList.Function<V, ? extends K> keyMaker, Comparator<? super K> keyGrouper) {
+        return new GroupingListMultiMap<K, V>(source, keyMaker, keyGrouper);
     }
 
     /**
