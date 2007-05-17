@@ -703,7 +703,7 @@ public final class GlazedLists {
      * @return a MultiMap which remains in sync with changes that occur to the
      *      underlying <code>source</code> {@link EventList}
      */
-    public static <K, V> Map<Comparable<K>, List<V>> syncEventListToMultiMap(EventList<V> source, FunctionList.Function<V, ? extends Comparable<K>> keyMaker) {
+    public static <K extends Comparable<? extends K>, V> Map<K, List<V>> syncEventListToMultiMap(EventList<V> source, FunctionList.Function<V, ? extends K> keyMaker) {
         return new GroupingListMultiMap<K, V>(source, keyMaker);
     }
 

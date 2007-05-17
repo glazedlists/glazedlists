@@ -33,7 +33,7 @@ import java.util.*;
  *
  * @author James Lemieux
  */
-public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, ListEventListener<List<V>> {
+public class GroupingListMultiMap<K extends Comparable<? extends K>, V> implements Map<K, List<V>>, ListEventListener<List<V>> {
 
     /** The raw values of this Map in an {@link EventList}. */
     private final GroupingList<V> groupingList;
@@ -42,19 +42,19 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
     private final FunctionList<List<V>, List<V>> valueList;
 
     /** The keys of this Map (used to remove entries from the {@link #delegate}) */
-    private final List<Comparable<K>> keyList;
+    private final List<K> keyList;
 
-    /** The keys of this Map made to look like a Set (it is build lazily in {@link #keySet()}) */
-    private Set<Comparable<K>> keySet;
+    /** The keys of this Map made to look like a Set (it is built lazily in {@link #keySet()}) */
+    private Set<K> keySet;
 
     /** The function which produces keys for this multimap. */
-    private final FunctionList.Function<V, ? extends Comparable<K>> keyFunction;
+    private final FunctionList.Function<V, ? extends K> keyFunction;
 
     /** The delegate Map which is kept in synch with {@link #groupingList} changes. */
-    private final Map<Comparable<K>, List<V>> delegate;
+    private final Map<K, List<V>> delegate;
 
     /** The set of Map.Entry objects in this Map (it is build lazily in {@link #entrySet()}) */
-    private Set<Map.Entry<Comparable<K>, List<V>>> entrySet;
+    private Set<Map.Entry<K, List<V>>> entrySet;
 
     /**
      * Construct a multimap which maps the keys produced by the
@@ -67,11 +67,11 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
      *      also determine the content of the {@link List}s which are the
      *      values of this {@link Map}.
      */
-    public GroupingListMultiMap(EventList<V> source, FunctionList.Function<V, ? extends Comparable<K>> keyFunction) {
+    public GroupingListMultiMap(EventList<V> source, FunctionList.Function<V, ? extends K> keyFunction) {
         this.keyFunction = keyFunction;
 
         // construct a GroupingList which groups together the source elements for common keys
-        this.groupingList = new GroupingList<V>(source, new FunctionComparator<V,K>(keyFunction));
+        this.groupingList = new GroupingList<V>(source, new FunctionComparator(keyFunction));
 
         // wrap each List in the GroupingList in a layer that enforces the keyFunction constraints for writes
         this.valueList = new FunctionList<List<V>, List<V>>(this.groupingList, new ValueListFunction());
@@ -79,13 +79,13 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
 
         // it is important that the keyList is a BasicEventList since we use its ListIterator, which remains
         // consistent with changes to its underlying data (any other Iterator would throw a ConcurrentModificationException)
-        this.keyList = new BasicEventList<Comparable<K>>(this.groupingList.size());
-        this.delegate = new HashMap<Comparable<K>,List<V>>(this.groupingList.size());
+        this.keyList = new BasicEventList<K>(this.groupingList.size());
+        this.delegate = new HashMap<K,List<V>>(this.groupingList.size());
 
         // initialize both the keyList and the delegate Map
         for (Iterator<List<V>> i = this.valueList.iterator(); i.hasNext();) {
             final List<V> value = i.next();
-            final Comparable key = key(value);
+            final K key = key(value);
             this.keyList.add(key);
             this.delegate.put(key, value);
         }
@@ -117,7 +117,7 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
     }
 
     /** {@inheritDoc} */
-    public List<V> put(Comparable<K> key, List<V> value) {
+    public List<V> put(K key, List<V> value) {
         this.checkKeyValueAgreement(key, value);
 
         final List<V> removed = (List<V>) this.remove(key);
@@ -127,18 +127,19 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
     }
 
     /** {@inheritDoc} */
-    public void putAll(Map<? extends Comparable<K>, ? extends List<V>> m) {
+
+    public void putAll(Map<? extends K, ? extends List<V>> m) {
         // verify the contents of the given Map and ensure all key/value pairs agree with the keyFunction
-        for (Iterator<? extends Entry<? extends Comparable<K>, ? extends List<V>>> i = m.entrySet().iterator(); i.hasNext();) {
-            final Entry<? extends Comparable<K>, ? extends List<V>> entry = i.next();
-            final Comparable<K> key = entry.getKey();
+        for (Iterator<? extends Entry<? extends K, ? extends List<V>>> i = m.entrySet().iterator(); i.hasNext();) {
+            final Entry<? extends K, ? extends List<V>> entry = i.next();
+            final K key = entry.getKey();
             final List<V> value = entry.getValue();
 
             this.checkKeyValueAgreement(key, value);
         }
 
         // remove all values currently associated with the keys
-        for (Iterator<? extends Comparable<K>> i = m.keySet().iterator(); i.hasNext();)
+        for (Iterator<? extends K> i = m.keySet().iterator(); i.hasNext();)
             this.remove(i.next());
 
         // add all new values into this Map
@@ -154,7 +155,7 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
      * @param value the value objects which should produce the given key when
      *      run through the key function
      */
-    private void checkKeyValueAgreement(Comparable<K> key, Collection<? extends V> value) {
+    private void checkKeyValueAgreement(K key, Collection<? extends V> value) {
         for (Iterator<? extends V> i = value.iterator(); i.hasNext();)
             checkKeyValueAgreement(key, i.next());
     }
@@ -168,8 +169,8 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
      * @param value the value object which should produce the given key when
      *      run through the key function
      */
-    private void checkKeyValueAgreement(Comparable<K> key, V value) {
-        final Comparable<K> k = key(value);
+    private void checkKeyValueAgreement(K key, V value) {
+        final K k = key(value);
 
         if (!GlazedListsImpl.equal(key, k))
             throw new IllegalArgumentException("The calculated key for the given value (" + k + ") does not match the given key (" + key + ")");
@@ -192,7 +193,7 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
     }
 
     /** {@inheritDoc} */
-    public Set<Comparable<K>> keySet() {
+    public Set<K> keySet() {
         if (this.keySet == null)
             this.keySet = new KeySet();
 
@@ -200,7 +201,7 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
     }
 
     /** {@inheritDoc} */
-    public Set<Entry<Comparable<K>, List<V>>> entrySet() {
+    public Set<Entry<K, List<V>>> entrySet() {
         if (this.entrySet == null)
             this.entrySet = new EntrySet();
 
@@ -237,12 +238,12 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
 
             if (changeType == ListEvent.INSERT) {
                 final List<V> inserted = (List<V>) listChanges.getSourceList().get(changeIndex);
-                final Comparable<K> key = key(inserted);
+                final K key = key(inserted);
                 this.keyList.add(changeIndex, key);
                 this.delegate.put(key, inserted);
 
             } else if (changeType == ListEvent.DELETE) {
-                final Comparable<K> deleted = keyList.remove(changeIndex);
+                final K deleted = keyList.remove(changeIndex);
                 this.delegate.remove(deleted);
             }
         }
@@ -255,7 +256,7 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
      *      {@link GroupingList} which share the same key value
      * @return the shared key which maps to each of the given values
      */
-    private Comparable<K> key(List<V> values) {
+    private K key(List<V> values) {
         return key(values.get(0));
     }
 
@@ -265,7 +266,7 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
      * @param value a single value from the source list
      * @return the key which maps to the given value
      */
-    private Comparable<K> key(V value) {
+    private K key(V value) {
         return this.keyFunction.evaluate(value);
     }
 
@@ -275,14 +276,14 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
      * "write through" to the backing {@link EventList} which ensures that both
      * the {@link EventList} and this MultiMap always remain in sync.
      */
-    private class EntrySet extends AbstractSet<Entry<Comparable<K>, List<V>>> {
+    private class EntrySet extends AbstractSet<Entry<K, List<V>>> {
         /** {@inheritDoc} */
         public int size() {
             return keyList.size();
         }
 
         /** {@inheritDoc} */
-        public Iterator<Entry<Comparable<K>, List<V>>> iterator() {
+        public Iterator<Entry<K, List<V>>> iterator() {
             return new EntrySetIterator(keyList.listIterator());
         }
 
@@ -291,8 +292,8 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
             if (!(o instanceof Map.Entry))
                 return false;
 
-            final Entry<Comparable<K>, List<V>> e = (Entry<Comparable<K>, List<V>>) o;
-            final Comparable<K> key = e.getKey();
+            final Entry<K, List<V>> e = (Entry<K, List<V>>) o;
+            final K key = e.getKey();
             final List<V> value = e.getValue();
 
             final List<V> mapValue = (List<V>) GroupingListMultiMap.this.get(key);
@@ -324,10 +325,10 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
      * {@link Map.Entry} object each time {@link #next} is called. Identity is
      * not preserved.
      */
-    private class EntrySetIterator implements Iterator<Entry<Comparable<K>, List<V>>> {
+    private class EntrySetIterator implements Iterator<Entry<K, List<V>>> {
 
         /** The delegate Iterator walks a List of keys for the MultiMap. */
-        private final ListIterator<Comparable<K>> keyIter;
+        private final ListIterator<K> keyIter;
 
         /**
          * Construct a new EntrySetIterator using a delegate Iterator that
@@ -335,7 +336,7 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
          *
          * @param keyIter a {@link ListIterator} that walks the keys of the MultiMap
          */
-        EntrySetIterator(ListIterator<Comparable<K>> keyIter) {
+        EntrySetIterator(ListIterator<K> keyIter) {
             this.keyIter = keyIter;
         }
 
@@ -347,8 +348,8 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
         /**
          * Returns a new {@link Map.Entry} each time this method is called.
          */
-        public Entry<Comparable<K>, List<V>> next() {
-            final Comparable<K> key = keyIter.next();
+        public Entry<K, List<V>> next() {
+            final K key = keyIter.next();
             return new MultiMapEntry(key, (List<V>) get(key));
         }
 
@@ -366,10 +367,10 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
      * "write through" to the backing {@link EventList} which ensures that
      * both the {@link EventList} and this MultiMap always remain in sync.
      */
-    private class MultiMapEntry implements Map.Entry<Comparable<K>, List<V>> {
+    private class MultiMapEntry implements Map.Entry<K, List<V>> {
 
         /** The MultiMap key for this Entry object. */
-        private final Comparable<K> key;
+        private final K key;
 
         /** The MultiMap value for this Entry object. */
         private List<V> value;
@@ -378,7 +379,7 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
          * Constructs a new MultiMapEntry with the given <code>key</code> and
          * initial <code>value</code>.
          */
-        MultiMapEntry(Comparable<K> key, List<V> value) {
+        MultiMapEntry(K key, List<V> value) {
             if (value == null) throw new IllegalArgumentException("value cannot be null");
 
             this.value = value;
@@ -386,7 +387,7 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
         }
 
         /** {@inheritDoc} */
-        public Comparable<K> getKey() {
+        public K getKey() {
             return key;
         }
 
@@ -408,7 +409,7 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
          */
         public List<V> setValue(List<V> newValue) {
             // ensure all of the newValue elements agree with the key of this Entry
-            checkKeyValueAgreement((Comparable<K>) getKey(), newValue);
+            checkKeyValueAgreement(getKey(), newValue);
 
             // record the old value List elements (to return)
             final List<V> oldValue = new ArrayList<V>(value);
@@ -454,14 +455,14 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
      * backing {@link EventList} which ensures that both the {@link EventList}
      * and this MultiMap always remain in sync.
      */
-    private class KeySet extends AbstractSet<Comparable<K>> {
+    private class KeySet extends AbstractSet<K> {
         /** {@inheritDoc} */
         public int size() {
             return keyList.size();
         }
 
         /** {@inheritDoc} */
-        public Iterator<Comparable<K>> iterator() {
+        public Iterator<K> iterator() {
             return new KeySetIterator(keyList.listIterator());
         }
 
@@ -487,10 +488,10 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
      * "write through" to the backing {@link EventList} which ensures that both
      * the {@link EventList} and this MultiMap always remain in sync.
      */
-    private class KeySetIterator implements Iterator<Comparable<K>> {
+    private class KeySetIterator implements Iterator<K> {
 
         /** The delegate Iterator walks a List of keys for the MultiMap. */
-        private final ListIterator<Comparable<K>> keyIter;
+        private final ListIterator<K> keyIter;
 
         /**
          * Construct a new KeySetIterator using a delegate Iterator that walks
@@ -498,7 +499,7 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
          *
          * @param keyIter a {@link ListIterator} that walks the keys of the MultiMap
          */
-        KeySetIterator(ListIterator<Comparable<K>> keyIter) {
+        KeySetIterator(ListIterator<K> keyIter) {
             this.keyIter = keyIter;
         }
 
@@ -508,7 +509,7 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
         }
 
         /** {@inheritDoc} */
-        public Comparable<K> next() {
+        public K next() {
             return keyIter.next();
         }
 
@@ -525,20 +526,20 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
      * {@link FunctionList.Function} to produce {@link Comparable} objects
      * which are then compared to determine a relative ordering.
      */
-    private static final class FunctionComparator<V,K> implements Comparator<V> {
+    private final class FunctionComparator implements Comparator<V> {
 
         /** A Comparator that orders {@link Comparable} objects. */
         private final Comparator<Comparable> delegate = GlazedLists.comparableComparator();
 
         /** A function that extracts {@link Comparable} values from given objects. */
-        private final FunctionList.Function<V, ? extends Comparable<K>> function;
+        private final FunctionList.Function<V, ? extends K> function;
 
         /**
          * Construct a new FunctionComparator that uses the given
          * <code>function</code> to extract {@link Comparable} values from
          * given objects.
          */
-        FunctionComparator(FunctionList.Function<V, ? extends Comparable<K>> function) {
+        FunctionComparator(FunctionList.Function<V, ? extends K> function) {
             if (function == null) throw new IllegalArgumentException("function may not be null");
             this.function = function;
         }
@@ -573,7 +574,7 @@ public class GroupingListMultiMap<K, V> implements Map<Comparable<K>, List<V>>, 
         private final List<V> delegate;
 
         /** The key that all values in this List must share. */
-        private final Comparable<K> key;
+        private final K key;
 
         public ValueList(List<V> delegate) {
             this.delegate = delegate;
