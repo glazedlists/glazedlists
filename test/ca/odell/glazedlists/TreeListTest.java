@@ -1763,4 +1763,56 @@ public class TreeListTest extends TestCase {
                 "MEMN",
         });
     }
+
+    /**
+     * This test isn't a spec - when the Comparator and equals() disagree, whom
+     * should we trust?
+     */
+    public void testComparatorWeakerThanEquals() {
+        ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat(String.CASE_INSENSITIVE_ORDER), TreeList.NODES_START_EXPANDED);
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.beginEvent(false);
+            source.add("AJU");
+            source.add("aJD");
+            source.add("AKG");
+        source.commitEvent();
+
+        assertTreeStructure(treeList, new String[] {
+                "a",
+                "aJ",
+                "aJD",
+                "AJU",
+                "AK",
+                "AKG",
+        });
+
+        source.beginEvent(true);
+            source.clear();
+            source.add("aJD");
+            source.add("AJU");
+            source.add("AKG");
+        source.commitEvent();
+
+        assertTreeStructure(treeList, new String[] {
+                "a",
+                "aJ",
+                "aJD",
+                "AJU",
+                "AK",
+                "AKG",
+        });
+    }
+
+    public void testComparatorOrdering_FixMe() {
+        CharacterTreeFormat treeFormat = new CharacterTreeFormat(String.CASE_INSENSITIVE_ORDER);
+        TreeList.NodeComparator<String> nodeComparator = new TreeList.NodeComparator<String>(treeFormat);
+
+        TreeList.Node<String> abc = new TreeList.Node<String>(false, GlazedListsTests.stringToList("ABC"));
+        TreeList.Node<String> abcd = new TreeList.Node<String>(false, GlazedListsTests.stringToList("ABCd"));
+        
+        assertTrue(nodeComparator.compare(abc, abcd) < 0);
+    }
 }

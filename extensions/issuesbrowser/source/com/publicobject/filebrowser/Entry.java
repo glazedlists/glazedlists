@@ -3,6 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.filebrowser;
 
+import ca.odell.glazedlists.GlazedLists;
+
 import java.io.File;
 import java.util.Date;
 
@@ -50,7 +52,7 @@ public class Entry implements Comparable<Entry> {
     }
 
     public String getKind() {
-        return "File";
+        return isDirectory ? "Directory" : "File";
     }
 
     public Entry getParent() {
