@@ -8,16 +8,16 @@
 -->
 
 <hibernate-mapping package="ca.odell.glazedlists.hibernate">
-<!-- 
+
     <typedef name="MyEventListType" class="ca.odell.glazedlists.hibernate.EventListType">
-        <param name="category">Test</param>
+        <param name="EventList.category">Test</param>
     </typedef>
- -->    
+    
     <class name="User" table="`USERS`">
         <id name="userName" column="USERNAME"/>
         <!-- mapping a value collection -->
         <list name="nickNames" table="USER_NICKNAMES"
-            collection-type="ca.odell.glazedlists.hibernate.EventListTypeCategoryTest$TestEventListType">
+            collection-type="MyEventListType">
             <key column="USER_ID"/>
             <list-index column="DISPLAY_ORDER"/>
             <element column="NAME" type="string" length="50"/>
@@ -25,7 +25,7 @@
         
         <!-- mapping a one-to-many entity association -->
         <list name="emailAddresses" table="USER_EMAIL" cascade="all, delete-orphan"
-            collection-type="ca.odell.glazedlists.hibernate.EventListTypeCategoryTest$TestEventListType">
+            collection-type="MyEventListType">
             <key column="USER_ID"/>
             <list-index column="DISPLAY_ORDER"/>
             <one-to-many class="Email"/>

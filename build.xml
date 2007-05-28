@@ -355,12 +355,12 @@
         <mkdir dir="extensions/hibernate/lib"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="https://glazedlists.dev.java.net/files/documents/1073/46765/hibernate.jar"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/58581/hibernate.jar"/>
             <arg value="extensions/hibernate/lib/hibernate.jar"/>
         </java>		
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="https://glazedlists.dev.java.net/files/documents/1073/46766/hibernate-libs.jar"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/58582/hibernate-libs.jar"/>
             <arg value="extensions/hibernate/lib/hibernate-libs.jar"/>
         </java>				
         <java classname="ca.odell.glazedlists.impl.HttpClient">

@@ -211,15 +211,6 @@ public class EventListTypeCategoryTest extends AbstractHibernateTestCase {
     /**
      * Custom EventListType to test list categories. 
      */
-    public static final class TestEventListType extends EventListType {
-        /** Constructor which sets a list category. */
-        public TestEventListType() {
-            useListCategory("Test");
-        }
-    }
-    /**
-     * Custom EventListType to test list categories. 
-     */
     public static final class TestEventListType2 extends EventListType {
         /** Lock as constant. */
         public static final ReadWriteLock LOCK = LockFactory.DEFAULT.createReadWriteLock();
