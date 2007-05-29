@@ -138,12 +138,12 @@ public class CircularArrayListTest extends TestCase {
 
   public void testLargeCircularArray() {
     for(int i = 0; i < 1000; i++) {
-      list.add(0, i);
+      list.add(0, new Integer(i));
       assertEquals(i + 1, list.size());
     }
 
     for(int i = 0; i < 1000; i++) {
-      list.add(list.size(), i);
+      list.add(list.size(), new Integer(i));
       assertEquals(1000 + i + 1, list.size());
     }
 
@@ -169,7 +169,7 @@ public class CircularArrayListTest extends TestCase {
     Random dice = new Random(0);
     for (int i = 0; i < 100; i++) {
       int index = dice.nextInt(list.size() + 1);
-      int value = dice.nextInt(1000);
+      Integer value = new Integer(dice.nextInt(1000));
       list.add(index, value);
       expected.add(index, value);
       assertEquals(expected, list);

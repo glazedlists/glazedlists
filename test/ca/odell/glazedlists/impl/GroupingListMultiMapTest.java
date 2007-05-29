@@ -725,9 +725,9 @@ public class GroupingListMultiMapTest extends TestCase {
 
         assertEquals(3, naturalMap.size());
         assertEquals(expectedKeys, naturalMap.keySet());
-        assertEquals(naturalMap.get(new AFirstLetterComparable(new ComparableKey("James"))), Arrays.asList(source.get(0), source.get(1), source.get(2), source.get(5)));
-        assertEquals(naturalMap.get(new AFirstLetterComparable(new ComparableKey("Andy"))), Arrays.asList(source.get(3)));
-        assertEquals(naturalMap.get(new AFirstLetterComparable(new ComparableKey("Fred"))), Arrays.asList(source.get(4)));
+        assertEquals(naturalMap.get(new AFirstLetterComparable(new ComparableKey("James"))), Arrays.asList(new Object[] {source.get(0), source.get(1), source.get(2), source.get(5)}));
+        assertEquals(naturalMap.get(new AFirstLetterComparable(new ComparableKey("Andy"))), Collections.singletonList(source.get(3)));
+        assertEquals(naturalMap.get(new AFirstLetterComparable(new ComparableKey("Fred"))), Collections.singletonList(source.get(4)));
     }
 
     public void testImplicitComparatorForComparableValues() {
@@ -750,10 +750,10 @@ public class GroupingListMultiMapTest extends TestCase {
 
         assertEquals(4, naturalMap.size());
         assertEquals(expectedKeys, naturalMap.keySet());
-        assertEquals(naturalMap.get(new ComparableKey("James")), Arrays.asList(source.get(0), source.get(2)));
-        assertEquals(naturalMap.get(new ComparableKey("Jesse")), Arrays.asList(source.get(1), source.get(5)));
-        assertEquals(naturalMap.get(new ComparableKey("Andy")), Arrays.asList(source.get(3)));
-        assertEquals(naturalMap.get(new ComparableKey("Fred")), Arrays.asList(source.get(4)));
+        assertEquals(naturalMap.get(new ComparableKey("James")), Arrays.asList(new Object[] {source.get(0), source.get(2)}));
+        assertEquals(naturalMap.get(new ComparableKey("Jesse")), Arrays.asList(new Object[] {source.get(1), source.get(5)}));
+        assertEquals(naturalMap.get(new ComparableKey("Andy")), Collections.singletonList(source.get(3)));
+        assertEquals(naturalMap.get(new ComparableKey("Fred")), Collections.singletonList(source.get(4)));
     }
 
     public void testUnnaturalStringKeyGeneric() {
@@ -774,9 +774,9 @@ public class GroupingListMultiMapTest extends TestCase {
 
         assertEquals(3, naturalMap.size());
         assertEquals(expectedKeys, naturalMap.keySet());
-        assertEquals(naturalMap.get("J"), Arrays.asList(source.get(0), source.get(1), source.get(2), source.get(5)));
-        assertEquals(naturalMap.get("A"), Arrays.asList(source.get(3)));
-        assertEquals(naturalMap.get("F"), Arrays.asList(source.get(4)));
+        assertEquals(naturalMap.get("J"), Arrays.asList(new Object[] {source.get(0), source.get(1), source.get(2), source.get(5)}));
+        assertEquals(naturalMap.get("A"), Collections.singletonList(source.get(3)));
+        assertEquals(naturalMap.get("F"), Collections.singletonList(source.get(4)));
     }
 
     private void runListIteratorMutationTest(ListIterator<String> listIterator, String key) {
@@ -942,7 +942,7 @@ public class GroupingListMultiMapTest extends TestCase {
         }
 
         public int compareTo(final AFirstLetterComparable o) {
-            return Character.valueOf(contained.getName().charAt(0)).compareTo(o.contained.getName().charAt(0));
+            return Character.valueOf(contained.getName().charAt(0)).compareTo(new Character(o.contained.getName().charAt(0)));
         }
 
         public String toString() {
