@@ -5,7 +5,7 @@ import junit.framework.TestCase;
 /**
  * @author jessewilson
  */
-public class AbstractKeyedCollectionTest extends TestCase {
+public abstract class AbstractKeyedCollectionTest extends TestCase {
 
     private NamePosition a = new NamePosition("A");
     private NamePosition b = new NamePosition("B");
