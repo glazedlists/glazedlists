@@ -264,7 +264,8 @@ public class GlazedListsTests {
     }    
     
     /**
-     * This listener invokes a static method each time it's target {@link EventList} is changed.
+     * This listener records the source of the last ListEvent received. This is
+     * useful for testing ListEventListener serialization.
      */
     public static class SerializableListener implements ListEventListener, Serializable {
         private static EventList lastSource = null;
