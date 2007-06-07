@@ -3,6 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.hibernate;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -11,7 +12,9 @@ import java.util.Collection;
  * 
  * @author Holger Brands
  */
-public class Role {
+public class Role implements Serializable {
+
+    private static final long serialVersionUID = 0L;
 
     /** Id. */
     private Long id;

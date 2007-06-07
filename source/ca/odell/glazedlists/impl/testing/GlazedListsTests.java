@@ -261,5 +261,34 @@ public class GlazedListsTests {
             count = 0;
             return result;
         }
+    }    
+    
+    /**
+     * This listener invokes a static method each time it's target {@link EventList} is changed.
+     */
+    public static class SerializableListener implements ListEventListener, Serializable {
+        private static EventList lastSource = null;
+
+        public void listChanged(ListEvent listChanges) {
+            lastSource = listChanges.getSourceList();
+        }
+        public static EventList getLastSource() {
+            return lastSource;
+        }
     }
+
+    /**
+     * This listener is not serializable, but it shouldn't prevent serialization on an observing
+     * {@link EventList}.
+     */
+    public static class UnserializableListener implements ListEventListener {
+        private static EventList lastSource = null;
+
+        public void listChanged(ListEvent listChanges) {
+            lastSource = listChanges.getSourceList();
+        }
+        public static EventList getLastSource() {
+            return lastSource;
+        }
+    }    
 }

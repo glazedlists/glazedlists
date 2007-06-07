@@ -3,8 +3,13 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.hibernate;
 
+import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventPublisher;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests.ListEventCounter;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests.SerializableListener;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests.UnserializableListener;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
@@ -12,6 +17,8 @@ import org.hibernate.FetchMode;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+
+import java.io.IOException;
 
 /**
  * Tests mapping and persisting BasicEventLists with Hibernate using list categories. 
@@ -130,6 +137,64 @@ public class EventListTypeCategoryTest extends AbstractHibernateTestCase {
         t = s.beginTransaction();
         u = loadUser(s, lazy);
         assertEquals(u, null);
+        t.commit();
+        s.close();
+    }
+    
+    /**
+     * Tests serialization of objects with PeristentEventLists.
+     */
+    public void testSerialize() throws IOException, ClassNotFoundException {
+        // create user and persist
+        User u = createAndPersistUser();
+
+        // load user in new session
+        Session s = openSession();
+        Transaction t = s.beginTransaction();
+
+        // load saved user again
+        u = loadUser(s, false);        
+        assertNotNull(u);
+        final EventList<String> nickNames = u.getNickNames();
+        final EventList<Email> emails = u.getEmailAddresses();
+        
+        UnserializableListener listener = new UnserializableListener();
+        nickNames.addListEventListener(listener);
+        SerializableListener serListener = new SerializableListener();
+        nickNames.addListEventListener(serListener);
+        nickNames.add("Testit");
+        assertEquals(nickNames, UnserializableListener.getLastSource());
+        assertEquals(nickNames, SerializableListener.getLastSource());
+        
+        final User uCopy = GlazedListsTests.serialize(u);
+        final EventList<String> nickNamesCopy = uCopy.getNickNames();
+        final EventList<Email> emailsCopy = uCopy.getEmailAddresses();
+        assertTrue(Hibernate.isInitialized(nickNamesCopy));
+        assertTrue(Hibernate.isInitialized(emailsCopy));
+        assertEquals(PersistentEventList.class, nickNamesCopy.getClass());
+        assertEquals(PersistentEventList.class, emailsCopy.getClass());
+        
+        assertEquals(nickNames, nickNamesCopy);
+        assertEquals(emails, emailsCopy);
+        assertEquals(3, nickNamesCopy.size());
+        assertEquals(2, emailsCopy.size());
+        ListEventCounter counter = new ListEventCounter();
+        nickNamesCopy.addListEventListener(counter);
+        nickNamesCopy.remove("Hacker");
+        assertEquals(1, counter.getCountAndReset());        
+        assertEquals(nickNames, UnserializableListener.getLastSource());
+        assertEquals(nickNamesCopy, SerializableListener.getLastSource());
+
+        final ReadWriteLock nickNamesLock = nickNamesCopy.getReadWriteLock();
+        final ReadWriteLock emailLock = emailsCopy.getReadWriteLock();
+        assertEquals(nickNamesLock, emailLock);
+
+        final ListEventPublisher nickNamesPublisher = nickNamesCopy.getPublisher();
+        final ListEventPublisher emailPublisher = emailsCopy.getPublisher();
+        assertEquals(nickNamesPublisher, emailPublisher);
+
+        // delete user
+        s.delete(u);
         t.commit();
         s.close();
     }

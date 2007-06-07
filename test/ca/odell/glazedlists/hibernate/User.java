@@ -6,13 +6,17 @@ package ca.odell.glazedlists.hibernate;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 
+import java.io.Serializable;
+
 /**
  * Helper class for User.
  * 
  * @author Holger Brands
  */
-public class User {
+public class User implements Serializable {
     
+    private static final long serialVersionUID = 0L;
+
     /** Username is Id. */
     private String userName;
 

@@ -14,6 +14,14 @@ import org.hibernate.collection.PersistentList;
 import org.hibernate.engine.SessionImplementor;
 import org.hibernate.persister.collection.CollectionPersister;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 /**
  * A Hibernate persistent wrapper for an {@link EventList}. Underlying
  * collection implementation is {@link BasicEventList}.
@@ -27,7 +35,7 @@ public final class PersistentEventList extends PersistentList implements EventLi
     private static final long serialVersionUID = 0L;
 
     /** the change event and notification system */
-    protected final ListEventAssembler updates;
+    protected transient ListEventAssembler updates;
 
     /**
      * Constructor with session.
@@ -104,5 +112,36 @@ public final class PersistentEventList extends PersistentList implements EventLi
         // (initialization should always appear to be transparent and thus should not produce ListEvents)
         if (wasInitialized())
             updates.forwardEvent(listChanges);
+    }
+
+    /**
+     * Serializes this list and all serializable listeners
+     */
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+        // write out all serializable listeners
+        List<ListEventListener> serializableListeners = new ArrayList<ListEventListener>();
+        for(Iterator<ListEventListener> i = updates.getListEventListeners().iterator(); i.hasNext(); ) {
+            ListEventListener listener = i.next();
+            if(!(listener instanceof Serializable)) continue;
+            serializableListeners.add(listener);
+        }
+        ListEventListener[] listeners = serializableListeners.toArray(new ListEventListener[serializableListeners.size()]);
+        out.writeObject(listeners);
+    }
+
+    /**
+     * Deserializes this list and all serializable listeners.
+     */
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        assert (list instanceof EventList) : "'list' member type unknown";
+        updates = new ListEventAssembler(this, ((EventList) list).getPublisher());
+        
+        // read in the listeners
+        final ListEventListener[] listeners = (ListEventListener[]) in.readObject();
+        for(int i = 0; i < listeners.length; i++) {
+            updates.addListEventListener(listeners[i]);
+        }
     }
 }

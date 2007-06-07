@@ -8,6 +8,8 @@ import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests.SerializableListener;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests.UnserializableListener;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
@@ -149,35 +151,6 @@ public class BasicEventListTest extends TestCase {
 
             // as a result, CompositeList should accept the BasicEventList for use
             compositeList.addMemberList(eventList);
-        }
-    }
-
-    /**
-     * This listener invokes a static method each time it's target {@link EventList} is changed.
-     */
-    private static class SerializableListener implements ListEventListener, Serializable {
-        private static EventList lastSource = null;
-
-        public void listChanged(ListEvent listChanges) {
-            lastSource = listChanges.getSourceList();
-        }
-        public static EventList getLastSource() {
-            return lastSource;
-        }
-    }
-
-    /**
-     * This listener is not serializable, but it shouldn't prevent serialization on an observing
-     * {@link EventList}.
-     */
-    private static class UnserializableListener implements ListEventListener {
-        private static EventList lastSource = null;
-
-        public void listChanged(ListEvent listChanges) {
-            lastSource = listChanges.getSourceList();
-        }
-        public static EventList getLastSource() {
-            return lastSource;
         }
     }
 }

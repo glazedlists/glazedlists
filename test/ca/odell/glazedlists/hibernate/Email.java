@@ -3,12 +3,16 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.hibernate;
 
+import java.io.Serializable;
+
 /**
  * Helper class for Email.
  * 
  * @author Holger Brands
  */
-public class Email {
+public class Email implements Serializable {
+
+    private static final long serialVersionUID = 0L;
 
     /** Id. */
     private Long id;
