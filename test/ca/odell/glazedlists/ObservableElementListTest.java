@@ -182,7 +182,7 @@ public class ObservableElementListTest extends TestCase {
 
         // match only property change events for properties 'text and 'enabled'
         labelList = new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), GlazedLists
-                .beanConnector(JLabel.class, new String[] {"text", "enabled"}));        
+                .beanConnector(JLabel.class, true, new String[] {"text", "enabled"}));        
         labelList.add(listElement1);
         labelList.add(listElement2);
         listener = ListConsistencyListener.install(labelList);
@@ -199,9 +199,8 @@ public class ObservableElementListTest extends TestCase {
         assertEquals(3, listener.getEventCount());
         
         // match all property change events excluding properties 'text' and 'enabled'
-        byNameMatcher = Matchers.propertyEventNameMatcher(false, new String[] {"text", "enabled"});
         labelList = new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), GlazedLists
-                .beanConnector(JLabel.class, byNameMatcher));        
+                .beanConnector(JLabel.class, false, new String[] {"text", "enabled"}));        
         labelList.add(listElement1);
         labelList.add(listElement2);
         listener = ListConsistencyListener.install(labelList);

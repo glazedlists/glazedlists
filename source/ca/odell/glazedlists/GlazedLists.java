@@ -447,22 +447,28 @@ public final class GlazedLists {
      * {@link java.beans.PropertyChangeListener}. The methods to add and remove listeners are
      * detected automatically by examining the bean class and searching for a method prefixed with
      * "add" or "remove" taking a single {@link java.beans.PropertyChangeListener} argument.
-     * 
-     * <p>The <code>propertyNames<code> parameter specifies the set of properties by name whose
-     * {@link java.beans.PropertyChangeEvent}s should be delivered to the ObservableElementList, 
-     * e.g. property change events for properties not contained in the specified 
-     * <code>propertyNames<code> are ignored.
+     * <p>Use this variant, if you want to control which {@link java.beans.PropertyChangeEvent}s
+     * are delivered to the ObservableElementList. You can match or filter events by name. 
+     * <p>If <code>matchPropertyNames</code> is <code>true</code>, the <code>propertyNames</code>
+     * parameter specifies the set of properties by name whose {@link java.beans.PropertyChangeEvent}s 
+     * should be delivered to the ObservableElementList, e.g. property change events for properties 
+     * not contained in the specified <code>propertyNames</code> are ignored in this case.
+     * If <code>matchPropertyNames</code> is <code>false</code>, then the specified 
+     * <code>propertyNames</code> are filtered, e.g. all but the specified property change events are
+     * delivered to the ObservableElementList.
      * 
      * @param beanClass a class with both
      *        <code>addPropertyChangeListener(PropertyChangeListener)</code> and
      *        <code>removePropertyChangeListener(PropertyChangeListener)</code>, or similar
      *        methods.
-     * @param propertyNames specifies the properties whose {@link java.beans.PropertyChangeEvent}s
-     *        should be delivered to the ObservableElementList, ignoring the all others
+     * @param matchPropertyNames if <code>true</code>, match property change events against the
+     *        specified property names, if <code>false</code> filter them
+     * @param propertyNames specifies the properties by name whose {@link java.beans.PropertyChangeEvent}s
+     *        should be matched or filtered
      * @return an ObservableElementList.Connector for the specified class
      */
-    public static <E> ObservableElementList.Connector<E> beanConnector(Class<E> beanClass, String... propertyNames) {
-        final Matcher<PropertyChangeEvent> byNameMatcher = Matchers.propertyEventNameMatcher(true, propertyNames);
+    public static <E> ObservableElementList.Connector<E> beanConnector(Class<E> beanClass, boolean matchPropertyNames, String... propertyNames) {
+        final Matcher<PropertyChangeEvent> byNameMatcher = Matchers.propertyEventNameMatcher(matchPropertyNames, propertyNames);
         return GlazedLists.beanConnector(beanClass, byNameMatcher);
     }
     
