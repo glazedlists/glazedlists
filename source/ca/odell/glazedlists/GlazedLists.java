@@ -469,7 +469,7 @@ public final class GlazedLists {
      */
     public static <E> ObservableElementList.Connector<E> beanConnector(Class<E> beanClass, boolean matchPropertyNames, String... propertyNames) {
         final Matcher<PropertyChangeEvent> byNameMatcher = Matchers.propertyEventNameMatcher(matchPropertyNames, propertyNames);
-        return GlazedLists.beanConnector(beanClass, byNameMatcher);
+        return beanConnector(beanClass, byNameMatcher);
     }
     
     /**
