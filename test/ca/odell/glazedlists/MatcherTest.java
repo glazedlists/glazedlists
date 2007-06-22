@@ -111,6 +111,25 @@ public class MatcherTest extends TestCase {
         results = Matchers.select(elements, new NumberMatcher(new Integer(99)), results);
         assertEquals(9, results.size());
     }
+    
+    public void testIndexOf() {
+        List<Integer> elements = new ArrayList<Integer>();
+        elements.add(new Integer(45));
+        elements.add(new Integer(22));
+        elements.add(new Integer(15));
+        elements.add(new Integer(22));
+        elements.add(new Integer(13));
+        elements.add(new Integer(53));
+        elements.add(new Integer(22));
+        elements.add(new Integer(23));
+        elements.add(new Integer(22));
+
+        assertEquals(0, Matchers.indexOf(elements, new NumberMatcher(new Integer(45))));
+        assertEquals(1, Matchers.indexOf(elements, new NumberMatcher(new Integer(22))));
+        assertEquals(2, Matchers.indexOf(elements, new NumberMatcher(new Integer(15))));
+        assertEquals(4, Matchers.indexOf(elements, new NumberMatcher(new Integer(13))));
+        assertEquals(-1, Matchers.indexOf(elements, new NumberMatcher(new Integer(99))));
+    }
 
     public void testPropertyMatcher() {
         Matcher<Collection> matcher = Matchers.beanPropertyMatcher(Collection.class, "empty", Boolean.TRUE);

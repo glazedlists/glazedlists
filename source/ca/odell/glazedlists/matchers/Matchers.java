@@ -7,10 +7,7 @@ import ca.odell.glazedlists.Filterator;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.impl.matchers.*;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import java.beans.PropertyChangeEvent;
 import java.lang.reflect.Array;
 
@@ -218,6 +215,26 @@ public final class Matchers {
         }
 
         return results;
+    }
+
+    /**
+     * Returns the index of the first element from the given <code>list</code>
+     * that satisfies the <code>matcher</code> or <tt>-1</tt> if no such
+     * element exists.
+     *
+     * @param list the List to search
+     * @param matcher the criteria for considering an element a match
+     * @return the index of the first element from the given <code>list</code>
+     *      that satisfies the <code>matcher</code> or <tt>-1</tt> if no such
+     *      element exists
+     */
+    public static <E> int indexOf(List<E> list, Matcher<? super E> matcher) {
+        for (int i = 0, n = list.size(); i < n; i++) {
+            if (matcher.matches(list.get(i)))
+                return i;
+        }
+
+        return -1;
     }
 
     /**
