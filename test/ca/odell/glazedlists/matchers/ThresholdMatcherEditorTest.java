@@ -44,11 +44,11 @@ public class ThresholdMatcherEditorTest extends TestCase {
 
 	EventList<Integer> sourceList;
 	FilterList<Integer> filterList;
-	ThresholdMatcherEditor<Integer> thresholdMatcherEditor;
+	ThresholdMatcherEditor<Integer,Integer> thresholdMatcherEditor;
 
 	protected void setUp() throws Exception {
 		sourceList = GlazedLists.eventList(INITIAL_LIST);
-		thresholdMatcherEditor = new ThresholdMatcherEditor<Integer>();
+		thresholdMatcherEditor = new ThresholdMatcherEditor<Integer,Integer>();
 		filterList = new FilterList<Integer>(sourceList, thresholdMatcherEditor);
 	}
 
@@ -402,7 +402,7 @@ public class ThresholdMatcherEditorTest extends TestCase {
 
     public void testFunction() {
         sourceList = GlazedLists.eventList(INITIAL_LIST);
-        thresholdMatcherEditor = new ThresholdMatcherEditor<Integer>(null, null, null, new FirstNumberFunction());
+        thresholdMatcherEditor = new ThresholdMatcherEditor<Integer,Integer>(null, null, null, new FirstNumberFunction());
         filterList = new FilterList<Integer>(sourceList, thresholdMatcherEditor);
 
         thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
@@ -427,12 +427,11 @@ public class ThresholdMatcherEditorTest extends TestCase {
         assertEquals(NINE, filterList.get(4));
     }
 
-    private static class FirstNumberFunction implements FunctionList.Function<Object, Integer> {
-        public Integer evaluate(Object sourceValue) {
+    private static class FirstNumberFunction implements FunctionList.Function<Integer, Integer> {
+        public Integer evaluate(Integer sourceValue) {
             if (sourceValue == null) return null;
 
-            Integer i = (Integer) sourceValue;
-            return new Integer(String.valueOf(i.intValue()).substring(0, 1));
+            return new Integer(String.valueOf(sourceValue.intValue()).substring(0, 1));
         }
     }
 
