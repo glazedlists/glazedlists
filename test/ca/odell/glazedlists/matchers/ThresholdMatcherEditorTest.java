@@ -7,12 +7,12 @@ package ca.odell.glazedlists.matchers;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.FunctionList;
 import junit.framework.TestCase;
 
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-
+import java.util.ArrayList;
 
 /**
  * Tests {@link ThresholdMatcherEditor}.
@@ -20,47 +20,51 @@ import java.util.List;
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
 public class ThresholdMatcherEditorTest extends TestCase {
-	private static final List INITIAL_LIST = Arrays.asList(new Integer[]{
-		new Integer(0),
-		new Integer(1),
-		new Integer(2),
-		new Integer(3),
-		new Integer(4),
-		new Integer(5),
-		new Integer(6),
-		new Integer(7),
-		new Integer(8),
-		new Integer(9),
-		new Integer(10)
-	});
 
-	EventList parent_list;
-	FilterList threshold_list;
+    private static final Integer MINUS_ONE = new Integer(-1);
+    private static final Integer ZERO = new Integer(0);
+    private static final Integer ONE = new Integer(1);
+    private static final Integer TWO = new Integer(2);
+    private static final Integer THREE = new Integer(3);
+    private static final Integer FOUR = new Integer(4);
+    private static final Integer FIVE = new Integer(5);
+    private static final Integer SIX = new Integer(6);
+    private static final Integer SEVEN = new Integer(7);
+    private static final Integer EIGHT = new Integer(8);
+    private static final Integer NINE = new Integer(9);
+    private static final Integer TEN = new Integer(10);
+    private static final Integer ELEVEN = new Integer(11);
+    private static final Integer TWELVE = new Integer(12);
 
-	ThresholdMatcherEditor threshold_matchereditor;
+    private static final List<Integer> INITIAL_LIST = new ArrayList<Integer>(10);
+    static {
+        for (int i = 0; i < 11; i++)
+            INITIAL_LIST.add(new Integer(i));
+    }
 
+	EventList<Integer> sourceList;
+	FilterList<Integer> filterList;
+	ThresholdMatcherEditor<Integer> thresholdMatcherEditor;
 
 	protected void setUp() throws Exception {
-		parent_list = GlazedLists.eventList(INITIAL_LIST);
-
-		threshold_matchereditor = new ThresholdMatcherEditor();
-		threshold_list = new FilterList(parent_list, threshold_matchereditor);
+		sourceList = GlazedLists.eventList(INITIAL_LIST);
+		thresholdMatcherEditor = new ThresholdMatcherEditor<Integer>();
+		filterList = new FilterList<Integer>(sourceList, thresholdMatcherEditor);
 	}
 
 	protected void tearDown() throws Exception {
-		threshold_list.dispose();
-		threshold_list = null;
-
-		parent_list = null;
-	}
-
+		filterList.dispose();
+		filterList = null;
+		sourceList = null;
+        thresholdMatcherEditor = null;
+    }
 
 	public void testNoThreshold() {
-		threshold_matchereditor.setThreshold(null);
+		thresholdMatcherEditor.setThreshold(null);
 
-		assertEquals(parent_list.size(), threshold_list.size());
-		for (int i = 0; i < parent_list.size(); i++) {
-			assertEquals(parent_list.get(i), threshold_list.get(i));
+		assertEquals(sourceList.size(), filterList.size());
+		for (int i = 0; i < sourceList.size(); i++) {
+			assertEquals(sourceList.get(i), filterList.get(i));
 		}
 	}
 
@@ -68,367 +72,376 @@ public class ThresholdMatcherEditorTest extends TestCase {
      * Test that toggling between equal and not equal works as expected.
      */
     public void testToggleEqual() {
-		threshold_matchereditor.setThreshold(new Integer(5));
+		thresholdMatcherEditor.setThreshold(FIVE);
 
-		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
-		assertEquals(1, threshold_list.size());
+		thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
+		assertEquals(1, filterList.size());
 
-		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.NOT_EQUAL);
-		assertEquals(10, threshold_list.size());
+		thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.NOT_EQUAL);
+		assertEquals(10, filterList.size());
 
-		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
-		assertEquals(1, threshold_list.size());
+		thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
+		assertEquals(1, filterList.size());
 	}
 
     /**
      * Test that toggling between operations works as expected.
      */
     public void testToggleOperations() {
-		threshold_matchereditor.setThreshold(new Integer(6));
+		thresholdMatcherEditor.setThreshold(SIX);
 
-		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN_OR_EQUAL);
-		assertEquals(5, threshold_list.size());
+		thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN_OR_EQUAL);
+		assertEquals(5, filterList.size());
 
-		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN);
-		assertEquals(4, threshold_list.size());
+		thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN);
+		assertEquals(4, filterList.size());
 
-		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN_OR_EQUAL);
-		assertEquals(5, threshold_list.size());
+		thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN_OR_EQUAL);
+		assertEquals(5, filterList.size());
 
-		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN_OR_EQUAL);
-		assertEquals(7, threshold_list.size());
+		thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN_OR_EQUAL);
+		assertEquals(7, filterList.size());
 
-		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN);
-		assertEquals(6, threshold_list.size());
+		thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN);
+		assertEquals(6, filterList.size());
 
-        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN_OR_EQUAL);
-        assertEquals(7, threshold_list.size());
+        thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN_OR_EQUAL);
+        assertEquals(7, filterList.size());
 
-        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
-        assertEquals(1, threshold_list.size());
+        thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
+        assertEquals(1, filterList.size());
 
-        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN);
-        assertEquals(6, threshold_list.size());
+        thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN);
+        assertEquals(6, filterList.size());
 
-        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
-        assertEquals(1, threshold_list.size());
+        thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
+        assertEquals(1, filterList.size());
 
-        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN);
-        assertEquals(4, threshold_list.size());
+        thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN);
+        assertEquals(4, filterList.size());
 
-        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
-        assertEquals(1, threshold_list.size());
+        thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
+        assertEquals(1, filterList.size());
 
-        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN_OR_EQUAL);
-        assertEquals(5, threshold_list.size());
+        thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN_OR_EQUAL);
+        assertEquals(5, filterList.size());
 
-        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
-        assertEquals(1, threshold_list.size());
+        thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
+        assertEquals(1, filterList.size());
 
-        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN_OR_EQUAL);
-        assertEquals(7, threshold_list.size());
+        thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN_OR_EQUAL);
+        assertEquals(7, filterList.size());
 
-        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN);
-        assertEquals(4, threshold_list.size());
+        thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN);
+        assertEquals(4, filterList.size());
 
-        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN_OR_EQUAL);
-        assertEquals(7, threshold_list.size());
+        thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN_OR_EQUAL);
+        assertEquals(7, filterList.size());
 
-        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN);
-        assertEquals(6, threshold_list.size());
+        thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN);
+        assertEquals(6, filterList.size());
 
-        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN_OR_EQUAL);
-        assertEquals(5, threshold_list.size());
+        thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN_OR_EQUAL);
+        assertEquals(5, filterList.size());
 
-        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN);
-        assertEquals(6, threshold_list.size());
+        thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN);
+        assertEquals(6, filterList.size());
 
-        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN);
-        assertEquals(4, threshold_list.size());
+        thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN);
+        assertEquals(4, filterList.size());
 
-        threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN);
-        assertEquals(6, threshold_list.size());
+        thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN);
+        assertEquals(6, filterList.size());
 	}
 
+	public void testLogic() {
+		thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN);
+		thresholdMatcherEditor.setThreshold(FIVE);
 
-	public void testLogicInverted() {
-		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN);
-		threshold_matchereditor.setThreshold(new Integer(5));
-
-		// Not inverted
-		//threshold_matchereditor.setLogicInverted(false);
-		assertEquals(threshold_list.toString(), 5, threshold_list.size()); // 6 7 8 9 10
+		assertEquals(filterList.toString(), 5, filterList.size()); // 6 7 8 9 10
 		for (int i = 0; i < 5; i++) {
-			assertEquals(new Integer(6 + i), threshold_list.get(i));
+			assertEquals(new Integer(6 + i), filterList.get(i));
 		}
 
-		// Inverted
-//		threshold_matchereditor.setLogicInverted(true);
-//		assertEquals(threshold_list.toString(), 6, threshold_list.size()); // 0 1 2 3 4 5
-//		for (int i = 0; i < 6; i++) {
-//			assertEquals(new Integer(i), threshold_list.get(i));
-//		}
-//
-		threshold_matchereditor.setThreshold(new Integer(7));
-//		assertEquals(threshold_list.toString(), 8, threshold_list.size()); // 0 1 2 3 4 5 6 7
-//		for (int i = 0; i < 6; i++) {
-//			assertEquals(new Integer(i), threshold_list.get(i));
-//		}
+		thresholdMatcherEditor.setThreshold(SEVEN);
 
-		// Not inverted
-//		threshold_matchereditor.setLogicInverted(false);
-		assertEquals(threshold_list.toString(), 3, threshold_list.size()); // 8 9 10
+		assertEquals(filterList.toString(), 3, filterList.size()); // 8 9 10
 		for (int i = 0; i < 3; i++) {
-			assertEquals(new Integer(8 + i), threshold_list.get(i));
+			assertEquals(new Integer(8 + i), filterList.get(i));
 		}
 	}
-
 
 	public void testGreaterThan() {
-		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN);
+		thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN);
 
 		// In the middle
-		threshold_matchereditor.setThreshold(new Integer(5));
-		assertEquals(threshold_list.toString(), 5, threshold_list.size()); // 6 7 8 9 10
+		thresholdMatcherEditor.setThreshold(FIVE);
+		assertEquals(filterList.toString(), 5, filterList.size()); // 6 7 8 9 10
 		for (int i = 0; i < 5; i++) {
-			assertEquals(new Integer(6 + i), threshold_list.get(i));
+			assertEquals(new Integer(6 + i), filterList.get(i));
 		}
 
 		// At min value
-		threshold_matchereditor.setThreshold(new Integer(0));
-		assertEquals(parent_list.size() - 1, threshold_list.size());
-		for (int i = 0; i < threshold_list.size(); i++) {
-			assertEquals(parent_list.get(i + 1), threshold_list.get(i));
+		thresholdMatcherEditor.setThreshold(ZERO);
+		assertEquals(sourceList.size() - 1, filterList.size());
+		for (int i = 0; i < filterList.size(); i++) {
+			assertEquals(sourceList.get(i + 1), filterList.get(i));
 		}
 
 		// Below min value
-		threshold_matchereditor.setThreshold(new Integer(-1));
-		assertEquals(parent_list.size(), threshold_list.size());
-		for (int i = 0; i < parent_list.size(); i++) {
-			assertEquals(parent_list.get(i), threshold_list.get(i));
+		thresholdMatcherEditor.setThreshold(MINUS_ONE);
+		assertEquals(sourceList.size(), filterList.size());
+		for (int i = 0; i < sourceList.size(); i++) {
+			assertEquals(sourceList.get(i), filterList.get(i));
 		}
 
 		// At max value
-		threshold_matchereditor.setThreshold(new Integer(10));
-		assertTrue(threshold_list.isEmpty());
+		thresholdMatcherEditor.setThreshold(TEN);
+		assertTrue(filterList.isEmpty());
 
 		// Above max value
-		threshold_matchereditor.setThreshold(new Integer(11));
-		assertTrue(threshold_list.isEmpty());
+		thresholdMatcherEditor.setThreshold(ELEVEN);
+		assertTrue(filterList.isEmpty());
 	}
-
 
 	public void testGreaterThanOrEqual() {
-		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN_OR_EQUAL);
+		thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN_OR_EQUAL);
 
 		// In the middle
-		threshold_matchereditor.setThreshold(new Integer(5));
-		assertEquals(6, threshold_list.size()); // 5 6 7 8 9 10
+		thresholdMatcherEditor.setThreshold(FIVE);
+		assertEquals(6, filterList.size()); // 5 6 7 8 9 10
 		for (int i = 0; i < 6; i++) {
-			assertEquals(new Integer(5 + i), threshold_list.get(i));
+			assertEquals(new Integer(5 + i), filterList.get(i));
 		}
 
 		// At min value
-		threshold_matchereditor.setThreshold(new Integer(0));
-		assertEquals(parent_list.size(), threshold_list.size());
-		for (int i = 0; i < parent_list.size(); i++) {
-			assertEquals(parent_list.get(i), threshold_list.get(i));
+		thresholdMatcherEditor.setThreshold(ZERO);
+		assertEquals(sourceList.size(), filterList.size());
+		for (int i = 0; i < sourceList.size(); i++) {
+			assertEquals(sourceList.get(i), filterList.get(i));
 		}
 
 		// Below min value
-		threshold_matchereditor.setThreshold(new Integer(-1));
-		assertEquals(parent_list.size(), threshold_list.size());
-		for (int i = 0; i < parent_list.size(); i++) {
-			assertEquals(parent_list.get(i), threshold_list.get(i));
+		thresholdMatcherEditor.setThreshold(MINUS_ONE);
+		assertEquals(sourceList.size(), filterList.size());
+		for (int i = 0; i < sourceList.size(); i++) {
+			assertEquals(sourceList.get(i), filterList.get(i));
 		}
 
 		// At max value
-		threshold_matchereditor.setThreshold(new Integer(10));
-		assertEquals(1, threshold_list.size());
-		assertEquals(new Integer(10), threshold_list.get(0));
+		thresholdMatcherEditor.setThreshold(TEN);
+		assertEquals(1, filterList.size());
+		assertEquals(TEN, filterList.get(0));
 
 		// Above max value
-		threshold_matchereditor.setThreshold(new Integer(11));
-		assertTrue(threshold_list.isEmpty());
+		thresholdMatcherEditor.setThreshold(ELEVEN);
+		assertTrue(filterList.isEmpty());
 	}
-
 
 	public void testLessThan() {
-		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN);
+		thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN);
 
 		// In the middle
-		threshold_matchereditor.setThreshold(new Integer(5));
-		assertEquals(threshold_list.toString(), 5, threshold_list.size()); // 0 1 2 3 4
+		thresholdMatcherEditor.setThreshold(FIVE);
+		assertEquals(filterList.toString(), 5, filterList.size()); // 0 1 2 3 4
 		for (int i = 0; i < 5; i++) {
-			assertEquals(new Integer(i), threshold_list.get(i));
+			assertEquals(new Integer(i), filterList.get(i));
 		}
 
 		// At min value
-		threshold_matchereditor.setThreshold(new Integer(0));
-		assertTrue(threshold_list.isEmpty());
+		thresholdMatcherEditor.setThreshold(ZERO);
+		assertTrue(filterList.isEmpty());
 
 		// Below min value
-		threshold_matchereditor.setThreshold(new Integer(-1));
-		assertTrue(threshold_list.isEmpty());
+		thresholdMatcherEditor.setThreshold(MINUS_ONE);
+		assertTrue(filterList.isEmpty());
 
 		// At max value
-		threshold_matchereditor.setThreshold(new Integer(10));
-		assertEquals(parent_list.size() - 1, threshold_list.size());
-		for (int i = 0; i < threshold_list.size(); i++) {
-			assertEquals(parent_list.get(i), threshold_list.get(i));
+		thresholdMatcherEditor.setThreshold(TEN);
+		assertEquals(sourceList.size() - 1, filterList.size());
+		for (int i = 0; i < filterList.size(); i++) {
+			assertEquals(sourceList.get(i), filterList.get(i));
 		}
 
 		// Above max value
-		threshold_matchereditor.setThreshold(new Integer(11));
-		assertEquals(parent_list.size(), threshold_list.size());
-		for (int i = 0; i < threshold_list.size(); i++) {
-			assertEquals(parent_list.get(i), threshold_list.get(i));
+		thresholdMatcherEditor.setThreshold(ELEVEN);
+		assertEquals(sourceList.size(), filterList.size());
+		for (int i = 0; i < filterList.size(); i++) {
+			assertEquals(sourceList.get(i), filterList.get(i));
 		}
 	}
-
 
 	public void testLessThanOrEqual() {
-		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN_OR_EQUAL);
+		thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN_OR_EQUAL);
 
 		// In the middle
-		threshold_matchereditor.setThreshold(new Integer(5));
-		assertEquals(6, threshold_list.size()); // 0 1 2 3 4 5
+		thresholdMatcherEditor.setThreshold(FIVE);
+		assertEquals(6, filterList.size()); // 0 1 2 3 4 5
 		for (int i = 0; i < 6; i++) {
-			assertEquals(new Integer(i), threshold_list.get(i));
+			assertEquals(new Integer(i), filterList.get(i));
 		}
 
 		// At min value
-		threshold_matchereditor.setThreshold(new Integer(0));
-		assertEquals(1, threshold_list.size());
-		assertEquals(new Integer(0), threshold_list.get(0));
+		thresholdMatcherEditor.setThreshold(ZERO);
+		assertEquals(1, filterList.size());
+		assertEquals(ZERO, filterList.get(0));
 
 		// Below min value
-		threshold_matchereditor.setThreshold(new Integer(-1));
-		assertTrue(threshold_list.isEmpty());
+		thresholdMatcherEditor.setThreshold(MINUS_ONE);
+		assertTrue(filterList.isEmpty());
 
 		// At max value
-		threshold_matchereditor.setThreshold(new Integer(10));
-		assertEquals(parent_list.size(), threshold_list.size());
-		for (int i = 0; i < threshold_list.size(); i++) {
-			assertEquals(parent_list.get(i), threshold_list.get(i));
+		thresholdMatcherEditor.setThreshold(TEN);
+		assertEquals(sourceList.size(), filterList.size());
+		for (int i = 0; i < filterList.size(); i++) {
+			assertEquals(sourceList.get(i), filterList.get(i));
 		}
 
 		// Above max value
-		threshold_matchereditor.setThreshold(new Integer(11));
-		assertEquals(parent_list.size(), threshold_list.size());
-		for (int i = 0; i < threshold_list.size(); i++) {
-			assertEquals(parent_list.get(i), threshold_list.get(i));
+		thresholdMatcherEditor.setThreshold(ELEVEN);
+		assertEquals(sourceList.size(), filterList.size());
+		for (int i = 0; i < filterList.size(); i++) {
+			assertEquals(sourceList.get(i), filterList.get(i));
 		}
 	}
-
 
 	public void testEqual() {
-		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
+		thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
 
 		// In the middle
-		threshold_matchereditor.setThreshold(new Integer(5));
-		assertEquals(1, threshold_list.size());
-		assertEquals(new Integer(5), threshold_list.get(0));
+		thresholdMatcherEditor.setThreshold(FIVE);
+		assertEquals(1, filterList.size());
+		assertEquals(FIVE, filterList.get(0));
 
 		// At min value
-		threshold_matchereditor.setThreshold(new Integer(0));
-		assertEquals(1, threshold_list.size());
-		assertEquals(new Integer(0), threshold_list.get(0));
+		thresholdMatcherEditor.setThreshold(ZERO);
+		assertEquals(1, filterList.size());
+		assertEquals(ZERO, filterList.get(0));
 
 		// Below min value
-		threshold_matchereditor.setThreshold(new Integer(-1));
-		assertTrue(threshold_list.isEmpty());
+		thresholdMatcherEditor.setThreshold(MINUS_ONE);
+		assertTrue(filterList.isEmpty());
 
 		// At max value
-		threshold_matchereditor.setThreshold(new Integer(10));
-		assertEquals(1, threshold_list.size());
-		assertEquals(new Integer(10), threshold_list.get(0));
+		thresholdMatcherEditor.setThreshold(TEN);
+		assertEquals(1, filterList.size());
+		assertEquals(TEN, filterList.get(0));
 
 		// Above max value
-		threshold_matchereditor.setThreshold(new Integer(11));
-		assertTrue(threshold_list.isEmpty());
+		thresholdMatcherEditor.setThreshold(ELEVEN);
+		assertTrue(filterList.isEmpty());
 	}
-
 
 	public void testNotEqual() {
-		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.NOT_EQUAL);
+		thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.NOT_EQUAL);
 
 		// In the middle
-		threshold_matchereditor.setThreshold(new Integer(5));
-		assertEquals(parent_list.size() - 1, threshold_list.size());
-		assertFalse(threshold_list.contains(new Integer(5)));
+		thresholdMatcherEditor.setThreshold(FIVE);
+		assertEquals(sourceList.size() - 1, filterList.size());
+		assertFalse(filterList.contains(FIVE));
 
 		// At min value
-		threshold_matchereditor.setThreshold(new Integer(0));
-		assertEquals(parent_list.size() - 1, threshold_list.size());
-		assertFalse(threshold_list.toString(), threshold_list.contains(new Integer(0)));
+		thresholdMatcherEditor.setThreshold(ZERO);
+		assertEquals(sourceList.size() - 1, filterList.size());
+		assertFalse(filterList.toString(), filterList.contains(ZERO));
 
 		// Below min value
-		threshold_matchereditor.setThreshold(new Integer(-1));
-		assertEquals(parent_list.size(), threshold_list.size());
-		for (int i = 0; i < threshold_list.size(); i++) {
-			assertEquals(parent_list.get(i), threshold_list.get(i));
+		thresholdMatcherEditor.setThreshold(MINUS_ONE);
+		assertEquals(sourceList.size(), filterList.size());
+		for (int i = 0; i < filterList.size(); i++) {
+			assertEquals(sourceList.get(i), filterList.get(i));
 		}
 
 		// At max value
-		threshold_matchereditor.setThreshold(new Integer(10));
-		assertEquals(parent_list.size() - 1, threshold_list.size());
-		assertFalse(threshold_list.contains(new Integer(10)));
+		thresholdMatcherEditor.setThreshold(TEN);
+		assertEquals(sourceList.size() - 1, filterList.size());
+		assertFalse(filterList.contains(TEN));
 
 		// Above max value
-		threshold_matchereditor.setThreshold(new Integer(11));
-		assertEquals(parent_list.size(), threshold_list.size());
-		for (int i = 0; i < threshold_list.size(); i++) {
-			assertEquals(parent_list.get(i), threshold_list.get(i));
+		thresholdMatcherEditor.setThreshold(ELEVEN);
+		assertEquals(sourceList.size(), filterList.size());
+		for (int i = 0; i < filterList.size(); i++) {
+			assertEquals(sourceList.get(i), filterList.get(i));
 		}
 	}
-
 
 	public void testComparator() {
 		// set to a comparator that uses absolute values. If not used, nothing will match.
-		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
-		threshold_matchereditor.setThreshold(new Integer(-1));
-		threshold_matchereditor.setComparator(new AbsComparator());
+		thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
+		thresholdMatcherEditor.setThreshold(MINUS_ONE);
+		thresholdMatcherEditor.setComparator(new AbsComparator());
 
-		assertEquals(1, threshold_list.size());
+		assertEquals(1, filterList.size());
 	}
 
     public void testWrites() {
-
 		// Add when not initially shown via filter
-		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN_OR_EQUAL);
-		threshold_matchereditor.setThreshold(new Integer(0));
+		thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN_OR_EQUAL);
+		thresholdMatcherEditor.setThreshold(ZERO);
 
-		parent_list.add(new Integer(11));
+		sourceList.add(ELEVEN);
 
-		assertEquals(INITIAL_LIST.size() + 1, parent_list.size());
-		assertEquals(1, threshold_list.size());
-		assertEquals(new Integer(0), threshold_list.get(0));
+		assertEquals(INITIAL_LIST.size() + 1, sourceList.size());
+		assertEquals(1, filterList.size());
+		assertEquals(ZERO, filterList.get(0));
 
-		threshold_matchereditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN_OR_EQUAL);
-		threshold_matchereditor.setThreshold(new Integer(11));
+		thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN_OR_EQUAL);
+		thresholdMatcherEditor.setThreshold(ELEVEN);
 
-		assertEquals(1, threshold_list.size());
-		assertEquals(new Integer(11), threshold_list.get(0));
+		assertEquals(1, filterList.size());
+		assertEquals(ELEVEN, filterList.get(0));
 
 		// Add when shown by filter
-		threshold_list.add(new Integer(12));
+		filterList.add(TWELVE);
 
-		assertEquals(2, threshold_list.size());
-		assertEquals(INITIAL_LIST.size() + 2, parent_list.size());
-		assertEquals(new Integer(11), threshold_list.get(0));
-		assertEquals(new Integer(12), threshold_list.get(1));
+		assertEquals(2, filterList.size());
+		assertEquals(INITIAL_LIST.size() + 2, sourceList.size());
+		assertEquals(ELEVEN, filterList.get(0));
+		assertEquals(TWELVE, filterList.get(1));
 	}
+
+    public void testFunction() {
+        sourceList = GlazedLists.eventList(INITIAL_LIST);
+        thresholdMatcherEditor = new ThresholdMatcherEditor<Integer>(null, null, null, new FirstNumberFunction());
+        filterList = new FilterList<Integer>(sourceList, thresholdMatcherEditor);
+
+        thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
+        thresholdMatcherEditor.setThreshold(ONE);
+        assertEquals(2, filterList.size());
+        assertEquals(ONE, filterList.get(0));
+        assertEquals(TEN, filterList.get(1));
+
+        thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN_OR_EQUAL);
+        assertEquals(3, filterList.size());
+        assertEquals(ZERO, filterList.get(0));
+        assertEquals(ONE, filterList.get(1));
+        assertEquals(TEN, filterList.get(2));
+
+        thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN_OR_EQUAL);
+        thresholdMatcherEditor.setThreshold(FIVE);
+        assertEquals(5, filterList.size());
+        assertEquals(FIVE, filterList.get(0));
+        assertEquals(SIX, filterList.get(1));
+        assertEquals(SEVEN, filterList.get(2));
+        assertEquals(EIGHT, filterList.get(3));
+        assertEquals(NINE, filterList.get(4));
+    }
+
+    private static class FirstNumberFunction implements FunctionList.Function<Object, Integer> {
+        public Integer evaluate(Object sourceValue) {
+            if (sourceValue == null) return null;
+
+            Integer i = (Integer) sourceValue;
+            return new Integer(String.valueOf(i.intValue()).substring(0, 1));
+        }
+    }
 
     /**
      * Compare two Integers by their absolute value.
      */
-    private static class AbsComparator implements Comparator {
-        public int compare(Object o1, Object o2) {
-            Integer one = new Integer(Math.abs(((Integer) o1).intValue()));
-            Integer two = new Integer(Math.abs(((Integer) o2).intValue()));
-
-            return one.compareTo(two);
+    private static class AbsComparator implements Comparator<Integer> {
+        public int compare(Integer o1, Integer o2) {
+            return Math.abs(o1) - Math.abs(o2);
         }
     }
 }

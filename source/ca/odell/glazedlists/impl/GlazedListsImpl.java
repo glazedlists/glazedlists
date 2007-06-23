@@ -5,6 +5,7 @@ package ca.odell.glazedlists.impl;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.FunctionList;
 import ca.odell.glazedlists.impl.text.LatinDiacriticsStripper;
 import ca.odell.glazedlists.impl.adt.KeyedCollection;
 
@@ -169,8 +170,8 @@ public final class GlazedListsImpl {
     }
 
     /**
-     * Returns a non-symmetric comparator returns 0 if two Objects are equal as
-     * specified by {@link Object#equals(Object)}, or 1 otherwise.
+     * Returns a non-symmetric Comparator that returns 0 if two Objects are
+     * equal as specified by {@link Object#equals(Object)}, or 1 otherwise.
      */
     public static Comparator<? extends Object> equalsComparator() {
         return new EqualsComparator<Object>();
@@ -179,6 +180,19 @@ public final class GlazedListsImpl {
         public int compare(T alpha, T beta) {
             boolean equal = alpha == null ? beta == null : alpha.equals(beta);
             return equal ? 0 : 1;
+        }
+    }
+
+    /**
+     * Returns a {@link FunctionList.Function} that simply reflects the
+     * function's argument as its result.
+     */
+    public static <E> FunctionList.Function<E,E> identityFunction() {
+        return new IdentityFunction<E>();
+    }
+    private static class IdentityFunction<E> implements FunctionList.Function<E,E> {
+        public E evaluate(E sourceValue) {
+            return sourceValue;
         }
     }
 

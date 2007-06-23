@@ -5,13 +5,16 @@
 package ca.odell.glazedlists.matchers;
 
 import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.FunctionList;
+import ca.odell.glazedlists.impl.GlazedListsImpl;
 
 import java.util.Comparator;
 
 /**
- * A {@link MatcherEditor} that filters elements based on whether they are greater than or
- * less than a threshold. The implementation is based on elements implementing {@link
- * Comparable} unless the constructor specifies a {@link Comparator}.
+ * A {@link MatcherEditor} that filters elements based on whether they are
+ * greater than or less than a threshold. The implementation is based on
+ * elements implementing {@link Comparable} unless the constructor specifies
+ * a {@link Comparator}.
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
@@ -24,92 +27,112 @@ public class ThresholdMatcherEditor<E> extends AbstractMatcherEditor<E> {
 	public static final MatchOperation EQUAL = new MatchOperation(0, true);
 	public static final MatchOperation NOT_EQUAL = new MatchOperation(0, false);
 
-    private MatchOperation currentMatcher = null;
+    private MatchOperation<E> currentMatcher;
 
-    private Comparator<E> comparator = null;
-    private MatchOperation operation = null;
-    private E threshold = null;
+    private Comparator<E> comparator;
+    private MatchOperation operation;
+    private E threshold;
+    private FunctionList.Function<Object, E> function;
 
 	/**
-	 * Construct an instance that will require elements to be greater than the threshold
-	 * (which is not initially set) and relies on the thresold object and elements in the
-	 * list implementing {@link Comparable}.
+	 * Construct an instance that will require elements to be greater than the
+     * threshold (which is not initially set) and relies on the threshold
+     * object and elements in the list implementing {@link Comparable}.
 	 */
 	public ThresholdMatcherEditor() {
-		this(null, null, null);
+		this(null);
 	}
 
 	/**
-	 * Construct an instance that will require elements to be greater than the given
-	 * threshold and relies on the thresold object and elements in the list implementing
-	 * {@link Comparable}.
+	 * Construct an instance that will require elements to be greater than the
+     * given threshold and relies on the threshold object and elements in the
+     * list implementing {@link Comparable}.
 	 *
-	 * @param threshold The initial threshold, or null if none.
+	 * @param threshold the initial threshold, or null if none.
 	 */
 	public ThresholdMatcherEditor(E threshold) {
-		this(threshold, null, null);
+		this(threshold, null);
 	}
 
 	/**
-	 * Construct an instance that will require elements to be greater than the given
-	 * threshold and relies on the thresold object and elements in the list implementing
-	 * {@link Comparable}.
+	 * Construct an instance that will require elements to be greater than the
+     * given threshold and relies on the threshold object and elements in the
+     * list implementing {@link Comparable}.
 	 *
-	 * @param threshold The initial threshold, or null if none.
-	 * @param operation The operation to determine what relation list elements should have to
-	 *                  the threshold in order to match (i.e., be visible). Specifying null
-	 *                  will use {@link #GREATER_THAN}.
+	 * @param threshold the initial threshold, or null if none.
+	 * @param operation the operation to determine what relation list elements
+     *      should have to the threshold in order to match (i.e., be visible).
+     *      Specifying null will use {@link #GREATER_THAN}.
 	 */
 	public ThresholdMatcherEditor(E threshold, MatchOperation operation) {
 		this(threshold, operation, null);
 	}
 
+    /**
+	 * Construct an instance.
+	 *
+	 * @param threshold rhe initial threshold, or null if none.
+	 * @param operation rhe operation to determine what relation list elements
+     *      should have to the threshold in order to match (i.e., be visible).
+     *      Specifying null will use {@link #GREATER_THAN}.
+	 * @param comparator determines how objects compare. If null, the threshold
+     *      object and list elements must implement {@link Comparable}.
+	 */
+	public ThresholdMatcherEditor(E threshold, MatchOperation operation, Comparator<E> comparator) {
+		this(threshold, operation, comparator, null);
+	}
+
 	/**
 	 * Construct an instance.
 	 *
-	 * @param threshold  The initial threshold, or null if none.
-	 * @param operation  The operation to determine what relation list elements should have
-	 *                   to the threshold in order to match (i.e., be visible). Specifying
-	 *                   null will use {@link #GREATER_THAN}.
-	 * @param comparator Determines how objects compare. If null, the threshold object and
-	 *                   list elements must implement {@link Comparable}.
+	 * @param threshold the initial threshold, or null if none.
+	 * @param operation the operation to determine what relation list elements
+     *      should have to the threshold in order to match (i.e., be visible).
+     *      Specifying null will use {@link #GREATER_THAN}.
+	 * @param comparator determines how objects compare with the threshold value.
+     *      If null, the threshold object and list elements must implement
+     *      {@link Comparable}.
+     * @param function an optional Function which produces a value fit to be
+     *      compared against the threshold. This argument is optional, and if
+     *      it is <tt>null</tt>, the raw values will compared against the
+     *      threshold.
 	 */
-	public ThresholdMatcherEditor(E threshold, MatchOperation operation, Comparator<E> comparator) {
-		// Defaults
+	public ThresholdMatcherEditor(E threshold, MatchOperation operation, Comparator<E> comparator, FunctionList.Function<Object, E> function) {
 		if (operation == null) operation = GREATER_THAN;
 		if (comparator == null) comparator = (Comparator<E>) GlazedLists.comparableComparator();
+        if (function == null) function = (FunctionList.Function<Object, E>) GlazedListsImpl.identityFunction();
 
-		this.operation = operation;
+        this.operation = operation;
 		this.comparator = comparator;
         this.threshold = threshold;
+        this.function = function;
 
         // if this is our first matcher, it's automatically a constrain
-        currentMatcher = operation.instance(comparator, threshold);
+        currentMatcher = operation.instance(comparator, threshold, function);
         fireConstrained(currentMatcher);
 	}
 
-
-	/**
+    /**
 	 * Update the threshold used to determine what is matched by the list. This coupled
 	 * with the {@link #setMatchOperation match operation} determines what's matched.
 	 *
-	 * @param threshold		The threshold, or null to match everything.
+	 * @param threshold	The threshold, or null to match everything.
 	 */
-	public synchronized void setThreshold(E threshold) {
+	public void setThreshold(E threshold) {
         this.threshold = threshold;
         rebuildMatcher();
 	}
 	/**
 	 * See {@link #getThreshold()}.
 	 */
-	public synchronized E getThreshold() {
+	public E getThreshold() {
 		return threshold;
 	}
 
 
 	/**
 	 * Update the operation used to determine what relation list elements should
-     * have to the threshold in order to match (i.e., be visible). Must be non-null.
+     * have to the threshold in order to match (i.e. be visible). Must be non-null.
 	 *
 	 * @see #GREATER_THAN
 	 * @see #GREATER_THAN_OR_EQUAL
@@ -118,10 +141,9 @@ public class ThresholdMatcherEditor<E> extends AbstractMatcherEditor<E> {
 	 * @see #EQUAL
 	 * @see #NOT_EQUAL
 	 */
-	public synchronized void setMatchOperation(MatchOperation operation) {
-		if (operation == null) {
+	public void setMatchOperation(MatchOperation<E> operation) {
+		if (operation == null)
 			throw new IllegalArgumentException("Operation cannot be null");
-		}
 
         this.operation = operation;
         rebuildMatcher();
@@ -129,86 +151,78 @@ public class ThresholdMatcherEditor<E> extends AbstractMatcherEditor<E> {
 	/**
 	 * See {@link #setMatchOperation}.
 	 */
-	public synchronized MatchOperation getMatchOperation() {
+	public MatchOperation<E> getMatchOperation() {
 		return operation;
 	}
-
 
 	/**
 	 * Update the comparator. Setting to null will require that thresholds and elements in
 	 * the list implement {@link Comparable}.
 	 */
-	public synchronized void setComparator(Comparator<E> comparator) {
+	public void setComparator(Comparator<E> comparator) {
 		if (comparator == null) comparator = (Comparator<E>) GlazedLists.comparableComparator();
 
 		this.comparator = comparator;
         rebuildMatcher();
 	}
-	/**
-	 * See {@link #setComparator}.
-	 */
-	public synchronized Comparator<E> getComparator() {
-		return comparator;
-	}
+	public Comparator<E> getComparator() { return comparator; }
 
-
-	/**
-	 * {@inheritDoc}
-	 */
+	/** {@inheritDoc} */
 	private void rebuildMatcher() {
-        MatchOperation newMatcher = operation.instance(comparator, threshold);
+        final MatchOperation<E> newMatcher = operation.instance(comparator, threshold, function);
 
         // otherwise test how the matchers relate
-        boolean moreStrict = newMatcher.isMoreStrict(currentMatcher);
-        boolean lessStrict = currentMatcher.isMoreStrict(newMatcher);
+        final boolean moreStrict = newMatcher.isMoreStrict(currentMatcher);
+        final boolean lessStrict = currentMatcher.isMoreStrict(newMatcher);
 
         // if they're equal we're done and we won't change the matcher
-        if(!moreStrict && !lessStrict) {
+        if (!moreStrict && !lessStrict)
             return;
-        }
 
         // otherwise, fire the appropriate event
-        this.currentMatcher = newMatcher;
-        if(moreStrict && lessStrict) {
-            fireChanged(this.currentMatcher);
-        } else if(moreStrict) {
-            fireConstrained(this.currentMatcher);
-        } else if(lessStrict) {
-            fireRelaxed(this.currentMatcher);
-        }
+        currentMatcher = newMatcher;
+        if (moreStrict && lessStrict)
+            fireChanged(currentMatcher);
+        else if (moreStrict)
+            fireConstrained(currentMatcher);
+        else
+            fireRelaxed(currentMatcher);
 	}
 
     /**
      * A {@link MatchOperation} serves as both a {@link Matcher} in and of itself
      * and as an enumerated type representing its type as an operation.
      */
-    private static class MatchOperation implements Matcher {
+    private static class MatchOperation<E> implements Matcher {
 
         /** the comparator to compare values against */
-        protected final Comparator comparator;
+        protected final Comparator<E> comparator;
         /** the pivot value to compare with */
-        protected final Object threshold;
+        protected final E threshold;
         /** either 1 for greater, 0 for equal, or -1 for less than */
         private final int polarity;
         /** either true for equal or false for not equal */
         private final boolean inclusive;
+        /** a function which produces a comparable value for a given element */
+        private final FunctionList.Function<Object, E> function;
 
-        private MatchOperation(Comparator comparator, Object threshold, int polarity, boolean inclusive) {
+        private MatchOperation(Comparator<E> comparator, E threshold, int polarity, boolean inclusive, FunctionList.Function<Object, E> function) {
             this.comparator = comparator;
             this.threshold = threshold;
             this.polarity = polarity;
             this.inclusive = inclusive;
+            this.function = function;
         }
         private MatchOperation(int polarity, boolean inclusive) {
-            this(null, null, polarity, inclusive);
+            this(null, null, polarity, inclusive, (FunctionList.Function<Object, E>) GlazedListsImpl.identityFunction());
         }
 
         /**
          * Factory method to create a {@link MatchOperation} of the same type
          * as this {@link MatchOperation}.
          */
-        private MatchOperation instance(Comparator comparator, Object threshold) {
-            return new MatchOperation(comparator, threshold, this.polarity, this.inclusive);
+        private MatchOperation<E> instance(Comparator<E> comparator, E threshold, FunctionList.Function<Object, E> function) {
+            return new MatchOperation<E>(comparator, threshold, polarity, inclusive, function);
         }
 
         /**
@@ -220,21 +234,24 @@ public class ThresholdMatcherEditor<E> extends AbstractMatcherEditor<E> {
          *       strict than each other.
          */
         boolean isMoreStrict(MatchOperation other) {
-            if(other.polarity != this.polarity) return true;
-            if(other.comparator != this.comparator) return true;
-            if(this.threshold == other.threshold) {
-                if(polarity == 0) return this.inclusive != other.inclusive;
-                else return (!this.inclusive && other.inclusive);
+            if(other.polarity != polarity) return true;
+            if(other.comparator != comparator) return true;
+            if(other.threshold == threshold) {
+                if(polarity == 0) return other.inclusive != inclusive;
+                else return (other.inclusive && !inclusive);
             } else {
-                if(this.polarity == 0) return true;
-                else if(!this.matches(other.threshold)) return true;
+                if(polarity == 0) return true;
+                else if(!matches(other.threshold)) return true;
             }
             return false;
         }
 
         /** {@inheritDoc} */
         public boolean matches(Object item) {
-            int compareResult = comparator.compare(item, this.threshold);
+            // extract a comparable value from the item
+            final E e = function.evaluate(item);
+            // compare the extracted value with the threshold
+            final int compareResult = comparator.compare(e, threshold);
             // item equals threshold, match <=, == and >=
             if(compareResult == 0) return inclusive;
             // for == and !=, handle the case when the item is not equal to threshold
