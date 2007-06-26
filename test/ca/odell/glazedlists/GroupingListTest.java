@@ -274,6 +274,34 @@ public class GroupingListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("D"), groupList.get(3));
     }
 
+    /**
+     * This method tests a peculiar problem in GroupingList reported from the
+     * field and captured here https://glazedlists.dev.java.net/issues/show_bug.cgi?id=412
+     * The test involves building a ListEvent that describes multiple updates
+     * within the same ListEvent (something that cannot be done through the
+     * normal List API).
+     *
+     * The problem we were seeing is that the GroupingList fires a ListEvent
+     * that includes an update to a group at an index that NEVER EXISTED.
+     */
+    public void testGroupListMassUpdate_FixMe() {
+        BasicEventList<String> sourceList = new BasicEventList<String>();
+        sourceList.addAll(GlazedListsTests.delimitedStringToList("A A A A"));
+        GroupingList<String> groupList = new GroupingList<String>(sourceList, GlazedListsTests.getFirstLetterComparator());
+        ListConsistencyListener<List<String>> checker = ListConsistencyListener.install(groupList);
+        checker.setPreviousElementTracked(false);
+
+        assertEquals(GlazedListsTests.delimitedStringToList("A A A A"), groupList.get(0));
+
+        sourceList.updates.beginEvent(true);
+        sourceList.set(0, "A");
+        sourceList.set(1, "A");
+        sourceList.set(2, "A");
+        sourceList.updates.commitEvent();
+
+        assertEquals(GlazedListsTests.delimitedStringToList("A A A A"), groupList.get(0));
+    }
+
     public void testGroupListRemove() {
         EventList<String> sourceList = GlazedLists.eventListOf(new String[] {"A", "B", "B", "C", "C", "C"});
         GroupingList<String> groupList = new GroupingList<String>(sourceList);
