@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-// for being a JUnit test case
 import junit.framework.TestCase;
 
 import javax.swing.*;
@@ -39,7 +38,7 @@ public abstract class SwingTestCase extends TestCase {
     
     /** useful empty arrays */
     private static final Class[] DECLARE_NO_PARAMETERS = new Class[0];
-    private static final Object[] SEND_NO_PARAMETERS = new Class[0];
+    private static final Object[] SEND_NO_PARAMETERS = new Object[0];
 
     /**
      * Run all methods from the specified test class that start with the prefix
@@ -67,7 +66,7 @@ public abstract class SwingTestCase extends TestCase {
         public void run() {
             try {
                 // create an instance with the appropriate methods
-                Object instance = guiClass.getConstructor(DECLARE_NO_PARAMETERS).newInstance(new Object[0]);
+                Object instance = guiClass.getConstructor(DECLARE_NO_PARAMETERS).newInstance(SEND_NO_PARAMETERS);
                 Method setUp = null;
                 try {
                     setUp = guiClass.getMethod(SET_UP_METHOD, DECLARE_NO_PARAMETERS);
