@@ -110,13 +110,13 @@ public class Grouper<E> {
      * responsible for firing the appropriate change events to its listeners.
      */
     public void listChanged(ListEvent<E> listChanges) {
-        // The approach to handling list changes in GroupingList uses two passes
-        // through the list of change events.
+        // The approach to handling list uses two passes through the list of
+        // change events.
         //
-        // In the first pass, the barcode is updated to reflect the changes but
-        // no events are fired. Deleted and updated original barcode values are
-        // stored in a temporary LinkedList. Updated values' barcode entries are
-        // set to UNIQUE.
+        // In pass 1, the barcode is changed and GroupingList is updated to
+        // reflect the changes but no events are fired. Deleted and updated
+        // original barcode values are stored in a temporary LinkedList. Updated
+        // values' barcode entries are set to UNIQUE.
         //
         // In pass 2, the change events are reviewed again. During this second pass
         // we bring the IndexedTree of GroupLists up to date and also fire ListEvents.
