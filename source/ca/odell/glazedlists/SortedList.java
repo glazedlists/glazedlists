@@ -641,17 +641,11 @@ public final class SortedList<E> extends TransformedList<E,E> {
          * Compares the alpha object to the beta object by their indices.
          */
         public int compare(Object alpha, Object beta) {
-            try {
-                Element alphaTreeNode = (Element)alpha;
-                Element betaTreeNode = (Element)beta;
-                int alphaIndex = unsorted.indexOfNode(alphaTreeNode, ALL_COLORS);
-                int betaIndex = unsorted.indexOfNode(betaTreeNode, ALL_COLORS);
-                return alphaIndex - betaIndex;
-            } catch(ClassCastException e) {
-                System.out.println(alpha.getClass());
-                System.out.println(beta.getClass());
-                throw e;
-            }
+            Element alphaTreeNode = (Element)alpha;
+            Element betaTreeNode = (Element)beta;
+            int alphaIndex = unsorted.indexOfNode(alphaTreeNode, ALL_COLORS);
+            int betaIndex = unsorted.indexOfNode(betaTreeNode, ALL_COLORS);
+            return alphaIndex - betaIndex;
         }
     }
 
