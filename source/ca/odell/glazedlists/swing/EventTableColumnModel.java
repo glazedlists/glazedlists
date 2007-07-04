@@ -28,10 +28,10 @@ import java.beans.PropertyChangeEvent;
  *
  * @author James Lemieux
  */
-public class EventTableColumnModel implements TableColumnModel, PropertyChangeListener, ListSelectionListener, ListEventListener<TableColumn> {
+public class EventTableColumnModel<T extends TableColumn> implements TableColumnModel, PropertyChangeListener, ListSelectionListener, ListEventListener<T> {
 
     /** the proxy moves events to the Swing Event Dispatch thread */
-    protected TransformedList<TableColumn, TableColumn> swingThreadSource;
+    protected TransformedList<T, T> swingThreadSource;
 
     /** <tt>true</tt> indicates that disposing this TableColumnModel should dispose of the swingThreadSource as well */
     private final boolean disposeSwingThreadSource;
@@ -59,7 +59,7 @@ public class EventTableColumnModel implements TableColumnModel, PropertyChangeLi
      * the given <code>source</code>. Changes to the <code>source</code> are
      * reflected in this model.
      */
-    public EventTableColumnModel(EventList<TableColumn> source) {
+    public EventTableColumnModel(EventList<T> source) {
         setSelectionModel(createSelectionModel());
         setColumnMargin(1);
         invalidateWidthCache();
@@ -80,7 +80,7 @@ public class EventTableColumnModel implements TableColumnModel, PropertyChangeLi
                 source.get(i).addPropertyChangeListener(this);
 
             disposeSwingThreadSource = !GlazedListsSwing.isSwingThreadProxyList(source);
-            swingThreadSource = disposeSwingThreadSource ? GlazedListsSwing.swingThreadProxyList(source) : (TransformedList<TableColumn, TableColumn>) source;
+            swingThreadSource = disposeSwingThreadSource ? GlazedListsSwing.swingThreadProxyList(source) : (TransformedList<T, T>) source;
             swingThreadSource.addListEventListener(this);
         } finally {
             source.getReadWriteLock().readLock().unlock();
@@ -91,7 +91,7 @@ public class EventTableColumnModel implements TableColumnModel, PropertyChangeLi
     public void addColumn(TableColumn column) {
         swingThreadSource.getReadWriteLock().writeLock().lock();
         try {
-            swingThreadSource.add(column);
+            swingThreadSource.add((T) column);
         } finally {
             swingThreadSource.getReadWriteLock().writeLock().unlock();
         }
@@ -341,7 +341,7 @@ public class EventTableColumnModel implements TableColumnModel, PropertyChangeLi
         fireColumnSelectionChanged(e);
     }
 
-    public void listChanged(ListEvent<TableColumn> listChanges) {
+    public void listChanged(ListEvent<T> listChanges) {
         // arbitrary changes have occurred so we begin by invalidating the cached total width of all TableColumns
         invalidateWidthCache();
 
