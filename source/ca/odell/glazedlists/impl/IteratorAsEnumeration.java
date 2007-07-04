@@ -16,7 +16,7 @@ import java.util.Iterator;
 public final class IteratorAsEnumeration<E> implements Enumeration<E> {
 
     /** The delegate Iterator which appears to be an Enumeration to the world. */
-    private final Iterator<E> iterator;
+    private final Iterator<? extends E> iterator;
 
     /**
      * Construct an Enumeration which is backed by the given
@@ -24,7 +24,7 @@ public final class IteratorAsEnumeration<E> implements Enumeration<E> {
      *
      * @throws IllegalArgumentException if <code>iterator</code> is <tt>null</tt>
      */
-    public IteratorAsEnumeration(Iterator<E> iterator) {
+    public IteratorAsEnumeration(Iterator<? extends E> iterator) {
         if (iterator == null)
             throw new IllegalArgumentException("iterator may not be null");
 
