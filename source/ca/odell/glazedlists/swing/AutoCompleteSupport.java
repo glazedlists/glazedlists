@@ -1137,7 +1137,10 @@ public final class AutoCompleteSupport<E> {
     /**
      * This special version of EventComboBoxModel simply marks a flag to
      * indicate the items in the ComboBoxModel should not be filtered as a
-     * side-effect of setting the selected item.
+     * side-effect of setting the selected item. It also marks another flag
+     * to indicate that the selected item is being explicitly set, and thus
+     * autocompletion should not execute and possibly overwrite the
+     * programmer's specified value.
      */
     private class AutoCompleteComboBoxModel extends EventComboBoxModel<E> {
         public AutoCompleteComboBoxModel(EventList<E> source) {
@@ -1145,6 +1148,7 @@ public final class AutoCompleteSupport<E> {
         }
         public void setSelectedItem(Object selected) {
             doNotFilter = true;
+            doNotAutoComplete = true;
             // remove all ActionListeners from the JComboBox since setting the selected item
             // would normally notify them, but in normal autocompletion behaviour, we don't want that
             final ActionListener[] listeners = unregisterAllActionListeners(comboBox);
@@ -1158,6 +1162,7 @@ public final class AutoCompleteSupport<E> {
                 // reinstall the ActionListeners we removed
                 registerAllActionListeners(comboBox, listeners);
                 doNotFilter = false;
+                doNotAutoComplete = false;
             }
         }
     }

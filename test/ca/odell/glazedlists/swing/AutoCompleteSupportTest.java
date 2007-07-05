@@ -669,6 +669,49 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertSame(ints.get(0), comboBox.getItemAt(2));
     }
 
+    /**
+     * This test ensures that calling ComboBoxModel.setSelectedItem *always*
+     * honours the given value and *never* replaces it due to autocompletion.
+     * Our interpretation is that the user has *explicitly* set a value, and
+     * that value should be honoured at all costs.
+     */
+    public void guiTestSettingSelectedItemInEmptyModel() throws BadLocationException {
+        final JComboBox combo = new JComboBox();
+        final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
+        final AbstractDocument doc = (AbstractDocument) textField.getDocument();
+        final EventList<String> items = new BasicEventList<String>();
+
+        AutoCompleteSupport.install(combo, items);
+        final ComboBoxModel comboBoxModel = combo.getModel();
+
+        assertEquals(0, comboBoxModel.getSize());
+        assertNull(comboBoxModel.getSelectedItem());
+
+        combo.setSelectedItem("Foo");
+        assertEquals(0, comboBoxModel.getSize());
+        assertEquals("Foo", comboBoxModel.getSelectedItem());
+
+        items.add("Foobar");
+        assertEquals(1, comboBoxModel.getSize());
+        assertEquals("Foo", comboBoxModel.getSelectedItem());
+
+        items.add("Blarg");
+        assertEquals(2, comboBoxModel.getSize());
+        assertEquals("Foo", comboBoxModel.getSelectedItem());
+
+        // type a "b" at the end of "Foo" which should cause autocompletion to happen
+        // which in turn will filter the model and select an autocompletion term
+        doc.insertString(3, "b", null);
+        assertEquals(1, comboBoxModel.getSize());
+        assertEquals("Foobar", comboBoxModel.getSelectedItem());
+
+        // setting "Foo" as the selected item, even when a "better" autocompletion term
+        // exists in the model ("Foobar"), should keep "Foo" as the selected item
+        combo.setSelectedItem("Foo");
+        assertEquals(1, comboBoxModel.getSize());
+        assertEquals("Foo", comboBoxModel.getSelectedItem());
+    }
+
     private static class NoopDocument implements Document {
         private Element root = new NoopElement();
 
