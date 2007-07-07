@@ -10,7 +10,7 @@ import java.util.List;
  * 
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class MouseKeyboardSortingStrategy implements ca.odell.glazedlists.impl.gui.SortingStrategy {
+public class MouseKeyboardSortingStrategy implements SortingStrategy {
 
     /** a column is sorted in forward, reverse or not at all */
     private static final int NONE = 0;
