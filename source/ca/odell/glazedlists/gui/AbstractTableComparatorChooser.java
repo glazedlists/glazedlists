@@ -57,7 +57,7 @@ public abstract class AbstractTableComparatorChooser<E> {
      * Emulate the sorting behaviour of SUN's TableSorter, by Philip Milne et. al.
      *
      * <p>This is not a direct adaptation since we choose to support potentially
-     * many Comparators per column, wheras TableSorter is limited to one.
+     * many Comparators per column, whereas TableSorter is limited to one.
      *
      * <p>For reference, this is TableSorter's behaviour, copied shamelessly
      * from that project's source file:
