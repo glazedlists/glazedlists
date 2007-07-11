@@ -7,6 +7,7 @@ import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.impl.gui.MouseKeyboardSortingStrategy;
 import ca.odell.glazedlists.impl.gui.MouseOnlySortingStrategy;
 import ca.odell.glazedlists.impl.gui.SortingState;
+import ca.odell.glazedlists.impl.gui.MouseOnlySortingStrategyWithUndo;
 import ca.odell.glazedlists.impl.sort.TableColumnComparator;
 
 import java.beans.PropertyChangeEvent;
@@ -35,7 +36,8 @@ public abstract class AbstractTableComparatorChooser<E> {
 
     /**
      * Sort multiple columns without use of the keyboard.  Single clicks cycle
-     * through comparators, double clicks clear them.
+     * through comparators, double clicks clear all secondary sorts before
+     * performing the normal behaviour.
      *
      * <p>This is the original sorting strategy provided by Glazed Lists, with a
      * limitation that it is impossible to clear a sort order that is already in
@@ -52,6 +54,25 @@ public abstract class AbstractTableComparatorChooser<E> {
      * <li>Double click: like a single click, but clear all sorting columns first.
      */
     public static final Object MULTIPLE_COLUMN_MOUSE = new MouseOnlySortingStrategy(true);
+
+    /**
+     * Sort multiple columns without use of the keyboard.  Single clicks cycle
+     * through comparators. Single click on the last comparator of the primary
+     * sort column will clear the entire sort (for all columns).
+     *
+     * <p>This is an improvement over the original sorting strategy provided by
+     * Glazed Lists, since it gives a reasonable mechanism for clearing a sort
+     * order that is already in place. It's designed to be used with multiple
+     * columns and multiple comparators per column.
+     *
+     * <p>The overall behaviour is as follows:
+     *
+     * <li>Click: sort this column. If it's already sorted, reverse the sort order.
+     * If its already reversed, sort using the column's next comparator in forward
+     * order. If there are no more comparators, clear ALL column comparators.
+     * If there are multiple sort columns, sort this column after those columns.
+     */
+    public static final Object MULTIPLE_COLUMN_MOUSE_WITH_UNDO = new MouseOnlySortingStrategyWithUndo();
 
     /**
      * Emulate the sorting behaviour of SUN's TableSorter, by Philip Milne et. al.
@@ -144,7 +165,7 @@ public abstract class AbstractTableComparatorChooser<E> {
      * free to add comparators to this list or clear the list if the specified
      * column cannot be sorted.
      */
-    public List getComparatorsForColumn(int column) {
+    public List<Comparator> getComparatorsForColumn(int column) {
         return sortingState.getColumns().get(column).getComparators();
     }
 

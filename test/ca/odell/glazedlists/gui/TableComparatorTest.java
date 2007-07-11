@@ -13,6 +13,8 @@ import junit.framework.TestCase;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumnModel;
+import java.awt.event.MouseEvent;
 
 /**
  * Verify that the {@link AbstractTableComparatorChooser} works, especially
@@ -23,14 +25,25 @@ import javax.swing.table.DefaultTableModel;
 public class TableComparatorTest extends TestCase {
 
     /** a table comparator choosers to test with */
-    private SortedList<String> sortedList = new SortedList<String>(new BasicEventList<String>());
-    private AbstractTableComparatorChooser<String> tableComparatorChooser = new TestTableComparatorChooser(sortedList, 10);
+    private SortedList<String> sortedList;
+    private AbstractTableComparatorChooser<String> tableComparatorChooser;
 
-    protected void setUp() throws Exception {
-        // add some comparators to column 3
+    protected void setUp() {
+        sortedList = new SortedList<String>(new BasicEventList<String>());
+        tableComparatorChooser = new TestTableComparatorChooser(sortedList, 10);
+
+        // add some comparators to column 2
         tableComparatorChooser.getComparatorsForColumn(1).add(GlazedLists.caseInsensitiveComparator());
         tableComparatorChooser.getComparatorsForColumn(1).add(GlazedLists.comparableComparator());
         tableComparatorChooser.getComparatorsForColumn(1).add(GlazedLists.reverseComparator());
+    }
+
+    protected void tearDown() {
+        tableComparatorChooser.dispose();
+        sortedList.dispose();
+
+        tableComparatorChooser = null;
+        sortedList = null;
     }
 
     /**
@@ -175,6 +188,76 @@ public class TableComparatorTest extends TestCase {
         // replacing the JTable's model should remove the remaining listener from secondModel
         table.setModel(new DefaultTableModel());
         assertEquals(0, secondModel.getTableModelListeners().length);
+    }
+
+    public void testMouseOnlySortingStrategyWithUndo() {
+        final TestTableFormat tableFormat = new TestTableFormat(10);
+        final JTable table = new JTable(new EventTableModel<String>(new BasicEventList<String>(), tableFormat));
+        tableComparatorChooser = TableComparatorChooser.install(table, sortedList, AbstractTableComparatorChooser.MULTIPLE_COLUMN_MOUSE_WITH_UNDO, tableFormat);
+
+        // add some comparators to column 1 (for a total of 3 comparators)
+        tableComparatorChooser.getComparatorsForColumn(1).add(GlazedLists.caseInsensitiveComparator());
+        tableComparatorChooser.getComparatorsForColumn(1).add(GlazedLists.comparableComparator());
+
+        assertEquals("", tableComparatorChooser.toString());
+
+        clickColumnHeader(table, 1);
+        assertEquals("column 1", tableComparatorChooser.toString());
+
+        clickColumnHeader(table, 0);
+        assertEquals("column 1, column 0", tableComparatorChooser.toString());
+
+        clickColumnHeader(table, 1);
+        assertEquals("column 1 reversed, column 0", tableComparatorChooser.toString());
+
+        clickColumnHeader(table, 1);
+        assertEquals("column 1 comparator 1, column 0", tableComparatorChooser.toString());
+
+        clickColumnHeader(table, 1);
+        assertEquals("column 1 comparator 1 reversed, column 0", tableComparatorChooser.toString());
+
+        clickColumnHeader(table, 1);
+        assertEquals("column 1 comparator 2, column 0", tableComparatorChooser.toString());
+
+        clickColumnHeader(table, 1);
+        assertEquals("column 1 comparator 2 reversed, column 0", tableComparatorChooser.toString());
+
+        clickColumnHeader(table, 0);
+        assertEquals("column 1 comparator 2 reversed, column 0 reversed", tableComparatorChooser.toString());
+
+        // click on the 1st column (secondary sort column) will simply toggle it from
+        // reversed to normal order again
+        clickColumnHeader(table, 0);
+        assertEquals("column 1 comparator 2 reversed, column 0", tableComparatorChooser.toString());
+
+        // clicking the 2nd column (primary sort column) one more time will invoke the special logic of
+        // MULTIPLE_COLUMN_MOUSE_WITH_UNDO and will clear the entire sort
+        clickColumnHeader(table, 1);
+        assertEquals("", tableComparatorChooser.toString());
+
+        // next click starts the sorting anew
+        clickColumnHeader(table, 1);
+        assertEquals("column 1", tableComparatorChooser.toString());
+    }
+
+    /**
+     * A convenience method to simulate a mouse click on the table header
+     * for the given table in the given column.
+     */
+    private static void clickColumnHeader(JTable table, int column) {
+        final TableColumnModel columnModel = table.getColumnModel();
+
+        // position the x coordinate half way through the column header in question
+        int x = 0;
+        for (int i = 0; i < column; i++)
+            x += columnModel.getColumn(i).getWidth();
+
+        x += columnModel.getColumn(column).getWidth() / 2;
+
+        // position the y coordinate half may down the header
+        int y = table.getTableHeader().getPreferredSize().height / 2;
+
+        table.getTableHeader().dispatchEvent(new MouseEvent(table, MouseEvent.MOUSE_CLICKED, 0, 0, x, y, 1, false, MouseEvent.BUTTON1));
     }
 
     private static class TestTableComparatorChooser extends AbstractTableComparatorChooser<String> {

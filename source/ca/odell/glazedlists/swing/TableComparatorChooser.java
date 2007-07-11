@@ -97,7 +97,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      * performed and fixes an API flaw by explicitly requiring the TableFormat.
      */
     public TableComparatorChooser(JTable table, SortedList<E> sortedList, Object strategy) {
-        this(table, sortedList,strategy,((EventTableModel<E>)table.getModel()).getTableFormat()  );
+        this(table, sortedList,strategy,((EventTableModel<E>)table.getModel()).getTableFormat());
     }
 
     /**
@@ -257,7 +257,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      * with the left mouse button. Extending classes can customize which mouse
      * events the table comparator chooser responds to by overriding this method.
      *
-     * <p>As of 2005/12/20, that this method is no longer called when the
+     * <p>As of 2005/12/20, this method is no longer called when the
      * corresponding mouse press event was a popup trigger. In effect, if this
      * is a right-click on Windows or a 'control-click' on the Mac.
      */

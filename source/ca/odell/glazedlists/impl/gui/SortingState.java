@@ -297,7 +297,7 @@ public final class SortingState {
         /**
          * Gets the list of comparators for this column.
          */
-        public List getComparators() {
+        public List<Comparator> getComparators() {
             return comparators;
         }
 
