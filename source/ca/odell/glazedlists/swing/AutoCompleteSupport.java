@@ -1525,7 +1525,7 @@ public final class AutoCompleteSupport<E> {
                 // notice that instead of doing the work directly, we post a Runnable here
                 // to check the strict mode invariant and repair it if it is broken. That's
                 // important. It's necessary because we must let the current ListEvent
-                // finish its broadcast before we attempt to change the filter of the
+                // finish its dispatching before we attempt to change the filter of the
                 // filteredItems list by setting new text into the comboBoxEditorComponent
                 SwingUtilities.invokeLater(checkStrictModeInvariantRunnable);
             }
