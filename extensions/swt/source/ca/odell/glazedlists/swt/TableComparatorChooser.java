@@ -74,7 +74,7 @@ public final class TableComparatorChooser<E> extends AbstractTableComparatorChoo
      *      sorting by multiple columns is more powerful, the user interface is
      *      not as simple and this strategy should only be used where necessary.
      */
-    public <E> TableComparatorChooser<E> install(EventTableViewer<E> eventTableViewer, SortedList<E> sortedList, boolean multipleColumnSort) {
+    public static <E> TableComparatorChooser<E> install(EventTableViewer<E> eventTableViewer, SortedList<E> sortedList, boolean multipleColumnSort) {
         return new TableComparatorChooser<E>(eventTableViewer, sortedList,  multipleColumnSort);
     }
 
