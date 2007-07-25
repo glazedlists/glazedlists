@@ -52,12 +52,12 @@ public interface EventList<E> extends List<E> {
     /**
      * Registers the specified listener to receive change updates for this list.
      */
-    public void addListEventListener(ListEventListener<E> listChangeListener);
+    public void addListEventListener(ListEventListener<? super E> listChangeListener);
 
     /**
      * Removes the specified listener from receiving change updates for this list.
      */
-    public void removeListEventListener(ListEventListener<E> listChangeListener);
+    public void removeListEventListener(ListEventListener<? super E> listChangeListener);
 
     /**
      * Gets the lock required to share this list between multiple threads.

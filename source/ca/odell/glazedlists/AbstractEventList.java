@@ -70,12 +70,12 @@ public abstract class AbstractEventList<E> implements EventList<E> {
     }
 
     /** {@inheritDoc} */
-    public void addListEventListener(ListEventListener<E> listChangeListener) {
+    public void addListEventListener(ListEventListener<? super E> listChangeListener) {
         updates.addListEventListener(listChangeListener);
     }
 
     /** {@inheritDoc} */
-    public void removeListEventListener(ListEventListener<E> listChangeListener) {
+    public void removeListEventListener(ListEventListener<? super E> listChangeListener) {
         updates.removeListEventListener(listChangeListener);
     }
 

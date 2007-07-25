@@ -272,7 +272,7 @@ public final class ListEventAssembler<E> {
      * listener, so if a listener does not process a set of changes, those
      * changes will persist in the next notification.
      */
-    public synchronized void addListEventListener(ListEventListener<E> listChangeListener) {
+    public synchronized void addListEventListener(ListEventListener<? super E> listChangeListener) {
         delegate.publisherAdapter.addListEventListener(listChangeListener, delegate.createListEvent());
     }
     /**
@@ -283,7 +283,7 @@ public final class ListEventAssembler<E> {
      * instead of <code>equals()</code>. This is because multiple Lists may be
      * listening and therefore <code>equals()</code> may be ambiguous.
      */
-    public synchronized void removeListEventListener(ListEventListener<E> listChangeListener) {
+    public synchronized void removeListEventListener(ListEventListener<? super E> listChangeListener) {
         delegate.publisherAdapter.removeListEventListener(listChangeListener);
     }
 
@@ -684,12 +684,12 @@ public final class ListEventAssembler<E> {
         /**
          * Adds the specified listener.
          */
-        void addListEventListener(ListEventListener<E> listChangeListener, ListEvent<E> listEvent);
+        void addListEventListener(ListEventListener<? super E> listChangeListener, ListEvent<E> listEvent);
 
         /**
          * Removes the specified listener.
          */
-        void removeListEventListener(ListEventListener<E> listener);
+        void removeListEventListener(ListEventListener<? super E> listener);
 
         /**
          * Get all list event listeners.
@@ -720,13 +720,13 @@ public final class ListEventAssembler<E> {
         }
 
         /** {@inheritDoc} */
-        public void addListEventListener(ListEventListener<E> listChangeListener, ListEvent<E> listEvent) {
+        public void addListEventListener(ListEventListener<? super E> listChangeListener, ListEvent<E> listEvent) {
             publisherSequenceDependencies.addListener(sourceList, listChangeListener, eventFormat);
             if(this.listEvent == null) this.listEvent = listEvent;
         }
 
         /** {@inheritDoc} */
-        public void removeListEventListener(ListEventListener<E> listener) {
+        public void removeListEventListener(ListEventListener<? super E> listener) {
             publisherSequenceDependencies.removeListener(sourceList, listener);
         }
 
@@ -749,22 +749,22 @@ public final class ListEventAssembler<E> {
         /**
          * Adapt {@link SequenceDependenciesEventPublisher.EventFormat} for use with {@link ListEvent}s.
          */
-        private static class ListEventFormat<E> implements SequenceDependenciesEventPublisher.EventFormat<EventList<E>,ListEventListener<E>,ListEvent<E>> {
+        private static class ListEventFormat<E> implements SequenceDependenciesEventPublisher.EventFormat<EventList<E>,ListEventListener<? super E>,ListEvent<E>> {
             private AssemblerHelper<E> assemblerDelegate;
 
             public ListEventFormat(AssemblerHelper<E> assemblerDelegate) {
                 this.assemblerDelegate = assemblerDelegate;
             }
-            public void fire(EventList<E> subject, ListEvent<E> event, ListEventListener<E> listener) {
+            public void fire(EventList<E> subject, ListEvent<E> event, ListEventListener<? super E> listener) {
                 event.reset();
-                listener.listChanged(event);
+                listener.listChanged((ListEvent) event);
             }
             public void postEvent(EventList<E> subject) {
                 assemblerDelegate.eventPending = false;
                 assemblerDelegate.cleanup();
                 ((ListSequencePublisherAdapter)assemblerDelegate.publisherAdapter).eventEnqueued = false;
             }
-            public boolean isStale(EventList<E> subject, ListEventListener<E> listener) {
+            public boolean isStale(EventList<E> subject, ListEventListener<? super E> listener) {
                 if(listener instanceof WeakReferenceProxy && ((WeakReferenceProxy)listener).getReferent() == null) {
                     ((WeakReferenceProxy)listener).dispose();
                     return true;

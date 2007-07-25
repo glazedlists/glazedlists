@@ -29,7 +29,6 @@ import java.util.Map;
  *   <li> Waterfall Charts
  * </ul>
  *
- *
  * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
  * <tr class="TableHeadingColor"><td colspan="2"><font size="+2"><b>Extension: JFreeChart</b></font></td></tr>
  * <tr><td  colspan="2">This Glazed Lists <i>extension</i> requires the third party library <b>JFreeChart</b>.</td></tr>
@@ -80,7 +79,7 @@ import java.util.Map;
  *
  * @author James Lemieux
  */
-public abstract class EventListCategoryDataset<R extends Comparable, C extends Comparable> extends AbstractDataset implements CategoryDataset {
+public abstract class EventListCategoryDataset<R extends Comparable, C extends Comparable> extends AbstractDataset implements CategoryDataset, ListEventListener<ValueSegment<C,R>> {
 
     /** The single immutable DatasetChangeEvent we fire each time this Dataset is changed. */
     private final DatasetChangeEvent immutableChangeEvent = new DatasetChangeEvent(this, this);
@@ -90,9 +89,6 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
 
     /** The source of the data to be charted. */
     private final EventList<ValueSegment<C,R>> source;
-
-    /** Listens to changes in the source EventList and rebroadcasts them as changes to this CategoryDataset */
-    private final DatasetEventListener datasetEventListener = new DatasetEventListener();
 
     /** An ordered list of keys identifying the chart's rows. */
     protected List<? extends Comparable> rowKeys;
@@ -126,7 +122,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
         this.rebuildRowAndColumnKeyList();
 
         // begin listening to changes in the source list
-        this.source.addListEventListener(this.datasetEventListener);
+        this.source.addListEventListener(this);
     }
 
     /**
@@ -252,7 +248,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
      * Releases the resources consumed by this {@link EventListCategoryDataset}
      * so that it may eventually be garbage collected.
      *
-     * <p>A {@link EventListCategoryDataset} will be garbage collected without
+     * <p>An {@link EventListCategoryDataset} will be garbage collected without
      * a call to {@link #dispose()}, but not before its source {@link EventList}
      * is garbage collected. By calling {@link #dispose()}, you allow the
      * {@link EventListCategoryDataset} to be garbage collected before its
@@ -265,7 +261,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
      * been disposed.
      */
     public void dispose() {
-        this.source.removeListEventListener(this.datasetEventListener);
+        this.source.removeListEventListener(this);
     }
 
     /**
@@ -333,7 +329,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
 
     /**
      * We override this method for speed reasons, since the super needlessly
-     * constructs a new DatasetChangedEvent each time this method is called.
+     * constructs a new DatasetChangeEvent each time this method is called.
      */
     protected void fireDatasetChanged() {
         notifyListeners(immutableChangeEvent);
@@ -347,70 +343,68 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
      *
      * This listener also rebroadcasts ListEvents as DatasetChangeEvents.
      */
-    private class DatasetEventListener implements ListEventListener<ValueSegment<C,R>> {
-        public void listChanged(ListEvent<ValueSegment<C,R>> listChanges) {
-            // speed up the case when listChanges describes a total clearing of
-            // the data structures, (which occurs when switching between projects)
-            if (listChanges.getSourceList().isEmpty()) {
-                clear();
+    public void listChanged(ListEvent<ValueSegment<C,R>> listChanges) {
+        // speed up the case when listChanges describes a total clearing of
+        // the data structures, (which occurs when switching between projects)
+        if (listChanges.getSourceList().isEmpty()) {
+            clear();
 
-            } else {
-                while (listChanges.next()) {
-                    final int type = listChanges.getType();
-                    final int index = listChanges.getIndex();
+        } else {
+            while (listChanges.next()) {
+                final int type = listChanges.getType();
+                final int index = listChanges.getIndex();
 
-                    if (type == ListEvent.INSERT) {
-                        // fetch the segment that was inserted
-                        final ValueSegment<C,R> segment = listChanges.getSourceList().get(index);
-                        // fetch the TreePair for the segment's value
-                        TreePair<C> treePair = getTreePair(segment.getValue());
+                if (type == ListEvent.INSERT) {
+                    // fetch the segment that was inserted
+                    final ValueSegment<C,R> segment = listChanges.getSourceList().get(index);
+                    // fetch the TreePair for the segment's value
+                    TreePair<C> treePair = getTreePair(segment.getValue());
 
-                        // if a TreePair has not been created for the segment's value, create one now
-                        if (treePair == null) {
-                            treePair = new TreePair<C>();
-                            valueToTreePairs.put(segment.getValue(), treePair);
-                        }
-
-                        // insert the segment into the TreePair
-                        treePair.insert(segment);
-                        // maintain our copy of the source contents
-                        sourceCopy.add(index, segment);
-                        // call into a hook for custom handling of this insert by subclasses
-                        postInsert(segment);
-
-                    } else if (type == ListEvent.UPDATE) {
-                        // fetch the segments involved
-                        final ValueSegment<C,R> newSegment = listChanges.getSourceList().get(index);
-                        final ValueSegment<C,R> oldSegment = sourceCopy.set(index, newSegment);
-
-                        // fetch the TreePairs involved
-                        final TreePair<C> oldTreePair = getTreePair(oldSegment.getValue());
-                        final TreePair<C> newTreePair = getTreePair(newSegment.getValue());
-
-                        // delete the segment from the oldTreePair
-                        oldTreePair.delete(oldSegment);
-                        postDelete(oldSegment);
-
-                        // add the segment to the newTreePair
-                        newTreePair.insert(newSegment);
-                        postInsert(newSegment);
-
-                    } else if (type == ListEvent.DELETE) {
-                        // fetch the segment that was removed
-                        final ValueSegment<C,R> segment = sourceCopy.remove(index);
-                        // fetch the TreePair for the segment's value
-                        final TreePair<C> treePair = getTreePair(segment.getValue());
-
-                        // delete the segment from the TreePair
-                        treePair.delete(segment);
-                        // call into a hook for custom handling of this delete by subclasses
-                        postDelete(segment);
+                    // if a TreePair has not been created for the segment's value, create one now
+                    if (treePair == null) {
+                        treePair = new TreePair<C>();
+                        valueToTreePairs.put(segment.getValue(), treePair);
                     }
+
+                    // insert the segment into the TreePair
+                    treePair.insert(segment);
+                    // maintain our copy of the source contents
+                    sourceCopy.add(index, segment);
+                    // call into a hook for custom handling of this insert by subclasses
+                    postInsert(segment);
+
+                } else if (type == ListEvent.UPDATE) {
+                    // fetch the segments involved
+                    final ValueSegment<C,R> newSegment = listChanges.getSourceList().get(index);
+                    final ValueSegment<C,R> oldSegment = sourceCopy.set(index, newSegment);
+
+                    // fetch the TreePairs involved
+                    final TreePair<C> oldTreePair = getTreePair(oldSegment.getValue());
+                    final TreePair<C> newTreePair = getTreePair(newSegment.getValue());
+
+                    // delete the segment from the oldTreePair
+                    oldTreePair.delete(oldSegment);
+                    postDelete(oldSegment);
+
+                    // add the segment to the newTreePair
+                    newTreePair.insert(newSegment);
+                    postInsert(newSegment);
+
+                } else if (type == ListEvent.DELETE) {
+                    // fetch the segment that was removed
+                    final ValueSegment<C,R> segment = sourceCopy.remove(index);
+                    // fetch the TreePair for the segment's value
+                    final TreePair<C> treePair = getTreePair(segment.getValue());
+
+                    // delete the segment from the TreePair
+                    treePair.delete(segment);
+                    // call into a hook for custom handling of this delete by subclasses
+                    postDelete(segment);
                 }
             }
-
-            // indicate the dataset contents have changed
-            fireDatasetChanged();
         }
+
+        // indicate the dataset contents have changed
+        fireDatasetChanged();
     }
 }
