@@ -712,6 +712,72 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals("Foo", comboBoxModel.getSelectedItem());
     }
 
+    public void guiTestFirstItem() throws BadLocationException {
+        final JComboBox combo = new JComboBox();
+        final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
+        final AbstractDocument doc = (AbstractDocument) textField.getDocument();
+        final EventList<String> items = new BasicEventList<String>();
+
+        AutoCompleteSupport<String> support = AutoCompleteSupport.install(combo, items);
+        assertNull(support.getFirstItem());
+
+        support.setFirstItem("Special First Item");
+        support.removeFirstItem();
+        support.setFirstItem("Special First Item");
+        final ComboBoxModel comboBoxModel = combo.getModel();
+
+        assertEquals(comboBoxModel.getSize(), 1);
+        assertSame("Special First Item", comboBoxModel.getElementAt(0));
+
+        items.add("one");
+        items.add("two");
+        items.add("three");
+
+        assertEquals(comboBoxModel.getSize(), 4);
+        assertSame("Special First Item", comboBoxModel.getElementAt(0));
+        assertSame("one", comboBoxModel.getElementAt(1));
+        assertSame("two", comboBoxModel.getElementAt(2));
+        assertSame("three", comboBoxModel.getElementAt(3));
+
+        // type a "t" which will filter the contents to "two" and "three" but should
+        // leave "Special First Item" as the initial value
+        doc.insertString(0, "t", null);
+        assertEquals("two", doc.getText(0, doc.getLength()));
+        assertEquals(comboBoxModel.getSize(), 3);
+        assertSame("Special First Item", comboBoxModel.getElementAt(0));
+        assertSame("two", comboBoxModel.getElementAt(1));
+        assertSame("three", comboBoxModel.getElementAt(2));
+
+        // type an "x" which will filter the contents to leave only "Special First Item" as the initial value
+        doc.insertString(1, "x", null);
+        assertEquals("txwo", doc.getText(0, doc.getLength()));
+        assertEquals(1, comboBoxModel.getSize());
+        assertSame("Special First Item", comboBoxModel.getElementAt(0));
+
+        // removing the first item should empty the model
+        assertSame("Special First Item", support.removeFirstItem());
+        assertEquals(0, comboBoxModel.getSize());
+        assertNull(support.getFirstItem());
+
+        // setting the first item should reestablishthe single element in the model
+        support.setFirstItem("blah");
+        assertEquals(1, comboBoxModel.getSize());
+        assertSame("blah", comboBoxModel.getElementAt(0));
+
+        // setting the first item should change the single element in the model
+        support.setFirstItem("Special First Item");
+        assertEquals(1, comboBoxModel.getSize());
+        assertSame("Special First Item", comboBoxModel.getElementAt(0));
+
+        assertEquals("txwo", doc.getText(0, doc.getLength()));
+        doc.remove(0, doc.getLength());
+        assertEquals(4, comboBoxModel.getSize());
+        assertSame("Special First Item", comboBoxModel.getElementAt(0));
+        assertSame("one", comboBoxModel.getElementAt(1));
+        assertSame("two", comboBoxModel.getElementAt(2));
+        assertSame("three", comboBoxModel.getElementAt(3));
+    }
+
     private static class NoopDocument implements Document {
         private Element root = new NoopElement();
 

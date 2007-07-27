@@ -153,6 +153,8 @@ import java.util.List;
  *   <li> {@link #setSelectsTextOnFocusGain(boolean)}
  *   <li> {@link #setHidesPopupOnFocusLost(boolean)}
  *   <li> {@link #setFilterMode(int)}
+ *   <li> {@link #setFirstItem(Object)}
+ *   <li> {@link #removeFirstItem()}
  * </ul>
  *
  * @author James Lemieux
@@ -222,6 +224,12 @@ public final class AutoCompleteSupport<E> {
 
     /** The FilterList which filters the items present in the comboBoxModel. */
     private final FilterList<E> filteredItems;
+
+    /** A single-element EventList for storing the optional first element, typically used to represent "no selection". */
+    private final EventList<E> firstItem;
+
+    /** The CompositeList which is the union of firstItem and filteredItems to produce all items available in the comboBoxModel. */
+    private final CompositeList<E> allItems;
 
     /** The Format capable of producing Strings from ComboBoxModel elements and vice versa. */
     private final Format format;
@@ -406,7 +414,11 @@ public final class AutoCompleteSupport<E> {
         this.filterMatcherEditor = new TextMatcherEditor(filterator == null ? new DefaultTextFilterator() : filterator);
         this.filterMatcherEditor.setMode(TextMatcherEditor.STARTS_WITH);
         this.filteredItems = new FilterList<E>(items, this.filterMatcherEditor);
-        this.comboBoxModel = new AutoCompleteComboBoxModel(this.filteredItems);
+        this.firstItem = new BasicEventList<E>(items.getPublisher(), items.getReadWriteLock());
+        this.allItems = new CompositeList<E>(items.getPublisher(), items.getReadWriteLock());
+        this.allItems.addMemberList(this.firstItem);
+        this.allItems.addMemberList(this.filteredItems);
+        this.comboBoxModel = new AutoCompleteComboBoxModel(this.allItems);
 
         // customize the comboBox
         this.comboBox.setModel(this.comboBoxModel);
@@ -1007,6 +1019,67 @@ public final class AutoCompleteSupport<E> {
     }
 
     /**
+     * This method set a single optional value to be used as the first element
+     * in the {@link ComboBoxModel}. This value typically represents
+     * "no selection" or "blank". This value is always present and is not
+     * filtered away during autocompletion.
+     * 
+     * @param item the first value to present in the {@link ComboBoxModel}
+     */
+    public void setFirstItem(E item) {
+        checkAccessThread();
+
+        doNotChangeDocument = true;
+        firstItem.getReadWriteLock().writeLock().lock();
+        try {
+            if (firstItem.isEmpty())
+                firstItem.add(item);
+            else
+                firstItem.set(0, item);
+        } finally {
+            firstItem.getReadWriteLock().writeLock().unlock();
+            doNotChangeDocument = false;
+        }
+    }
+
+    /**
+     * Returns the optional single value used as the first element in the
+     * {@link ComboBoxModel} or <tt>null</tt> if no first item has been set.
+     *
+     * @return the special first value presented in the {@link ComboBoxModel}
+     *      or <tt>null</tt> if no first item has been set
+     */
+    public E getFirstItem() {
+        firstItem.getReadWriteLock().readLock().lock();
+        try {
+            return firstItem.isEmpty() ? null : firstItem.get(0);
+        } finally {
+            firstItem.getReadWriteLock().readLock().unlock();
+        }
+    }
+
+    /**
+     * Removes and returns the optional single value used as the first element
+     * in the {@link ComboBoxModel} or <tt>null</tt> if no first item has been
+     * set.
+     *
+     * @return the special first value presented in the {@link ComboBoxModel}
+     *      or <tt>null</tt> if no first item has been set
+     */
+    public E removeFirstItem() {
+        checkAccessThread();
+
+        doNotChangeDocument = true;
+        firstItem.getReadWriteLock().writeLock().lock();
+        try {
+            return firstItem.isEmpty() ? null : firstItem.remove(0);
+        } finally {
+            firstItem.getReadWriteLock().writeLock().unlock();
+            doNotChangeDocument = false;
+        }
+    }
+
+    /**
      * This method removes autocompletion support from the {@link JComboBox}
      * it was installed on. This method is useful when the {@link EventList} of
      * items that backs the combo box must outlive the combo box itself.
@@ -1041,7 +1114,8 @@ public final class AutoCompleteSupport<E> {
         // 5. dispose of our ComboBoxModel
         this.comboBoxModel.dispose();
 
-        // 6. dispose of our FilterList so that it is severed from the given items EventList
+        // 6. dispose of our EventLists so that they are severed from the given items EventList
+        this.allItems.dispose();
         this.filteredItems.dispose();
 
         // null out the comboBox to indicate that this support class is uninstalled
