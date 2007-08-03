@@ -291,4 +291,19 @@ public class CompositeListTest extends TestCase {
         memberListTwo.add(0, "D");
         assertEquals(0, eventCounter.getCountAndReset());
     }
+
+    /**
+     * It should be possible to create a member list of *any* generic type from
+     * *any* CompositeList, since it may be transformed *before* being used by
+     * the CompositeList.
+     */
+    public void testCreateMemberListGenerics() {
+        CompositeList<String> strings = new CompositeList<String>();
+
+        EventList<String> moreStrings = strings.createMemberList();
+        EventList<Integer> integers = strings.createMemberList();
+
+        assertSame(moreStrings.getPublisher(), integers.getPublisher());
+        assertSame(moreStrings.getReadWriteLock(), integers.getReadWriteLock());
+    }
 }
