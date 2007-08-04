@@ -28,7 +28,12 @@ public class FileBrowserModel implements Runnable {
     private JobQueue jobQueue = new JobQueue();
 
     public FileBrowserModel(String[] args) {
-        this.root = new Entry(new File(args[0]), null);
+        String rootString = args.length > 0 ? args[0] : null;
+        if (rootString == null) {
+            rootString = System.getProperty("user.dir");
+        }
+
+        this.root = new Entry(new File(rootString), null);
     }
 
     public void run() {
