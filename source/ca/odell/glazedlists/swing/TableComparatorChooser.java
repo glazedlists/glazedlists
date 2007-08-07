@@ -110,7 +110,8 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      *          <li> {@link ca.odell.glazedlists.gui.AbstractTableComparatorChooser#SINGLE_COLUMN}
      *          <li> {@link ca.odell.glazedlists.gui.AbstractTableComparatorChooser#MULTIPLE_COLUMN_MOUSE}
      *          <li> {@link ca.odell.glazedlists.gui.AbstractTableComparatorChooser#MULTIPLE_COLUMN_KEYBOARD}
- * @param tableFormat the TableFormat providing the columns for the table
+     *          <li> {@link ca.odell.glazedlists.gui.AbstractTableComparatorChooser#MULTIPLE_COLUMN_MOUSE_WITH_UNDO}
+     * @param tableFormat the TableFormat providing the columns for the table
      */
     private TableComparatorChooser(JTable table, SortedList<E> sortedList, Object strategy, TableFormat<? super E> tableFormat) {
         super(sortedList, tableFormat);
@@ -150,6 +151,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      *          <li> {@link AbstractTableComparatorChooser#SINGLE_COLUMN}
      *          <li> {@link AbstractTableComparatorChooser#MULTIPLE_COLUMN_MOUSE}
      *          <li> {@link AbstractTableComparatorChooser#MULTIPLE_COLUMN_KEYBOARD}
+     *          <li> {@link AbstractTableComparatorChooser#MULTIPLE_COLUMN_MOUSE_WITH_UNDO}
      *      </ul>
      * @return TableComparatorChooser object that is responsible for translating
      *      mouse clicks on the table header into sorting actions on the sortedList.
@@ -178,6 +180,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      *          <li> {@link AbstractTableComparatorChooser#SINGLE_COLUMN}
      *          <li> {@link AbstractTableComparatorChooser#MULTIPLE_COLUMN_MOUSE}
      *          <li> {@link AbstractTableComparatorChooser#MULTIPLE_COLUMN_KEYBOARD}
+     *          <li> {@link AbstractTableComparatorChooser#MULTIPLE_COLUMN_MOUSE_WITH_UNDO}
      *      </ul>
      * @return TableComparatorChooser object that is responsible for translating
      *      mouse clicks on the table header into sorting actions on the sortedList.
@@ -213,6 +216,39 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      */
     public void removeSortActionListener(ActionListener sortActionListener) {
         sortListener = AWTEventMulticaster.remove(sortListener, sortActionListener);
+    }
+
+    /**
+     * Decorates and returns the given <code>delegateRenderer</code> with
+     * functionality that attempts to install a sorting icon into the Component
+     * returned by the <code>delegateRenderer</code>. In particular, the
+     * <code>delegateRenderer</code> will be decorated with a sorting icon in
+     * one of two scenarios:
+     *
+     * <ul>
+     *   <li>the delegateRenderer implements {@link SortableRenderer} - in this
+     *       case {@link SortableRenderer#setSortIcon setSortIcon} is called on
+     *       the delegateRenderer and it is expected to place the icon anywhere
+     *       it desires on the Component it returns. This allows maximum
+     *       flexibility when displaying the sort icon.
+     *
+     *   <li>the Component returned by the delegateRenderer is a JLabel - in
+     *       this case {@link JLabel#setIcon setIcon} is called on the JLabel
+     *       with the sort icon. This caters to the typical case when a
+     *       {@link javax.swing.table.DefaultTableCellRenderer} is used as the
+     *       delegateRenderer.
+     * </ul>
+     *
+     * If neither of these scenarios are true of the given delegateRenderer
+     * then no sort indicator arrows will be added to the renderer's component.
+     *
+     * @param delegateRenderer the TableCellRenderer acting as a table header
+     *      renderer and to which a sort icon should be added
+     * @return a TableCellRenderer that attempts to decorate the given
+     *      <code>delegateRenderer</code> with a sort icon
+     */
+    public TableCellRenderer createSortArrowHeaderRenderer(TableCellRenderer delegateRenderer) {
+        return new SortArrowHeaderRenderer(delegateRenderer);
     }
 
     /**
@@ -373,8 +409,8 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      * table header renderer.
      *
      * <p>This class fails to add indicator arrows on table headers where the
-     * default table header render is not a DefaultTableCellRenderer or does
-     * not implement {@link SortableRenderer}.
+     * default table header render does not return a JLabel or does not
+     * implement {@link SortableRenderer}.
      */
     class SortArrowHeaderRenderer implements TableCellRenderer {
 
@@ -404,7 +440,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
             // this is a special case for JideTable with nested table columns
             if (column < 0)
                 return delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            
+
             final Icon sortIcon = icons[getSortingStyle(column)];
             final Component rendered;
 
