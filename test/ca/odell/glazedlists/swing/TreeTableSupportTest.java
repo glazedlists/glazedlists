@@ -7,6 +7,7 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.TreeList;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.gui.TableFormat;
 
 import javax.swing.*;
@@ -22,7 +23,7 @@ public class TreeTableSupportTest extends SwingTestCase {
     public void guiTestUninstall() {
         // build a TreeList
         final EventList<String> source = new BasicEventList<String>();
-        final TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        final TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.compressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
 
         // build a regular JTable around the TreeList
         final String[] propertyNames = {""};
@@ -68,7 +69,7 @@ public class TreeTableSupportTest extends SwingTestCase {
     public void guiTestSetDelegateRendererAndEditor() {
         // build a TreeList
         final EventList<String> source = new BasicEventList<String>();
-        final TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        final TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.compressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
 
         // build a regular JTable around the TreeList
         final String[] propertyNames = {""};
@@ -105,7 +106,7 @@ public class TreeTableSupportTest extends SwingTestCase {
     public void guiTestListEventsArriveOnEDT() throws InterruptedException {
         // build a TreeList
         final EventList<String> source = new BasicEventList<String>();
-        final TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        final TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.compressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
 
         // build a regular JTable around the TreeList
         final TableFormat<String> itemTableFormat = GlazedLists.tableFormat(new String[] {""}, new String[] {"Column 1"});
@@ -146,21 +147,6 @@ public class TreeTableSupportTest extends SwingTestCase {
 
         public RuntimeException getRuntimeException() {
             return runtimeException;
-        }
-    }
-
-    private static class CharacterTreeFormat implements TreeList.Format<String> {
-        public void getPath(List<String> path, String element) {
-            for (int i = 0, n = element.length(); i < n; i++)
-                path.add(String.valueOf(element.charAt(0)));
-        }
-
-        public boolean allowsChildren(String element) {
-            return true;
-        }
-
-        public Comparator<String> getComparator(int depth) {
-            return (Comparator)GlazedLists.comparableComparator();
         }
     }
 }

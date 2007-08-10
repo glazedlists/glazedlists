@@ -61,7 +61,6 @@ public class EventTreeModel<E> implements TreeModel, ListEventListener<E> {
             source.getReadWriteLock().readLock().unlock();
         }
 
-        this.swingThreadSource = GlazedListsSwing.swingThreadProxyList(source);
         this.treeList = source;
     }
 
