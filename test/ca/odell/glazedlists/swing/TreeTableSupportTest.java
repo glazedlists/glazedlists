@@ -3,11 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.TreeList;
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.TableFormat;
 
 import javax.swing.*;
@@ -16,14 +12,16 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import java.awt.event.MouseListener;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class TreeTableSupportTest extends SwingTestCase {
 
     public void guiTestUninstall() {
         // build a TreeList
         final EventList<String> source = new BasicEventList<String>();
-        final TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.compressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        final TreeList<String> treeList = new TreeList<String>(source, TreeListTest.COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
 
         // build a regular JTable around the TreeList
         final String[] propertyNames = {""};
@@ -69,7 +67,7 @@ public class TreeTableSupportTest extends SwingTestCase {
     public void guiTestSetDelegateRendererAndEditor() {
         // build a TreeList
         final EventList<String> source = new BasicEventList<String>();
-        final TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.compressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        final TreeList<String> treeList = new TreeList<String>(source, TreeListTest.COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
 
         // build a regular JTable around the TreeList
         final String[] propertyNames = {""};
@@ -106,7 +104,7 @@ public class TreeTableSupportTest extends SwingTestCase {
     public void guiTestListEventsArriveOnEDT() throws InterruptedException {
         // build a TreeList
         final EventList<String> source = new BasicEventList<String>();
-        final TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.compressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        final TreeList<String> treeList = new TreeList<String>(source, TreeListTest.COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
 
         // build a regular JTable around the TreeList
         final TableFormat<String> itemTableFormat = GlazedLists.tableFormat(new String[] {""}, new String[] {"Column 1"});

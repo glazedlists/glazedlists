@@ -14,6 +14,9 @@ import java.util.*;
  */
 public class TreeListTest extends TestCase {
 
+    public static final TreeList.Format<String> COMPRESSED_CHARACTER_TREE_FORMAT = new CharacterTreeFormat();
+    public static final TreeList.Format<String> UNCOMPRESSED_CHARACTER_TREE_FORMAT = new CharacterTreeFormat(null);
+
     /**
      * Can we build a tree list?
      */
@@ -82,7 +85,7 @@ public class TreeListTest extends TestCase {
         source.add("ABEFH");
         source.add("ACD");
         source.add("ACE");
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.compressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         assertTreeStructure(treeList, new String[] {
                 "A",
                 "AB",
@@ -127,7 +130,7 @@ public class TreeListTest extends TestCase {
         source.add("ABEFG");
         source.add("ACDC");
         source.add("ACE");
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.compressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         assertTreeStructure(treeList, new String[] {
                 "A",
                 "AB",
@@ -165,7 +168,7 @@ public class TreeListTest extends TestCase {
         source.add("ABCG");
         SortedList<String> sortedSource = new SortedList<String>(source, null);
 
-        TreeList<String> treeList = new TreeList<String>(sortedSource, GlazedListsTests.compressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(sortedSource, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         assertTreeStructure(treeList, new String[] {
                 "A",
                 "AB",
@@ -190,7 +193,7 @@ public class TreeListTest extends TestCase {
 
     public void testVirtualParentsAreCleanedUp() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.compressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -237,7 +240,7 @@ public class TreeListTest extends TestCase {
 
     public void testInsertRealOverVirtualParent() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.compressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -248,7 +251,7 @@ public class TreeListTest extends TestCase {
 
     public void testStructureChangingUpdates() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.compressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -313,7 +316,7 @@ public class TreeListTest extends TestCase {
 
     public void testClear() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.compressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -327,7 +330,7 @@ public class TreeListTest extends TestCase {
 
     public void testSourceChangesOnCollapsedSubtrees() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.compressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -520,7 +523,7 @@ public class TreeListTest extends TestCase {
 
     public void testCollapseExpand() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.compressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -643,7 +646,7 @@ public class TreeListTest extends TestCase {
 
     public void testSourceUpdateEvents() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.compressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -666,7 +669,7 @@ public class TreeListTest extends TestCase {
 
     public void testDeletedRealParentIsReplacedByVirtualParent() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.compressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -682,7 +685,7 @@ public class TreeListTest extends TestCase {
 
     public void testTreeEditing() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.compressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -715,7 +718,7 @@ public class TreeListTest extends TestCase {
     public void testTreeSortingUnsortedTree() {
         EventList<String> source = new BasicEventList<String>();
         SortedList<String> sortedSource = new SortedList<String>(source);
-        TreeList<String> treeList = new TreeList<String>(sortedSource, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(sortedSource, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -742,7 +745,7 @@ public class TreeListTest extends TestCase {
     public void testTreeSorting() {
         EventList<String> source = new BasicEventList<String>();
         SortedList<String> sortedSource = new SortedList<String>(source);
-        TreeList<String> treeList = new TreeList<String>(sortedSource, GlazedListsTests.compressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(sortedSource, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -768,7 +771,7 @@ public class TreeListTest extends TestCase {
 
     public void testInsertInReverseOrder() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.compressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -778,7 +781,7 @@ public class TreeListTest extends TestCase {
 
     public void testNonSiblingsBecomeSiblings() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -808,7 +811,7 @@ public class TreeListTest extends TestCase {
 
     public void testSiblingsBecomeNonSiblings() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -830,7 +833,7 @@ public class TreeListTest extends TestCase {
 
     public void testSiblingsBecomeNonSiblingsWithCollapsedNodes() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -872,7 +875,7 @@ public class TreeListTest extends TestCase {
      */
     public void testInsertMultipleParents() {
         ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -900,7 +903,7 @@ public class TreeListTest extends TestCase {
 
     public void testAttachSiblings() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -918,7 +921,7 @@ public class TreeListTest extends TestCase {
 
     public void testDeleteParentAndOneChild() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -942,7 +945,7 @@ public class TreeListTest extends TestCase {
 
     public void testReplaceVirtualWithRealWithSiblings() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -966,7 +969,7 @@ public class TreeListTest extends TestCase {
 
     public void testAddSubtreePlusSiblings() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -986,7 +989,7 @@ public class TreeListTest extends TestCase {
 
     public void testInsertUpdateDeleteOnCollapsed() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1031,7 +1034,7 @@ public class TreeListTest extends TestCase {
 
     public void testInsertVirtualParentsOnCollapsed() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1052,7 +1055,7 @@ public class TreeListTest extends TestCase {
 
     public void testReplaceHiddenVirtualParentWithReal() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1074,7 +1077,7 @@ public class TreeListTest extends TestCase {
     public void testSortingSource() {
         EventList<String> source = new BasicEventList<String>();
         SortedList<String> sortedList = new SortedList<String>(source, null);
-        TreeList<String> treeList = new TreeList<String>(sortedList, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(sortedList, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1096,7 +1099,7 @@ public class TreeListTest extends TestCase {
     public void testSortingSourceWithVirtualParentsBetween() {
         EventList<String> source = new BasicEventList<String>();
         SortedList<String> sortedList = new SortedList<String>(source, null);
-        TreeList<String> treeList = new TreeList<String>(sortedList, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(sortedList, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1113,7 +1116,7 @@ public class TreeListTest extends TestCase {
     public void testObsoleteVirtualParentsWithinMovedNodes() {
         EventList<String> source = new BasicEventList<String>();
         SortedList<String> sortedList = new SortedList<String>(source, null);
-        TreeList<String> treeList = new TreeList<String>(sortedList, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(sortedList, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1137,7 +1140,7 @@ public class TreeListTest extends TestCase {
 
     public void testVisibilityOnParentMergeFollowerCollapsed() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1157,7 +1160,7 @@ public class TreeListTest extends TestCase {
 
     public void testVisibilityOnParentMergeLeaderCollapsed() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1177,7 +1180,7 @@ public class TreeListTest extends TestCase {
 
     public void testSplitChildrenHoldsSiblings() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1208,7 +1211,7 @@ public class TreeListTest extends TestCase {
 
     public void testAttachSiblingsToStrippedSiblings() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1237,7 +1240,7 @@ public class TreeListTest extends TestCase {
 
     public void testInsertAncestorAfterChild() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1270,7 +1273,7 @@ public class TreeListTest extends TestCase {
 
     public void testSiblingsAttachedToNewParentsFromSplitNodes() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1305,7 +1308,7 @@ public class TreeListTest extends TestCase {
 
     public void testAddExtraRoot() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1336,7 +1339,7 @@ public class TreeListTest extends TestCase {
 
     public void testAddParentAndSibling() {
         EventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1360,7 +1363,7 @@ public class TreeListTest extends TestCase {
 
     public void testRebuildSiblingsInUnnaturalOrder() {
         ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>(), false);
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1394,7 +1397,7 @@ public class TreeListTest extends TestCase {
     public void testReorderIntoInfiniteLoop() {
         EventList<String> source = new BasicEventList<String>();
         SortedList<String> sortedSource = new SortedList<String>(source, null);
-        TreeList<String> treeList = new TreeList<String>(sortedSource, GlazedListsTests.characterTreeFormat(new NullCompartor<String>()), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(sortedSource, new CharacterTreeFormat(new NullCompartor<String>()), TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1420,7 +1423,7 @@ public class TreeListTest extends TestCase {
 
     public void testRemoveHiddenCollapsedSubtrees() {
         BasicEventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1452,7 +1455,7 @@ public class TreeListTest extends TestCase {
 
     public void testCollapsedByDefaultOnInsert() {
         BasicEventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_COLLAPSED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_COLLAPSED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1484,7 +1487,7 @@ public class TreeListTest extends TestCase {
                 "EFG",
         }));
 
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_COLLAPSED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_COLLAPSED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1505,7 +1508,7 @@ public class TreeListTest extends TestCase {
 
     public void testCollapsedByDefaultForSplits() {
         BasicEventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_COLLAPSED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_COLLAPSED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1527,7 +1530,7 @@ public class TreeListTest extends TestCase {
     public void testInsertParentWithVisibleChildGetsExpandedState() {
         BasicEventList<String> source = new BasicEventList<String>();
         DefaultExternalExpansionModel<String> expansionProvider = new DefaultExternalExpansionModel<String>(TreeList.NODES_START_EXPANDED);
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), expansionProvider);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, expansionProvider);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1552,7 +1555,7 @@ public class TreeListTest extends TestCase {
     public void testDeleteAndReinsertLeafRetainsParentState() {
         ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
 
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1577,7 +1580,7 @@ public class TreeListTest extends TestCase {
      */
     public void testExpansionModelWithInsertedNodes() {
         BasicEventList<String> source = new BasicEventList<String>();
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_COLLAPSED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_COLLAPSED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1601,7 +1604,7 @@ public class TreeListTest extends TestCase {
     public void testInsertCollapsedParentWithExpandedChild() {
         ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
 
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_COLLAPSED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_COLLAPSED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1629,7 +1632,7 @@ public class TreeListTest extends TestCase {
     public void testExpandingParentWhileTreeIsInvalid() {
         ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
 
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_COLLAPSED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_COLLAPSED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1658,7 +1661,7 @@ public class TreeListTest extends TestCase {
     public void testUpdatingElementMovesIt() {
         EventList<String> source = new BasicEventList<String>();
 
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.characterTreeFormat(String.CASE_INSENSITIVE_ORDER), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat(String.CASE_INSENSITIVE_ORDER), TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1674,7 +1677,7 @@ public class TreeListTest extends TestCase {
     public void testUpdatingElementsRetainExpandCollapseState() {
         EventList<String> source = new BasicEventList<String>();
 
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.characterTreeFormat(String.CASE_INSENSITIVE_ORDER), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat(String.CASE_INSENSITIVE_ORDER), TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1703,7 +1706,7 @@ public class TreeListTest extends TestCase {
 
     public void testTemporaryVirtualNodesAreRemoved() {
         ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.uncompressedCharacterTreeFormat(), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1745,7 +1748,7 @@ public class TreeListTest extends TestCase {
      */
     public void testComparatorWeakerThanEquals() {
         ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
-        TreeList<String> treeList = new TreeList<String>(source, GlazedListsTests.characterTreeFormat(String.CASE_INSENSITIVE_ORDER), TreeList.NODES_START_EXPANDED);
+        TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat(String.CASE_INSENSITIVE_ORDER), TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -1782,11 +1785,39 @@ public class TreeListTest extends TestCase {
     }
 
     public void testComparatorOrdering_FixMe() {
-        TreeList.NodeComparator<String> nodeComparator = new TreeList.NodeComparator<String>(GlazedListsTests.characterTreeFormat(String.CASE_INSENSITIVE_ORDER));
+        TreeList.NodeComparator<String> nodeComparator = new TreeList.NodeComparator<String>(new CharacterTreeFormat(String.CASE_INSENSITIVE_ORDER));
 
         TreeList.Node<String> abc = new TreeList.Node<String>(false, GlazedListsTests.stringToList("ABC"));
         TreeList.Node<String> abcd = new TreeList.Node<String>(false, GlazedListsTests.stringToList("ABCd"));
         
         assertTrue(nodeComparator.compare(abc, abcd) < 0);
+    }
+
+    /**
+     * Convert Strings into paths. For example, PUPPY is <code>/P/U/P/P/Y</code>
+     *
+     * <p>Lowercase values cannot have children.
+     */
+    private static class CharacterTreeFormat implements TreeList.Format<String> {
+        private final Comparator<String> comparator;
+
+        public CharacterTreeFormat() {
+            this.comparator = GlazedLists.comparableComparator();
+        }
+
+        public CharacterTreeFormat(Comparator<String> comparator) {
+            this.comparator = comparator;
+        }
+
+        public boolean allowsChildren(String element) {
+            return Character.isUpperCase(element.charAt(0));
+        }
+        public void getPath(List<String> path, String element) {
+            path.addAll(GlazedListsTests.stringToList(element));
+        }
+
+        public Comparator<String> getComparator(int depth) {
+            return comparator;
+        }
     }
 }

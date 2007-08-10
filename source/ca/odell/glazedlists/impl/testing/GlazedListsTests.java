@@ -4,8 +4,6 @@
 package ca.odell.glazedlists.impl.testing;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.TreeList;
-import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.Matcher;
@@ -22,9 +20,6 @@ public class GlazedListsTests {
 
     private static final Comparator<String> FIRST_LETTER_COMPARATOR = new FirstLetterComparator();
     private static final Comparator<String> LAST_LETTER_COMPARATOR = new LastLetterComparator();
-
-    private static final TreeList.Format<String> COMPRESSED_CHARACTER_TREE_FORMAT = new CharacterTreeFormat();
-    private static final TreeList.Format<String> UNCOMPRESSED_CHARACTER_TREE_FORMAT = new CharacterTreeFormat(null);
 
     /**
      * A dummy constructor to prevent instantiation of this class
@@ -188,18 +183,6 @@ public class GlazedListsTests {
         }
     }
 
-    public static TreeList.Format<String> compressedCharacterTreeFormat() {
-        return COMPRESSED_CHARACTER_TREE_FORMAT;
-    }
-
-    public static TreeList.Format<String> uncompressedCharacterTreeFormat() {
-        return UNCOMPRESSED_CHARACTER_TREE_FORMAT;
-    }
-
-    public static TreeList.Format<String> characterTreeFormat(Comparator<String> comparator) {
-        return new CharacterTreeFormat(comparator);
-    }
-
     public static Date createDate(int year, int month, int date) {
         Calendar cal = Calendar.getInstance();
         cal.clear();
@@ -308,33 +291,5 @@ public class GlazedListsTests {
         public static EventList getLastSource() {
             return lastSource;
         }
-    }
-
-    /**
-     * Convert Strings into paths. For example, PUPPY is <code>/P/U/P/P/Y</code>
-     *
-     * <p>Lowercase values cannot have children.
-     */
-    private static class CharacterTreeFormat implements TreeList.Format<String> {
-        private final Comparator<String> comparator;
-
-        public CharacterTreeFormat() {
-            this.comparator = GlazedLists.comparableComparator();
-        }
-
-        public CharacterTreeFormat(Comparator<String> comparator) {
-            this.comparator = comparator;
-        }
-
-        public boolean allowsChildren(String element) {
-            return Character.isUpperCase(element.charAt(0));
-        }
-        public void getPath(List<String> path, String element) {
-            path.addAll(GlazedListsTests.stringToList(element));
-        }
-
-        public Comparator<String> getComparator(int depth) {
-            return comparator;
-        }
-    }
+    }    
 }
