@@ -98,7 +98,11 @@ public class EventTableViewer<E> implements ListEventListener<E> {
             selection = new SelectionManager<E>(this.source, new SelectableTable());
 
             // configure how the Table will be manipulated
-            tableHandler = (table.getStyle() & SWT.VIRTUAL) == SWT.VIRTUAL ? new VirtualTableHandler() : new DefaultTableHandler();
+            if((table.getStyle() & SWT.VIRTUAL) == SWT.VIRTUAL) {
+                tableHandler = new VirtualTableHandler();
+            } else {
+                tableHandler = new DefaultTableHandler();
+            }
 
             // setup the Table with initial values
             initTable();
