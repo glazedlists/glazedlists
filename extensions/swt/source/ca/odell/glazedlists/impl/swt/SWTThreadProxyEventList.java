@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.swt;
 
-// Java collections are used for underlying data storage
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.impl.gui.ThreadProxyEventList;
 import org.eclipse.swt.widgets.Display;
@@ -18,11 +17,11 @@ import org.eclipse.swt.widgets.Display;
 public class SWTThreadProxyEventList<E> extends ThreadProxyEventList<E> {
 
     /** the display which owns the user interface thread */
-    private Display display;
+    private final Display display;
     
     /**
-     * Create a {@link SWTThreadProxyEventList} that mirrors the specified source
-     * {@link EventList} for access on the Swing thread.
+     * Create a {@link SWTThreadProxyEventList} that mirrors the specified
+     * source {@link EventList} for access on the SWT thread.
      */
     public SWTThreadProxyEventList(EventList<E> source, Display display) {
         super(source);

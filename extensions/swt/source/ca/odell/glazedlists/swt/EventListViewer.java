@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swt;
 
-// for swt Lists
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -18,9 +17,6 @@ import org.eclipse.swt.widgets.List;
  *
  * <p>This class is not thread safe. It must be used exclusively with the SWT
  * event handler thread.
- *
- * <p><strong>Warning:</strong> This class is a a developer preview and subject to
- * many bugs and API changes.
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
@@ -52,27 +48,26 @@ public class EventListViewer<E> implements ListEventListener<E> {
      * List elements are formatted using the provided {@link ILabelProvider}.
      */
     public EventListViewer(EventList<E> source, List list, ILabelProvider labelProvider) {
-        swtSource = GlazedListsSWT.swtThreadProxyList(source, list.getDisplay());
-        this.list = list;
-        this.labelProvider = labelProvider;
+        // lock the source list for reading since we want to prevent writes
+        // from occurring until we fully initialize this EventListViewer
+        source.getReadWriteLock().readLock().lock();
+        try {
+            swtSource = GlazedListsSWT.swtThreadProxyList(source, list.getDisplay());
+            this.list = list;
+            this.labelProvider = labelProvider;
 
-        // Enable the selection lists
-        selection = new SelectionManager<E>(swtSource, new SelectableList());
+            // Enable the selection lists
+            selection = new SelectionManager<E>(swtSource, new SelectableList());
 
-        // setup initial values
-        populateList();
+            // setup initial values
+            for(int i = 0, n = swtSource.size(); i < n; i++) {
+                addRow(i, swtSource.get(i));
+            }
 
-        // listen for changes
-        swtSource.addListEventListener(this);
-    }
-
-    /**
-     * Populates the list with the original contents of the source event list.
-     */
-    private void populateList() {
-        // set the initial data
-        for(int i = 0; i < swtSource.size(); i++) {
-            addRow(i, swtSource.get(i));
+            // listen for changes
+            swtSource.addListEventListener(this);
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
         }
     }
 

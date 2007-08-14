@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swt;
 
-// for swt Lists
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -17,9 +16,6 @@ import org.eclipse.swt.widgets.Combo;
  *
  * <p>This class is not thread safe. It must be used exclusively with the SWT
  * event handler thread.
- *
- * <p><strong>Warning:</strong> This class is a a developer preview and subject to
- * many bugs and API changes.
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
@@ -56,17 +52,24 @@ public class EventComboViewer<E> implements ListEventListener<E> {
      * @see GlazedListsSWT#beanLabelProvider(String)
      */
     public EventComboViewer(EventList<E> source, Combo combo, ILabelProvider labelProvider) {
-        swtSource = GlazedListsSWT.swtThreadProxyList(source, combo.getDisplay());
-        this.combo = combo;
-        this.labelProvider = labelProvider;
+        // lock the source list for reading since we want to prevent writes
+        // from occurring until we fully initialize this EventComboViewer
+        source.getReadWriteLock().readLock().lock();
+        try {
+            this.swtSource = GlazedListsSWT.swtThreadProxyList(source, combo.getDisplay());
+            this.combo = combo;
+            this.labelProvider = labelProvider;
 
-        // set the initial data
-        for(int i = 0; i < source.size(); i++) {
-            addRow(i, source.get(i));
+            // set the initial data
+            for(int i = 0, n = source.size(); i < n; i++) {
+                addRow(i, source.get(i));
+            }
+
+            // listen for changes
+            swtSource.addListEventListener(this);
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
         }
-
-        // listen for changes
-        swtSource.addListEventListener(this);
     }
 
     /**

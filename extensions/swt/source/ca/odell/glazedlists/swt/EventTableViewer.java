@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swt;
 
-// the core Glazed Lists packages
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.TransformedList;
@@ -15,15 +14,13 @@ import ca.odell.glazedlists.impl.adt.BarcodeIterator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.*;
+import java.util.List;
 
 /**
  * A view helper that displays an EventList in an SWT table.
  *
  * <p>This class is not thread safe. It must be used exclusively with the SWT
  * event handler thread.
- *
- * <p><strong>Warning:</strong> This class is a a developer preview and subject to
- * many bugs and API changes.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
@@ -32,30 +29,41 @@ public class EventTableViewer<E> implements ListEventListener<E> {
     /** the heavyweight table */
     private Table table;
 
-    /** to manipulate Tables in a generic way */
-    private TableHandler tableHandler = null;
-
-    /** the first source event list to dispose */
-    private TransformedList<E, E> disposeSource = null;
-
-    /** the proxy moves events to the SWT user interface thread */
-    private TransformedList<E, E> swtSource = null;
+    /** the proxy that moves events to the SWT user interface thread */
+    private TransformedList<E,E> swtThreadSource;
 
     /** Enables check support */
-    private TableCheckFilterList<E, E> checkFilter = null;
+    private TableCheckFilterList<E,E> checkFilterList;
+
+    /** the actual EventList to which this EventTableViewer is listening */
+    private EventList<E> source;
+
+    /** to manipulate Tables in a generic way */
+    private TableHandler tableHandler;
 
     /** Specifies how to render table headers and sort */
     private TableFormat<E> tableFormat;
 
     /** For selection management */
-    private SelectionManager<E> selection = null;
+    private SelectionManager<E> selection;
 
     /**
      * Creates a new viewer for the given {@link Table} that updates the table
-     * contents in response to changes on the specified {@link EventList}.  The
+     * contents in response to changes on the specified {@link EventList}. The
      * {@link Table} is formatted with an automatically generated
      * {@link TableFormat}. It uses JavaBeans and Reflection to create a
      * {@link TableFormat} as specified.
+     *
+     * @param source the EventList that provides the row objects
+     * @param table the Table viewing the source objects
+     * @param propertyNames an array of property names in the JavaBeans format.
+     *      For example, if your list contains Objects with the methods getFirstName(),
+     *      setFirstName(String), getAge(), setAge(Integer), then this array should
+     *      contain the two strings "firstName" and "age". This format is specified
+     *      by the JavaBeans {@link java.beans.PropertyDescriptor}.
+     * @param columnLabels the corresponding column names for the listed property
+     *      names. For example, if your columns are "firstName" and "age", then
+     *      your labels might be "First Name" and "Age".
      */
     public EventTableViewer(EventList<E> source, Table table, String[] propertyNames, String[] columnLabels) {
         this(source, table, (TableFormat<E>)GlazedLists.tableFormat(propertyNames, columnLabels));
@@ -63,39 +71,44 @@ public class EventTableViewer<E> implements ListEventListener<E> {
 
     /**
      * Creates a new viewer for the given {@link Table} that updates the table
-     * contents in response to changes on the specified {@link EventList}.  The
+     * contents in response to changes on the specified {@link EventList}. The
      * {@link Table} is formatted with the specified {@link TableFormat}.
+     *
+     * @param source the EventList that provides the row objects
+     * @param table the Table viewing the source objects
+     * @param tableFormat the object responsible for extracting column data
+     *      from the row objects
      */
     public EventTableViewer(EventList<E> source, Table table, TableFormat<E> tableFormat) {
-        swtSource = GlazedListsSWT.swtThreadProxyList(source, table.getDisplay());
-        disposeSource = swtSource;
+        // lock the source list for reading since we want to prevent writes
+        // from occurring until we fully initialize this EventTableViewer
+        source.getReadWriteLock().readLock().lock();
+        try {
+            // insert a list to move ListEvents to the SWT event dispatch thread
+            this.source = swtThreadSource = GlazedListsSWT.swtThreadProxyList(source, table.getDisplay());
 
-        // insert a checked source if supported by the table
-        if((table.getStyle() & SWT.CHECK) == SWT.CHECK) {
-            checkFilter = new TableCheckFilterList<E, E>(swtSource, table, tableFormat);
-            swtSource = checkFilter;
+            // insert a checked source if supported by the table
+            if ((table.getStyle() & SWT.CHECK) == SWT.CHECK)
+                this.source = checkFilterList = new TableCheckFilterList<E,E>(swtThreadSource, table, tableFormat);
+
+            this.table = table;
+            this.tableFormat = tableFormat;
+
+            // enable the selection lists
+            selection = new SelectionManager<E>(this.source, new SelectableTable());
+
+            // configure how the Table will be manipulated
+            tableHandler = (table.getStyle() & SWT.VIRTUAL) == SWT.VIRTUAL ? new VirtualTableHandler() : new DefaultTableHandler();
+
+            // setup the Table with initial values
+            initTable();
+            tableHandler.populateTable();
+
+            // prepare listeners
+            this.source.addListEventListener(this);
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
         }
-
-        // save table, source list and table format
-        this.table = table;
-        this.tableFormat = tableFormat;
-
-        // enable the selection lists
-        selection = new SelectionManager<E>(swtSource, new SelectableTable());
-
-        // configure how the Table will be manipulated
-        if((table.getStyle() & SWT.VIRTUAL) == SWT.VIRTUAL) {
-            tableHandler = new VirtualTableHandler();
-        } else {
-            tableHandler = new DefaultTableHandler();
-        }
-
-        // setup the Table with initial values
-        initTable();
-        tableHandler.populateTable();
-
-        // listen for events, using the user interface thread
-        swtSource.addListEventListener(this);
     }
 
     /**
@@ -116,8 +129,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
     private void setItemText(TableItem item, E value) {
         for(int i = 0; i < tableFormat.getColumnCount(); i++) {
             Object cellValue = tableFormat.getColumnValue(value, i);
-            if(cellValue != null) item.setText(i, cellValue.toString());
-            else item.setText(i, "");
+            item.setText(i, cellValue != null ? cellValue.toString() : "");
         }
     }
 
@@ -136,7 +148,6 @@ public class EventTableViewer<E> implements ListEventListener<E> {
         return table;
     }
 
-
     /**
      * Sets this {@link Table} to be formatted by a different
      * {@link TableFormat}.  This method is not yet implemented for SWT.
@@ -149,34 +160,34 @@ public class EventTableViewer<E> implements ListEventListener<E> {
      * Set whether this shall show only checked elements.
      */
     public void setCheckedOnly(boolean checkedOnly) {
-        checkFilter.setCheckedOnly(checkedOnly);
+        checkFilterList.setCheckedOnly(checkedOnly);
     }
     /**
      * Get whether this is showing only checked elements.
      */
     public boolean getCheckedOnly() {
-        return checkFilter.getCheckedOnly();
+        return checkFilterList.getCheckedOnly();
     }
 
     /**
      * Gets all checked items.
      */
-    public java.util.List getAllChecked() {
-        return checkFilter.getAllChecked();
+    public List getAllChecked() {
+        return checkFilterList.getAllChecked();
     }
 
     /**
      * Get the source of this {@link EventTableViewer}.
      */
-    public EventList getSourceList() {
-        return swtSource;
+    public EventList<E> getSourceList() {
+        return source;
     }
 
     /**
      * Provides access to an {@link EventList} that contains items from the
      * viewed {@link Table} that are not currently selected.
      */
-    public EventList getDeselected() {
+    public EventList<E> getDeselected() {
         return selection.getSelectionList().getDeselected();
     }
 
@@ -184,7 +195,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
      * Provides access to an {@link EventList} that contains items from the
      * viewed {@link Table} that are currently selected.
      */
-    public EventList getSelected() {
+    public EventList<E> getSelected() {
         return selection.getSelectionList().getSelected();
     }
 
@@ -194,9 +205,9 @@ public class EventTableViewer<E> implements ListEventListener<E> {
      */
     public void listChanged(ListEvent listChanges) {
         Barcode deletes = new Barcode();
-        deletes.addWhite(0, swtSource.size());
-        int firstChange = swtSource.size();
-            // Disable redraws so that the table is updated in bulk
+        deletes.addWhite(0, swtThreadSource.size());
+        int firstChange = swtThreadSource.size();
+        // Disable redraws so that the table is updated in bulk
         table.setRedraw(false);
 
         // Apply changes to the list
@@ -208,12 +219,12 @@ public class EventTableViewer<E> implements ListEventListener<E> {
             // Insert a new element in the Table and the Barcode
             if (changeType == ListEvent.INSERT) {
                 deletes.addWhite(adjustedIndex, 1);
-                tableHandler.addRow(adjustedIndex, swtSource.get(changeIndex));
+                tableHandler.addRow(adjustedIndex, swtThreadSource.get(changeIndex));
                 firstChange = Math.min(changeIndex, firstChange);
 
                 // Update the element in the Table
             } else if (changeType == ListEvent.UPDATE) {
-                tableHandler.updateRow(adjustedIndex, swtSource.get(changeIndex));
+                tableHandler.updateRow(adjustedIndex, swtThreadSource.get(changeIndex));
 
                 // Just mark the element as deleted in the Barcode
             } else if (changeType == ListEvent.DELETE) {
@@ -260,10 +271,19 @@ public class EventTableViewer<E> implements ListEventListener<E> {
     public void dispose() {
         tableHandler.dispose();
         selection.dispose();
-        disposeSource.dispose();
+        swtThreadSource.dispose();
+        source.removeListEventListener(this);
 
-        swtSource.removeListEventListener(this);
-        swtSource.dispose();
+        // if we created the checkFilterList then we must also dispose it
+        if(checkFilterList != null) {
+            checkFilterList.dispose();
+        }
+
+        // this encourages exceptions to be thrown if this model is incorrectly accessed again
+        swtThreadSource = null;
+        checkFilterList = null;
+        tableHandler = null;
+        selection = null;
     }
 
     /**
@@ -345,8 +365,8 @@ public class EventTableViewer<E> implements ListEventListener<E> {
          * Populate the Table with initial data.
          */
         public void populateTable() {
-            for(int r = 0; r < swtSource.size(); r++) {
-                addRow(r, swtSource.get(r));
+            for(int i = 0, n = swtThreadSource.size(); i < n; i++) {
+                addRow(i, swtThreadSource.get(i));
             }
         }
 
@@ -389,14 +409,13 @@ public class EventTableViewer<E> implements ListEventListener<E> {
     private final class VirtualTableHandler implements TableHandler, Listener {
 
         /** to keep track of what's been requested */
-        private Barcode requested = null;
+        private final Barcode requested = new Barcode();
 
         /**
          * Create a new VirtualTableHandler.
          */
         public VirtualTableHandler() {
-            requested = new Barcode();
-            requested.addWhite(0, swtSource.size());
+            requested.addWhite(0, swtThreadSource.size());
             table.addListener(SWT.SetData, this);
         }
 
@@ -404,7 +423,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
          * Populate the Table with initial data.
          */
         public void populateTable() {
-            table.setItemCount(swtSource.size());
+            table.setItemCount(swtThreadSource.size());
         }
 
         /**
@@ -480,7 +499,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
 
             // Set the value on the Virtual element
             requested.setBlack(index, 1);
-            setItemText(item, swtSource.get(index));
+            setItemText(item, swtThreadSource.get(index));
         }
 
         /**

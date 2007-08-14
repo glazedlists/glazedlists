@@ -4,6 +4,7 @@
 package ca.odell.glazedlists.swt;
 
 // the core Glazed Lists packages
+
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ThresholdList;
 import ca.odell.glazedlists.TransformedList;
@@ -92,5 +93,13 @@ public final class GlazedListsSWT {
      */
     public static SelectionListener upperThresholdViewer(ThresholdList thresholdList, Scale scale) {
         return new UpperThresholdViewer(thresholdList, BoundedRangeControlFactory.scale(scale));
+    }
+
+    /**
+     * Returns true iff <code>list</code> is an {@link EventList} that fires
+     * all of its update events from the SWT event dispatch thread.
+     */
+    public static boolean isSWTThreadProxyList(EventList list) {
+        return list instanceof SWTThreadProxyEventList;
     }
 }

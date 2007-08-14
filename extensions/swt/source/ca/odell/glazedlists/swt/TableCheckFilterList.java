@@ -3,7 +3,6 @@
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 package ca.odell.glazedlists.swt;
 
-// the core Glazed Lists packages
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.TransformedList;
@@ -16,6 +15,7 @@ import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.Matchers;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
@@ -34,7 +34,7 @@ import java.util.List;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-final class TableCheckFilterList<S, E> extends TransformedList<S, E> implements org.eclipse.swt.events.SelectionListener {
+final class TableCheckFilterList<S, E> extends TransformedList<S, E> implements SelectionListener {
 
     /** filter out unchecked elements */
     private CheckMatcherEditor<S> checkMatcherEditor = new CheckMatcherEditor<S>();
@@ -349,21 +349,16 @@ class CheckableWrapperList extends TransformedList {
 class CheckWrapped<E> {
     private boolean checked = false;
     private E wrapped = null;
+
     public CheckWrapped(E wrapped) {
         this.wrapped = wrapped;
     }
-    public E getWrapped() {
-        return wrapped;
-    }
-    public void setWrapped(E wrapped) {
-        this.wrapped = wrapped;
-    }
-    public boolean getChecked() {
-        return checked;
-    }
-    public void setChecked(boolean checked) {
-        this.checked = checked;
-    }
+    public E getWrapped() { return wrapped; }
+    public void setWrapped(E wrapped) { this.wrapped = wrapped; }
+
+    public boolean getChecked() { return checked; }
+    public void setChecked(boolean checked) { this.checked = checked; }
+
     public String toString() {
         if(checked) return "[*] " + wrapped;
         else return "[ ] " + wrapped;
