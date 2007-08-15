@@ -4,13 +4,11 @@
 package com.publicobject.amazonbrowser;
 
 import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.TreeList;
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 
 import java.util.Comparator;
 import java.util.Date;
-import java.util.List;
 
 /**
  * The ItemTableFormat specifies how an item is displayed in a table.

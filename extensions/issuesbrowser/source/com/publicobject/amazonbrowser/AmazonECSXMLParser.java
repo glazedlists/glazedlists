@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Map;
 
 /**
  * This class knows how to fetch and parse XML streams of product data from the

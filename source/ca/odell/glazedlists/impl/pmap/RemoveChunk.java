@@ -5,7 +5,6 @@ package ca.odell.glazedlists.impl.pmap;
 
 // NIO is used for CTP
 import java.io.IOException;
-import java.nio.channels.FileChannel;
 import java.util.logging.Logger;
 
 /**

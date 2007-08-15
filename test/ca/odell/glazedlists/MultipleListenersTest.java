@@ -6,8 +6,6 @@ package ca.odell.glazedlists;
 // for being a JUnit test case
 import ca.odell.glazedlists.impl.sort.ReverseComparator;
 import ca.odell.glazedlists.impl.testing.AtLeastMatcherEditor;
-import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
-import ca.odell.glazedlists.matchers.Matcher;
 import junit.framework.TestCase;
 
 import java.util.*;

@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.filebrowser;
 
-import ca.odell.glazedlists.GlazedLists;
 
 import java.io.File;
 import java.util.Date;
