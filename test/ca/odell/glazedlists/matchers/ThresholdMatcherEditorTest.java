@@ -440,7 +440,7 @@ public class ThresholdMatcherEditorTest extends TestCase {
      */
     private static class AbsComparator implements Comparator<Integer> {
         public int compare(Integer o1, Integer o2) {
-            return Math.abs(o1) - Math.abs(o2);
+            return Math.abs(o1.intValue()) - Math.abs(o2.intValue());
         }
     }
 }
