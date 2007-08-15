@@ -42,7 +42,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
     private TableHandler<E> tableHandler;
 
     /** Specifies how to render table headers and sort */
-    private TableFormat<E> tableFormat;
+    private TableFormat<? super E> tableFormat;
 
     /** For selection management */
     private SelectionManager<E> selection;
@@ -79,7 +79,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
      * @param tableFormat the object responsible for extracting column data
      *      from the row objects
      */
-    public EventTableViewer(EventList<E> source, Table table, TableFormat<E> tableFormat) {
+    public EventTableViewer(EventList<E> source, Table table, TableFormat<? super E> tableFormat) {
         // lock the source list for reading since we want to prevent writes
         // from occurring until we fully initialize this EventTableViewer
         source.getReadWriteLock().readLock().lock();
@@ -140,7 +140,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
     /**
      * Gets the {@link TableFormat}.
      */
-    public TableFormat<E> getTableFormat() {
+    public TableFormat<? super E> getTableFormat() {
         return tableFormat;
     }
 

@@ -7,6 +7,7 @@ package com.publicobject.issuesbrowser.swt;
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.Matchers;
 import ca.odell.glazedlists.matchers.ThreadedMatcherEditor;
 import ca.odell.glazedlists.swt.*;
@@ -30,7 +31,7 @@ import org.eclipse.swt.widgets.*;
 public class IssuesBrowser {
 
     /** an event list to host the issues */
-    private UniqueList issuesEventList = new UniqueList(new BasicEventList());
+    private UniqueList<Issue> issuesEventList = new UniqueList<Issue>(new BasicEventList<Issue>());
 
     /** To get access to the unique list of users */
     private UsersMatcherEditor usersMatcherEditor = null;
@@ -45,10 +46,10 @@ public class IssuesBrowser {
     private IssuesBrowser(Shell shell) {
         // Various Layered List Transformations
         usersMatcherEditor = new UsersMatcherEditor(issuesEventList);
-        FilterList issuesUserFiltered = new FilterList(issuesEventList, usersMatcherEditor);
-        FilterList issuesTextFiltered = new FilterList(issuesUserFiltered, Matchers.trueMatcher());
-        ThresholdList priorityList = new ThresholdList(issuesTextFiltered, "priority.rating");
-        SortedList issuesSortedList = new SortedList(priorityList);
+        FilterList<Issue> issuesUserFiltered = new FilterList<Issue>(issuesEventList, usersMatcherEditor);
+        FilterList<Issue> issuesTextFiltered = new FilterList<Issue>(issuesUserFiltered, Matchers.trueMatcher());
+        ThresholdList<Issue> priorityList = new ThresholdList<Issue>(issuesTextFiltered, "priority.rating");
+        SortedList<Issue> issuesSortedList = new SortedList<Issue>(priorityList);
 
         // This is the outer component for the demo
         SashForm demoForm = new SashForm(shell, SWT.HORIZONTAL);
@@ -87,7 +88,8 @@ public class IssuesBrowser {
 
         // Add the various filters
         Text filterText = createFilterText(filterPanel);
-        issuesTextFiltered.setMatcherEditor(new ThreadedMatcherEditor(new TextWidgetMatcherEditor(filterText, null)));
+        final MatcherEditor<Issue> matcherEditor = new TextWidgetMatcherEditor<Issue>(filterText, new IssueTextFilterator());
+        issuesTextFiltered.setMatcherEditor(new ThreadedMatcherEditor<Issue>(matcherEditor));
         createPrioritySlider(filterPanel, priorityList);
         createUsersList(shell, filterPanel);
 
@@ -110,9 +112,9 @@ public class IssuesBrowser {
 
         // Create the Issues Table
         Table issuesTable = createIssuesTable(issuePanel);
-        EventTableViewer issuesTableViewer = new EventTableViewer(issuesSortedList, issuesTable, new IssueTableFormat());
+        EventTableViewer<Issue> issuesTableViewer = new EventTableViewer<Issue>(issuesSortedList, issuesTable, new IssueTableFormat());
         issuesTable = formatIssuesTable(issuesTable);
-        new TableComparatorChooser(issuesTableViewer, issuesSortedList, false);
+        TableComparatorChooser.install(issuesTableViewer, issuesSortedList, false);
 
         // Create the Descriptions Table
         createDescriptionsTable(issuePanel, issuesTableViewer);
@@ -125,7 +127,7 @@ public class IssuesBrowser {
 
         // Start the demo
         issueLoader.start();
-        issueLoader.setProject((Project) Project.getProjects().get(0));
+        issueLoader.setProject(Project.getProjects().get(0));
     }
 
     private Text createFilterText(Composite parent) {
@@ -302,7 +304,7 @@ public class IssuesBrowser {
         usersList.setLayoutData(usersListLayout);
 
         // Add filtering based on selection of issue owners
-        EventListViewer listViewer = new EventListViewer(usersMatcherEditor.getUsersList(), usersList);
+        EventListViewer<String> listViewer = new EventListViewer<String>(usersMatcherEditor.getUsersList(), usersList);
         usersMatcherEditor.setSelectionList(listViewer.getSelected());
     }
 
@@ -332,18 +334,7 @@ public class IssuesBrowser {
         return issuesTable;
     }
 
-    private void createDescriptionsHeader(Composite parent) {
-        Label descriptionsLabel = new Label(parent, SWT.HORIZONTAL | SWT.CENTER | SWT.SHADOW_NONE);
-        descriptionsLabel.setText("Description");
-        GridData descriptionsLabelLayout = new GridData();
-        descriptionsLabelLayout.horizontalAlignment = GridData.FILL;
-        descriptionsLabelLayout.verticalAlignment = GridData.BEGINNING;
-        descriptionsLabelLayout.grabExcessHorizontalSpace = true;
-        descriptionsLabelLayout.grabExcessVerticalSpace = false;
-        descriptionsLabel.setLayoutData(descriptionsLabelLayout);
-    }
-
-    private void createDescriptionsTable(Composite parent, EventTableViewer issuesTableViewer) {
+    private void createDescriptionsTable(Composite parent, EventTableViewer<Issue> issuesTableViewer) {
         Table descriptionsTable = new Table(parent, SWT.MULTI | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.BORDER);
         GridData descriptionsTableLayout = new GridData();
         descriptionsTableLayout.horizontalAlignment = GridData.FILL;
@@ -363,19 +354,19 @@ public class IssuesBrowser {
      * A listener to selection on the issues table that reflects the change
      * in selection within the description table.
      */
-    static class IssueSelectionListener implements ListEventListener {
+    static class IssueSelectionListener implements ListEventListener<Issue> {
 
-        private EventList source = null;
+        private EventList<Issue> source = null;
         private Table descriptionsTable = null;
 
-        IssueSelectionListener(EventList source, Table descriptionsTable) {
+        IssueSelectionListener(EventList<Issue> source, Table descriptionsTable) {
             this.source = source;
             this.descriptionsTable = descriptionsTable;
             source.addListEventListener(this);
         }
 
         /** {@inheritDoc} */
-        public void listChanged(ListEvent listChanges) {
+        public void listChanged(ListEvent<Issue> listChanges) {
             boolean selectionAffected = false;
             while(listChanges.next()) {
                 if(!selectionAffected) {
@@ -389,7 +380,7 @@ public class IssuesBrowser {
 
                 // The selected value to display was changed
                 if(source.size() != 0) {
-                    Issue selected = (Issue)source.get(0);
+                    Issue selected = source.get(0);
                     java.util.List descriptions = selected.getDescriptions();
                     for (int i = 0; i < descriptions.size(); i++) {
                        int rowOffset = descriptionsTable.getItemCount();
@@ -424,12 +415,9 @@ public class IssuesBrowser {
     }
 
     /**
-     *
+     * Starts the IssueBrowser.
      */
     public static void main(String[] args) {
-//        System.setProperty("java.library.path", ".");
-        System.out.println(System.getProperty("java.library.path"));
-
         Display display = new Display();
         Shell parent = new Shell(display);
         parent.setText("Issues");
