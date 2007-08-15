@@ -132,9 +132,9 @@ final class TableCheckFilterList<S, E> extends TransformedList<S, E> implements 
     /**
      * Gets a static snapshot of the checked Objects in this list.
      */
-    public List getAllChecked() {
-        List result = new ArrayList();
-        for(int i = 0; i < size(); i++) {
+    public List<E> getAllChecked() {
+        final List<E> result = new ArrayList<E>();
+        for(int i = 0, n = size(); i < n; i++) {
             if(getChecked(i)) {
                 result.add(get(i));
             }
@@ -157,7 +157,6 @@ final class TableCheckFilterList<S, E> extends TransformedList<S, E> implements 
         return checkMatcherEditor.getCheckedOnly();
     }
 
-
     /**
      * Returns the element at the specified position in this list. This unwraps
      * a {@link CheckWrapped} object from the source if necessary.
@@ -166,7 +165,7 @@ final class TableCheckFilterList<S, E> extends TransformedList<S, E> implements 
         if(checkableTableFormat != null) {
             return super.get(index);
         } else {
-            CheckWrapped<E> checkWrapped = (CheckWrapped)super.get(index);
+            CheckWrapped<E> checkWrapped = (CheckWrapped<E>)super.get(index);
             return checkWrapped.getWrapped();
         }
     }
@@ -175,7 +174,6 @@ final class TableCheckFilterList<S, E> extends TransformedList<S, E> implements 
     public void listChanged(ListEvent listChanges) {
         updates.forwardEvent(listChanges);
     }
-
 
     /**
      * Sent when selection occurs in the control.
@@ -233,7 +231,7 @@ final class TableCheckFilterList<S, E> extends TransformedList<S, E> implements 
      * This is because the TableCheckFilterList may not have any lists between it
      * and the EventTableViewer.
      */
-    public void addListEventListener(ListEventListener listChangeListener) {
+    public void addListEventListener(ListEventListener<? super E> listChangeListener) {
         super.addListEventListener(listChangeListener);
 
         // also adjust the table's checked rows
@@ -253,7 +251,7 @@ final class TableCheckFilterList<S, E> extends TransformedList<S, E> implements 
     /**
      * The TableChecker checks the table rows after they have been updated.
      */
-    private class TableChecker implements ListEventListener {
+    private class TableChecker implements ListEventListener<E> {
         public TableChecker() {
             for(int i = 0; i < size(); i++) {
                 boolean checked = getChecked(i);
@@ -284,12 +282,12 @@ final class TableCheckFilterList<S, E> extends TransformedList<S, E> implements 
  * All get() calls return from the mirror collection rather than from the source
  * list.
  */
-class CheckableWrapperList extends TransformedList {
+class CheckableWrapperList<S> extends TransformedList<S, CheckWrapped<S>> {
 
     /** wrapped list contains CheckWrapped elements only */
-    private List wrappedSource = new ArrayList();
+    private List<CheckWrapped<S>> wrappedSource = new ArrayList<CheckWrapped<S>>();
 
-    public CheckableWrapperList(EventList source) {
+    public CheckableWrapperList(EventList<S> source) {
         super(source);
 
         source.getReadWriteLock().readLock().lock();
@@ -303,40 +301,37 @@ class CheckableWrapperList extends TransformedList {
 
     /**
      * The CheckableWrapperList supports only one write operation, which is to
-     * force an update on a specified value. This requires that the parameter value
-     * is an instance of CheckWrapped, which is the only value that this list
-     * supports.
+     * force an update on a specified value. This requires that the parameter
+     * value is an instance of CheckWrapped, which is the only value that this
+     * list supports.
      */
-    public Object set(int index, Object value) {
-        CheckWrapped checkWrapped = (CheckWrapped)value;
-        return source.set(index, checkWrapped.getWrapped());
+    public CheckWrapped<S> set(int index, CheckWrapped<S> value) {
+        source.set(index, value.getWrapped());
+        return value;
     }
 
     private void prepareElements() {
-        for(int i = 0; i < source.size(); i++) {
-            CheckWrapped checkWrapped = new CheckWrapped(source.get(i));
-            wrappedSource.add(i, checkWrapped);
+        for(int i = 0, n = source.size(); i < n; i++) {
+            wrappedSource.add(i, new CheckWrapped<S>(source.get(i)));
         }
     }
 
-    public Object get(int index) {
+    public CheckWrapped<S> get(int index) {
         return wrappedSource.get(index);
     }
 
     public void listChanged(ListEvent listChanges) {
         updates.beginEvent();
-        while(listChanges.next()) {
-            int changeIndex = listChanges.getIndex();
-            int changeType = listChanges.getType();
-            if(changeType == ListEvent.INSERT) {
-                CheckWrapped checkWrapped = new CheckWrapped(source.get(changeIndex));
-                wrappedSource.add(changeIndex, checkWrapped);
-            } else if(changeType == ListEvent.UPDATE) {
-                CheckWrapped checkWrapped = (CheckWrapped)wrappedSource.get(changeIndex);
-                checkWrapped.setWrapped(source.get(changeIndex));
-            } else if(changeType == ListEvent.DELETE) {
-                wrappedSource.remove(changeIndex);
+        while (listChanges.next()) {
+            final int changeIndex = listChanges.getIndex();
+            final int changeType = listChanges.getType();
+
+            switch (changeType) {
+                case ListEvent.INSERT: wrappedSource.add(changeIndex, new CheckWrapped<S>(source.get(changeIndex))); break;
+                case ListEvent.UPDATE: wrappedSource.get(changeIndex).setWrapped(source.get(changeIndex)); break;
+                case ListEvent.DELETE: wrappedSource.remove(changeIndex); break;
             }
+
             updates.addChange(changeType, changeIndex);
         }
         updates.commitEvent();

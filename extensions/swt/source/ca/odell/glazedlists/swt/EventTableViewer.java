@@ -39,7 +39,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
     private EventList<E> source;
 
     /** to manipulate Tables in a generic way */
-    private TableHandler tableHandler;
+    private TableHandler<E> tableHandler;
 
     /** Specifies how to render table headers and sort */
     private TableFormat<E> tableFormat;
@@ -122,7 +122,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
         table.setHeaderVisible(true);
         for(int c = 0; c < tableFormat.getColumnCount(); c++) {
             TableColumn column = new TableColumn(table, SWT.LEFT, c);
-            column.setText((String)tableFormat.getColumnName(c));
+            column.setText(tableFormat.getColumnName(c));
             column.setWidth(80);
         }
     }
@@ -156,7 +156,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
      * Sets this {@link Table} to be formatted by a different
      * {@link TableFormat}.  This method is not yet implemented for SWT.
      */
-    public void setTableFormat(TableFormat tableFormat) {
+    public void setTableFormat(TableFormat<E> tableFormat) {
         throw new UnsupportedOperationException();
     }
 
@@ -176,8 +176,13 @@ public class EventTableViewer<E> implements ListEventListener<E> {
     /**
      * Gets all checked items.
      */
-    public List getAllChecked() {
-        return checkFilterList.getAllChecked();
+    public List<E> getAllChecked() {
+        checkFilterList.getReadWriteLock().readLock().lock();
+        try {
+            return checkFilterList.getAllChecked();
+        } finally {
+            checkFilterList.getReadWriteLock().readLock().unlock();
+        }
     }
 
     /**
@@ -333,7 +338,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
     /**
      * Defines how Tables will be manipulated.
      */
-    private interface TableHandler {
+    private interface TableHandler<E> {
 
         /**
          * Populate the Table with data.
@@ -343,12 +348,12 @@ public class EventTableViewer<E> implements ListEventListener<E> {
         /**
          * Add a row with the given value.
          */
-        public void addRow(int row, Object value);
+        public void addRow(int row, E value);
 
         /**
          * Update a row with the given value.
          */
-        public void updateRow(int row, Object value);
+        public void updateRow(int row, E value);
 
         /**
          * Removes a set of rows in a single call
@@ -364,7 +369,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
     /**
      * Allows manipulation of standard SWT Tables.
      */
-    private final class DefaultTableHandler implements TableHandler {
+    private final class DefaultTableHandler implements TableHandler<E> {
         /**
          * Populate the Table with initial data.
          */
@@ -377,17 +382,17 @@ public class EventTableViewer<E> implements ListEventListener<E> {
         /**
          * Adds a row with the given value.
          */
-        public void addRow(int row, Object value) {
+        public void addRow(int row, E value) {
             TableItem item = new TableItem(table, 0, row);
-            setItemText(item, (E)value);
+            setItemText(item, value);
         }
 
         /**
          * Updates a row with the given value.
          */
-        public void updateRow(int row, Object value) {
+        public void updateRow(int row, E value) {
             TableItem item = table.getItem(row);
-            setItemText(item, (E)value);
+            setItemText(item, value);
         }
 
         /**
@@ -410,7 +415,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
      * like providing the SetData callback method and tracking which values
      * are Virtual.
      */
-    private final class VirtualTableHandler implements TableHandler, Listener {
+    private final class VirtualTableHandler implements TableHandler<E>, Listener {
 
         /** to keep track of what's been requested */
         private final Barcode requested = new Barcode();
@@ -433,12 +438,12 @@ public class EventTableViewer<E> implements ListEventListener<E> {
         /**
          * Adds a row with the given value.
          */
-        public void addRow(int row, Object value) {
+        public void addRow(int row, E value) {
             // Adding before the last non-Virtual value
             if(row <= getLastIndex()) {
                 requested.addBlack(row, 1);
                 TableItem item = new TableItem(table, 0, row);
-                setItemText(item, (E)value);
+                setItemText(item, value);
 
             // Adding in the Virtual values at the end
             } else {
@@ -450,12 +455,12 @@ public class EventTableViewer<E> implements ListEventListener<E> {
         /**
          * Updates a row with the given value.
          */
-        public void updateRow(int row, Object value) {
+        public void updateRow(int row, E value) {
             // Only set a row if it is NOT Virtual
             if(!isVirtual(row)) {
                 requested.setBlack(row, 1);
                 TableItem item = table.getItem(row);
-                setItemText(item, (E)value);
+                setItemText(item, value);
             }
         }
 
@@ -464,7 +469,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
          */
         public void removeAll(int[] rows) {
             // Sync the requested barcode to clear values that have been removed
-            for(int i = 0;i < rows.length;i++) {
+            for(int i = 0; i < rows.length; i++) {
                 requested.remove(rows[i] - i, 1);
             }
             table.remove(rows);
