@@ -184,6 +184,21 @@ public class DebugListTest extends TestCase {
         list.getReadWriteLock().writeLock().unlock();
     }
 
+    public void testCreateNewDebugList() {
+        DebugList<String> list1 = new DebugList<String>();
+        DebugList<String> list2 = list1.createNewDebugList();
+
+        assertSame(list1.getPublisher(), list2.getPublisher());
+        assertSame(list1.getReadWriteLock(), list2.getReadWriteLock());
+        assertSame(list1.getReadWriteLock().readLock(), list2.getReadWriteLock().readLock());
+        assertSame(list1.getReadWriteLock().writeLock(), list2.getReadWriteLock().writeLock());
+
+        list1.add("James");
+
+        assertEquals(1, list1.size());
+        assertEquals(0, list2.size());
+    }
+
     private void runReadLockFailure(Runnable r) {
         try {
             r.run();

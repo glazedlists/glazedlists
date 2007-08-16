@@ -56,7 +56,7 @@ public class DebugList<E> extends AbstractEventList<E> {
     private final EventList<E> delegate;
 
     /** A special ReadWriteLock that reports the Threads that own the read lock and write lock at any given time. */
-    private final DebugReadWriteLock debugReadWriteLock = new DebugReadWriteLock();
+    private final DebugReadWriteLock debugReadWriteLock;
 
     /**
      * Constructs a DebugList which, by default, performs no debugging. It must
@@ -64,8 +64,20 @@ public class DebugList<E> extends AbstractEventList<E> {
      * sense for the list pipeline.
      */
     public DebugList() {
+        this(null, new DebugReadWriteLock());
+    }
+
+    /**
+     * Creates a {@link DebugList} using the specified
+     * {@link ListEventPublisher} and {@link ReadWriteLock}. This is
+     * particularly useful when multiple {@link DebugList}s are used within a
+     * {@link CompositeList} and must share the same lock and publisher.
+     */
+    private DebugList(ListEventPublisher publisher, DebugReadWriteLock debugReadWriteLock) {
+        this.debugReadWriteLock = debugReadWriteLock;
+
         // use a normal BasicEventList as the delegate implementation
-        this.delegate = new BasicEventList<E>(this.debugReadWriteLock);
+        this.delegate = new BasicEventList<E>(publisher, this.debugReadWriteLock);
         this.delegate.addListEventListener(new ListEventForwarder());
     }
 
@@ -113,6 +125,17 @@ public class DebugList<E> extends AbstractEventList<E> {
      */
     public Set<Thread> getSanctionedWriterThreads() {
         return sanctionedWriterThreads;
+    }
+
+    /**
+     * Returns a new empty {@link DebugList} which shares the same
+     * {@link ListEventListener} and {@link ReadWriteLock} with this DebugList.
+     * This method is particularly useful when debugging a {@link CompositeList}
+     * where some member lists are DebugLists and thus must share an identical
+     * publisher and locks in order to participate in the CompositeList.
+     */
+    public DebugList<E> createNewDebugList() {
+        return new DebugList<E>(getPublisher(), debugReadWriteLock);
     }
 
     /**
