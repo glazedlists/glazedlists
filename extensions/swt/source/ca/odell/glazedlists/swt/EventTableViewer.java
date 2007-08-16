@@ -82,7 +82,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
     public EventTableViewer(EventList<E> source, Table table, TableFormat<? super E> tableFormat) {
         // lock the source list for reading since we want to prevent writes
         // from occurring until we fully initialize this EventTableViewer
-        source.getReadWriteLock().readLock().lock();
+        source.getReadWriteLock().writeLock().lock();
         try {
             // insert a list to move ListEvents to the SWT event dispatch thread
             this.source = swtThreadSource = GlazedListsSWT.swtThreadProxyList(source, table.getDisplay());
@@ -111,7 +111,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
             // prepare listeners
             this.source.addListEventListener(this);
         } finally {
-            source.getReadWriteLock().readLock().unlock();
+            source.getReadWriteLock().writeLock().unlock();
         }
     }
 

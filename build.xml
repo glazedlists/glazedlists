@@ -245,8 +245,28 @@
         <mkdir dir="extensions/swt/lib"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="https://glazedlists.dev.java.net/files/documents/1073/25145/swt-api.jar"/>
-            <arg value="extensions/swt/lib/swt-api.jar"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/64386/org.eclipse.core.commands.jar"/>
+            <arg value="extensions/swt/lib/org.eclipse.core.commands.jar"/>
+        </java>
+        <java classname="ca.odell.glazedlists.impl.HttpClient">
+            <classpath path="${classes.dir}"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/64387/org.eclipse.equinox.common.jar"/>
+            <arg value="extensions/swt/lib/org.eclipse.equinox.common.jar"/>
+        </java>
+        <java classname="ca.odell.glazedlists.impl.HttpClient">
+            <classpath path="${classes.dir}"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/64388/org.eclipse.jface.jar"/>
+            <arg value="extensions/swt/lib/org.eclipse.jface.jar"/>
+        </java>
+        <java classname="ca.odell.glazedlists.impl.HttpClient">
+            <classpath path="${classes.dir}"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/64390/org.eclipse.swt.carbon.macosx.jar"/>
+            <arg value="extensions/swt/lib/org.eclipse.swt.carbon.macosx.jar"/>
+        </java>
+        <java classname="ca.odell.glazedlists.impl.HttpClient">
+            <classpath path="${classes.dir}"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/64389/org.eclipse.swt.win32.win32.x86.jar"/>
+            <arg value="extensions/swt/lib/org.eclipse.swt.win32.win32.x86.jar"/>
         </java>
         <javac destdir="${classes.dir}" srcdir="extensions/swt/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
             <classpath>
@@ -572,7 +592,7 @@
         <mkdir dir="${java14_glazedlists.dir}/extensions/swt/source"/>
         <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
             <arg value="extensions/swt/source"/>
-            <arg value="${classes.dir}${path.separator}extensions/swt/lib/swt-api.jar"/>
+            <arg value="${classes.dir}${path.separator}extensions/swt/lib/org.eclipse.core.commands.jar${path.separator}extensions/swt/lib/org.eclipse.equinox.common.jar${path.separator}extensions/swt/lib/org.eclipse.jface.jar${path.separator}extensions/swt/lib/ org.eclipse.swt.carbon.macosx.jar${path.separator}extensions/swt/lib/org.eclipse.swt.win32.win32.x86.jar"/>
             <arg value="${java14_glazedlists.dir}/extensions/swt/source"/>
         </java>
 
@@ -636,7 +656,7 @@
         <mkdir dir="${java14_glazedlists.dir}/extensions/issuesbrowser/source"/>
         <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
             <arg value="extensions/issuesbrowser/source"/>
-            <arg value="${classes.dir}${path.separator}extensions/swt/lib/swt-api.jar${path.separator}extensions/jfreechart/lib/jcommon.jar${path.separator}extensions/jfreechart/lib/jfreechart.jar${path.separator}extensions/jgoodiesforms/lib/forms.jar${path.separator}extensions/nachocalendar/lib/nachocalendar.jar${path.separator}extensions/issuesbrowser/lib/http.jar"/>
+            <arg value="${classes.dir}${path.separator}extensions/swt/lib/org.eclipse.core.commands.jar${path.separator}extensions/swt/lib/org.eclipse.equinox.common.jar${path.separator}extensions/swt/lib/org.eclipse.jface.jar${path.separator}extensions/swt/lib/ org.eclipse.swt.carbon.macosx.jar${path.separator}extensions/swt/lib/org.eclipse.swt.win32.win32.x86.jar${path.separator}extensions/jfreechart/lib/jcommon.jar${path.separator}extensions/jfreechart/lib/jfreechart.jar${path.separator}extensions/jgoodiesforms/lib/forms.jar${path.separator}extensions/nachocalendar/lib/nachocalendar.jar${path.separator}extensions/issuesbrowser/lib/http.jar"/>
             <arg value="${java14_glazedlists.dir}/extensions/issuesbrowser/source"/>
         </java>
 
