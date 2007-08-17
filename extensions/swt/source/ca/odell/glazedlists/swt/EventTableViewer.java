@@ -213,6 +213,10 @@ public class EventTableViewer<E> implements ListEventListener<E> {
      * displayed {@link Table}.
      */
     public void listChanged(ListEvent listChanges) {
+        // if the table is no longer available, we don't want to do anything as
+        // it will result in a "Widget is disposed" exception
+        if (table.isDisposed()) return;
+
         Barcode deletes = new Barcode();
         deletes.addWhite(0, swtThreadSource.size());
         int firstChange = swtThreadSource.size();
