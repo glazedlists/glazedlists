@@ -318,7 +318,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals(1, listener.getCount());
     }
 
-    public void guiTestSwitchingToStrictMode() throws BadLocationException {
+    public void guiTestStrictMode() throws BadLocationException {
         final CountingActionListener listener = new CountingActionListener();
 
         final JComboBox combo = new JComboBox();
@@ -367,6 +367,44 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals(4, combo.getItemCount());
         assertEquals("New Brunswick", textField.getText());
         assertEquals(3, listener.getCount());
+    }
+
+    public void guiTestStrictModeAndFirstItem() throws BadLocationException {
+        final JComboBox combo = new JComboBox();
+
+        final EventList<String> items = new BasicEventList<String>();
+        items.add("New Brunswick");
+        items.add("Nova Scotia");
+        items.add("Newfoundland");
+        items.add("Prince Edward Island");
+
+        AutoCompleteSupport support = AutoCompleteSupport.install(combo, items);
+        final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
+
+        assertNull(combo.getSelectedItem());
+        support.setStrict(true);
+        assertEquals("New Brunswick", textField.getText());
+
+        support.setStrict(false);
+        support.setFirstItem("Saskatchewan");
+        combo.setSelectedItem(null);
+        assertNull(combo.getSelectedItem());
+
+        support.setStrict(true);
+        assertEquals("Saskatchewan", combo.getSelectedItem());
+        assertEquals(0, combo.getSelectedIndex());
+
+        support.setStrict(false);
+        support.setFirstItem(null);
+        combo.setSelectedItem(null);
+        assertNull(combo.getSelectedItem());
+        assertEquals(-1, combo.getSelectedIndex());
+
+        // at the moment, a null firstItem yields "no selection" in the case of strict mode
+        // it remains to be seen if this is correct / desirable
+        support.setStrict(true);
+        assertNull(combo.getSelectedItem());
+        assertEquals(-1, combo.getSelectedIndex());
     }
 
     public void guiTestDeleteKey() throws BadLocationException {

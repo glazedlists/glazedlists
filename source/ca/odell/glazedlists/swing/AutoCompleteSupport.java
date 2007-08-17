@@ -228,8 +228,11 @@ public final class AutoCompleteSupport<E> {
     /** A single-element EventList for storing the optional first element, typically used to represent "no selection". */
     private final EventList<E> firstItem;
 
-    /** The CompositeList which is the union of firstItem and filteredItems to produce all items available in the comboBoxModel. */
-    private final CompositeList<E> allItems;
+    /** The CompositeList which is the union of firstItem and filteredItems to produce all filtered items available in the comboBoxModel. */
+    private final CompositeList<E> allItemsFiltered;
+
+    /** The CompositeList which is the union of firstItem and items to produce all unfiltered items available in the comboBoxModel. */
+    private final CompositeList<E> allItemsUnfiltered;
 
     /** The Format capable of producing Strings from ComboBoxModel elements and vice versa. */
     private final Format format;
@@ -415,10 +418,17 @@ public final class AutoCompleteSupport<E> {
         this.filterMatcherEditor.setMode(TextMatcherEditor.STARTS_WITH);
         this.filteredItems = new FilterList<E>(items, this.filterMatcherEditor);
         this.firstItem = new BasicEventList<E>(items.getPublisher(), items.getReadWriteLock());
-        this.allItems = new CompositeList<E>(items.getPublisher(), items.getReadWriteLock());
-        this.allItems.addMemberList(this.firstItem);
-        this.allItems.addMemberList(this.filteredItems);
-        this.comboBoxModel = new AutoCompleteComboBoxModel(this.allItems);
+
+        // the ComboBoxModel always contains the firstItem and a filtered view of all other items
+        this.allItemsFiltered = new CompositeList<E>(items.getPublisher(), items.getReadWriteLock());
+        this.allItemsFiltered.addMemberList(this.firstItem);
+        this.allItemsFiltered.addMemberList(this.filteredItems);
+        this.comboBoxModel = new AutoCompleteComboBoxModel(this.allItemsFiltered);
+
+        // we need an unfiltered view in order to try to locate autocompletion terms
+        this.allItemsUnfiltered = new CompositeList<E>(items.getPublisher(), items.getReadWriteLock());
+        this.allItemsUnfiltered.addMemberList(this.firstItem);
+        this.allItemsUnfiltered.addMemberList(this.items);
 
         // customize the comboBox
         this.comboBox.setModel(this.comboBoxModel);
@@ -876,8 +886,8 @@ public final class AutoCompleteSupport<E> {
             if (value.equals(strictValue)) return;
 
             // select the first element if no autocompletion term could be found
-            if (strictValue == null && !items.isEmpty())
-                strictValue = convertToString(items.get(0));
+            if (strictValue == null && !allItemsUnfiltered.isEmpty())
+                strictValue = convertToString(allItemsUnfiltered.get(0));
 
             // return all elements to the ComboBoxModel
             applyFilter("");
@@ -1115,7 +1125,8 @@ public final class AutoCompleteSupport<E> {
         this.comboBoxModel.dispose();
 
         // 6. dispose of our EventLists so that they are severed from the given items EventList
-        this.allItems.dispose();
+        this.allItemsFiltered.dispose();
+        this.allItemsUnfiltered.dispose();
         this.filteredItems.dispose();
 
         // null out the comboBox to indicate that this support class is uninstalled
@@ -1189,9 +1200,9 @@ public final class AutoCompleteSupport<E> {
 
         String partialMatchTerm = null;
 
-        // search the list of ALL items for an autocompletion term for the given value
-        for (int i = 0, n = items.size(); i < n; i++) {
-            final String itemString = convertToString(items.get(i));
+        // search the list of ALL UNFILTERED items for an autocompletion term for the given value
+        for (int i = 0, n = allItemsUnfiltered.size(); i < n; i++) {
+            final String itemString = convertToString(allItemsUnfiltered.get(i));
 
             // if we have an exact match, return the given value immediately
             if (value.equals(itemString))
@@ -1310,7 +1321,7 @@ public final class AutoCompleteSupport<E> {
             final String valueAfterEdit = comboBoxEditorComponent.getText();
 
             // if an autocomplete term could not be found and we're in strict mode, rollback the edit
-            if (isStrict() && findAutoCompleteTerm(valueAfterEdit) == null && !items.isEmpty()) {
+            if (isStrict() && findAutoCompleteTerm(valueAfterEdit) == null && !allItemsUnfiltered.isEmpty()) {
                 // indicate the error to the user
                 UIManager.getLookAndFeel().provideErrorFeedback(comboBoxEditorComponent);
 
@@ -1616,8 +1627,8 @@ public final class AutoCompleteSupport<E> {
                 // if we did not find the same autocomplete term
                 if (!currentText.equals(newStrictValue)) {
                     // select the first item if we could not find an autocomplete term with the currentText
-                    if (newStrictValue == null && !items.isEmpty())
-                        newStrictValue = convertToString(items.get(0));
+                    if (newStrictValue == null && !allItemsUnfiltered.isEmpty())
+                        newStrictValue = convertToString(allItemsUnfiltered.get(0));
 
                     // set the new strict value text into the editor component
                     comboBoxEditorComponent.setText(newStrictValue);
