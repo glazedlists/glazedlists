@@ -134,7 +134,7 @@ public class DebugList<E> extends AbstractEventList<E> {
      * where some member lists are DebugLists and thus must share an identical
      * publisher and locks in order to participate in the CompositeList.
      */
-    public DebugList<E> createNewDebugList() {
+    public <E> DebugList<E> createNewDebugList() {
         return new DebugList<E>(getPublisher(), debugReadWriteLock);
     }
 

@@ -186,7 +186,7 @@ public class DebugListTest extends TestCase {
 
     public void testCreateNewDebugList() {
         DebugList<String> list1 = new DebugList<String>();
-        DebugList<String> list2 = list1.createNewDebugList();
+        DebugList<Integer> list2 = list1.createNewDebugList();
 
         assertSame(list1.getPublisher(), list2.getPublisher());
         assertSame(list1.getReadWriteLock(), list2.getReadWriteLock());
