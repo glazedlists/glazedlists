@@ -501,12 +501,12 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         items.add("New Brunswick");
         items.add("Aenima");
         items.add("M\u00fcller");
-        items.add("\u00c6nima"); // ÔøΩnima
-        items.add("Ru\u00dfland"); // RuÔøΩland        
+        items.add("\u00c6nima"); // Aenima (with the A and e smashed together)
+        items.add("Ru\u00dfland"); // Russland (with a special char that means 'ss')
         items.add("Nova Scotia");
         items.add("Newfoundland");
         items.add("Ècole");
-        items.add("weiﬂe Wasserwelle");
+        items.add("wei\u00dfe Wasserwelle");
 
         AutoCompleteSupport support = AutoCompleteSupport.install(combo, items);
         final ComboBoxModel model = combo.getModel();
@@ -537,7 +537,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals("Ru\u00dfland", model.getElementAt(0));
         doc.replace(0, doc.getLength(), "Russland", null);
         assertEquals(0, combo.getItemCount());
-        doc.replace(0, doc.getLength(), "weiﬂe Wasser", null);
+        doc.replace(0, doc.getLength(), "wei\u00dfe Wasser", null);
         assertEquals(0, combo.getItemCount());
         
         support.setTextMatchingStrategy(TextMatcherEditor.NORMALIZED_STRATEGY);
@@ -570,7 +570,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals("Ru\u00dfland", model.getElementAt(0));
         doc.replace(0, doc.getLength(), "Russland", null);
         assertEquals(0, combo.getItemCount());
-        doc.replace(0, doc.getLength(), "weiﬂe Wasser", null);
+        doc.replace(0, doc.getLength(), "wei\u00dfe Wasser", null);
         assertEquals(0, combo.getItemCount());
         
         support.setTextMatchingStrategy(GlazedListsICU4J.UNICODE_TEXT_SEARCH_STRATEGY);
@@ -603,9 +603,9 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         doc.replace(0, doc.getLength(), "Ru\u00df", null);
         assertEquals(1, combo.getItemCount());
         assertEquals("Ru\u00dfland", model.getElementAt(0));
-        doc.replace(0, doc.getLength(), "weiﬂe Wasser", null);
+        doc.replace(0, doc.getLength(), "wei\u00dfe Wasser", null);
         assertEquals(1, combo.getItemCount());
-        assertEquals("weiﬂe Wasserwelle", model.getElementAt(0));
+        assertEquals("wei\u00dfe Wasserwelle", model.getElementAt(0));
         
         // @todo activate when ICU4J bug 5420 is fixed!
 //        doc.replace(0, doc.getLength(), "Russland", null);

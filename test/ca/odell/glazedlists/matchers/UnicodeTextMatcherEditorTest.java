@@ -17,11 +17,11 @@ public class UnicodeTextMatcherEditorTest extends TestCase {
 
         list.add(null);
         list.add("");
-        list.add("r\u00e9sum\u00e9");
-        list.add("Bj\u00f6rk");
-        list.add("M\u00fcller");
-        list.add("\u00c6nima"); // �nima
-        list.add("Ru\u00dfland"); // Ru�land
+        list.add("résumé"); //
+        list.add("Bj\u00f6rk"); // Bjork (with an umlaut over the o)
+        list.add("M\u00fcller"); // Muller (with an umlaut over the u)
+        list.add("\u00c6nima"); // Aenima (with the A and e smashed together)
+        list.add("Ru\u00dfland"); // Russland (with a special char that means 'ss')
 
         textMatcherEditor.setFilterText(new String[0]);
         textMatcherEditor.setFilterText(new String[] {"M\u00fcller"});
@@ -45,12 +45,12 @@ public class UnicodeTextMatcherEditorTest extends TestCase {
 
 
         textMatcherEditor.setFilterText(new String[0]);
-        textMatcherEditor.setFilterText(new String[] {"\u00c6nima"}); // �nima
+        textMatcherEditor.setFilterText(new String[] {"\u00c6nima"});
         assertEquals(1, list.size());
         assertEquals("\u00c6nima", list.get(0));
 
         textMatcherEditor.setFilterText(new String[0]);
-        textMatcherEditor.setFilterText(new String[] {"\u00e6nima"}); // �nima
+        textMatcherEditor.setFilterText(new String[] {"\u00e6nima"});
         assertEquals(1, list.size());
         assertEquals("\u00c6nima", list.get(0));
 
@@ -71,7 +71,7 @@ public class UnicodeTextMatcherEditorTest extends TestCase {
         textMatcherEditor.setMode(TextMatcherEditor.STARTS_WITH);
         FilterList<String> list = new FilterList<String>(new BasicEventList<String>(), textMatcherEditor);
 
-        list.add("Ru\u00dfland"); // Ru�land
+        list.add("Ru\u00dfland");
 
         textMatcherEditor.setFilterText(new String[0]);
         textMatcherEditor.setFilterText(new String[] {"Ru\u00df"});
