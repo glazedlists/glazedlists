@@ -85,6 +85,7 @@
 	<condition property="swt.jar.file" value="org.eclipse.swt.win32.win32.x86.jar">
 		<os family="windows"/>
 	</condition>
+
 	<condition property="swt.jar.path" value="https://glazedlists.dev.java.net/files/documents/1073/64390/">
 		<os family="mac"/>
 	</condition>
@@ -92,6 +93,17 @@
 		<os family="mac"/>
 	</condition>
 
+	<condition property="swt.jar.path" value="https://glazedlists.dev.java.net/files/documents/1073/64627/">
+		<os name="Linux"/>
+	</condition>
+	<condition property="swt.jar.file" value="org.eclipse.swt.gtk.linux.x86.jar">
+		<os name="Linux"/>
+	</condition>
+	
+	<!-- use windows files as default if nothing matches -->
+	<property name="swt.jar.path" value="https://glazedlists.dev.java.net/files/documents/1073/64389/"/>
+	<property name="swt.jar.file" value="org.eclipse.swt.win32.win32.x86.jar"/>
+	
 	<target name="clean"
 		description="Clean up generated files, forcing them to be rebuilt.">
 
