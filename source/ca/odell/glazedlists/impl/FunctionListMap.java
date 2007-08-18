@@ -369,7 +369,7 @@ public class FunctionListMap<K, V> implements Map<K, V>, ListEventListener<V> {
          */
         public Entry<K, V> next() {
             final K key = keyIter.next();
-            return new MapEntry(key, (V) get(key));
+            return new MapEntry(key, get(key));
         }
 
         /** {@inheritDoc} */

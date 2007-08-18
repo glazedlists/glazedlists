@@ -31,14 +31,11 @@ public class MultipleSourcesTest extends TestCase {
      * transformation lists. When the source changes, the transformation lists will
      * be notified one at a time. This verifies that Glazed Lists behaves correctly
      * after the first has been notified but before the second has been notified.
-     *
-     * <p>This test currently fails. A fix should be available within the next
-     * couple of weeks!
      */
     public void testMultipleSources() {
-        BasicEventList source = new BasicEventList();
-        FilterList filterOne = new FilterList(source, Matchers.trueMatcher());
-        FilterList filterTwo = new FilterList(source, Matchers.trueMatcher());
+        BasicEventList<String> source = new BasicEventList<String>();
+        FilterList<String> filterOne = new FilterList<String>(source, Matchers.trueMatcher());
+        FilterList<String> filterTwo = new FilterList<String>(source, Matchers.trueMatcher());
         
         source.add("Game Cube");
         source.add("Genesis");
@@ -46,7 +43,7 @@ public class MultipleSourcesTest extends TestCase {
         source.add("PlayStation");
         source.add("Turbo Graphics 16");
         
-        List filterLists = new ArrayList();
+        List<EventList<String>> filterLists = new ArrayList<EventList<String>>();
         filterLists.add(filterOne);
         filterLists.add(filterTwo);
         MultipleSourcesListener filtersListener = new MultipleSourcesListener(filterLists, true);
@@ -73,9 +70,9 @@ public class MultipleSourcesTest extends TestCase {
      * when not all of the sources are directly registered as ListEventListeners.
      */
     public void testMultipleSourcesNoListener() {
-        BasicEventList source = new BasicEventList();
-        FilterList filterOne = new FilterList(source, Matchers.trueMatcher());
-        FilterList filterTwo = new FilterList(source, Matchers.trueMatcher());
+        BasicEventList<String> source = new BasicEventList<String>();
+        FilterList<String> filterOne = new FilterList<String>(source, Matchers.trueMatcher());
+        FilterList<String> filterTwo = new FilterList<String>(source, Matchers.trueMatcher());
         
         source.add("Game Cube");
         source.add("Genesis");
@@ -83,7 +80,7 @@ public class MultipleSourcesTest extends TestCase {
         source.add("PlayStation");
         source.add("Turbo Graphics 16");
         
-        List filterLists = new ArrayList();
+        List<EventList<String>> filterLists = new ArrayList<EventList<String>>();
         filterLists.add(filterOne);
         filterLists.add(filterTwo);
         MultipleSourcesListener filtersListener = new MultipleSourcesListener(filterLists, false);
@@ -112,15 +109,15 @@ public class MultipleSourcesTest extends TestCase {
      * Listens to multiple sources, and when one source changes, this iterates all
      * sources.
      */
-    static class MultipleSourcesListener implements ListEventListener {
-        private List sources;
+    static class MultipleSourcesListener implements ListEventListener<String> {
+        private List<EventList<String>> sources;
         private int changeCount = 0;
 
-        public MultipleSourcesListener(List sources, boolean addListeners) {
+        public MultipleSourcesListener(List<EventList<String>> sources, boolean addListeners) {
             this.sources = sources;
             if(addListeners) {
-                for(Iterator i = sources.iterator(); i.hasNext(); ) {
-                    EventList eventList = (EventList)i.next();
+                for(Iterator<EventList<String>> i = sources.iterator(); i.hasNext(); ) {
+                    EventList<String> eventList = i.next();
                     eventList.addListEventListener(this);
                 }
             }
@@ -130,10 +127,10 @@ public class MultipleSourcesTest extends TestCase {
             return changeCount;
         }
 
-        public void listChanged(ListEvent e) {
+        public void listChanged(ListEvent<String> e) {
             changeCount++;
-            for(Iterator i = sources.iterator(); i.hasNext(); ) {
-                EventList eventList = (EventList)i.next();
+            for(Iterator<EventList<String>> i = sources.iterator(); i.hasNext(); ) {
+                EventList<String> eventList = i.next();
                 eventList.toArray();
             }
         }

@@ -598,7 +598,7 @@ class CacheTestHelper {
         System.out.println("Cost of Uncached Information Retrieval: "
             + uncachedExpense + "ms");
         System.out.println("Net Expense of using CachingList: "
-            + (int)Math.round(timeTaken - uncachedExpense) + "ms\n");
+            + Math.round(timeTaken - uncachedExpense) + "ms\n");
     }
 
     /**

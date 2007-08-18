@@ -732,7 +732,7 @@ public class SeparatorListTest extends TestCase {
         filtered.setMatcher(new SubstringMatcher("BD"));
         assertEquals(36, separated.size());
 
-        filtered.setMatcher((Matcher)Matchers.trueMatcher());
+        filtered.setMatcher(Matchers.trueMatcher());
 
         source.clear();
         source.addAll(GlazedListsTests.stringToList("CCS"));

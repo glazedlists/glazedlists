@@ -89,7 +89,7 @@ public class ListModificationTest extends TestCase {
         List<String> controlList = new ArrayList<String>();
         controlList.addAll(alphabet);
 
-        List<String> vowels = new FilterList(alphabet, new VowelMatcher());
+        List<String> vowels = new FilterList<String>(alphabet, new VowelMatcher());
         vowels.remove("C");
         vowels.remove("A");
         controlList.remove("A");
@@ -113,7 +113,7 @@ public class ListModificationTest extends TestCase {
         List<String> controlList = new ArrayList<String>();
         controlList.addAll(alphabet);
 
-        List<String> vowels = new FilterList(alphabet, new VowelMatcher());
+        List<String> vowels = new FilterList<String>(alphabet, new VowelMatcher());
 
         List<String> toRemove = new ArrayList<String>();
         toRemove.add("C");

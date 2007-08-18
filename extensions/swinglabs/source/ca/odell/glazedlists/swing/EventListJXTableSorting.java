@@ -159,7 +159,7 @@ public class EventListJXTableSorting {
             // see if we're already sorting with this column
             SortOrder columnSortOrder = SortOrder.ASCENDING;
             for(Iterator<? extends SortKey> s = newSortKeys.iterator(); s.hasNext(); ) {
-                SortKey sortKey = (SortKey)s.next();
+                SortKey sortKey = s.next();
                 if(sortKey.getSortOrder() == SortOrder.UNSORTED) continue;
                 if(sortKey.getColumn() == columnIndex) {
                     columnSortOrder = (sortKey.getSortOrder() == SortOrder.ASCENDING) ? SortOrder.DESCENDING : SortOrder.ASCENDING;
@@ -187,7 +187,7 @@ public class EventListJXTableSorting {
             // rebuild the SortedList's comparator
             List<Comparator> comparators = new ArrayList<Comparator>(this.sortKeys.size());
             for(int k = 0; k < this.sortKeys.size(); k++) {
-                SortKey sortKey = (SortKey)this.sortKeys.get(k);
+                SortKey sortKey = this.sortKeys.get(k);
                 if(sortKey.getSortOrder() == SortOrder.UNSORTED) continue;
 
                 Comparator comparator = getComparator(sortKey.getColumn());
@@ -235,7 +235,7 @@ public class EventListJXTableSorting {
         /** {@inheritDoc} */
         public SortOrder getSortOrder(int columnIndex) {
             for(int k = 0; k < this.sortKeys.size(); k++) {
-                SortKey s = (SortKey)this.sortKeys.get(k);
+                SortKey s = this.sortKeys.get(k);
                 if(s.getColumn() == columnIndex) return s.getSortOrder();
             }
             return SortOrder.UNSORTED;

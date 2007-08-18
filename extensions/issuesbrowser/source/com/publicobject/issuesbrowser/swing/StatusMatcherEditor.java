@@ -123,13 +123,13 @@ class StatusMatcherEditor extends AbstractMatcherEditor<Issue> implements ListEv
             final String status;
             final int count;
             if (type == ListEvent.INSERT) {
-                List issuesOfThisStatus = (List)issuesByStatusSwingThread.get(index);
-                status = ((Issue)issuesOfThisStatus.get(0)).getStatus();
+                List<Issue> issuesOfThisStatus = issuesByStatusSwingThread.get(index);
+                status = issuesOfThisStatus.get(0).getStatus();
                 statuses.add(index, status);
                 count = issuesOfThisStatus.size();
             } else if (type == ListEvent.UPDATE) {
-                List issuesOfThisStatus = (List)issuesByStatusSwingThread.get(index);
-                status = (String)statuses.get(index);
+                List<Issue> issuesOfThisStatus = issuesByStatusSwingThread.get(index);
+                status = statuses.get(index);
                 count = issuesOfThisStatus.size();
             } else if (type == ListEvent.DELETE) {
                 status = statuses.remove(index);

@@ -13,7 +13,7 @@ import java.util.ArrayList;
  */
 public class CircularArrayListTest extends TestCase {
 
-  private final CircularArrayList list = new CircularArrayList();
+  private final CircularArrayList<Object> list = new CircularArrayList<Object>();
   
   public void testRightShifts() {
     Object[] innerArray = new Object[] { "A", "B", "C", "D", "E", "a", "b", "c" };

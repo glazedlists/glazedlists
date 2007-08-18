@@ -34,7 +34,7 @@ public abstract class AbstractKTableFormat implements KTableFormat {
     /** {@inheritDoc} */
     public int getColumnWidth(int column) {
         prepareDefaultColumnWidths();
-        return ((Integer)columnWidths.get(column)).intValue();
+        return columnWidths.get(column).intValue();
     }
 
     /** {@inheritDoc} */

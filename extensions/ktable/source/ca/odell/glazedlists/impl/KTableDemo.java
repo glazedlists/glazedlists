@@ -58,7 +58,7 @@ public class KTableDemo {
         // loads issues
         final IssueLoader issueLoader = new IssueLoader(issuesEventList, new SimpleThrobber());
         issueLoader.start();
-        issueLoader.setProject((Project) Project.getProjects().get(0));
+        issueLoader.setProject(Project.getProjects().get(0));
     }
 
     private static class SimpleThrobber implements Throbber {

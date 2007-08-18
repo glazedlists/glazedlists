@@ -135,7 +135,7 @@ public final class NetworkList<E> extends TransformedList<E, E> {
             ListEvent<E> listChangesCopy = listChanges.copy();
             Bufferlo listChangesBytes = ListEventToBytes.toBytes(listChangesCopy, byteCoder);
             for(int r = 0; r < resourceListeners.size(); r++) {
-                ResourceListener listener = (ResourceListener)resourceListeners.get(r);
+                ResourceListener listener = resourceListeners.get(r);
                 listener.resourceUpdated(privateInterfaces, listChangesBytes.duplicate());
             }
         } catch(IOException e) {

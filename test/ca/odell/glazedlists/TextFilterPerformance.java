@@ -45,20 +45,20 @@ public class TextFilterPerformance {
         String line = "";
         
         // read the filter strings
-        List testFilters = new ArrayList();
-        List testHitCounts = new ArrayList();
+        List<String> testFilters = new ArrayList<String>();
+        List<Integer> testHitCounts = new ArrayList<Integer>();
         while(!(line = in.readLine()).equals("")) {
             testFilters.add(line);
             testHitCounts.add(new Integer(in.readLine()));
         }
         
         // read the input texts
-        List elements = new ArrayList();
-        List currentElement = new ArrayList();
+        List<Collection<String>> elements = new ArrayList<Collection<String>>();
+        List<String> currentElement = new ArrayList<String>();
         elements.add(currentElement);
         while((line = in.readLine()) != null) {
             if(line.equals("")) {
-                currentElement = new ArrayList();
+                currentElement = new ArrayList<String>();
                 elements.add(currentElement);
             } else {
                 currentElement.add(line);
@@ -75,10 +75,10 @@ public class TextFilterPerformance {
         }
         
         // prepare the filter list
-        BasicEventList unfiltered = new BasicEventList();
+        BasicEventList<Collection<String>> unfiltered = new BasicEventList<Collection<String>>();
         unfiltered.addAll(elements);
-        TextMatcherEditor textMatcherEditor = new TextMatcherEditor(new CollectionTextFilterator());
-        FilterList filtered = new FilterList(unfiltered, textMatcherEditor);
+        TextMatcherEditor<Collection<String>> textMatcherEditor = new TextMatcherEditor<Collection<String>>(new CollectionTextFilterator());
+        FilterList<Collection<String>> filtered = new FilterList<Collection<String>>(unfiltered, textMatcherEditor);
         
         // track time
         long startTime = 0;
@@ -90,10 +90,10 @@ public class TextFilterPerformance {
         long fullFilterTime = 0;
         // perform the filters
         for(int i = 0; i < testFilters.size(); i++) {
-            String filter = (String)testFilters.get(i);
+            String filter = testFilters.get(i);
             System.out.print("Filtering " + i + ", \"" + filter + "\"...");
 
-            int expectedResult = ((Integer)testHitCounts.get(i)).intValue();
+            int expectedResult = testHitCounts.get(i).intValue();
             startTime = System.currentTimeMillis();
             textMatcherEditor.setFilterText(filter.split("[ \t]"));
             finishTime = System.currentTimeMillis();
@@ -117,7 +117,7 @@ public class TextFilterPerformance {
         fullFilterTime = 0;
         // perform the filters 1 char at a time (to simulate the user typing)
         for(int i = 0; i < testFilters.size(); i++) {
-            String filter = (String)testFilters.get(i);
+            String filter = testFilters.get(i);
             long totalFilteringTime = 0;
             long totalUnfilteringTime = 0;
             System.out.print("Filtering " + i + ", \"" + filter + "\" by character...");
@@ -134,7 +134,7 @@ public class TextFilterPerformance {
             }
 
             // check the filtered result
-            int expectedResult = ((Integer)testHitCounts.get(i)).intValue();
+            int expectedResult = testHitCounts.get(i).intValue();
             if(filtered.size() != expectedResult) {
                 System.out.println("expected size " + expectedResult + " != actual size " + filtered.size() + " for filter " + filter);
                 for(int j = 0; j < filtered.size(); j++) {
@@ -164,7 +164,7 @@ public class TextFilterPerformance {
         fullFilterTime = 0;
         // perform the filters 1 char at a time (to simulate the user typing)
         for(int i = 0; i < testFilters.size(); i++) {
-            String filter = (String)testFilters.get(i);
+            String filter = testFilters.get(i);
             long totalFilteringTime = 0;
             long totalUnfilteringTime = 0;
             System.out.print("Filtering " + i + ", \"" + filter + "\" by character...");
@@ -185,7 +185,7 @@ public class TextFilterPerformance {
             fullFilterTime += totalFilteringTime;
 
             // check the filtered result
-            int expectedResult = ((Integer)testHitCounts.get(i)).intValue();
+            int expectedResult = testHitCounts.get(i).intValue();
             if(filtered.size() != expectedResult) {
                 System.out.println("expected size " + expectedResult + " != actual size " + filtered.size() + " for filter " + filter);
                 for(int j = 0; j < filtered.size(); j++) {
@@ -214,16 +214,16 @@ public class TextFilterPerformance {
 
 
         // attach a ThreadedMatcherEditor to the FilterList rather than a regular TextMatcherEditor
-        textMatcherEditor = new TextMatcherEditor(new CollectionTextFilterator());
-        MatcherEditor bufferedMatcherEditor = new ThreadedMatcherEditor(textMatcherEditor);
-        filtered = new FilterList(unfiltered, bufferedMatcherEditor);
+        textMatcherEditor = new TextMatcherEditor<Collection<String>>(new CollectionTextFilterator());
+        MatcherEditor<Collection<String>> bufferedMatcherEditor = new ThreadedMatcherEditor<Collection<String>>(textMatcherEditor);
+        filtered = new FilterList<Collection<String>>(unfiltered, bufferedMatcherEditor);
 
         System.out.println("");
         System.out.println("Simulated Typing Character-by-character Filter (delays with ThreadedMatcherEditor)");
         fullFilterTime = 0;
         // perform the filters 1 char at a time (to simulate the user typing)
         for(int i = 0; i < testFilters.size(); i++) {
-            String filter = (String)testFilters.get(i);
+            String filter = testFilters.get(i);
             long totalFilteringTime = 0;
             long totalUnfilteringTime = 0;
             System.out.print("Filtering " + i + ", \"" + filter + "\" by character with buffering...");
@@ -240,7 +240,7 @@ public class TextFilterPerformance {
             }
 
             // poll until the filter is fully applied
-            int expectedResult = ((Integer)testHitCounts.get(i)).intValue();
+            int expectedResult = testHitCounts.get(i).intValue();
             long pollingStartTime = System.currentTimeMillis();
             while (filtered.size() != expectedResult) {
                 if (System.currentTimeMillis() - pollingStartTime > 10000) {
