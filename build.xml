@@ -325,7 +325,7 @@
         </javac>
     </target>
 
-    <target name="swinglabs" depends="swing">
+    <target name="swinglabs" depends="swing, issuesbrowser">
         <!-- the swinglabs .jar is Java 1.5+ only, so we do not bother to run
              this code through our Java 1.5 to Java 1.4 source code translator -->
         <mkdir dir="extensions/swinglabs/lib"/>
@@ -665,14 +665,14 @@
             <arg value="${java14_glazedlists.dir}/extensions/icu4j/source"/>
         </java>
     	
-        <!-- Declaw swinglabs/ -->
+        <!-- do not declaw swinglabs: swingx is only supported on Java >= 1.5
         <mkdir dir="${java14_glazedlists.dir}/extensions/swinglabs/source"/>
         <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
             <arg value="extensions/swinglabs/source"/>
             <arg value="${classes.dir}${path.separator}extensions/swinglabs/lib/swingx.jar"/>
             <arg value="${java14_glazedlists.dir}/extensions/swinglabs/source"/>
         </java>
-
+		-->
         <!-- Declaw issuesbrowser/ -->
         <mkdir dir="${java14_glazedlists.dir}/extensions/issuesbrowser/source"/>
         <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
