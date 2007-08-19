@@ -676,8 +676,8 @@ public class ListSelectionTest extends TestCase {
     }
 
     public void testRemovingItemNotInSourceFromTogglingView() {
-        EventList togglingSelected = listSelection.getTogglingSelected();
-        EventList togglingDeselected = listSelection.getTogglingDeselected();
+        EventList<Integer> togglingSelected = listSelection.getTogglingSelected();
+        EventList<Integer> togglingDeselected = listSelection.getTogglingDeselected();
         assertFalse(togglingSelected.remove(new Integer(6)));
         assertFalse(togglingDeselected.remove(new Integer(6)));
         List<Integer> ints = new ArrayList<Integer>();

@@ -19,7 +19,7 @@ import java.util.List;
 public class ListEventBlockTest extends TestCase {
 
     public void testSortListEventBlocks() {
-        ExternalNestingEventList list = new ExternalNestingEventList(new BasicEventList());
+        ExternalNestingEventList<String> list = new ExternalNestingEventList<String>(new BasicEventList<String>());
         ListConsistencyListener.install(list);
 
         list.beginEvent(true);
@@ -41,7 +41,7 @@ public class ListEventBlockTest extends TestCase {
     }
 
     public void testSortListEventBlocks2() {
-        ExternalNestingEventList list = new ExternalNestingEventList(new BasicEventList());
+        ExternalNestingEventList<String> list = new ExternalNestingEventList<String>(new BasicEventList<String>());
         ListConsistencyListener.install(list);
 
         list.beginEvent(true);
@@ -56,7 +56,7 @@ public class ListEventBlockTest extends TestCase {
     }
 
     public void testSortListEventBlocks3() {
-        ExternalNestingEventList list = new ExternalNestingEventList(new BasicEventList());
+        ExternalNestingEventList<String> list = new ExternalNestingEventList<String>(new BasicEventList<String>());
         ListConsistencyListener.install(list);
 
         list.beginEvent(true);
@@ -71,7 +71,7 @@ public class ListEventBlockTest extends TestCase {
     }
 
     public void testSortListEventBlocks4() {
-        ExternalNestingEventList list = new ExternalNestingEventList(new BasicEventList());
+        ExternalNestingEventList<String> list = new ExternalNestingEventList<String>(new BasicEventList<String>());
         ListConsistencyListener.install(list);
 
         list.beginEvent(true);
@@ -103,7 +103,7 @@ public class ListEventBlockTest extends TestCase {
         }
 
         // prepare the list to perform all of our changes on
-        ExternalNestingEventList list = new ExternalNestingEventList(new BasicEventList());
+        ExternalNestingEventList<String> list = new ExternalNestingEventList<String>(new BasicEventList<String>());
         ListConsistencyListener.install(list);
 
         int count = 0;

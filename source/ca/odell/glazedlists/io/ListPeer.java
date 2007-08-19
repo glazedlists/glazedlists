@@ -82,8 +82,8 @@ public class ListPeer {
      * @return a simple decorator of the published {@link EventList}
      *      with additional methods to bring the list offline. This list is writable.
      */
-    public NetworkList publish(EventList source, String path, ByteCoder byteCoder) {
-        NetworkList published = new NetworkList(source, byteCoder);
+    public <E> NetworkList<E> publish(EventList<E> source, String path, ByteCoder byteCoder) {
+        NetworkList<E> published = new NetworkList<E>(source, byteCoder);
         ResourceStatus resourceStatus = peer.publish(published.getResource(), path);
         published.setResourceStatus(resourceStatus);
         published.setWritable(true);

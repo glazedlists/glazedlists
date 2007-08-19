@@ -18,8 +18,8 @@ import java.util.Set;
 public class ListToByteCoderTest extends TestCase {
 
     public void testSymmetry() {
-        List values = GlazedListsTests.stringToList("ABCDEFG");
-        ListToByteCoder coder = new ListToByteCoder(values);
+        List<String> values = GlazedListsTests.stringToList("ABCDEFG");
+        ListToByteCoder<String> coder = new ListToByteCoder<String>(values);
 
         // color to byte
         byte a = coder.colorToByte("A");

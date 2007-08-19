@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import java.util.Comparator;
 
 /**
  * Verifies that ListEventAssembler is well behaved.
@@ -28,7 +27,7 @@ public class ListEventAssemblerPerformance {
             } else {
                 list.add(new Long(i));
                 if(i % 1000 == 0) {
-                    sorted.setComparator((Comparator)GlazedLists.reverseComparator());
+                    sorted.setComparator(GlazedLists.reverseComparator());
                 } else if(i % 1000 == 1) {
                     sorted.setComparator(null);
                 }

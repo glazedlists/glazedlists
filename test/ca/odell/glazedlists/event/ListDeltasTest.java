@@ -21,8 +21,8 @@ public class ListDeltasTest extends TestCase {
 
 
     public void testInsert() {
-        List original = GlazedListsTests.stringToList("FILTER");
-        List current = new ArrayList(original);
+        List<String> original = GlazedListsTests.stringToList("FILTER");
+        List<String> current = new ArrayList<String>(original);
 
         BarcodeListDeltas deltas = new BarcodeListDeltas();
         deltas.reset(original.size());
@@ -58,8 +58,8 @@ public class ListDeltasTest extends TestCase {
 
 
     public void testUpdates() {
-        List original = GlazedListsTests.stringToList("FILTER");
-        List current = new ArrayList(original);
+        List<String> original = GlazedListsTests.stringToList("FILTER");
+        List<String> current = new ArrayList<String>(original);
 
         BarcodeListDeltas deltas = new BarcodeListDeltas();
         deltas.reset(original.size());
@@ -98,8 +98,8 @@ public class ListDeltasTest extends TestCase {
     }
 
     public void testIterator() {
-        List original = GlazedListsTests.stringToList("FILTER");
-        List current = new ArrayList(original);
+        List<String> original = GlazedListsTests.stringToList("FILTER");
+        List<String> current = new ArrayList<String>(original);
 
         BarcodeListDeltas deltas = new BarcodeListDeltas();
         deltas.reset(original.size());
@@ -152,8 +152,8 @@ public class ListDeltasTest extends TestCase {
     }
 
     public void testIteratorTrailingInsert() {
-        List original = GlazedListsTests.stringToList("JA");
-        List current = new ArrayList(original);
+        List<String> original = GlazedListsTests.stringToList("JA");
+        List<String> current = new ArrayList<String>(original);
 
         BarcodeListDeltas deltas = new BarcodeListDeltas();
         deltas.reset(original.size());

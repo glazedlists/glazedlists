@@ -27,12 +27,12 @@ public class ListEventCoderTest extends TestCase {
      */
     public void testEncodeDecode() throws IOException {
         // prepare the encoding list
-        EventList toEncode = new BasicEventList();
+        EventList<Integer> toEncode = new BasicEventList<Integer>();
         EventEncoderListener encoder = new EventEncoderListener(intCoder);
         toEncode.addListEventListener(encoder);
         
         // prepare the decoding list
-        EventList toDecode = new BasicEventList();
+        EventList<Integer> toDecode = new BasicEventList<Integer>();
         
         // change, encode, decode
         toEncode.add(new Integer(8));
@@ -41,7 +41,7 @@ public class ListEventCoderTest extends TestCase {
         assertEquals(toEncode, toDecode);
         
         // multichange, encode, decode
-        List addAll = Arrays.asList(new Object[] { new Integer(6), new Integer(7), new Integer(5), new Integer(3), new Integer(0), new Integer(9) });
+        List<Integer> addAll = Arrays.asList(new Integer[] { new Integer(6), new Integer(7), new Integer(5), new Integer(3), new Integer(0), new Integer(9) });
         toEncode.addAll(addAll);
         Bufferlo addAllEncoding = (Bufferlo)encoder.getEncodings().remove(0);
         ListEventToBytes.toListEvent(addAllEncoding, toDecode, intCoder);
@@ -53,16 +53,16 @@ public class ListEventCoderTest extends TestCase {
      */
     public void testSnapshotDecode() throws IOException {
         // prepare the encoding list
-        EventList toEncode = new BasicEventList();
+        EventList<Integer> toEncode = new BasicEventList<Integer>();
         
         // prepare the decoding list
-        EventList toDecode = new BasicEventList();
+        EventList<Integer> toDecode = new BasicEventList<Integer>();
         toDecode.add(new Integer(1));
         toDecode.add(new Integer(2));
         toDecode.add(new Integer(4));
         
         // change, encode, decode
-        List entireList = Arrays.asList(new Object[] { new Integer(8), new Integer(6), new Integer(7), new Integer(5), new Integer(3), new Integer(0), new Integer(9) });
+        List<Integer> entireList = Arrays.asList(new Integer[] { new Integer(8), new Integer(6), new Integer(7), new Integer(5), new Integer(3), new Integer(0), new Integer(9) });
         toEncode.addAll(entireList);
         Bufferlo entireListEncoding = ListEventToBytes.toBytes(toEncode, intCoder);
         ListEventToBytes.toListEvent(entireListEncoding, toDecode, intCoder);

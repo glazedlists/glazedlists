@@ -138,30 +138,31 @@ public class ListEventPublisher2Test extends TestCase {
      * an inserted element.
      */
     public void testAppendContradictingEvents() {
-        EventList source = new BasicEventList();
-        NotFirstMatcherEditor matcherEditor = new NotFirstMatcherEditor();
-        FilterList filtered = new FilterList(source, matcherEditor);
+        EventList<String> source = new BasicEventList<String>();
+        NotFirstMatcherEditor<String> matcherEditor = new NotFirstMatcherEditor<String>();
+        FilterList<String> filtered = new FilterList<String>(source, matcherEditor);
         source.addListEventListener(matcherEditor);
         source.add("A");
 
         ListConsistencyListener filteredListener = ListConsistencyListener.install(filtered);
         assertEquals(0, filteredListener.getEventCount());
     }
-    public static class NotFirstMatcherEditor extends AbstractMatcherEditor implements ListEventListener {
-        public void listChanged(ListEvent listChanges) {
-            EventList sourceList = listChanges.getSourceList();
+    
+    private static class NotFirstMatcherEditor<E> extends AbstractMatcherEditor<E> implements ListEventListener<E> {
+        public void listChanged(ListEvent<E> listChanges) {
+            EventList<E> sourceList = listChanges.getSourceList();
             if(sourceList.size() > 0) {
-                fireChanged(new NotSameMatcher(sourceList.get(0)));
+                fireChanged(new NotSameMatcher<E>(sourceList.get(0)));
             } else {
                 fireMatchAll();
             }
         }
-        private static class NotSameMatcher implements Matcher {
-            Object item;
-            public NotSameMatcher(Object item) {
+        private static class NotSameMatcher<E> implements Matcher<E> {
+            E item;
+            public NotSameMatcher(E item) {
                 this.item = item;
             }
-            public boolean matches(Object item) {
+            public boolean matches(E item) {
                 return item != this.item;
             }
         }

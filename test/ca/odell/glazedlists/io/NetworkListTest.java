@@ -54,8 +54,8 @@ public class NetworkListTest extends TestCase {
         try {
             // prepare the source list
             String path = "/integers";
-            EventList sourceListTS = GlazedLists.threadSafeList(new BasicEventList());
-            NetworkList sourceList = peer.publish(sourceListTS, path, GlazedListsIO.serializableByteCoder());
+            EventList<Integer> sourceListTS = GlazedLists.threadSafeList(new BasicEventList<Integer>());
+            NetworkList<Integer> sourceList = peer.publish(sourceListTS, path, GlazedListsIO.serializableByteCoder());
             SimpleNetworkListStatusListener sourceListener = new SimpleNetworkListStatusListener(sourceList);
             waitFor(1000);
             assertTrue(sourceListener.isConnected());
@@ -99,8 +99,8 @@ public class NetworkListTest extends TestCase {
         try {
             // prepare the source list
             String path = "/integers";
-            EventList sourceListTS = GlazedLists.threadSafeList(new BasicEventList());
-            NetworkList sourceList = peer.publish(sourceListTS, path, GlazedListsIO.serializableByteCoder());
+            EventList<Integer> sourceListTS = GlazedLists.threadSafeList(new BasicEventList<Integer>());
+            NetworkList<Integer> sourceList = peer.publish(sourceListTS, path, GlazedListsIO.serializableByteCoder());
             sourceListTS.add(new Integer(8));
             sourceListTS.add(new Integer(6));
             
@@ -113,7 +113,7 @@ public class NetworkListTest extends TestCase {
             assertTrue(targetListener.isConnected());
             assertTrue(targetList.isConnected());
             assertEquals(sourceList, targetList);
-            List snapshot = new ArrayList();
+            List<Integer> snapshot = new ArrayList<Integer>();
             snapshot.addAll(sourceListTS);
             
             // disconnect the client
@@ -154,8 +154,8 @@ public class NetworkListTest extends TestCase {
         try {
             // prepare the source list
             String path = "/integers";
-            EventList sourceListTS = GlazedLists.threadSafeList(new BasicEventList());
-            NetworkList sourceList = peer.publish(sourceListTS, path, GlazedListsIO.serializableByteCoder());
+            EventList<Integer> sourceListTS = GlazedLists.threadSafeList(new BasicEventList<Integer>());
+            NetworkList<Integer> sourceList = peer.publish(sourceListTS, path, GlazedListsIO.serializableByteCoder());
             SimpleNetworkListStatusListener sourceListener = new SimpleNetworkListStatusListener(sourceList);
             sourceListTS.add(new Integer(8));
             sourceListTS.add(new Integer(6));
@@ -171,7 +171,7 @@ public class NetworkListTest extends TestCase {
             assertTrue(targetListener.isConnected());
             assertTrue(targetList.isConnected());
             assertEquals(sourceList, targetList);
-            List snapshot = new ArrayList();
+            List<Integer> snapshot = new ArrayList<Integer>();
             snapshot.addAll(sourceListTS);
             
             // disconnect the server
@@ -218,14 +218,14 @@ public class NetworkListTest extends TestCase {
         try {
             // prepare the source list
             String path = "/integers";
-            EventList sourceListTS = GlazedLists.threadSafeList(new BasicEventList());
-            NetworkList sourceList = peer.publish(sourceListTS, path, GlazedListsIO.serializableByteCoder());
+            EventList<Integer> sourceListTS = GlazedLists.threadSafeList(new BasicEventList<Integer>());
+            NetworkList<Integer> sourceList = peer.publish(sourceListTS, path, GlazedListsIO.serializableByteCoder());
             sourceListTS.add(new Integer(8));
             sourceListTS.add(new Integer(6));
             int connectPort = serverPort;
             
             // prepare the listener's peers
-            List peers = new ArrayList();
+            List<ListPeer> peers = new ArrayList<ListPeer>();
             for(int p = 0; p < 4; p++) {
                 serverPort++;
                 ListPeer listenerPeer = new ListPeer(serverPort);
@@ -234,17 +234,17 @@ public class NetworkListTest extends TestCase {
             }
             
             // prepare the listeners
-            List listeners = new ArrayList();
-            for(Iterator p = peers.iterator(); p.hasNext(); ) {
-                ListPeer listenerPeer = (ListPeer)p.next();
+            List<NetworkList> listeners = new ArrayList<NetworkList>();
+            for(Iterator<ListPeer> p = peers.iterator(); p.hasNext(); ) {
+                ListPeer listenerPeer = p.next();
                 NetworkList listener = listenerPeer.subscribe("localhost", connectPort, path, GlazedListsIO.serializableByteCoder());
                 listeners.add(listener);
             }
             
             // verify they're equal after a subscribe
             waitFor(1000);
-            for(Iterator i = listeners.iterator(); i.hasNext(); ) {
-                NetworkList listener = (NetworkList)i.next();
+            for(Iterator<NetworkList> i = listeners.iterator(); i.hasNext(); ) {
+                NetworkList listener = i.next();
                 assertEquals(sourceList, listener);
             }
 
@@ -280,8 +280,8 @@ public class NetworkListTest extends TestCase {
         try {
             // prepare the source list
             String path = "/integers";
-            EventList sourceListTS = GlazedLists.threadSafeList(new BasicEventList());
-            NetworkList sourceList = peer.publish(sourceListTS, path, GlazedListsIO.serializableByteCoder());
+            EventList<Integer> sourceListTS = GlazedLists.threadSafeList(new BasicEventList<Integer>());
+            NetworkList<Integer> sourceList = peer.publish(sourceListTS, path, GlazedListsIO.serializableByteCoder());
             sourceListTS.add(new Integer(8));
             sourceListTS.add(new Integer(6));
             
@@ -291,7 +291,7 @@ public class NetworkListTest extends TestCase {
             // verify they're equal after a subscribe
             waitFor(1000);
             assertEquals(sourceList, targetList);
-            List snapshot = new ArrayList();
+            List<Integer> snapshot = new ArrayList<Integer>();
             snapshot.addAll(sourceListTS);
             
             // disconnect the first list
@@ -301,8 +301,8 @@ public class NetworkListTest extends TestCase {
             assertFalse(targetList.isConnected());
             
             // prepare the second source list
-            EventList sourceList2TS = GlazedLists.threadSafeList(new BasicEventList());
-            NetworkList sourceList2 = peer.publish(sourceList2TS, path, GlazedListsIO.serializableByteCoder());
+            EventList<Integer> sourceList2TS = GlazedLists.threadSafeList(new BasicEventList<Integer>());
+            NetworkList<Integer> sourceList2 = peer.publish(sourceList2TS, path, GlazedListsIO.serializableByteCoder());
             sourceList2TS.add(new Integer(7));
             sourceList2TS.add(new Integer(5));
             
@@ -337,8 +337,8 @@ public class NetworkListTest extends TestCase {
         try {
             // prepare the source list
             String path = "/integers";
-            EventList sourceListTS = GlazedLists.threadSafeList(new BasicEventList());
-            NetworkList sourceList = peer.publish(sourceListTS, path, GlazedListsIO.serializableByteCoder());
+            EventList<Integer> sourceListTS = GlazedLists.threadSafeList(new BasicEventList<Integer>());
+            NetworkList<Integer> sourceList = peer.publish(sourceListTS, path, GlazedListsIO.serializableByteCoder());
 
             // prepare the target list
             NetworkList targetList = peer.subscribe("localhost", serverPort, path, GlazedListsIO.serializableByteCoder());
