@@ -50,7 +50,7 @@ public final class SequenceList<E> extends TransformedList<E,E> {
     private final List<E> sequence = new ArrayList<E>();
 
     /** The comparator that defines the order of the source and sequence values. */
-    private final Comparator<E> comparator;
+    private final Comparator<? super E> comparator;
 
     /**
      * The object containing the logic which produces next and previous
@@ -78,12 +78,13 @@ public final class SequenceList<E> extends TransformedList<E,E> {
      *
      * @param source the raw values to build a sequence around
      * @param sequencer the logic to produce sequence values relative to a value
+     * @param comparator determines the order of the sequence values
      */
-    public SequenceList(EventList<E> source, Sequencer<E> sequencer, Comparator<E> comparator) {
+    public SequenceList(EventList<E> source, Sequencer<E> sequencer, Comparator<? super E> comparator) {
         this(new SortedList<E>(source, comparator), sequencer, comparator);
     }
 
-    private SequenceList(SortedList<E> source, Sequencer<E> sequencer, Comparator<E> comparator) {
+    private SequenceList(SortedList<E> source, Sequencer<E> sequencer, Comparator<? super E> comparator) {
         super(source);
 
         if (sequencer == null)

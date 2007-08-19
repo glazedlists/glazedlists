@@ -8,7 +8,6 @@ import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import junit.framework.TestCase;
 
-import java.util.Comparator;
 import java.util.Date;
 
 public class SequenceListTest extends TestCase {
@@ -29,7 +28,7 @@ public class SequenceListTest extends TestCase {
         }
 
         try {
-            new SequenceList<Date>(new BasicEventList<Date>(), null, (Comparator) GlazedLists.comparableComparator());
+            new SequenceList<Date>(new BasicEventList<Date>(), null, GlazedLists.comparableComparator());
             fail();
         } catch (IllegalArgumentException e) {
             // expected
@@ -44,7 +43,7 @@ public class SequenceListTest extends TestCase {
 
         // valid constructor arguments
         new SequenceList<Date>(new BasicEventList<Date>(), Sequencers.monthSequencer());
-        new SequenceList<Date>(new BasicEventList<Date>(), Sequencers.monthSequencer(), (Comparator) GlazedLists.comparableComparator());
+        new SequenceList<Date>(new BasicEventList<Date>(), Sequencers.monthSequencer(), GlazedLists.comparableComparator());
 
         // construct a SequenceList with a populated source list
         final EventList<Date> source = new BasicEventList<Date>();
