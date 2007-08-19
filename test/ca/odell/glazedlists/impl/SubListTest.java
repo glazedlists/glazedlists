@@ -28,8 +28,8 @@ public class SubListTest extends TestCase {
      */
     public void testSubList() {
         // create a source list of values
-        BasicEventList eventList = new BasicEventList();
-        List controlList = new ArrayList();
+        BasicEventList<Integer> eventList = new BasicEventList<Integer>();
+        List<Integer> controlList = new ArrayList<Integer>();
         for(int i = 0; i < 26; i++) {
             eventList.add(new Integer(i));
             controlList.add(new Integer(i));
@@ -96,8 +96,8 @@ public class SubListTest extends TestCase {
      * Test that SubList works with a single index, even if the list is sorted.
      */
     public void testSingleIndexSorting() {
-        EventList eventList = new BasicEventList();
-        SortedList sortedList = new SortedList(eventList);
+        EventList<String> eventList = new BasicEventList<String>();
+        SortedList<String> sortedList = new SortedList<String>(eventList);
         sortedList.setComparator(null);
 
         eventList.add("Lions");
@@ -112,7 +112,7 @@ public class SubListTest extends TestCase {
         assertEquals(eventList, sortedList);
 
         List riders = sortedList.subList(3, 4);
-        List expectedRiders = new ArrayList();
+        List<String> expectedRiders = new ArrayList<String>();
         expectedRiders.add("Roughriders");
         assertEquals(expectedRiders, riders);
 
@@ -147,13 +147,13 @@ public class SubListTest extends TestCase {
      * Test that SubList works while the underlying list changes.
      */
     public void testSingleIndexListChanges() {
-        EventList eventList = new BasicEventList();
+        EventList<String> eventList = new BasicEventList<String>();
         eventList.add("Viper");
         eventList.add("Mustang");
         eventList.add("Camaro");
 
         List mustang = eventList.subList(1, 2);
-        List expectedMustang = new ArrayList();
+        List<String> expectedMustang = new ArrayList<String>();
         expectedMustang.add("Mustang");
         assertEquals(expectedMustang, mustang);
 

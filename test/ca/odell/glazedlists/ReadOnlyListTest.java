@@ -20,17 +20,17 @@ import java.util.List;
 public class ReadOnlyListTest extends TestCase {
 
     /** attempt to modify this list */
-    private EventList readOnlyData = null;
+    private EventList<String> readOnlyData = null;
 
     /** attempt to modify this list */
-    private List readOnly = null;
+    private List<String> readOnly = null;
 
     /**
      * Prepare for the test.
      */
     public void setUp() {
         // create a list of data
-        readOnlyData = new BasicEventList();
+        readOnlyData = new BasicEventList<String>();
         readOnlyData.add("A");
         readOnlyData.add("B");
         readOnlyData.add("C");

@@ -20,7 +20,7 @@ public class RuntimeExceptionTest extends TestCase {
     private RuntimeException luckyException = new RuntimeException();
 
     /** list to fire events */
-    private BasicEventList source = new BasicEventList();
+    private BasicEventList<String> source = new BasicEventList<String>();
 
     /** listener that throws exceptions */
     private ExceptionThrower exceptionThrower = new ExceptionThrower();
@@ -107,12 +107,12 @@ public class RuntimeExceptionTest extends TestCase {
     /**
      * ListEventListener that throws an exception on demand.
      */
-    static class ExceptionThrower implements ListEventListener {
+    static class ExceptionThrower implements ListEventListener<String> {
         private RuntimeException nextException = null;
         public void setNextException(RuntimeException nextException) {
             this.nextException = nextException;
         }
-        public void listChanged(ListEvent listChanges) {
+        public void listChanged(ListEvent<String> listChanges) {
             if(nextException == null) return;
             RuntimeException toThrow = nextException;
             nextException = null;
