@@ -942,7 +942,7 @@ public class GroupingListMultiMapTest extends TestCase {
         }
 
         public int compareTo(final AFirstLetterComparable o) {
-            return Character.valueOf(contained.getName().charAt(0)).compareTo(new Character(o.contained.getName().charAt(0)));
+            return new Character(contained.getName().charAt(0)).compareTo(new Character(o.contained.getName().charAt(0)));
         }
 
         public String toString() {
@@ -958,7 +958,7 @@ public class GroupingListMultiMapTest extends TestCase {
         }
 
         public int hashCode() {
-            return Character.valueOf(contained.getName().charAt(0)).hashCode();
+            return new Character(contained.getName().charAt(0)).hashCode();
         }
     }
 

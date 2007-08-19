@@ -694,7 +694,7 @@ public class SeparatorListTest extends TestCase {
         public int compare(String a, String b) {
             boolean aIsUpperCase = Character.isUpperCase(a.charAt(0));
             boolean bIsUpperCase = Character.isUpperCase(b.charAt(0));
-            return Boolean.valueOf(aIsUpperCase).compareTo(Boolean.valueOf(bIsUpperCase));
+            return (bIsUpperCase == aIsUpperCase ? 0 : (aIsUpperCase ? 1 : -1));
         }
     }
 
