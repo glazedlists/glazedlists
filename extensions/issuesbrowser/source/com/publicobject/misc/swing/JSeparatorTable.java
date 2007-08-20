@@ -22,11 +22,7 @@ public class JSeparatorTable extends JTable {
     private TableCellEditor separatorEditor;
 
     public JSeparatorTable(EventTableModel tableModel) {
-        super(tableModel);
-        setUI(new SpanTableUI());
-
-        // use a toString() renderer for the separator
-        this.separatorRenderer = getDefaultRenderer(Object.class);
+        this(tableModel, null);
     }
 
     public JSeparatorTable(EventTableModel tableModel, TableColumnModel tableColumnModel) {
@@ -39,20 +35,31 @@ public class JSeparatorTable extends JTable {
 
     /** {@inheritDoc} */
     public void setModel(TableModel tableModel) {
-        if(!(tableModel instanceof EventTableModel)) throw new IllegalArgumentException();
+        if(!(tableModel instanceof EventTableModel))
+            throw new IllegalArgumentException("tableModel is expected to be an EventTableModel");
         super.setModel(tableModel);
+    }
+
+    /**
+     * A convenience method to cast the TableModel to the expected
+     * EventTableModel implementation.
+     *
+     * @return the EventTableModel that backs this table
+     */
+    private EventTableModel getEventTableModel() {
+        return (EventTableModel) getModel();
     }
 
     /** {@inheritDoc} */
     public Rectangle getCellRect(int row, int column, boolean includeSpacing) {
-        EventTableModel eventTableModel = (EventTableModel) getModel();
+        final EventTableModel eventTableModel = getEventTableModel();
 
         // sometimes JTable asks for a cellrect that doesn't exist anymore, due
         // to an editor being installed before a bunch of rows were removed.
         // In this case, just return an empty rectangle, since it's going to
         // be discarded anyway
         if(row >= eventTableModel.getRowCount()) {
-            return new Rectangle(0, 0, 0, 0);
+            return new Rectangle();
         }
 
         // if it's the separator row, return the entire row as one big rectangle
@@ -67,71 +74,64 @@ public class JSeparatorTable extends JTable {
             return super.getCellRect(row, column, includeSpacing);
         }
     }
+
     public Rectangle getCellRectWithoutSpanning(int row, int column, boolean includeSpacing) {
         return super.getCellRect(row, column, includeSpacing);
     }
 
     /** {@inheritDoc} */
     public Object getValueAt(int row, int column) {
-        Object rowValue = ((EventTableModel)getModel()).getElementAt(row);
+        final Object rowValue = getEventTableModel().getElementAt(row);
 
-        // if it's the separator row, return the entire row as one big rectangle
-        if(rowValue instanceof SeparatorList.Separator) {
+        // if it's the separator row, return the value directly
+        if(rowValue instanceof SeparatorList.Separator)
             return rowValue;
 
         // otherwise it's business as usual
-        } else {
-            return super.getValueAt(row, column);
-        }
+        return super.getValueAt(row, column);
     }
 
     /** {@inheritDoc} */
     public TableCellRenderer getCellRenderer(int row, int column) {
-        Object rowValue = ((EventTableModel)getModel()).getElementAt(row);
-
         // if it's the separator row, use the separator renderer
-        if(rowValue instanceof SeparatorList.Separator) {
+        if(getEventTableModel().getElementAt(row) instanceof SeparatorList.Separator)
             return separatorRenderer;
 
         // otherwise it's business as usual
-        } else {
-            return super.getCellRenderer(row, column);
-        }
+        return super.getCellRenderer(row, column);
     }
 
     /** {@inheritDoc} */
     public TableCellEditor getCellEditor(int row, int column) {
-        Object rowValue = ((EventTableModel)getModel()).getElementAt(row);
-
         // if it's the separator row, use the separator editor
-        if(rowValue instanceof SeparatorList.Separator) {
+        if(getEventTableModel().getElementAt(row) instanceof SeparatorList.Separator)
             return separatorEditor;
 
         // otherwise it's business as usual
-        } else {
-            return super.getCellEditor(row, column);
-        }
+        return super.getCellEditor(row, column);
+    }
+
+    /** {@inheritDoc} */
+    public boolean isCellEditable(int row, int column) {
+        // if it's the separator row, it can never be edited
+        if(getEventTableModel().getElementAt(row) instanceof SeparatorList.Separator)
+            return false;
+
+        // otherwise it's business as usual
+        return super.isCellEditable(row, column);
     }
 
     /**
      * Get the renderer for separator rows.
      */
-    public TableCellRenderer getSeparatorRenderer() {
-        return separatorRenderer;
-    }
-    public void setSeparatorRenderer(TableCellRenderer separatorRenderer) {
-        this.separatorRenderer = separatorRenderer;
-    }
+    public TableCellRenderer getSeparatorRenderer() { return separatorRenderer; }
+    public void setSeparatorRenderer(TableCellRenderer separatorRenderer) { this.separatorRenderer = separatorRenderer; }
 
     /**
      * Get the editor for separator rows.
      */
-    public TableCellEditor getSeparatorEditor() {
-        return separatorEditor;
-    }
-    public void setSeparatorEditor(TableCellEditor separatorEditor) {
-        this.separatorEditor = separatorEditor;
-    }
+    public TableCellEditor getSeparatorEditor() { return separatorEditor; }
+    public void setSeparatorEditor(TableCellEditor separatorEditor) { this.separatorEditor = separatorEditor; }
 
     /** {@inheritDoc} */
     public void tableChanged(TableModelEvent e) {
@@ -221,8 +221,7 @@ class SpanTableUI extends BasicTableUI {
         } else {
             TableCellRenderer renderer = table.getCellRenderer(row, column);
             Component component = table.prepareRenderer(renderer, row, column);
-            rendererPane.paintComponent(g, component, table, cellRect.x, cellRect.y,
-                                    cellRect.width, cellRect.height, true);
+            rendererPane.paintComponent(g, component, table, cellRect.x, cellRect.y, cellRect.width, cellRect.height, true);
         }
     }
     private void paintCells(Graphics g, int rMin, int rMax, int cMin, int cMax) {

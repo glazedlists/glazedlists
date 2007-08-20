@@ -40,17 +40,16 @@ public class SeparatorList<E> extends TransformedList<E, E> {
     private static final Object SOURCE_ELEMENT = Barcode.WHITE;
 
     /** how many elements before we get a separator, such as 1 or 2 */
-    private int minimumSizeForSeparator;
+    private final int minimumSizeForSeparator;
 
     /** manage collapsed elements */
     private Barcode collapsedElements;
-
 
     /**
      * Create a {@link SeparatorList}...
      */
     public SeparatorList(EventList<E> source, Comparator<E> comparator, int minimumSizeForSeparator, int defaultLimit) {
-        super(new SeparatorInjectorList<E>(new SortedList<E>(source, comparator), comparator, defaultLimit));
+        super(new SeparatorInjectorList<E>(new SortedList<E>(source, comparator), defaultLimit));
         this.separatorSource = (SeparatorInjectorList<E>)super.source;
         this.minimumSizeForSeparator = minimumSizeForSeparator;
 
@@ -81,6 +80,11 @@ public class SeparatorList<E> extends TransformedList<E, E> {
     /** {@inheritDoc} */
     protected int getSourceIndex(int mutationIndex) {
         return collapsedElements.getIndex(mutationIndex, Barcode.BLACK);
+    }
+
+    /** {@inheritDoc} */
+    protected boolean isWritable() {
+        return true;
     }
 
     /**
@@ -434,13 +438,11 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         private int defaultLimit;
 
         /**
-         * Create a new {@link UniqueList} that determines groups using the specified
-         * {@link Comparator}. Elements that the {@link Comparator} determines are
-         * equal will share a common separator.
-         *
-         * @see GlazedLists#beanPropertyComparator
+         * Create a new {@link SeparatorInjectorList} that determines groups
+         * using the specified {@link Comparator}. Elements that the
+         * {@link Comparator} determines are equal will share a common separator.
          */
-        public SeparatorInjectorList(SortedList<E> source, Comparator<E> comparator, int defaultLimit) {
+        public SeparatorInjectorList(SortedList<E> source, int defaultLimit) {
             super(source);
             this.defaultLimit = defaultLimit;
 
@@ -502,6 +504,10 @@ public class SeparatorList<E> extends TransformedList<E, E> {
             else throw new IllegalStateException();
         }
 
+        /** {@inheritDoc} */
+        protected boolean isWritable() {
+            return true;
+        }
 
         /** {@inheritDoc} */
         public int size() {
