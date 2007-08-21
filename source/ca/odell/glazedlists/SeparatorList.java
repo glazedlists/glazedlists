@@ -18,6 +18,16 @@ import java.util.List;
 /**
  * A list that adds separator objects before each group of elements.
  *
+ * <p>SeparatorList is writable, however, attempts to write over separators
+ * will always produce an {@link IllegalArgumentException}. For example,
+ * calling {@link #add(int, Object)}, {@link #set(int, Object)} or
+ * {@link #remove(int)} with a an index that actually corresponds to a
+ * separator in this list will produce an {@link IllegalArgumentException}.
+ * This is because there is no corresponding index for separators in the source
+ * list; separators are added by this SeparatorList. All index-based write
+ * operations must be performed on indexes known to correspond to non-separator
+ * elements.
+ *
  * <p><strong>Warning:</strong> this class won't work very well with generics
  * because separators are mixed in, which will be a different class than the
  * other list elements.
@@ -46,9 +56,23 @@ public class SeparatorList<E> extends TransformedList<E, E> {
     private Barcode collapsedElements;
 
     /**
-     * Create a {@link SeparatorList}...
+     * Construct a SeparatorList overtop of the <code>source</code> list by
+     * using the given <code>comparator</code> to compute groups of similar
+     * source items. For each group a single separator will be present in this
+     * SeparatorList provided the group contains at least the
+     * <code>minimumSizeForSeparator</code> number of items (otherwise they are
+     * left without a separator). In addition this SeparatorList will never
+     * show more than the <code>defaultLimit</code> number of group elements
+     * from any given group.
+     *
+     * @param source the list containing the raw items to be grouped
+     * @param comparator the Comparator which defines the grouping logic
+     * @param minimumSizeForSeparator the number of elements which must exist
+     *      in a group in order for a separator to be created
+     * @param defaultLimit the maximum number of element to display for a group;
+     *      extra elements are truncated
      */
-    public SeparatorList(EventList<E> source, Comparator<E> comparator, int minimumSizeForSeparator, int defaultLimit) {
+    public SeparatorList(EventList<E> source, Comparator<? super E> comparator, int minimumSizeForSeparator, int defaultLimit) {
         super(new SeparatorInjectorList<E>(new SortedList<E>(source, comparator), defaultLimit));
         this.separatorSource = (SeparatorInjectorList<E>)super.source;
         this.minimumSizeForSeparator = minimumSizeForSeparator;
@@ -395,7 +419,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
      * as a separate transformation from the hiding of separators
      * and collapsed elements.
      */
-    private static class SeparatorInjectorList<E> extends TransformedList<E, E> {
+    static class SeparatorInjectorList<E> extends TransformedList<E, E> {
 
         /** the grouping service manages finding where to insert groups */
         private final Grouper<E> grouper;
@@ -438,9 +462,15 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         private int defaultLimit;
 
         /**
-         * Create a new {@link SeparatorInjectorList} that determines groups
-         * using the specified {@link Comparator}. Elements that the
-         * {@link Comparator} determines are equal will share a common separator.
+         * Create a new {@link SeparatorInjectorList} that groups together like
+         * items using the Comparator from the <code>source</code>. Elements
+         * that the {@link Comparator} determines are equal will share a common
+         * separator.
+         *
+         * @param source the sorted list of items with a Comparator that defines
+         *      the group boundaries
+         * @param defaultLimit the maximum number of items to include in a
+         *      group; all remaining items will be truncated
          */
         public SeparatorInjectorList(SortedList<E> source, int defaultLimit) {
             super(source);
@@ -493,7 +523,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         /** {@inheritDoc} */
         protected int getSourceIndex(int mutationIndex) {
             Object type = insertedSeparators.get(mutationIndex);
-            if(type == SEPARATOR) return -1;
+            if(type == SEPARATOR) throw new IllegalArgumentException("No source index exists for the separator located at index " + mutationIndex);
             else if(type == SOURCE_ELEMENT) return insertedSeparators.getColourIndex(mutationIndex, SOURCE_ELEMENT);
             else throw new IllegalStateException();
         }
@@ -678,7 +708,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         /**
          * Implement the {@link Separator} interface in the most natural way.
          */
-        private class GroupSeparator implements Separator<E> {
+        class GroupSeparator implements Separator<E> {
             private int limit = Integer.MAX_VALUE;
             private int size;
             private E first;

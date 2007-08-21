@@ -157,7 +157,7 @@ public class SeparatorListTest extends TestCase {
         EventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.stringToList("AAAABBBDDD"));
 
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, (Comparator)GlazedLists.comparableComparator(), 0, Integer.MAX_VALUE);
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, GlazedLists.comparableComparator(), 0, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -302,7 +302,7 @@ public class SeparatorListTest extends TestCase {
         EventList<String> source = new SortedList<String>(new BasicEventList<String>());
         source.addAll(GlazedListsTests.stringToList("AAAAAAABBCCCCC"));
 
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, (Comparator)GlazedLists.comparableComparator(), 0, 3);
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, GlazedLists.comparableComparator(), 0, 3);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -376,7 +376,7 @@ public class SeparatorListTest extends TestCase {
         EventList<String> source = new SortedList<String>(new BasicEventList<String>());
         source.addAll(GlazedListsTests.stringToList("AAABCCC"));
 
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, (Comparator)GlazedLists.comparableComparator(), 2, Integer.MAX_VALUE);
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, GlazedLists.comparableComparator(), 2, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -396,7 +396,7 @@ public class SeparatorListTest extends TestCase {
         EventList<String> source = new SortedList<String>(new BasicEventList<String>());
         source.addAll(GlazedListsTests.stringToList("AAABBBBBBBCCC"));
 
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, (Comparator)GlazedLists.comparableComparator(), 0, 5);
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, GlazedLists.comparableComparator(), 0, 5);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -435,7 +435,7 @@ public class SeparatorListTest extends TestCase {
         EventList<String> source = new SortedList<String>(new BasicEventList<String>());
         source.addAll(GlazedListsTests.stringToList("AAABBBBBBBCCC"));
 
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, (Comparator)GlazedLists.comparableComparator(), 0, 5);
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, GlazedLists.comparableComparator(), 0, 5);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -444,7 +444,7 @@ public class SeparatorListTest extends TestCase {
     }
 
     public void testSortedSource() {
-        Comparator<String> alphabetical = (Comparator)GlazedLists.comparableComparator();
+        Comparator<String> alphabetical = GlazedLists.comparableComparator();
         Comparator<String> length = GlazedLists.reverseComparator(new StringLengthComparator());
 
         BasicEventList<String> unsortedSource = new BasicEventList<String>();
@@ -473,7 +473,7 @@ public class SeparatorListTest extends TestCase {
      * by reflecting the new elements in that list.
      */
     public void testSortSource() {
-        Comparator<String> caseSensitive = (Comparator)GlazedLists.comparableComparator();
+        Comparator<String> caseSensitive = GlazedLists.comparableComparator();
         Comparator<String> caseInsensitive = String.CASE_INSENSITIVE_ORDER;
         Random dice = new Random(0);
         int expectedEventCount = 0;
@@ -525,7 +525,7 @@ public class SeparatorListTest extends TestCase {
         BasicEventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.stringToList("AABBBCCCCDDDDEFGHHHH"));
 
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, (Comparator)GlazedLists.comparableComparator(), 0, Integer.MAX_VALUE);
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, GlazedLists.comparableComparator(), 0, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
         assertEqualsIgnoreSeparators(source, separatorList, GlazedLists.comparableComparator());
@@ -575,12 +575,12 @@ public class SeparatorListTest extends TestCase {
         final BasicEventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.stringToList("AABBBCCCCDDDDEFGHHHH"));
 
-        final SeparatorList separatorList = new SeparatorList(source, GlazedLists.comparableComparator(), 0, Integer.MAX_VALUE);
+        final SeparatorList<String> separatorList = new SeparatorList<String>(source, GlazedLists.comparableComparator(), 0, Integer.MAX_VALUE);
         ListConsistencyListener listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
         assertEqualsIgnoreSeparators(source, separatorList, GlazedLists.comparableComparator());
 
-        SeparatorList.Separator separator = (SeparatorList.Separator)separatorList.get(0);
+        SeparatorList.Separator separator = (SeparatorList.Separator)(Object)separatorList.get(0);
         assertEquals("A", separator.first());
         assertEquals(2, separator.size());
 
@@ -651,8 +651,6 @@ public class SeparatorListTest extends TestCase {
         assertEquals(24, separatorList.size());
     }
 
-
-
     private void assertEqualsIgnoreSeparators(List source, SeparatorList separatorList, Comparator separatorComparator) {
         // create a protective copy that we can surely modify
         source = new ArrayList(source);
@@ -707,7 +705,7 @@ public class SeparatorListTest extends TestCase {
     public void testHandleChange() {
         ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
         FilterList<String> filtered = new FilterList<String>(source);
-        SeparatorList<String> separated = new SeparatorList<String>(filtered, (Comparator)GlazedLists.comparableComparator(), 1, Integer.MAX_VALUE);
+        SeparatorList<String> separated = new SeparatorList<String>(filtered, GlazedLists.comparableComparator(), 1, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separated);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -761,7 +759,7 @@ public class SeparatorListTest extends TestCase {
      */
     public void testHandleChangeSimplified() {
         ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
-        SeparatorList<String> separated = new SeparatorList<String>(source, (Comparator)GlazedLists.comparableComparator(), 1, Integer.MAX_VALUE);
+        SeparatorList<String> separated = new SeparatorList<String>(source, GlazedLists.comparableComparator(), 1, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separated);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -793,7 +791,7 @@ public class SeparatorListTest extends TestCase {
      */
     public void testHandleUpdateEvents() {
         EventList<String> source = new BasicEventList<String>();
-        SeparatorList separated = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        SeparatorList<String> separated = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separated);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -804,11 +802,122 @@ public class SeparatorListTest extends TestCase {
         assertEquals(listConsistencyListener.getEventCount(), 2);
 
         // collapse the group, update events should still cause updates
-        ((SeparatorList.Separator<String>)separated.get(0)).setLimit(0);
+        ((SeparatorList.Separator)(Object)separated.get(0)).setLimit(0);
         assertEquals(listConsistencyListener.getEventCount(), 3);
         assertEquals(1, separated.size());
         source.set(2, "a");
         assertEquals(listConsistencyListener.getEventCount(), 4);
         assertEquals(1, separated.size());
+    }
+
+    public void testSet() {
+        EventList<String> source = new BasicEventList<String>();
+        SeparatorList<String> separated = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        
+        source.addAll(GlazedListsTests.stringToList("ABCABCABC"));
+        assertEquals(9, source.size());
+        assertEquals(12, separated.size());
+
+        // modify the first item in a group
+        assertEquals("A", source.get(0));
+        assertEquals("A", separated.get(1));
+        separated.set(1, "D");
+        assertEqualsIgnoreSeparators(source, separated, String.CASE_INSENSITIVE_ORDER);
+
+        // modify the middle item in a group
+        assertEquals("B", source.get(4));
+        assertEquals("B", separated.get(5));
+        separated.set(5, "E");
+        assertEqualsIgnoreSeparators(source, separated, String.CASE_INSENSITIVE_ORDER);
+
+        // modify the last item in a group
+        assertEquals("C", source.get(8));
+        assertEquals("C", separated.get(9));
+        separated.set(9, "F");
+        assertEqualsIgnoreSeparators(source, separated, String.CASE_INSENSITIVE_ORDER);
+
+        // try to modify a Separator which is disallowed
+        try {
+            separated.set(0, "This will fail");
+            fail("failed to receive an IllegalArgumentException when accessing an index that stores a separator");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+    }
+
+    public void testAdd() {
+        EventList<String> source = new BasicEventList<String>();
+        SeparatorList<String> separated = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+
+        source.addAll(GlazedListsTests.stringToList("ABCABCABC"));
+        assertEquals(9, source.size());
+        assertEquals(12, separated.size());
+
+        // add a new first item in a group
+        assertEquals("A", source.get(0));
+        assertEquals("A", separated.get(1));
+        separated.add(1, "A");
+        assertEqualsIgnoreSeparators(source, separated, String.CASE_INSENSITIVE_ORDER);
+
+        // add a new middle item in a group
+        assertEquals("B", source.get(5));
+        assertEquals("B", separated.get(7));
+        separated.add(7, "B");
+        assertEqualsIgnoreSeparators(source, separated, String.CASE_INSENSITIVE_ORDER);
+
+        // add the last item in a group
+        assertEquals("C", source.get(10));
+        assertEquals("C", separated.get(13));
+        separated.add(13, "C");
+        assertEqualsIgnoreSeparators(source, separated, String.CASE_INSENSITIVE_ORDER);
+
+        // add the last item in a group
+        assertEquals("C", source.get(11));
+        assertEquals("C", separated.get(14));
+        separated.add("C");
+        assertEqualsIgnoreSeparators(source, separated, String.CASE_INSENSITIVE_ORDER);
+
+        // try to modify a Separator which is disallowed
+        try {
+            separated.add(0, "This should fail");
+            fail("failed to receive an IllegalArgumentException when accessing an index that stores a separator");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+    }
+
+    public void testRemove() {
+        EventList<String> source = new BasicEventList<String>();
+        SeparatorList<String> separated = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+
+        source.addAll(GlazedListsTests.stringToList("ABCABCABC"));
+        assertEquals(9, source.size());
+        assertEquals(12, separated.size());
+
+        // remove the first item in a group
+        assertEquals("A", source.get(0));
+        assertEquals("A", separated.get(1));
+        separated.remove(1);
+        assertEqualsIgnoreSeparators(source, separated, String.CASE_INSENSITIVE_ORDER);
+
+        // remove the middle item in a group
+        assertEquals("B", source.get(3));
+        assertEquals("B", separated.get(5));
+        separated.remove(5);
+        assertEqualsIgnoreSeparators(source, separated, String.CASE_INSENSITIVE_ORDER);
+
+        // remove the last item in a group
+        assertEquals("C", source.get(6));
+        assertEquals("C", separated.get(9));
+        separated.remove(9);
+        assertEqualsIgnoreSeparators(source, separated, String.CASE_INSENSITIVE_ORDER);
+
+        // try to modify a Separator which is disallowed
+        try {
+            separated.remove(0);
+            fail("failed to receive an IllegalArgumentException when accessing an index that stores a separator");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
     }
 }
