@@ -288,9 +288,8 @@ public class EventTableViewer<E> implements ListEventListener<E> {
         source.removeListEventListener(this);
 
         // if we created the checkFilterList then we must also dispose it
-        if(checkFilterList != null) {
+        if (checkFilterList != null)
             checkFilterList.dispose();
-        }
 
         // this encourages exceptions to be thrown if this model is incorrectly accessed again
         swtThreadSource = null;

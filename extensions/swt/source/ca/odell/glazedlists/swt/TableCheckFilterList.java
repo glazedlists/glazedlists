@@ -37,42 +37,77 @@ import java.util.List;
 final class TableCheckFilterList<S, E> extends TransformedList<S, E> implements SelectionListener {
 
     /** filter out unchecked elements */
-    private CheckMatcherEditor<S> checkMatcherEditor = new CheckMatcherEditor<S>();
+    private final CheckMatcherEditor<S> checkMatcherEditor = new CheckMatcherEditor<S>();
 
     /** the table that checkboxes are displayed in */
-    private Table table;
+    private final Table table;
 
     /** for checking table items */
-    private CheckableTableFormat checkableTableFormat;
+    private final CheckableTableFormat checkableTableFormat;
+
+    /** Retain a reference to the CheckableWrapperList, if we create one, so it can be disposed */
+    private CheckableWrapperList checkableWrapperList;
+
+    /** Retain a reference to the FilterList so it can be disposed */
+    private FilterList filterList;
+
+    /** Retain a reference to the TableChecker, if we create one, so it can be disposed */
+    private TableChecker tableChecker;
 
     /**
      * Creates a new filter that filters elements depending on whether they are
      * checked in the table.
      *
+     * @param source the items to decorate with checkability
+     * @param table the checkable table
      * @param tableFormat if this class implements {@link CheckableTableFormat}
      *      it will be used to store check state. Otherwise check state will be
      *      stored transiently within this class' state.
      */
     public TableCheckFilterList(EventList<S> source, Table table, TableFormat tableFormat) {
-        super(new FilterList<S>(tableFormat instanceof CheckableTableFormat ? source : new CheckableWrapperList(source), Matchers.trueMatcher()));
+        this(table, tableFormat, tableFormat instanceof CheckableTableFormat ? source : new CheckableWrapperList(source));
+    }
+
+    /**
+     * A hidden constructor that allows us to store a reference to the source of
+     * the FilterList, which we may have created and must dispose later.
+     *
+     * @param table the checkable table
+     * @param tableFormat the format of the checkable table
+     * @param filterListSource the source of the FilterList that backs this TableCheckFilterList
+     */
+    private TableCheckFilterList(Table table, TableFormat tableFormat, EventList<S> filterListSource) {
+        this(new FilterList<S>(filterListSource, Matchers.trueMatcher()), table, tableFormat);
+
+        // if a CheckableWrapperList was created, store a reference so it can be disposed later
+        if (filterListSource instanceof CheckableWrapperList)
+            checkableWrapperList = (CheckableWrapperList) filterListSource;
+    }
+
+    /**
+     * A hidden constructor that allows us to store a reference to the
+     * FilterList, which we created and must dispose later.
+     *
+     * @param filterList the FilterList that backs this TableCheckFilterList
+     * @param table the checkable table
+     * @param tableFormat the format of the checkable table
+     */
+    private TableCheckFilterList(FilterList<S> filterList, Table table, TableFormat tableFormat) {
+        super(filterList);
+
+        this.filterList = filterList;
         this.table = table;
-        if(tableFormat instanceof CheckableTableFormat) {
-            this.checkableTableFormat = (CheckableTableFormat)tableFormat;
-        } else {
-            this.checkableTableFormat = null;
-        }
+        this.checkableTableFormat = tableFormat instanceof CheckableTableFormat ? (CheckableTableFormat) tableFormat : null;
 
         // listen for changes in checkedness
         table.addSelectionListener(this);
 
         // prepare the filter
-        FilterList<S> filteredSource = (FilterList<S>)super.source;
-        filteredSource.setMatcherEditor(checkMatcherEditor);
+        filterList.setMatcherEditor(checkMatcherEditor);
 
         // handle changes
-        source.addListEventListener(this);
+        filterList.addListEventListener(this);
     }
-
 
     /**
      * Set the specified list element in the source list as checked.
@@ -223,28 +258,26 @@ final class TableCheckFilterList<S, E> extends TransformedList<S, E> implements 
         source.set(sourceIndex, source.get(sourceIndex));
     }
 
-    /**
-     * Registers the specified listener to receive notification of changes
-     * to this list.
-     *
-     * <p>The only listener added to a TableCheckFilterList may be a EventTableViewer.
-     * This is because the TableCheckFilterList may not have any lists between it
-     * and the EventTableViewer.
-     */
     public void addListEventListener(ListEventListener<? super E> listChangeListener) {
         super.addListEventListener(listChangeListener);
 
         // also adjust the table's checked rows
         if(listChangeListener instanceof EventTableViewer) {
-            super.addListEventListener(new TableChecker());
+            tableChecker = new TableChecker();
+            super.addListEventListener(tableChecker);
         }
     }
 
     /** {@inheritDoc} */
     public void dispose() {
-        if(source instanceof CheckableWrapperList) {
-            ((CheckableWrapperList)source).dispose();
-        }
+        if (checkableWrapperList != null)
+            checkableWrapperList.dispose();
+
+        if (tableChecker != null)
+            removeListEventListener(tableChecker);
+
+        filterList.dispose();
+
         super.dispose();
     }
 
