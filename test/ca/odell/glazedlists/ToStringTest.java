@@ -21,10 +21,10 @@ public class ToStringTest extends TestCase {
      * Validate that toString() is consistent with ArrayList on all lists.
      */
     public void testToStringConsistency() {
-        ArrayList controlList = new ArrayList();
-        BasicEventList basicEventList = new BasicEventList();
-        FilterList filterList = new FilterList(basicEventList, Matchers.trueMatcher());
-        SortedList sortedList = new SortedList(basicEventList);
+        ArrayList<String> controlList = new ArrayList<String>();
+        BasicEventList<String> basicEventList = new BasicEventList<String>();
+        FilterList<String> filterList = new FilterList<String>(basicEventList, Matchers.trueMatcher());
+        SortedList<String> sortedList = SortedList.create(basicEventList);
 
         // Test On Empty Lists
 

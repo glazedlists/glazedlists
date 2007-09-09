@@ -22,7 +22,7 @@ public class PopularityListTest extends TestCase {
      */
     public void testSimpleData() {
         EventList<String> source = new BasicEventList<String>();
-        PopularityList popularityList = new PopularityList<String>(source);
+        PopularityList popularityList = PopularityList.create(source);
         
         source.add("Mike");
         source.add("Kevin");
@@ -64,8 +64,8 @@ public class PopularityListTest extends TestCase {
         Random dice = new Random(0);
         
         EventList<Integer> source = new BasicEventList<Integer>();
-        SortedList<Integer> sortedSource = new SortedList<Integer>(source);
-        PopularityList<Integer> popularityList = new PopularityList<Integer>(source);
+        SortedList<Integer> sortedSource = SortedList.create(source);
+        PopularityList<Integer> popularityList = PopularityList.create(source);
         new PopularityListValidator(popularityList, sortedSource);
         
         // add 1000
@@ -130,8 +130,8 @@ public class PopularityListTest extends TestCase {
         source.add("Chevy");     // A A A B C C C
         source.add("Datsun");    // A A A B C C C D
 
-        SortedList<String> sortedList = new SortedList<String>(source);
-        PopularityList<String> popularityList = new PopularityList<String>(source);
+        SortedList<String> sortedList = SortedList.create(source);
+        PopularityList<String> popularityList = PopularityList.create(source);
         new PopularityListValidator(popularityList, sortedList);
         
         // in sorted order changes
@@ -163,8 +163,8 @@ public class PopularityListTest extends TestCase {
      */
     public void testLeftEdgeSet() {
         EventList<String> source = new BasicEventList<String>();
-        SortedList<String> sortedList = new SortedList<String>(source);
-        PopularityList<String> popularityList = new PopularityList<String>(source);
+        SortedList<String> sortedList = SortedList.create(source);
+        PopularityList<String> popularityList = PopularityList.create(source);
         new PopularityListValidator(popularityList, sortedList);
         
         // in sorted order changes
@@ -181,7 +181,7 @@ public class PopularityListTest extends TestCase {
      */
     public void testEqualPopularityOrdering() {
         EventList<String> source = new BasicEventList<String>();
-        PopularityList<String> popularityList = new PopularityList<String>(source);
+        PopularityList<String> popularityList = PopularityList.create(source);
         
         // in sorted order changes
         source.add(0, "chaos"); // c

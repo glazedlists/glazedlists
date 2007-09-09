@@ -42,20 +42,31 @@ public final class PopularityList<E> extends TransformedList<E, E> {
 
     /**
      * Creates a new {@link PopularityList} that provides frequency-ranking
+     * for the specified {@link EventList}. All elements of the source {@link EventList}
+     * must implement {@link Comparable}.
+     */
+    public static <E extends Comparable<? super E>> PopularityList<E> create(EventList<E> source) {
+        return new PopularityList<E>(UniqueList.create(source));
+    }
+
+    /**
+     * Creates a new {@link PopularityList} that provides frequency-ranking
+     * for the specified {@link EventList}. All elements of the source {@link EventList}
+     * must implement {@link Comparable}.
+     * <p>Usage of factory method {@link #create(EventList)} is preferable.
+     */
+    public PopularityList(EventList<E> source) {
+        this(new UniqueList<E>(source));
+    }
+
+    /**
+     * Creates a new {@link PopularityList} that provides frequency-ranking
      * for the specified {@link EventList}.
      *
      * @param uniqueComparator {@link Comparator} used to determine equality
      */
     public PopularityList(EventList<E> source, Comparator<E> uniqueComparator) {
         this(new UniqueList<E>(source, uniqueComparator));
-    }
-
-    /**
-     * Creates a new {@link PopularityList} that provides frequency-ranking
-     * for the specified {@link EventList}.
-     */
-    public PopularityList(EventList<E> source) {
-        this(new UniqueList<E>(source));
     }
 
     /**

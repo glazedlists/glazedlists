@@ -717,7 +717,7 @@ public class TreeListTest extends TestCase {
 
     public void testTreeSortingUnsortedTree() {
         EventList<String> source = new BasicEventList<String>();
-        SortedList<String> sortedSource = new SortedList<String>(source);
+        SortedList<String> sortedSource = SortedList.create(source);
         TreeList<String> treeList = new TreeList<String>(sortedSource, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
@@ -744,7 +744,7 @@ public class TreeListTest extends TestCase {
 
     public void testTreeSorting() {
         EventList<String> source = new BasicEventList<String>();
-        SortedList<String> sortedSource = new SortedList<String>(source);
+        SortedList<String> sortedSource = SortedList.create(source);
         TreeList<String> treeList = new TreeList<String>(sortedSource, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);

@@ -84,7 +84,7 @@ public class EventListTest extends TestCase {
         List<List<String>> listTypes = new ArrayList<List<String>>();
         listTypes.add(new ArrayList<String>());
         listTypes.add(new BasicEventList<String>());
-        listTypes.add(new SortedList<String>(new BasicEventList<String>()));
+        listTypes.add(SortedList.create(new BasicEventList<String>()));
 
         // test all different list types
         for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext();) {
@@ -113,7 +113,7 @@ public class EventListTest extends TestCase {
         List<List<String>> listTypes = new ArrayList<List<String>>();
         listTypes.add(new ArrayList<String>());
         listTypes.add(new BasicEventList<String>());
-        listTypes.add(new SortedList<String>(new BasicEventList<String>()));
+        listTypes.add(SortedList.create(new BasicEventList<String>()));
 
         // test all different list types
         for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext();) {
@@ -144,7 +144,7 @@ public class EventListTest extends TestCase {
         List<List<String>> listTypes = new ArrayList<List<String>>();
         listTypes.add(new ArrayList<String>());
         listTypes.add(new BasicEventList<String>());
-        listTypes.add(new SortedList<String>(new BasicEventList<String>()));
+        listTypes.add(SortedList.create(new BasicEventList<String>()));
 
         // test all different list types
         for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext();) {
@@ -173,7 +173,7 @@ public class EventListTest extends TestCase {
         List<List<String>> listTypes = new ArrayList<List<String>>();
         listTypes.add(new ArrayList<String>());
         listTypes.add(new BasicEventList<String>());
-        listTypes.add(new SortedList<String>(new BasicEventList<String>()));
+        listTypes.add(SortedList.create(new BasicEventList<String>()));
 
         // test all different list types
         for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext();) {
@@ -202,7 +202,7 @@ public class EventListTest extends TestCase {
         List<List<String>> listTypes = new ArrayList<List<String>>();
         listTypes.add(new ArrayList<String>());
         listTypes.add(new BasicEventList<String>());
-        listTypes.add(new SortedList<String>(new BasicEventList<String>()));
+        listTypes.add(SortedList.create(new BasicEventList<String>()));
 
         // test all different list types
         for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext();) {
@@ -232,7 +232,7 @@ public class EventListTest extends TestCase {
         List<List<String>> listTypes = new ArrayList<List<String>>();
         listTypes.add(new ArrayList<String>());
         listTypes.add(new BasicEventList<String>());
-        listTypes.add(new SortedList<String>(new BasicEventList<String>()));
+        listTypes.add(SortedList.create(new BasicEventList<String>()));
 
         // test all different list types
         for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext();) {
@@ -261,7 +261,7 @@ public class EventListTest extends TestCase {
         List<List<String>> listTypes = new ArrayList<List<String>>();
         listTypes.add(new ArrayList<String>());
         listTypes.add(new BasicEventList<String>());
-        listTypes.add(new SortedList<String>(new BasicEventList<String>()));
+        listTypes.add(SortedList.create(new BasicEventList<String>()));
 
         // test all different list types
         for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext();) {
@@ -289,7 +289,7 @@ public class EventListTest extends TestCase {
         List<List<String>> listTypes = new ArrayList<List<String>>();
         listTypes.add(new ArrayList<String>());
         listTypes.add(new BasicEventList<String>());
-        listTypes.add(new SortedList<String>(new BasicEventList<String>()));
+        listTypes.add(SortedList.create(new BasicEventList<String>()));
 
         // test all different list types
         for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext();) {

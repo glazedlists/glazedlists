@@ -39,7 +39,7 @@ public class UsersMatcherEditor extends AbstractMatcherEditor<Issue> {
     public UsersMatcherEditor(EventList<Issue> source) {
         // create a unique users list from the source issues list
         usersForIssues = new CollectionList<Issue, String>(source, new IssueUserator());
-        allUsers = new UniqueList<String>(usersForIssues);
+        allUsers = UniqueList.create(usersForIssues);
     }
 
     /**

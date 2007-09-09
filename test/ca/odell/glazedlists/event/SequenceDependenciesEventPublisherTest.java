@@ -455,7 +455,7 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
         source.add("A");
         source.add("B");
 
-        SortedList<String> forwardSource = new SortedList<String>(source);
+        SortedList<String> forwardSource = SortedList.create(source);
         SortedList<String> reverseSource = new SortedList<String>(source, GlazedLists.reverseComparator());
         compositeList.addMemberList(forwardSource);
         compositeList.addMemberList(source);

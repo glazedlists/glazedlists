@@ -19,7 +19,7 @@ public class ListEventAssemblerPerformance {
      */
     public void testMemoryUsage() {
         BasicEventList<Long> list = new BasicEventList<Long>();
-        SortedList<Long> sorted = new SortedList<Long>(list);
+        SortedList<Long> sorted = SortedList.create(list);
         for(long i = 0; i < 100000000; i++) {
             if(i % 10000 == 0) {
                 list.clear();

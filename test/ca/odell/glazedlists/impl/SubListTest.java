@@ -97,7 +97,7 @@ public class SubListTest extends TestCase {
      */
     public void testSingleIndexSorting() {
         EventList<String> eventList = new BasicEventList<String>();
-        SortedList<String> sortedList = new SortedList<String>(eventList);
+        SortedList<String> sortedList = SortedList.create(eventList);
         sortedList.setComparator(null);
 
         eventList.add("Lions");

@@ -59,6 +59,18 @@ public final class UniqueList<E> extends TransformedList<E, E> {
      *
      * @param source the {@link EventList} containing duplicates to remove
      */
+    public static <E extends Comparable<? super E>> UniqueList<E> create(EventList<E> source) {
+        return new UniqueList<E>(source);
+    }
+
+    /**
+     * Creates a {@link UniqueList} that determines uniqueness via the
+     * {@link Comparable} interface. All elements of the source {@link EventList}
+     * must implement {@link Comparable}.
+     * <p>Usage of factory method {@link #create(EventList)} is preferable.
+     *
+     * @param source the {@link EventList} containing duplicates to remove
+     */
     public UniqueList(EventList<E> source) {
         this(source, (Comparator<E>) GlazedLists.comparableComparator());
     }

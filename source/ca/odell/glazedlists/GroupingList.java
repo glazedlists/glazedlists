@@ -56,6 +56,16 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
      * {@link Comparable} interface which all elements of the <code>source</code>
      * are assumed to implement.
      */
+    public static <E extends Comparable<? super E>> GroupingList<E> create(EventList<E> source) {
+        return new GroupingList<E>(source);
+    }
+
+    /**
+     * Creates a {@link GroupingList} that determines groupings via the
+     * {@link Comparable} interface which all elements of the <code>source</code>
+     * are assumed to implement.
+     * <p>Usage of factory method {@link #create(EventList)} is preferable.
+     */
     public GroupingList(EventList<E> source) {
         this(source, (Comparator<E>) GlazedLists.comparableComparator());
     }

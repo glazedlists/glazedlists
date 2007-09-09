@@ -29,7 +29,7 @@ public class TableComparatorTest extends TestCase {
     private AbstractTableComparatorChooser<String> tableComparatorChooser;
 
     protected void setUp() {
-        sortedList = new SortedList<String>(new BasicEventList<String>());
+        sortedList = SortedList.create(new BasicEventList<String>());
         tableComparatorChooser = new TestTableComparatorChooser(sortedList, 10);
 
         // add some comparators to column 2

@@ -976,7 +976,7 @@ public class UniqueListTest extends TestCase {
 
     public void testNewReplaceAll() {
         EventList target = new BasicEventList();
-        EventList source = new SortedList(new BasicEventList());
+        EventList source = SortedList.create(new BasicEventList());
 
         source.addAll(GlazedListsTests.stringToList("ACDF"));
 
@@ -1428,7 +1428,7 @@ public class UniqueListTest extends TestCase {
 
     public void testRemoveAPair() {
         EventList<String> source = new BasicEventList<String>();
-        UniqueList<String> uniqueList = new UniqueList<String>(source);
+        UniqueList<String> uniqueList = UniqueList.create(source);
         ListConsistencyListener.install(uniqueList);
 
         source.addAll(GlazedListsTests.stringToList("AABBBD"));

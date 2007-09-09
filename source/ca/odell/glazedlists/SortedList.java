@@ -83,13 +83,25 @@ public final class SortedList<E> extends TransformedList<E,E> {
 
     /** one of {@link #STRICT_SORT_ORDER} or {@link #AVOID_MOVING_ELEMENTS}. */
     private int mode = STRICT_SORT_ORDER;
-
+    
+    /**
+     * Creates a {@link SortedList} that sorts the specified {@link EventList}.
+     * All elements in the specified {@link EventList} must implement {@link Comparable}.
+     * 
+     * @param source the {@link EventList} to be sorted
+     */
+    public static <E extends Comparable<? super E>> SortedList<E> create(EventList<E> source) {
+        return new SortedList<E>(source);
+    }
 
     /**
      * Creates a {@link SortedList} that sorts the specified {@link EventList}.
      * Because this constructor takes no {@link Comparator} argument, all
      * elements in the specified {@link EventList} must implement {@link Comparable}
      * or a {@link ClassCastException} will be thrown.
+     * <p>Usage of factory method {@link #create(EventList)} is preferable.
+     * 
+     * @param source the {@link EventList} to be sorted
      */
     public SortedList(EventList<E> source) {
         this(source, (Comparator<E>)GlazedLists.comparableComparator());

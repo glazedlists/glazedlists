@@ -82,7 +82,7 @@ public class MultipleEventsTest extends TestCase {
         source.add("C");
 
         // prepare a unique list
-        EventList<String> uniqueList = new UniqueList<String>(source);
+        EventList<String> uniqueList = UniqueList.create(source);
 
         // listen to changes on the unique list
         ListConsistencyListener<String> counter = ListConsistencyListener.install(uniqueList);

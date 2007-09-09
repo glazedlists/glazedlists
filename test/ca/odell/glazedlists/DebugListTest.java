@@ -58,7 +58,7 @@ public class DebugListTest extends TestCase {
     }
 
     public void testDebugListPassThrough() {
-        final EventList sorted = new SortedList(list);
+        final EventList<String> sorted = SortedList.create(list);
 
         assertEquals(sorted.size(), list.size());
         assertTrue(sorted.containsAll(list));

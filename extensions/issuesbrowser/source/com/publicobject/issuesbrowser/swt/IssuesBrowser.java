@@ -31,7 +31,7 @@ import org.eclipse.swt.widgets.*;
 public class IssuesBrowser {
 
     /** an event list to host the issues */
-    private UniqueList<Issue> issuesEventList = new UniqueList<Issue>(new BasicEventList<Issue>());
+    private UniqueList<Issue> issuesEventList = UniqueList.create(new BasicEventList<Issue>());
 
     /** To get access to the unique list of users */
     private UsersMatcherEditor usersMatcherEditor = null;
@@ -49,7 +49,7 @@ public class IssuesBrowser {
         FilterList<Issue> issuesUserFiltered = new FilterList<Issue>(issuesEventList, usersMatcherEditor);
         FilterList<Issue> issuesTextFiltered = new FilterList<Issue>(issuesUserFiltered, Matchers.trueMatcher());
         ThresholdList<Issue> priorityList = new ThresholdList<Issue>(issuesTextFiltered, "priority.rating");
-        SortedList<Issue> issuesSortedList = new SortedList<Issue>(priorityList);
+        SortedList<Issue> issuesSortedList = SortedList.create(priorityList);
 
         // This is the outer component for the demo
         SashForm demoForm = new SashForm(shell, SWT.HORIZONTAL);

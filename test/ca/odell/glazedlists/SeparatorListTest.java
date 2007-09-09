@@ -299,7 +299,7 @@ public class SeparatorListTest extends TestCase {
 
 
     public void testLimit() {
-        EventList<String> source = new SortedList<String>(new BasicEventList<String>());
+        EventList<String> source = SortedList.create(new BasicEventList<String>());
         source.addAll(GlazedListsTests.stringToList("AAAAAAABBCCCCC"));
 
         SeparatorList<String> separatorList = new SeparatorList<String>(source, GlazedLists.comparableComparator(), 0, 3);
@@ -373,7 +373,7 @@ public class SeparatorListTest extends TestCase {
     }
 
     public void testMinimumSize() {
-        EventList<String> source = new SortedList<String>(new BasicEventList<String>());
+        EventList<String> source = SortedList.create(new BasicEventList<String>());
         source.addAll(GlazedListsTests.stringToList("AAABCCC"));
 
         SeparatorList<String> separatorList = new SeparatorList<String>(source, GlazedLists.comparableComparator(), 2, Integer.MAX_VALUE);
@@ -393,7 +393,7 @@ public class SeparatorListTest extends TestCase {
     }
 
     public void testAdjustLimit() {
-        EventList<String> source = new SortedList<String>(new BasicEventList<String>());
+        EventList<String> source = SortedList.create(new BasicEventList<String>());
         source.addAll(GlazedListsTests.stringToList("AAABBBBBBBCCC"));
 
         SeparatorList<String> separatorList = new SeparatorList<String>(source, GlazedLists.comparableComparator(), 0, 5);
@@ -432,7 +432,7 @@ public class SeparatorListTest extends TestCase {
     }
 
     public void testClear() {
-        EventList<String> source = new SortedList<String>(new BasicEventList<String>());
+        EventList<String> source = SortedList.create(new BasicEventList<String>());
         source.addAll(GlazedListsTests.stringToList("AAABBBBBBBCCC"));
 
         SeparatorList<String> separatorList = new SeparatorList<String>(source, GlazedLists.comparableComparator(), 0, 5);
