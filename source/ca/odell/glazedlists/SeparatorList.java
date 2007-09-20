@@ -122,14 +122,18 @@ public class SeparatorList<E> extends TransformedList<E, E> {
      * of thread safe code.
      */
     public void setComparator(Comparator<E> comparator) {
-        // this implementation loses selection, but that's the best we can do
-        // with the current limitations of the Glazed Lists ListEventAssembler.
-        // What we really need here is the ability to fire an event that contains
-        // both reordering and structure change information.
-        updates.beginEvent();
+        final boolean isEmpty = isEmpty();
 
-        // remove all
-        updates.addDelete(0, size() - 1);
+        if (!isEmpty) {
+            // this implementation loses selection, but that's the best we can do
+            // with the current limitations of the Glazed Lists ListEventAssembler.
+            // What we really need here is the ability to fire an event that contains
+            // both reordering and structure change information.
+            updates.beginEvent();
+
+            // remove all
+            updates.addDelete(0, size() - 1);
+        }
 
         // make the change to the sorted source, the grouper will respond but
         // the {@link SeparatorInjectorList} doesn't fire any events forward when
@@ -137,12 +141,14 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         SortedList<E> sortedList = (SortedList<E>)separatorSource.source;
         sortedList.setComparator(comparator);
 
-        // rebuild which elements are collapsed out
-        rebuildCollapsedElements();
+        if (!isEmpty) {
+            // rebuild which elements are collapsed out
+            rebuildCollapsedElements();
 
-        // insert all again
-        updates.addInsert(0, size() - 1);
-        updates.commitEvent();
+            // insert all again
+            updates.addInsert(0, size() - 1);
+            updates.commitEvent();
+        }
     }
 
     /**
