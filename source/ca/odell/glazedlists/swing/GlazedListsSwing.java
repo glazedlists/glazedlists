@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-// the core Glazed Lists packages
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ThresholdList;
 import ca.odell.glazedlists.TransformedList;

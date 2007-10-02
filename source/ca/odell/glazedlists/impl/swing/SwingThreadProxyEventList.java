@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.swing;
 
-// the core Glazed Lists packages
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.impl.gui.ThreadProxyEventList;
 
