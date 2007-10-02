@@ -39,8 +39,8 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
     /** the proxy moves events to the Swing Event Dispatch thread */
     protected TransformedList<E,E> swingThreadSource;
 
-    /** <tt>true</tt> indicates that disposing this TableModel should dispose of the swingThreadSource as well */
-    private final boolean disposeSwingThreadSource;
+    /** the source of data for this TableModel, which may or may not be {@link #swingThreadSource} */
+    protected EventList<E> source;
 
     /** specifies how column data is extracted from each row object */
     private TableFormat<? super E> tableFormat;
@@ -61,13 +61,19 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
         // from occurring until we fully initialize this EventTableModel
         source.getReadWriteLock().readLock().lock();
         try {
-            disposeSwingThreadSource = !GlazedListsSwing.isSwingThreadProxyList(source);
-            swingThreadSource = disposeSwingThreadSource ? GlazedListsSwing.swingThreadProxyList(source) : (TransformedList<E,E>) source;
+            final TransformedList<E,E> decorated = createSwingThreadProxyList(source);
+
+            // if the create method actually returned a decorated form of the source,
+            // record it so it may later be disposed
+            if (decorated != null && decorated != source)
+                this.source = swingThreadSource = decorated;
+            else
+                this.source = source;
 
             this.tableFormat = tableFormat;
 
             // prepare listeners
-            swingThreadSource.addListEventListener(this);
+            this.source.addListEventListener(this);
         } finally {
             source.getReadWriteLock().readLock().unlock();
         }
@@ -95,6 +101,27 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
      */
     public EventTableModel(EventList<E> source, String[] propertyNames, String[] columnLabels, boolean[] writable) {
         this(source, GlazedLists.tableFormat(propertyNames, columnLabels, writable));
+    }
+
+    /**
+     * This method exists as a hook for subclasses that may have custom
+     * threading needs within their EventTableModels. By default, this method
+     * will wrap the given <code>source</code> in a SwingThreadProxyList if it
+     * is not already a SwingThreadProxyList. Subclasses may replace this logic
+     * and return either a custom ThreadProxyEventList of their choosing, or
+     * return <code>null</code> or the <code>source</code> unchanged in order
+     * to indicate that <strong>NO</strong> ThreadProxyEventList is desired.
+     * In these cases it is expected that some external mechanism will ensure
+     * that threading is handled correctly.
+     *
+     * @param source the EventList that provides the row objects
+     * @return the source wrapped in some sort of ThreadProxyEventList if
+     *      Thread-proxying is desired, or either <code>null</code> or the
+     *      <code>source</code> unchanged to indicate that <strong>NO</strong>
+     *      Thread-proxying is desired
+     */
+    protected TransformedList<E,E> createSwingThreadProxyList(EventList<E> source) {
+        return GlazedListsSwing.isSwingThreadProxyList(source) ? null : GlazedListsSwing.swingThreadProxyList(source);
     }
 
     /**
@@ -277,14 +304,14 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
      * corresponding Component <strong>before</strong> it is disposed.
      */
     public void dispose() {
-        swingThreadSource.removeListEventListener(this);
+        source.removeListEventListener(this);
 
         // if we created the swingThreadSource then we must also dispose it
-        if(disposeSwingThreadSource) {
+        if (swingThreadSource != null)
             swingThreadSource.dispose();
-        }
 
         // this encourages exceptions to be thrown if this model is incorrectly accessed again
         swingThreadSource = null;
+        source = null;
     }
 }

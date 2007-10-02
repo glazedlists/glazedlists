@@ -207,6 +207,32 @@ public class EventTableModelTest extends SwingTestCase {
     }
 
     /**
+     * This test ensures subclasses can prevent the building of a
+     * SwingThreadProxyEventList by overriding
+     * {@link EventTableModel#createSwingThreadProxyList}.
+     */
+    public void guiTestNoThreadProxyingDesired() {
+        final EventList<JLabel> source = new BasicEventList<JLabel>();
+        final TableFormat<JLabel> tableFormat = new SaskTableFormat();
+
+        final EventTableModel<JLabel> labelModelWithProxy = new EventTableModel<JLabel>(source, tableFormat);
+        assertNotNull(labelModelWithProxy.swingThreadSource);
+        assertSame(labelModelWithProxy.source, labelModelWithProxy.swingThreadSource);
+
+        labelModelWithProxy.dispose();
+        assertNull(labelModelWithProxy.swingThreadSource);
+        assertNull(labelModelWithProxy.source);
+
+        final NoProxyingEventTableModel<JLabel> labelModelNoProxy = new NoProxyingEventTableModel<JLabel>(source, tableFormat);
+        assertNull(labelModelNoProxy.swingThreadSource);
+        assertSame(labelModelNoProxy.source, source);
+
+        labelModelNoProxy.dispose();
+        assertNull(labelModelNoProxy.swingThreadSource);
+        assertNull(labelModelNoProxy.source);
+    }
+
+    /**
      * This TableFormat returns new JLabels from its setValueAt()
      * method rather than modifying the existing one in place.
      */
@@ -355,6 +381,20 @@ public class EventTableModelTest extends SwingTestCase {
         MouseListener[] listeners = table.getTableHeader().getMouseListeners();
         for(int i = 0; i < listeners.length; i++) {
             listeners[i].mouseClicked(mouseEvent);
+        }
+    }
+
+    private class NoProxyingEventTableModel<E> extends EventTableModel<E> {
+
+        public NoProxyingEventTableModel(EventList<E> source, TableFormat<? super E> tableFormat) {
+            super(source, tableFormat);
+        }
+
+        /**
+         * Returning null implies no ThreadProxyEventList is necessary.
+         */
+        protected TransformedList<E, E> createSwingThreadProxyList(EventList<E> source) {
+            return null;
         }
     }
 }

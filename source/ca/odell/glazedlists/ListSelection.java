@@ -93,8 +93,18 @@ public class ListSelection<E> {
     /** the selection mode defines characteristics of the selection */
     private int selectionMode = MULTIPLE_INTERVAL_SELECTION_DEFENSIVE;
 
-    /** the registered SelectionListeners */
-    private List<Listener> selectionListeners = new ArrayList<Listener>(1);
+    /**
+     * the registered SelectionListeners; also used as a mutex to ensure we
+     * build each of the following only once:
+     *
+     * <ul>
+     *   <li>{@link #selectedList}</li>
+     *   <li>{@link #deselectedList}</li>
+     *   <li>{@link #selectedToggleList}</li>
+     *   <li>{@link #deselectedToggleList}</li>
+     * </ul>
+     */
+    private final List<Listener> selectionListeners = new ArrayList<Listener>(1);
 
     /**
      * Creates a new ListSelection that listens to changes on the given source.
@@ -300,15 +310,17 @@ public class ListSelection<E> {
      * the source list.
      */
     public EventList<E> getSelected() {
-        source.getReadWriteLock().writeLock().lock();
+        source.getReadWriteLock().readLock().lock();
         try {
-            if(selectedList == null){
-                selectedList = new SelectedList<E>(source);
-                source.getPublisher().setRelatedListener(selectedList, sourceListener);
+            synchronized (selectionListeners) {
+                if(selectedList == null){
+                    selectedList = new SelectedList<E>(source);
+                    source.getPublisher().setRelatedListener(selectedList, sourceListener);
+                }
             }
             return selectedList;
         } finally {
-            source.getReadWriteLock().writeLock().unlock();
+            source.getReadWriteLock().readLock().unlock();
         }
     }
 
@@ -322,15 +334,17 @@ public class ListSelection<E> {
      * the {@link List#set set} method.
      */
     public EventList<E> getTogglingSelected() {
-        source.getReadWriteLock().writeLock().lock();
+        source.getReadWriteLock().readLock().lock();
         try {
-            if(selectedToggleList == null){
-                selectedToggleList = new SelectionToggleList<E>(source);
-                source.getPublisher().setRelatedListener(selectedToggleList, sourceListener);
+            synchronized (selectionListeners) {
+                if(selectedToggleList == null) {
+                    selectedToggleList = new SelectionToggleList<E>(source);
+                    source.getPublisher().setRelatedListener(selectedToggleList, sourceListener);
+                }
             }
             return selectedToggleList;
         } finally {
-            source.getReadWriteLock().writeLock().unlock();
+            source.getReadWriteLock().readLock().unlock();
         }
     }
 
@@ -342,15 +356,17 @@ public class ListSelection<E> {
      * the source list.
      */
     public EventList<E> getDeselected() {
-        source.getReadWriteLock().writeLock().lock();
+        source.getReadWriteLock().readLock().lock();
         try {
-            if(deselectedList == null){
-                deselectedList = new DeselectedList<E>(source);
-                source.getPublisher().setRelatedListener(deselectedList, sourceListener);
+            synchronized (selectionListeners) {
+                if(deselectedList == null) {
+                    deselectedList = new DeselectedList<E>(source);
+                    source.getPublisher().setRelatedListener(deselectedList, sourceListener);
+                }
             }
             return deselectedList;
         } finally {
-            source.getReadWriteLock().writeLock().unlock();
+            source.getReadWriteLock().readLock().unlock();
         }
     }
 
@@ -364,15 +380,17 @@ public class ListSelection<E> {
      * the {@link List#set set} method.
      */
     public EventList<E> getTogglingDeselected() {
-        source.getReadWriteLock().writeLock().lock();
+        source.getReadWriteLock().readLock().lock();
         try {
-            if(deselectedToggleList == null) {
-                deselectedToggleList = new DeselectionToggleList<E>(source);
-                source.getPublisher().setRelatedListener(deselectedToggleList, sourceListener);
+            synchronized (selectionListeners) {
+                if(deselectedToggleList == null) {
+                    deselectedToggleList = new DeselectionToggleList<E>(source);
+                    source.getPublisher().setRelatedListener(deselectedToggleList, sourceListener);
+                }
             }
             return deselectedToggleList;
         } finally {
-            source.getReadWriteLock().writeLock().unlock();
+            source.getReadWriteLock().readLock().unlock();
         }
     }
 
