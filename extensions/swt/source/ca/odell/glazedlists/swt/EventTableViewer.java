@@ -197,7 +197,12 @@ public class EventTableViewer<E> implements ListEventListener<E> {
      * viewed {@link Table} that are not currently selected.
      */
     public EventList<E> getDeselected() {
-        return selection.getSelectionList().getDeselected();
+        swtThreadSource.getReadWriteLock().readLock().lock();
+        try {
+            return selection.getSelectionList().getDeselected();
+        } finally {
+            swtThreadSource.getReadWriteLock().readLock().unlock();
+        }
     }
 
     /**
@@ -205,7 +210,12 @@ public class EventTableViewer<E> implements ListEventListener<E> {
      * viewed {@link Table} that are currently selected.
      */
     public EventList<E> getSelected() {
-        return selection.getSelectionList().getSelected();
+        swtThreadSource.getReadWriteLock().readLock().lock();
+        try {
+            return selection.getSelectionList().getSelected();
+        } finally {
+            swtThreadSource.getReadWriteLock().readLock().unlock();
+        }
     }
 
     /**

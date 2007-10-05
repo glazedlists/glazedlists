@@ -26,7 +26,7 @@ public class EventListViewer<E> implements ListEventListener<E> {
     private List list = null;
 
     /** the proxy moves events to the SWT user interface thread */
-    private TransformedList<E, E> swtSource = null;
+    private TransformedList<E, E> swtThreadSource = null;
 
     /** the formatter for list elements */
     private ILabelProvider labelProvider = null;
@@ -52,20 +52,20 @@ public class EventListViewer<E> implements ListEventListener<E> {
         // from occurring until we fully initialize this EventListViewer
         source.getReadWriteLock().readLock().lock();
         try {
-            swtSource = GlazedListsSWT.swtThreadProxyList(source, list.getDisplay());
+            swtThreadSource = GlazedListsSWT.swtThreadProxyList(source, list.getDisplay());
             this.list = list;
             this.labelProvider = labelProvider;
 
             // Enable the selection lists
-            selection = new SelectionManager<E>(swtSource, new SelectableList());
+            selection = new SelectionManager<E>(swtThreadSource, new SelectableList());
 
             // setup initial values
-            for(int i = 0, n = swtSource.size(); i < n; i++) {
-                addRow(i, swtSource.get(i));
+            for(int i = 0, n = swtThreadSource.size(); i < n; i++) {
+                addRow(i, swtThreadSource.get(i));
             }
 
             // listen for changes
-            swtSource.addListEventListener(this);
+            swtThreadSource.addListEventListener(this);
         } finally {
             source.getReadWriteLock().readLock().unlock();
         }
@@ -90,7 +90,12 @@ public class EventListViewer<E> implements ListEventListener<E> {
      * viewed Table that are not currently selected.
      */
     public EventList<E> getDeselected() {
-        return selection.getSelectionList().getDeselected();
+        swtThreadSource.getReadWriteLock().readLock().lock();
+        try {
+            return selection.getSelectionList().getDeselected();
+        } finally {
+            swtThreadSource.getReadWriteLock().readLock().unlock();
+        }
     }
 
     /**
@@ -98,7 +103,12 @@ public class EventListViewer<E> implements ListEventListener<E> {
      * viewed Table that are currently selected.
      */
     public EventList<E> getSelected() {
-        return selection.getSelectionList().getSelected();
+        swtThreadSource.getReadWriteLock().readLock().lock();
+        try {
+            return selection.getSelectionList().getSelected();
+        } finally {
+            swtThreadSource.getReadWriteLock().readLock().unlock();
+        }
     }
 
     /**
@@ -127,17 +137,17 @@ public class EventListViewer<E> implements ListEventListener<E> {
      * displayed List.
      */
     public void listChanged(ListEvent<E> listChanges) {
-        int firstModified = swtSource.size();
+        int firstModified = swtThreadSource.size();
         // Apply the list changes
         while (listChanges.next()) {
             int changeIndex = listChanges.getIndex();
             int changeType = listChanges.getType();
 
             if (changeType == ListEvent.INSERT) {
-                addRow(changeIndex, swtSource.get(changeIndex));
+                addRow(changeIndex, swtThreadSource.get(changeIndex));
                 firstModified = Math.min(changeIndex, firstModified);
             } else if (changeType == ListEvent.UPDATE) {
-                updateRow(changeIndex, swtSource.get(changeIndex));
+                updateRow(changeIndex, swtThreadSource.get(changeIndex));
             } else if (changeType == ListEvent.DELETE) {
                 deleteRow(changeIndex);
                 firstModified = Math.min(changeIndex, firstModified);
@@ -145,7 +155,7 @@ public class EventListViewer<E> implements ListEventListener<E> {
         }
 
         // Reapply selection to the List
-        selection.fireSelectionChanged(firstModified, swtSource.size() - 1);
+        selection.fireSelectionChanged(firstModified, swtThreadSource.size() - 1);
     }
 
     /**
@@ -213,7 +223,7 @@ public class EventListViewer<E> implements ListEventListener<E> {
     public void dispose() {
         selection.dispose();
 
-        swtSource.removeListEventListener(this);
-        swtSource.dispose();
+        swtThreadSource.removeListEventListener(this);
+        swtThreadSource.dispose();
     }
 }

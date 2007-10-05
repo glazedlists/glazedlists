@@ -107,7 +107,12 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
      * the source list.
      */
     public EventList<E> getSelected() {
-        return listSelection.getSelected();
+        swingThreadSource.getReadWriteLock().readLock().lock();
+        try {
+            return listSelection.getSelected();
+        } finally {
+            swingThreadSource.getReadWriteLock().readLock().unlock();
+        }
     }
 
     /**
@@ -119,7 +124,12 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
      * {@link IllegalArgumentException} is thrown.
      */
     public EventList<E> getTogglingSelected() {
-        return listSelection.getTogglingSelected();
+        swingThreadSource.getReadWriteLock().readLock().lock();
+        try {
+            return listSelection.getTogglingSelected();
+        } finally {
+            swingThreadSource.getReadWriteLock().readLock().unlock();
+        }
     }
 
     /**
@@ -130,7 +140,12 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
      * the source list.
      */
     public EventList<E> getDeselected() {
-        return listSelection.getDeselected();
+        swingThreadSource.getReadWriteLock().readLock().lock();
+        try {
+            return listSelection.getDeselected();
+        } finally {
+            swingThreadSource.getReadWriteLock().readLock().unlock();
+        }
     }
     
     /**
@@ -142,7 +157,12 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
      * {@link IllegalArgumentException} is thrown
      */
     public EventList<E> getTogglingDeselected() {
-        return listSelection.getTogglingDeselected();
+        swingThreadSource.getReadWriteLock().readLock().lock();
+        try {
+            return listSelection.getTogglingDeselected();
+        } finally {
+            swingThreadSource.getReadWriteLock().readLock().unlock();
+        }
     }
 
     /**
@@ -344,7 +364,12 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
      * Returns true if no indices are selected.
      */
     public boolean isSelectionEmpty() {
-        return listSelection.getSelected().isEmpty();
+        swingThreadSource.getReadWriteLock().readLock().lock();
+        try {
+            return listSelection.getSelected().isEmpty();
+        } finally {
+            swingThreadSource.getReadWriteLock().readLock().unlock();
+        }
     }
 
     /**
