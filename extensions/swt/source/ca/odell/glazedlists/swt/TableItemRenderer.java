@@ -20,7 +20,7 @@ public interface TableItemRenderer {
      * Default renderer that converts the column value to a string and sets it as
      * the text of the TableItem.
      */
-    public static final TableItemRenderer DEFAULT = new ColumnValueToStringRenderer();
+    public static final TableItemRenderer DEFAULT = new DefaultTableItemRenderer();
     
     /**
      * Callback method that allows the configuration of the TableItem properties.
@@ -36,7 +36,7 @@ public interface TableItemRenderer {
      * Default renderer that converts the column value to a string and sets it as
      * the text of the TableItem.
      */
-    class ColumnValueToStringRenderer implements TableItemRenderer {
+    class DefaultTableItemRenderer implements TableItemRenderer {
 
         /** {@inheritDoc} */
         public void render(TableItem item, Object columnValue, int column) {
