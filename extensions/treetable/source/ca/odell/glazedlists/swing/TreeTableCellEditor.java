@@ -37,7 +37,7 @@ import java.util.EventObject;
  */
 public class TreeTableCellEditor extends AbstractCellEditor implements TableCellEditor {
 
-    /** The panel capable of laying out a spacer component, expander button, and data Component to produce the entire tree node display. */
+    /** The panel capable of laying out a indenter component, expander button, spacer component, and data Component to produce the entire tree node display. */
     private final TreeTableCellPanel component = new TreeTableCellPanel();
 
     /** The data structure that answers questions about the tree node. */
@@ -105,9 +105,40 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
         // ask the delegate editor to produce the data component
         final Component c = delegate.getTableCellEditorComponent(table, value, isSelected, row, column);
 
-        // ask our special component to configure itself for editing this tree node
-        component.configure(treeNodeData, showExpanderForEmptyParent, c, false);
+        // fetch the number of pixels to indent
+        final int indent = getIndent(treeNodeData, showExpanderForEmptyParent);
+
+        // fetch the number of pixels to space over
+        final int spacer = getSpacer(treeNodeData, showExpanderForEmptyParent);
+
+        // ask our special component to configure itself for this tree node
+        component.configure(treeNodeData, showExpanderForEmptyParent, c, false, indent, spacer);
         return component;
+    }
+
+    /**
+     * Returns the number of pixels to indent the contents of the editor.
+     *
+     * @param treeNodeData hierarhical information about the node within the tree
+     * @param showExpanderForEmptyParent <tt>true</tt> indicates the expander
+     *      button should always be present, even when no children yet exist
+     */
+    protected int getIndent(TreeNodeData treeNodeData, boolean showExpanderForEmptyParent) {
+        final boolean showExpanderButton = treeNodeData.hasChildren() || (treeNodeData.allowsChildren() && showExpanderForEmptyParent);
+        final int trueDepth = showExpanderButton ? treeNodeData.getDepth() : treeNodeData.getDepth() + 1;
+        return UIManager.getIcon("Tree.expandedIcon").getIconWidth() * trueDepth;
+    }
+
+    /**
+     * Returns the number of pixels of space between the expand/collapse button
+     * and the node component.
+     *
+     * @param treeNodeData hierarhical information about the node within the tree
+     * @param showExpanderForEmptyParent <tt>true</tt> indicates the expander
+     *      button should always be present, even when no children yet exist
+     */
+    protected int getSpacer(TreeNodeData treeNodeData, boolean showExpanderForEmptyParent) {
+        return 2;
     }
 
    /**

@@ -37,6 +37,9 @@ import java.awt.*;
  */
 public class TreeTableCellRenderer implements TableCellRenderer {
 
+    /** The panel capable of laying out a indenter component, expander button, spacer component, and data Component to produce the entire tree node display. */
+    private final TreeTableCellPanel component = new TreeTableCellPanel();
+
     /** The user-supplied renderer that produces the look of the tree node's data. */
     private TableCellRenderer delegate;
 
@@ -46,15 +49,12 @@ public class TreeTableCellRenderer implements TableCellRenderer {
     /** <tt>true</tt> indicates the expander button should be visible even if the parent has no children. */
     private boolean showExpanderForEmptyParent;
 
-    /** The panel capable of laying out a spacer component, expander button, and data Component to produce the entire tree node display. */
-    private final TreeTableCellPanel component = new TreeTableCellPanel();
-
     /** Data describing the hierarchy information of the tree node being rendered. */
     private final TreeNodeData treeNodeData = new TreeNodeData();
 
     /**
      * Decorate the component returned from the <code>delegate</code> with
-     * extra components that display the tree nodes location within the tree.
+     * extra components that display the tree node's location within the tree.
      * If <code>delegate</code> is <tt>null</tt> then a
      * {@link DefaultTableCellRenderer} will be used as the delegate.
      *
@@ -68,7 +68,7 @@ public class TreeTableCellRenderer implements TableCellRenderer {
     }
 
     /**
-     * Build the delegate TableCellEditor that handles rendering the data of
+     * Build the delegate TableCellRenderer that handles rendering the data of
      * each tree node.
      */
     protected TableCellRenderer createDelegateRenderer() {
@@ -76,7 +76,7 @@ public class TreeTableCellRenderer implements TableCellRenderer {
     }
 
     /**
-     * Return decorated form of the component returned by the data
+     * Return a decorated form of the component returned by the data
      * {@link TableCellRenderer}.
      */
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -98,9 +98,40 @@ public class TreeTableCellRenderer implements TableCellRenderer {
         // ask the delegate renderer to produce the data component
         final Component c = delegate.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
+        // fetch the number of pixels to indent
+        final int indent = getIndent(treeNodeData, showExpanderForEmptyParent);
+
+        // fetch the number of pixels to space over
+        final int spacer = getSpacer(treeNodeData, showExpanderForEmptyParent);
+
         // ask our special component to configure itself for this tree node
-        component.configure(treeNodeData, showExpanderForEmptyParent, c, hasFocus);
+        component.configure(treeNodeData, showExpanderForEmptyParent, c, hasFocus, indent, spacer);
         return component;
+    }
+
+    /**
+     * Returns the number of pixels to indent the contents of the renderer.
+     *
+     * @param treeNodeData hierarhical information about the node within the tree
+     * @param showExpanderForEmptyParent <tt>true</tt> indicates the expander
+     *      button should always be present, even when no children yet exist
+     */
+    protected int getIndent(TreeNodeData treeNodeData, boolean showExpanderForEmptyParent) {
+        final boolean showExpanderButton = treeNodeData.hasChildren() || (treeNodeData.allowsChildren() && showExpanderForEmptyParent);
+        final int trueDepth = showExpanderButton ? treeNodeData.getDepth() : treeNodeData.getDepth() + 1;
+        return UIManager.getIcon("Tree.expandedIcon").getIconWidth() * trueDepth;
+    }
+
+    /**
+     * Returns the number of pixels of space between the expand/collapse button
+     * and the node component.
+     *
+     * @param treeNodeData hierarhical information about the node within the tree
+     * @param showExpanderForEmptyParent <tt>true</tt> indicates the expander
+     *      button should always be present, even when no children yet exist
+     */
+    protected int getSpacer(TreeNodeData treeNodeData, boolean showExpanderForEmptyParent) {
+        return 2;
     }
 
     /**
@@ -134,7 +165,7 @@ public class TreeTableCellRenderer implements TableCellRenderer {
      * must be prepared for garbage collection.
      */
     public void dispose() {
-        this.delegate = null;
-        this.treeList = null;
+        delegate = null;
+        treeList = null;
     }
 }

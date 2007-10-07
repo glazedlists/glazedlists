@@ -7,8 +7,8 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This panel exists to relieve the burdens of creating a
@@ -18,17 +18,19 @@ import java.util.List;
  * components to produce a single panel. Those components are:
  *
  * <ul>
- *   <li>A spacer component whose width reflects the depth of the tree node being rendered.
+ *   <li>An indenter component whose width reflects the depth of the tree node being rendered.
  *       This component really determines the look of the hierarchy.
  *   <li>A collapse/expand button that is visible for parent tree nodes but invisible for
  *       leaf nodes. If the button is visible it will display one of two icons to represent
  *       the expanded or collapsed state of the row.
+ *   <li>A spacer component whose width provides the space between the collapse/expand button
+ *       and the user supplied component
  *   <li>A user supplied component representing the actual data for the tree node.
  * </ul>
  *
  * The components are arranged on the panel like this:
  *
- * <p><strong>[spacer component] [expand/collapse button] [nodeComponent]</strong>
+ * <p><strong>[indent pixels] [expand/collapse button] [indent2 pixels] [nodeComponent]</strong>
  *
  * @author James Lemieux
  */
@@ -37,8 +39,8 @@ class TreeTableCellPanel extends JPanel {
     /** The border that spaces the delegate component over from the expander button. */
     private static final Border NO_FOCUS_BORDER = BorderFactory.createEmptyBorder(0, 0, 0, 0);
 
-    /** A cache of appropriate spacer components for each depth in the tree. */
-    private final List<Component> spacerComponentsCache = new ArrayList<Component>();
+    /** A cache of appropriate indenter/spacer components for each unique width in the tree. */
+    private final Map<Integer, Component> spacerComponentsCache = new HashMap<Integer, Component>();
 
     /** The button to toggle the expanded/collapsed state of the tree node. */
     private final JButton expanderButton = new JButton();
@@ -50,31 +52,33 @@ class TreeTableCellPanel extends JPanel {
         super(new TreeTableCellLayout());
 
         // configure the expander button to display its icon with no margins
-        this.expanderButton.setBorder(BorderFactory.createEmptyBorder());
-        this.expanderButton.setContentAreaFilled(false);
-        this.expanderButton.setFocusable(false);
+        expanderButton.setBorder(BorderFactory.createEmptyBorder());
+        expanderButton.setContentAreaFilled(false);
+        expanderButton.setFocusable(false);
     }
 
     /**
-     * This method adjusts the contents of this panel to display the given
+     * This method adjusts the contents of this panel to display thse given
      * <code>nodeComponent</code>. Specifically, the panel is layed out like so:
      *
-     * <p><strong>[spacer component] [expand/collapse button] [nodeComponent]</strong>
-     *
-     * <p>The <strong>spacer component</strong>'s width is calculated using the
-     * <code>depth</code> of the tree node.
+     * <p><strong>[indent pixels] [expand/collapse button] [spacer pixels] [nodeComponent]</strong>
      *
      * <p>The <strong>expand/collapse button</strong> is visible if
-     * <code>isExpandable</code> is <tt>true</tt>. The expander button's icon
-     * is either a traditional plus or minus icon depending on the value of
-     * <code>isExpanded</code>.
+     * {@link TreeNodeData#isExpanded()} returns <tt>true</tt>. The expander
+     * button's icon is either a traditional plus or minus icon depending on
+     * the value of {@link TreeNodeData#isExpanded()}.
      *
      * <p>The <strong>nodeComponent</strong> is displayed unmodified.
      *
      * @param treeNodeData hierarhical information about the node within the tree
+     * @param showExpanderForEmptyParent <tt>true</tt> indicates the expander
+     *      button should always be present, even when no children yet exist
      * @param nodeComponent a Component which displays the data of the tree node
+     * @param hasFocus <tt>true</tt> indicates the cell currently has the focus
+     * @param indent the amount of space between the left cell edge and the expand/collapse button
+     * @param spacer the amount of space between the right edge of the expand/collapse button and the nodeComponent
      */
-    public void configure(TreeNodeData treeNodeData, boolean showExpanderForEmptyParent, Component nodeComponent, boolean hasFocus) {
+    public void configure(TreeNodeData treeNodeData, boolean showExpanderForEmptyParent, Component nodeComponent, boolean hasFocus, int indent, int spacer) {
         // if the tree node is expandable, pick an icon for the expander button
         final boolean showExpanderButton = treeNodeData.hasChildren() || (treeNodeData.allowsChildren() && showExpanderForEmptyParent);
         if(showExpanderButton)
@@ -98,8 +102,9 @@ class TreeTableCellPanel extends JPanel {
         // configure this panel with the updated space/expander button and the supplied nodeComponent
         // taking care to give the nodeComponent *ALL* excess space (not just its preferred size)
         removeAll();
-        add(getSpacer(showExpanderButton ? treeNodeData.getDepth() : treeNodeData.getDepth() + 1), TreeTableCellLayout.SPACER);
-        add(showExpanderButton ? expanderButton : createSpacer(1), TreeTableCellLayout.EXPANDER);
+        add(getSpacer(indent), TreeTableCellLayout.INDENTER);
+        add(showExpanderButton ? expanderButton : createSpacer(UIManager.getIcon("Tree.expandedIcon").getIconWidth()), TreeTableCellLayout.EXPANDER);
+        add(getSpacer(spacer), TreeTableCellLayout.SPACER);
         add(nodeComponent, TreeTableCellLayout.NODE_COMPONENT);
 
         this.nodeComponent = nodeComponent;
@@ -161,15 +166,16 @@ class TreeTableCellPanel extends JPanel {
     /**
      * Return a spacer component and update the spacer component cache as needed.
      */
-    private Component getSpacer(int depth) {
-        if (depth >= spacerComponentsCache.size()) {
-            for (int i = spacerComponentsCache.size(); i <= depth; i++) {
-                final Component spacer = createSpacer(UIManager.getIcon("Tree.expandedIcon").getIconWidth() * i);
-                spacerComponentsCache.add(spacer);
-            }
+    private Component getSpacer(int width) {
+        final Integer key = new Integer(width);
+
+        Component spacer = spacerComponentsCache.get(key);
+        if (spacer == null) {
+            spacer = createSpacer(width);
+            spacerComponentsCache.put(key, spacer);
         }
 
-        return spacerComponentsCache.get(depth);
+        return spacer;
     }
 
     /**
@@ -243,32 +249,37 @@ class TreeTableCellPanel extends JPanel {
     }
 
     /**
-     * A custom layout that grants preferred width to a spacer component and
-     * expander button and the remaining width to the node component. When
-     * insufficient space exists for all 3 components, they are simply cropped.
+     * A custom layout that grants preferred width to a indenter component,
+     * expander button and spacer component and the remaining width to the node
+     * component. When insufficient space exists for all 4 components, they are
+     * simply cropped.
      */
     private static class TreeTableCellLayout implements LayoutManager2 {
 
         // constraints Objects to be used when adding components to the layout
-        public static final Object SPACER = new Object();
+        public static final Object INDENTER = new Object();
         public static final Object EXPANDER = new Object();
+        public static final Object SPACER = new Object();
         public static final Object NODE_COMPONENT = new Object();
 
         // each of the known components layed out by this layout manager
-        private Component spacer;
+        private Component indenter;
         private Component expander;
+        private Component spacer;
         private Component nodeComponent;
 
         public void addLayoutComponent(Component comp, Object constraints) {
-            if (constraints == SPACER) spacer = comp;
+            if (constraints == INDENTER) indenter = comp;
             else if (constraints == EXPANDER) expander = comp;
+            else if (constraints == SPACER) spacer = comp;
             else if (constraints == NODE_COMPONENT) nodeComponent = comp;
             else throw new IllegalArgumentException("Unexpected constraints object: " + constraints);
         }
 
         public void removeLayoutComponent(Component comp) {
-            if (comp == spacer) spacer = null;
+            if (comp == indenter) indenter = null;
             if (comp == expander) expander = null;
+            if (comp == spacer) spacer = null;
             if (comp == nodeComponent) nodeComponent = null;
         }
 
@@ -282,10 +293,10 @@ class TreeTableCellPanel extends JPanel {
             // no height means no reason to layout
             if (totalHeight <= 0) return;
 
-            // 1. layout the spacer
-            if (availableWidth > 0 && spacer != null) {
-                final int spacerWidth = spacer.getPreferredSize().width;
-                spacer.setBounds(0, 0, spacerWidth, totalHeight);
+            // 1. layout the indenter
+            if (availableWidth > 0 && indenter != null) {
+                final int spacerWidth = indenter.getPreferredSize().width;
+                indenter.setBounds(0, 0, spacerWidth, totalHeight);
                 availableWidth -= spacerWidth;
             }
 
@@ -305,10 +316,15 @@ class TreeTableCellPanel extends JPanel {
                 availableWidth -= expanderButtonWidth;
             }
 
-            // space the nodeComponent 2 pixels right of the expander button
-            availableWidth -= 2;
+            // 3. layout the spacer
+            if (availableWidth > 0 && spacer != null) {
+                final int spacerX = totalWidth - availableWidth;
+                final int spacerWidth = spacer.getPreferredSize().width;
+                spacer.setBounds(spacerX, 0, spacerWidth, totalHeight);
+                availableWidth -= spacerWidth;
+            }
 
-            // 3. layout the node component (centered vertically and getting all remaining horizontal space)
+            // 4. layout the node component (centered vertically and getting all remaining horizontal space)
             if (availableWidth > 0 && nodeComponent != null) {
                 int nodeComponentX = totalWidth - availableWidth;
                 int nodeComponentY = insets.top;
