@@ -4,22 +4,48 @@
 package com.publicobject.issuesbrowser.swt;
 
 // swt
-import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.ThresholdList;
+import ca.odell.glazedlists.UniqueList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.Matchers;
 import ca.odell.glazedlists.matchers.ThreadedMatcherEditor;
-import ca.odell.glazedlists.swt.*;
-import com.publicobject.issuesbrowser.*;
+import ca.odell.glazedlists.swt.EventListViewer;
+import ca.odell.glazedlists.swt.EventTableViewer;
+import ca.odell.glazedlists.swt.GlazedListsSWT;
+import ca.odell.glazedlists.swt.TableComparatorChooser;
+import ca.odell.glazedlists.swt.TextWidgetMatcherEditor;
+
+import com.publicobject.issuesbrowser.Description;
+import com.publicobject.issuesbrowser.Issue;
+import com.publicobject.issuesbrowser.IssueLoader;
+import com.publicobject.issuesbrowser.IssueTextFilterator;
+import com.publicobject.issuesbrowser.Project;
+import com.publicobject.issuesbrowser.UsersMatcherEditor;
 import com.publicobject.misc.Throbber;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Canvas;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.List;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Slider;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
 
 
 /**
@@ -112,7 +138,8 @@ public class IssuesBrowser {
 
         // Create the Issues Table
         Table issuesTable = createIssuesTable(issuePanel);
-        EventTableViewer<Issue> issuesTableViewer = new EventTableViewer<Issue>(issuesSortedList, issuesTable, new IssueTableFormat());
+        EventTableViewer<Issue> issuesTableViewer = new EventTableViewer<Issue>(issuesSortedList,
+                issuesTable, new SwtIssueTableFormat(), new IssueTableItemRenderer());
         issuesTable = formatIssuesTable(issuesTable);
         TableComparatorChooser.install(issuesTableViewer, issuesSortedList, false);
 
@@ -323,14 +350,6 @@ public class IssuesBrowser {
 
     private Table formatIssuesTable(Table issuesTable) {
         issuesTable.getVerticalBar().setEnabled(true);
-        issuesTable.getColumn(0).setWidth(30);
-        issuesTable.getColumn(0).setResizable(false);
-        issuesTable.getColumn(1).setWidth(50);
-        issuesTable.getColumn(2).setWidth(46);
-        issuesTable.getColumn(2).setResizable(false);
-        issuesTable.getColumn(3).setWidth(50);
-        issuesTable.getColumn(4).setWidth(60);
-        issuesTable.getColumn(5).setWidth(250);
         return issuesTable;
     }
 

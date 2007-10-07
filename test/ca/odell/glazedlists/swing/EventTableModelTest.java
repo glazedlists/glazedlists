@@ -3,15 +3,29 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.DelayList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.ObservableElementList;
+import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.ThreadRecorderEventList;
+import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.matchers.Matcher;
 
-import javax.swing.*;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.table.TableCellRenderer;
-import java.awt.*;
+
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Arrays;
@@ -211,7 +225,7 @@ public class EventTableModelTest extends SwingTestCase {
      * SwingThreadProxyEventList by overriding
      * {@link EventTableModel#createSwingThreadProxyList}.
      */
-    public void guiTestNoThreadProxyingDesired() {
+    public void guiTestNoThreadProxyingDesired_FixMe() {
         final EventList<JLabel> source = new BasicEventList<JLabel>();
         final TableFormat<JLabel> tableFormat = new SaskTableFormat();
 
@@ -226,7 +240,8 @@ public class EventTableModelTest extends SwingTestCase {
         final NoProxyingEventTableModel<JLabel> labelModelNoProxy = new NoProxyingEventTableModel<JLabel>(source, tableFormat);
         assertNull(labelModelNoProxy.swingThreadSource);
         assertSame(labelModelNoProxy.source, source);
-
+        assertEquals(0, labelModelNoProxy.getRowCount());
+        
         labelModelNoProxy.dispose();
         assertNull(labelModelNoProxy.swingThreadSource);
         assertNull(labelModelNoProxy.source);
