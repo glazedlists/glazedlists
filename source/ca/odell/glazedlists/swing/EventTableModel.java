@@ -152,11 +152,11 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
      * @see #getValueAt(int,int)
      */
     public E getElementAt(int index) {
-        swingThreadSource.getReadWriteLock().readLock().lock();
+        source.getReadWriteLock().readLock().lock();
         try {
-            return swingThreadSource.get(index);
+            return source.get(index);
         } finally {
-            swingThreadSource.getReadWriteLock().readLock().unlock();
+            source.getReadWriteLock().readLock().unlock();
         }
     }
 
@@ -190,11 +190,11 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
      * The number of rows equals the number of entries in the source event list.
      */
     public int getRowCount() {
-        swingThreadSource.getReadWriteLock().readLock().lock();
+        source.getReadWriteLock().readLock().lock();
         try {
-            return swingThreadSource.size();
+            return source.size();
         } finally {
-            swingThreadSource.getReadWriteLock().readLock().unlock();
+            source.getReadWriteLock().readLock().unlock();
         }
     }
 
@@ -223,11 +223,11 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
      * Retrieves the value at the specified location of the table.
      */
     public Object getValueAt(int row, int column) {
-        swingThreadSource.getReadWriteLock().readLock().lock();
+        source.getReadWriteLock().readLock().lock();
         try {
-            return tableFormat.getColumnValue(swingThreadSource.get(row), column);
+            return tableFormat.getColumnValue(source.get(row), column);
         } finally {
-            swingThreadSource.getReadWriteLock().readLock().unlock();
+            source.getReadWriteLock().readLock().unlock();
         }
     }
 
@@ -239,12 +239,12 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
         // ensure this is a writable table
         if(tableFormat instanceof WritableTableFormat) {
             WritableTableFormat<E> writableTableFormat = (WritableTableFormat<E>)tableFormat;
-            swingThreadSource.getReadWriteLock().readLock().lock();
+            source.getReadWriteLock().readLock().lock();
             try {
-                final E toEdit = swingThreadSource.get(row);
+                final E toEdit = source.get(row);
                 return writableTableFormat.isEditable(toEdit, column);
             } finally {
-                swingThreadSource.getReadWriteLock().readLock().unlock();
+                source.getReadWriteLock().readLock().unlock();
             }
         // this is not a writable table
         } else {
@@ -259,11 +259,11 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
     public void setValueAt(Object editedValue, int row, int column) {
         // ensure this is a writable table
         if(tableFormat instanceof WritableTableFormat) {
-            swingThreadSource.getReadWriteLock().writeLock().lock();
+            source.getReadWriteLock().writeLock().lock();
             try {
                 final WritableTableFormat<E> writableTableFormat = (WritableTableFormat<E>)tableFormat;
                 // get the object being edited from the source list
-                final E baseObject = swingThreadSource.get(row);
+                final E baseObject = source.get(row);
 
                 // tell the table format to set the value based on what it knows
                 final E updatedObject = writableTableFormat.setColumnValue(baseObject, editedValue, column);
@@ -272,14 +272,14 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
                 if(updatedObject != null) {
                     // check if updating the baseObject has caused it to be removed from this
                     // TableModel (FilterList) or moved to another location (SortedList)
-                    final boolean baseObjectHasNotMoved = row < this.getRowCount() && swingThreadSource.get(row) == baseObject;
+                    final boolean baseObjectHasNotMoved = row < getRowCount() && source.get(row) == baseObject;
 
                     // if the row is still present, update it
                     if(baseObjectHasNotMoved)
-                        swingThreadSource.set(row, updatedObject);
+                        source.set(row, updatedObject);
                 }
             } finally {
-                swingThreadSource.getReadWriteLock().writeLock().unlock();
+                source.getReadWriteLock().writeLock().unlock();
             }
         // this is not a writable table
         } else {

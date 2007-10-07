@@ -142,7 +142,7 @@ public class EventTableModelTest extends SwingTestCase {
 
         final FilterList<JLabel> saskLabels = new FilterList<JLabel>(observedLabels, new SaskLabelMatcher());
 
-        final EventTableModel tableModel = new EventTableModel<JLabel>(saskLabels, new SaskTableFormat());
+        final EventTableModel tableModel = new EventTableModel<JLabel>(saskLabels, new LabelTableFormat());
 
         assertEquals(3, tableModel.getRowCount());
         assertEquals("saskatchewan", tableModel.getValueAt(0, 0));
@@ -169,7 +169,7 @@ public class EventTableModelTest extends SwingTestCase {
 
         final FilterList<JLabel> saskLabels = new FilterList<JLabel>(observedLabels, new SaskLabelMatcher());
 
-        final EventTableModel tableModel = new EventTableModel<JLabel>(saskLabels, new CopyingSaskTableFormat());
+        final EventTableModel tableModel = new EventTableModel<JLabel>(saskLabels, new CopyingLabelTableFormat());
 
         assertEquals(3, tableModel.getRowCount());
         assertEquals("saskatchewan", tableModel.getValueAt(0, 0));
@@ -196,7 +196,7 @@ public class EventTableModelTest extends SwingTestCase {
 
         final SortedList<JLabel> sortedLabels = new SortedList<JLabel>(observedLabels, GlazedLists.beanPropertyComparator(JLabel.class, "text"));
 
-        final EventTableModel<JLabel> tableModel = new EventTableModel<JLabel>(sortedLabels, new SaskTableFormat());
+        final EventTableModel<JLabel> tableModel = new EventTableModel<JLabel>(sortedLabels, new LabelTableFormat());
 
         assertEquals(3, tableModel.getRowCount());
         assertEquals("apple", tableModel.getValueAt(0, 0));
@@ -216,7 +216,7 @@ public class EventTableModelTest extends SwingTestCase {
      */
     public void guiTestGenericTypeRelationships() {
         final EventList<DefaultListCellRenderer> source = new BasicEventList<DefaultListCellRenderer>();
-        final TableFormat<JLabel> tableFormat = new SaskTableFormat();
+        final TableFormat<JLabel> tableFormat = new LabelTableFormat();
         new EventTableModel<DefaultListCellRenderer>(source, tableFormat);
     }
 
@@ -225,24 +225,43 @@ public class EventTableModelTest extends SwingTestCase {
      * SwingThreadProxyEventList by overriding
      * {@link EventTableModel#createSwingThreadProxyList}.
      */
-    public void guiTestNoThreadProxyingDesired_FixMe() {
+    public void guiTestNoThreadProxyingDesired() {
+        final JLabel jamesLabel = new JLabel("James");
         final EventList<JLabel> source = new BasicEventList<JLabel>();
-        final TableFormat<JLabel> tableFormat = new SaskTableFormat();
+        source.add(jamesLabel);
+        final TableFormat<JLabel> tableFormat = new LabelTableFormat();
 
+        // 1. test reading and writing with a thread proxy
         final EventTableModel<JLabel> labelModelWithProxy = new EventTableModel<JLabel>(source, tableFormat);
         assertNotNull(labelModelWithProxy.swingThreadSource);
         assertSame(labelModelWithProxy.source, labelModelWithProxy.swingThreadSource);
+        assertEquals(1, labelModelWithProxy.getRowCount());
+        assertEquals("James", labelModelWithProxy.getValueAt(0, 0));
+        assertSame(jamesLabel, labelModelWithProxy.getElementAt(0));
+        assertTrue(labelModelWithProxy.isCellEditable(0, 0));
+        labelModelWithProxy.setValueAt("Thanks Holger", 0, 0);
+        assertEquals("Thanks Holger", labelModelWithProxy.getValueAt(0, 0));
 
         labelModelWithProxy.dispose();
         assertNull(labelModelWithProxy.swingThreadSource);
         assertNull(labelModelWithProxy.source);
 
+        // reset the state
+        jamesLabel.setText("James");
+
+        // 2. test reading and writing without a thread proxy
         final NoProxyingEventTableModel<JLabel> labelModelNoProxy = new NoProxyingEventTableModel<JLabel>(source, tableFormat);
         assertNull(labelModelNoProxy.swingThreadSource);
         assertSame(labelModelNoProxy.source, source);
-        assertEquals(0, labelModelNoProxy.getRowCount());
-        
+        assertEquals(1, labelModelNoProxy.getRowCount());
+        assertEquals("James", labelModelNoProxy.getValueAt(0, 0));
+        assertSame(jamesLabel, labelModelNoProxy.getElementAt(0));
+        assertTrue(labelModelNoProxy.isCellEditable(0, 0));
+        labelModelNoProxy.setValueAt("Thanks Holger", 0, 0);
+        assertEquals("Thanks Holger", labelModelNoProxy.getValueAt(0, 0));
+
         labelModelNoProxy.dispose();
+        assertNull(labelModelNoProxy.swingThreadSource);
         assertNull(labelModelNoProxy.swingThreadSource);
         assertNull(labelModelNoProxy.source);
     }
@@ -251,7 +270,7 @@ public class EventTableModelTest extends SwingTestCase {
      * This TableFormat returns new JLabels from its setValueAt()
      * method rather than modifying the existing one in place.
      */
-    private static final class CopyingSaskTableFormat implements WritableTableFormat<JLabel> {
+    private static final class CopyingLabelTableFormat implements WritableTableFormat<JLabel> {
         public boolean isEditable(JLabel baseObject, int column) { return true; }
 
         public JLabel setColumnValue(JLabel baseObject, Object editedValue, int column) {
@@ -266,7 +285,7 @@ public class EventTableModelTest extends SwingTestCase {
     /**
      * This TableFormat modifyies existing JLabels in place.
      */
-    private static final class SaskTableFormat implements WritableTableFormat<JLabel> {
+    private static final class LabelTableFormat implements WritableTableFormat<JLabel> {
         public boolean isEditable(JLabel baseObject, int column) { return true; }
 
         public JLabel setColumnValue(JLabel baseObject, Object editedValue, int column) {
