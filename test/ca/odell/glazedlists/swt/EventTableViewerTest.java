@@ -127,9 +127,9 @@ public class EventTableViewerTest extends SwtTestCase {
         /** {@inheritedDoc} */
         public Object getColumnValue(Color baseObject, int column) {
             if (baseObject == null) return null;
-            if (column == 0) return baseObject.getRed();
-            if (column == 1) return baseObject.getGreen();
-            if (column == 2) return baseObject.getBlue();
+            if (column == 0) return new Integer(baseObject.getRed());
+            if (column == 1) return new Integer(baseObject.getGreen());
+            if (column == 2) return new Integer(baseObject.getBlue());
             return null;
         }
 
