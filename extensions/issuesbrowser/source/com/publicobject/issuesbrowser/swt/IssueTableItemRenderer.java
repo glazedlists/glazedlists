@@ -6,6 +6,8 @@ package com.publicobject.issuesbrowser.swt;
 
 import ca.odell.glazedlists.swt.TableItemRenderer;
 
+import com.publicobject.issuesbrowser.Issue;
+
 import org.eclipse.swt.widgets.TableItem;
 
 import java.text.DateFormat;
@@ -16,17 +18,17 @@ import java.util.Date;
  * 
  * @author hbrands
  */
-public class IssueTableItemRenderer implements TableItemRenderer {
+public class IssueTableItemRenderer implements TableItemRenderer<Issue> {
 
     /** DateFormatter. */
     private final DateFormat dateFormatter = DateFormat.getDateInstance();
     
     /** {@inheritDoc} */
-    public void render(TableItem item, Object columnValue, int column) {
+    public void render(TableItem item, Issue rowValue, Object columnValue, int row, int column) {
         switch (column) {
             case 2: item.setText(column, dateToString(columnValue)); break;            
             case 3: item.setText(column, dateToString(columnValue)); break;
-            default: TableItemRenderer.DEFAULT.render(item, columnValue, column);
+            default: TableItemRenderer.DEFAULT.render(item, rowValue, columnValue, row, column);
         }
     }
 

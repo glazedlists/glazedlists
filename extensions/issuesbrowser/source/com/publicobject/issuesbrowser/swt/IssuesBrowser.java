@@ -139,7 +139,9 @@ public class IssuesBrowser {
         // Create the Issues Table
         Table issuesTable = createIssuesTable(issuePanel);
         EventTableViewer<Issue> issuesTableViewer = new EventTableViewer<Issue>(issuesSortedList,
-                issuesTable, new SwtIssueTableFormat(), new IssueTableItemRenderer());
+                issuesTable, new SwtIssueTableFormat());
+        issuesTableViewer.setTableItemRenderer(new IssueTableItemRenderer());
+
         issuesTable = formatIssuesTable(issuesTable);
         TableComparatorChooser.install(issuesTableViewer, issuesSortedList, false);
 

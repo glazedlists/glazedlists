@@ -31,37 +31,15 @@ public class EventTableViewerTest extends SwtTestCase {
     }
     
     /** Tests the default TableItemRenderer. */
-    public void testDefaultTableItemRenderer() {
+    public void testTableItemRenderer() {
         final EventList<Color> source = GlazedLists.eventList(RGBNull);
-        final TableFormat<Color> tableFormat = GlazedLists.tableFormat(new String[] { "red", "green", "blue" }, new String[] { "Red", "Green", "Blue" });
-        final Table table = new Table(shell, SWT.CHECK);
+        final TableFormat<Color> tableFormat = GlazedLists.tableFormat(new String[] { "red",
+                "green", "blue" }, new String[] { "Red", "Green", "Blue" });
+        final Table table = new Table(shell, SWT.CHECK | SWT.VIRTUAL);
         EventTableViewer<Color> viewer = new EventTableViewer<Color>(source, table, tableFormat);
-        assertSame(TableItemRenderer.DEFAULT, viewer.getTableItemRenderer());
-        assertEquals(4, table.getItemCount());
-        assertEquals("255", table.getItem(0).getText(0));
-        assertEquals("0", table.getItem(0).getText(1));
-        assertEquals("0", table.getItem(0).getText(2));
-        
-        assertEquals("0", table.getItem(1).getText(0));
-        assertEquals("255", table.getItem(1).getText(1));
-        assertEquals("0", table.getItem(1).getText(2));
-        
-        assertEquals("0", table.getItem(2).getText(0));
-        assertEquals("0", table.getItem(2).getText(1));
-        assertEquals("255", table.getItem(2).getText(2));
-        
-        assertEquals("", table.getItem(3).getText(0));
-        assertEquals("", table.getItem(3).getText(1));
-        assertEquals("", table.getItem(3).getText(2));
-        viewer.dispose();
-    }
-
-    /** Tests a custom TableItemRenderer. */
-    public void testCustomTableItemRenderer() {
-        final EventList<Color> source = GlazedLists.eventList(RGBNull);
-        final TableFormat<Color> tableFormat = GlazedLists.tableFormat(new String[] { "red", "green", "blue" }, new String[] { "Red", "Green", "Blue" });
-        final Table table = new Table(shell, SWT.CHECK);
-        EventTableViewer<Color> viewer = new EventTableViewer<Color>(source, table, tableFormat, new ColorTableItemRenderer());
+        doTestDefaultRenderer(table, viewer);
+        // setting custom renderer
+        viewer.setTableItemRenderer(new ColorTableItemRenderer());
         assertNotSame(TableItemRenderer.DEFAULT, viewer.getTableItemRenderer());
         assertEquals(4, table.getItemCount());
         assertEquals("Red=255", table.getItem(0).getText(0));
@@ -79,7 +57,42 @@ public class EventTableViewerTest extends SwtTestCase {
         assertEquals("Red=null", table.getItem(3).getText(0));
         assertEquals("Green=null", table.getItem(3).getText(1));
         assertEquals("Blue=null", table.getItem(3).getText(2));
+        
+        // restoring default renderer
+        viewer.setTableItemRenderer(TableItemRenderer.DEFAULT);
+        doTestDefaultRenderer(table, viewer);
+        
+        try {
+            viewer.setTableItemRenderer(null);
+            fail("IllegalArgumentException expected");
+        } catch (IllegalArgumentException ex) {
+            // expected because null is not allowed
+        }
+        assertSame(TableItemRenderer.DEFAULT, viewer.getTableItemRenderer());
         viewer.dispose();
+    }
+    
+    /**
+     * Helper method to test default TableItemRenderer.
+     */
+    private void doTestDefaultRenderer(Table table, EventTableViewer viewer) {
+        assertSame(TableItemRenderer.DEFAULT, viewer.getTableItemRenderer());
+        assertEquals(4, table.getItemCount());
+        assertEquals("255", table.getItem(0).getText(0));
+        assertEquals("0", table.getItem(0).getText(1));
+        assertEquals("0", table.getItem(0).getText(2));
+        
+        assertEquals("0", table.getItem(1).getText(0));
+        assertEquals("255", table.getItem(1).getText(1));
+        assertEquals("0", table.getItem(1).getText(2));
+        
+        assertEquals("0", table.getItem(2).getText(0));
+        assertEquals("0", table.getItem(2).getText(1));
+        assertEquals("255", table.getItem(2).getText(2));
+        
+        assertEquals("", table.getItem(3).getText(0));
+        assertEquals("", table.getItem(3).getText(1));
+        assertEquals("", table.getItem(3).getText(2));        
     }
     
     /** Tests a TableFormat that is a TableColumnConfigurer. */
@@ -149,10 +162,10 @@ public class EventTableViewerTest extends SwtTestCase {
         }
     }
     
-    private static class ColorTableItemRenderer implements TableItemRenderer {
+    private static class ColorTableItemRenderer implements TableItemRenderer<Color> {
 
         /** {@inheritedDoc} */
-        public void render(TableItem item, Object columnValue, int column) {
+        public void render(TableItem item, Color rowValue, Object columnValue, int row, int column) {
             switch(column) {
                 case 0: item.setText(column, "Red=" + columnValue); break;
                 case 1: item.setText(column, "Green=" + columnValue); break;

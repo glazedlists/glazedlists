@@ -51,7 +51,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
     private TableFormat<? super E> tableFormat;
 
     /** Specifies how to render column values represented by TableItems. */
-    private TableItemRenderer tableItemRenderer;
+    private TableItemRenderer<? super E> tableItemRenderer = TableItemRenderer.DEFAULT;
     
     /** For selection management */
     private SelectionManager<E> selection;
@@ -89,23 +89,6 @@ public class EventTableViewer<E> implements ListEventListener<E> {
      *      from the row objects
      */
     public EventTableViewer(EventList<E> source, Table table, TableFormat<? super E> tableFormat) {
-        this(source, table, tableFormat, TableItemRenderer.DEFAULT);
-    }
-
-    /**
-     * Creates a new viewer for the given {@link Table} that updates the table
-     * contents in response to changes on the specified {@link EventList}. The
-     * {@link Table} is formatted with the specified {@link TableFormat}. 
-     * The table items, e.g. the cell values, are formatted with the specified 
-     * {@link TableItemRenderer}.
-     *
-     * @param source the EventList that provides the row objects
-     * @param table the Table viewing the source objects
-     * @param tableFormat the object responsible for extracting column data
-     *      from the row objects
-     * @param tableItemRenderer the renderer responsible to configure TableItems for display
-     */
-    public EventTableViewer(EventList<E> source, Table table, TableFormat<? super E> tableFormat, TableItemRenderer tableItemRenderer) {
         // lock the source list for reading since we want to prevent writes
         // from occurring until we fully initialize this EventTableViewer
         source.getReadWriteLock().writeLock().lock();
@@ -119,13 +102,12 @@ public class EventTableViewer<E> implements ListEventListener<E> {
 
             this.table = table;
             this.tableFormat = tableFormat;
-            this.tableItemRenderer = tableItemRenderer;
 
             // enable the selection lists
             selection = new SelectionManager<E>(this.source, new SelectableTable());
 
             // configure how the Table will be manipulated
-            if((table.getStyle() & SWT.VIRTUAL) == SWT.VIRTUAL) {
+            if(isTableVirtual()) {
                 tableHandler = new VirtualTableHandler();
             } else {
                 tableHandler = new DefaultTableHandler();
@@ -142,6 +124,13 @@ public class EventTableViewer<E> implements ListEventListener<E> {
         }
     }
 
+    /**
+     * Gets wether the table is virtual or not. 
+     */
+    private boolean isTableVirtual() {
+        return ((table.getStyle() & SWT.VIRTUAL) == SWT.VIRTUAL);
+    }
+    
     /**
      * Builds the columns and headers for the {@link Table}
      */
@@ -161,10 +150,10 @@ public class EventTableViewer<E> implements ListEventListener<E> {
     /**
      * Sets all of the column values on a {@link TableItem}.
      */
-    private void renderTableItem(TableItem item, E value) {
+    private void renderTableItem(TableItem item, E value, int row) {
         for(int i = 0; i < tableFormat.getColumnCount(); i++) {
             final Object cellValue = tableFormat.getColumnValue(value, i);
-            tableItemRenderer.render(item, cellValue, i);
+            tableItemRenderer.render(item, value, cellValue, row, i);
         }
     }
 
@@ -186,12 +175,39 @@ public class EventTableViewer<E> implements ListEventListener<E> {
     /**
      * Gets the {@link TableItemRenderer}.
      */
-    public TableItemRenderer getTableItemRenderer() {
+    public TableItemRenderer<? super E> getTableItemRenderer() {
         return tableItemRenderer;
     }
-    
+
     /**
-     * Gets the {@link TableColumnConfigurer} or <code>null</code> if not available.
+     * Sets a new {@link TableItemRenderer}. Existing, non-virtual table items,
+     * e.g. the cell values will be formatted with the specified renderer.
+     */
+    public void setTableItemRenderer(TableItemRenderer<? super E> tableItemRenderer) {
+        if (tableItemRenderer == null)
+            throw new IllegalArgumentException("TableItemRenderer may not be null");
+
+        this.tableItemRenderer = tableItemRenderer;
+        // determine the index of the last, non-virtual table item
+        final int maxIndex = tableHandler.getLastIndex();
+        // Disable redraws so that the table is updated in bulk
+        table.setRedraw(false);
+        // reprocess all table items between indexes 0 and maxIndex
+        for (int i = 0; i <= maxIndex; i++) {
+//            System.out.println("setTableItemRenderer: Rerender Item " + i);
+            final E rowValue = swtThreadSource.get(i);
+            for (int c = 0; c < tableFormat.getColumnCount(); c++) {
+                final Object columnValue = tableFormat.getColumnValue(rowValue, c);
+                tableItemRenderer.render(table.getItem(i), rowValue, columnValue, i, c);
+            }
+        }
+        // Re-enable redraws to update the table        
+        table.setRedraw(true);
+    }
+
+    /**
+     * Gets the {@link TableColumnConfigurer} or <code>null</code> if not
+     * available.
      */
     private TableColumnConfigurer getTableColumnConfigurer() {
         if (tableFormat instanceof TableColumnConfigurer) {
@@ -425,6 +441,12 @@ public class EventTableViewer<E> implements ListEventListener<E> {
          * Disposes of this TableHandler
          */
         public void dispose();
+
+        /**
+         * Gets the last real, non-virtual row index. -1 means empty or
+         * completely virtual table
+         */
+        public int getLastIndex();
     }
 
     /**
@@ -445,7 +467,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
          */
         public void addRow(int row, E value) {
             TableItem item = new TableItem(table, 0, row);
-            renderTableItem(item, value);
+            renderTableItem(item, value, row);
         }
 
         /**
@@ -453,7 +475,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
          */
         public void updateRow(int row, E value) {
             TableItem item = table.getItem(row);
-            renderTableItem(item, value);
+            renderTableItem(item, value, row);
         }
 
         /**
@@ -468,6 +490,11 @@ public class EventTableViewer<E> implements ListEventListener<E> {
          */
         public void dispose() {
             // no-op for default Tables
+        }
+
+        /** {@inheritedDoc} */
+        public int getLastIndex() {
+            return table.getItemCount() - 1;
         }
     }
 
@@ -504,7 +531,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
             if(row <= getLastIndex()) {
                 requested.addBlack(row, 1);
                 TableItem item = new TableItem(table, 0, row);
-                renderTableItem(item, value);
+                renderTableItem(item, value, row);
 
             // Adding in the Virtual values at the end
             } else {
@@ -521,7 +548,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
             if(!isVirtual(row)) {
                 requested.setBlack(row, 1);
                 TableItem item = table.getItem(row);
-                renderTableItem(item, value);
+                renderTableItem(item, value, row);
             }
         }
 
@@ -540,7 +567,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
          * Returns the highest index that has been requested or -1 if the
          * Table is entirely Virtual.
          */
-        private int getLastIndex() {
+        public int getLastIndex() {
             // Everything is Virtual
             if(requested.blackSize() == 0) return -1;
 
@@ -566,10 +593,11 @@ public class EventTableViewer<E> implements ListEventListener<E> {
             // might be sending incorrectly indexed TableItems in the event.
             int whiteIndex = requested.getWhiteIndex(table.getTopIndex(), false);
             int index = requested.getIndex(whiteIndex, Barcode.WHITE);
-
+//            System.out.println("ETV.handleEvent: e.index|index|topindex|lastindex=" + e.index + "|"
+//                    + index + "|" + table.getTopIndex() + "|" + getLastIndex());
             // Set the value on the Virtual element
             requested.setBlack(index, 1);
-            renderTableItem(item, swtThreadSource.get(index));
+            renderTableItem(item, swtThreadSource.get(index), index);
         }
 
         /**
