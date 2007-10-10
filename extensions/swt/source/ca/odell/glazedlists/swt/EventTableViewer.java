@@ -14,6 +14,7 @@ import ca.odell.glazedlists.impl.adt.BarcodeIterator;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
@@ -36,13 +37,13 @@ public class EventTableViewer<E> implements ListEventListener<E> {
     private Table table;
 
     /** the proxy that moves events to the SWT user interface thread */
-    private TransformedList<E,E> swtThreadSource;
+    protected TransformedList<E,E> swtThreadSource;
 
     /** Enables check support */
     private TableCheckFilterList<E,E> checkFilterList;
 
     /** the actual EventList to which this EventTableViewer is listening */
-    private EventList<E> source;
+    protected EventList<E> source;
 
     /** to manipulate Tables in a generic way */
     private TableHandler<E> tableHandler;
@@ -52,7 +53,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
 
     /** Specifies how to render column values represented by TableItems. */
     private TableItemRenderer<? super E> tableItemRenderer = TableItemRenderer.DEFAULT;
-    
+
     /** For selection management */
     private SelectionManager<E> selection;
 
@@ -94,11 +95,15 @@ public class EventTableViewer<E> implements ListEventListener<E> {
         source.getReadWriteLock().writeLock().lock();
         try {
             // insert a list to move ListEvents to the SWT event dispatch thread
-            this.source = swtThreadSource = GlazedListsSWT.swtThreadProxyList(source, table.getDisplay());
+            final TransformedList<E,E> decorated = createSwtThreadProxyList(source, table.getDisplay());
+            if (decorated != null && decorated != source)
+                this.source = swtThreadSource = decorated;
+            else
+                this.source = source;
 
             // insert a checked source if supported by the table
             if ((table.getStyle() & SWT.CHECK) == SWT.CHECK)
-                this.source = checkFilterList = new TableCheckFilterList<E,E>(swtThreadSource, table, tableFormat);
+                this.source = checkFilterList = new TableCheckFilterList<E,E>(this.source, table, tableFormat);
 
             this.table = table;
             this.tableFormat = tableFormat;
@@ -123,14 +128,34 @@ public class EventTableViewer<E> implements ListEventListener<E> {
             source.getReadWriteLock().writeLock().unlock();
         }
     }
+    /**
+     * This method exists as a hook for subclasses that may have custom
+     * threading needs within their EventTableViewers. By default, this method
+     * will wrap the given <code>source</code> in a SWTThreadProxyList if it
+     * is not already a SWTThreadProxyList. Subclasses may replace this logic
+     * and return either a custom ThreadProxyEventList of their choosing, or
+     * return <code>null</code> or the <code>source</code> unchanged in order
+     * to indicate that <strong>NO</strong> ThreadProxyEventList is desired.
+     * In these cases it is expected that some external mechanism will ensure
+     * that threading is handled correctly.
+     *
+     * @param source the EventList that provides the row objects
+     * @return the source wrapped in some sort of ThreadProxyEventList if
+     *      Thread-proxying is desired, or either <code>null</code> or the
+     *      <code>source</code> unchanged to indicate that <strong>NO</strong>
+     *      Thread-proxying is desired
+     */
+    protected TransformedList<E,E> createSwtThreadProxyList(EventList<E> source, Display display) {
+        return GlazedListsSWT.isSWTThreadProxyList(source) ? null : GlazedListsSWT.swtThreadProxyList(source, display);
+    }
 
     /**
-     * Gets wether the table is virtual or not. 
+     * Gets wether the table is virtual or not.
      */
     private boolean isTableVirtual() {
         return ((table.getStyle() & SWT.VIRTUAL) == SWT.VIRTUAL);
     }
-    
+
     /**
      * Builds the columns and headers for the {@link Table}
      */
@@ -190,18 +215,24 @@ public class EventTableViewer<E> implements ListEventListener<E> {
         this.tableItemRenderer = tableItemRenderer;
         // determine the index of the last, non-virtual table item
         final int maxIndex = tableHandler.getLastIndex();
+        if (maxIndex < 0) return;
         // Disable redraws so that the table is updated in bulk
         table.setRedraw(false);
-        // reprocess all table items between indexes 0 and maxIndex
-        for (int i = 0; i <= maxIndex; i++) {
-//            System.out.println("setTableItemRenderer: Rerender Item " + i);
-            final E rowValue = swtThreadSource.get(i);
-            for (int c = 0; c < tableFormat.getColumnCount(); c++) {
-                final Object columnValue = tableFormat.getColumnValue(rowValue, c);
-                tableItemRenderer.render(table.getItem(i), rowValue, columnValue, i, c);
+        source.getReadWriteLock().readLock().lock();
+        try {
+            // reprocess all table items between indexes 0 and maxIndex
+            for (int i = 0; i <= maxIndex; i++) {
+    //            System.out.println("setTableItemRenderer: Rerender Item " + i);
+                final E rowValue = source.get(i);
+                for (int c = 0; c < tableFormat.getColumnCount(); c++) {
+                    final Object columnValue = tableFormat.getColumnValue(rowValue, c);
+                    tableItemRenderer.render(table.getItem(i), rowValue, columnValue, i, c);
+                }
             }
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
         }
-        // Re-enable redraws to update the table        
+        // Re-enable redraws to update the table
         table.setRedraw(true);
     }
 
@@ -215,7 +246,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
         }
         return null;
     }
-    
+
     /**
      * Gets the {@link Table} that is being managed by this
      * {@link EventTableViewer}.
@@ -261,11 +292,11 @@ public class EventTableViewer<E> implements ListEventListener<E> {
      * viewed {@link Table} that are not currently selected.
      */
     public EventList<E> getDeselected() {
-        swtThreadSource.getReadWriteLock().readLock().lock();
+        source.getReadWriteLock().readLock().lock();
         try {
             return selection.getSelectionList().getDeselected();
         } finally {
-            swtThreadSource.getReadWriteLock().readLock().unlock();
+            source.getReadWriteLock().readLock().unlock();
         }
     }
 
@@ -274,11 +305,11 @@ public class EventTableViewer<E> implements ListEventListener<E> {
      * viewed {@link Table} that are currently selected.
      */
     public EventList<E> getSelected() {
-        swtThreadSource.getReadWriteLock().readLock().lock();
+        source.getReadWriteLock().readLock().lock();
         try {
             return selection.getSelectionList().getSelected();
         } finally {
-            swtThreadSource.getReadWriteLock().readLock().unlock();
+            source.getReadWriteLock().readLock().unlock();
         }
     }
 
@@ -292,8 +323,8 @@ public class EventTableViewer<E> implements ListEventListener<E> {
         if (table.isDisposed()) return;
 
         Barcode deletes = new Barcode();
-        deletes.addWhite(0, swtThreadSource.size());
-        int firstChange = swtThreadSource.size();
+        deletes.addWhite(0, source.size());
+        int firstChange = source.size();
         // Disable redraws so that the table is updated in bulk
         table.setRedraw(false);
 
@@ -306,12 +337,12 @@ public class EventTableViewer<E> implements ListEventListener<E> {
             // Insert a new element in the Table and the Barcode
             if (changeType == ListEvent.INSERT) {
                 deletes.addWhite(adjustedIndex, 1);
-                tableHandler.addRow(adjustedIndex, swtThreadSource.get(changeIndex));
+                tableHandler.addRow(adjustedIndex, source.get(changeIndex));
                 firstChange = Math.min(changeIndex, firstChange);
 
                 // Update the element in the Table
             } else if (changeType == ListEvent.UPDATE) {
-                tableHandler.updateRow(adjustedIndex, swtThreadSource.get(changeIndex));
+                tableHandler.updateRow(adjustedIndex, source.get(changeIndex));
 
                 // Just mark the element as deleted in the Barcode
             } else if (changeType == ListEvent.DELETE) {
@@ -358,7 +389,8 @@ public class EventTableViewer<E> implements ListEventListener<E> {
     public void dispose() {
         tableHandler.dispose();
         selection.dispose();
-        swtThreadSource.dispose();
+        if (swtThreadSource != null)
+            swtThreadSource.dispose();
         source.removeListEventListener(this);
 
         // if we created the checkFilterList then we must also dispose it
@@ -457,8 +489,8 @@ public class EventTableViewer<E> implements ListEventListener<E> {
          * Populate the Table with initial data.
          */
         public void populateTable() {
-            for(int i = 0, n = swtThreadSource.size(); i < n; i++) {
-                addRow(i, swtThreadSource.get(i));
+            for(int i = 0, n = source.size(); i < n; i++) {
+                addRow(i, source.get(i));
             }
         }
 
@@ -512,7 +544,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
          * Create a new VirtualTableHandler.
          */
         public VirtualTableHandler() {
-            requested.addWhite(0, swtThreadSource.size());
+            requested.addWhite(0, source.size());
             table.addListener(SWT.SetData, this);
         }
 
@@ -520,7 +552,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
          * Populate the Table with initial data.
          */
         public void populateTable() {
-            table.setItemCount(swtThreadSource.size());
+            table.setItemCount(source.size());
         }
 
         /**
@@ -597,7 +629,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
 //                    + index + "|" + table.getTopIndex() + "|" + getLastIndex());
             // Set the value on the Virtual element
             requested.setBlack(index, 1);
-            renderTableItem(item, swtThreadSource.get(index), index);
+            renderTableItem(item, source.get(index), index);
         }
 
         /**

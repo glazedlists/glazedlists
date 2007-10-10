@@ -3,10 +3,12 @@ package ca.odell.glazedlists.swt;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.io.IntegerTableFormat;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
@@ -17,7 +19,7 @@ import java.util.List;
 
 /**
  * Tests for the {@link EventTableViewer}.
- * 
+ *
  * @author hbrands
  */
 public class EventTableViewerTest extends SwtTestCase {
@@ -29,7 +31,7 @@ public class EventTableViewerTest extends SwtTestCase {
         EventTableViewer<Integer> viewer = new EventTableViewer<Integer>(new BasicEventList<Integer>(), new Table(shell, SWT.CHECK), new IntegerTableFormat());
         viewer.dispose();
     }
-    
+
     /** Tests the default TableItemRenderer. */
     public void testTableItemRenderer() {
         final EventList<Color> source = GlazedLists.eventList(RGBNull);
@@ -45,23 +47,23 @@ public class EventTableViewerTest extends SwtTestCase {
         assertEquals("Red=255", table.getItem(0).getText(0));
         assertEquals("Green=0", table.getItem(0).getText(1));
         assertEquals("Blue=0", table.getItem(0).getText(2));
-        
+
         assertEquals("Red=0", table.getItem(1).getText(0));
         assertEquals("Green=255", table.getItem(1).getText(1));
         assertEquals("Blue=0", table.getItem(1).getText(2));
-        
+
         assertEquals("Red=0", table.getItem(2).getText(0));
         assertEquals("Green=0", table.getItem(2).getText(1));
         assertEquals("Blue=255", table.getItem(2).getText(2));
-        
+
         assertEquals("Red=null", table.getItem(3).getText(0));
         assertEquals("Green=null", table.getItem(3).getText(1));
         assertEquals("Blue=null", table.getItem(3).getText(2));
-        
+
         // restoring default renderer
         viewer.setTableItemRenderer(TableItemRenderer.DEFAULT);
         doTestDefaultRenderer(table, viewer);
-        
+
         try {
             viewer.setTableItemRenderer(null);
             fail("IllegalArgumentException expected");
@@ -71,7 +73,7 @@ public class EventTableViewerTest extends SwtTestCase {
         assertSame(TableItemRenderer.DEFAULT, viewer.getTableItemRenderer());
         viewer.dispose();
     }
-    
+
     /**
      * Helper method to test default TableItemRenderer.
      */
@@ -81,20 +83,20 @@ public class EventTableViewerTest extends SwtTestCase {
         assertEquals("255", table.getItem(0).getText(0));
         assertEquals("0", table.getItem(0).getText(1));
         assertEquals("0", table.getItem(0).getText(2));
-        
+
         assertEquals("0", table.getItem(1).getText(0));
         assertEquals("255", table.getItem(1).getText(1));
         assertEquals("0", table.getItem(1).getText(2));
-        
+
         assertEquals("0", table.getItem(2).getText(0));
         assertEquals("0", table.getItem(2).getText(1));
         assertEquals("255", table.getItem(2).getText(2));
-        
+
         assertEquals("", table.getItem(3).getText(0));
         assertEquals("", table.getItem(3).getText(1));
-        assertEquals("", table.getItem(3).getText(2));        
+        assertEquals("", table.getItem(3).getText(2));
     }
-    
+
     /** Tests a TableFormat that is a TableColumnConfigurer. */
     public void testTableColumnConfigurer() {
         final EventList<Color> source = GlazedLists.eventList(RGBNull);
@@ -107,13 +109,13 @@ public class EventTableViewerTest extends SwtTestCase {
         assertEquals(80, table.getColumn(0).getWidth());
         assertEquals(true, table.getColumn(0).getResizable());
         assertEquals(null, table.getColumn(0).getToolTipText());
-        
+
         assertEquals("Green", table.getColumn(1).getText());
         assertEquals(SWT.LEFT, table.getColumn(1).getAlignment());
         assertEquals(100, table.getColumn(1).getWidth());
         assertEquals(false, table.getColumn(1).getResizable());
         assertEquals(null, table.getColumn(1).getToolTipText());
-        
+
         assertEquals("Blue", table.getColumn(2).getText());
         assertEquals(SWT.CENTER, table.getColumn(2).getAlignment());
         assertEquals(80, table.getColumn(2).getWidth());
@@ -121,7 +123,56 @@ public class EventTableViewerTest extends SwtTestCase {
         assertEquals("Blue Column", table.getColumn(2).getToolTipText());
         viewer.dispose();
     }
-    
+
+    /**
+     * This test ensures subclasses can prevent the building of a
+     * SWTThreadProxyEventList by overriding
+     * {@link EventTableViewer#createSwtThreadProxyList}.
+     */
+    public void guiTestNoThreadProxyingDesired() {
+        final EventList<Color> source = new BasicEventList<Color>();
+        source.add(Color.RED);
+        final TableFormat<Color> tableFormat = new ColorTableFormat();
+        final Table table = new Table(shell, SWT.CHECK | SWT.VIRTUAL);
+        // 1. test with a thread proxy
+        final EventTableViewer<Color> colorViewerWithProxy = new EventTableViewer<Color>(source, table, tableFormat);
+        assertNotNull(colorViewerWithProxy.swtThreadSource);
+        assertSame(colorViewerWithProxy.source, colorViewerWithProxy.swtThreadSource);
+        assertEquals(0, colorViewerWithProxy.getSelected().size());
+        assertEquals(1, colorViewerWithProxy.getDeselected().size());
+        assertEquals(0, colorViewerWithProxy.getAllChecked().size());
+        assertSame(Color.RED, colorViewerWithProxy.getSourceList().get(0));
+        colorViewerWithProxy.dispose();
+        assertNull(colorViewerWithProxy.swtThreadSource);
+        assertNull(colorViewerWithProxy.source);
+
+        // 2. test without a thread proxy
+        final NoProxyingEventTableViewer<Color> colorViewerNoProxy = new NoProxyingEventTableViewer<Color>(source, table, tableFormat);
+        assertNull(colorViewerNoProxy.swtThreadSource);
+        assertSame(colorViewerNoProxy.source, source);
+        assertEquals(0, colorViewerNoProxy.getSelected().size());
+        assertEquals(1, colorViewerNoProxy.getDeselected().size());
+        assertEquals(0, colorViewerNoProxy.getAllChecked().size());
+        assertSame(Color.RED, colorViewerNoProxy.getSourceList().get(0));
+        colorViewerNoProxy.dispose();
+        assertNull(colorViewerNoProxy.swtThreadSource);
+        assertNull(colorViewerNoProxy.source);
+    }
+
+    private class NoProxyingEventTableViewer<E> extends EventTableViewer<E> {
+
+        public NoProxyingEventTableViewer(EventList<E> source, Table table, TableFormat<? super E> tableFormat) {
+            super(source, table, tableFormat);
+        }
+
+        /**
+         * Returning null implies no ThreadProxyEventList is necessary.
+         */
+        protected TransformedList<E, E> createSwtThreadProxyList(EventList<E> source, Display display) {
+            return null;
+        }
+    }
+
     private static class ColorTableFormat implements TableFormat<Color>, TableColumnConfigurer {
 
         /** {@inheritedDoc} */
@@ -149,7 +200,7 @@ public class EventTableViewerTest extends SwtTestCase {
         /** {@inheritedDoc} */
         public void configure(TableColumn tableColumn, int column) {
             switch(column) {
-                case 1: 
+                case 1:
                     tableColumn.setWidth(100);
                     tableColumn.setResizable(false);
                     break;
@@ -161,7 +212,7 @@ public class EventTableViewerTest extends SwtTestCase {
             }
         }
     }
-    
+
     private static class ColorTableItemRenderer implements TableItemRenderer<Color> {
 
         /** {@inheritedDoc} */
@@ -172,6 +223,6 @@ public class EventTableViewerTest extends SwtTestCase {
                 case 2: item.setText(column, "Blue=" + columnValue); break;
                 default: item.setText(column, "???");
             }
-        }        
+        }
     }
 }
