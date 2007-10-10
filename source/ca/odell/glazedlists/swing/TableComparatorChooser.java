@@ -12,10 +12,12 @@ import ca.odell.glazedlists.impl.SortIconFactory;
 import ca.odell.glazedlists.impl.gui.SortingStrategy;
 
 import javax.swing.*;
+import javax.swing.plaf.UIResource;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -61,9 +63,12 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      * the header renderer which decorates an underlying renderer
      * (the table header's default renderer) with a sort arrow icon.
      */
-    private final SortArrowHeaderRenderer sortArrowHeaderRenderer;
+    private SortArrowHeaderRenderer sortArrowHeaderRenderer;
 
-    /** listen for table and mouse events */
+    /** listen for UI delegate changes to the table header */
+    private final TableHeaderUIHandler tableHeaderUIHandler = new TableHeaderUIHandler();
+
+    /** listen for table and property change events */
     private final TableModelHandler tableModelHandler = new TableModelHandler();
 
     /** the table being sorted */
@@ -120,16 +125,33 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
         // save the Swing-specific state
         this.table = table;
         this.table.addPropertyChangeListener("model", tableModelHandler);
+        this.table.getTableHeader().addPropertyChangeListener("UI", tableHeaderUIHandler);
 
-        // build and set the table header renderer which decorates the existing renderer with sort arrows
-        sortArrowHeaderRenderer = new SortArrowHeaderRenderer(table.getTableHeader().getDefaultRenderer());
-        table.getTableHeader().setDefaultRenderer(sortArrowHeaderRenderer);
+        // wrap the default table header with logic that decorates it with a sorting icon
+        wrapDefaultTableHeaderRenderer();
 
         // listen for events on the specified table
         table.getModel().addTableModelListener(tableModelHandler);
 
         // install the sorting strategy to interpret clicks
         headerClickHandler = new HeaderClickHandler(table, (SortingStrategy)strategy);
+    }
+
+    /**
+     * A method to wrap the default renderer of the JTableHeader if it does not
+     * appear to be wrapped already. This is particularly useful when the UI
+     * delegate of the table header changes.
+     */
+    private void wrapDefaultTableHeaderRenderer() {
+        final TableCellRenderer defaultRenderer = table.getTableHeader().getDefaultRenderer();
+        final Class defaultRendererType = defaultRenderer == null ? null : defaultRenderer.getClass();
+
+        // if the renderer does not appear to be wrapped, do it
+        if (defaultRendererType != SortArrowHeaderRenderer.class && defaultRendererType != null) {
+            // decorate the default table header renderer with sort arrows
+            sortArrowHeaderRenderer = new SortArrowHeaderRenderer(defaultRenderer);
+            table.getTableHeader().setDefaultRenderer(sortArrowHeaderRenderer);
+        }
     }
 
     /**
@@ -346,9 +368,22 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
         // remove our listeners from the table's header and model
         table.getModel().removeTableModelListener(tableModelHandler);
         table.removePropertyChangeListener("model", tableModelHandler);
+        table.getTableHeader().removePropertyChangeListener("UI", tableHeaderUIHandler);
 
         // null out our table reference for safety's sake
         table = null;
+    }
+
+    /**
+     * Nested Listener class handles changes in the UI delegate for the table's
+     * header. It responds by rewrapping the default renderer for the table
+     * header, if it was replaced in the course of installing the new
+     * TableHeaderUI.
+     */
+    private class TableHeaderUIHandler implements PropertyChangeListener {
+        public void propertyChange(PropertyChangeEvent evt) {
+            wrapDefaultTableHeaderRenderer();
+        }
     }
 
     /**
@@ -412,7 +447,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      * default table header render does not return a JLabel or does not
      * implement {@link SortableRenderer}.
      */
-    class SortArrowHeaderRenderer implements TableCellRenderer {
+    class SortArrowHeaderRenderer implements TableCellRenderer, UIResource {
 
         /** the renderer to which we delegate */
         private TableCellRenderer delegateRenderer;
@@ -433,13 +468,14 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
         }
 
         /**
-         * Renders the header in the default way but with the addition of an icon.
+         * Renders the header in the default way but with the addition of an
+         * icon to indicate sorting state.
          */
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             // if column index is negative, just call the delegate renderer
             // this is a special case for JideTable with nested table columns
             if (column < 0)
-                return delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                return getDelegateTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
             final Icon sortIcon = icons[getSortingStyle(column)];
             final Component rendered;
@@ -447,11 +483,11 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
             // 1. look for our custom SortableRenderer interface
             if (delegateRenderer instanceof SortableRenderer) {
                 ((SortableRenderer) delegateRenderer).setSortIcon(sortIcon);
-                rendered = delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                rendered = getDelegateTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
             // 2. Otherwise check whether the rendered component is a JLabel (this is the case of the default header renderer)
             } else {
-                rendered = delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                rendered = getDelegateTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
                 // we check for a JLabel rather than a DefaultTableCellRenderer to support WinLAF,
                 // which installs a decorator over the DefaultTableCellRenderer
@@ -464,10 +500,30 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
 
             return rendered;
         }
+
+        /**
+         * Attempts to retrieve the decorated Component from the delegate
+         * renderer. If a RuntimeException occurs, this method replaces the
+         * delegate renderer with a {@link DefaultTableCellRenderer} and
+         * requests the Component from it. This exists because our decorating
+         * approach is the victim of a SUN bug in WindowsTableHeaderUI:
+         * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6429812
+         *
+         * See also more information reported by Eric Burke here:
+         * http://stuffthathappens.com/blog/2007/10/02/rich-client-developers-avoid-java-6/
+         */
+        private Component getDelegateTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            try {
+                return delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            } catch (RuntimeException e) {
+                delegateRenderer = new DefaultTableCellRenderer();
+                return delegateRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            }
+        }
     }
 
     /**
-     * Handle clicks to the table's header by adjusting the sorrting state.
+     * Handle clicks to the table's header by adjusting the sorting state.
      */
     private class HeaderClickHandler extends MouseAdapter {
         private final JTable table;
@@ -481,8 +537,8 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
         }
 
         public void mouseClicked(MouseEvent e) {
-            if(mouseEventIsPerformingPopupTrigger) return;
-            if(!isSortingMouseEvent(e)) return;
+            if (mouseEventIsPerformingPopupTrigger) return;
+            if (!isSortingMouseEvent(e)) return;
 
             boolean shift = e.isShiftDown();
             boolean control = e.isControlDown() || e.isMetaDown();
@@ -491,7 +547,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
             int viewColumn = columnModel.getColumnIndexAtX(e.getX());
             int column = table.convertColumnIndexToModel(viewColumn);
             int clicks = e.getClickCount();
-            if(clicks >= 1 && column != -1) {
+            if (clicks >= 1 && column != -1) {
                 delegate.columnClicked(sortingState, column, clicks, shift, control);
             }
         }
