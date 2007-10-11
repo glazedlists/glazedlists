@@ -32,17 +32,17 @@ public class EventTableViewerTest extends SwtTestCase {
         viewer.dispose();
     }
 
-    /** Tests the default TableItemRenderer. */
-    public void testTableItemRenderer() {
+    /** Tests the default TableItemConfigurer. */
+    public void testTableItemConfigurer() {
         final EventList<Color> source = GlazedLists.eventList(RGBNull);
         final TableFormat<Color> tableFormat = GlazedLists.tableFormat(new String[] { "red",
                 "green", "blue" }, new String[] { "Red", "Green", "Blue" });
         final Table table = new Table(shell, SWT.CHECK | SWT.VIRTUAL);
         EventTableViewer<Color> viewer = new EventTableViewer<Color>(source, table, tableFormat);
-        doTestDefaultRenderer(table, viewer);
-        // setting custom renderer
-        viewer.setTableItemRenderer(new ColorTableItemRenderer());
-        assertNotSame(TableItemRenderer.DEFAULT, viewer.getTableItemRenderer());
+        doTestDefaultConfigurer(table, viewer);
+        // setting custom configurer
+        viewer.setTableItemConfigurer(new ColorTableItemConfigurer());
+        assertNotSame(TableItemConfigurer.DEFAULT, viewer.getTableItemConfigurer());
         assertEquals(4, table.getItemCount());
         assertEquals("Red=255", table.getItem(0).getText(0));
         assertEquals("Green=0", table.getItem(0).getText(1));
@@ -60,25 +60,25 @@ public class EventTableViewerTest extends SwtTestCase {
         assertEquals("Green=null", table.getItem(3).getText(1));
         assertEquals("Blue=null", table.getItem(3).getText(2));
 
-        // restoring default renderer
-        viewer.setTableItemRenderer(TableItemRenderer.DEFAULT);
-        doTestDefaultRenderer(table, viewer);
+        // restoring default configurer
+        viewer.setTableItemConfigurer(TableItemConfigurer.DEFAULT);
+        doTestDefaultConfigurer(table, viewer);
 
         try {
-            viewer.setTableItemRenderer(null);
+            viewer.setTableItemConfigurer(null);
             fail("IllegalArgumentException expected");
         } catch (IllegalArgumentException ex) {
             // expected because null is not allowed
         }
-        assertSame(TableItemRenderer.DEFAULT, viewer.getTableItemRenderer());
+        assertSame(TableItemConfigurer.DEFAULT, viewer.getTableItemConfigurer());
         viewer.dispose();
     }
 
     /**
-     * Helper method to test default TableItemRenderer.
+     * Helper method to test default TableItemConfigurer.
      */
-    private void doTestDefaultRenderer(Table table, EventTableViewer viewer) {
-        assertSame(TableItemRenderer.DEFAULT, viewer.getTableItemRenderer());
+    private void doTestDefaultConfigurer(Table table, EventTableViewer viewer) {
+        assertSame(TableItemConfigurer.DEFAULT, viewer.getTableItemConfigurer());
         assertEquals(4, table.getItemCount());
         assertEquals("255", table.getItem(0).getText(0));
         assertEquals("0", table.getItem(0).getText(1));
@@ -159,7 +159,7 @@ public class EventTableViewerTest extends SwtTestCase {
         assertNull(colorViewerNoProxy.source);
     }
 
-    private class NoProxyingEventTableViewer<E> extends EventTableViewer<E> {
+    private static class NoProxyingEventTableViewer<E> extends EventTableViewer<E> {
 
         public NoProxyingEventTableViewer(EventList<E> source, Table table, TableFormat<? super E> tableFormat) {
             super(source, table, tableFormat);
@@ -213,10 +213,10 @@ public class EventTableViewerTest extends SwtTestCase {
         }
     }
 
-    private static class ColorTableItemRenderer implements TableItemRenderer<Color> {
+    private static class ColorTableItemConfigurer implements TableItemConfigurer<Color> {
 
         /** {@inheritedDoc} */
-        public void render(TableItem item, Color rowValue, Object columnValue, int row, int column) {
+        public void configure(TableItem item, Color rowValue, Object columnValue, int row, int column) {
             switch(column) {
                 case 0: item.setText(column, "Red=" + columnValue); break;
                 case 1: item.setText(column, "Green=" + columnValue); break;

@@ -10,24 +10,26 @@ import ca.odell.glazedlists.gui.TableFormat;
 import org.eclipse.swt.widgets.TableItem;
 
 /**
- * A <code>TableItemRenderer</code> can be provided to an
+ * A <code>TableItemConfigurer</code> can be provided to an
  * {@link EventTableViewer} to customize the initial format and appearance of
  * column values, each represented by a {@link TableItem}.
- * 
+ *
+ * @see EventTableViewer#setTableItemConfigurer(TableItemConfigurer)
+ *
  * @author hbrands
  */
-public interface TableItemRenderer<E> {
+public interface TableItemConfigurer<E> {
 
     /**
-     * Default renderer that converts the column value to a string and sets it
+     * Default configurer that converts the column value to a string and sets it
      * as the text of the TableItem.
      */
-    public static final TableItemRenderer DEFAULT = new DefaultTableItemRenderer();
+    public static final TableItemConfigurer DEFAULT = new DefaultTableItemConfigurer();
 
     /**
      * Callback method that allows the configuration of the TableItem properties
      * for the specified row and column.
-     * 
+     *
      * @param item the TableItem at index <code>row</code>
      * @param rowValue the list element from the source {@link EventList} at
      *        index <code>row</code>
@@ -36,16 +38,16 @@ public interface TableItemRenderer<E> {
      * @param row the row index
      * @param column the column index
      */
-    void render(TableItem item, E rowValue, Object columnValue, int row, int column);
+    void configure(TableItem item, E rowValue, Object columnValue, int row, int column);
 
     /**
-     * Default renderer that converts the column value to a string and sets it
+     * Default configurer that converts the column value to a string and sets it
      * as the text of the TableItem.
      */
-    class DefaultTableItemRenderer<E> implements TableItemRenderer<E> {
+    class DefaultTableItemConfigurer<E> implements TableItemConfigurer<E> {
 
         /** {@inheritDoc} */
-        public void render(TableItem item, E rowValue, Object columnValue, int row, int column) {
+        public void configure(TableItem item, E rowValue, Object columnValue, int row, int column) {
             item.setText(column, columnValue == null ? "" : columnValue.toString());
         }
     }

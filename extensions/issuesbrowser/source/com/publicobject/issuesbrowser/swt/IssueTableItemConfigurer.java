@@ -4,7 +4,7 @@
 
 package com.publicobject.issuesbrowser.swt;
 
-import ca.odell.glazedlists.swt.TableItemRenderer;
+import ca.odell.glazedlists.swt.TableItemConfigurer;
 
 import com.publicobject.issuesbrowser.Issue;
 
@@ -14,21 +14,21 @@ import java.text.DateFormat;
 import java.util.Date;
 
 /**
- * {@link TableItemRenderer} for the issues table.
- * 
+ * {@link TableItemConfigurer} for the issues table.
+ *
  * @author hbrands
  */
-public class IssueTableItemRenderer implements TableItemRenderer<Issue> {
+public class IssueTableItemConfigurer implements TableItemConfigurer<Issue> {
 
     /** DateFormatter. */
     private final DateFormat dateFormatter = DateFormat.getDateInstance();
-    
+
     /** {@inheritDoc} */
-    public void render(TableItem item, Issue rowValue, Object columnValue, int row, int column) {
+    public void configure(TableItem item, Issue rowValue, Object columnValue, int row, int column) {
         switch (column) {
-            case 2: item.setText(column, dateToString(columnValue)); break;            
+            case 2: item.setText(column, dateToString(columnValue)); break;
             case 3: item.setText(column, dateToString(columnValue)); break;
-            default: TableItemRenderer.DEFAULT.render(item, rowValue, columnValue, row, column);
+            default: TableItemConfigurer.DEFAULT.configure(item, rowValue, columnValue, row, column);
         }
     }
 

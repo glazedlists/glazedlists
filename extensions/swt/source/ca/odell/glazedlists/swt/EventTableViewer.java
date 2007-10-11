@@ -52,7 +52,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
     private TableFormat<? super E> tableFormat;
 
     /** Specifies how to render column values represented by TableItems. */
-    private TableItemRenderer<? super E> tableItemRenderer = TableItemRenderer.DEFAULT;
+    private TableItemConfigurer<? super E> tableItemConfigurer = TableItemConfigurer.DEFAULT;
 
     /** For selection management */
     private SelectionManager<E> selection;
@@ -178,7 +178,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
     private void renderTableItem(TableItem item, E value, int row) {
         for(int i = 0; i < tableFormat.getColumnCount(); i++) {
             final Object cellValue = tableFormat.getColumnValue(value, i);
-            tableItemRenderer.render(item, value, cellValue, row, i);
+            tableItemConfigurer.configure(item, value, cellValue, row, i);
         }
     }
 
@@ -198,21 +198,21 @@ public class EventTableViewer<E> implements ListEventListener<E> {
     }
 
     /**
-     * Gets the {@link TableItemRenderer}.
+     * Gets the {@link TableItemConfigurer}.
      */
-    public TableItemRenderer<? super E> getTableItemRenderer() {
-        return tableItemRenderer;
+    public TableItemConfigurer<? super E> getTableItemConfigurer() {
+        return tableItemConfigurer;
     }
 
     /**
-     * Sets a new {@link TableItemRenderer}. Existing, non-virtual table items,
-     * e.g. the cell values will be formatted with the specified renderer.
+     * Sets a new {@link TableItemConfigurer}. The cell values of existing,
+     * non-virtual table items will be reconfigured with the specified configurer.
      */
-    public void setTableItemRenderer(TableItemRenderer<? super E> tableItemRenderer) {
-        if (tableItemRenderer == null)
-            throw new IllegalArgumentException("TableItemRenderer may not be null");
+    public void setTableItemConfigurer(TableItemConfigurer<? super E> tableItemConfigurer) {
+        if (tableItemConfigurer == null)
+            throw new IllegalArgumentException("TableItemConfigurer may not be null");
 
-        this.tableItemRenderer = tableItemRenderer;
+        this.tableItemConfigurer = tableItemConfigurer;
         // determine the index of the last, non-virtual table item
         final int maxIndex = tableHandler.getLastIndex();
         if (maxIndex < 0) return;
@@ -222,11 +222,11 @@ public class EventTableViewer<E> implements ListEventListener<E> {
         try {
             // reprocess all table items between indexes 0 and maxIndex
             for (int i = 0; i <= maxIndex; i++) {
-    //            System.out.println("setTableItemRenderer: Rerender Item " + i);
+    //            System.out.println("setTableItemConfigurer: Reconfigure Item " + i);
                 final E rowValue = source.get(i);
                 for (int c = 0; c < tableFormat.getColumnCount(); c++) {
                     final Object columnValue = tableFormat.getColumnValue(rowValue, c);
-                    tableItemRenderer.render(table.getItem(i), rowValue, columnValue, i, c);
+                    tableItemConfigurer.configure(table.getItem(i), rowValue, columnValue, i, c);
                 }
             }
         } finally {
