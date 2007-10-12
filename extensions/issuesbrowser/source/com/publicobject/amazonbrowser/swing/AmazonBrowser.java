@@ -124,8 +124,7 @@ public class AmazonBrowser implements Runnable {
         filterFieldMatcherEditor.setFields(filterFields);
 
         // sort the original items list
-        final EventList<Item> swingThreadProxyList = GlazedListsSwing.swingThreadProxyList(itemEventList);
-        final SortedList<Item> sortedItemsList = new SortedList<Item>(swingThreadProxyList, null);
+        final SortedList<Item> sortedItemsList = new SortedList<Item>(itemEventList, null);
         final FilterList<Item> filteredItemsList = new FilterList<Item>(sortedItemsList, filterFieldMatcherEditor);
 
         final StartNewSearchActionListener startNewSearch = new StartNewSearchActionListener();
@@ -167,7 +166,7 @@ public class AmazonBrowser implements Runnable {
         searchPanel.add(filterField,                  new GridBagConstraints(5, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 10), 0, 0));
         searchPanel.add(Box.createVerticalStrut(65),  new GridBagConstraints(6, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
-        EventList<Item> swingFilteredItemsList = GlazedListsSwing.swingThreadProxyList(filteredItemsList);
+        final EventList<Item> swingFilteredItemsList = GlazedListsSwing.swingThreadProxyList(filteredItemsList);
         treeList = new TreeList<Item>(swingFilteredItemsList, new ItemTreeFormat(treeCriteriaEditor.getActiveCriteria()), TreeList.NODES_START_EXPANDED);
 
         // create a JTable to display the items
