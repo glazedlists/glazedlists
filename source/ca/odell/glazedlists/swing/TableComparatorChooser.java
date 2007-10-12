@@ -446,6 +446,12 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      * <p>This class fails to add indicator arrows on table headers where the
      * default table header render does not return a JLabel or does not
      * implement {@link SortableRenderer}.
+     *
+     * <p>We implement UIResource here so that changes to the UI delegate of
+     * the JTableHeader will replace our renderer with a new one that is
+     * appropriate for the new LaF. We, in turn, react to the change of UI
+     * delegates by *re-wrapping* the new default renderer with our sort icon
+     * injection logic.
      */
     class SortArrowHeaderRenderer implements TableCellRenderer, UIResource {
 
