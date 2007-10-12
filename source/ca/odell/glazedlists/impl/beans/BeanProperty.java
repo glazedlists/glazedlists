@@ -44,6 +44,8 @@ public class BeanProperty<T> {
             throw new IllegalArgumentException("beanClass may not be null");
         if (propertyName == null)
             throw new IllegalArgumentException("propertyName may not be null");
+        if (propertyName.length() == 0)
+            throw new IllegalArgumentException("propertyName may not be empty");
 
         this.beanClass = beanClass;
         this.propertyName = propertyName;
