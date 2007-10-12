@@ -124,6 +124,11 @@ public class EventTableViewer<E> implements ListEventListener<E> {
 
             // prepare listeners
             this.source.addListEventListener(this);
+
+            // indicate the dependency between this EventTableViewer & the SelectionManager's ListSelection
+            // (this is crucial because it ensures the ListEventPublisher delivers events to this EventTableViewer
+            // *before* the SelectionManager's ListSelection, which is the correct relative order of notification)
+            this.source.getPublisher().setRelatedListener(selection.getSelectionList(), this);
         } finally {
             source.getReadWriteLock().writeLock().unlock();
         }
@@ -392,6 +397,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
         if (swtThreadSource != null)
             swtThreadSource.dispose();
         source.removeListEventListener(this);
+        source.getPublisher().clearRelatedListener(selection.getSelectionList(), this);
 
         // if we created the checkFilterList then we must also dispose it
         if (checkFilterList != null)
