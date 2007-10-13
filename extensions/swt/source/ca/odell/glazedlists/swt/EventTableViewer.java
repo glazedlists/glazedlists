@@ -408,6 +408,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
         checkFilterList = null;
         tableHandler = null;
         selection = null;
+        source = null;
     }
 
     /**

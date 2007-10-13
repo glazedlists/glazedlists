@@ -129,18 +129,17 @@ public class EventTableViewerTest extends SwtTestCase {
      * SWTThreadProxyEventList by overriding
      * {@link EventTableViewer#createSwtThreadProxyList}.
      */
-    public void guiTestNoThreadProxyingDesired() {
+    public void testNoThreadProxyingDesired() {
         final EventList<Color> source = new BasicEventList<Color>();
         source.add(Color.RED);
         final TableFormat<Color> tableFormat = new ColorTableFormat();
-        final Table table = new Table(shell, SWT.CHECK | SWT.VIRTUAL);
+        final Table table = new Table(shell, SWT.VIRTUAL);
         // 1. test with a thread proxy
         final EventTableViewer<Color> colorViewerWithProxy = new EventTableViewer<Color>(source, table, tableFormat);
         assertNotNull(colorViewerWithProxy.swtThreadSource);
         assertSame(colorViewerWithProxy.source, colorViewerWithProxy.swtThreadSource);
         assertEquals(0, colorViewerWithProxy.getSelected().size());
         assertEquals(1, colorViewerWithProxy.getDeselected().size());
-        assertEquals(0, colorViewerWithProxy.getAllChecked().size());
         assertSame(Color.RED, colorViewerWithProxy.getSourceList().get(0));
         colorViewerWithProxy.dispose();
         assertNull(colorViewerWithProxy.swtThreadSource);
@@ -152,7 +151,6 @@ public class EventTableViewerTest extends SwtTestCase {
         assertSame(colorViewerNoProxy.source, source);
         assertEquals(0, colorViewerNoProxy.getSelected().size());
         assertEquals(1, colorViewerNoProxy.getDeselected().size());
-        assertEquals(0, colorViewerNoProxy.getAllChecked().size());
         assertSame(Color.RED, colorViewerNoProxy.getSourceList().get(0));
         colorViewerNoProxy.dispose();
         assertNull(colorViewerNoProxy.swtThreadSource);
