@@ -124,6 +124,39 @@ public class EventTableViewerTest extends SwtTestCase {
         viewer.dispose();
     }
 
+    public void testBug413_FixMe() {
+        final BasicEventList<String> source = new BasicEventList<String>();
+        for (int i = 0; i < 3; i++) {
+            source.add("Str" + i);
+        }
+        final Table table = new Table(shell, SWT.VIRTUAL | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+        final EventTableViewer<String> viewer = new EventTableViewer<String>(source, table, new SimpleTableFormat());
+        // BUG:If comment the following line. The table will show Str0, Str1, Str2.
+        // If donot comment the following line. The table will show Str1, Str2, Str0.
+        // The item order is differenct.
+        table.getItem(2).getBounds();
+
+        assertEquals(3, table.getItemCount());
+        assertEquals("Str0", table.getItem(0).getText(0));
+        assertEquals("Str1", table.getItem(1).getText(0));
+        assertEquals("Str2", table.getItem(2).getText(0));
+        viewer.dispose();
+    }
+
+    private static class SimpleTableFormat implements TableFormat<String> {
+        public SimpleTableFormat() {
+        }
+        public int getColumnCount() {
+            return 1;
+        }
+        public String getColumnName(int column) {
+            return "Hello";
+        }
+        public Object getColumnValue(String baseObject, int column) {
+            return baseObject;
+        }
+    }
+
     /**
      * This test ensures subclasses can prevent the building of a
      * SWTThreadProxyEventList by overriding
