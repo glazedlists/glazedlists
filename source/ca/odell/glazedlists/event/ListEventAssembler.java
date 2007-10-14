@@ -34,10 +34,8 @@ public final class ListEventAssembler<E> {
      *     which causes certain sortedlist events to be very slow
      * <li>barcodedeltas: a proof of concept based on the barcode class, this
      *     strategy is particularly performant, although not very elegant!
-     * <li>treedeltas: uses our specially designed general tree ADT
-     * <li>tree4deltas: a fork of our treedeltas strategy that tweaks the
-     *     code in the general tree to be particularly performant for tracking
-     *     list changes
+     * <li>treedeltas: a strategy that tweaks the code in the general tree to
+     *     be particularly performant for tracking list changes
      *
      * <p>Ideally we will support fewer strategies in the future. In particular,
      * we plan on keeping only treedeltas and removing the other strategies.
@@ -544,38 +542,26 @@ public final class ListEventAssembler<E> {
         public void addChange(int type, int startIndex, int endIndex, E oldValue, E newValue) {
             // try the linear holder first
             if(useListBlocksLinear) {
-                boolean success = blockSequence.addChange(type, startIndex, endIndex + 1, oldValue, newValue);
-                if(success) {
+                final boolean success = blockSequence.addChange(type, startIndex, endIndex + 1, oldValue, newValue);
+                if (success)
                     return;
 
                 // convert from linear to tree4deltas
-                } else {
-                    listDeltas.addAll(blockSequence);
-                    useListBlocksLinear = false;
-                }
+                listDeltas.addAll(blockSequence);
+                useListBlocksLinear = false;
             }
 
             // try the good old reliable deltas 2
-            if(type == ListEvent.INSERT) {
-                listDeltas.targetInsert(startIndex, endIndex + 1, newValue);
-            } else if(type == ListEvent.UPDATE) {
-                listDeltas.targetUpdate(startIndex, endIndex + 1, oldValue, newValue);
-            } else if(type == ListEvent.DELETE) {
-                listDeltas.targetDelete(startIndex, endIndex + 1, oldValue);
+            switch (type) {
+                case ListEvent.INSERT: listDeltas.targetInsert(startIndex, endIndex + 1, newValue); break;
+                case ListEvent.UPDATE: listDeltas.targetUpdate(startIndex, endIndex + 1, oldValue, newValue); break;
+                case ListEvent.DELETE: listDeltas.targetDelete(startIndex, endIndex + 1, oldValue); break;
             }
         }
 
-        public boolean getUseListBlocksLinear() {
-            return useListBlocksLinear;
-        }
-
-        public Tree4Deltas getListDeltas() {
-            return listDeltas;
-        }
-
-        public BlockSequence getListBlocksLinear() {
-            return blockSequence;
-        }
+        public boolean getUseListBlocksLinear() { return useListBlocksLinear; }
+        public Tree4Deltas getListDeltas() { return listDeltas; }
+        public BlockSequence getListBlocksLinear() { return blockSequence; }
 
         /** {@inheritDoc} */
         public boolean isEventEmpty() {
