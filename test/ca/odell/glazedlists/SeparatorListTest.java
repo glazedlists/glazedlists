@@ -703,7 +703,7 @@ public class SeparatorListTest extends TestCase {
      * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=322">Issue 322</a>
      */
     public void testHandleChange() {
-        ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
+        NestableEventsList<String> source = new NestableEventsList<String>(new BasicEventList<String>());
         FilterList<String> filtered = new FilterList<String>(source);
         SeparatorList<String> separated = new SeparatorList<String>(filtered, GlazedLists.comparableComparator(), 1, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separated);
@@ -758,7 +758,7 @@ public class SeparatorListTest extends TestCase {
      * A mechanically simplified version of {@link #testHandleChange()}.
      */
     public void testHandleChangeSimplified() {
-        ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
+        NestableEventsList<String> source = new NestableEventsList<String>(new BasicEventList<String>());
         SeparatorList<String> separated = new SeparatorList<String>(source, GlazedLists.comparableComparator(), 1, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separated);
         listConsistencyListener.setPreviousElementTracked(false);

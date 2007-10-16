@@ -523,7 +523,7 @@ public class EventListTest extends TestCase {
      * events while processing them.
      */
     public void testCombineEvents() {
-        ExternalNestingEventList<Object> list = new ExternalNestingEventList<Object>(new BasicEventList<Object>(), true);
+        NestableEventsList<Object> list = new NestableEventsList<Object>(new BasicEventList<Object>(), true);
         for (int i = 0; i < 16; i++)
              list.add(new Integer(0));
 

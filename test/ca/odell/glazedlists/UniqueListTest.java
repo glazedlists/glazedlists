@@ -1559,7 +1559,7 @@ public class UniqueListTest extends TestCase {
     }
 
     public void testAllPossibleGrouperStateChanges_FixMe() {
-        ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>(), true);
+        NestableEventsList<String> source = new NestableEventsList<String>(new BasicEventList<String>(), true);
         final UniqueList<String> uniqueList = new UniqueList<String>(source, String.CASE_INSENSITIVE_ORDER);
         ListConsistencyListener.install(uniqueList);
 

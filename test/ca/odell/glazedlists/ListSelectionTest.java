@@ -504,7 +504,7 @@ public class ListSelectionTest extends TestCase {
     }
 
     public void testContradictingUpdates() {
-        ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
+        NestableEventsList<String> source = new NestableEventsList<String>(new BasicEventList<String>());
 
         ListSelection<String> listSelection = new ListSelection<String>(source);
         ListConsistencyListener.install(listSelection.getSelected());

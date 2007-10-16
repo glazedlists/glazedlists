@@ -21,7 +21,7 @@ import java.util.List;
 public class NestedEventsTest extends TestCase {
 
     private EventList<String> source = null;
-    private ExternalNestingEventList<String> nestingList = null;
+    private NestableEventsList<String> nestingList = null;
     private ListConsistencyListener<String> counter = null;
 
     /**
@@ -29,7 +29,7 @@ public class NestedEventsTest extends TestCase {
      */
     public void setUp() {
         source  = new BasicEventList<String>();
-        nestingList = new ExternalNestingEventList<String>(source);
+        nestingList = new NestableEventsList<String>(source);
         counter = ListConsistencyListener.install(nestingList);
     }
 

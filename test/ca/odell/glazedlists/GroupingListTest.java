@@ -451,7 +451,7 @@ public class GroupingListTest extends TestCase {
      * impact the {@link GroupingList}.
      */
     public void testSeparatorListBreaks() {
-        ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
+        NestableEventsList<String> source = new NestableEventsList<String>(new BasicEventList<String>());
         GroupingList<String> grouped = new GroupingList<String>(source, (Comparator)GlazedLists.comparableComparator());
         ListConsistencyListener<List<String>> listConsistencyListener = ListConsistencyListener.install(grouped);
         listConsistencyListener.setPreviousElementTracked(false);

@@ -874,7 +874,7 @@ public class TreeListTest extends TestCase {
      * the appropriate virtual nodes are assigned the appropriate new parents.
      */
     public void testInsertMultipleParents() {
-        ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
+        NestableEventsList<String> source = new NestableEventsList<String>(new BasicEventList<String>());
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
@@ -1362,7 +1362,7 @@ public class TreeListTest extends TestCase {
     }
 
     public void testRebuildSiblingsInUnnaturalOrder() {
-        ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>(), false);
+        NestableEventsList<String> source = new NestableEventsList<String>(new BasicEventList<String>(), false);
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
@@ -1553,7 +1553,7 @@ public class TreeListTest extends TestCase {
      * children are deleted new children inserted in a single event.
      */
     public void testDeleteAndReinsertLeafRetainsParentState() {
-        ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
+        NestableEventsList<String> source = new NestableEventsList<String>(new BasicEventList<String>());
 
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
@@ -1602,7 +1602,7 @@ public class TreeListTest extends TestCase {
      * for new nodes that whose child nodes are already exist.
      */
     public void testInsertCollapsedParentWithExpandedChild() {
-        ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
+        NestableEventsList<String> source = new NestableEventsList<String>(new BasicEventList<String>());
 
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_COLLAPSED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
@@ -1630,7 +1630,7 @@ public class TreeListTest extends TestCase {
      * the setExpanded() method can work while the tree is still changing.
      */
     public void testExpandingParentWhileTreeIsInvalid() {
-        ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
+        NestableEventsList<String> source = new NestableEventsList<String>(new BasicEventList<String>());
 
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_COLLAPSED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
@@ -1705,7 +1705,7 @@ public class TreeListTest extends TestCase {
     }
 
     public void testTemporaryVirtualNodesAreRemoved() {
-        ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
+        NestableEventsList<String> source = new NestableEventsList<String>(new BasicEventList<String>());
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
@@ -1747,7 +1747,7 @@ public class TreeListTest extends TestCase {
      * should we trust?
      */
     public void testComparatorWeakerThanEquals() {
-        ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
+        NestableEventsList<String> source = new NestableEventsList<String>(new BasicEventList<String>());
         TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat(String.CASE_INSENSITIVE_ORDER), TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);

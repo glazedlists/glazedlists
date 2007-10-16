@@ -4,7 +4,7 @@
 package ca.odell.glazedlists.event;
 
 import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.ExternalNestingEventList;
+import ca.odell.glazedlists.NestableEventsList;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import junit.framework.TestCase;
@@ -19,7 +19,7 @@ import java.util.List;
 public class ListEventBlockTest extends TestCase {
 
     public void testSortListEventBlocks() {
-        ExternalNestingEventList<String> list = new ExternalNestingEventList<String>(new BasicEventList<String>());
+        NestableEventsList<String> list = new NestableEventsList<String>(new BasicEventList<String>());
         ListConsistencyListener.install(list);
 
         list.beginEvent(true);
@@ -41,7 +41,7 @@ public class ListEventBlockTest extends TestCase {
     }
 
     public void testSortListEventBlocks2() {
-        ExternalNestingEventList<String> list = new ExternalNestingEventList<String>(new BasicEventList<String>());
+        NestableEventsList<String> list = new NestableEventsList<String>(new BasicEventList<String>());
         ListConsistencyListener.install(list);
 
         list.beginEvent(true);
@@ -56,7 +56,7 @@ public class ListEventBlockTest extends TestCase {
     }
 
     public void testSortListEventBlocks3() {
-        ExternalNestingEventList<String> list = new ExternalNestingEventList<String>(new BasicEventList<String>());
+        NestableEventsList<String> list = new NestableEventsList<String>(new BasicEventList<String>());
         ListConsistencyListener.install(list);
 
         list.beginEvent(true);
@@ -71,7 +71,7 @@ public class ListEventBlockTest extends TestCase {
     }
 
     public void testSortListEventBlocks4() {
-        ExternalNestingEventList<String> list = new ExternalNestingEventList<String>(new BasicEventList<String>());
+        NestableEventsList<String> list = new NestableEventsList<String>(new BasicEventList<String>());
         ListConsistencyListener.install(list);
 
         list.beginEvent(true);
@@ -103,7 +103,7 @@ public class ListEventBlockTest extends TestCase {
         }
 
         // prepare the list to perform all of our changes on
-        ExternalNestingEventList<String> list = new ExternalNestingEventList<String>(new BasicEventList<String>());
+        NestableEventsList<String> list = new NestableEventsList<String>(new BasicEventList<String>());
         ListConsistencyListener.install(list);
 
         int count = 0;

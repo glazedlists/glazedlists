@@ -134,7 +134,7 @@ public class SortedListTest extends TestCase {
      */
     public void testComplexEvents() {
         unsortedList = new BasicEventList<Comparable>();
-        ExternalNestingEventList<Comparable> nestableList = new ExternalNestingEventList<Comparable>(unsortedList);
+        NestableEventsList<Comparable> nestableList = new NestableEventsList<Comparable>(unsortedList);
         sortedList = SortedList.create(nestableList);
         ListConsistencyListener.install(sortedList);
 

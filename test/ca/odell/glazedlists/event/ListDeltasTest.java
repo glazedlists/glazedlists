@@ -5,7 +5,7 @@ package ca.odell.glazedlists.event;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.ExternalNestingEventList;
+import ca.odell.glazedlists.NestableEventsList;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import ca.odell.glazedlists.impl.event.Tree4Deltas;
@@ -178,7 +178,7 @@ public class ListDeltasTest extends TestCase {
      */
     public void testAddAndRemove() {
         EventList<String> source = new BasicEventList<String>();
-        ExternalNestingEventList<String> nesting = new ExternalNestingEventList<String>(source);
+        NestableEventsList<String> nesting = new NestableEventsList<String>(source);
         ListConsistencyListener.install(nesting);
 
         nesting.beginEvent(true);
@@ -226,7 +226,7 @@ public class ListDeltasTest extends TestCase {
      */
     public void testInsertedElementUpdated() {
         EventList<String> source = new BasicEventList<String>();
-        ExternalNestingEventList<String> nesting = new ExternalNestingEventList<String>(source);
+        NestableEventsList<String> nesting = new NestableEventsList<String>(source);
         ListConsistencyListener.install(nesting);
 
         nesting.beginEvent(true);
@@ -249,7 +249,7 @@ public class ListDeltasTest extends TestCase {
      */
     public void testInsertsAndDeletes() {
         EventList<String> source = new BasicEventList<String>();
-        ExternalNestingEventList<String> nesting = new ExternalNestingEventList<String>(source);
+        NestableEventsList<String> nesting = new NestableEventsList<String>(source);
         ListConsistencyListener.install(nesting);
 
         nesting.beginEvent(true);
@@ -272,7 +272,7 @@ public class ListDeltasTest extends TestCase {
 
     public void testDeleteIndexBeforeAnotherDeleteIndex() {
         EventList<String> source = new BasicEventList<String>();
-        ExternalNestingEventList<String> nesting = new ExternalNestingEventList<String>(source);
+        NestableEventsList<String> nesting = new NestableEventsList<String>(source);
         ListConsistencyListener.install(nesting);
 
         nesting.beginEvent(true);

@@ -712,13 +712,13 @@ public class FunctionListMapTest extends TestCase {
 
     /**
      * This testcase highlights another specific use of the Map. If a user
-     * creates some type of batching EventList (like our ExternalNestingEventList)
+     * creates some type of batching EventList (like our NestableEventsList)
      * which allows them to batch up complex ListEvents, then it was possible to
      * create a ListEvent which temporarily broke the invariant we check for in
      * FunctionListMap.putInDelegate.
      */
     public void testMoveElementInMap() {
-        final ExternalNestingEventList<String> source = new ExternalNestingEventList<String>(new BasicEventList<String>());
+        final NestableEventsList<String> source = new NestableEventsList<String>(new BasicEventList<String>());
         final Map<String, String> eventMap = GlazedLists.syncEventListToMap(source, new FirstLetterFunction());
 
         source.beginEvent(true);
