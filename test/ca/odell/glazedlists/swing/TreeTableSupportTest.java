@@ -101,6 +101,52 @@ public class TreeTableSupportTest extends SwingTestCase {
         assertNull(editor.getDelegate());
     }
 
+    public void guiTestSetRendererAndEditor() {
+        // build a TreeList
+        final EventList<String> source = new BasicEventList<String>();
+        final TreeList<String> treeList = new TreeList<String>(source, TreeListTest.COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
+
+        // build a regular JTable around the TreeList
+        final String[] propertyNames = {""};
+        final String[] columnLabels = {"Column 1"};
+        final TableFormat<String> itemTableFormat = GlazedLists.tableFormat(propertyNames, columnLabels);
+        final EventTableModel<String> model = new EventTableModel<String>(treeList, itemTableFormat);
+        final JTable table = new JTable(model);
+
+        // install TreeTableSupport
+        final TreeTableSupport support = TreeTableSupport.install(table, treeList, 0);
+        final TableColumn hierarchyColumn = table.getColumnModel().getColumn(0);
+        final TreeTableCellRenderer renderer = (TreeTableCellRenderer) hierarchyColumn.getCellRenderer();
+        final TreeTableCellEditor editor = (TreeTableCellEditor) hierarchyColumn.getCellEditor();
+
+        // validate the state of the editors
+        assertSame(renderer, support.getRenderer());
+        assertSame(editor, support.getEditor());
+        assertSame(renderer.getDelegate(), support.getDelegateRenderer());
+        assertSame(editor.getDelegate(), support.getDelegateEditor());
+
+        // install a new TreeTableCellRenderer and TreeTableCellEditor
+        final TreeTableCellRenderer newRenderer = new TreeTableCellRenderer(support.getDelegateRenderer(), treeList);
+        final TreeTableCellEditor newEditor = new TreeTableCellEditor(support.getDelegateEditor(), treeList);
+
+        assertNotSame(support.getRenderer(), newRenderer);
+        assertNotSame(support.getEditor(), newEditor);
+        support.setRenderer(newRenderer);
+        support.setEditor(newEditor);
+        assertSame(support.getRenderer(), newRenderer);
+        assertSame(support.getEditor(), newEditor);
+        assertSame(newRenderer.getDelegate(), support.getDelegateRenderer());
+        assertSame(newEditor.getDelegate(), support.getDelegateEditor());
+
+        // uninstall TreeTableSupport
+        support.uninstall();
+
+        assertNull(renderer.getDelegate());
+        assertNull(editor.getDelegate());
+        assertNull(newRenderer.getDelegate());
+        assertNull(newEditor.getDelegate());
+    }
+
     public void guiTestListEventsArriveOnEDT() throws InterruptedException {
         // build a TreeList
         final EventList<String> source = new BasicEventList<String>();

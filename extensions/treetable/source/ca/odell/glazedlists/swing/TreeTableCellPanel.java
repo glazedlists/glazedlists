@@ -30,7 +30,7 @@ import java.util.Map;
  *
  * The components are arranged on the panel like this:
  *
- * <p><strong>[indent pixels] [expand/collapse button] [indent2 pixels] [nodeComponent]</strong>
+ * <p><strong>[indent pixels] [expand/collapse button] [spacer pixels] [nodeComponent]</strong>
  *
  * @author James Lemieux
  */

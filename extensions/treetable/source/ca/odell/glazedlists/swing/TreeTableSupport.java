@@ -154,10 +154,10 @@ public final class TreeTableSupport {
     private boolean showExpanderForEmptyParent;
 
     /** The renderer installed on the hierarchical TableColumn. */
-    private final TreeTableCellRenderer treeTableCellRenderer;
+    private TreeTableCellRenderer treeTableCellRenderer;
 
     /** The editor installed on the hierarchical TableColumn. */
-    private final TreeTableCellEditor treeTableCellEditor;
+    private TreeTableCellEditor treeTableCellEditor;
 
     /** The orignal TableCellRenderer, if any, to be replaced when TreeTableSupport is {@link #uninstall() uninstalled}. */
     private final TableCellRenderer originalRenderer;
@@ -331,12 +331,13 @@ public final class TreeTableSupport {
     }
 
     /**
-     * Sets whether the expander is displayed for nodes that do not
-     * contain children but are allowed to contain children, and
-     * thus may accumulate children in the future. If this property is
-     * <tt>true</tt> then empty nodes that may contain children in the future
-     * are displayed with a visible expander; otherwise they are displayed
-     * without the expander.
+     * Sets whether the expander is displayed for nodes that do not contain
+     * children but are allowed to contain children, and thus may accumulate
+     * children in the future. If this property is <tt>true</tt> then empty
+     * nodes that may contain children in the future are displayed with a
+     * visible expander; otherwise they are displayed without the expander.
+     * A node signals that it may contain children in the future by returning
+     * <tt>true</tt> from {@link TreeList.Format#allowsChildren(Object)}.
      */
     public void setShowExpanderForEmptyParent(boolean showExpanderForEmptyParent) {
         checkAccessThread();
@@ -416,6 +417,38 @@ public final class TreeTableSupport {
     }
 
     /**
+     * Use the given <code>treeTableCellRenderer</code> when rendering the
+     * hierarchy column of the tree table.
+     */
+    public void setRenderer(TreeTableCellRenderer treeTableCellRenderer) {
+        checkAccessThread();
+
+        // ensure we can find the view column index of the hierarchical column
+        final int viewColumnIndex = table.convertColumnIndexToView(hierarchyColumnModelIndex);
+        if (viewColumnIndex == -1)
+            throw new IllegalArgumentException("Unable to locate a view index for the given model index: " + hierarchyColumnModelIndex);
+
+        // look up the hierarchical TableColumn
+        final TableColumn viewColumn = table.getColumnModel().getColumn(viewColumnIndex);
+
+        // dispose the old renderer
+        this.treeTableCellRenderer.dispose();
+
+        // install the new renderer
+        this.treeTableCellRenderer = treeTableCellRenderer;
+        treeTableCellRenderer.setShowExpanderForEmptyParent(showExpanderForEmptyParent);
+        viewColumn.setCellRenderer(treeTableCellRenderer);
+    }
+
+    /**
+     * Returns the <code>treeTableCellRenderer</code> used to render the
+     * hierarchy column of the tree table.
+     */
+    public TreeTableCellRenderer getRenderer() {
+        return treeTableCellRenderer;
+    }
+
+    /**
      * Use the given <code>renderer</code> as the new delegate renderer of the
      * {@link TreeTableCellRenderer} which is responsible for rendering the
      * data associated with each tree node in the hierarchy column.
@@ -427,6 +460,46 @@ public final class TreeTableSupport {
     }
 
     /**
+     * Returns the <code>renderer</code> responsible for rendering the data
+     * associated with each tree node in the hierarchy column.
+     */
+    public TableCellRenderer getDelegateRenderer() {
+        return treeTableCellRenderer.getDelegate();
+    }
+
+    /**
+     * Use the given <code>treeTableCellEditor</code> when editing the
+     * hierarchy column of the tree table.
+     */
+    public void setEditor(TreeTableCellEditor treeTableCellEditor) {
+        checkAccessThread();
+
+        // ensure we can find the view column index of the hierarchical column
+        final int viewColumnIndex = table.convertColumnIndexToView(hierarchyColumnModelIndex);
+        if (viewColumnIndex == -1)
+            throw new IllegalArgumentException("Unable to locate a view index for the given model index: " + hierarchyColumnModelIndex);
+
+        // look up the hierarchical TableColumn
+        final TableColumn viewColumn = table.getColumnModel().getColumn(viewColumnIndex);
+
+        // dispose the old editor
+        this.treeTableCellEditor.dispose();
+
+        // install the new editor
+        this.treeTableCellEditor = treeTableCellEditor;
+        treeTableCellEditor.setShowExpanderForEmptyParent(showExpanderForEmptyParent);
+        viewColumn.setCellEditor(treeTableCellEditor);
+    }
+
+    /**
+     * Returns the <code>treeTableCellEditor</code> used to render the
+     * hierarchy column of the tree table.
+     */
+    public TreeTableCellEditor getEditor() {
+        return treeTableCellEditor;
+    }
+
+    /**
      * Use the given <code>editor</code> as the new delegate editor of the
      * {@link TreeTableCellEditor} which is responsible for editing the data
      * associated with each tree node in the hierarchy column.
@@ -435,6 +508,14 @@ public final class TreeTableSupport {
         checkAccessThread();
 
         treeTableCellEditor.setDelegate(editor);
+    }
+
+    /**
+     * Returns the <code>editor</code> responsible for editing the data
+     * associated with each tree node in the hierarchy column.
+     */
+    public TableCellEditor getDelegateEditor() {
+        return treeTableCellEditor.getDelegate();
     }
 
     /**

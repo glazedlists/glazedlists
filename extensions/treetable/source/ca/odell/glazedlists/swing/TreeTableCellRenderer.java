@@ -117,9 +117,7 @@ public class TreeTableCellRenderer implements TableCellRenderer {
      *      button should always be present, even when no children yet exist
      */
     protected int getIndent(TreeNodeData treeNodeData, boolean showExpanderForEmptyParent) {
-        final boolean showExpanderButton = treeNodeData.hasChildren() || (treeNodeData.allowsChildren() && showExpanderForEmptyParent);
-        final int trueDepth = showExpanderButton ? treeNodeData.getDepth() : treeNodeData.getDepth() + 1;
-        return UIManager.getIcon("Tree.expandedIcon").getIconWidth() * trueDepth;
+        return UIManager.getIcon("Tree.expandedIcon").getIconWidth() * treeNodeData.getDepth();
     }
 
     /**
