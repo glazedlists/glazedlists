@@ -340,12 +340,45 @@ class TreeTableCellPanel extends JPanel {
             }
         }
 
+        public Dimension preferredLayoutSize(Container target) {
+            final Dimension preferredSize = new Dimension(0, 0);
+
+            if (indenter != null) {
+                final Dimension indenterSize = indenter.getPreferredSize();
+                preferredSize.height = Math.max(preferredSize.height, indenterSize.height);
+                preferredSize.width += indenterSize.width;
+            }
+
+            if (expander != null) {
+                final Dimension expanderSize = expander.getPreferredSize();
+                preferredSize.height = Math.max(preferredSize.height, expanderSize.height);
+                preferredSize.width += expanderSize.width;
+            }
+
+            if (spacer != null) {
+                final Dimension spacerSize = spacer.getPreferredSize();
+                preferredSize.height = Math.max(preferredSize.height, spacerSize.height);
+                preferredSize.width += spacerSize.width;
+            }
+
+            if (nodeComponent != null) {
+                final Dimension nodeComponentSize = nodeComponent.getPreferredSize();
+                preferredSize.height = Math.max(preferredSize.height, nodeComponentSize.height);
+                preferredSize.width += nodeComponentSize.width;
+            }
+
+            final Insets insets = target.getInsets();
+            preferredSize.height += insets.top + insets.bottom;
+            preferredSize.width += insets.left + insets.right;
+
+            return preferredSize;
+        }
+
         public void invalidateLayout(Container target) { }
         public float getLayoutAlignmentX(Container target) { throw new UnsupportedOperationException(); }
         public float getLayoutAlignmentY(Container target) { throw new UnsupportedOperationException(); }
         public void addLayoutComponent(String name, Component comp) { throw new UnsupportedOperationException(); }
         public Dimension minimumLayoutSize(Container parent) { throw new UnsupportedOperationException(); }
         public Dimension maximumLayoutSize(Container target) { throw new UnsupportedOperationException(); }
-        public Dimension preferredLayoutSize(Container parent) { throw new UnsupportedOperationException(); }
     }
 }
