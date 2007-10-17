@@ -252,6 +252,7 @@ public class BeanProperty<T> {
     public Object set(T member, Object newValue) {
         if(!isWritable()) throw new IllegalStateException("Property " + propertyName + " of " + beanClass + " not writable");
 
+        Method setterMethod = null;
         try {
             // everything except the last setter chain element is a getter
             Object currentMember = member;
@@ -262,8 +263,17 @@ public class BeanProperty<T> {
             }
 
             // do the remaining setter
-            Method setterMethod = setterChain.get(setterChain.size() - 1);
+            setterMethod = setterChain.get(setterChain.size() - 1);
             return setterMethod.invoke(currentMember, new Object[] { newValue });
+        } catch (IllegalArgumentException e) {
+            String message = e.getMessage();
+
+            // improve the message if possible into something like:
+            // "MyClass.someMethod(SomeClassType) cannot be called with an instance of WrongClassType"
+            if ("argument type mismatch".equals(message) && setterMethod != null)
+                message = getSimpleName(setterMethod.getDeclaringClass()) + "." + setterMethod.getName() + "(" + getSimpleName(setterMethod.getParameterTypes()[0]) + ") cannot be called with an instance of " + getSimpleName(newValue.getClass());
+
+            throw new IllegalArgumentException(message);
         } catch(IllegalAccessException e) {
             SecurityException se = new SecurityException();
             se.initCause(e);
@@ -273,6 +283,44 @@ public class BeanProperty<T> {
         } catch(RuntimeException e) {
             throw new RuntimeException("Failed to set property \"" + propertyName + "\" of " + beanClass + " to " + (newValue == null ? "null" : "instance of " + newValue.getClass()), e);
         }
+    }
+
+    /**
+     * This method was backported from the JDK 1.5 version of java.lang.Class.
+     *
+     * Returns the simple name of the given class as given in the
+     * source code. Returns an empty string if the underlying class is
+     * anonymous.
+     *
+     * @return the simple name of the given class
+     */
+    private static String getSimpleName(Class clazz) {
+        Class declaringClass = clazz.getDeclaringClass();
+        String simpleName = declaringClass == null ? null : declaringClass.getName();
+        if (simpleName == null) { // top level class
+            simpleName = clazz.getName();
+            return simpleName.substring(simpleName.lastIndexOf(".") + 1); // strip the package name
+        }
+
+        // Remove leading "\$[0-9]*" from the name
+        int length = simpleName.length();
+        if (length < 1 || simpleName.charAt(0) != '$')
+            throw new InternalError("Malformed class name");
+        int index = 1;
+        while (index < length && isAsciiDigit(simpleName.charAt(index)))
+            index++;
+        // Eventually, this is the empty string iff this is an anonymous class
+        return simpleName.substring(index);
+    }
+
+    /**
+     * This method was backported from the JDK 1.5 version of java.lang.Class.
+     *
+     * Character.isDigit answers <tt>true</tt> to some non-ascii
+     * digits. This one does not.
+     */
+    private static boolean isAsciiDigit(char c) {
+        return '0' <= c && c <= '9';
     }
 
     /** {@inheritDoc} */
