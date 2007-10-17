@@ -9,15 +9,14 @@ import java.util.*;
 /**
  * UndoSupport, as the name suggests, will provide generic support for undoing
  * and redoing groups of changes to an {@link EventList}. The granularity of
- * each undoable edit is determined by the ListEvent that describes the
- * arbitrary changes made to the EventList.
+ * each undoable edit is determined by the ListEvent from which it was generated.
  *
  * <p>Not every change described in a ListEvent results in an undoable edit.
  * Specifically, a <strong>mutation</strong> of a list element IN PLACE does
  * not produce an undoable edit. For example, an {@link ObservableElementList}
  * which observes a change of an element, or a call to {@link List#set} with
- * the same object at that index produce a ListEvent that does not have a
- * corresponding {@link Edit} object. These ListEvent are ignored because they
+ * the same object at that index produce both a ListEvent that does not have a
+ * corresponding {@link Edit} object. These ListEvents are ignored because they
  * lack sufficient information to undo or redo the change.
  *
  * <p>In general UndoSupport only makes sense for use with a
@@ -197,6 +196,9 @@ public final class UndoSupport<E> {
 
     /**
      * Provides an easy interface to undo/redo a ListEvent in its entirety.
+     * At any point in time it is only possible to do one, and only one, of
+     * {@link #undo} and {@link #redo}. To determine which one is allowed, use
+     * {@link #canUndo()} and {@link #canRedo()}.
      */
     public interface Edit {
         /** Undo the edit. */
@@ -230,6 +232,7 @@ public final class UndoSupport<E> {
         private boolean isEmpty() { return edits.isEmpty(); }
 
         public void undo() {
+            // validate that we can proceed with the undo
             if (!canUndo())
                 throw new IllegalStateException("The Edit is in an incorrect state for undoing");
 
@@ -248,12 +251,14 @@ public final class UndoSupport<E> {
         }
 
         public void redo() {
+            // validate that we can proceed with the redo
             if (!canRedo())
                 throw new IllegalStateException("The Edit is in an incorrect state for redoing");
 
             ignoreListEvent = true;
             nestableSource.beginEvent(true);
             try {
+                // re-apply each edit in their original order
                 for (Iterator<Edit> i = edits.iterator(); i.hasNext();)
                     i.next().redo();
             } finally {
@@ -284,6 +289,10 @@ public final class UndoSupport<E> {
             this.value = value;
         }
 
+        /**
+         * These methods aren't used, and it isn't worth storing a value to
+         * return, so we simply return true for economy of memory.
+         */
         public final boolean canUndo() { return true; }
         public final boolean canRedo() { return true; }
     }
