@@ -1,3 +1,6 @@
+/* Glazed Lists                                                 (c) 2003-2006 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
 import junit.framework.TestCase;
@@ -6,25 +9,26 @@ import java.util.*;
 
 import ca.odell.glazedlists.event.ListEvent;
 
-public class UndoSupportTest extends TestCase {
+public class UndoRedoSupportTest extends TestCase {
 
     private EventList<String> source;
     private NestableEventsList<String> nestedSource;
-    private UndoSupport undoSupport;
+    private UndoRedoSupport undoRedoSupport;
     private UndoSupportWatcher undoSupportWatcher;
 
-    protected void setUp() throws Exception {
+    protected void setUp() {
         source = new BasicEventList<String>();
         nestedSource = new NestableEventsList<String>(source, true);
-        undoSupport = UndoSupport.install(nestedSource);
+        undoRedoSupport = UndoRedoSupport.install(nestedSource);
         undoSupportWatcher = new UndoSupportWatcher();
 
-        undoSupport.addUndoSupportListener(undoSupportWatcher);
+        undoRedoSupport.addUndoSupportListener(undoSupportWatcher);
     }
 
-    protected void tearDown() throws Exception {
+    protected void tearDown() {
         source = null;
-        undoSupport = null;
+        nestedSource = null;
+        undoRedoSupport = null;
         undoSupportWatcher = null;
     }
 
@@ -32,7 +36,7 @@ public class UndoSupportTest extends TestCase {
         source.add("First");
         assertEquals(1, undoSupportWatcher.getEditStack().size());
 
-        UndoSupport.Edit lastEdit = undoSupportWatcher.getEditStack().remove(0);
+        UndoRedoSupport.Edit lastEdit = undoSupportWatcher.getEditStack().remove(0);
         assertTrue(lastEdit.canUndo());
         assertFalse(lastEdit.canRedo());
         assertEquals(1, source.size());
@@ -57,7 +61,7 @@ public class UndoSupportTest extends TestCase {
         source.remove(0);
         assertEquals(1, undoSupportWatcher.getEditStack().size());
 
-        UndoSupport.Edit lastEdit = undoSupportWatcher.getEditStack().remove(0);
+        UndoRedoSupport.Edit lastEdit = undoSupportWatcher.getEditStack().remove(0);
         assertTrue(lastEdit.canUndo());
         assertFalse(lastEdit.canRedo());
         assertEquals(0, source.size());
@@ -82,7 +86,7 @@ public class UndoSupportTest extends TestCase {
         source.set(0, "Second");
         assertEquals(1, undoSupportWatcher.getEditStack().size());
 
-        UndoSupport.Edit lastEdit = undoSupportWatcher.getEditStack().remove(0);
+        UndoRedoSupport.Edit lastEdit = undoSupportWatcher.getEditStack().remove(0);
         assertTrue(lastEdit.canUndo());
         assertFalse(lastEdit.canRedo());
         assertEquals(1, source.size());
@@ -129,7 +133,7 @@ public class UndoSupportTest extends TestCase {
         final List<String> afterSnapshot = new ArrayList<String>(source);
 
         assertEquals(1, undoSupportWatcher.getEditStack().size());
-        UndoSupport.Edit lastEdit = undoSupportWatcher.getEditStack().remove(0);
+        UndoRedoSupport.Edit lastEdit = undoSupportWatcher.getEditStack().remove(0);
         assertTrue(lastEdit.canUndo());
         assertFalse(lastEdit.canRedo());
         assertSame("First", source.get(0));
@@ -178,7 +182,7 @@ public class UndoSupportTest extends TestCase {
         assertEquals(500, undoSupportWatcher.getEditStack().size());
 
         // undo all edits (should result in an empty list)
-        final ListIterator<UndoSupport.Edit> i = undoSupportWatcher.getEditStack().listIterator();
+        final ListIterator<UndoRedoSupport.Edit> i = undoSupportWatcher.getEditStack().listIterator();
         while (i.hasNext())
             i.next().undo();
 
@@ -191,13 +195,13 @@ public class UndoSupportTest extends TestCase {
         assertEquals(snapshot, nestedSource);
     }
 
-    private static class UndoSupportWatcher implements UndoSupport.Listener {
-        private List<UndoSupport.Edit> editStack = new ArrayList<UndoSupport.Edit>();
+    private static class UndoSupportWatcher implements UndoRedoSupport.Listener {
+        private List<UndoRedoSupport.Edit> editStack = new ArrayList<UndoRedoSupport.Edit>();
 
-        public void undoableEditHappened(UndoSupport.Edit edit) {
+        public void undoableEditHappened(UndoRedoSupport.Edit edit) {
             editStack.add(0, edit);
         }
 
-        public List<UndoSupport.Edit> getEditStack() { return editStack; }
+        public List<UndoRedoSupport.Edit> getEditStack() { return editStack; }
     }
 }

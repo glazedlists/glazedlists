@@ -1,3 +1,6 @@
+/* Glazed Lists                                                 (c) 2003-2006 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.event.ListEvent;
@@ -7,9 +10,10 @@ import javax.swing.event.EventListenerList;
 import java.util.*;
 
 /**
- * UndoSupport, as the name suggests, will provide generic support for undoing
- * and redoing groups of changes to an {@link EventList}. The granularity of
- * each undoable edit is determined by the ListEvent from which it was generated.
+ * UndoRedoSupport, as the name suggests, will provide generic support for
+ * undoing and redoing groups of changes to an {@link EventList}. The
+ * granularity of each undoable edit is determined by the ListEvent from which
+ * it was generated.
  *
  * <p>Not every change described in a ListEvent results in an undoable edit.
  * Specifically, a <strong>mutation</strong> of a list element IN PLACE does
@@ -19,20 +23,21 @@ import java.util.*;
  * corresponding {@link Edit} object. These ListEvents are ignored because they
  * lack sufficient information to undo or redo the change.
  *
- * <p>In general UndoSupport only makes sense for use with a
+ * <p>In general UndoRedoSupport only makes sense for use with a
  * {@link BasicEventList} or a trivial wrapper around a BasicEventList which
  * does not affect the order or type of the elements, such as an
  * {@link ObservableElementList}. Advanced transformations, such as
  * {@link SortedList} or {@link FilterList} will not work as expected with this
- * UndoSupport class since their contents are controlled by information outside
- * of themselves ({@link Comparator}s and {@link ca.odell.glazedlists.matchers.Matcher}s).
+ * UndoRedoSupport class since their contents are controlled by information
+ * outside of themselves ({@link Comparator}s and
+ * {@link ca.odell.glazedlists.matchers.Matcher}s).
  *
  * <p>This class is agnostic to any particular GUI toolkit. As such it may be
  * used in a headless environment or can also be bound to a specific toolkit.
  *
  * @author James Lemieux
  */
-public final class UndoSupport<E> {
+public final class UndoRedoSupport<E> {
 
     /** A wrapper around the true source EventList provides control over the granularity of ListEvents it produces. */
     private NestableEventsList<E> nestableSource;
@@ -56,7 +61,7 @@ public final class UndoSupport<E> {
      */
     private List<E> priorElements;
 
-    private UndoSupport(EventList<E> source) {
+    private UndoRedoSupport(EventList<E> source) {
         this.nestableSource = new NestableEventsList<E>(source, true);
         this.nestableSource.addListEventListener(nestableSourceListener);
 
@@ -100,17 +105,17 @@ public final class UndoSupport<E> {
      * functions for the entire application.
      *
      * @param source the EventList on which to provide undo/redo capabilities
-     * @return an instance of UndoSupport through which the undo/redo behaviour
+     * @return an instance of UndoRedoSupport through which the undo/redo behaviour
      *      can be customized
      */
-    public static <E> UndoSupport install(EventList<E> source) {
-        return new UndoSupport<E>(source);
+    public static <E> UndoRedoSupport install(EventList<E> source) {
+        return new UndoRedoSupport<E>(source);
     }
 
     /**
      * This method removes undo/redo support from the {@link EventList} it was
      * installed on. This method is useful when the {@link EventList} must
-     * outlive the UndoSupport object itself. The UndoSupport object will become
+     * outlive the UndoRedoSupport object itself. The UndoRedoSupport object will become
      * available for garbage collection independently of the {@link EventList}
      * it decorated with behaviour.
      */
@@ -184,7 +189,7 @@ public final class UndoSupport<E> {
 
     /**
      * Implementations of this Listener interface should be registered with an
-     * UndoSupport object via {@link UndoSupport#addUndoSupportListener}. They
+     * UndoRedoSupport object via {@link UndoRedoSupport#addUndoSupportListener}. They
      * will be notified of each undoable edit that occurs to the given EventList.
      */
     public interface Listener extends EventListener {
