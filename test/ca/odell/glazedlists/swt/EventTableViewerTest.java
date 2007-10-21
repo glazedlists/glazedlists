@@ -23,6 +23,7 @@ import java.util.List;
  * @author hbrands
  */
 public class EventTableViewerTest extends SwtTestCase {
+    
     private static final List<Color> RGB = Arrays.asList(new Color[] { Color.RED, Color.GREEN, Color.BLUE });
     private static final List<Color> RGBNull = Arrays.asList(new Color[] { Color.RED, Color.GREEN, Color.BLUE, null });
 
@@ -124,7 +125,7 @@ public class EventTableViewerTest extends SwtTestCase {
         viewer.dispose();
     }
 
-    public void testBug413_FixMe() {
+    public void guiTestBug413_FixMe() {
         final BasicEventList<String> source = new BasicEventList<String>();
         for (int i = 0; i < 3; i++) {
             source.add("Str" + i);
@@ -133,7 +134,7 @@ public class EventTableViewerTest extends SwtTestCase {
         final EventTableViewer<String> viewer = new EventTableViewer<String>(source, table, new SimpleTableFormat());
         // BUG:If comment the following line. The table will show Str0, Str1, Str2.
         // If donot comment the following line. The table will show Str1, Str2, Str0.
-        // The item order is differenct.
+        // The item order is different.
         table.getItem(2).getBounds();
 
         assertEquals(3, table.getItemCount());
@@ -144,8 +145,6 @@ public class EventTableViewerTest extends SwtTestCase {
     }
 
     private static class SimpleTableFormat implements TableFormat<String> {
-        public SimpleTableFormat() {
-        }
         public int getColumnCount() {
             return 1;
         }
