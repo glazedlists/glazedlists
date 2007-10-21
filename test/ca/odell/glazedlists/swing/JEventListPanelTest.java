@@ -14,13 +14,6 @@ import javax.swing.*;
 public class JEventListPanelTest extends SwingTestCase {
 
     /**
-     * Tests the user interface. This is a mandatory method in SwingTestCase classes.
-     */
-    public void testGui() {
-        super.testGui();
-    }
-
-    /**
      * Verifies that JEventListPanel works with all operations in sequence.
      */
     public void guiTestAddUpdateDelete() {

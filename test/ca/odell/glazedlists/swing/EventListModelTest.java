@@ -19,13 +19,6 @@ import java.awt.*;
 public class EventListModelTest extends SwingTestCase {
 
     /**
-     * Tests the user interface. This is a mandatory method in SwingTestCase classes.
-     */
-    public void testGui() {
-        super.testGui();
-    }
-
-    /**
      * Verifies that the new getElementAt() method of EventListModel works.
      */
     public void guiTestGetElementAt() {

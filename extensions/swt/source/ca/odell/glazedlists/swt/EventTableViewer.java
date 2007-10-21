@@ -279,7 +279,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
     public List<E> getAllChecked() {
         checkFilterList.getReadWriteLock().readLock().lock();
         try {
-            return checkFilterList.getAllChecked();
+            return checkFilterList.getAllChecked(); 
         } finally {
             checkFilterList.getReadWriteLock().readLock().unlock();
         }

@@ -21,27 +21,6 @@ import javax.swing.*;
 public class ConflictingThreadsTest extends SwingTestCase {
 
     /**
-     * Tests the user interface. This is a mandatory method in SwingTestCase classes.
-     */
-    public void testGui() {
-        super.testGui();
-    }
-
-    /**
-     * Prepare for the test.
-     */
-    public void guiSetUp() {
-        // do nothing
-    }
-
-    /**
-     * Clean up after the test.
-     */
-    public void guiTearDown() {
-        // do nothing
-    }
-
-    /**
      * Verifies that conflicting threads are resolved intelligently.
      */
     public void guiTestConflictingThreads_FixMe() {

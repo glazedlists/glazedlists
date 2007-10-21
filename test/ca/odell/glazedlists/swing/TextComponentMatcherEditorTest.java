@@ -19,13 +19,6 @@ public class TextComponentMatcherEditorTest extends SwingTestCase {
 
     private SimpleMatcherEditorListener eventCounter;
 
-    /**
-     * Tests the user interface. This is a mandatory method in SwingTestCase classes.
-     */
-    public void testGui() {
-        super.testGui();
-    }
-
     public void guiSetUp() {
         eventCounter = new SimpleMatcherEditorListener();
     }
