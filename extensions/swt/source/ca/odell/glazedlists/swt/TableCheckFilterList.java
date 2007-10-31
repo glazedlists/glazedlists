@@ -323,13 +323,8 @@ class CheckableWrapperList<S> extends TransformedList<S, CheckWrapped<S>> {
     public CheckableWrapperList(EventList<S> source) {
         super(source);
 
-        source.getReadWriteLock().readLock().lock();
-        try {
-            prepareElements();
-            source.addListEventListener(this);
-        } finally {
-            source.getReadWriteLock().readLock().unlock();
-        }
+        prepareElements();
+        source.addListEventListener(this);
     }
 
     /**

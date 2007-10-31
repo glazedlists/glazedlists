@@ -40,16 +40,21 @@ import java.util.*;
 public final class UndoRedoSupport<E> {
 
     /** A wrapper around the true source EventList provides control over the granularity of ListEvents it produces. */
-    private NestableEventsList<E> nestableSource;
+    private TransactionList<E> txSource;
 
-    /** A ListEventListener that watches the {@link #nestableSource} and in turn broadcasts an {@link Edit} object to all {@link Listener}s */
-    private ListEventListener<E> nestableSourceListener = new NestableSourceListener();
+    /** A ListEventListener that watches the {@link #txSource} and in turn broadcasts an {@link Edit} object to all {@link Listener}s */
+    private ListEventListener<E> txSourceListener = new NestableSourceListener();
 
     /** A data structure storing all registered {@link Listener}s. */
     private final EventListenerList listenerList = new EventListenerList();
 
-    /** A flag which indicates a ListEvent should be ignored because it was caused by an undo or redo. */
-    private boolean ignoreListEvent = false;
+    /**
+     * A count which, when greater than 0, indicates a ListEvent must be
+     * ignored by this UndoRedoSupport because it was caused by an undo or
+     * redo. An int is used rather than a boolean flag so that nested
+     * undos/redos are properly handled.
+     */
+    private int ignoreListEvent = 0;
 
     /**
      * A list of the elements in the <code>source</code> prior to the most
@@ -62,8 +67,10 @@ public final class UndoRedoSupport<E> {
     private List<E> priorElements;
 
     private UndoRedoSupport(EventList<E> source) {
-        this.nestableSource = new NestableEventsList<E>(source, true);
-        this.nestableSource.addListEventListener(nestableSourceListener);
+        // build a TransactionList that does NOT support rollback - we don't
+        // need it and it relies on UndoRedoSupport, so we would have 
+        this.txSource = new TransactionList<E>(source, false);
+        this.txSource.addListEventListener(txSourceListener);
 
         this.priorElements = new ArrayList<E>(source);
     }
@@ -120,22 +127,22 @@ public final class UndoRedoSupport<E> {
      * it decorated with behaviour.
      */
     public void uninstall() {
-        nestableSource.dispose();
-        nestableSource.removeListEventListener(nestableSourceListener);
+        txSource.dispose();
+        txSource.removeListEventListener(txSourceListener);
 
-        nestableSource = null;
+        txSource = null;
         priorElements = null;
     }
 
     /**
-     * This Listener watches the NestableEventsList for changes and responds by
+     * This Listener watches the TransactionList for changes and responds by
      * created an {@link Edit} and broadcasting that object to all registered
      * {@link Listener}s.
      */
     private class NestableSourceListener implements ListEventListener<E> {
         public void listChanged(ListEvent<E> listChanges) {
             // if an undo or redo caused this ListEvent, it is not an undoable edit
-            if (ignoreListEvent)
+            if (ignoreListEvent > 0)
                 return;
 
             // build a CompositeEdit that describes the ListEvent and provides methods for undoing and redoing it
@@ -147,9 +154,9 @@ public final class UndoRedoSupport<E> {
 
                 // provide an AddEdit to the CompositeEdit
                 if (changeType == ListEvent.INSERT) {
-                    final E inserted = nestableSource.get(changeIndex);
+                    final E inserted = txSource.get(changeIndex);
                     priorElements.add(changeIndex, inserted);
-                    edit.add(new AddEdit<E>(nestableSource, changeIndex, inserted));
+                    edit.add(new AddEdit<E>(txSource, changeIndex, inserted));
 
                 // provide a RemoveEdit to the CompositeEdit
                 } else if (changeType == ListEvent.DELETE) {
@@ -161,7 +168,7 @@ public final class UndoRedoSupport<E> {
                     if (deleted == ListEvent.UNKNOWN_VALUE)
                         deleted = deletedElementFromPrivateCopy;
 
-                    edit.add(new RemoveEdit<E>(nestableSource, changeIndex, deleted));
+                    edit.add(new RemoveEdit<E>(txSource, changeIndex, deleted));
 
                 // provide an UpdateEdit to the CompositeEdit
                 } else if (changeType == ListEvent.UPDATE) {
@@ -171,19 +178,19 @@ public final class UndoRedoSupport<E> {
                     if (previousValue == ListEvent.UNKNOWN_VALUE)
                         previousValue = priorElements.get(changeIndex);
 
-                    final E newValue = nestableSource.get(changeIndex);
+                    final E newValue = txSource.get(changeIndex);
 
                     // if a different object is present at the index
                     if (newValue != previousValue) {
                         priorElements.set(changeIndex, newValue);
-                        edit.add(new UpdateEdit<E>(nestableSource, changeIndex, newValue, previousValue));
+                        edit.add(new UpdateEdit<E>(txSource, changeIndex, newValue, previousValue));
                     }
                 }
             }
 
             // if the edit has real contents, broadcast it
             if (!edit.isEmpty())
-                fireUndoableEditHappened(edit);
+                fireUndoableEditHappened(edit.getSimplestEdit());
         }
     }
 
@@ -219,37 +226,20 @@ public final class UndoRedoSupport<E> {
         public boolean canRedo();
     }
 
-    /**
-     * An Edit which acts as a container for finer-grained Edit objects.
-     */
-    private final class CompositeEdit implements Edit {
-
-        /** The edits in the order they were made. */
-        private final List<Edit> edits = new ArrayList<Edit>();
-
+    private abstract class AbstractEdit implements Edit {
         /** Initially the Edit can be undone but not redone. */
-        private boolean canUndo = true;
-
-        /** Adds a single Edit to this container of Edits. */
-        private void add(Edit edit) { edits.add(edit); }
-
-        /** Returns <tt>true</tt> if this container of Edits is empty; <tt>false</tt> otherwise. */
-        private boolean isEmpty() { return edits.isEmpty(); }
+        protected boolean canUndo = true;
 
         public void undo() {
             // validate that we can proceed with the undo
             if (!canUndo())
                 throw new IllegalStateException("The Edit is in an incorrect state for undoing");
 
-            ignoreListEvent = true;
-            nestableSource.beginEvent(true);
+            ignoreListEvent++;
             try {
-                // undo the Edits in reverse order they were applied
-                for (ListIterator<Edit> i = edits.listIterator(edits.size()); i.hasPrevious();)
-                    i.previous().undo();
+                undoImpl();
             } finally {
-                nestableSource.commitEvent();
-                ignoreListEvent = false;
+                ignoreListEvent--;
             }
 
             canUndo = false;
@@ -260,76 +250,108 @@ public final class UndoRedoSupport<E> {
             if (!canRedo())
                 throw new IllegalStateException("The Edit is in an incorrect state for redoing");
 
-            ignoreListEvent = true;
-            nestableSource.beginEvent(true);
+            ignoreListEvent++;
             try {
-                // re-apply each edit in their original order
-                for (Iterator<Edit> i = edits.iterator(); i.hasNext();)
-                    i.next().redo();
+                redoImpl();
             } finally {
-                nestableSource.commitEvent();
-                ignoreListEvent = false;
+                ignoreListEvent--;
             }
 
             canUndo = true;
         }
+
+        protected abstract void undoImpl();
+        protected abstract void redoImpl();
 
         public final boolean canUndo() { return canUndo; }
         public final boolean canRedo() { return !canUndo; }
     }
 
     /**
+     * An Edit which acts as a container for finer-grained Edit objects.
+     */
+    final class CompositeEdit extends AbstractEdit {
+
+        /** The edits in the order they were made. */
+        private final List<Edit> edits = new ArrayList<Edit>();
+
+        /** Adds a single Edit to this container of Edits. */
+        void add(Edit edit) { edits.add(edit); }
+
+        /** Returns <tt>true</tt> if this container of Edits is empty; <tt>false</tt> otherwise. */
+        private boolean isEmpty() { return edits.isEmpty(); }
+
+        /** Returns the single Edit contained within this composite, if only one exists, otherwise it returns this entire CompositeEdit. */
+        private Edit getSimplestEdit() { return edits.size() == 1 ? edits.get(0) : this; }
+
+        public void undoImpl() {
+            txSource.beginEvent();
+            try {
+                // undo the Edits in reverse order they were applied
+                for (ListIterator<Edit> i = edits.listIterator(edits.size()); i.hasPrevious();)
+                    i.previous().undo();
+            } finally {
+                txSource.commitEvent();
+            }
+        }
+
+        public void redoImpl() {
+            txSource.beginEvent();
+            try {
+                // re-apply each edit in their original order
+                for (Edit edit : edits)
+                    edit.redo();
+            } finally {
+                txSource.commitEvent();
+            }
+        }
+    }
+
+    /**
      * A base class implementing common logic and storage for the specific kind
      * of Edits which can occur to a single index in the EventList.
      */
-    private static abstract class AbstractEdit<E> implements Edit {
+    private abstract class AbstractSimpleEdit<E> extends AbstractEdit {
 
         protected final EventList<E> source;
         protected final int index;
         protected final E value;
 
-        protected AbstractEdit(EventList<E> source, int index, E value) {
+        protected AbstractSimpleEdit(EventList<E> source, int index, E value) {
             this.source = source;
             this.index = index;
             this.value = value;
         }
-
-        /**
-         * These methods aren't used, and it isn't worth storing a value to
-         * return, so we simply return true for economy of memory.
-         */
-        public final boolean canUndo() { return true; }
-        public final boolean canRedo() { return true; }
     }
 
     /**
      * A class describing an undoable Add to an EventList.
      */
-    private static final class AddEdit<E> extends AbstractEdit<E> {
+    private final class AddEdit<E> extends AbstractSimpleEdit<E> {
         public AddEdit(EventList<E> source, int index, E value) {
             super(source, index, value);
         }
 
-        public void undo() { source.remove(index); }
-        public void redo() { source.add(index, value); }
+        public void undoImpl() { source.remove(index); }
+        public void redoImpl() { source.add(index, value); }
     }
 
     /**
      * A class describing an undoable Remove to an EventList.
      */
-    private static final class RemoveEdit<E> extends AbstractEdit<E> {
+    private final class RemoveEdit<E> extends AbstractSimpleEdit<E> {
         public RemoveEdit(EventList<E> source, int index, E value) {
             super(source, index, value);
         }
 
-        public void undo() { source.add(index, value); }
-        public void redo() { source.remove(index); }
+        public void undoImpl() { source.add(index, value); }
+        public void redoImpl() { source.remove(index); }
     }
 
     /**
      * A class describing an undoable Update to an EventList.
      */
-    private static final class UpdateEdit<E> extends AbstractEdit<E> {
+    private final class UpdateEdit<E> extends AbstractSimpleEdit<E> {
         private final E oldValue;
 
         public UpdateEdit(EventList<E> source, int index, E value, E oldValue) {
@@ -337,7 +359,7 @@ public final class UndoRedoSupport<E> {
             this.oldValue = oldValue;
         }
 
-        public void undo() { source.set(index, oldValue); }
-        public void redo() { source.set(index, value); }
+        public void undoImpl() { source.set(index, oldValue); }
+        public void redoImpl() { source.set(index, value); }
     }
 }

@@ -5,11 +5,10 @@ package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.NestableEventsList;
+import ca.odell.glazedlists.TransactionList;
 import ca.odell.glazedlists.event.ListEvent;
 
 import javax.swing.undo.UndoManager;
-import javax.swing.undo.CannotUndoException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -17,20 +16,24 @@ import java.util.Random;
 public class UndoSupportTest extends SwingTestCase {
 
     private EventList<String> source;
-    private NestableEventsList<String> nestedSource;
+    private TransactionList<String> txSource;
     private UndoManager undoManager;
+    private UndoSupport undoSupport;
 
     public void guiSetUp() {
         source = new BasicEventList<String>();
-        nestedSource = new NestableEventsList<String>(source, true);
+        txSource = new TransactionList<String>(source);
         undoManager = new UndoManager();
         undoManager.setLimit(Integer.MAX_VALUE);
-        UndoSupport.install(undoManager, nestedSource);
+        undoSupport = UndoSupport.install(undoManager, txSource);
+        System.out.println("UndoSupportTest.guiSetUp");
     }
 
     public void guiTearDown() {
+        undoSupport.uninstall();
+        txSource.dispose();
         source = null;
-        nestedSource = null;
+        txSource = null;
         undoManager = null;
     }
 
@@ -114,11 +117,11 @@ public class UndoSupportTest extends SwingTestCase {
         undoManager.discardAllEdits();
         assertFalse(undoManager.canUndoOrRedo());
 
-        nestedSource.beginEvent(true);
-        nestedSource.add(5, "Sixth");
-        nestedSource.remove(2);
-        nestedSource.set(3, "Updated");
-        nestedSource.commitEvent();
+        txSource.beginEvent();
+        txSource.add(5, "Sixth");
+        txSource.remove(2);
+        txSource.set(3, "Updated");
+        txSource.commitEvent();
 
         final List<String> afterSnapshot = new ArrayList<String>(source);
 
@@ -131,6 +134,8 @@ public class UndoSupportTest extends SwingTestCase {
         assertSame("Sixth", source.get(4));
 
         undoManager.undo();
+        assertTrue(undoManager.canRedo());
+        assertFalse(undoManager.canUndo());
         assertEquals(beforeSnapshot, source);
 
         undoManager.redo();
@@ -149,30 +154,30 @@ public class UndoSupportTest extends SwingTestCase {
 
         // create a series of 500 changes
         for (int i = 0; i < 500; i++) {
-            int changeType = nestedSource.isEmpty() ? ListEvent.INSERT : random.nextInt(3);
-            int index = nestedSource.isEmpty() ? 0 : random.nextInt(nestedSource.size());
+            int changeType = txSource.isEmpty() ? ListEvent.INSERT : random.nextInt(3);
+            int index = txSource.isEmpty() ? 0 : random.nextInt(txSource.size());
 
             if (changeType == ListEvent.INSERT)
-                nestedSource.add(index, String.valueOf(++value));
+                txSource.add(index, String.valueOf(++value));
             else if (changeType == ListEvent.DELETE)
-                nestedSource.remove(index);
+                txSource.remove(index);
             else if (changeType == ListEvent.UPDATE)
-                nestedSource.set(index, String.valueOf(++value));
+                txSource.set(index, String.valueOf(++value));
         }
 
         // take a snapshot of the List after 500 random edits
-        final List<String> snapshot = new ArrayList<String>(nestedSource);
+        final List<String> snapshot = new ArrayList<String>(txSource);
 
         // undo all edits (should result in an empty list)
         for (int i = 0; i < 500; i++)
             undoManager.undo();
 
-        assertTrue(nestedSource.isEmpty());
+        assertTrue(txSource.isEmpty());
 
         // redo all edits (should result in snapshot)
         for (int i = 0; i < 500; i++)
             undoManager.redo();
 
-        assertEquals(snapshot, nestedSource);
+        assertEquals(snapshot, txSource);
     }
 }

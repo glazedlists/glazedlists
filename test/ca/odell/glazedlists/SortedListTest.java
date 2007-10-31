@@ -134,11 +134,11 @@ public class SortedListTest extends TestCase {
      */
     public void testComplexEvents() {
         unsortedList = new BasicEventList<Comparable>();
-        NestableEventsList<Comparable> nestableList = new NestableEventsList<Comparable>(unsortedList);
+        TransactionList<Comparable> nestableList = new TransactionList<Comparable>(unsortedList);
         sortedList = SortedList.create(nestableList);
         ListConsistencyListener.install(sortedList);
 
-        nestableList.beginEvent(true);
+        nestableList.beginEvent();
         nestableList.addAll(GlazedListsTests.stringToList("ABCDEFG"));
         nestableList.commitEvent();
 

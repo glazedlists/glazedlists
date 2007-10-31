@@ -4,7 +4,7 @@
 package ca.odell.glazedlists.event;
 
 import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.NestableEventsList;
+import ca.odell.glazedlists.TransactionList;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import junit.framework.TestCase;
@@ -19,10 +19,10 @@ import java.util.List;
 public class ListEventBlockTest extends TestCase {
 
     public void testSortListEventBlocks() {
-        NestableEventsList<String> list = new NestableEventsList<String>(new BasicEventList<String>());
+        TransactionList<String> list = new TransactionList<String>(new BasicEventList<String>());
         ListConsistencyListener.install(list);
 
-        list.beginEvent(true);
+        list.beginEvent();
         list.addAll(GlazedListsTests.stringToList("AAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
         list.commitEvent();
 
@@ -41,14 +41,14 @@ public class ListEventBlockTest extends TestCase {
     }
 
     public void testSortListEventBlocks2() {
-        NestableEventsList<String> list = new NestableEventsList<String>(new BasicEventList<String>());
+        TransactionList<String> list = new TransactionList<String>(new BasicEventList<String>());
         ListConsistencyListener.install(list);
 
-        list.beginEvent(true);
+        list.beginEvent();
         list.addAll(GlazedListsTests.stringToList("AAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
         list.commitEvent();
 
-        list.beginEvent(true);
+        list.beginEvent();
         list.set(3, "A");
         list.remove(3);
         list.set(1, "A");
@@ -56,14 +56,14 @@ public class ListEventBlockTest extends TestCase {
     }
 
     public void testSortListEventBlocks3() {
-        NestableEventsList<String> list = new NestableEventsList<String>(new BasicEventList<String>());
+        TransactionList<String> list = new TransactionList<String>(new BasicEventList<String>());
         ListConsistencyListener.install(list);
 
-        list.beginEvent(true);
+        list.beginEvent();
         list.addAll(GlazedListsTests.stringToList("AAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
         list.commitEvent();
 
-        list.beginEvent(true);
+        list.beginEvent();
         list.remove(2);
         list.set(0, "A");
         list.add(2, "A");
@@ -71,14 +71,14 @@ public class ListEventBlockTest extends TestCase {
     }
 
     public void testSortListEventBlocks4() {
-        NestableEventsList<String> list = new NestableEventsList<String>(new BasicEventList<String>());
+        TransactionList<String> list = new TransactionList<String>(new BasicEventList<String>());
         ListConsistencyListener.install(list);
 
-        list.beginEvent(true);
+        list.beginEvent();
         list.addAll(GlazedListsTests.stringToList("AAA"));
         list.commitEvent();
 
-        list.beginEvent(true);
+        list.beginEvent();
         list.set(0, "B");
         list.set(0, "A");
         list.set(1, "B");
@@ -103,7 +103,7 @@ public class ListEventBlockTest extends TestCase {
         }
 
         // prepare the list to perform all of our changes on
-        NestableEventsList<String> list = new NestableEventsList<String>(new BasicEventList<String>());
+        TransactionList<String> list = new TransactionList<String>(new BasicEventList<String>());
         ListConsistencyListener.install(list);
 
         int count = 0;
@@ -113,14 +113,14 @@ public class ListEventBlockTest extends TestCase {
             if(count % 100 == 0) System.out.println(count);
 
             // perform this series of changes
-            list.beginEvent(true);
+            list.beginEvent();
             for(int i = 0; i < LIST_INITIAL_SIZE; i++) {
                 list.add("X");
             }
             list.commitEvent();
 
             // perform all required changes to this list
-            list.beginEvent(true);
+            list.beginEvent();
             for(Iterator i = listChangeEnumarations.iterator(); i.hasNext(); ) {
                 ListChangeEnumeration listChange = (ListChangeEnumeration)i.next();
                 int changeType = listChange.getChangeType();

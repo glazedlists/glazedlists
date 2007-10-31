@@ -12,13 +12,13 @@ import ca.odell.glazedlists.event.ListEvent;
 public class UndoRedoSupportTest extends TestCase {
 
     private EventList<String> source;
-    private NestableEventsList<String> nestedSource;
+    private TransactionList<String> nestedSource;
     private UndoRedoSupport undoRedoSupport;
     private UndoSupportWatcher undoSupportWatcher;
 
     protected void setUp() {
         source = new BasicEventList<String>();
-        nestedSource = new NestableEventsList<String>(source, true);
+        nestedSource = new TransactionList<String>(source, true);
         undoRedoSupport = UndoRedoSupport.install(nestedSource);
         undoSupportWatcher = new UndoSupportWatcher();
 
@@ -124,7 +124,7 @@ public class UndoRedoSupportTest extends TestCase {
         undoSupportWatcher.getEditStack().clear();
         assertEquals(0, undoSupportWatcher.getEditStack().size());
 
-        nestedSource.beginEvent(true);
+        nestedSource.beginEvent();
         nestedSource.add(5, "Sixth");
         nestedSource.remove(2);
         nestedSource.set(3, "Updated");

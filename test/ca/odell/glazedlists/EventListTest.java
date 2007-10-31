@@ -523,13 +523,13 @@ public class EventListTest extends TestCase {
      * events while processing them.
      */
     public void testCombineEvents() {
-        NestableEventsList<Object> list = new NestableEventsList<Object>(new BasicEventList<Object>(), true);
+        TransactionList<Object> list = new TransactionList<Object>(new BasicEventList<Object>(), true);
         for (int i = 0; i < 16; i++)
              list.add(new Integer(0));
 
         ListConsistencyListener.install(list);
 
-        list.beginEvent(true);
+        list.beginEvent();
 
         for(int i = 0; i < 4; i++) list.add(8, new Object());
         for(int j = 7; j >= 0; j--) {

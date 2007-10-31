@@ -703,7 +703,7 @@ public class SeparatorListTest extends TestCase {
      * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=322">Issue 322</a>
      */
     public void testHandleChange() {
-        NestableEventsList<String> source = new NestableEventsList<String>(new BasicEventList<String>());
+        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
         FilterList<String> filtered = new FilterList<String>(source);
         SeparatorList<String> separated = new SeparatorList<String>(filtered, GlazedLists.comparableComparator(), 1, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separated);
@@ -735,7 +735,7 @@ public class SeparatorListTest extends TestCase {
         source.clear();
         source.addAll(GlazedListsTests.stringToList("CCS"));
 
-        source.beginEvent(true);
+        source.beginEvent();
         source.addAll(0, GlazedListsTests.stringToList("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCDDDDDDFNSSSSSSS"));
         source.remove(48);
         source.remove(48);
@@ -745,7 +745,7 @@ public class SeparatorListTest extends TestCase {
         // adjust using an event known to put the separator in the wrong place
         source.clear();
         source.addAll(0, GlazedListsTests.stringToList("CSC"));
-        source.beginEvent(true);
+        source.beginEvent();
         source.addAll(0, GlazedListsTests.stringToList("WWWWCWWWWWWWWWWWWFSCCWSCTTTTCCSTTWTCSSCDTSWNSCCDDTCDCCDCTCTDCTCTCCCCCCWCCCCCC"));
         source.remove(77);
         source.remove(78);
@@ -758,14 +758,14 @@ public class SeparatorListTest extends TestCase {
      * A mechanically simplified version of {@link #testHandleChange()}.
      */
     public void testHandleChangeSimplified() {
-        NestableEventsList<String> source = new NestableEventsList<String>(new BasicEventList<String>());
+        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
         SeparatorList<String> separated = new SeparatorList<String>(source, GlazedLists.comparableComparator(), 1, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separated);
         listConsistencyListener.setPreviousElementTracked(false);
 
         // adjust using an event known to put the separator in the wrong place
         source.addAll(0, GlazedListsTests.stringToList("CSC"));
-        source.beginEvent(true);
+        source.beginEvent();
         source.remove(0);
         source.remove(1);
         source.addAll(0, GlazedListsTests.stringToList("SC"));

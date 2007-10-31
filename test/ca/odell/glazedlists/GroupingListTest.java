@@ -451,14 +451,14 @@ public class GroupingListTest extends TestCase {
      * impact the {@link GroupingList}.
      */
     public void testSeparatorListBreaks() {
-        NestableEventsList<String> source = new NestableEventsList<String>(new BasicEventList<String>());
+        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
         GroupingList<String> grouped = new GroupingList<String>(source, (Comparator)GlazedLists.comparableComparator());
         ListConsistencyListener<List<String>> listConsistencyListener = ListConsistencyListener.install(grouped);
         listConsistencyListener.setPreviousElementTracked(false);
 
         // adjust using an event known to put the separator in the wrong place
         source.addAll(0, GlazedListsTests.stringToList("CSC"));
-        source.beginEvent(true);
+        source.beginEvent();
         source.remove(0);
         source.remove(1);
         source.addAll(0, GlazedListsTests.stringToList("SC"));

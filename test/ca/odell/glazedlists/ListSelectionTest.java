@@ -504,7 +504,7 @@ public class ListSelectionTest extends TestCase {
     }
 
     public void testContradictingUpdates() {
-        NestableEventsList<String> source = new NestableEventsList<String>(new BasicEventList<String>());
+        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
 
         ListSelection<String> listSelection = new ListSelection<String>(source);
         ListConsistencyListener.install(listSelection.getSelected());
@@ -513,7 +513,7 @@ public class ListSelectionTest extends TestCase {
         source.add("C");
         source.add("E");
         source.commitEvent();
-        source.beginEvent(true);
+        source.beginEvent();
         source.add(0, "A");
         source.add(1, "B");
         source.set(2, "C");
@@ -528,7 +528,7 @@ public class ListSelectionTest extends TestCase {
         source.add("A");
         source.add("B");
         source.commitEvent();
-        source.beginEvent(true);
+        source.beginEvent();
         source.set(0, "a");
         source.set(1, "b");
         source.add(2, "c");

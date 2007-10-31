@@ -5,7 +5,7 @@ package ca.odell.glazedlists.event;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.NestableEventsList;
+import ca.odell.glazedlists.TransactionList;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import ca.odell.glazedlists.impl.event.Tree4Deltas;
@@ -178,14 +178,14 @@ public class ListDeltasTest extends TestCase {
      */
     public void testAddAndRemove() {
         EventList<String> source = new BasicEventList<String>();
-        NestableEventsList<String> nesting = new NestableEventsList<String>(source);
+        TransactionList<String> nesting = new TransactionList<String>(source);
         ListConsistencyListener.install(nesting);
 
-        nesting.beginEvent(true);
+        nesting.beginEvent();
         source.addAll(GlazedListsTests.stringToList("ABCDE"));
         nesting.commitEvent();
 
-        nesting.beginEvent(true);
+        nesting.beginEvent();
         source.remove(4);
         source.add(4, "F");
         nesting.commitEvent();
@@ -226,14 +226,14 @@ public class ListDeltasTest extends TestCase {
      */
     public void testInsertedElementUpdated() {
         EventList<String> source = new BasicEventList<String>();
-        NestableEventsList<String> nesting = new NestableEventsList<String>(source);
+        TransactionList<String> nesting = new TransactionList<String>(source);
         ListConsistencyListener.install(nesting);
 
-        nesting.beginEvent(true);
+        nesting.beginEvent();
         source.addAll(GlazedListsTests.stringToList("AB"));
         nesting.commitEvent();
 
-        nesting.beginEvent(true);
+        nesting.beginEvent();
         source.add(0, "C");
         source.add(1, "D");
         source.set(1, "d");
@@ -249,14 +249,14 @@ public class ListDeltasTest extends TestCase {
      */
     public void testInsertsAndDeletes() {
         EventList<String> source = new BasicEventList<String>();
-        NestableEventsList<String> nesting = new NestableEventsList<String>(source);
+        TransactionList<String> nesting = new TransactionList<String>(source);
         ListConsistencyListener.install(nesting);
 
-        nesting.beginEvent(true);
+        nesting.beginEvent();
         source.addAll(GlazedListsTests.stringToList("ABC"));
         nesting.commitEvent();
 
-        nesting.beginEvent(true);
+        nesting.beginEvent();
         source.add(0, "D");
         source.add(1, "E");
         source.add(2, "F");
@@ -272,14 +272,14 @@ public class ListDeltasTest extends TestCase {
 
     public void testDeleteIndexBeforeAnotherDeleteIndex() {
         EventList<String> source = new BasicEventList<String>();
-        NestableEventsList<String> nesting = new NestableEventsList<String>(source);
+        TransactionList<String> nesting = new TransactionList<String>(source);
         ListConsistencyListener.install(nesting);
 
-        nesting.beginEvent(true);
+        nesting.beginEvent();
         source.addAll(GlazedListsTests.stringToList("ABCDEFGHIJKLM"));
         nesting.commitEvent();
 
-        nesting.beginEvent(true);
+        nesting.beginEvent();
         source.remove(0);
         source.remove(2);
         source.remove(9);

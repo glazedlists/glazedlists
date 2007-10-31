@@ -1559,7 +1559,7 @@ public class UniqueListTest extends TestCase {
     }
 
     public void testAllPossibleGrouperStateChanges_FixMe() {
-        NestableEventsList<String> source = new NestableEventsList<String>(new BasicEventList<String>(), true);
+        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>(), true);
         final UniqueList<String> uniqueList = new UniqueList<String>(source, String.CASE_INSENSITIVE_ORDER);
         ListConsistencyListener.install(uniqueList);
 
@@ -1587,11 +1587,11 @@ public class UniqueListTest extends TestCase {
         // update: join the left group
         source.set(2, "A");
         source.set(4, "c");
-        source.beginEvent(true);
+        source.beginEvent();
             source.set(3, "a");
             source.set(4, "A");
         source.commitEvent();
-        source.beginEvent(true);
+        source.beginEvent();
             source.set(3, "e");
             source.set(4, "e");
         source.commitEvent(); // this failure proves a bug in the reporting of previous elements in ListConsistencyListener

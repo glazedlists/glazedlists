@@ -3,8 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-// the Glazed Lists
-// for being a JUnit test case
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import junit.framework.TestCase;
@@ -20,8 +18,8 @@ import java.util.List;
  */
 public class NestedEventsTest extends TestCase {
 
-    private EventList<String> source = null;
-    private NestableEventsList<String> nestingList = null;
+    private BasicEventList<String> source = null;
+    private TransactionList<String> txList = null;
     private ListConsistencyListener<String> counter = null;
 
     /**
@@ -29,8 +27,8 @@ public class NestedEventsTest extends TestCase {
      */
     public void setUp() {
         source  = new BasicEventList<String>();
-        nestingList = new NestableEventsList<String>(source);
-        counter = ListConsistencyListener.install(nestingList);
+        txList = new TransactionList<String>(source);
+        counter = ListConsistencyListener.install(txList);
     }
 
     /**
@@ -38,7 +36,7 @@ public class NestedEventsTest extends TestCase {
      */
     public void tearDown() {
         counter = null;
-        nestingList = null;
+        txList = null;
         source = null;
     }
 
@@ -47,22 +45,22 @@ public class NestedEventsTest extends TestCase {
      */
     public void testFullyDeletedInserts() {
         boolean contradictionsAllowed = true;
-        nestingList.beginEvent(false);
+        txList.beginEvent(false);
         source.addAll(GlazedListsTests.stringToList("ABFG"));
-        nestingList.commitEvent();
+        txList.commitEvent();
 
         // test nested events: add 3 elements at 2 and delete 3 elements at 1
-        nestingList.beginEvent(contradictionsAllowed);
+        txList.beginEvent(contradictionsAllowed);
         source.add(2, "C");
         source.add(3, "D");
         source.add(4, "E");
         source.remove(1);
         source.remove(1);
         source.remove(1);
-        nestingList.commitEvent();
+        txList.commitEvent();
 
         // net change is: remove 1 element at 1 and add 1 element at 1
-        assertEquals(nestingList, GlazedListsTests.stringToList("AEFG"));
+        assertEquals(txList, GlazedListsTests.stringToList("AEFG"));
         assertEquals(2, counter.getEventCount());
         assertEquals(2, counter.getChangeCount(1));
     }
@@ -76,13 +74,13 @@ public class NestedEventsTest extends TestCase {
         boolean contradictionsAllowed = true;
 
         // make nested events
-        nestingList.beginEvent(contradictionsAllowed);
+        txList.beginEvent(contradictionsAllowed);
         source.addAll(jesse);
         source.removeAll(wilson);
-        nestingList.commitEvent();
+        txList.commitEvent();
 
         // ensure the number of changes is limited
-        assertEquals(3, nestingList.size());
+        assertEquals(3, txList.size());
         assertEquals(1, counter.getEventCount());
         assertEquals(3, counter.getChangeCount(0));
     }
@@ -92,22 +90,22 @@ public class NestedEventsTest extends TestCase {
      */
     public void testFullyUpdatedInserts() {
         boolean contradictionsAllowed = true;
-        nestingList.beginEvent(false);
+        txList.beginEvent(false);
         source.addAll(GlazedListsTests.stringToList("ABFG"));
-        nestingList.commitEvent();
+        txList.commitEvent();
 
         // test nested events: add 3 elements at 2 and delete 3 elements at 1
-        nestingList.beginEvent(contradictionsAllowed);
+        txList.beginEvent(contradictionsAllowed);
         source.add(2, "C");
         source.add(3, "D");
         source.add(4, "E");
         source.set(2, "c");
         source.set(3, "d");
         source.set(4, "e");
-        nestingList.commitEvent();
+        txList.commitEvent();
 
         // net change is: add 'c', 'd', 'e'
-        assertEquals(nestingList, GlazedListsTests.stringToList("ABcdeFG"));
+        assertEquals(txList, GlazedListsTests.stringToList("ABcdeFG"));
         assertEquals(2, counter.getEventCount());
         assertEquals(3, counter.getChangeCount(1));
     }
@@ -117,22 +115,22 @@ public class NestedEventsTest extends TestCase {
      */
     public void testUpdatedInserts() {
         boolean contradictionsAllowed = true;
-        nestingList.beginEvent(false);
+        txList.beginEvent(false);
         source.addAll(GlazedListsTests.stringToList("ABFG"));
-        nestingList.commitEvent();
+        txList.commitEvent();
 
         // test nested events: add 3 elements at 2 and delete 3 elements at 1
-        nestingList.beginEvent(contradictionsAllowed);
+        txList.beginEvent(contradictionsAllowed);
         source.add(2, "C");
         source.add(3, "D");
         source.add(4, "E");
         source.set(1, "b");
         source.set(2, "c");
         source.set(3, "d");
-        nestingList.commitEvent();
+        txList.commitEvent();
 
         // net change is: replace 'B' with 'b' and add 'd', 'E'
-        assertEquals(nestingList, GlazedListsTests.stringToList("AbcdEFG"));
+        assertEquals(txList, GlazedListsTests.stringToList("AbcdEFG"));
         assertEquals(2, counter.getEventCount());
         assertEquals(4, counter.getChangeCount(1));
     }
@@ -142,22 +140,22 @@ public class NestedEventsTest extends TestCase {
      */
     public void testFullyDeletedUpdates() {
         boolean contradictionsAllowed = true;
-        nestingList.beginEvent(false);
+        txList.beginEvent(false);
         source.addAll(GlazedListsTests.stringToList("ABCDEFG"));
-        nestingList.commitEvent();
+        txList.commitEvent();
 
         // test nested events: add 3 elements at 2 and delete 3 elements at 1
-        nestingList.beginEvent(contradictionsAllowed);
+        txList.beginEvent(contradictionsAllowed);
         source.set(2, "c");
         source.set(3, "d");
         source.set(4, "e");
         source.remove(2);
         source.remove(2);
         source.remove(2);
-        nestingList.commitEvent();
+        txList.commitEvent();
 
         // net change is: remove 1 element at 1 and add 1 element at 1
-        assertEquals(nestingList, GlazedListsTests.stringToList("ABFG"));
+        assertEquals(txList, GlazedListsTests.stringToList("ABFG"));
         assertEquals(2, counter.getEventCount());
         assertEquals(3, counter.getChangeCount(1));
     }
@@ -167,22 +165,22 @@ public class NestedEventsTest extends TestCase {
      */
     public void testDeletedUpdates() {
         boolean contradictionsAllowed = true;
-        nestingList.beginEvent(false);
+        txList.beginEvent(false);
         source.addAll(GlazedListsTests.stringToList("ABCDEFG"));
-        nestingList.commitEvent();
+        txList.commitEvent();
 
         // test nested events: add 3 elements at 2 and delete 3 elements at 1
-        nestingList.beginEvent(contradictionsAllowed);
+        txList.beginEvent(contradictionsAllowed);
         source.set(2, "c");
         source.set(3, "d");
         source.set(4, "e");
         source.remove(1);
         source.remove(1);
         source.remove(1);
-        nestingList.commitEvent();
+        txList.commitEvent();
 
         // net change is: remove 1 element at 1 and add 1 element at 1
-        assertEquals(nestingList, GlazedListsTests.stringToList("AeFG"));
+        assertEquals(txList, GlazedListsTests.stringToList("AeFG"));
         assertEquals(2, counter.getEventCount());
         assertEquals(4, counter.getChangeCount(1));
     }
@@ -192,12 +190,12 @@ public class NestedEventsTest extends TestCase {
      */
     public void testUpdatedUpdates() {
         boolean contradictionsAllowed = true;
-        nestingList.beginEvent(false);
+        txList.beginEvent(false);
         source.addAll(GlazedListsTests.stringToList("ABCDEFG"));
-        nestingList.commitEvent();
+        txList.commitEvent();
 
         // test nested events: add 3 elements at 2 and delete 3 elements at 1
-        nestingList.beginEvent(contradictionsAllowed);
+        txList.beginEvent(contradictionsAllowed);
         source.set(2, "c");
         source.set(3, "d");
         source.set(4, "e");
@@ -205,10 +203,10 @@ public class NestedEventsTest extends TestCase {
         source.set(3, "d");
         source.set(4, "e");
         source.set(5, "f");
-        nestingList.commitEvent();
+        txList.commitEvent();
 
         // net change is: replacing C, D, E, F with c, d, e, f
-        assertEquals(nestingList, GlazedListsTests.stringToList("ABcdefGH"));
+        assertEquals(txList, GlazedListsTests.stringToList("ABcdefGH"));
         assertEquals(2, counter.getEventCount());
         assertEquals(5, counter.getChangeCount(1));
     }
@@ -218,12 +216,12 @@ public class NestedEventsTest extends TestCase {
      */
     public void testFullyUpdatedUpdates() {
         boolean contradictionsAllowed = true;
-        nestingList.beginEvent(false);
+        txList.beginEvent(false);
         source.addAll(GlazedListsTests.stringToList("ABCDEFG"));
-        nestingList.commitEvent();
+        txList.commitEvent();
 
         // test nested events: add 3 elements at 2 and delete 3 elements at 1
-        nestingList.beginEvent(contradictionsAllowed);
+        txList.beginEvent(contradictionsAllowed);
         source.set(2, "c");
         source.set(3, "d");
         source.set(4, "e");
@@ -231,10 +229,10 @@ public class NestedEventsTest extends TestCase {
         source.set(2, "c");
         source.set(3, "d");
         source.set(4, "e");
-        nestingList.commitEvent();
+        txList.commitEvent();
 
         // net change is: replacing C, D, E with c, d, e and add H
-        assertEquals(nestingList, GlazedListsTests.stringToList("ABcdeFGH"));
+        assertEquals(txList, GlazedListsTests.stringToList("ABcdeFGH"));
         assertEquals(2, counter.getEventCount());
         assertEquals(4, counter.getChangeCount(1));
     }
@@ -243,14 +241,12 @@ public class NestedEventsTest extends TestCase {
      * Validates that simple contradicting events throw an exception if not allowed.
      */
     public void testSimpleContradictingEventsFail() {
-        boolean contradictionsAllowed = false;
-
         // test nested events
         try {
-            nestingList.beginEvent(contradictionsAllowed);
+            txList.beginEvent(false);
             source.add("hello");
             source.remove(0);
-            nestingList.commitEvent();
+            txList.commitEvent();
             fail("Expected IllegalStateException");
         } catch(IllegalStateException e) {
             // expected
@@ -263,18 +259,16 @@ public class NestedEventsTest extends TestCase {
     public void testComplexContradictingEventsFail() {
         List<String> jesse = GlazedListsTests.stringToList("JESSE");
         List<String> wilson = GlazedListsTests.stringToList("WILSON");
-        boolean contradictionsAllowed = false;
 
         // test nested events
         try {
-            nestingList.beginEvent(contradictionsAllowed);
+            txList.beginEvent(false);
             source.addAll(jesse);
             source.removeAll(wilson);
-            nestingList.commitEvent();
+            txList.commitEvent();
             fail("Expected IllegalStateException");
         } catch(IllegalStateException e) {
             // expected
         }
     }
-
 }

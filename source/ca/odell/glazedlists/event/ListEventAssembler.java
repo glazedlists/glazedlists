@@ -250,6 +250,22 @@ public final class ListEventAssembler<E> {
     }
 
     /**
+     * Discards the current atomic change to this list change queue. This does
+     * not notify any listeners about any changes.
+     *
+     * <p>The caller of this method is responsible for returning the EventList
+     * to its state before the event began. If they fail to do so, the EventList
+     * pipeline may be in an inconsistent state.
+     *
+     * <p>If the current event is nested within a greater event, this will
+     * discard changes at the current nesting level and that further changes
+     * are still applied directly to the parent change.
+     */
+    public synchronized void discardEvent() {
+        delegate.discardEvent();
+    }
+
+    /**
      * Returns <tt>true</tt> if the current atomic change to this list change
      * queue is empty; <tt>false</tt> otherwise.
      *
@@ -402,6 +418,25 @@ public final class ListEventAssembler<E> {
                     eventPending = false;
                     cleanup();
                 }
+            }
+        }
+
+        /**
+         * Discards the current atomic change to this list change queue
+         * without firing it.
+         */
+        public final synchronized void discardEvent() {
+            // complain if we have no event to commit
+            if(eventLevel == 0) throw new IllegalStateException("Cannot discard without an event in progress");
+
+            // we are one event less nested
+            eventLevel--;
+            allowNestedEvents = true;
+
+            // if this is the last stage, clean it up
+            if(eventLevel == 0) {
+                eventPending = false;
+                cleanup();
             }
         }
 

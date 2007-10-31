@@ -874,7 +874,7 @@ public class TreeListTest extends TestCase {
      * the appropriate virtual nodes are assigned the appropriate new parents.
      */
     public void testInsertMultipleParents() {
-        NestableEventsList<String> source = new NestableEventsList<String>(new BasicEventList<String>());
+        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
@@ -885,7 +885,7 @@ public class TreeListTest extends TestCase {
             source.add("ABE");
         source.commitEvent();
 
-        source.beginEvent(true);
+        source.beginEvent();
             source.addAll(0, Arrays.asList(new String[] { "A", "AB" }));
             source.addAll(3, Arrays.asList(new String[] { "A", "AB" }));
         source.commitEvent();
@@ -1362,19 +1362,19 @@ public class TreeListTest extends TestCase {
     }
 
     public void testRebuildSiblingsInUnnaturalOrder() {
-        NestableEventsList<String> source = new NestableEventsList<String>(new BasicEventList<String>(), false);
+        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
-        source.beginEvent(true);
+        source.beginEvent();
         source.addAll(Arrays.asList(new String[] {
                 "PMMP",
                 "PMMS",
         }));
         source.commitEvent();
 
-        source.beginEvent(true);
+        source.beginEvent();
         source.add(1, "P");
         source.add(3, "PDDV");
         source.commitEvent();
@@ -1553,7 +1553,7 @@ public class TreeListTest extends TestCase {
      * children are deleted new children inserted in a single event.
      */
     public void testDeleteAndReinsertLeafRetainsParentState() {
-        NestableEventsList<String> source = new NestableEventsList<String>(new BasicEventList<String>());
+        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
 
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
@@ -1602,7 +1602,7 @@ public class TreeListTest extends TestCase {
      * for new nodes that whose child nodes are already exist.
      */
     public void testInsertCollapsedParentWithExpandedChild() {
-        NestableEventsList<String> source = new NestableEventsList<String>(new BasicEventList<String>());
+        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
 
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_COLLAPSED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
@@ -1630,7 +1630,7 @@ public class TreeListTest extends TestCase {
      * the setExpanded() method can work while the tree is still changing.
      */
     public void testExpandingParentWhileTreeIsInvalid() {
-        NestableEventsList<String> source = new NestableEventsList<String>(new BasicEventList<String>());
+        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
 
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_COLLAPSED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
@@ -1705,7 +1705,7 @@ public class TreeListTest extends TestCase {
     }
 
     public void testTemporaryVirtualNodesAreRemoved() {
-        NestableEventsList<String> source = new NestableEventsList<String>(new BasicEventList<String>());
+        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
@@ -1718,7 +1718,7 @@ public class TreeListTest extends TestCase {
             source.add("MEMN");
         source.commitEvent();
 
-        source.beginEvent(true);
+        source.beginEvent();
             source.clear();
             source.add("MEPB");
             source.add("MEPD");
@@ -1747,7 +1747,7 @@ public class TreeListTest extends TestCase {
      * should we trust?
      */
     public void testComparatorWeakerThanEquals() {
-        NestableEventsList<String> source = new NestableEventsList<String>(new BasicEventList<String>());
+        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
         TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat(String.CASE_INSENSITIVE_ORDER), TreeList.NODES_START_EXPANDED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
@@ -1767,7 +1767,7 @@ public class TreeListTest extends TestCase {
                 "AKG",
         });
 
-        source.beginEvent(true);
+        source.beginEvent();
             source.clear();
             source.add("aJD");
             source.add("AJU");
