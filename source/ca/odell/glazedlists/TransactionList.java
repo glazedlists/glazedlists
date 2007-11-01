@@ -74,6 +74,21 @@ import java.util.ArrayList;
  * aware of the changes made during the transaction and must also be given a
  * chance to undo their changes.
  *
+ * <p>Transactions may be nested arbitrarily deep using code that resembles:
+ * <pre>
+ *   txList.beginEvent();
+ *     txList.add("A");
+ *
+ *     txList.beginEvent();
+ *       txList.set(0, "B");
+ *     txList.commitEvent();
+ *
+ *     txList.beginEvent();
+ *       txList.add("C");
+ *     txList.commitEvent();
+ *   txList.commitEvent();
+ * </pre>
+ *
  * @author James Lemieux
  */
 public class TransactionList<E> extends TransformedList<E, E> {
