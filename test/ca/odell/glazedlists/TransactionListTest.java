@@ -225,6 +225,81 @@ public class TransactionListTest extends TestCase {
         }
     }
 
+    public void testRollbackNestedTransactions() {
+        txList.beginEvent(false);
+            txList.add("A");
+            txList.add("B");
+            assertState(GlazedListsTests.stringToList("AB"), 2);
+
+            // nest a transaction that does delay its events
+            txList.beginEvent(true);
+                txList.add("C");
+                txList.add("D");
+                assertState(GlazedListsTests.stringToList("ABCD"), 0);
+            txList.rollbackEvent();
+            assertState(GlazedListsTests.stringToList("AB"), 0);
+
+            // nest a transaction that does not delay its events
+            txList.beginEvent(false);
+                txList.add("E");
+                txList.add("F");
+                assertState(GlazedListsTests.stringToList("ABEF"), 2);
+            txList.rollbackEvent();
+            assertState(GlazedListsTests.stringToList("AB"), 1);
+
+            txList.add("G");
+            txList.add("H");
+            assertState(GlazedListsTests.stringToList("ABGH"), 2);
+        txList.commitEvent();
+        assertState(GlazedListsTests.stringToList("ABGH"), 0);
+    }
+
+    public void testCommitNestedTransactions() {
+        txList.beginEvent(true);
+            txList.add("A");
+            txList.add("B");
+            assertState(GlazedListsTests.stringToList("AB"), 0);
+
+            // nest a transaction that does delay its events
+            txList.beginEvent(true);
+                txList.add("C");
+                txList.add("D");
+                assertState(GlazedListsTests.stringToList("ABCD"), 0);
+            txList.commitEvent();
+            assertState(GlazedListsTests.stringToList("ABCD"), 0);
+
+            // nest a transaction that does not delay its events
+            txList.beginEvent(false);
+                txList.add("E");
+                txList.add("F");
+                assertState(GlazedListsTests.stringToList("ABCDEF"), 0);
+            txList.commitEvent();
+            assertState(GlazedListsTests.stringToList("ABCDEF"), 0);
+
+            txList.add("G");
+            txList.add("H");
+            assertState(GlazedListsTests.stringToList("ABCDEFGH"), 0);
+        txList.commitEvent();
+        assertState(GlazedListsTests.stringToList("ABCDEFGH"), 1);
+    }
+    
+    public void testIgnoreChangesOutsideOfTransaction() {
+        txList.add("A");
+        assertState(GlazedListsTests.stringToList("A"), 1);
+
+        txList.set(0, "B");
+        assertState(GlazedListsTests.stringToList("B"), 1);
+
+        txList.beginEvent();
+            txList.add("C");
+            assertState(GlazedListsTests.stringToList("BC"), 0);
+        txList.commitEvent();
+        assertState(GlazedListsTests.stringToList("BC"), 1);
+
+        txList.add("D");
+        assertState(GlazedListsTests.stringToList("BCD"), 1);
+    }
+
     private void assertState(List expected, int numEvents) {
         assertEquals(expected, source);
         assertEquals(expected, txList);

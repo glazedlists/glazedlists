@@ -5,6 +5,9 @@ package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.event.ListEvent;
 
+import java.util.List;
+import java.util.ArrayList;
+
 /**
  * A list transformation that presents traditional transaction semantics.
  * Typical usage resembles one of two methods:
@@ -78,14 +81,8 @@ public class TransactionList<E> extends TransformedList<E, E> {
     /** produces {@link UndoRedoSupport.Edit}s which are collected during a transaction to support rollback */
     private UndoRedoSupport rollbackSupport;
 
-    /** collects the smaller intermediate Edits that occur during a transaction; <code>null</code> if no transaction exists */
-    private UndoRedoSupport.CompositeEdit rollbackEdit;
-
-    /**
-     * <tt>true</tt> indicates a ListEvent was started when {@link #beginEvent(boolean)}
-     * was called and must be committed on either {@link #commitEvent()} or {@link #rollbackEvent()}.
-     */
-    private boolean eventStarted = false;
+    /** A stack of transactions contexts; one for each layer of nested transaction */
+    private final List<Context> txContextStack = new ArrayList<Context>();
 
     /**
      * Constructs a <code>TransactionList</code> that provides traditional
@@ -108,6 +105,9 @@ public class TransactionList<E> extends TransformedList<E, E> {
      * used internally by Glazed Lists.
      *
      * @param source the EventList over which to provide a transactional view
+     * @param rollbackSupport <tt>true</tt> indicates this TransactionList must
+     *      support the rollback ability; <tt>false</tt> indicates it is not
+     *      necessary
      */
     TransactionList(EventList<E> source, boolean rollbackSupport) {
         super(source);
@@ -143,20 +143,12 @@ public class TransactionList<E> extends TransformedList<E, E> {
      *      be sent on immediately
      */
     public void beginEvent(boolean buffered) {
-        // we don't allow nested transactions, so check if one is in progress
-        if (rollbackSupport != null && rollbackEdit != null)
-            throw new IllegalStateException("Unable to begin a new transaction before committing or rolling back the previous transaction");
-
         // start a nestable ListEvent if we're supposed to buffer them
         if (buffered)
             updates.beginEvent(true);
 
-        // record whether a ListEvent was started
-        this.eventStarted = buffered;
-
-        // build a new CompositeEdit to accumulate the smaller Edits which
-        // occur during the transaction (this allows us to support rollback)
-        rollbackEdit = rollbackSupport == null ? null : rollbackSupport.new CompositeEdit();
+        // push a new context onto the stack describing this new transaction
+        txContextStack.add(new Context(buffered));
     }
 
     /**
@@ -167,14 +159,11 @@ public class TransactionList<E> extends TransformedList<E, E> {
      */
     public void commitEvent() {
         // verify that there is a transaction to roll back
-        if (rollbackSupport != null && rollbackEdit == null)
+        if (rollbackSupport != null && txContextStack.isEmpty())
             throw new IllegalStateException("No ListEvent exists to commit");
 
-        rollbackEdit = null;
-
-        // fire the summary ListEvent if necessary
-        if (eventStarted)
-            updates.commitEvent();
+        // pop the last context off the stack and ask it to commit
+        txContextStack.remove(txContextStack.size()-1).commit();
     }
 
     /**
@@ -189,21 +178,11 @@ public class TransactionList<E> extends TransformedList<E, E> {
             throw new IllegalStateException("This TransactionList does not support rollback");
 
         // check if a transaction exists to rollback
-        if (rollbackEdit == null)
+        if (txContextStack.isEmpty())
             throw new IllegalStateException("No ListEvent exists to roll back");
 
-        // undo all of the transaction's changes as a single ListEvent
-        updates.beginEvent(true);
-        try {
-            rollbackEdit.undo();
-        } finally {
-            updates.commitEvent();
-        }
-        rollbackEdit = null;
-
-        // throw away the ListEvent if we started one in beginEvent()
-        if (eventStarted)
-            updates.discardEvent();
+        // pop the last context off the stack and ask it to rollback
+        txContextStack.remove(txContextStack.size()-1).rollback();
     }
 
     /** {@inheritDoc} */
@@ -216,7 +195,7 @@ public class TransactionList<E> extends TransformedList<E, E> {
         if (rollbackSupport != null)
             rollbackSupport.uninstall();
         rollbackSupport = null;
-        rollbackEdit = null;
+        txContextStack.clear();
 
         super.dispose();
     }
@@ -236,9 +215,75 @@ public class TransactionList<E> extends TransformedList<E, E> {
      */
     private class RollbackSupportListener implements UndoRedoSupport.Listener {
         public void undoableEditHappened(UndoRedoSupport.Edit edit) {
-            // if rollbackEdit is not null we are in the middle of a transaction
+            // if a tx context exists we are in the middle of a transaction
+            if (!txContextStack.isEmpty())
+                txContextStack.get(txContextStack.size()-1).add(edit);
+        }
+    }
+
+    /**
+     * A small object describing the details about the transaction that was
+     * started so that it can be properly committed or rolled back at a later
+     * time. Specifically it tracks:
+     *
+     * <ul>
+     *   <li>a CompositeEdit which can be used to undo the transaction's changes
+     *       in the case of a rollback</li>
+     *   <li>a flag indicating wether a ListEvent was started when the
+     *       transaction began (and thus must be committed or discarded later)
+     * </ul>
+     */
+    private final class Context {
+        /** collects the smaller intermediate Edits that occur during a transaction; <code>null</code> if no transaction exists */
+        private UndoRedoSupport.CompositeEdit rollbackEdit = rollbackSupport == null ? null : rollbackSupport.new CompositeEdit();
+
+        /**
+         * <tt>true</tt> indicates a ListEvent was started when this Context
+         * was created and must be committed or rolled back later.
+         */
+        private boolean eventStarted = false;
+
+        public Context(boolean eventStarted) {
+            this.eventStarted = eventStarted;
+        }
+
+        /**
+         * Add the given edit into this Context to support its possible rollback.
+         */
+        public void add(UndoRedoSupport.Edit edit) {
             if (rollbackEdit != null)
                 rollbackEdit.add(edit);
+        }
+
+        /**
+         * Commit the changes associated with this transaction.
+         */
+        public void commit() {
+            rollbackEdit = null;
+
+            if (eventStarted)
+                updates.commitEvent();
+        }
+
+        /**
+         * Rollback the changes associated with this transaction.
+         */
+        public void rollback() {
+            if (rollbackEdit != null) {
+                // rollback all changes from the transaction as a single ListEvent
+                updates.beginEvent(true);
+                try {
+                    rollbackEdit.undo();
+                } finally {
+                    updates.commitEvent();
+                }
+
+                rollbackEdit = null;
+            }
+
+            // throw away the ListEvent if we started one
+            if (eventStarted)
+                updates.discardEvent();
         }
     }
 }
