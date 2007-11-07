@@ -43,7 +43,7 @@ public final class UndoRedoSupport<E> {
     private TransactionList<E> txSource;
 
     /** A ListEventListener that watches the {@link #txSource} and in turn broadcasts an {@link Edit} object to all {@link Listener}s */
-    private ListEventListener<E> txSourceListener = new NestableSourceListener();
+    private ListEventListener<E> txSourceListener = new TXSourceListener();
 
     /** A data structure storing all registered {@link Listener}s. */
     private final EventListenerList listenerList = new EventListenerList();
@@ -139,7 +139,7 @@ public final class UndoRedoSupport<E> {
      * created an {@link Edit} and broadcasting that object to all registered
      * {@link Listener}s.
      */
-    private class NestableSourceListener implements ListEventListener<E> {
+    private class TXSourceListener implements ListEventListener<E> {
         public void listChanged(ListEvent<E> listChanges) {
             // if an undo or redo caused this ListEvent, it is not an undoable edit
             if (ignoreListEvent > 0)
