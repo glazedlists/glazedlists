@@ -128,7 +128,12 @@ class SelectionManager<E> {
             // don't set selection on the SelectionList if it has already been set
             if(!selectionInProgress) {
                 selectionInProgress = true;
-                selection.setSelection(selectable.getSelectionIndex());
+                selection.getSource().getReadWriteLock().writeLock().lock();
+                try {
+                    selection.setSelection(selectable.getSelectionIndex());
+                } finally {
+                    selection.getSource().getReadWriteLock().writeLock().unlock();
+                }
                 selectionInProgress = false;
             }
         }
@@ -154,7 +159,12 @@ class SelectionManager<E> {
             // don't set selection on the SelectionList if it has already been set
             if(!selectionInProgress) {
                 selectionInProgress = true;
-                selection.setSelection(selectable.getSelectionIndices());
+                selection.getSource().getReadWriteLock().writeLock().lock();
+                try {
+                    selection.setSelection(selectable.getSelectionIndices());
+                } finally {
+                    selection.getSource().getReadWriteLock().writeLock().unlock();
+                }
                 selectionInProgress = false;
             }
         }
