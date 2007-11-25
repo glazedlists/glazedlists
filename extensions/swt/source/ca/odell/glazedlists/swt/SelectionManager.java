@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swt;
 
-// core glazed lists packages
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ListSelection;
 import org.eclipse.swt.SWT;
@@ -20,13 +19,13 @@ import org.eclipse.swt.events.SelectionListener;
 class SelectionManager<E> {
 
     /** the model to the Selectable widget's selection */
-    private ListSelection<E> selection = null;
+    private ListSelection<E> selection;
 
     /** the Selectable SWT Viewer */
-    private Selectable selectable = null;
+    private Selectable selectable;
 
     /** the selection listener */
-    private SelectionListener selectionListener = null;
+    private SelectionListener selectionListener;
 
     /** to prevent extra processing of selection */
     private boolean selectionInProgress = false;
@@ -132,9 +131,9 @@ class SelectionManager<E> {
                 try {
                     selection.setSelection(selectable.getSelectionIndex());
                 } finally {
+                    selectionInProgress = false;
                     selection.getSource().getReadWriteLock().writeLock().unlock();
                 }
-                selectionInProgress = false;
             }
         }
     }
@@ -163,9 +162,9 @@ class SelectionManager<E> {
                 try {
                     selection.setSelection(selectable.getSelectionIndices());
                 } finally {
+                    selectionInProgress = false;
                     selection.getSource().getReadWriteLock().writeLock().unlock();
                 }
-                selectionInProgress = false;
             }
         }
     }
