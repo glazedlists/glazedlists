@@ -24,9 +24,9 @@ public class StartsWithCaseInsensitiveTextSearchStrategy extends AbstractTextSea
      */
     public void setSubtext(String subtext) {
         if (subtext.length() == 1)
-            this.indexOfStrategy = new SingleCharacterIndexOfStrategy(subtext.charAt(0));
+            indexOfStrategy = new SingleCharacterIndexOfStrategy(subtext.charAt(0));
         else
-            this.indexOfStrategy = new MultiCharacterIndexOfStrategy(subtext);
+            indexOfStrategy = new MultiCharacterIndexOfStrategy(subtext);
     }
 
     /**
@@ -41,10 +41,10 @@ public class StartsWithCaseInsensitiveTextSearchStrategy extends AbstractTextSea
      */
     public int indexOf(String text) {
         // ensure we are in a state to search the text
-        if (this.indexOfStrategy == null)
+        if (indexOfStrategy == null)
             throw new IllegalStateException("setSubtext must be called with a valid value before this method can operate");
 
-        return this.indexOfStrategy.indexOf(text);
+        return indexOfStrategy.indexOf(text);
     }
 
     /**
@@ -103,13 +103,13 @@ public class StartsWithCaseInsensitiveTextSearchStrategy extends AbstractTextSea
 
         public int indexOf(String text) {
             // if the text is not long enough to match the subtext, bail early
-            if (text.length() < this.subtextLength)
+            if (text.length() < subtextLength)
                 return -1;
 
             for (int i = 0; i < subtextLength; i++) {
                 char c = map(text.charAt(i));
 
-                if (this.subtextCharsLower[i] != c && this.subtextCharsUpper[i] != c)
+                if (subtextCharsLower[i] != c && subtextCharsUpper[i] != c)
                     return -1;
             }
 

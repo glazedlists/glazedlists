@@ -20,15 +20,20 @@ import ca.odell.glazedlists.impl.GlazedListsImpl;
  * to be matched implements the {@link TextFilterable} interface. These are
  * used to extract the searchable {@link String}s for each Object.
  *
- * <p>{@link TextMatcherEditor} is able to operate in one of two modes.
+ * <p>{@link TextMatcherEditor} is able to operate in one of three modes.
  * <ul>
  *   <li>{@link #CONTAINS} will produce {@link Matcher} objects that test if
- *        at least one searchable string for an Object contains one of the
- *        filter strings <strong>anywhere</strong> within itself.
+ *        at least one searchable string for an Object <strong>contains</strong>
+ *        one of the filter strings anywhere within itself.
  *
  *   <li>{@link #STARTS_WITH} will produce {@link Matcher} objects that test
  *        if at least one searchable string for an Object
  *        <strong>begins with</strong> at least one of the filter strings.
+ *
+ *   <li>{@link #REGULAR_EXPRESSION} will produce {@link Matcher} objects that
+ *        test if at least one searchable string for an Object <strong>matches,
+ *        using regular expression rules,</strong> at least one of the filter
+ *        strings.
  * </ul>
  *
  * <p>{@link TextMatcherEditor} is able to operate with one of two strategies.
@@ -39,7 +44,7 @@ import ca.odell.glazedlists.impl.GlazedListsImpl;
  *   <li>{@link #NORMALIZED_STRATEGY} defines a text match more leniently for
  *        Latin-character based languages. Specifically, diacritics are
  *        stripped from all Latin characters before comparisons are made.
- *        Consequently, filters like "resume" match works like "r�sum�".
+ *        Consequently, filters like "resume" match words like "r�sum�".
  * </ul>
  *
  * @author James Lemieux
@@ -62,6 +67,13 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
     public static final int STARTS_WITH = 1;
 
     /**
+     * Matching mode where items are considered a match using a
+     * {@link java.util.regex.Matcher} produced by compiling a regular
+     * expression into {@link java.util.regex.Pattern}.
+     */
+    public static final int REGULAR_EXPRESSION = 2;
+
+    /**
      * Character comparison strategy that assumes all characters can be
      * compared directly as though they are ASCII. This implies there is no
      * fuzzy matching with this strategy - each character must be precisely
@@ -71,14 +83,16 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
     // this would be an inner class if declawer supported it
     private static class IdenticalStrategyFactory implements TextSearchStrategy.Factory {
         public TextSearchStrategy create(int mode, String filter) {
-            if(mode == TextMatcherEditor.CONTAINS) {
+            if (mode == TextMatcherEditor.CONTAINS) {
                 if (filter.length() == 1) {
                     return new SingleCharacterCaseInsensitiveTextSearchStrategy();
                 } else {
                     return new BoyerMooreCaseInsensitiveTextSearchStrategy();
                 }
-            } else if(mode == TextMatcherEditor.STARTS_WITH) {
+            } else if (mode == TextMatcherEditor.STARTS_WITH) {
                 return new StartsWithCaseInsensitiveTextSearchStrategy();
+            } else if (mode == TextMatcherEditor.REGULAR_EXPRESSION) {
+                return new RegularExpressionTextSearchStrategy();
             } else {
                 throw new IllegalArgumentException("unrecognized mode: " + mode);
             }
@@ -109,7 +123,7 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
     /** the filterator is used as an alternative to implementing the TextFilterable interface */
     private final TextFilterator<? super E> filterator;
 
-    /** one of {@link #CONTAINS} or {@link #STARTS_WITH} */
+    /** one of {@link #CONTAINS}, {@link #STARTS_WITH}, or {@link #REGULAR_EXPRESSION} */
     private int mode = CONTAINS;
 
     /** one of {@link #IDENTICAL_STRATEGY} or {@link #NORMALIZED_STRATEGY} */
@@ -119,7 +133,7 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      * Creates a {@link TextMatcherEditor} whose Matchers can test only elements which
      * implement the {@link TextFilterable} interface.
      *
-     * <p>The {@link Matcher}s from this {@link MatcherEditor} will fire a
+     * <p>The {@link Matcher}s from this {@link MatcherEditor} will throw a
      * {@link ClassCastException} when called with an Object that does not implement
      * {@link TextFilterable}.
      */

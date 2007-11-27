@@ -178,16 +178,23 @@ public class TextComponentMatcherEditor<E> extends TextMatcherEditor<E> {
      */
     private void refilter() {
         try {
+            final int mode = getMode();
             final String text = document.getText(0, document.getLength());
-            String[] filters = null;
+            final String[] filters;
 
             // in CONTAINS mode we treat the string as whitespace delimited
-            if (this.getMode() == CONTAINS)
+            if (mode == CONTAINS)
                 filters = text.split("[ \t]");
 
             // in STARTS_WITH mode we use the string in its entirety
-            else if (this.getMode() == STARTS_WITH)
+            else if (mode == STARTS_WITH)
                 filters = new String[] {text};
+
+            // in REGULAR_EXPRESSION mode we use the string in its entirety
+            else if (mode == REGULAR_EXPRESSION)
+                filters = new String[] {text};
+
+            else throw new IllegalStateException("Unknown mode: " + mode);
 
             setFilterText(filters);
         } catch (BadLocationException ble) {
@@ -201,17 +208,9 @@ public class TextComponentMatcherEditor<E> extends TextMatcherEditor<E> {
      * text of this TextMatcherEditor to the contents of the Document.
      */
     private class FilterHandler implements DocumentListener, ActionListener {
-        public void insertUpdate(DocumentEvent e) {
-            refilter();
-        }
-        public void removeUpdate(DocumentEvent e) {
-            refilter();
-        }
-        public void changedUpdate(DocumentEvent e) {
-            refilter();
-        }
-        public void actionPerformed(ActionEvent e) {
-            refilter();
-        }
+        public void insertUpdate(DocumentEvent e) { refilter(); }
+        public void removeUpdate(DocumentEvent e) { refilter(); }
+        public void changedUpdate(DocumentEvent e) { refilter(); }
+        public void actionPerformed(ActionEvent e) { refilter(); }
     }
 }

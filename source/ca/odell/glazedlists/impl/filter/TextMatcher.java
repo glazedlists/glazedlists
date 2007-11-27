@@ -21,7 +21,7 @@ public class TextMatcher<E> implements Matcher<E> {
     /** the filterator is used as an alternative to implementing the TextFilterable interface */
     private final TextFilterator<? super E> filterator;
 
-    /** one of {@link TextMatcherEditor#CONTAINS} or {@link TextMatcherEditor#STARTS_WITH} */
+    /** one of {@link TextMatcherEditor#CONTAINS}, {@link TextMatcherEditor#STARTS_WITH} or {@link TextMatcherEditor#REGULAR_EXPRESSION} */
     private final int mode;
 
     /** one of {@link TextMatcherEditor#IDENTICAL_STRATEGY}, {@link TextMatcherEditor#NORMALIZED_STRATEGY} or {@link ca.odell.glazedlists.matchers.GlazedListsICU4J#UNICODE_TEXT_SEARCH_STRATEGY} */
@@ -41,15 +41,18 @@ public class TextMatcher<E> implements Matcher<E> {
      * @param filterator the object that will extract filter Strings from each
      *      object to be matched; <code>null</code> indicates the objects
      *      implement {@link TextFilterable}
-     * @param mode one of {@link TextMatcherEditor#CONTAINS} or
-     *      {@link TextMatcherEditor#STARTS_WITH} which indicates where to
-     *      locate the search terms for a successful match
+     * @param mode one of {@link TextMatcherEditor#CONTAINS},
+     *      {@link TextMatcherEditor#STARTS_WITH} or {@link TextMatcherEditor#REGULAR_EXPRESSION}
+     *      which indicates where to locate the search terms for a successful match
      * @param strategy one of {@link TextMatcherEditor#IDENTICAL_STRATEGY},
      *      {@link TextMatcherEditor#NORMALIZED_STRATEGY} or
      *      {@link ca.odell.glazedlists.matchers.GlazedListsICU4J#UNICODE_TEXT_SEARCH_STRATEGY}
      *      which indicates what kind of algorithm to use when determining a match
      */
     public TextMatcher(SearchTerm[] searchTerms, TextFilterator<? super E> filterator, int mode, Object strategy) {
+        if (mode == TextMatcherEditor.REGULAR_EXPRESSION && strategy == TextMatcherEditor.NORMALIZED_STRATEGY)
+            throw new IllegalArgumentException("TextMatcher does not support normalized character matching with Regular Expressions");
+
         this.filterator = filterator;
         this.searchTerms = TextMatchers.normalizeSearchTerms(searchTerms, (TextSearchStrategy.Factory)strategy);
         this.mode = mode;
@@ -67,6 +70,7 @@ public class TextMatcher<E> implements Matcher<E> {
      * terms for a successful match.
      *
      * @return one of {@link TextMatcherEditor#CONTAINS}, {@link TextMatcherEditor#STARTS_WITH}
+     *      or {@link TextMatcherEditor#REGULAR_EXPRESSION}
      */
     public int getMode() {
         return mode;
@@ -110,16 +114,16 @@ public class TextMatcher<E> implements Matcher<E> {
      * Return a new TextMatcher identical to this TextMatcher save for the
      * given <code>mode</code>.
      */
-    public TextMatcher newMode(int mode) {
-        return new TextMatcher(searchTerms, filterator, mode, strategy);
+    public TextMatcher<E> newMode(int mode) {
+        return new TextMatcher<E>(searchTerms, filterator, mode, strategy);
     }
 
     /**
      * Return a new TextMatcher identical to this TextMatcher save for the
      * given <code>strategy</code>.
      */
-    public TextMatcher newStrategy(Object strategy) {
-        return new TextMatcher(searchTerms, filterator, mode, strategy);
+    public TextMatcher<E> newStrategy(Object strategy) {
+        return new TextMatcher<E>(searchTerms, filterator, mode, strategy);
     }
 
     /**
@@ -128,7 +132,8 @@ public class TextMatcher<E> implements Matcher<E> {
      *
      * @param filter the filter for which to locate a TextSearchStrategy
      * @param mode the type of search behaviour to use; either
-     *      {@link TextMatcherEditor#CONTAINS} or {@link TextMatcherEditor#STARTS_WITH}
+     *      {@link TextMatcherEditor#CONTAINS}, {@link TextMatcherEditor#STARTS_WITH}
+     *      or {@link TextMatcherEditor#REGULAR_EXPRESSION}
      * @param strategy a hint about the character matching strategy to use; either
      *      {@link TextMatcherEditor#IDENTICAL_STRATEGY}, {@link TextMatcherEditor#NORMALIZED_STRATEGY}
      *      or {@link ca.odell.glazedlists.matchers.GlazedListsICU4J#UNICODE_TEXT_SEARCH_STRATEGY}

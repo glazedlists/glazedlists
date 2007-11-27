@@ -385,6 +385,25 @@ public class TextMatchersTest extends TestCase {
         assertFalse(TextMatchers.isMatcherConstrained(matcherB, matcherA));
     }
 
+    public void testRegularExpressionMatcher() {
+        TextMatcher<String> matcher = new TextMatcher<String>(TextMatchers.parse("[a-z]"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.REGULAR_EXPRESSION, TextMatcherEditor.IDENTICAL_STRATEGY);
+        assertEquals(TextMatcherEditor.REGULAR_EXPRESSION, matcher.getMode());
+        assertTrue(matcher.matches("a"));
+        assertTrue(matcher.matches("x"));
+        assertFalse(matcher.matches("A"));
+    }
+
+    public void testConstructor() {
+        new TextMatcher<String>(TextMatchers.parse("[a-z]"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.REGULAR_EXPRESSION, TextMatcherEditor.IDENTICAL_STRATEGY);
+
+        try {
+            new TextMatcher<String>(TextMatchers.parse("[a-z]"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.REGULAR_EXPRESSION, TextMatcherEditor.NORMALIZED_STRATEGY);
+            fail("failed to receive an IllegalArgumentException using REGULAR_EXPRESSION and NORMALIZED_STRATEGY together");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+    }
+
     private SearchTerm[] normalizedSearchTerms(String text) {
         return TextMatchers.normalizeSearchTerms(searchTerms(text), (TextSearchStrategy.Factory) TextMatcherEditor.IDENTICAL_STRATEGY);
     }
