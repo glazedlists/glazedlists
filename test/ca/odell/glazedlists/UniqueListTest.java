@@ -18,8 +18,8 @@ import java.util.*;
  */
 public class UniqueListTest extends TestCase {
 
-    private UniqueList<Object> unique = null;
-    private BasicEventList<Object> source = null;
+    private UniqueList<Object> unique;
+    private BasicEventList<Object> source;
 
     /**
      * Prepare for the test.
@@ -1559,7 +1559,7 @@ public class UniqueListTest extends TestCase {
     }
 
     public void testAllPossibleGrouperStateChanges_FixMe() {
-        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>(), true);
+        final TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>(), true);
         final UniqueList<String> uniqueList = new UniqueList<String>(source, String.CASE_INSENSITIVE_ORDER);
         ListConsistencyListener.install(uniqueList);
 
@@ -1596,6 +1596,28 @@ public class UniqueListTest extends TestCase {
             source.set(4, "e");
         source.commitEvent(); // this failure proves a bug in the reporting of previous elements in ListConsistencyListener
         assertEquals(source, GlazedListsTests.stringToList("AaAeeE"));
+    }
 
+    public void testMassUpdates_FixMe() {
+        final TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>(), true);
+        final UniqueList<String> uniqueList = new UniqueList<String>(source, String.CASE_INSENSITIVE_ORDER);
+
+        source.add("A");
+        source.add("A");
+        source.add("A");
+        source.add("A");
+        source.add("A");
+
+        assertEquals("A", uniqueList.get(0));
+
+        source.beginEvent(true);
+            source.set(0, "B");
+            source.set(1, "B");
+            source.set(2, "B");
+            source.set(3, "B");
+            source.set(4, "B");
+        source.commitEvent();
+
+        assertEquals("B", uniqueList.get(0));
     }
 }
