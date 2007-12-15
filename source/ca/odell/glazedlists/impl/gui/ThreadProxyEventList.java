@@ -13,6 +13,7 @@ import ca.odell.glazedlists.event.ListEventListener;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.RandomAccess;
 
 /**
  * An {@link EventList} that only forwards its events on a proxy thread,
@@ -64,7 +65,7 @@ import java.util.List;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> {
+public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> implements RandomAccess {
     
     /** a local cache of the source list */
     private List<E> localCache = new ArrayList<E>();

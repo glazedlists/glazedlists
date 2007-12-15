@@ -8,6 +8,7 @@ import ca.odell.glazedlists.event.ListEvent;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.RandomAccess;
 
 /**
  * A SequenceList contains values in adjacent indices which occur at predictable
@@ -21,7 +22,7 @@ import java.util.List;
  * {@link Sequencer} can be implemented to reliably produce the next or previous
  * value in a sequence using only some value from the source list.
  *
- * SequenceList is a readonly list; calling any write method on this list
+ * <p>SequenceList is a readonly list; calling any write method on this list
  * will produce an {@link UnsupportedOperationException}.
  *
  * <p>The start and end values of the sequence are the smallest sequence values
@@ -44,7 +45,7 @@ import java.util.List;
  *
  * @author James Lemieux
  */
-public final class SequenceList<E> extends TransformedList<E,E> {
+public final class SequenceList<E> extends TransformedList<E,E> implements RandomAccess {
 
     /** The values participating in the sequence. */
     private final List<E> sequence = new ArrayList<E>();

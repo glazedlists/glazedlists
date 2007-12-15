@@ -39,7 +39,7 @@ import java.util.*;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public final class BasicEventList<E> extends AbstractEventList<E> implements Serializable {
+public final class BasicEventList<E> extends AbstractEventList<E> implements Serializable, RandomAccess {
 
     /** For versioning as a {@link Serializable} */
     private static final long serialVersionUID = 4883958173323072345L;

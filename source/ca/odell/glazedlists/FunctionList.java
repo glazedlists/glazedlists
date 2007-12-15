@@ -7,6 +7,7 @@ import ca.odell.glazedlists.event.ListEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.RandomAccess;
 
 /**
  * This List is meant to simplify the task of transforming each element of a
@@ -60,7 +61,7 @@ import java.util.List;
  * </td></tr>
  * </table>
  */
-public final class FunctionList<S, E> extends TransformedList<S, E> {
+public final class FunctionList<S, E> extends TransformedList<S, E> implements RandomAccess {
 
     private final List<S> sourceElements;
 
