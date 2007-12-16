@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class SortingState {
+public final class SortingState {
 
     /** this regular expression for parsing the string representation of a column */
     private static final Pattern FROM_STRING_PATTERN = Pattern.compile("^\\s*column\\s+(\\d+)(\\s+comparator\\s+(\\d+))?(\\s+(reversed))?\\s*$", Pattern.CASE_INSENSITIVE);

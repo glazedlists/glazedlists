@@ -118,7 +118,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      *          <li> {@link ca.odell.glazedlists.gui.AbstractTableComparatorChooser#MULTIPLE_COLUMN_MOUSE_WITH_UNDO}
      * @param tableFormat the TableFormat providing the columns for the table
      */
-    protected TableComparatorChooser(JTable table, SortedList<E> sortedList, Object strategy, TableFormat<? super E> tableFormat) {
+    private TableComparatorChooser(JTable table, SortedList<E> sortedList, Object strategy, TableFormat<? super E> tableFormat) {
         super(sortedList, tableFormat);
         validateSortingStrategy(strategy);
 
