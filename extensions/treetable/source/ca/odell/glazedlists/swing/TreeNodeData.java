@@ -24,7 +24,7 @@ public final class TreeNodeData {
      * Returns the depth of the tree node in the hierarchy.
      */
     public int getDepth() { return depth; }
-    void setDepth(int depth) { this.depth = depth; }
+    public void setDepth(int depth) { this.depth = depth; }
 
     /**
      * Returns <tt>true</tt> if the node is expanded and its children are thus
@@ -33,19 +33,19 @@ public final class TreeNodeData {
      * returns <tt>true</tt>; otherwise it should be ignored.
      */
     public boolean isExpanded() { return isExpanded; }
-    void setExpanded(boolean expanded) { isExpanded = expanded; }
+    public void setExpanded(boolean expanded) { isExpanded = expanded; }
 
     /**
      * Returns <tt>true</tt> if the tree node has child nodes; <tt>false</tt>
      * otherwise.
      */
     public boolean hasChildren() { return hasChildren; }
-    void setHasChildren(boolean hasChildren) { this.hasChildren = hasChildren; }
+    public void setHasChildren(boolean hasChildren) { this.hasChildren = hasChildren; }
 
     /**
      * Returns <tt>true</tt> if the node is of the type that can have child
      * elements; <tt>false</tt> otherwise.
      */
     public boolean allowsChildren() { return allowsChildren; }
-    void setAllowsChildren(boolean allowsChildren) { this.allowsChildren = allowsChildren; }
+    public void setAllowsChildren(boolean allowsChildren) { this.allowsChildren = allowsChildren; }
 }

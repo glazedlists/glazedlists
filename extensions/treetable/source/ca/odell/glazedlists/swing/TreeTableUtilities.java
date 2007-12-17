@@ -15,7 +15,7 @@ import java.awt.*;
  *
  * @author James Lemieux
  */
-class TreeTableUtilities {
+public class TreeTableUtilities {
 
     /**
      * Assuming the <code>mouseEvent</code> occurred over a {@link JTable},
@@ -39,7 +39,7 @@ class TreeTableUtilities {
      *      <code>null</code> if the click was outside the table or the
      *      renderer does not return a TreeTableCellPanel
      */
-    static TreeTableCellPanel prepareRenderer(MouseEvent mouseEvent) {
+    public static TreeTableCellPanel prepareRenderer(MouseEvent mouseEvent) {
         // extract information about the location of the click
         final JTable table = (JTable) mouseEvent.getSource();
         final Point clickPoint = mouseEvent.getPoint();

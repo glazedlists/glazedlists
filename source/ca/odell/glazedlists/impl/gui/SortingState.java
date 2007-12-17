@@ -177,10 +177,14 @@ public final class SortingState {
 
         sortingColumns = new ArrayList<SortingColumn>(columnCount);
         for(int i = 0; i < columnCount; i++) {
-            sortingColumns.add(new SortingColumn(tableFormat, i));
+            sortingColumns.add(createSortingColumn(tableFormat, i));
         }
 
         recentlyClickedColumns.clear();
+    }
+
+    protected SortingColumn createSortingColumn(TableFormat tableFormat, int columnIndex) {
+        return new SortingColumn(tableFormat, columnIndex);
     }
 
     public List<SortingColumn> getColumns() {

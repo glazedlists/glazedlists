@@ -109,7 +109,7 @@ public abstract class AbstractTableComparatorChooser<E> {
     protected Comparator<? super E> sortedListComparator = null;
 
     /** manage which columns are sorted and in which order */
-    protected final SortingState sortingState = new SortingState(this);
+    protected SortingState sortingState;
 
     /**
      * Create a {@link AbstractTableComparatorChooser} that sorts the specified
@@ -117,9 +117,18 @@ public abstract class AbstractTableComparatorChooser<E> {
      */
     protected AbstractTableComparatorChooser(SortedList<E> sortedList, TableFormat<? super E> tableFormat) {
         this.sortedList = sortedList;
+        this.sortingState = createSortingState();
         this.setTableFormat(tableFormat);
 
         this.sortingState.addPropertyChangeListener(new SortingStateListener());
+    }
+
+    /**
+     * Returns the object which models the current sorting state of all columns
+     * in the table.
+     */
+    protected SortingState createSortingState() {
+        return new SortingState(this);
     }
 
     /**

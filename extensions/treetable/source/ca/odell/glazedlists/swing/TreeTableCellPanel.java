@@ -34,7 +34,7 @@ import java.util.Map;
  *
  * @author James Lemieux
  */
-class TreeTableCellPanel extends JPanel {
+public class TreeTableCellPanel extends JPanel {
 
     /** The border that spaces the delegate component over from the expander button. */
     private static final Border NO_FOCUS_BORDER = BorderFactory.createEmptyBorder(0, 0, 0, 0);
