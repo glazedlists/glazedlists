@@ -61,9 +61,9 @@ public class GlazedListsTests {
     public static List<List<String>> stringToLists(CharSequence chars) {
         List<List<String>> result = new ArrayList<List<String>>();
         String[] strings = chars.toString().split(",");
-        for(int i = 0; i < strings.length; i++) {
-            result.add(stringToList(strings[i]));
-        }
+        for (String string : strings)
+            result.add(stringToList(string));
+
         return result;
     }
 
@@ -72,9 +72,9 @@ public class GlazedListsTests {
      */
     public static List<String> stringsToList(CharSequence[] data) {
         List<String> result = new ArrayList<String>();
-        for(int s = 0; s < data.length; s++) {
-            result.addAll(stringToList(data[s]));
-        }
+        for (CharSequence datum : data)
+            result.addAll(stringToList(datum));
+
         return result;
     }
 
@@ -83,9 +83,9 @@ public class GlazedListsTests {
      */
     public static List<Integer> intArrayToIntegerCollection(int[] values) {
         List<Integer> result = new ArrayList<Integer>();
-        for(int i = 0; i < values.length; i++) {
-            result.add(new Integer(values[i]));
-        }
+        for (int value : values)
+            result.add(new Integer(value));
+
         return result;
     }
 

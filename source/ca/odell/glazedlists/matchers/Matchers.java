@@ -258,4 +258,17 @@ public final class Matchers {
     public static <E> Matcher<E> and(Matcher<? super E>... matchers) {
         return new AndMatcher<E>(matchers);
     }
+
+    /**
+     * Returns a Matcher which reports a match when the given object to match
+     * is not null and reports on of the given <code>classes</code> as its type.
+     *
+     * @param classes the object types that are matched
+     * @return a Matcher which reports a match when the given object to match
+     *      is not null and reports on of the given <code>classes</code> as its
+     *      type
+     */
+    public static <E> Matcher<E> types(Class... classes) {
+        return new TypeMatcher<E>(classes);
+    }
 }

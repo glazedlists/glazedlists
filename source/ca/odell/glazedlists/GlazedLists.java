@@ -131,12 +131,43 @@ public final class GlazedLists {
     private static Comparator<Comparable> reversedComparable = null;
 
     /**
-     * Creates a {@link Comparator} that uses Reflection to compare two instances
-     * of the specified {@link Class} by the given JavaBean property.  The JavaBean
-     * property must implement {@link Comparable}.
+     * Creates a {@link Comparator} that uses Reflection to compare two
+     * instances of the specified {@link Class} by the given JavaBean
+     * properties. The JavaBean <code>property</code> and any extra
+     * <code>properties</code> must implement {@link Comparable}.
+     *
+     * <p>The following example code sorts a List of Customers by first name,
+     * with ties broken by last name.
+     *
+     * <pre>
+     *    List<Customer> customers = ...
+     *    Comparator<Customer> comparator = GlazedLists.beanPropertyComparator(Customer.class, "firstName", "lastName");
+     *    Collections.sort(customers, comparator);
+     * </pre>
+     *
+     * @param clazz the name of the class which defines the accessor method
+     *      for the given <code>property</code> and optionaly <code>properties</code>
+     * @param property the name of the first Comparable property to be extracted
+     *      and used to compare instances of the <code>clazz</code>
+     * @param properties the name of optional Comparable properties, each of
+     *      which is used to break ties for the prior property.
      */
-    public static <T> Comparator<T> beanPropertyComparator(Class<T> className, String property) {
-        return beanPropertyComparator(className, property, comparableComparator());
+    public static <T> Comparator<T> beanPropertyComparator(Class<T> clazz, String property, String... properties) {
+        // build the Comparator that must exist
+        Comparator<T> firstComparator = beanPropertyComparator(clazz, property, comparableComparator());
+
+        // if only one Comparator is specified, return it immediately
+        if (properties.length == 0) return firstComparator;
+
+        // build the remaining Comparators
+        final List<Comparator<T>> comparators = new ArrayList<Comparator<T>>(properties.length+1);
+        comparators.add(firstComparator);
+
+        for (String prop : properties)
+            comparators.add(beanPropertyComparator(clazz, prop, comparableComparator()));
+
+        // chain all Comparators together
+        return chainComparators(comparators);
     }
 
     /**

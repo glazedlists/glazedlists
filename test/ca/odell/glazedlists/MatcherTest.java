@@ -13,13 +13,13 @@ public class MatcherTest extends TestCase {
     public void testTrueMatcher() {
         Matcher<String> s = Matchers.trueMatcher();
         Matcher<Boolean> b = Matchers.trueMatcher();
-        assertTrue((Object) s == b);
+        assertSame(s, b);
     }
 
     public void testFalseMatcher() {
         Matcher<String> s = Matchers.falseMatcher();
         Matcher<Boolean> b = Matchers.falseMatcher();
-        assertTrue((Object) s == b);
+        assertSame(s, b);
     }
 
     public void testNotMatcher() {
@@ -229,6 +229,29 @@ public class MatcherTest extends TestCase {
         assertEquals(false, matcher.matches(event3));
         assertEquals(false, matcher.matches(event4));
         assertEquals(true, matcher.matches(event5));
+    }
+
+    public void testTypeMatcher() {
+        final List<Number> numbers = new ArrayList<Number>();
+        numbers.add(new Float(0));
+        numbers.add(new Double(1));
+        numbers.add(new Short((short) 2));
+        numbers.add(new Integer(3));
+        numbers.add(new Long(4));
+
+        Collection<? super Number> selected;
+
+        final Matcher<Number> intAndLongMatcher = Matchers.types(Long.class, Integer.class);
+        selected = Matchers.select(numbers, intAndLongMatcher);
+        assertEquals(Arrays.asList(new Integer(3), new Long(4)), selected);
+
+        final Matcher<Number> numberMatcher = Matchers.types(Number.class);
+        selected = Matchers.select(numbers, numberMatcher);
+        assertEquals(Arrays.asList(new Float(0), new Double(1), new Short((short) 2), new Integer(3), new Long(4)), selected);
+
+        final Matcher<Number> stringMatcher = Matchers.types(String.class);
+        selected = Matchers.select(numbers, stringMatcher);
+        assertEquals(Collections.EMPTY_LIST, selected);
     }
     
     private static class NumberMatcherEditor extends AbstractMatcherEditor<Number> {

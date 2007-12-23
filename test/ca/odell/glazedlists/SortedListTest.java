@@ -1260,6 +1260,49 @@ public class SortedListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("KLARTZ"), sorted);
     }
 
+    /**
+     * This test ensures that the SortedList sorts by its own
+     * order, then by the order in the source list.
+     */
+    public void testChainedComparator() {
+        sortedList.setComparator(null);
+
+        Song nookie = new Song("Limp Bizkit", "Nookie");
+        Song eatYouAlive = new Song("Limp Bizkit", "Eat You Alive");
+        Song rearranged = new Song("Limp Bizkit", "Rearranged");
+        Song theUnquestionableTruth = new Song("Limp Bizkit", "The Unquestionable Truth");
+        Song welcomeToTheFold = new Song("Filter", "Welcome to the Fold");
+        Song takeAPicture = new Song("Filter", "Take a Picture");
+        Song missBlue = new Song("Filter", "Miss Blue");
+
+        unsortedList.add(nookie);
+        unsortedList.add(eatYouAlive);
+        unsortedList.add(takeAPicture);
+        unsortedList.add(rearranged);
+        unsortedList.add(missBlue);
+        unsortedList.add(theUnquestionableTruth);
+        unsortedList.add(welcomeToTheFold);
+
+        assertSame(nookie, sortedList.get(0));
+        assertSame(eatYouAlive, sortedList.get(1));
+        assertSame(takeAPicture, sortedList.get(2));
+        assertSame(rearranged, sortedList.get(3));
+        assertSame(missBlue, sortedList.get(4));
+        assertSame(theUnquestionableTruth, sortedList.get(5));
+        assertSame(welcomeToTheFold, sortedList.get(6));
+
+        Comparator songComparator = GlazedLists.beanPropertyComparator(Song.class, "artist", "song");
+        sortedList.setComparator(songComparator);
+
+        assertSame(missBlue, sortedList.get(0));
+        assertSame(takeAPicture, sortedList.get(1));
+        assertSame(welcomeToTheFold, sortedList.get(2));
+        assertSame(eatYouAlive, sortedList.get(3));
+        assertSame(nookie, sortedList.get(4));
+        assertSame(rearranged, sortedList.get(5));
+        assertSame(theUnquestionableTruth, sortedList.get(6));
+    }
+
     /** test a sorted list for equality */
     public void assertSortedEquals(List<Comparable> unsorted, SortedList sorted) {
         // create a protective copy to muck with
