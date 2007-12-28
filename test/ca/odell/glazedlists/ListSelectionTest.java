@@ -6,6 +6,8 @@ package ca.odell.glazedlists;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import junit.framework.TestCase;
 
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.ListSelectionEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -707,5 +709,43 @@ public class ListSelectionTest extends TestCase {
         assertEquals(0, listSelection.getTogglingSelected().size());
         assertEquals(2, source.size());
         assertEquals(2, listSelection.getTogglingDeselected().size());
+    }
+
+    public void testEventsCoverAnchorAndLeadIndexes() {
+        for (int i = 0; i < 100; i++)
+            source.add(new Integer(i));
+
+        final ListSelectionCounter counter = new ListSelectionCounter();
+        listSelection.addSelectionListener(counter);
+        assertEquals(0, counter.changeStart);
+        assertEquals(0, counter.changeEnd);
+        assertEquals(0, counter.callbacks);
+        assertEquals(-1, listSelection.getAnchorSelectionIndex());
+        assertEquals(-1, listSelection.getLeadSelectionIndex());
+
+        listSelection.select(4);
+        assertEquals(4, counter.changeStart);
+        assertEquals(4, counter.changeEnd);
+        assertEquals(1, counter.callbacks);
+        assertEquals(4, listSelection.getAnchorSelectionIndex());
+        assertEquals(4, listSelection.getLeadSelectionIndex());
+
+        // anchor == 4, so we fire an event from 4 -> 10
+        listSelection.select(10);
+        assertEquals(4, counter.changeStart);
+        assertEquals(10, counter.changeEnd);
+        assertEquals(2, counter.callbacks);
+        assertEquals(10, listSelection.getAnchorSelectionIndex());
+        assertEquals(10, listSelection.getLeadSelectionIndex());
+    }
+
+    private class ListSelectionCounter implements ListSelection.Listener {
+        private int changeStart, changeEnd, callbacks;
+
+        public void selectionChanged(int changeStart, int changeEnd) {
+            this.changeStart = changeStart;
+            this.changeEnd = changeEnd;
+            this.callbacks++;
+        }
     }
 }

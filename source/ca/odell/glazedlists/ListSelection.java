@@ -445,12 +445,17 @@ public class ListSelection<E> implements ListEventListener<E> {
         } else if(selectionMode == SINGLE_INTERVAL_SELECTION && start > getMinSelectionIndex()) {
             end = Math.max(end, getMaxSelectionIndex());
         }
+
+        // record the original anchor and lead if they are about to change
+        final int oldAnchor = anchorSelectionIndex == start ? -1 : anchorSelectionIndex;
+        final int oldLead = leadSelectionIndex == end ? -1 : leadSelectionIndex;
+
         // update anchor and lead
         anchorSelectionIndex = start;
         leadSelectionIndex = end;
 
         // alter selection accordingly
-        setSubRangeOfRange(false, start, end, -1, -1);
+        setSubRangeOfRange(false, start, end, -1, -1, oldLead, oldAnchor);
     }
 
     /**
@@ -563,12 +568,17 @@ public class ListSelection<E> implements ListEventListener<E> {
                 return;
             }
         }
+
+        // record the original anchor and lead if they are about to change
+        final int oldAnchor = anchorSelectionIndex == start ? -1 : anchorSelectionIndex;
+        final int oldLead = leadSelectionIndex == end ? -1 : leadSelectionIndex;
+
         // update anchor and lead
         anchorSelectionIndex = start;
         leadSelectionIndex = end;
 
         // alter selection accordingly
-        setSubRangeOfRange(true, start, end, -1, -1);
+        setSubRangeOfRange(true, start, end, -1, -1, oldLead, oldAnchor);
     }
 
     /**
@@ -679,12 +689,16 @@ public class ListSelection<E> implements ListEventListener<E> {
             end = start;
         }
 
+        // record the original anchor and lead if they are about to change
+        final int oldAnchor = anchorSelectionIndex == start ? -1 : anchorSelectionIndex;
+        final int oldLead = leadSelectionIndex == end ? -1 : leadSelectionIndex;
+
         // update anchor and lead
         anchorSelectionIndex = start;
         leadSelectionIndex = end;
 
         // alter selection accordingly
-        setSubRangeOfRange(true, start, end, getMinSelectionIndex(), getMaxSelectionIndex());
+        setSubRangeOfRange(true, start, end, getMinSelectionIndex(), getMaxSelectionIndex(), oldLead, oldAnchor);
     }
 
     /**
@@ -745,6 +759,9 @@ public class ListSelection<E> implements ListEventListener<E> {
      * Set the anchor selection index.
      */
     public void setAnchorSelectionIndex(int anchorSelectionIndex) {
+        // record the original anchor and lead if they are about to change
+        final int oldAnchor = this.anchorSelectionIndex == anchorSelectionIndex ? -1 : anchorSelectionIndex;
+
         // update anchor
         this.anchorSelectionIndex = anchorSelectionIndex;
 
@@ -754,15 +771,15 @@ public class ListSelection<E> implements ListEventListener<E> {
 
         // only the anchor should be selected
         } else if(selectionMode == SINGLE_SELECTION) {
-            setSubRangeOfRange(true, anchorSelectionIndex, anchorSelectionIndex, getMinSelectionIndex(), getMaxSelectionIndex());
+            setSubRangeOfRange(true, anchorSelectionIndex, anchorSelectionIndex, getMinSelectionIndex(), getMaxSelectionIndex(), -1, oldAnchor);
 
         // select the interval between anchor and lead
         } else if(selectionMode == SINGLE_INTERVAL_SELECTION) {
-            setSubRangeOfRange(true, anchorSelectionIndex, leadSelectionIndex, getMinSelectionIndex(), getMaxSelectionIndex());
+            setSubRangeOfRange(true, anchorSelectionIndex, leadSelectionIndex, getMinSelectionIndex(), getMaxSelectionIndex(), -1, oldAnchor);
 
         // select the interval between anchor and lead without deselecting anything
         } else {
-            setSubRangeOfRange(true, anchorSelectionIndex, leadSelectionIndex, -1, -1);
+            setSubRangeOfRange(true, anchorSelectionIndex, leadSelectionIndex, -1, -1, -1, oldAnchor);
         }
     }
 
@@ -777,6 +794,9 @@ public class ListSelection<E> implements ListEventListener<E> {
      * Set the lead selection index.
      */
     public void setLeadSelectionIndex(int leadSelectionIndex) {
+        // record the original anchor and lead if they are about to change
+        final int oldLead = this.leadSelectionIndex == leadSelectionIndex ? -1 : leadSelectionIndex;
+
         // update lead
         int originalLeadIndex = this.leadSelectionIndex;
         this.leadSelectionIndex = leadSelectionIndex;
@@ -787,15 +807,15 @@ public class ListSelection<E> implements ListEventListener<E> {
 
         // select only the lead
         } else if(selectionMode == SINGLE_SELECTION) {
-            setSubRangeOfRange(true, leadSelectionIndex, leadSelectionIndex, getMinSelectionIndex(), getMaxSelectionIndex());
+            setSubRangeOfRange(true, leadSelectionIndex, leadSelectionIndex, getMinSelectionIndex(), getMaxSelectionIndex(), oldLead, -1);
 
         // select the interval between anchor and lead
         } else if(selectionMode == SINGLE_INTERVAL_SELECTION) {
-            setSubRangeOfRange(true, anchorSelectionIndex, leadSelectionIndex, getMinSelectionIndex(), getMaxSelectionIndex());
+            setSubRangeOfRange(true, anchorSelectionIndex, leadSelectionIndex, getMinSelectionIndex(), getMaxSelectionIndex(), oldLead, -1);
 
         // select the interval between anchor and lead deselecting as necessary
         } else {
-            setSubRangeOfRange(true, anchorSelectionIndex, leadSelectionIndex, anchorSelectionIndex, originalLeadIndex);
+            setSubRangeOfRange(true, anchorSelectionIndex, leadSelectionIndex, anchorSelectionIndex, originalLeadIndex, oldLead, -1);
         }
     }
 
@@ -941,7 +961,7 @@ public class ListSelection<E> implements ListEventListener<E> {
      *      This may be lower than invertIndex0. To specify an empty second
      *      range, specify -1 for this value.
      */
-    private void setSubRangeOfRange(boolean select, int changeIndex0, int changeIndex1, int invertIndex0, int invertIndex1) {
+    private void setSubRangeOfRange(boolean select, int changeIndex0, int changeIndex1, int invertIndex0, int invertIndex1, int oldLead, int oldAnchor) {
         // verify that the first range is legitimate
         if(changeIndex0 >= source.size() || changeIndex1 >= source.size()
         || ((changeIndex0 == -1 || changeIndex1 == -1) && changeIndex0 != changeIndex1)) {
@@ -1011,6 +1031,18 @@ public class ListSelection<E> implements ListEventListener<E> {
             }
         }
         commitAll();
+
+        // consider the original lead/anchor indexes, if any, when firing the "selection changed" event
+        // (this forces a redraw of the old lead/anchor rows when the lead/anchor changes)
+        if (oldLead != -1) {
+            minChangedIndex = Math.min(minChangedIndex, oldLead);
+            maxChangedIndex = Math.max(maxChangedIndex, oldLead);
+        }
+
+        if (oldAnchor != -1) {
+            minChangedIndex = Math.min(minChangedIndex, oldAnchor);
+            maxChangedIndex = Math.max(maxChangedIndex, oldAnchor);
+        }
 
         // notify selection listeners
         if(minChangedIndex <= maxChangedIndex) fireSelectionChanged(minChangedIndex, maxChangedIndex);
