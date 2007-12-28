@@ -163,8 +163,8 @@ public final class GlazedLists {
         final List<Comparator<T>> comparators = new ArrayList<Comparator<T>>(properties.length+1);
         comparators.add(firstComparator);
 
-        for (String prop : properties)
-            comparators.add(beanPropertyComparator(clazz, prop, comparableComparator()));
+        for (int i = 0; i < properties.length; i++)
+            comparators.add(beanPropertyComparator(clazz, properties[i], comparableComparator()));
 
         // chain all Comparators together
         return chainComparators(comparators);

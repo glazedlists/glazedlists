@@ -68,7 +68,7 @@ class IssueSummaryChartsComponent {
 
     public IssueSummaryChartsComponent(EventList<Issue> issuesList) {
         // build a PieDataset representing Issues by Status
-        final Comparator<Issue> issuesByStatusGrouper = GlazedLists.beanPropertyComparator(Issue.class, "status");
+        final Comparator<Issue> issuesByStatusGrouper = GlazedLists.beanPropertyComparator(Issue.class, "status", new String[0]);
         final FunctionList.Function<List<Issue>, Comparable<String>> keyFunction = new StatusFunction();
         final FunctionList.Function<List<Issue>, Number> valueFunction = new ListSizeFunction();
         final EventList<Issue> pieDataSource = GlazedListsSwing.swingThreadProxyList(issuesList);
