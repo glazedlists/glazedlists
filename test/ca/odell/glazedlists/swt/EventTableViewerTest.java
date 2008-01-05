@@ -23,7 +23,7 @@ import java.util.List;
  * @author hbrands
  */
 public class EventTableViewerTest extends SwtTestCase {
-    
+
     private static final List<Color> RGB = Arrays.asList(new Color[] { Color.RED, Color.GREEN, Color.BLUE });
     private static final List<Color> RGBNull = Arrays.asList(new Color[] { Color.RED, Color.GREEN, Color.BLUE, null });
 
@@ -125,7 +125,7 @@ public class EventTableViewerTest extends SwtTestCase {
         viewer.dispose();
     }
 
-    public void guiTestBug413_FixMe() {
+    public void guiTestBug413() {
         final BasicEventList<String> source = new BasicEventList<String>();
         for (int i = 0; i < 3; i++) {
             source.add("Str" + i);

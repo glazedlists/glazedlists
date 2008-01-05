@@ -279,7 +279,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
     public List<E> getAllChecked() {
         checkFilterList.getReadWriteLock().readLock().lock();
         try {
-            return checkFilterList.getAllChecked(); 
+            return checkFilterList.getAllChecked();
         } finally {
             checkFilterList.getReadWriteLock().readLock().unlock();
         }
@@ -630,7 +630,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
 
             // Calculate the index that should be requested because the Table
             // might be sending incorrectly indexed TableItems in the event.
-            int whiteIndex = requested.getWhiteIndex(table.getTopIndex(), false);
+            int whiteIndex = requested.getWhiteIndex(table.indexOf(item), false);
             int index = requested.getIndex(whiteIndex, Barcode.WHITE);
 //            System.out.println("ETV.handleEvent: e.index|index|topindex|lastindex=" + e.index + "|"
 //                    + index + "|" + table.getTopIndex() + "|" + getLastIndex());
