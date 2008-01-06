@@ -2,11 +2,21 @@ package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.impl.matchers.NotMatcher;
 import ca.odell.glazedlists.impl.matchers.PropertyEventNameMatcher;
-import ca.odell.glazedlists.matchers.*;
+import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
+import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.matchers.MatcherEditor;
+import ca.odell.glazedlists.matchers.Matchers;
+import ca.odell.glazedlists.matchers.TextMatcherEditor;
+
 import junit.framework.TestCase;
 
 import java.beans.PropertyChangeEvent;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 public class MatcherTest extends TestCase {
 
@@ -111,7 +121,7 @@ public class MatcherTest extends TestCase {
         results = Matchers.select(elements, new NumberMatcher(new Integer(99)), results);
         assertEquals(9, results.size());
     }
-    
+
     public void testIndexOf() {
         List<Integer> elements = new ArrayList<Integer>();
         elements.add(new Integer(45));
@@ -194,14 +204,14 @@ public class MatcherTest extends TestCase {
         final PropertyChangeEvent event3 = new PropertyChangeEvent(this, "hello", "old", "new");
         final PropertyChangeEvent event4 = new PropertyChangeEvent(this, "hello", null, null);
         final PropertyChangeEvent event5 = new PropertyChangeEvent(this, null, null, null);
-        
-        Matcher<PropertyChangeEvent> matcher = new PropertyEventNameMatcher(true, new String[] {"test", null});        
+
+        Matcher<PropertyChangeEvent> matcher = new PropertyEventNameMatcher(true, new String[] {"test", null});
         assertEquals(true, matcher.matches(event1));
         assertEquals(true, matcher.matches(event2));
         assertEquals(false, matcher.matches(event3));
         assertEquals(false, matcher.matches(event4));
         assertEquals(true, matcher.matches(event5));
-        
+
         matcher = new PropertyEventNameMatcher(false, new String[] {"test", null});
         assertEquals(false, matcher.matches(event1));
         assertEquals(false, matcher.matches(event2));
@@ -223,7 +233,7 @@ public class MatcherTest extends TestCase {
         assertEquals(true, matcher.matches(event4));
         assertEquals(true, matcher.matches(event5));
 
-        matcher = new PropertyEventNameMatcher(true, Arrays.asList(new String[] {"test", null}));        
+        matcher = new PropertyEventNameMatcher(true, Arrays.asList(new String[] {"test", null}));
         assertEquals(true, matcher.matches(event1));
         assertEquals(true, matcher.matches(event2));
         assertEquals(false, matcher.matches(event3));
@@ -241,19 +251,19 @@ public class MatcherTest extends TestCase {
 
         Collection<? super Number> selected;
 
-        final Matcher<Number> intAndLongMatcher = Matchers.types(Long.class, Integer.class);
+        final Matcher<Number> intAndLongMatcher = Matchers.types(new Class[] {Long.class, Integer.class});
         selected = Matchers.select(numbers, intAndLongMatcher);
-        assertEquals(Arrays.asList(new Integer(3), new Long(4)), selected);
+        assertEquals(Arrays.asList(new Number[] {new Integer(3), new Long(4)}), selected);
 
-        final Matcher<Number> numberMatcher = Matchers.types(Number.class);
+        final Matcher<Number> numberMatcher = Matchers.types(new Class[] {Number.class});
         selected = Matchers.select(numbers, numberMatcher);
-        assertEquals(Arrays.asList(new Float(0), new Double(1), new Short((short) 2), new Integer(3), new Long(4)), selected);
+        assertEquals(Arrays.asList(new Number[] {new Float(0), new Double(1), new Short((short) 2), new Integer(3), new Long(4)}), selected);
 
-        final Matcher<Number> stringMatcher = Matchers.types(String.class);
+        final Matcher<Number> stringMatcher = Matchers.types(new Class[] {String.class});
         selected = Matchers.select(numbers, stringMatcher);
         assertEquals(Collections.EMPTY_LIST, selected);
     }
-    
+
     private static class NumberMatcherEditor extends AbstractMatcherEditor<Number> {
         public void setNumber(Number number) {
             this.fireChanged(new NumberMatcher(number));

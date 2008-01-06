@@ -4,12 +4,20 @@
 package ca.odell.glazedlists;
 
 // for being a JUnit test case
+import ca.odell.glazedlists.impl.filter.StringLengthComparator;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import ca.odell.glazedlists.impl.filter.StringLengthComparator;
+
 import junit.framework.TestCase;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Random;
 
 /**
  * This test verifies that the SortedList works.
@@ -1069,8 +1077,8 @@ public class SortedListTest extends TestCase {
      * order, then by the order in the source list.
      */
     public void testSortedListHandlesSortEvents() {
-        Comparator artistComparator = GlazedLists.beanPropertyComparator(Song.class, "artist");
-        Comparator songComparator = GlazedLists.beanPropertyComparator(Song.class, "song");
+        Comparator artistComparator = GlazedLists.beanPropertyComparator(Song.class, "artist", new String[0]);
+        Comparator songComparator = GlazedLists.beanPropertyComparator(Song.class, "song", new String[0]);
         List<Comparable> expectedOrder;
         sortedList.setComparator(null);
 
@@ -1291,7 +1299,7 @@ public class SortedListTest extends TestCase {
         assertSame(theUnquestionableTruth, sortedList.get(5));
         assertSame(welcomeToTheFold, sortedList.get(6));
 
-        Comparator songComparator = GlazedLists.beanPropertyComparator(Song.class, "artist", "song");
+        Comparator songComparator = GlazedLists.beanPropertyComparator(Song.class, "artist", new String[] {"song"});
         sortedList.setComparator(songComparator);
 
         assertSame(missBlue, sortedList.get(0));

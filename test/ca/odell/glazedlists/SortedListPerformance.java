@@ -79,14 +79,15 @@ public class SortedListPerformance {
 
         List issues = loadIssues(args[0]);
         Comparator[] comparators = new Comparator[8];
-        comparators[0] = GlazedLists.beanPropertyComparator(MozillaEntry.class, "id");
-        comparators[1] = GlazedLists.beanPropertyComparator(MozillaEntry.class, "severity");
-        comparators[2] = GlazedLists.beanPropertyComparator(MozillaEntry.class, "priority");
-        comparators[3] = GlazedLists.beanPropertyComparator(MozillaEntry.class, "os");
-        comparators[4] = GlazedLists.beanPropertyComparator(MozillaEntry.class, "email");
-        comparators[5] = GlazedLists.beanPropertyComparator(MozillaEntry.class, "result");
-        comparators[6] = GlazedLists.beanPropertyComparator(MozillaEntry.class, "status");
-        comparators[7] = GlazedLists.beanPropertyComparator(MozillaEntry.class, "desc");
+        final String[] empty = {};
+        comparators[0] = GlazedLists.beanPropertyComparator(MozillaEntry.class, "id", empty);
+        comparators[1] = GlazedLists.beanPropertyComparator(MozillaEntry.class, "severity", empty);
+        comparators[2] = GlazedLists.beanPropertyComparator(MozillaEntry.class, "priority", empty);
+        comparators[3] = GlazedLists.beanPropertyComparator(MozillaEntry.class, "os", empty);
+        comparators[4] = GlazedLists.beanPropertyComparator(MozillaEntry.class, "email", empty);
+        comparators[5] = GlazedLists.beanPropertyComparator(MozillaEntry.class, "result", empty);
+        comparators[6] = GlazedLists.beanPropertyComparator(MozillaEntry.class, "status", empty);
+        comparators[7] = GlazedLists.beanPropertyComparator(MozillaEntry.class, "desc", empty);
 
         EventList issuesEventList = new BasicEventList();
         SortedList sorted = new SortedList(issuesEventList, comparators[0]);

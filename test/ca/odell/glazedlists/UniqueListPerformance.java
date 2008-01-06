@@ -6,7 +6,9 @@ package ca.odell.glazedlists;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 /**
  * Utility class for analyzing the performance of the UniqueList.
@@ -16,13 +18,13 @@ import java.util.*;
 public class UniqueListPerformance {
 
     private static Random dice = new Random(137);
-    
+
     /**
      * Load issues from the specified file and return the result.
      */
     private static List<MozillaEntry> loadIssues(String file) throws IOException {
         System.out.println("Reading issues...");
-        
+
         List<MozillaEntry> issues = new ArrayList<MozillaEntry>();
         BufferedReader in = new BufferedReader(new FileReader(file));
 
@@ -30,7 +32,7 @@ public class UniqueListPerformance {
         while(!in.readLine().equals("")) {
             // no-op to ignore the file header which is for text filtering
         }
-        
+
         // Read the actual data.
         String[] entryValues = new String[8];
         int counter = 0;
@@ -53,10 +55,10 @@ public class UniqueListPerformance {
         // we're done reading
         System.out.println("done. " + issues.size() + " issues loaded.");
         in.close();
-        
+
         return issues;
     }
-    
+
     /**
      * Execute a performance test that is specified on the command line.
      */
@@ -72,13 +74,14 @@ public class UniqueListPerformance {
         List<MozillaEntry> issues = loadIssues(args[0]);
 
         EventList<MozillaEntry> issuesEventList = new BasicEventList<MozillaEntry>();
-        UniqueList<MozillaEntry> uniqueByEmail    = new UniqueList<MozillaEntry>(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "email"));
-        UniqueList<MozillaEntry> uniqueBySeverity = new UniqueList<MozillaEntry>(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "severity"));
-        UniqueList<MozillaEntry> uniqueByPriority = new UniqueList<MozillaEntry>(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "priority"));
-        UniqueList<MozillaEntry> uniqueByOs       = new UniqueList<MozillaEntry>(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "os"));
-        UniqueList<MozillaEntry> uniqueByResult   = new UniqueList<MozillaEntry>(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "result"));
-        UniqueList<MozillaEntry> uniqueByStatus   = new UniqueList<MozillaEntry>(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "status"));
-        
+        final String[] empty = {};
+        UniqueList<MozillaEntry> uniqueByEmail    = new UniqueList<MozillaEntry>(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "email", empty));
+        UniqueList<MozillaEntry> uniqueBySeverity = new UniqueList<MozillaEntry>(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "severity", empty));
+        UniqueList<MozillaEntry> uniqueByPriority = new UniqueList<MozillaEntry>(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "priority", empty));
+        UniqueList<MozillaEntry> uniqueByOs       = new UniqueList<MozillaEntry>(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "os", empty));
+        UniqueList<MozillaEntry> uniqueByResult   = new UniqueList<MozillaEntry>(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "result", empty));
+        UniqueList<MozillaEntry> uniqueByStatus   = new UniqueList<MozillaEntry>(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "status", empty));
+
         // populate
         System.out.print("Populating issues list...");
         long setUpStart = System.currentTimeMillis();
@@ -99,7 +102,7 @@ public class UniqueListPerformance {
         long tearDownTime = tearDownEnd - tearDownStart;
         System.out.println("done. Time: " + tearDownTime + "ms");
     }
-    
+
     /**
      * An entry in the Mozilla bug db
      */
