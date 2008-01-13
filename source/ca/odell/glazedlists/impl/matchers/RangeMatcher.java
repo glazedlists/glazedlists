@@ -85,10 +85,10 @@ public class RangeMatcher<D extends Comparable,E> implements Matcher<E> {
 
             // check if the filterComparable is within the defined range
             if (filterComparable != null) {
-                if (start != null && start.compareTo(filterComparable) == 1)
+                if (start != null && start.compareTo(filterComparable) > 0)
                     continue;
 
-                if (end != null && end.compareTo(filterComparable) == -1)
+                if (end != null && end.compareTo(filterComparable) < 0)
                     continue;
             }
 
