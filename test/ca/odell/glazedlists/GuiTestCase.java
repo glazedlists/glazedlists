@@ -95,20 +95,21 @@ public abstract class GuiTestCase extends TestCase {
 
                 // ensure no methods of the form testXXX() exist
                 final Method[] allMethods = guiTestClass.getMethods();
-                for (Method method : allMethods) {
-                    final String methodName = method.getName();
+                for (int i = 0; i < allMethods.length; i++) {
+                    final String methodName = allMethods[i].getName();
                     if (methodName.startsWith(JUNIT_BAD_PREFIX) && !methodName.equals(JUNIT_OK_METHOD))
                         throw new IllegalStateException(methodName + "() must be renamed to guiT" + methodName.substring(1) +"()");
                 }
 
                 // run all test methods
-                for (Method method : allMethods) {
-                    if (!method.getName().startsWith(TEST_METHOD_PREFIX))
+                for (int i = 0; i < allMethods.length; i++) {
+                    final String methodName = allMethods[i].getName();
+                    if (!methodName.startsWith(TEST_METHOD_PREFIX))
                         continue;
 
-                    System.out.println("Executing " + method.getName());
+                    System.out.println("Executing " + methodName);
                     setUp.invoke(testCase, SEND_NO_PARAMETERS);
-                    method.invoke(testCase, SEND_NO_PARAMETERS);
+                    allMethods[i].invoke(testCase, SEND_NO_PARAMETERS);
                     tearDown.invoke(testCase, SEND_NO_PARAMETERS);
                 }
             }
