@@ -11,7 +11,7 @@ import javax.swing.*;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
-public class GlazedListsSwingTest extends TestCase {
+public class CalculationsTest extends TestCase {
 
     public void testCalculationLabel() {
         final EventList<Float> source = new BasicEventList<Float>();
@@ -27,8 +27,8 @@ public class GlazedListsSwingTest extends TestCase {
         formatter.setMinimumFractionDigits(2);
         formatter.setMaximumFractionDigits(2);
 
-        GlazedListsSwing.bind(label, division);
-        GlazedListsSwing.bind(formattedLabel, division, formatter);
+        Calculations.bind(label, division);
+        Calculations.bind(formattedLabel, division, formatter);
 
         assertEquals("1.0", label.getText());
         assertEquals("1.00", formattedLabel.getText());
