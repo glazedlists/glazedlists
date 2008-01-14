@@ -19,7 +19,7 @@ import java.util.*;
  * Specifically, a <strong>mutation</strong> of a list element IN PLACE does
  * not produce an undoable edit. For example, an {@link ObservableElementList}
  * which observes a change of an element, or a call to {@link List#set} with
- * the same object at that index produce both a ListEvent that does not have a
+ * the same object at that index produce a ListEvent that does not have a
  * corresponding {@link Edit} object. These ListEvents are ignored because they
  * lack sufficient information to undo or redo the change.
  *
