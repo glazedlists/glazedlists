@@ -4,6 +4,7 @@
 package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import ca.odell.glazedlists.matchers.Matchers;
@@ -626,6 +627,27 @@ public class EventListTest extends TestCase {
         for(int i = 0; i < 2; i++) list.remove(0);
 
         list.commitEvent();
+    }
+
+    public void testGenericsOfListEvent() {
+        final EventList<? extends String> source = GlazedLists.eventListOf();
+        source.addListEventListener(new ListEventListener<Object>() {
+            public void listChanged(ListEvent<Object> listChanges) {
+                listChanges.next();
+                Object o = listChanges.getSourceList().get(listChanges.getIndex());
+                assertEquals(String.class, o.getClass());
+            }
+        });
+
+        source.addListEventListener(new ListEventListener<String>() {
+            public void listChanged(ListEvent<String> listChanges) {
+                listChanges.next();
+                String s = listChanges.getSourceList().get(listChanges.getIndex());
+                assertEquals(String.class, s.getClass());
+            }
+        });
+
+        ((EventList)source).add("Test");
     }
 
     /**
