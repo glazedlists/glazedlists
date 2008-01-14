@@ -1,7 +1,6 @@
 /* Glazed Lists                                                 (c) 2003-2007 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-
 package ca.odell.glazedlists.hibernate;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -28,7 +27,7 @@ public final class CategoryEventListFactory implements EventListFactory {
     private static final Map<String, ListInfo> CATEGORY_MAP = new HashMap<String, ListInfo>();
     
     /** List category used by this factory instance. */
-    private String category;
+    private final String category;
     
     /**
      * Constructor with list category to use. If the category is not registered yet, it will be
@@ -46,8 +45,7 @@ public final class CategoryEventListFactory implements EventListFactory {
      * 
      * @throws IllegalStateException if the same category is already registered with different values
      */
-    public CategoryEventListFactory(String category, ReadWriteLock lock,
-            ListEventPublisher publisher) {
+    public CategoryEventListFactory(String category, ReadWriteLock lock, ListEventPublisher publisher) {
         if (category == null) throw new IllegalArgumentException("Category must not be null");
         if (lock == null) throw new IllegalArgumentException("ReadWriteLock must not be null");
         if (publisher == null) throw new IllegalArgumentException("ListEventPublisher must not be null");
@@ -139,6 +137,5 @@ public final class CategoryEventListFactory implements EventListFactory {
             this.lock = lock; 
             this.publisher = publisher;
         }
-        
     }
 }
