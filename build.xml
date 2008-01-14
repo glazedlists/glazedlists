@@ -221,7 +221,7 @@
 		description="Compile the default components of the source.">
 	</target>
 
-	<target name="compileall" depends="core,migrationkit,swing,io,calculations,swt,ktable,issuesbrowser,swinglabs,hibernate,icu4j"
+	<target name="compileall" depends="core,migrationkit,calculations,swing,io,swt,ktable,issuesbrowser,swinglabs,hibernate,icu4j"
 		description="Compile all components of the source.">
 	</target>
 
