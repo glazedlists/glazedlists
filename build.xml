@@ -221,7 +221,7 @@
 		description="Compile the default components of the source.">
 	</target>
 
-	<target name="compileall" depends="core,migrationkit,swing,io,calculations,swt,ktable,issuesbrowser,swinglabs,hibernate,icu4j"
+	<target name="compileall" depends="core,migrationkit,swing,io,calculation,swt,ktable,issuesbrowser,swinglabs,hibernate,icu4j"
 		description="Compile all components of the source.">
 	</target>
 
@@ -267,8 +267,8 @@
        EXTENSIONS
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-    <target name="calculations" depends="swing">
-        <javac destdir="${classes.dir}" srcdir="extensions/calculations/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off"/>
+    <target name="calculation" depends="swing">
+        <javac destdir="${classes.dir}" srcdir="extensions/calculation/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off"/>
     </target>
 
     <target name="swt" depends="core">

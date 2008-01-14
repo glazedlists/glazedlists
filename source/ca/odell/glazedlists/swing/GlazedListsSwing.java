@@ -6,15 +6,11 @@ package ca.odell.glazedlists.swing;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ThresholdList;
 import ca.odell.glazedlists.TransformedList;
-import ca.odell.glazedlists.calculation.Calculation;
 import ca.odell.glazedlists.impl.swing.LowerThresholdRangeModel;
 import ca.odell.glazedlists.impl.swing.SwingThreadProxyEventList;
 import ca.odell.glazedlists.impl.swing.UpperThresholdRangeModel;
 
 import javax.swing.*;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
-import java.text.NumberFormat;
 
 /**
  * A factory for creating all sorts of objects to be used with Glazed Lists.
