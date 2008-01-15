@@ -3,9 +3,9 @@ package ca.odell.glazedlists.swing;
 import ca.odell.glazedlists.calculation.Calculation;
 
 import javax.swing.*;
-import java.text.NumberFormat;
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.text.Format;
 
 public class Calculations {
     /**
@@ -28,7 +28,7 @@ public class Calculations {
      * @param formatter used to format the raw numeric value of the calculation
      *      into pretty display text
      */
-    public static void bind(JLabel label, Calculation calculation, NumberFormat formatter) {
+    public static void bind(JLabel label, Calculation calculation, Format formatter) {
         calculation.addPropertyChangeListener(new CalculationToLabelBinder(label, formatter, calculation.getValue()));
     }
 
@@ -40,9 +40,9 @@ public class Calculations {
     private static final class CalculationToLabelBinder implements PropertyChangeListener {
 
         private final JLabel label;
-        private final NumberFormat formatter;
+        private final Format formatter;
 
-        private CalculationToLabelBinder(JLabel label, NumberFormat formatter, Number initialValue) {
+        private CalculationToLabelBinder(JLabel label, Format formatter, Number initialValue) {
             this.label = label;
             this.formatter = formatter;
             update(initialValue);
