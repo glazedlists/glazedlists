@@ -14,6 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashSet;
 import java.util.Set;
+import java.io.Serializable;
 
 /**
  * A MatcherEditor that matches Objects that contain the filter text located
@@ -121,7 +122,7 @@ public class SearchEngineTextMatcherEditor<E> extends TextMatcherEditor<E> {
      * field from the Objects being text matched must be present in the Set
      * of Field objects on the {@link SearchEngineTextMatcherEditor}.
      */
-    public static final class Field<E> {
+    public static final class Field<E> implements Serializable {
 
         /**
          * The text which which uniquely identifies this Field relative to all

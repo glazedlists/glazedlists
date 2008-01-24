@@ -8,6 +8,7 @@ import ca.odell.glazedlists.swing.SearchEngineTextMatcherEditor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.io.Serializable;
 
 /**
  * A SearchTerm object stores metadata around a single piece of text to be
@@ -33,7 +34,7 @@ import java.util.List;
  *
  * @author James Lemieux
  */
-public final class SearchTerm<E> {
+public final class SearchTerm<E> implements Serializable {
 
     // the text to be located
     private final String text;
