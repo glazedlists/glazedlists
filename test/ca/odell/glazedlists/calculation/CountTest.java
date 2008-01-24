@@ -14,7 +14,7 @@ public class CountTest extends TestCase {
         source.add("a");
 
         final PropertyChangeCounter counter = new PropertyChangeCounter();
-        final Count count = new Count(source);
+        final Calculation<Integer> count = Calculations.count(source);
         count.addPropertyChangeListener(counter);
 
         // check the initial Count state

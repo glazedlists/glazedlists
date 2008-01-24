@@ -25,28 +25,28 @@ import java.util.List;
  *
  * @author James Lemieux
  */
-public abstract class AbstractEventListCalculation<E, N extends Number> extends AbstractCalculation<N> implements ListEventListener<E> {
+public abstract class AbstractEventListCalculation<N extends Number> extends AbstractCalculation<N> implements ListEventListener<Number> {
 
     /** the List of elements from which this calculation is derived */
-    private final EventList<E> source;
+    private final EventList<? extends Number> source;
 
     /** a snapshot of the {@link #source} after the last ListEvent; used to retrieve deleted elements */
-    private final List<E> snapshot;
+    private final List<Number> snapshot;
 
     /**
      * @param initialValue the value that should immediately be reported as the
      *      value of this Calculation
      * @param source the List of elements from which this calculation is derived
      */
-    protected AbstractEventListCalculation(N initialValue, EventList<E> source) {
+    protected AbstractEventListCalculation(N initialValue, EventList<? extends Number> source) {
         super(initialValue);
 
         this.source = source;
-        this.snapshot = new ArrayList<E>(source);
+        this.snapshot = new ArrayList<Number>(source);
 
         // compute the first value of this Calculation by simulating the entry
         // of all existing elements
-        for (E element : this.snapshot)
+        for (Number element : this.snapshot)
             inserted(element);
 
         // begin listening to the source for changes
@@ -75,7 +75,7 @@ public abstract class AbstractEventListCalculation<E, N extends Number> extends 
      *
      * @param newElement the new element within the EventList
      */
-    protected abstract void inserted(E newElement);
+    protected abstract void inserted(Number newElement);
 
     /**
      * Updates the value of this Calculation to exclude the information from
@@ -83,7 +83,7 @@ public abstract class AbstractEventListCalculation<E, N extends Number> extends 
      *
      * @param oldElement the old element within the EventList
      */
-    protected abstract void deleted(E oldElement);
+    protected abstract void deleted(Number oldElement);
 
     /**
      * Updates the value of this Calculation to exclude the information from
@@ -93,7 +93,7 @@ public abstract class AbstractEventListCalculation<E, N extends Number> extends 
      * @param oldElement the old element within the EventList
      * @param newElement the new element which replaced the oldElement
      */
-    protected abstract void updated(E oldElement, E newElement);
+    protected abstract void updated(Number oldElement, Number newElement);
 
     /**
      * Updates the value of this Calculation in response to the
@@ -101,11 +101,11 @@ public abstract class AbstractEventListCalculation<E, N extends Number> extends 
      *
      * @param listChanges describes the changes to the backing EventList
      */
-    public void listChanged(ListEvent<E> listChanges) {
+    public void listChanged(ListEvent<Number> listChanges) {
         // store the value for later when we fire a PropertyChangeEvent
         final N oldValue = getValue();
 
-        final List<E> source = listChanges.getSourceList();
+        final List<Number> source = listChanges.getSourceList();
 
         // update our snapshot and update the value of this Calculation by
         // delegating to the abstract methods which provide that updating logic
@@ -114,7 +114,7 @@ public abstract class AbstractEventListCalculation<E, N extends Number> extends 
 
             switch (listChanges.getType()) {
                 case ListEvent.INSERT: {
-                    final E element = source.get(index);
+                    final Number element = source.get(index);
                     snapshot.add(index, element);
                     inserted(element);
                     break;
@@ -126,8 +126,8 @@ public abstract class AbstractEventListCalculation<E, N extends Number> extends 
                 }
 
                 case ListEvent.UPDATE: {
-                    final E newElement = source.get(index);
-                    final E oldElement = snapshot.set(index, newElement);
+                    final Number newElement = source.get(index);
+                    final Number oldElement = snapshot.set(index, newElement);
                     updated(oldElement, newElement);
                     break;
                 }

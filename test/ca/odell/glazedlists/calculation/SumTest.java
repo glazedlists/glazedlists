@@ -14,7 +14,7 @@ public final class SumTest extends TestCase {
         source.add(1f);
 
         final PropertyChangeCounter counter = new PropertyChangeCounter();
-        final Sum.SumFloat sum = new Sum.SumFloat(source);
+        final Calculation<Float> sum = Calculations.sumFloats(source);
         sum.addPropertyChangeListener(counter);
 
         // check the initial Sum state
@@ -47,7 +47,7 @@ public final class SumTest extends TestCase {
         source.add(1d);
 
         final PropertyChangeCounter counter = new PropertyChangeCounter();
-        final Sum.SumDouble sum = new Sum.SumDouble(source);
+        final Calculation<Double> sum = Calculations.sumDoubles(source);
         sum.addPropertyChangeListener(counter);
 
         // check the initial Sum state

@@ -5,32 +5,36 @@ package ca.odell.glazedlists.calculation;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 
 /**
  * Reports the size of the backing EventList as the value of this Calculation.
  *
  * @author James Lemieux
  */
-public final class Count extends AbstractEventListCalculation<Object, Integer> {
+final class Count extends AbstractCalculation<Integer> implements ListEventListener {
+
+    private final EventList source;
 
     /**
      * @param source the List whose size is reported as the value of this
      *      Calculation
      */
     public Count(EventList source) {
-        super(0, source);
+        super(0);
         setValue(source.size());
+
+        this.source = source;
+        this.source.addListEventListener(this);
     }
 
-    /** No-op since the value of this Calculation is not based on element data. */
-    protected void inserted(Object newElement) { }
-    /** No-op since the value of this Calculation is not based on element data. */
-    protected void deleted(Object oldElement) { }
-    /** No-op since the value of this Calculation is not based on element data. */
-    protected void updated(Object oldElement, Object newElement) { }
+    /** @inheritDoc */
+    public void dispose() {
+        this.source.removeListEventListener(this);
+    }
 
     /** @inheritDoc */
-    public void listChanged(ListEvent<Object> listChanges) {
+    public void listChanged(ListEvent listChanges) {
         final Integer oldValue = getValue();
         setValue(listChanges.getSourceList().size());
         final Integer newValue = getValue();

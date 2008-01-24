@@ -11,45 +11,45 @@ import ca.odell.glazedlists.EventList;
  *
  * @author James Lemieux
  */
-public final class Sum {
+final class Sum {
 
-    public static final class SumFloat extends AbstractEventListCalculation<Float, Float> {
-        public SumFloat(EventList<Float> source) {
+    static final class SumFloat extends AbstractEventListCalculation<Float> {
+        public SumFloat(EventList<? extends Number> source) {
             super(0f, source);
         }
 
-        protected void inserted(Float element) { setValue(getValue() + element); }
-        protected void deleted(Float element) { setValue(getValue() - element); }
-        protected void updated(Float oldElement, Float newElement) { setValue(getValue() - oldElement + newElement); }
+        protected void inserted(Number element) { setValue(getValue() + element.floatValue()); }
+        protected void deleted(Number element) { setValue(getValue() - element.floatValue()); }
+        protected void updated(Number oldElement, Number newElement) { setValue(getValue() - oldElement.floatValue() + newElement.floatValue()); }
     }
 
-    public static final class SumDouble extends AbstractEventListCalculation<Double, Double> {
-        public SumDouble(EventList<Double> source) {
+    static final class SumDouble extends AbstractEventListCalculation<Double> {
+        public SumDouble(EventList<? extends Number> source) {
             super(0d, source);
         }
 
-        protected void inserted(Double element) { setValue(getValue() + element); }
-        protected void deleted(Double element) { setValue(getValue() - element); }
-        protected void updated(Double oldElement, Double newElement) { setValue(getValue() - oldElement + newElement); }
+        protected void inserted(Number element) { setValue(getValue() + element.doubleValue()); }
+        protected void deleted(Number element) { setValue(getValue() - element.doubleValue()); }
+        protected void updated(Number oldElement, Number newElement) { setValue(getValue() - oldElement.doubleValue() + newElement.doubleValue()); }
     }
 
-    public static final class SumInteger extends AbstractEventListCalculation<Integer, Integer> {
-        public SumInteger(EventList<Integer> source) {
+    static final class SumInteger extends AbstractEventListCalculation<Integer> {
+        public SumInteger(EventList<? extends Number> source) {
             super(0, source);
         }
 
-        protected void inserted(Integer element) { setValue(getValue() + element); }
-        protected void deleted(Integer element) { setValue(getValue() - element); }
-        protected void updated(Integer oldElement, Integer newElement) { setValue(getValue() - oldElement + newElement); }
+        protected void inserted(Number element) { setValue(getValue() + element.intValue()); }
+        protected void deleted(Number element) { setValue(getValue() - element.intValue()); }
+        protected void updated(Number oldElement, Number newElement) { setValue(getValue() - oldElement.intValue() + newElement.intValue()); }
     }
 
-    public static final class SumLong extends AbstractEventListCalculation<Long, Long> {
-        public SumLong(EventList<Long> source) {
+    static final class SumLong extends AbstractEventListCalculation<Long> {
+        public SumLong(EventList<? extends Number> source) {
             super(0L, source);
         }
 
-        protected void inserted(Long element) { setValue(getValue() + element); }
-        protected void deleted(Long element) { setValue(getValue() - element); }
-        protected void updated(Long oldElement, Long newElement) { setValue(getValue() - oldElement + newElement); }
+        protected void inserted(Number element) { setValue(getValue() + element.longValue()); }
+        protected void deleted(Number element) { setValue(getValue() - element.longValue()); }
+        protected void updated(Number oldElement, Number newElement) { setValue(getValue() - oldElement.longValue() + newElement.longValue()); }
     }
 }

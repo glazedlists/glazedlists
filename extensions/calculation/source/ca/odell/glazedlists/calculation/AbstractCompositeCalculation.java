@@ -40,6 +40,13 @@ public abstract class AbstractCompositeCalculation<N extends Number> extends Abs
             input.addPropertyChangeListener(this);
     }
 
+    /** @inheritDoc */
+    public void dispose() {
+        // stop listening to the input Calculations for changes
+        for (Calculation<? extends Number> input : inputs)
+            input.removePropertyChangeListener(this);
+    }
+
     /**
      * A convenience method to fetch a snapshot of the values of each of the
      * smaller Calculations being combined by this composite calculation.

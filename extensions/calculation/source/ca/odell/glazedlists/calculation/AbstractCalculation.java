@@ -13,7 +13,7 @@ import java.beans.PropertyChangeSupport;
  *
  * @author James Lemieux
  */
-public class AbstractCalculation<N extends Number> implements Calculation<N> {
+public abstract class AbstractCalculation<N extends Number> implements Calculation<N> {
 
     /** manages the registered PropertyChangeListeners */
     private final PropertyChangeSupport support = new PropertyChangeSupport(this);

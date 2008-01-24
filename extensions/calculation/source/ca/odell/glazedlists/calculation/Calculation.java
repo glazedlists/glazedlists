@@ -37,4 +37,10 @@ public interface Calculation<N extends Number> {
      * @return the latest calculated value
      */
     public N getValue();
+
+    /**
+     * Cease the updating of this Calculation from its data sources and free
+     * them for garbage collection.
+     */
+    public void dispose();
 }

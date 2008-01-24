@@ -1,3 +1,6 @@
+/* Glazed Lists                                                 (c) 2003-2007 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.calculation.Calculation;
@@ -7,7 +10,10 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.Format;
 
-public class Calculations {
+public final class SwingCalculations {
+
+    private SwingCalculations() {}
+
     /**
      * Updates the given label with the latest value of a Calculation each time
      * it reports a change.
@@ -49,8 +55,12 @@ public class Calculations {
         }
 
         private void update(Number value) {
-            final String text = formatter == null ? (value == null ? "" : String.valueOf(value)) : formatter.format(value);
+            final String text = formatter == null ? (isNumberFormattable(value) ? String.valueOf(value) : "") : formatter.format(value);
             label.setText(text);
+        }
+
+        private static boolean isNumberFormattable(Number n) {
+            return n != null && !n.equals(Float.NaN) && !n.equals(Double.NaN);
         }
 
         public void propertyChange(PropertyChangeEvent evt) {

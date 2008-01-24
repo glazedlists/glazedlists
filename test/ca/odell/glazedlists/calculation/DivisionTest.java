@@ -14,9 +14,9 @@ public class DivisionTest extends TestCase {
         source.add(1f);
 
         final PropertyChangeCounter counter = new PropertyChangeCounter();
-        final Count count = new Count(source);
-        final Sum.SumFloat sum = new Sum.SumFloat(source);
-        final Division.DivisionFloat division = new Division.DivisionFloat(sum, count);
+        final Calculation<Integer> count = Calculations.count(source);
+        final Calculation<Float> sum = Calculations.sumFloats(source);
+        final Calculation<Float> division = Calculations.divideFloats(sum, count);
         division.addPropertyChangeListener(counter);
 
         // check the initial Division state
@@ -46,7 +46,7 @@ public class DivisionTest extends TestCase {
         // test remove all
         source.remove(0);
         assertEquals(Float.NaN, division.getValue());
-        assertEquals(1, counter.getCountAndReset());
+        assertEquals(2, counter.getCountAndReset());
     }
 
     public void testMeanDouble() {
@@ -54,9 +54,9 @@ public class DivisionTest extends TestCase {
         source.add(1d);
 
         final PropertyChangeCounter counter = new PropertyChangeCounter();
-        final Count count = new Count(source);
-        final Sum.SumDouble sum = new Sum.SumDouble(source);
-        final Division.DivisionDouble division = new Division.DivisionDouble(sum, count);
+        final Calculation<Integer> count = Calculations.count(source);
+        final Calculation<Double> sum = Calculations.sumDoubles(source);
+        final Calculation<Double> division = Calculations.divideDoubles(sum, count);
         division.addPropertyChangeListener(counter);
 
         // check the initial Division state
@@ -86,6 +86,6 @@ public class DivisionTest extends TestCase {
         // test remove all
         source.remove(0);
         assertEquals(Double.NaN, division.getValue());
-        assertEquals(1, counter.getCountAndReset());
+        assertEquals(2, counter.getCountAndReset());
     }
 }
