@@ -80,7 +80,7 @@ public final class SumTest extends TestCase {
         source.add(1);
 
         final PropertyChangeCounter counter = new PropertyChangeCounter();
-        final Sum.SumInteger sum = new Sum.SumInteger(source);
+        final Calculation<Integer> sum = Calculations.sumIntegers(source);
         sum.addPropertyChangeListener(counter);
 
         // check the initial Sum state
@@ -113,7 +113,7 @@ public final class SumTest extends TestCase {
         source.add(1L);
 
         final PropertyChangeCounter counter = new PropertyChangeCounter();
-        final Sum.SumLong sum = new Sum.SumLong(source);
+        final Calculation<Long> sum = Calculations.sumLongs(source);
         sum.addPropertyChangeListener(counter);
 
         // check the initial Sum state

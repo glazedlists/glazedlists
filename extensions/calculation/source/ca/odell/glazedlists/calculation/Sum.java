@@ -13,8 +13,8 @@ import ca.odell.glazedlists.EventList;
  */
 final class Sum {
 
-    static final class SumFloat extends AbstractEventListCalculation<Float> {
-        public SumFloat(EventList<? extends Number> source) {
+    static final class SumFloat<N extends Number> extends AbstractEventListCalculation<Float, N> {
+        public SumFloat(EventList<N> source) {
             super(0f, source);
         }
 
@@ -23,8 +23,8 @@ final class Sum {
         protected void updated(Number oldElement, Number newElement) { setValue(getValue() - oldElement.floatValue() + newElement.floatValue()); }
     }
 
-    static final class SumDouble extends AbstractEventListCalculation<Double> {
-        public SumDouble(EventList<? extends Number> source) {
+    static final class SumDouble<N extends Number> extends AbstractEventListCalculation<Double, N> {
+        public SumDouble(EventList<N> source) {
             super(0d, source);
         }
 
@@ -33,8 +33,8 @@ final class Sum {
         protected void updated(Number oldElement, Number newElement) { setValue(getValue() - oldElement.doubleValue() + newElement.doubleValue()); }
     }
 
-    static final class SumInteger extends AbstractEventListCalculation<Integer> {
-        public SumInteger(EventList<? extends Number> source) {
+    static final class SumInteger<N extends Number> extends AbstractEventListCalculation<Integer, N> {
+        public SumInteger(EventList<N> source) {
             super(0, source);
         }
 
@@ -43,8 +43,8 @@ final class Sum {
         protected void updated(Number oldElement, Number newElement) { setValue(getValue() - oldElement.intValue() + newElement.intValue()); }
     }
 
-    static final class SumLong extends AbstractEventListCalculation<Long> {
-        public SumLong(EventList<? extends Number> source) {
+    static final class SumLong<N extends Number> extends AbstractEventListCalculation<Long, N> {
+        public SumLong(EventList<N> source) {
             super(0L, source);
         }
 

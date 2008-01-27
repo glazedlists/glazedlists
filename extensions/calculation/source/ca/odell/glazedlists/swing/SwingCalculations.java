@@ -34,7 +34,7 @@ public final class SwingCalculations {
      * @param formatter used to format the raw numeric value of the calculation
      *      into pretty display text
      */
-    public static void bind(JLabel label, Calculation calculation, Format formatter) {
+    public static void bind(JLabel label, Calculation<? extends Number> calculation, Format formatter) {
         calculation.addPropertyChangeListener(new CalculationToLabelBinder(label, formatter, calculation.getValue()));
     }
 

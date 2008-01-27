@@ -19,7 +19,7 @@ import java.beans.PropertyChangeListener;
  *
  * @author James Lemieux
  */
-public interface Calculation<N extends Number> {
+public interface Calculation<N> {
 
     /**
      * @param pcl a PropertyChangeListener to notify any time the
