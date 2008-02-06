@@ -318,6 +318,10 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      * <p>As of 2005/12/20, this method is no longer called when the
      * corresponding mouse press event was a popup trigger. In effect, if this
      * is a right-click on Windows or a 'control-click' on the Mac.
+     *
+     * <p>As of 2008/02/05, this method is no longer called when the
+     * Cursor over the JTableHeader indicates a column resize is expected to
+     * take place, rather than a change in sort.
      */
     protected boolean isSortingMouseEvent(MouseEvent e) {
         // skip the sort if it's not button 1
@@ -543,17 +547,24 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
         }
 
         public void mouseClicked(MouseEvent e) {
+            // if the MouseEvent is popping up a context menu, do not sort
             if (mouseEventIsPerformingPopupTrigger) return;
+
+            // if the cursor indicates we're resizing columns, do not sort
+            if (table.getTableHeader().getCursor() == Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR))
+                return;
+
+            // check if there is any other reason to ignore this MouseEvent
             if (!isSortingMouseEvent(e)) return;
 
-            boolean shift = e.isShiftDown();
-            boolean control = e.isControlDown() || e.isMetaDown();
+            final TableColumnModel columnModel = table.getColumnModel();
+            final int viewColumn = columnModel.getColumnIndexAtX(e.getX());
+            final int column = table.convertColumnIndexToModel(viewColumn);
+            final int clicks = e.getClickCount();
 
-            TableColumnModel columnModel = table.getColumnModel();
-            int viewColumn = columnModel.getColumnIndexAtX(e.getX());
-            int column = table.convertColumnIndexToModel(viewColumn);
-            int clicks = e.getClickCount();
             if (clicks >= 1 && column != -1) {
+                final boolean shift = e.isShiftDown();
+                final boolean control = e.isControlDown() || e.isMetaDown();
                 delegate.columnClicked(sortingState, column, clicks, shift, control);
             }
         }
