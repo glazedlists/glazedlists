@@ -99,6 +99,23 @@ public class EventListViewer<E> implements ListEventListener<E> {
     }
 
     /**
+     * Gets an {@link EventList} that contains only deselected values and
+     * modifies the selection state on mutation.
+     *
+     * Adding an item to this list deselects it and removing an item selects it.
+     * If an item not in the source list is added an
+     * {@link IllegalArgumentException} is thrown
+     */
+    public EventList<E> getTogglingDeselected() {
+        swtThreadSource.getReadWriteLock().readLock().lock();
+        try {
+            return selection.getSelectionList().getTogglingDeselected();
+        } finally {
+            swtThreadSource.getReadWriteLock().readLock().unlock();
+        }
+    }
+
+    /**
      * Provides access to an {@link EventList} that contains items from the
      * viewed Table that are currently selected.
      */
@@ -106,6 +123,23 @@ public class EventListViewer<E> implements ListEventListener<E> {
         swtThreadSource.getReadWriteLock().readLock().lock();
         try {
             return selection.getSelectionList().getSelected();
+        } finally {
+            swtThreadSource.getReadWriteLock().readLock().unlock();
+        }
+    }
+
+    /**
+     * Gets an {@link EventList} that contains only selected
+     * values and modifies the selection state on mutation.
+     *
+     * Adding an item to this list selects it and removing an item deselects it.
+     * If an item not in the source list is added an
+     * {@link IllegalArgumentException} is thrown.
+     */
+    public EventList<E> getTogglingSelected() {
+        swtThreadSource.getReadWriteLock().readLock().lock();
+        try {
+            return selection.getSelectionList().getTogglingSelected();
         } finally {
             swtThreadSource.getReadWriteLock().readLock().unlock();
         }

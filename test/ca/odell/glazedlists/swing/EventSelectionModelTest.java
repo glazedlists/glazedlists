@@ -3,13 +3,21 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.DelayList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.ThreadRecorderEventList;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.matchers.Matchers;
 
+import javax.swing.DefaultListSelectionModel;
+import javax.swing.JList;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.*;
+
 import java.util.Collections;
 
 /**
@@ -26,24 +34,36 @@ public class EventSelectionModelTest extends SwingTestCase {
         EventList<Comparable> list = new BasicEventList<Comparable>();
         SortedList<Comparable> sorted = new SortedList<Comparable>(list, null);
         EventSelectionModel<Comparable> eventSelectionModel = new EventSelectionModel<Comparable>(sorted);
-        
+
         // populate the list
         list.addAll(GlazedListsTests.delimitedStringToList("E C F B A D"));
 
         assertEquals(Collections.EMPTY_LIST, eventSelectionModel.getSelected());
-        
+        assertEquals(Collections.EMPTY_LIST, eventSelectionModel.getTogglingSelected());
+        assertEquals(list, eventSelectionModel.getDeselected());
+        assertEquals(list, eventSelectionModel.getTogglingDeselected());
+
         // select the vowels
         eventSelectionModel.addSelectionInterval(0, 0);
         eventSelectionModel.addSelectionInterval(4, 4);
         assertEquals(GlazedListsTests.delimitedStringToList("E A"), eventSelectionModel.getSelected());
-        
+        assertEquals(GlazedListsTests.delimitedStringToList("E A"), eventSelectionModel.getTogglingSelected());
+        assertEquals(GlazedListsTests.delimitedStringToList("C F B D"), eventSelectionModel.getDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("C F B D"), eventSelectionModel.getTogglingDeselected());
+
         // flip the list
         sorted.setComparator(GlazedLists.comparableComparator());
         assertEquals(GlazedListsTests.delimitedStringToList("A E"), eventSelectionModel.getSelected());
-        
+        assertEquals(GlazedListsTests.delimitedStringToList("A E"), eventSelectionModel.getTogglingSelected());
+        assertEquals(GlazedListsTests.delimitedStringToList("B C D F"), eventSelectionModel.getDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("B C D F"), eventSelectionModel.getTogglingDeselected());
+
         // flip the list again
         sorted.setComparator(GlazedLists.reverseComparator());
         assertEquals(GlazedListsTests.delimitedStringToList("E A"), eventSelectionModel.getSelected());
+        assertEquals(GlazedListsTests.delimitedStringToList("E A"), eventSelectionModel.getTogglingSelected());
+        assertEquals(GlazedListsTests.delimitedStringToList("F D C B"), eventSelectionModel.getDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("F D C B"), eventSelectionModel.getTogglingDeselected());
     }
 
     /**
@@ -61,15 +81,105 @@ public class EventSelectionModelTest extends SwingTestCase {
 
         // test the selection
         assertEquals(list.subList(1, 5), eventSelectionModel.getSelected());
+        assertEquals(list.subList(1, 5), eventSelectionModel.getTogglingSelected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A F"), eventSelectionModel.getDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A F"), eventSelectionModel.getTogglingDeselected());
 
         // clear the selection
         eventSelectionModel.clearSelection();
 
         // test the selection
         assertEquals(Collections.EMPTY_LIST, eventSelectionModel.getSelected());
+        assertEquals(Collections.EMPTY_LIST, eventSelectionModel.getTogglingSelected());
         assertEquals(-1, eventSelectionModel.getMinSelectionIndex());
         assertEquals(-1, eventSelectionModel.getMaxSelectionIndex());
         assertEquals(true, eventSelectionModel.isSelectionEmpty());
+        assertEquals(list, eventSelectionModel.getDeselected());
+        assertEquals(list, eventSelectionModel.getTogglingDeselected());
+    }
+
+    /**
+     * Tests the lists {@link EventSelectionModel#getTogglingSelected()} and
+     * {@link EventSelectionModel#getTogglingDeselected()} for programmatic selection control.
+     */
+    public void guiTestToggleSelection() {
+        EventList<String> list = new BasicEventList<String>();
+        EventSelectionModel<String> eventSelectionModel = new EventSelectionModel<String>(list);
+        assertEquals(Collections.EMPTY_LIST, eventSelectionModel.getSelected());
+        assertEquals(Collections.EMPTY_LIST, eventSelectionModel.getTogglingSelected());
+        assertEquals(Collections.EMPTY_LIST, eventSelectionModel.getDeselected());
+        assertEquals(Collections.EMPTY_LIST, eventSelectionModel.getTogglingDeselected());
+
+        // populate the list
+        list.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
+        assertEquals(Collections.EMPTY_LIST, eventSelectionModel.getSelected());
+        assertEquals(Collections.EMPTY_LIST, eventSelectionModel.getTogglingSelected());
+        assertEquals(list, eventSelectionModel.getDeselected());
+        assertEquals(list, eventSelectionModel.getTogglingDeselected());
+
+        // remove on TogglingDeselected selects
+        eventSelectionModel.getTogglingDeselected().remove("A");
+        eventSelectionModel.getTogglingDeselected().remove(1);
+        eventSelectionModel.getTogglingDeselected().removeAll(GlazedListsTests.delimitedStringToList("F D"));
+        assertEquals(GlazedListsTests.delimitedStringToList("B E"), eventSelectionModel.getDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("B E"), eventSelectionModel.getTogglingDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A C D F"), eventSelectionModel.getSelected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A C D F"), eventSelectionModel.getTogglingSelected());
+
+        // add on TogglingDeselected deselects
+        eventSelectionModel.getTogglingDeselected().add("F");
+        eventSelectionModel.getTogglingDeselected().addAll(GlazedListsTests.delimitedStringToList("C D"));
+        assertEquals(GlazedListsTests.delimitedStringToList("B C D E F"), eventSelectionModel.getDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("B C D E F"), eventSelectionModel.getTogglingDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A"), eventSelectionModel.getSelected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A"), eventSelectionModel.getTogglingSelected());
+
+        // add on TogglingSelected selects
+        eventSelectionModel.getTogglingSelected().add("F");
+        eventSelectionModel.getTogglingSelected().addAll(GlazedListsTests.delimitedStringToList("C D"));
+        assertEquals(GlazedListsTests.delimitedStringToList("B E"), eventSelectionModel.getDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("B E"), eventSelectionModel.getTogglingDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A C D F"), eventSelectionModel.getSelected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A C D F"), eventSelectionModel.getTogglingSelected());
+
+        // remove on TogglingSelected deselects
+        eventSelectionModel.getTogglingSelected().remove("A");
+        eventSelectionModel.getTogglingSelected().remove(1);
+        eventSelectionModel.getTogglingSelected().removeAll(GlazedListsTests.delimitedStringToList("F"));
+        assertEquals(GlazedListsTests.delimitedStringToList("A B D E F"), eventSelectionModel.getDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A B D E F"), eventSelectionModel.getTogglingDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("C"), eventSelectionModel.getSelected());
+        assertEquals(GlazedListsTests.delimitedStringToList("C"), eventSelectionModel.getTogglingSelected());
+
+        // remove on source list
+        list.remove("C");
+        list.removeAll(GlazedListsTests.delimitedStringToList("B E"));
+        assertEquals(GlazedListsTests.delimitedStringToList("A D F"), eventSelectionModel.getDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A D F"), eventSelectionModel.getTogglingDeselected());
+        assertEquals(Collections.EMPTY_LIST, eventSelectionModel.getSelected());
+        assertEquals(Collections.EMPTY_LIST, eventSelectionModel.getTogglingSelected());
+
+        // add on source list
+        list.add("E");
+        list.addAll(GlazedListsTests.delimitedStringToList("C B"));
+        assertEquals(GlazedListsTests.delimitedStringToList("A D F E C B"), eventSelectionModel.getDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A D F E C B"), eventSelectionModel.getTogglingDeselected());
+        assertEquals(Collections.EMPTY_LIST, eventSelectionModel.getSelected());
+        assertEquals(Collections.EMPTY_LIST, eventSelectionModel.getTogglingSelected());
+
+        // clear on TogglingDeselected selects all deselected
+        eventSelectionModel.getTogglingDeselected().clear();
+        assertEquals(Collections.EMPTY_LIST, eventSelectionModel.getDeselected());
+        assertEquals(Collections.EMPTY_LIST, eventSelectionModel.getTogglingDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A D F E C B"), eventSelectionModel.getSelected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A D F E C B"), eventSelectionModel.getTogglingSelected());
+
+        // clear on TogglingSelected deselects all selected
+        eventSelectionModel.getTogglingSelected().clear();
+        assertEquals(GlazedListsTests.delimitedStringToList("A D F E C B"), eventSelectionModel.getDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A D F E C B"), eventSelectionModel.getTogglingDeselected());
+        assertEquals(Collections.EMPTY_LIST, eventSelectionModel.getSelected());
+        assertEquals(Collections.EMPTY_LIST, eventSelectionModel.getTogglingSelected());
     }
 
     /**
@@ -262,7 +372,7 @@ public class EventSelectionModelTest extends SwingTestCase {
         assertEquals(0, defaultListSelectionModelCounter.getCountAndReset());
         assertEquals(0, eventSelectionModelCounter.getCountAndReset());
     }
-    
+
     public void guiTestDeleteSelectedRows_FixMe() {
         EventList<String> source = GlazedLists.eventListOf(new String[] {"one", "two", "three"});
 

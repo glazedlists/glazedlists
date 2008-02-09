@@ -5,6 +5,7 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.gui.TableFormat;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.io.IntegerTableFormat;
 
 import org.eclipse.swt.SWT;
@@ -15,6 +16,7 @@ import org.eclipse.swt.widgets.TableItem;
 
 import java.awt.Color;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -122,6 +124,102 @@ public class EventTableViewerTest extends SwtTestCase {
         assertEquals(80, table.getColumn(2).getWidth());
         assertEquals(true, table.getColumn(2).getResizable());
         assertEquals("Blue Column", table.getColumn(2).getToolTipText());
+        viewer.dispose();
+    }
+
+    /**
+     * Tests the lists {@link EventTableViewer#getTogglingSelected()} and
+     * {@link EventTableViewer#getTogglingDeselected()} for programmatic selection control.
+     */
+    public void guiTestToggleSelection() {
+        final BasicEventList<String> list = new BasicEventList<String>();
+        final Table table = new Table(getShell(), SWT.VIRTUAL | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+        final EventTableViewer<String> viewer = new EventTableViewer<String>(list, table, new SimpleTableFormat());
+
+        // populate the list
+        list.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
+        assertEquals(Collections.EMPTY_LIST, viewer.getSelected());
+        assertEquals(Collections.EMPTY_LIST, viewer.getTogglingSelected());
+        assertEquals(list, viewer.getDeselected());
+        assertEquals(list, viewer.getTogglingDeselected());
+        assertEquals(0, table.getSelectionCount());
+
+        // remove on TogglingDeselected selects
+        viewer.getTogglingDeselected().remove("A");
+        viewer.getTogglingDeselected().remove(1);
+        viewer.getTogglingDeselected().removeAll(GlazedListsTests.delimitedStringToList("F D"));
+        assertEquals(GlazedListsTests.delimitedStringToList("B E"), viewer.getDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("B E"), viewer.getTogglingDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A C D F"), viewer.getSelected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A C D F"), viewer.getTogglingSelected());
+        assertEquals(4, table.getSelectionCount());
+        assertTrue(Arrays.equals(new int[] {0, 2, 3, 5}, table.getSelectionIndices()));
+
+        // add on TogglingDeselected deselects
+        viewer.getTogglingDeselected().add("F");
+        viewer.getTogglingDeselected().addAll(GlazedListsTests.delimitedStringToList("C D"));
+        assertEquals(GlazedListsTests.delimitedStringToList("B C D E F"), viewer.getDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("B C D E F"), viewer.getTogglingDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A"), viewer.getSelected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A"), viewer.getTogglingSelected());
+        assertEquals(1, table.getSelectionCount());
+        assertTrue(Arrays.equals(new int[] {0}, table.getSelectionIndices()));
+
+        // add on TogglingSelected selects
+        viewer.getTogglingSelected().add("F");
+        viewer.getTogglingSelected().addAll(GlazedListsTests.delimitedStringToList("C D"));
+        assertEquals(GlazedListsTests.delimitedStringToList("B E"), viewer.getDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("B E"), viewer.getTogglingDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A C D F"), viewer.getSelected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A C D F"), viewer.getTogglingSelected());
+        assertEquals(4, table.getSelectionCount());
+        assertTrue(Arrays.equals(new int[] {0, 2, 3, 5}, table.getSelectionIndices()));
+
+        // remove on TogglingSelected deselects
+        viewer.getTogglingSelected().remove("A");
+        viewer.getTogglingSelected().remove(1);
+        viewer.getTogglingSelected().removeAll(GlazedListsTests.delimitedStringToList("F"));
+        assertEquals(GlazedListsTests.delimitedStringToList("A B D E F"), viewer.getDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A B D E F"), viewer.getTogglingDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("C"), viewer.getSelected());
+        assertEquals(GlazedListsTests.delimitedStringToList("C"), viewer.getTogglingSelected());
+        assertEquals(1, table.getSelectionCount());
+        assertTrue(Arrays.equals(new int[] {2}, table.getSelectionIndices()));
+
+        // remove on source list
+        list.remove("C");
+        list.removeAll(GlazedListsTests.delimitedStringToList("B E"));
+        assertEquals(GlazedListsTests.delimitedStringToList("A D F"), viewer.getDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A D F"), viewer.getTogglingDeselected());
+        assertEquals(Collections.EMPTY_LIST, viewer.getSelected());
+        assertEquals(Collections.EMPTY_LIST, viewer.getTogglingSelected());
+        assertEquals(0, table.getSelectionCount());
+
+        // add on source list
+        list.add("E");
+        list.addAll(GlazedListsTests.delimitedStringToList("C B"));
+        assertEquals(GlazedListsTests.delimitedStringToList("A D F E C B"), viewer.getDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A D F E C B"), viewer.getTogglingDeselected());
+        assertEquals(Collections.EMPTY_LIST, viewer.getSelected());
+        assertEquals(Collections.EMPTY_LIST, viewer.getTogglingSelected());
+        assertEquals(0, table.getSelectionCount());
+
+        // clear on TogglingDeselected selects all deselected
+        viewer.getTogglingDeselected().clear();
+        assertEquals(Collections.EMPTY_LIST, viewer.getDeselected());
+        assertEquals(Collections.EMPTY_LIST, viewer.getTogglingDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A D F E C B"), viewer.getSelected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A D F E C B"), viewer.getTogglingSelected());
+        assertEquals(6, table.getSelectionCount());
+        assertTrue(Arrays.equals(new int[] {0, 1, 2, 3, 4, 5}, table.getSelectionIndices()));
+
+        // clear on TogglingSelected deselects all selected
+        viewer.getTogglingSelected().clear();
+        assertEquals(GlazedListsTests.delimitedStringToList("A D F E C B"), viewer.getDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A D F E C B"), viewer.getTogglingDeselected());
+        assertEquals(Collections.EMPTY_LIST, viewer.getSelected());
+        assertEquals(Collections.EMPTY_LIST, viewer.getTogglingSelected());
+        assertEquals(0, table.getSelectionCount());
         viewer.dispose();
     }
 
