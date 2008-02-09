@@ -723,7 +723,7 @@
 		</zip>
 	</target>
 
-    <target name="upload" depends="dist,jar"
+    <target name="upload" depends="dist,jar,compiletests"
         description="Upload binaries to java.net, see http://javanettasks.dev.java.net/">
 
         <!-- download the javanettasks library for uploading jars to the java.net webserver -->
