@@ -4,11 +4,14 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.calculation.Calculation;
 import ca.odell.glazedlists.calculation.Calculations;
+
 import junit.framework.TestCase;
 
-import javax.swing.*;
+import javax.swing.JLabel;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Locale;
 
 public class CalculationsTest extends TestCase {
 
@@ -20,7 +23,7 @@ public class CalculationsTest extends TestCase {
 
         final JLabel label = new JLabel();
         final JLabel formattedLabel = new JLabel();
-        final NumberFormat formatter = DecimalFormat.getNumberInstance();
+        final NumberFormat formatter = DecimalFormat.getNumberInstance(Locale.US);
         formatter.setMinimumFractionDigits(2);
         formatter.setMaximumFractionDigits(2);
 

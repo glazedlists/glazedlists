@@ -3,14 +3,22 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import ca.odell.glazedlists.matchers.Matchers;
+
 import junit.framework.TestCase;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Verifies that EventList matches the List API.
@@ -630,7 +638,7 @@ public class EventListTest extends TestCase {
     }
 
     public void testGenericsOfListEvent() {
-        final EventList<? extends String> source = GlazedLists.eventListOf();
+        final EventList<? extends String> source = GlazedLists.eventListOf(null);
         source.addListEventListener(new ListEventListener<Object>() {
             public void listChanged(ListEvent<Object> listChanges) {
                 listChanges.next();
