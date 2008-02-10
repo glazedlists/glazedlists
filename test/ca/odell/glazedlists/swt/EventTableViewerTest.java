@@ -3,6 +3,7 @@ package ca.odell.glazedlists.swt;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
@@ -33,6 +34,86 @@ public class EventTableViewerTest extends SwtTestCase {
     public void guiTestConstructorWithCheckableTable() {
         EventTableViewer<Integer> viewer = new EventTableViewer<Integer>(new BasicEventList<Integer>(), new Table(getShell(), SWT.CHECK), new IntegerTableFormat());
         viewer.dispose();
+    }
+
+    /** Tests SWT table sort column and sort direction with GL single column sort. */
+    public void guiTestSingleColumnSort() {
+        final EventList<Color> source = GlazedLists.eventList(RGB);
+        final SortedList<Color> sorted = new SortedList<Color>(source, null);
+        final TableFormat<Color> tableFormat = GlazedLists.tableFormat(new String[] { "red",
+                "green", "blue" }, new String[] { "Red", "Green", "Blue" });
+        final Table table = new Table(getShell(), SWT.VIRTUAL | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+        final EventTableViewer<Color> viewer = new EventTableViewer<Color>(sorted, table, tableFormat);
+        final TableComparatorChooser<Color> chooser = TableComparatorChooser.install(viewer, sorted, false);
+        assertNull(table.getSortColumn());
+        assertEquals(SWT.NONE, table.getSortDirection());
+        chooser.getComparatorsForColumn(0).add(GlazedLists.beanPropertyComparator(Color.class, "red", new String[]{}));
+        chooser.getComparatorsForColumn(1).add(GlazedLists.beanPropertyComparator(Color.class, "green", new String[]{}));
+        chooser.getComparatorsForColumn(2).add(GlazedLists.beanPropertyComparator(Color.class, "blue", new String[]{}));
+
+        chooser.appendComparator(0, 0, false);
+        assertEquals(table.getColumn(0), table.getSortColumn());
+        assertEquals(SWT.UP, table.getSortDirection());
+
+        chooser.clearComparator();
+        assertNull(table.getSortColumn());
+        assertEquals(SWT.NONE, table.getSortDirection());
+
+        chooser.appendComparator(0, 0, true);
+        assertEquals(table.getColumn(0), table.getSortColumn());
+        assertEquals(SWT.DOWN, table.getSortDirection());
+
+        chooser.fromString("column 2");
+        assertEquals(table.getColumn(2), table.getSortColumn());
+        assertEquals(SWT.UP, table.getSortDirection());
+
+        chooser.fromString("column 1 reversed");
+        assertEquals(table.getColumn(1), table.getSortColumn());
+        assertEquals(SWT.DOWN, table.getSortDirection());
+    }
+
+    /**
+     * Tests SWT table sort column and sort direction with GL multiple column sort.
+     * <p>As SWT table only supports one sort column, it'll always be the GL primary sort column.</p>
+     */
+    public void guiTestMultiColumnSort() {
+        final EventList<Color> source = GlazedLists.eventList(RGB);
+        final SortedList<Color> sorted = new SortedList<Color>(source, null);
+        final TableFormat<Color> tableFormat = GlazedLists.tableFormat(new String[] { "red",
+                "green", "blue" }, new String[] { "Red", "Green", "Blue" });
+        final Table table = new Table(getShell(), SWT.VIRTUAL | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+        final EventTableViewer<Color> viewer = new EventTableViewer<Color>(sorted, table, tableFormat);
+        final TableComparatorChooser<Color> chooser = TableComparatorChooser.install(viewer, sorted, true);
+        assertNull(table.getSortColumn());
+        assertEquals(SWT.NONE, table.getSortDirection());
+        chooser.getComparatorsForColumn(0).add(GlazedLists.beanPropertyComparator(Color.class, "red", new String[]{}));
+        chooser.getComparatorsForColumn(1).add(GlazedLists.beanPropertyComparator(Color.class, "green", new String[]{}));
+        chooser.getComparatorsForColumn(2).add(GlazedLists.beanPropertyComparator(Color.class, "blue", new String[]{}));
+
+        chooser.appendComparator(0, 0, false);
+        assertEquals(table.getColumn(0), table.getSortColumn());
+        assertEquals(SWT.UP, table.getSortDirection());
+
+        chooser.clearComparator();
+        assertNull(table.getSortColumn());
+        assertEquals(SWT.NONE, table.getSortDirection());
+
+        chooser.appendComparator(0, 0, true);
+        assertEquals(table.getColumn(0), table.getSortColumn());
+        assertEquals(SWT.DOWN, table.getSortDirection());
+
+        // primary sort column remains swt table sort column
+        chooser.appendComparator(2, 0, false);
+        assertEquals(table.getColumn(0), table.getSortColumn());
+        assertEquals(SWT.DOWN, table.getSortDirection());
+
+        chooser.fromString("column 2");
+        assertEquals(table.getColumn(2), table.getSortColumn());
+        assertEquals(SWT.UP, table.getSortDirection());
+
+        chooser.fromString("column 1 reversed, column 2");
+        assertEquals(table.getColumn(1), table.getSortColumn());
+        assertEquals(SWT.DOWN, table.getSortDirection());
     }
 
     /** Tests the default TableItemConfigurer. */

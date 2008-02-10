@@ -9,6 +9,8 @@ import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.gui.AbstractTableComparatorChooser;
 import ca.odell.glazedlists.impl.gui.MouseOnlySortingStrategy;
 import ca.odell.glazedlists.impl.gui.SortingStrategy;
+
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
@@ -114,11 +116,32 @@ public final class TableComparatorChooser<E> extends AbstractTableComparatorChoo
     }
 
     /**
+     * Updates the SWT table to indicate sorting icon on the primary sort column.
+     */
+    protected final void updateTableSortColumn() {
+        final List<Integer> sortedColumns = getSortingColumns();
+        if (sortedColumns.isEmpty()) {
+            // no columns sorted
+            table.setSortColumn(null);
+            table.setSortDirection(SWT.NONE);
+        } else {
+            // make GL primary sort column the SWT table sort column
+            final int primaryColumnIndex = sortedColumns.get(0).intValue();
+            final int sortDirection = isColumnReverse(primaryColumnIndex) ? SWT.DOWN : SWT.UP;
+            table.setSortColumn(table.getColumn(primaryColumnIndex));
+            table.setSortDirection(sortDirection);
+        }
+    }
+
+    /**
      * Updates the comparator in use and applies it to the table.
+     *
+     * <p>This method is called when the sorting state changed.</p>
      */
     protected final void rebuildComparator() {
         super.rebuildComparator();
-
+        // update sorting icon in SWT table
+        updateTableSortColumn();
         // notify interested listeners that the sorting has changed
         Event sortEvent = new Event();
         sortEvent.widget = table;
