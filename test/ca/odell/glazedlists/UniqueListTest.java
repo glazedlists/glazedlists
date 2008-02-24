@@ -1555,7 +1555,16 @@ public class UniqueListTest extends TestCase {
 
         source.add(1, "B");
         assertEquals(4, uniqueList.size());
+    }
 
+    public void testGenerics() {
+        final EventList<Integer> source = new BasicEventList<Integer>();
+        final Comparator<Number> comparator = new Comparator<Number>() {
+            public int compare(Number o1, Number o2) {
+                return o1.intValue() - o2.intValue();
+            }
+        };
+        final UniqueList<Integer> unique = new UniqueList<Integer>(source, comparator);
     }
 
     public void testAllPossibleGrouperStateChanges_FixMe() {

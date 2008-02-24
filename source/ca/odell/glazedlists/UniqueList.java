@@ -82,7 +82,7 @@ public final class UniqueList<E> extends TransformedList<E, E> {
      * @param source the {@link EventList} containing duplicates to remove
      * @param comparator the {@link Comparator} used to determine equality
      */
-    public UniqueList(EventList<E> source, Comparator<E> comparator) {
+    public UniqueList(EventList<E> source, Comparator<? super E> comparator) {
         this(new SortedList<E>(source, comparator), (Void) null);
     }
 
