@@ -18,27 +18,27 @@ public final class SumTest extends TestCase {
         sum.addPropertyChangeListener(counter);
 
         // check the initial Sum state
-        assertEquals(1f, sum.getValue().floatValue());
+        assertEquals(new Float(1), sum.getValue());
         assertEquals(0, counter.getCountAndReset());
 
         // test add
-        source.add(2f);
-        assertEquals(3f, sum.getValue().floatValue());
+        source.add(new Float(2));
+        assertEquals(new Float(3), sum.getValue());
         assertEquals(1, counter.getCountAndReset());
 
         // test update with sum change
-        source.set(1, 3f);
-        assertEquals(4f, sum.getValue().floatValue());
+        source.set(1, new Float(3));
+        assertEquals(new Float(4), sum.getValue());
         assertEquals(1, counter.getCountAndReset());
 
         // test update without sum change
         source.set(1, source.get(1));
-        assertEquals(4f, sum.getValue().floatValue());
+        assertEquals(new Float(4), sum.getValue());
         assertEquals(0, counter.getCountAndReset());
 
         // test remove
         source.remove(1);
-        assertEquals(1f, sum.getValue().floatValue());
+        assertEquals(new Float(1), sum.getValue());
         assertEquals(1, counter.getCountAndReset());
     }
 
@@ -51,27 +51,27 @@ public final class SumTest extends TestCase {
         sum.addPropertyChangeListener(counter);
 
         // check the initial Sum state
-        assertEquals(1d, sum.getValue().doubleValue());
+        assertEquals(new Double(1), sum.getValue());
         assertEquals(0, counter.getCountAndReset());
 
         // test add
         source.add(new Double(2));
-        assertEquals(3d, sum.getValue().doubleValue());
+        assertEquals(new Double(3), sum.getValue());
         assertEquals(1, counter.getCountAndReset());
 
         // test update with sum change
         source.set(1, new Double(3));
-        assertEquals(4d, sum.getValue().doubleValue());
+        assertEquals(new Double(4), sum.getValue());
         assertEquals(1, counter.getCountAndReset());
 
         // test update without sum change
         source.set(1, source.get(1));
-        assertEquals(4d, sum.getValue().doubleValue());
+        assertEquals(new Double(4), sum.getValue());
         assertEquals(0, counter.getCountAndReset());
 
         // test remove
         source.remove(1);
-        assertEquals(1d, sum.getValue().doubleValue());
+        assertEquals(new Double(1), sum.getValue());
         assertEquals(1, counter.getCountAndReset());
     }
 

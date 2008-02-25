@@ -4,6 +4,7 @@
 package ca.odell.glazedlists.calculation;
 
 import junit.framework.TestCase;
+import junit.framework.Assert;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.BasicEventList;
 
@@ -20,32 +21,32 @@ public class DivisionTest extends TestCase {
         division.addPropertyChangeListener(counter);
 
         // check the initial Division state
-        assertEquals(1f, division.getValue().floatValue());
+        assertEquals(new Float(1), division.getValue());
         assertEquals(0, counter.getCountAndReset());
 
         // test add
         source.add(new Float(2));
-        assertEquals(1.5f, division.getValue().floatValue());
+        assertEquals(new Float(1.5), division.getValue());
         assertEquals(2, counter.getCountAndReset());
 
         // test update with sum change
         source.set(1, new Float(3));
-        assertEquals(2f, division.getValue().floatValue());
+        assertEquals(new Float(2), division.getValue());
         assertEquals(1, counter.getCountAndReset());
 
         // test update without sum change
         source.set(1, source.get(1));
-        assertEquals(2f, division.getValue().floatValue());
+        assertEquals(new Float(2), division.getValue());
         assertEquals(0, counter.getCountAndReset());
 
         // test remove
         source.remove(1);
-        assertEquals(1f, division.getValue().floatValue());
+        assertEquals(new Float(1), division.getValue());
         assertEquals(2, counter.getCountAndReset());
 
         // test remove all
         source.remove(0);
-        assertEquals(Float.NaN, division.getValue().floatValue());
+        assertEquals(new Float(Float.NaN), division.getValue());
         assertEquals(2, counter.getCountAndReset());
     }
 
@@ -60,32 +61,32 @@ public class DivisionTest extends TestCase {
         division.addPropertyChangeListener(counter);
 
         // check the initial Division state
-        assertEquals(1d, division.getValue().doubleValue());
+        assertEquals(new Double(1), division.getValue());
         assertEquals(0, counter.getCountAndReset());
 
         // test add
         source.add(new Double(2));
-        assertEquals(1.5d, division.getValue().doubleValue());
+        assertEquals(new Double(1.5), division.getValue());
         assertEquals(2, counter.getCountAndReset());
 
         // test update with sum change
         source.set(1, new Double(3));
-        assertEquals(2d, division.getValue().doubleValue());
+        assertEquals(new Double(2), division.getValue());
         assertEquals(1, counter.getCountAndReset());
 
         // test update without sum change
         source.set(1, source.get(1));
-        assertEquals(2d, division.getValue().doubleValue());
+        assertEquals(new Double(2), division.getValue());
         assertEquals(0, counter.getCountAndReset());
 
         // test remove
         source.remove(1);
-        assertEquals(1d, division.getValue().doubleValue());
+        assertEquals(new Double(1), division.getValue());
         assertEquals(2, counter.getCountAndReset());
 
         // test remove all
         source.remove(0);
-        assertEquals(Double.NaN, division.getValue().doubleValue());
+        assertEquals(new Double(Double.NaN), division.getValue());
         assertEquals(2, counter.getCountAndReset());
     }
 }
