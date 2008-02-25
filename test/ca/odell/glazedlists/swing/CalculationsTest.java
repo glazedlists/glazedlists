@@ -17,7 +17,7 @@ public class CalculationsTest extends TestCase {
 
     public void testCalculationLabel() {
         final EventList<Float> source = new BasicEventList<Float>();
-        source.add(1f);
+        source.add(new Float(1));
 
         final Calculation<Float> mean = Calculations.meanFloats(source);
 
@@ -34,7 +34,7 @@ public class CalculationsTest extends TestCase {
         assertEquals("1.00", formattedLabel.getText());
 
         // alter the value
-        source.add(12f);
+        source.add(new Float(12));
         assertEquals("6.5", label.getText());
         assertEquals("6.50", formattedLabel.getText());
 

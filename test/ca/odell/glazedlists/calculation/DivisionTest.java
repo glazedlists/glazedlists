@@ -11,7 +11,7 @@ public class DivisionTest extends TestCase {
 
     public void testMeanFloat() {
         final EventList<Float> source = new BasicEventList<Float>();
-        source.add(1f);
+        source.add(new Float(1));
 
         final PropertyChangeCounter counter = new PropertyChangeCounter();
         final Calculation<Integer> count = Calculations.count(source);
@@ -20,38 +20,38 @@ public class DivisionTest extends TestCase {
         division.addPropertyChangeListener(counter);
 
         // check the initial Division state
-        assertEquals(1f, division.getValue());
+        assertEquals(1f, division.getValue().floatValue());
         assertEquals(0, counter.getCountAndReset());
 
         // test add
-        source.add(2f);
-        assertEquals(1.5f, division.getValue());
+        source.add(new Float(2));
+        assertEquals(1.5f, division.getValue().floatValue());
         assertEquals(2, counter.getCountAndReset());
 
         // test update with sum change
-        source.set(1, 3f);
-        assertEquals(2f, division.getValue());
+        source.set(1, new Float(3));
+        assertEquals(2f, division.getValue().floatValue());
         assertEquals(1, counter.getCountAndReset());
 
         // test update without sum change
         source.set(1, source.get(1));
-        assertEquals(2f, division.getValue());
+        assertEquals(2f, division.getValue().floatValue());
         assertEquals(0, counter.getCountAndReset());
 
         // test remove
         source.remove(1);
-        assertEquals(1f, division.getValue());
+        assertEquals(1f, division.getValue().floatValue());
         assertEquals(2, counter.getCountAndReset());
 
         // test remove all
         source.remove(0);
-        assertEquals(Float.NaN, division.getValue());
+        assertEquals(Float.NaN, division.getValue().floatValue());
         assertEquals(2, counter.getCountAndReset());
     }
 
     public void testMeanDouble() {
         final EventList<Double> source = new BasicEventList<Double>();
-        source.add(1d);
+        source.add(new Double(1));
 
         final PropertyChangeCounter counter = new PropertyChangeCounter();
         final Calculation<Integer> count = Calculations.count(source);
@@ -60,32 +60,32 @@ public class DivisionTest extends TestCase {
         division.addPropertyChangeListener(counter);
 
         // check the initial Division state
-        assertEquals(1d, division.getValue());
+        assertEquals(1d, division.getValue().doubleValue());
         assertEquals(0, counter.getCountAndReset());
 
         // test add
-        source.add(2d);
-        assertEquals(1.5d, division.getValue());
+        source.add(new Double(2));
+        assertEquals(1.5d, division.getValue().doubleValue());
         assertEquals(2, counter.getCountAndReset());
 
         // test update with sum change
-        source.set(1, 3d);
-        assertEquals(2d, division.getValue());
+        source.set(1, new Double(3));
+        assertEquals(2d, division.getValue().doubleValue());
         assertEquals(1, counter.getCountAndReset());
 
         // test update without sum change
         source.set(1, source.get(1));
-        assertEquals(2d, division.getValue());
+        assertEquals(2d, division.getValue().doubleValue());
         assertEquals(0, counter.getCountAndReset());
 
         // test remove
         source.remove(1);
-        assertEquals(1d, division.getValue());
+        assertEquals(1d, division.getValue().doubleValue());
         assertEquals(2, counter.getCountAndReset());
 
         // test remove all
         source.remove(0);
-        assertEquals(Double.NaN, division.getValue());
+        assertEquals(Double.NaN, division.getValue().doubleValue());
         assertEquals(2, counter.getCountAndReset());
     }
 }

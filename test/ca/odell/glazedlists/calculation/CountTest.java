@@ -18,22 +18,22 @@ public class CountTest extends TestCase {
         count.addPropertyChangeListener(counter);
 
         // check the initial Count state
-        assertEquals(1, (int) count.getValue());
+        assertEquals(1, count.getValue().intValue());
         assertEquals(0, counter.getCountAndReset());
 
         // test add
         source.add("a");
-        assertEquals(2, (int) count.getValue());
+        assertEquals(2, count.getValue().intValue());
         assertEquals(1, counter.getCountAndReset());
 
         // test update
         source.set(1, "b");
-        assertEquals(2, (int) count.getValue());
+        assertEquals(2, count.getValue().intValue());
         assertEquals(0, counter.getCountAndReset());
 
         // test remove
         source.remove(1);
-        assertEquals(1, (int) count.getValue());
+        assertEquals(1, count.getValue().intValue());
         assertEquals(1, counter.getCountAndReset());
     }
 }
