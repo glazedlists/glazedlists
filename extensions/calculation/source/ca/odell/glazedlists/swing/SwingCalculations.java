@@ -60,7 +60,7 @@ public final class SwingCalculations {
         }
 
         private static boolean isNumberFormattable(Number n) {
-            return n != null && !n.equals(Float.NaN) && !n.equals(Double.NaN);
+            return n != null && !n.equals(new Float(Float.NaN)) && !n.equals(new Double(Double.NaN));
         }
 
         public void propertyChange(PropertyChangeEvent evt) {

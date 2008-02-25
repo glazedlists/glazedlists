@@ -48,7 +48,7 @@ public abstract class AbstractCalculation<N> implements Calculation<N> {
      * Subclasses should call this method in order to update the value that is
      * reported from this calculation. Note: this method does NOT fire a
      * PropertyChangeEvent. Subclasses must do that at appropriate times using
-     * {@link #fireValueChange(Number, Number)}.
+     * {@link #fireValueChange(Object, Object)}.
      *
      * @param value the new value of this calculation
      */

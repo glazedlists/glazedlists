@@ -21,8 +21,8 @@ final class Count extends AbstractCalculation<Integer> implements ListEventListe
      *      Calculation
      */
     public Count(EventList source) {
-        super(0);
-        setValue(source.size());
+        super(new Integer(0));
+        setValue(new Integer(source.size()));
 
         this.source = source;
         this.source.addListEventListener(this);
@@ -36,7 +36,7 @@ final class Count extends AbstractCalculation<Integer> implements ListEventListe
     /** @inheritDoc */
     public void listChanged(ListEvent listChanges) {
         final Integer oldValue = getValue();
-        setValue(listChanges.getSourceList().size());
+        setValue(new Integer(listChanges.getSourceList().size()));
         final Integer newValue = getValue();
         fireValueChange(oldValue, newValue);
     }

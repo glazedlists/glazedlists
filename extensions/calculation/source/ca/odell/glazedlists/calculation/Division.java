@@ -19,7 +19,7 @@ final class Division {
         protected Float recompute(Number[] inputs) {
             final float numerator = inputs[0].floatValue();
             final float denominator = inputs[1].floatValue();
-            return numerator / denominator;
+            return new Float(numerator / denominator);
         }
     }
 
@@ -31,7 +31,7 @@ final class Division {
         protected Double recompute(Number[] inputs) {
             final double numerator = inputs[0].doubleValue();
             final double denominator = inputs[1].doubleValue();
-            return numerator / denominator;
+            return new Double(numerator / denominator);
         }
     }
 }
