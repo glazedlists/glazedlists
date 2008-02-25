@@ -13,7 +13,7 @@ final class Division {
 
     static final class DivisionFloat extends AbstractCompositeCalculation<Float> {
         public DivisionFloat(Calculation<? extends Number> numerator, Calculation<? extends Number> denominator) {
-            super(numerator, denominator);
+            super(new Calculation[] {numerator, denominator});
         }
 
         protected Float recompute(Number[] inputs) {
@@ -25,7 +25,7 @@ final class Division {
 
     static final class DivisionDouble extends AbstractCompositeCalculation<Double> {
         public DivisionDouble(Calculation<? extends Number> numerator, Calculation<? extends Number> denominator) {
-            super(numerator, denominator);
+            super(new Calculation[] {numerator, denominator});
         }
 
         protected Double recompute(Number[] inputs) {
