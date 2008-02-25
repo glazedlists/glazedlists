@@ -36,15 +36,15 @@ public abstract class AbstractCompositeCalculation<N extends Number> extends Abs
         setValue(recompute(getInputValues()));
 
         // begin listening to the input Calculations for changes
-        for (Calculation<? extends Number> input : inputs)
-            input.addPropertyChangeListener(this);
+        for (int i = 0; i < inputs.length; i++)
+            inputs[i].addPropertyChangeListener(this);
     }
 
     /** @inheritDoc */
     public void dispose() {
         // stop listening to the input Calculations for changes
-        for (Calculation<? extends Number> input : inputs)
-            input.removePropertyChangeListener(this);
+        for (int i = 0; i < inputs.length; i++)
+            inputs[i].removePropertyChangeListener(this);
     }
 
     /**
