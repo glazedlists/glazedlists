@@ -6,6 +6,7 @@ package ca.odell.glazedlists.impl;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FunctionList;
 import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.DisposableMap;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
@@ -41,7 +42,7 @@ import java.util.*;
  *
  * @author James Lemieux
  */
-public class FunctionListMap<K, V> implements Map<K, V>, ListEventListener<V> {
+public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventListener<V> {
 
     /** The keys of this Map (used to remove entries from the {@link #delegate}) */
     private List<K> keyList;
@@ -87,6 +88,16 @@ public class FunctionListMap<K, V> implements Map<K, V>, ListEventListener<V> {
         // populate the keyList and the delegate Map
         for (int i = 0, n = source.size(); i < n; i++)
             elementAdded(i);
+    }
+
+    /** @inheritDoc */
+    public void dispose() {
+        valueList.removeListEventListener(this);
+
+        keySet = null;
+        entrySet = null;
+        keyList.clear();
+        delegate.clear();
     }
 
     /** @inheritDoc */

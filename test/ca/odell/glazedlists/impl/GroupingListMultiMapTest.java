@@ -1,9 +1,6 @@
 package ca.odell.glazedlists.impl;
 
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FunctionList;
-import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import junit.framework.TestCase;
 
@@ -777,6 +774,19 @@ public class GroupingListMultiMapTest extends TestCase {
         assertEquals(naturalMap.get("J"), Arrays.asList(new Object[] {source.get(0), source.get(1), source.get(2), source.get(5)}));
         assertEquals(naturalMap.get("A"), Collections.singletonList(source.get(3)));
         assertEquals(naturalMap.get("F"), Collections.singletonList(source.get(4)));
+    }
+
+    public void testDispose() {
+        final EventList<String> source = new BasicEventList<String>();
+        final DisposableMap<Comparable<String>, List<String>> eventMap = GlazedLists.syncEventListToMultiMap(source, new FirstLetterFunction());
+
+        // insert some data
+        source.addAll(GlazedListsTests.delimitedStringToList("Jesse Jiries"));
+        source.addAll(GlazedListsTests.delimitedStringToList("Katie"));
+        source.addAll(GlazedListsTests.delimitedStringToList("Wilson"));
+
+        assertEquals(3, eventMap.size());
+        eventMap.dispose();
     }
 
     private void runListIteratorMutationTest(ListIterator<String> listIterator, String key) {

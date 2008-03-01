@@ -751,6 +751,19 @@ public class FunctionListMapTest extends TestCase {
         assertEquals("Popeye", source.get(2));
     }
 
+    public void testDispose() {
+        final EventList<String> source = new BasicEventList<String>();
+        final DisposableMap<String, String> eventMap = GlazedLists.syncEventListToMap(source, new FirstLetterFunction());
+
+        // insert some data
+        source.add("Bluto");
+        source.add("Popeye");
+        source.add("Olive");
+
+        assertEquals(3, eventMap.size());
+        eventMap.dispose();
+    }
+
     private static final class FirstLetterComparator implements Comparator<String> {
         public int compare(String o1, String o2) {
             return o1.charAt(0) - o2.charAt(0);

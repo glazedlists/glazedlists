@@ -33,7 +33,7 @@ import java.util.*;
  *
  * @author James Lemieux
  */
-public class GroupingListMultiMap<K, V> implements Map<K, List<V>>, ListEventListener<List<V>> {
+public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, ListEventListener<List<V>> {
 
     /** The raw values of this Map in an {@link EventList}. */
     private final GroupingList<V> groupingList;
@@ -53,7 +53,7 @@ public class GroupingListMultiMap<K, V> implements Map<K, List<V>>, ListEventLis
     /** The delegate Map which is kept in synch with {@link #groupingList} changes. */
     private final Map<K, List<V>> delegate;
 
-    /** The set of Map.Entry objects in this Map (it is build lazily in {@link #entrySet()}) */
+    /** The set of Map.Entry objects in this Map (it is built lazily in {@link #entrySet()}) */
     private Set<Map.Entry<K, List<V>>> entrySet;
 
     /**
@@ -97,36 +97,48 @@ public class GroupingListMultiMap<K, V> implements Map<K, List<V>>, ListEventLis
     }
 
     /** {@inheritDoc} */
+    public void dispose() {
+        valueList.removeListEventListener(this);
+        valueList.dispose();
+        groupingList.dispose();
+
+        keySet = null;
+        entrySet = null;
+        keyList.clear();
+        delegate.clear();
+    }
+
+    /** {@inheritDoc} */
     public int size() {
-        return this.delegate.size();
+        return delegate.size();
     }
 
     /** {@inheritDoc} */
     public boolean isEmpty() {
-        return this.delegate.isEmpty();
+        return delegate.isEmpty();
     }
 
     /** {@inheritDoc} */
     public boolean containsKey(Object key) {
-        return this.delegate.containsKey(key);
+        return delegate.containsKey(key);
     }
 
     /** {@inheritDoc} */
     public boolean containsValue(Object value) {
-        return this.delegate.containsValue(value);
+        return delegate.containsValue(value);
     }
 
     /** {@inheritDoc} */
     public List<V> get(Object key) {
-        return this.delegate.get(key);
+        return delegate.get(key);
     }
 
     /** {@inheritDoc} */
     public List<V> put(K key, List<V> value) {
-        this.checkKeyValueAgreement(key, value);
+        checkKeyValueAgreement(key, value);
 
-        final List<V> removed = (List<V>) this.remove(key);
-        this.groupingList.add(value);
+        final List<V> removed = (List<V>) remove(key);
+        groupingList.add(value);
 
         return removed;
     }
@@ -140,15 +152,15 @@ public class GroupingListMultiMap<K, V> implements Map<K, List<V>>, ListEventLis
             final K key = entry.getKey();
             final List<V> value = entry.getValue();
 
-            this.checkKeyValueAgreement(key, value);
+            checkKeyValueAgreement(key, value);
         }
 
         // remove all values currently associated with the keys
         for (Iterator<? extends K> i = m.keySet().iterator(); i.hasNext();)
-            this.remove(i.next());
+            remove(i.next());
 
         // add all new values into this Map
-        this.groupingList.addAll(m.values());
+        groupingList.addAll(m.values());
     }
 
     /**
@@ -183,34 +195,34 @@ public class GroupingListMultiMap<K, V> implements Map<K, List<V>>, ListEventLis
 
     /** {@inheritDoc} */
     public void clear() {
-        this.groupingList.clear();
+        groupingList.clear();
     }
 
     /** {@inheritDoc} */
     public List<V> remove(Object key) {
-        final int index = this.keyList.indexOf(key);
-        return index == -1 ? null : this.groupingList.remove(index);
+        final int index = keyList.indexOf(key);
+        return index == -1 ? null : groupingList.remove(index);
     }
 
     /** {@inheritDoc} */
     public Collection<List<V>> values() {
-        return this.groupingList;
+        return groupingList;
     }
 
     /** {@inheritDoc} */
     public Set<K> keySet() {
-        if (this.keySet == null)
-            this.keySet = new KeySet();
+        if (keySet == null)
+            keySet = new KeySet();
 
-        return this.keySet;
+        return keySet;
     }
 
     /** {@inheritDoc} */
     public Set<Entry<K, List<V>>> entrySet() {
-        if (this.entrySet == null)
-            this.entrySet = new EntrySet();
+        if (entrySet == null)
+            entrySet = new EntrySet();
 
-        return this.entrySet;
+        return entrySet;
     }
 
     /** @inheritDoc */
@@ -244,12 +256,12 @@ public class GroupingListMultiMap<K, V> implements Map<K, List<V>>, ListEventLis
             if (changeType == ListEvent.INSERT) {
                 final List<V> inserted = (List<V>) listChanges.getSourceList().get(changeIndex);
                 final K key = key(inserted);
-                this.keyList.add(changeIndex, key);
-                this.delegate.put(key, inserted);
+                keyList.add(changeIndex, key);
+                delegate.put(key, inserted);
 
             } else if (changeType == ListEvent.DELETE) {
                 final K deleted = keyList.remove(changeIndex);
-                this.delegate.remove(deleted);
+                delegate.remove(deleted);
             }
         }
     }
@@ -272,7 +284,7 @@ public class GroupingListMultiMap<K, V> implements Map<K, List<V>>, ListEventLis
      * @return the key which maps to the given value
      */
     private K key(V value) {
-        return this.keyFunction.evaluate(value);
+        return keyFunction.evaluate(value);
     }
 
     /**
@@ -595,27 +607,27 @@ public class GroupingListMultiMap<K, V> implements Map<K, List<V>>, ListEventLis
         public <T>T[] toArray(T[] a) { return delegate.toArray(a); }
 
         public boolean add(V o) {
-            checkKeyValueAgreement(this.key, o);
+            checkKeyValueAgreement(key, o);
             return delegate.add(o);
         }
 
         public boolean addAll(Collection<? extends V> c) {
-            checkKeyValueAgreement(this.key, c);
+            checkKeyValueAgreement(key, c);
             return delegate.addAll(c);
         }
 
         public boolean addAll(int index, Collection<? extends V> c) {
-            checkKeyValueAgreement(this.key, c);
+            checkKeyValueAgreement(key, c);
             return delegate.addAll(index, c);
         }
 
         public void add(int index, V element) {
-            checkKeyValueAgreement(this.key, element);
+            checkKeyValueAgreement(key, element);
             delegate.add(index, element);
         }
 
         public V set(int index, V element) {
-            checkKeyValueAgreement(this.key, element);
+            checkKeyValueAgreement(key, element);
             return delegate.set(index, element);
         }
 
