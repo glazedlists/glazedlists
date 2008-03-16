@@ -47,25 +47,28 @@ import java.util.List;
  *   <li> typing any value into the editor when the popup is invisible causes
  *        the popup to appear and its contents to be filtered according to the
  *        editor's text. It also autocompletes to the first item that is
- *        prefixed with the editor's text and selects that item within the popup.
+ *        prefixed with the editor's text and selects that item within the popup. </li>
  *   <li> typing any value into the editor when the popup is visible causes
  *        the popup to be refiltered according to the editor's text and
- *        reselects an appropriate autocompletion item
+ *        reselects an appropriate autocompletion item. </li>
  *   <li> typing the down or up arrow keys in the editor when the popup is
  *        invisible causes the popup to appear and its contents to be filtered
  *        according to the editor's text. It also autocompletes to the first
  *        item that is prefixed with the editor's text and selects that item
- *        within the popup.
+ *        within the popup. </li>
  *   <li> typing the up arrow key when the popup is visible and the selected
  *        element is the first element causes the autocompletion to be cleared
- *        and the popup's selection to be removed
+ *        and the popup's selection to be removed. </li>
  *   <li> typing the up arrow key when no selection exists causes the last
- *        element of the popup to become selected and used for autocompletion
+ *        element of the popup to become selected and used for autocompletion </li>
  *   <li> typing the down arrow key when the popup is visible and the selected
  *        element is the last element causes the autocompletion to be cleared
- *        and the popup's selection to be removed
+ *        and the popup's selection to be removed </li>
  *   <li> typing the down arrow key when no selection exists causes the first
- *        element of the popup to become selected and used for autocompletion
+ *        element of the popup to become selected and used for autocompletion </li>
+ *   <li> typing the delete key while in strict mode will select the prior
+ *        text rather than delete it. Attempting to delete all text results in
+ *        a beep unless the autcomplete support has been configured to not beep.
  * </ol>
  *
  * <strong>Clicking on the Arrow Button</strong>
@@ -147,9 +150,11 @@ import java.util.List;
  *   <li> {@link #install(JComboBox, EventList)}
  *   <li> {@link #install(JComboBox, EventList, TextFilterator)}
  *   <li> {@link #install(JComboBox, EventList, TextFilterator, Format)}
+ *   <li> {@link #isInstalled()}
  *   <li> {@link #uninstall()}
  *   <li> {@link #setCorrectsCase(boolean)}
  *   <li> {@link #setStrict(boolean)}
+ *   <li> {@link #setBeepOnStrictViolation(boolean)}
  *   <li> {@link #setSelectsTextOnFocusGain(boolean)}
  *   <li> {@link #setHidesPopupOnFocusLost(boolean)}
  *   <li> {@link #setFilterMode(int)}
@@ -180,6 +185,13 @@ public final class AutoCompleteSupport<E> {
      * ComboBoxModel; <tt>true</tt> otherwise.
      */
     private boolean strict = false;
+
+    /**
+     * <tt>true</tt> indicates a beep sound should be played to the user to
+     * indicate their error when attempting to violate the {@link #strict}
+     * setting; <tt>false</tt> indicates we should not beep.
+     */
+    private boolean beepOnStrictViolation = true;
 
     /**
      * <tt>true</tt> if the text in the combobox editor is selected when the
@@ -263,7 +275,7 @@ public final class AutoCompleteSupport<E> {
     private Matcher<String> filterMatcher = Matchers.trueMatcher();
 
     /** Controls the selection behavior of the JComboBox when it is used in a JTable DefaultCellEditor. */
-    private boolean isTableCellEditor;
+    private final boolean isTableCellEditor;
 
     //
     // These listeners work together to enforce different aspects of the autocompletion behaviour
@@ -413,22 +425,29 @@ public final class AutoCompleteSupport<E> {
         this.isTableCellEditor = Boolean.TRUE.equals(comboBox.getClientProperty("JComboBox.isTableCellEditor"));
         this.doNotTogglePopup = !isTableCellEditor;
 
-        // build the ComboBoxModel capable of filtering its values
-        this.filterMatcherEditor = new TextMatcherEditor(filterator == null ? new DefaultTextFilterator() : filterator);
-        this.filterMatcherEditor.setMode(TextMatcherEditor.STARTS_WITH);
-        this.filteredItems = new FilterList<E>(items, this.filterMatcherEditor);
-        this.firstItem = new BasicEventList<E>(items.getPublisher(), items.getReadWriteLock());
+        // lock the items list for reading since we want to prevent writes
+        // from occurring until we fully initialize this AutoCompleteSupport
+        items.getReadWriteLock().readLock().lock();
+        try {
+            // build the ComboBoxModel capable of filtering its values
+            this.filterMatcherEditor = new TextMatcherEditor(filterator == null ? new DefaultTextFilterator() : filterator);
+            this.filterMatcherEditor.setMode(TextMatcherEditor.STARTS_WITH);
+            this.filteredItems = new FilterList<E>(items, this.filterMatcherEditor);
+            this.firstItem = new BasicEventList<E>(items.getPublisher(), items.getReadWriteLock());
 
-        // the ComboBoxModel always contains the firstItem and a filtered view of all other items
-        this.allItemsFiltered = new CompositeList<E>(items.getPublisher(), items.getReadWriteLock());
-        this.allItemsFiltered.addMemberList(this.firstItem);
-        this.allItemsFiltered.addMemberList(this.filteredItems);
-        this.comboBoxModel = new AutoCompleteComboBoxModel(this.allItemsFiltered);
+            // the ComboBoxModel always contains the firstItem and a filtered view of all other items
+            this.allItemsFiltered = new CompositeList<E>(items.getPublisher(), items.getReadWriteLock());
+            this.allItemsFiltered.addMemberList(this.firstItem);
+            this.allItemsFiltered.addMemberList(this.filteredItems);
+            this.comboBoxModel = new AutoCompleteComboBoxModel(this.allItemsFiltered);
 
-        // we need an unfiltered view in order to try to locate autocompletion terms
-        this.allItemsUnfiltered = new CompositeList<E>(items.getPublisher(), items.getReadWriteLock());
-        this.allItemsUnfiltered.addMemberList(this.firstItem);
-        this.allItemsUnfiltered.addMemberList(this.items);
+            // we need an unfiltered view in order to try to locate autocompletion terms
+            this.allItemsUnfiltered = new CompositeList<E>(items.getPublisher(), items.getReadWriteLock());
+            this.allItemsUnfiltered.addMemberList(this.firstItem);
+            this.allItemsUnfiltered.addMemberList(this.items);
+        } finally {
+            items.getReadWriteLock().readLock().unlock();
+        }
 
         // customize the comboBox
         this.comboBox.setModel(this.comboBoxModel);
@@ -581,6 +600,9 @@ public final class AutoCompleteSupport<E> {
         // stop listening for model changes
         this.comboBox.getModel().removeListDataListener(listDataHandler);
 
+        // remove the DocumentFilter from the Document backing the editor JTextField
+        this.document.setDocumentFilter(null);
+
         // restore the original ComboBoxEditor if our custom ComboBoxEditor is still installed
         if (this.comboBox.getEditor() == comboBoxEditor)
             this.comboBox.setEditor(comboBoxEditor.getDelegate());
@@ -604,9 +626,6 @@ public final class AutoCompleteSupport<E> {
         // restore the original actions for the arrow keys in the Apple Aqua L&F
         actionMap.put("aquaSelectPrevious", originalAquaSelectPreviousAction);
         actionMap.put("aquaSelectNext", originalAquaSelectNextAction);
-
-        // remove the DocumentFilter from the Document backing the editor JTextField
-        this.document.setDocumentFilter(null);
 
         // remove the KeyListener from the ComboBoxEditor which handles the special case of backspace when in strict mode
         this.comboBoxEditorComponent.removeKeyListener(strictModeBackspaceHandler);
@@ -903,6 +922,34 @@ public final class AutoCompleteSupport<E> {
     }
 
     /**
+     * Returns <tt>true</tt> if a beep sound is played when the user attempts
+     * to violate the strict invariant; <tt>false</tt> if no beep sound is
+     * played. This setting is only respected if {@link #isStrict()} returns
+     * <tt>true</tt>.
+     *
+     * @see #setStrict(boolean)
+     */
+    public boolean getBeepOnStrictViolation() {
+        return beepOnStrictViolation;
+    }
+    /**
+     * Sets the policy for indicating strict-mode violations to the user by way
+     * of a beep sound.
+     *
+     * @param beepOnStrictViolation <tt>true</tt> if a beep sound should be
+     * played when the user attempts to violate the strict invariant;
+     * <tt>false</tt> if no beep sound should be played
+     *
+     * @throws IllegalStateException if this method is called from any Thread
+     *      other than the Swing Event Dispatch Thread
+     */
+    public void setBeepOnStrictViolation(boolean beepOnStrictViolation) {
+        checkAccessThread();
+
+        this.beepOnStrictViolation = beepOnStrictViolation;
+    }
+
+    /**
      * Returns <tt>true</tt> if the combo box editor text is selected when it
      * gains focus; <tt>false</tt> otherwise.
      */
@@ -1090,6 +1137,20 @@ public final class AutoCompleteSupport<E> {
     }
 
     /**
+     * Returns <tt>true</tt> if this autocomplete support instance is currently
+     * installed and altering the behaviour of the combo box; <tt>false</tt> if
+     * it has been {@link #uninstall}ed.
+     *
+     * @throws IllegalStateException if this method is called from any Thread
+     *      other than the Swing Event Dispatch Thread
+     */
+    public boolean isInstalled() {
+        checkAccessThread();
+
+        return comboBox != null;
+    }
+
+    /**
      * This method removes autocompletion support from the {@link JComboBox}
      * it was installed on. This method is useful when the {@link EventList} of
      * items that backs the combo box must outlive the combo box itself.
@@ -1106,31 +1167,36 @@ public final class AutoCompleteSupport<E> {
         if (this.comboBox == null)
             throw new IllegalStateException("This AutoCompleteSupport has already been uninstalled");
 
-        // 1. stop listening for changes
-        this.comboBox.removePropertyChangeListener("UI", this.uiWatcher);
-        this.comboBox.removePropertyChangeListener("model", this.modelWatcher);
-        this.comboBoxEditorComponent.removePropertyChangeListener("document", this.documentWatcher);
+        items.getReadWriteLock().readLock().lock();
+        try {
+            // 1. stop listening for changes
+            this.comboBox.removePropertyChangeListener("UI", this.uiWatcher);
+            this.comboBox.removePropertyChangeListener("model", this.modelWatcher);
+            this.comboBoxEditorComponent.removePropertyChangeListener("document", this.documentWatcher);
 
-        // 2. undecorate the original UI components
-        this.undecorateOriginalUI();
+            // 2. undecorate the original UI components
+            this.undecorateOriginalUI();
 
-        // 3. restore the original model to the JComboBox
-        this.comboBox.setModel(originalModel);
-        this.originalModel = null;
+            // 3. restore the original model to the JComboBox
+            this.comboBox.setModel(originalModel);
+            this.originalModel = null;
 
-        // 4. restore the original editable flag to the JComboBox
-        this.comboBox.setEditable(originalComboBoxEditable);
+            // 4. restore the original editable flag to the JComboBox
+            this.comboBox.setEditable(originalComboBoxEditable);
 
-        // 5. dispose of our ComboBoxModel
-        this.comboBoxModel.dispose();
+            // 5. dispose of our ComboBoxModel
+            this.comboBoxModel.dispose();
 
-        // 6. dispose of our EventLists so that they are severed from the given items EventList
-        this.allItemsFiltered.dispose();
-        this.allItemsUnfiltered.dispose();
-        this.filteredItems.dispose();
+            // 6. dispose of our EventLists so that they are severed from the given items EventList
+            this.allItemsFiltered.dispose();
+            this.allItemsUnfiltered.dispose();
+            this.filteredItems.dispose();
 
-        // null out the comboBox to indicate that this support class is uninstalled
-        this.comboBox = null;
+            // null out the comboBox to indicate that this support class is uninstalled
+            this.comboBox = null;
+        } finally {
+            items.getReadWriteLock().readLock().unlock();
+        }
     }
 
     /**
@@ -1323,7 +1389,8 @@ public final class AutoCompleteSupport<E> {
             // if an autocomplete term could not be found and we're in strict mode, rollback the edit
             if (isStrict() && findAutoCompleteTerm(valueAfterEdit) == null && !allItemsUnfiltered.isEmpty()) {
                 // indicate the error to the user
-                UIManager.getLookAndFeel().provideErrorFeedback(comboBoxEditorComponent);
+                if (getBeepOnStrictViolation())
+                    UIManager.getLookAndFeel().provideErrorFeedback(comboBoxEditorComponent);
 
                 // rollback the edit
                 doNotPostProcessDocumentChanges = true;
@@ -1793,7 +1860,8 @@ public final class AutoCompleteSupport<E> {
 
                 // if we cannot extend the selection to the left, indicate the error
                 if (selectionStart == 0) {
-                    UIManager.getLookAndFeel().provideErrorFeedback(comboBoxEditorComponent);
+                    if (getBeepOnStrictViolation())
+                        UIManager.getLookAndFeel().provideErrorFeedback(comboBoxEditorComponent);
                     return;
                 }
 
