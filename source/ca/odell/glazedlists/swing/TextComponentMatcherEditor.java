@@ -186,12 +186,8 @@ public class TextComponentMatcherEditor<E> extends TextMatcherEditor<E> {
             if (mode == CONTAINS)
                 filters = text.split("[ \t]");
 
-            // in STARTS_WITH mode we use the string in its entirety
-            else if (mode == STARTS_WITH)
-                filters = new String[] {text};
-
-            // in REGULAR_EXPRESSION mode we use the string in its entirety
-            else if (mode == REGULAR_EXPRESSION)
+            // in STARTS_WITH, REGULAR_EXPRESSION, or EXACT modes we use the string in its entirety
+            else if (mode == STARTS_WITH || mode == REGULAR_EXPRESSION || mode == EXACT)
                 filters = new String[] {text};
 
             else throw new IllegalStateException("Unknown mode: " + mode);

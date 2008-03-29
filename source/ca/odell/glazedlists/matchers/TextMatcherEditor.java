@@ -74,6 +74,12 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
     public static final int REGULAR_EXPRESSION = 2;
 
     /**
+     * Matching mode where items are considered a match if they are an exact
+     * character for character match with at least one of the filter strings.
+     */
+    public static final int EXACT = 3;
+
+    /**
      * Character comparison strategy that assumes all characters can be
      * compared directly as though they are ASCII. This implies there is no
      * fuzzy matching with this strategy - each character must be precisely
@@ -89,10 +95,16 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
                 } else {
                     return new BoyerMooreCaseInsensitiveTextSearchStrategy();
                 }
+
             } else if (mode == TextMatcherEditor.STARTS_WITH) {
                 return new StartsWithCaseInsensitiveTextSearchStrategy();
+
             } else if (mode == TextMatcherEditor.REGULAR_EXPRESSION) {
                 return new RegularExpressionTextSearchStrategy();
+
+            } else if (mode == TextMatcherEditor.EXACT) {
+                return new ExactCaseInsensitiveTextSearchStrategy();
+
             } else {
                 throw new IllegalArgumentException("unrecognized mode: " + mode);
             }
@@ -164,14 +176,17 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      * Modify the behaviour of this {@link TextMatcherEditor} to one of the
      * predefined modes.
      *
-     * @param mode either {@link #CONTAINS} or {@link #STARTS_WITH}.
+     * @param mode either {@link #CONTAINS}, {@link #STARTS_WITH},
+     *      {@link #REGULAR_EXPRESSION}, or {@link #EXACT}
      */
     public void setMode(int mode) {
-        if(mode != CONTAINS && mode != STARTS_WITH)
-            throw new IllegalArgumentException("mode must be either TextMatcherEditor.CONTAINS or TextMatcherEditor.STARTS_WITH");
-        if(mode == this.mode) return;
+        if (mode != CONTAINS && mode != STARTS_WITH && mode != REGULAR_EXPRESSION && mode != EXACT)
+            throw new IllegalArgumentException("mode must be one of: TextMatcherEditor.CONTAINS, STARTS_WITH, REGULAR_EXPRESSION or EXACT");
+
+        if (mode == this.mode) return;
 
         // apply the new mode
+        final int oldMode = this.mode;
         this.mode = mode;
 
         // if no filter text exists, no Matcher change is necessary
@@ -179,19 +194,25 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
         if (currentTextMatcher == null)
             return;
 
-        if (mode == STARTS_WITH) {
+        if (oldMode == CONTAINS && mode == STARTS_WITH) {
             // CONTAINS -> STARTS_WITH is a constraining change
             fireConstrained(currentTextMatcher.newMode(mode));
-        } else {
+
+        } else if (oldMode == STARTS_WITH && mode == CONTAINS) {
             // STARTS_WITH -> CONTAINS is a relaxing change
             fireRelaxed(currentTextMatcher.newMode(mode));
+
+        } else {
+            // otherwise we can't do better than a raw change
+            fireChanged(currentTextMatcher.newMode(mode));
         }
     }
 
     /**
      * Returns the behaviour mode for this {@link TextMatcherEditor}.
      *
-     * @return one of {@link #CONTAINS} (default) or {@link #STARTS_WITH}
+     * @return one of {@link #CONTAINS} (default), {@link #STARTS_WITH},
+     *      {@link #REGULAR_EXPRESSION}, or {@link #EXACT}
      */
     public int getMode() {
         return mode;

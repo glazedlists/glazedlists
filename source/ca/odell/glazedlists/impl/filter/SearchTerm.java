@@ -148,7 +148,7 @@ public final class SearchTerm<E> implements Serializable {
         // if the text is equal then no strict constrainment exists
         if (getText().equals(term.getText())) return false;
 
-        // otherwise constrainment is determined by whether we can locate one's test within the other
+        // otherwise constrainment is determined by whether we can locate one's text within the other
         return isNegated() ? term.getText().indexOf(getText()) != -1 : getText().indexOf(term.getText()) != -1;
     }
 

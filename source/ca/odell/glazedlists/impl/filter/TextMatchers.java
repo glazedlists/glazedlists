@@ -373,6 +373,14 @@ public final class TextMatchers {
         if (oldMatcher.getMode() == TextMatcherEditor.STARTS_WITH && newMatcher.getMode() == TextMatcherEditor.CONTAINS)
             return false;
 
+        // if either mode is REGULAR_EXPRESSION we cannot reliably report a constrainment
+        if (oldMatcher.getMode() == TextMatcherEditor.REGULAR_EXPRESSION || newMatcher.getMode() == TextMatcherEditor.REGULAR_EXPRESSION)
+            return false;
+
+        // if either mode is EXACT we cannot reliably report a constrainment
+        if (oldMatcher.getMode() == TextMatcherEditor.EXACT || newMatcher.getMode() == TextMatcherEditor.EXACT)
+            return false;
+
         // extract the SearchTerms for comparison
         final SearchTerm[] oldTerms = oldMatcher.getSearchTerms();
         final SearchTerm[] newTerms = newMatcher.getSearchTerms();

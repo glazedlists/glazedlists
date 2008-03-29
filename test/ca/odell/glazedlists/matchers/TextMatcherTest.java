@@ -173,6 +173,15 @@ public class TextMatcherTest extends TestCase {
 
         textMatcherEditor.setMode(TextMatcherEditor.CONTAINS);
         assertEquals(dictionary, list);
+
+        textMatcherEditor.setMode(TextMatcherEditor.EXACT);
+        assertEquals(Arrays.asList(new String[] {"act"}), list);
+
+        textMatcherEditor.setFilterText(new String[] {"actor"});
+        assertEquals(Arrays.asList(new String[] {"actor"}), list);
+
+        textMatcherEditor.setFilterText(new String[] {"badvalue"});
+        assertEquals(Arrays.asList(new String[0]), list);
     }
 
     public void testChangeModeNotifications() {

@@ -1,3 +1,6 @@
+/* Glazed Lists                                                 (c) 2003-2006 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.filter;
 
 import java.util.regex.Pattern;
@@ -12,17 +15,13 @@ import java.util.regex.Matcher;
  */
 public class RegularExpressionTextSearchStrategy extends AbstractTextSearchStrategy {
 
-    private Pattern pattern;
+    private Matcher matcher;
 
     public void setSubtext(String regex) {
-        pattern = Pattern.compile(regex);
+        matcher = Pattern.compile(regex).matcher("");
     }
 
     public int indexOf(String text) {
-        int result = -1;
-        Matcher matcher = pattern.matcher(text);
-        if (matcher.matches())
-            result = matcher.start();
-        return result;
+        return matcher.reset(text).matches() ? matcher.start() : -1;
     }
 }

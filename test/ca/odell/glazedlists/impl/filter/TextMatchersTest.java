@@ -393,6 +393,29 @@ public class TextMatchersTest extends TestCase {
         assertFalse(matcher.matches("A"));
     }
 
+    public void testExactExpressionMatcher() {
+        TextMatcher<String> matcher = new TextMatcher<String>(TextMatchers.parse("abc"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.EXACT, TextMatcherEditor.IDENTICAL_STRATEGY);
+        assertEquals(TextMatcherEditor.EXACT, matcher.getMode());
+        assertFalse(matcher.matches("a"));
+        assertFalse(matcher.matches("ab"));
+        assertTrue(matcher.matches("abc"));
+        assertFalse(matcher.matches("abcd"));
+    }
+
+    public void testExactExpressionConstrainedAndRelaxed() {
+        TextMatcher<String> matcherA = new TextMatcher<String>(TextMatchers.parse("reactor core"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.EXACT, TextMatcherEditor.IDENTICAL_STRATEGY);
+        TextMatcher<String> matcherB = new TextMatcher<String>(TextMatchers.parse("reactor"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.EXACT, TextMatcherEditor.IDENTICAL_STRATEGY);
+        assertFalse(TextMatchers.isMatcherRelaxed(matcherA, matcherB));
+        assertFalse(TextMatchers.isMatcherRelaxed(matcherB, matcherA));
+        assertFalse(TextMatchers.isMatcherConstrained(matcherA, matcherB));
+        assertFalse(TextMatchers.isMatcherConstrained(matcherB, matcherA));
+
+        assertFalse(TextMatchers.isMatcherRelaxed(matcherA, matcherA));
+        assertFalse(TextMatchers.isMatcherRelaxed(matcherB, matcherB));
+        assertFalse(TextMatchers.isMatcherConstrained(matcherA, matcherA));
+        assertFalse(TextMatchers.isMatcherConstrained(matcherB, matcherB));
+    }
+
     public void testConstructor() {
         new TextMatcher<String>(TextMatchers.parse("[a-z]"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.REGULAR_EXPRESSION, TextMatcherEditor.IDENTICAL_STRATEGY);
 
