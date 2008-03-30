@@ -51,6 +51,17 @@ final class MutableTableModelEvent extends TableModelEvent {
     }
 
     /**
+     * Sets the table model event to notify that all table data
+     * has changed.
+     */
+    public void setAllDataChanged() {
+        firstRow = 0;
+        lastRow = Integer.MAX_VALUE;
+        column = ALL_COLUMNS;
+        type = UPDATE;
+    }
+
+    /**
      * Sets the table model event to reflect the specified changes.
      */
     public void setValues(int startIndex, int endIndex, int listChangeType) {
