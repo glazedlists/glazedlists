@@ -141,7 +141,7 @@
 			<packageset dir="extensions/treetable/source"><exclude name="**/impl/**"/></packageset>			
             <classpath><fileset dir="extensions/" includes="**/lib/*.jar"/></classpath>
             <link href="http://java.sun.com/j2se/${java.target.version}/docs/api/"/>
-            <link href="http://help.eclipse.org/help31/nftopic/org.eclipse.platform.doc.isv/reference/api/"/>
+            <link href="http://help.eclipse.org/help33/nftopic/org.eclipse.platform.doc.isv/reference/api/"/>
             <link href="http://www.jdocs.com/formlayout/1.0.4/api/" packagelistloc="extensions/jgoodiesforms/lib"/>
             <link href="http://nachocalendar.sourceforge.net/doc/"/>
             <link href="http://www.jfree.org/jfreechart/api/javadoc/"/>
@@ -335,7 +335,7 @@
         <mkdir dir="extensions/swinglabs/lib"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="https://glazedlists.dev.java.net/files/documents/1073/40876/swingx.jar"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/92328/swingx.jar"/>
             <arg value="extensions/swinglabs/lib/swingx.jar"/>
         </java>
         <javac destdir="${classes.dir}" srcdir="extensions/swinglabs/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
