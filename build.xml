@@ -144,7 +144,7 @@
             <link href="http://help.eclipse.org/help31/nftopic/org.eclipse.platform.doc.isv/reference/api/"/>
             <link href="http://www.jdocs.com/formlayout/1.0.4/api/" packagelistloc="extensions/jgoodiesforms/lib"/>
             <link href="http://nachocalendar.sourceforge.net/doc/"/>
-            <link href="http://www.jfree.org/jfreechart/javadoc/"/>
+            <link href="http://www.jfree.org/jfreechart/api/javadoc/"/>
             <link href="http://download.java.net/javadesktop/swinglabs/releases/0.8/docs/api/"/>
 			<link href="http://www.hibernate.org/hib_docs/v3/api/"/>
             <doctitle><![CDATA[<h1>${doctitle}</h1>]]></doctitle>

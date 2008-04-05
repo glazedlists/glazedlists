@@ -5,13 +5,19 @@ package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
-import ca.odell.glazedlists.impl.adt.KeyedCollection;
 import ca.odell.glazedlists.impl.adt.CircularArrayList;
+import ca.odell.glazedlists.impl.adt.KeyedCollection;
 import ca.odell.glazedlists.impl.adt.barcode2.Element;
 import ca.odell.glazedlists.impl.adt.barcode2.FourColorTree;
 import ca.odell.glazedlists.impl.adt.barcode2.ListToByteCoder;
 
-import java.util.*;
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * A hierarchial EventList that infers its structure from a flat list.
@@ -266,7 +272,9 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         return getTreeNode(visibleIndex).getElement();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * @return the tree node at the specified index
+     */
     public Node<E> getTreeNode(int visibleIndex) {
         return data.get(visibleIndex, VISIBLE_NODES).get();
     }
@@ -1318,7 +1326,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         /**
          * Returns the comparator used to order path elements of the specified
          * depth. If enforcing order at this level is not intended, this method
-         * should return <code>null</code>. 
+         * should return <code>null</code>.
          */
         public Comparator<? extends E> getComparator(int depth);
     }

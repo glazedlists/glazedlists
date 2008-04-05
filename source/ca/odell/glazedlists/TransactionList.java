@@ -44,7 +44,7 @@ import java.util.ArrayList;
  * <p>If the transaction was rolled back instead of committed, the txList would
  * not produce a ListEvent, since none of its listeners would be aware of any
  * changes made during the transaction.
- * 
+ *
  * The second popular usage resembles this:
  *
  * <pre>
@@ -168,7 +168,7 @@ public class TransactionList<E> extends TransformedList<E, E> {
 
     /**
      * Demarks the successful completion of a transaction. If changes were
-     * buffered during the transaction by calling {@link #beginEvent(true)}
+     * buffered during the transaction by calling {@link #beginEvent(boolean) beginEvent(true)}
      * then a single ListEvent will be fired from this TransactionList
      * describing the changes accumulated during the transaction.
      */
@@ -183,7 +183,7 @@ public class TransactionList<E> extends TransformedList<E, E> {
 
     /**
      * Demarks the unsuccessful completion of a transaction. If changes were
-     * NOT buffered during the transaction by calling {@link #beginEvent(false)}
+     * NOT buffered during the transaction by calling {@link #beginEvent(boolean) beginEvent(false)}
      * then a single ListEvent will be fired from this TransactionList
      * describing the rollback of the changes accumulated during the transaction.
      */

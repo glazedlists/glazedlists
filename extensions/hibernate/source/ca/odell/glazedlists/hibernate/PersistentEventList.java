@@ -68,7 +68,7 @@ public final class PersistentEventList extends PersistentList implements EventLi
         newList.addListEventListener(this);
     }
 
-    /** {@inheritDoc} */
+    /** Kept for compatibility with older Hibernate versions. */
     public void beforeInitialize(CollectionPersister persister) {
         beforeInitialize();
     }
@@ -137,7 +137,7 @@ public final class PersistentEventList extends PersistentList implements EventLi
         in.defaultReadObject();
         assert (list instanceof EventList) : "'list' member type unknown";
         updates = new ListEventAssembler(this, ((EventList) list).getPublisher());
-        
+
         // read in the listeners
         final ListEventListener[] listeners = (ListEventListener[]) in.readObject();
         for(int i = 0; i < listeners.length; i++) {

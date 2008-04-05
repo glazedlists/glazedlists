@@ -3,7 +3,14 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.CompositeList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.FunctionList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.UniqueList;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.impl.filter.SearchTerm;
@@ -13,7 +20,24 @@ import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.Matchers;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
 
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.ComboBoxEditor;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultCellEditor;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JList;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.ListCellRenderer;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
@@ -22,9 +46,26 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.plaf.UIResource;
 import javax.swing.plaf.basic.BasicComboBoxEditor;
 import javax.swing.plaf.basic.ComboPopup;
-import javax.swing.text.*;
-import java.awt.*;
-import java.awt.event.*;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.DocumentFilter;
+
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.Method;
@@ -1039,7 +1080,7 @@ public final class AutoCompleteSupport<E> {
             doNotChangeDocument = false;
         }
     }
-    
+
     /**
      * Sets the manner in which the contents of the {@link ComboBoxModel} are
      * filtered and autocompletion terms are matched. The given <code>strategy</code> must be one of
@@ -1064,13 +1105,13 @@ public final class AutoCompleteSupport<E> {
             doNotChangeDocument = false;
         }
     }
-    
+
     /**
      * Returns the manner in which the contents of the {@link ComboBoxModel} are
      * filtered and autocompletion terms are matched. The returned <code>strategy</code> is one of
      * {@link TextMatcherEditor#IDENTICAL_STRATEGY} or {@link TextMatcherEditor#NORMALIZED_STRATEGY}
      * or the Unicode strategy of the ICU4J extension.
-     */    
+     */
     public Object getTextMatchingStrategy() {
         return filterMatcherEditor.getStrategy();
     }
@@ -1080,7 +1121,7 @@ public final class AutoCompleteSupport<E> {
      * in the {@link ComboBoxModel}. This value typically represents
      * "no selection" or "blank". This value is always present and is not
      * filtered away during autocompletion.
-     * 
+     *
      * @param item the first value to present in the {@link ComboBoxModel}
      */
     public void setFirstItem(E item) {
@@ -2124,7 +2165,7 @@ public final class AutoCompleteSupport<E> {
      * <p>Note that this factory method is only appropriate for use when the
      * values in the {@link ComboBoxModel} should be the unique set of values
      * in a table column. If some other list of values will be used then
-     * {@link #createTableCellEditor(EventList<E>)} is the appropriate factory
+     * {@link #createTableCellEditor(EventList)} is the appropriate factory
      * method to use.
      *
      * <p>If the appearance or function of the autocompleting {@link JComboBox}
@@ -2160,7 +2201,7 @@ public final class AutoCompleteSupport<E> {
      * <p>Note that this factory method is only appropriate for use when the
      * values in the {@link ComboBoxModel} should be the unique set of values
      * in a table column. If some other list of values will be used then
-     * {@link #createTableCellEditor(EventList<E>)} is the appropriate factory
+     * {@link #createTableCellEditor(EventList)} is the appropriate factory
      * method to use.
      *
      * <p>If the appearance or function of the autocompleting {@link JComboBox}

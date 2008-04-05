@@ -3,20 +3,21 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import ca.odell.glazedlists.TreeList;
-import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.TreeList;
 import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 
+import javax.swing.JTree;
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
-import javax.swing.*;
-import javax.swing.event.TreeModelListener;
-import javax.swing.event.TreeModelEvent;
-import java.util.List;
+
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Adapt a {@link TreeList} for use in a {@link JTree}.
@@ -46,7 +47,12 @@ public class EventTreeModel<E> implements TreeModel, ListEventListener<E> {
     /** Listeners. */
     protected List<TreeModelListener> listenerList = new ArrayList<TreeModelListener>();
 
-    /** {@inheritDoc} */
+    /**
+     * Creates a new tree model that extracts the tree data from the given
+     * <code>source</code>.
+     *
+     * @param source a {@link TreeList} that provides the tree data
+     */
     public EventTreeModel(TreeList<E> source) {
         // lock the source list for reading since we want to prevent writes
         // from occurring until we fully initialize this EventTableModel
