@@ -12,7 +12,7 @@ import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 
-import javax.swing.*;
+import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 
@@ -47,6 +47,12 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
 
     /** reusable TableModelEvent for broadcasting changes */
     private final MutableTableModelEvent tableModelEvent = new MutableTableModelEvent(this);
+
+    /**
+     * if <code>true</code>, this model translates one ListEvent to one TableModelEvent, else
+     * one TableModelEvent per ListEvent block.
+     */
+    private boolean fireOneTableModelEventOnly;
 
     /**
      * Creates a new table model that extracts column data from the given
@@ -147,7 +153,7 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
      * Retrieves the value at the specified location from the table.
      *
      * <p>This may be used by renderers to paint the cells of a row differently
-     * based on the entire value for that row. 
+     * based on the entire value for that row.
      *
      * @see #getValueAt(int,int)
      */
@@ -161,12 +167,9 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
     }
 
     /**
-     * For implementing the ListEventListener interface. This sends changes
-     * to the table which repaints the table cells. Because this class is
-     * backed by {@link GlazedListsSwing#swingThreadProxyList}, all natural
-     * calls to this method are guaranteed to occur on the Swing EDT.
+     * Ensures that only one TableModelEvent is created and fired for the given ListEvent.
      */
-    public void listChanged(ListEvent<E> listChanges) {
+    private void fireOneTableModelEvent(ListEvent<E> listChanges) {
         // build an "optimized" TableModelEvent describing the precise range of rows in the first block
         listChanges.nextBlock();
         final int startIndex = listChanges.getBlockStartIndex();
@@ -180,6 +183,34 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
 
         // fire the single TableModelEvent representing the entire ListEvent
         fireTableChanged(tableModelEvent);
+    }
+
+    /**
+     * For implementing the ListEventListener interface. This sends changes
+     * to the table which repaints the table cells. Because this class is
+     * backed by {@link GlazedListsSwing#swingThreadProxyList}, all natural
+     * calls to this method are guaranteed to occur on the Swing EDT.
+     * <p>The translation from the ListEvent to one or more TableModelEvents is
+     * affected by property <code>fireOneTableModelEventOnly</code>.</p>
+     *
+     * @see #setFireOneTableModelEventOnly(boolean)
+     */
+    public void listChanged(ListEvent<E> listChanges) {
+        if (isFireOneTableModelEventOnly()) {
+            // for all changes, only one TableModelEvent
+            fireOneTableModelEvent(listChanges);
+        } else {
+            // for all changes, one block at a time
+            while (listChanges.nextBlock()) {
+                // get the current change info
+                int startIndex = listChanges.getBlockStartIndex();
+                int endIndex = listChanges.getBlockEndIndex();
+                int changeType = listChanges.getType();
+                // create a table model event for this block
+                tableModelEvent.setValues(startIndex, endIndex, changeType);
+                fireTableChanged(tableModelEvent);
+            }
+        }
     }
 
     /**
@@ -289,7 +320,35 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
             throw new UnsupportedOperationException("Unexpected setValueAt() on read-only table");
         }
     }
-    
+
+    /**
+     * Returns <code>true</code>, if a ListEvent will always be translated to exactly one
+     * TableModelEvent. Returns <code>false</code>, if there will be one TableModelEvent per
+     * ListEvent block. The default value is <code>false</code>.
+     *
+     * @see #setFireOneTableModelEventOnly(boolean)
+     */
+    public boolean isFireOneTableModelEventOnly() {
+        return fireOneTableModelEventOnly;
+    }
+
+    /**
+     * This property affects the translation from ListEvents to TableModelEvents.
+     * <p>If set to <code>true</code>, a ListEvent will always be translated to exactly one
+     * TableModelEvent. If the ListEvent contains multiple blocks, a special <em>data changed</em>
+     * TableModelEvent will be fired, indicating that all row data has changed. Note, this kind of
+     * TableModelEvent will lead to a loss of the table selection.</p>
+     * <p>If set to <code>false</code>, there will be one TableModelEvent per ListEvent block. This
+     * setting could potentially cause problems for TableModel listeners that need to access
+     * TableModel state or the source list during TableModelEvent propagation.
+     * A consistent state is only guaranteed after all TableModelEvents for a ListEvent
+     * have been fired.</p>
+     * The default value is <code>false</code>.
+     */
+    public void setFireOneTableModelEventOnly(boolean fireOneTableModelEventOnly) {
+        this.fireOneTableModelEventOnly = fireOneTableModelEventOnly;
+    }
+
     /**
      * Releases the resources consumed by this {@link EventTableModel} so that it
      * may eventually be garbage collected.
@@ -297,10 +356,10 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
      * <p>An {@link EventTableModel} will be garbage collected without a call to
      * {@link #dispose()}, but not before its source {@link EventList} is garbage
      * collected. By calling {@link #dispose()}, you allow the {@link EventTableModel}
-     * to be garbage collected before its source {@link EventList}. This is 
+     * to be garbage collected before its source {@link EventList}. This is
      * necessary for situations where an {@link EventTableModel} is short-lived but
      * its source {@link EventList} is long-lived.
-     * 
+     *
      * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
      * to call any method on an {@link EventTableModel} after it has been disposed.
      * As such, this {@link EventTableModel} should be detached from its

@@ -21,6 +21,8 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.TableCellRenderer;
 
 import java.awt.Color;
@@ -399,6 +401,57 @@ public class EventTableModelTest extends SwingTestCase {
     }
 
     /**
+     * Verifies that table selection is preserved, when handling a complex ListEvent with blocks.
+     */
+    public void guiTestRemoveWithBlocksInListEvent() {
+        // setup JTable with EventTableModel and EventSelectionModel
+        final EventList<String> list = new BasicEventList<String>();
+        list.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
+        final EventTableModel<String> model = new EventTableModel<String>(list,
+                GlazedLists.tableFormat(new String[] {"bytes"}, new String [] {"Bytes"}));
+        final TableModelChangeCounter counter = new TableModelChangeCounter();
+        model.addTableModelListener(counter);
+        final JTable table = new JTable(model);
+        final EventSelectionModel selModel = new EventSelectionModel<String>(list);
+        table.setSelectionModel(selModel);
+        // establish a selection
+        selModel.setSelectionInterval(1, 1);
+        assertEquals(Arrays.asList("B"), selModel.getSelected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A C D E F"), selModel.getDeselected());
+        list.removeAll(GlazedListsTests.delimitedStringToList("E F"));
+        assertEquals(2, counter.getCountAndReset());
+        assertEquals(Arrays.asList("B"), selModel.getSelected());
+        assertEquals(Arrays.asList("A", "C", "D"), selModel.getDeselected());
+    }
+
+    /**
+     * Tests {@link EventTableModel#setFireOneTableModelEventOnly(boolean)}.
+     */
+    public void guiTestFireOneTableModelEventOnly() {
+        // setup JTable with a EventTableModel and EventSelectionModel
+        final EventList<String> list = new BasicEventList<String>();
+        list.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
+        final EventTableModel<String> model = new EventTableModel<String>(list,
+                GlazedLists.tableFormat(new String[] {"bytes"}, new String [] {"Bytes"}));
+        assertEquals(false, model.isFireOneTableModelEventOnly());
+        model.setFireOneTableModelEventOnly(true);
+        final TableModelChangeCounter counter = new TableModelChangeCounter();
+        model.addTableModelListener(counter);
+        final JTable table = new JTable(model);
+        final EventSelectionModel selModel = new EventSelectionModel<String>(list);
+        table.setSelectionModel(selModel);
+        // establish a selection
+        selModel.setSelectionInterval(1, 1);
+        assertEquals(Arrays.asList("B"), selModel.getSelected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A C D E F"), selModel.getDeselected());
+        list.removeAll(GlazedListsTests.delimitedStringToList("E F"));
+        assertEquals(1, counter.getCountAndReset());
+        // unfortunately, JTable will clear the selection for a "data changed" TableModelEvent
+        assertEquals(true, selModel.getSelected().isEmpty());
+        assertEquals(Arrays.asList("A", "B", "C", "D"), selModel.getDeselected());
+    }
+
+    /**
      * Fake a click on the specified column. This is useful for tests where the
      * table has not been layed out on screen and may have invalid dimensions.
      */
@@ -422,6 +475,22 @@ public class EventTableModelTest extends SwingTestCase {
          */
         protected TransformedList<E, E> createSwingThreadProxyList(EventList<E> source) {
             return null;
+        }
+    }
+
+    /**
+     * Counts the number of TableModelEvents fired.
+     */
+    private static class TableModelChangeCounter implements TableModelListener {
+        private int count = 0;
+        public void tableChanged(TableModelEvent e) {
+            count++;
+        }
+
+        public int getCountAndReset() {
+            int result = count;
+            count = 0;
+            return result;
         }
     }
 }

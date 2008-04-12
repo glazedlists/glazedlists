@@ -9,7 +9,10 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ThreadRecorderEventList;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 
-import java.awt.*;
+import javax.swing.JList;
+
+import java.awt.Color;
+import java.util.Arrays;
 
 /**
  * Test EventListModel from the Swing thread.
@@ -67,5 +70,28 @@ public class EventListModelTest extends SwingTestCase {
         // correct locking should have produced a thread log like: WriterThread* AWT-EventQueue-0* WriterThread*
         // correct locking should have produced a read/write pattern like: W...W R...R W...W
         assertEquals(3, atomicList.getReadWriteBlockCount());
+    }
+
+    /**
+     * Verifies that list selection is preserved, when handling a complex ListEvent with blocks,
+     * which triggers a "data changed" ListDateEvent.
+     */
+    public void guiTestRemoveWithBlocksInListEvent() {
+        // setup JList with EventListModel and EventSelectionModel
+        final EventList<String> list = new BasicEventList<String>();
+        list.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
+        final EventListModel<String> model = new EventListModel<String>(list);
+        final JList jList = new JList(model);
+        final EventSelectionModel selModel = new EventSelectionModel<String>(list);
+        jList.setSelectionModel(selModel);
+        // establish a selection
+        selModel.setSelectionInterval(1, 1);
+        assertEquals(Arrays.asList("B"), selModel.getSelected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A C D E F"), selModel.getDeselected());
+        // trigger a ListEvent with blocks
+        list.removeAll(GlazedListsTests.delimitedStringToList("E F"));
+        // selection should be preserved
+        assertEquals(Arrays.asList("B"), selModel.getSelected());
+        assertEquals(Arrays.asList("A", "C", "D"), selModel.getDeselected());
     }
 }
