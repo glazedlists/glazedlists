@@ -452,6 +452,41 @@ public class EventTableModelTest extends SwingTestCase {
     }
 
     /**
+     * Tests {@link EventTableModel#setFireOneTableModelEventOnly(boolean)} in combination with
+     * a reorder event, for example caused by {@link SortedList#setComparator(java.util.Comparator)}.
+     */
+    public void guiTestReorderWithFireOneTableModelEventOnly_FixMe() {
+        // setup JTable with a EventTableModel and EventSelectionModel
+        final EventList<String> list = new BasicEventList<String>();
+        list.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
+        final SortedList<String> sortedList = SortedList.create(list);
+        final EventTableModel<String> model = new EventTableModel<String>(sortedList,
+                GlazedLists.tableFormat(new String[] {"bytes"}, new String [] {"Bytes"}));
+        assertEquals(false, model.isFireOneTableModelEventOnly());
+        model.setFireOneTableModelEventOnly(true);
+        final TableModelChangeCounter counter = new TableModelChangeCounter();
+        model.addTableModelListener(counter);
+        final JTable table = new JTable(model);
+        final EventSelectionModel selModel = new EventSelectionModel<String>(sortedList);
+        table.setSelectionModel(selModel);
+
+        // establish a selection
+        selModel.setSelectionInterval(1, 1);
+        assertEquals(Arrays.asList("B"), selModel.getSelected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A C D E F"), selModel.getDeselected());
+
+        sortedList.setComparator(GlazedLists.reverseComparator());
+        assertEquals(2, counter.getCountAndReset());
+        assertEquals(Arrays.asList("F", "E", "D", "C", "B", "A"), sortedList);
+
+        // unfortunately, JTable will clear the selection for a "data changed" TableModelEvent
+//        assertEquals(Arrays.asList("B"), selModel.getSelected());
+//        assertEquals(Arrays.asList("A", "C", "D", "E", "F"), selModel.getDeselected());
+        assertEquals(true, selModel.getSelected().isEmpty());
+        assertEquals(Arrays.asList("A", "B", "C", "D", "E", "F"), selModel.getDeselected());
+    }
+
+    /**
      * Fake a click on the specified column. This is useful for tests where the
      * table has not been layed out on screen and may have invalid dimensions.
      */
