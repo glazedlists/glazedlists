@@ -3,16 +3,25 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.filter;
 
-import ca.odell.glazedlists.matchers.TextMatcherEditor;
-import ca.odell.glazedlists.matchers.Matchers;
-import ca.odell.glazedlists.matchers.Matcher;
-import ca.odell.glazedlists.impl.GlazedListsImpl;
+import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.TextFilterable;
 import ca.odell.glazedlists.TextFilterator;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.swing.SearchEngineTextMatcherEditor;
+import ca.odell.glazedlists.impl.GlazedListsImpl;
+import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.matchers.Matchers;
+import ca.odell.glazedlists.matchers.SearchEngineTextMatcherEditor;
+import ca.odell.glazedlists.matchers.TextMatcherEditor;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Common services required when implementing a Matcher that performs text

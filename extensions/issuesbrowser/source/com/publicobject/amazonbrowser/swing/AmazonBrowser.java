@@ -3,19 +3,62 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.amazonbrowser.swing;
 
-import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.TreeList;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import ca.odell.glazedlists.swing.*;
-import com.publicobject.amazonbrowser.*;
+import ca.odell.glazedlists.matchers.SearchEngineTextMatcherEditor;
+import ca.odell.glazedlists.swing.AbstractTreeTableNodeDataRenderer;
+import ca.odell.glazedlists.swing.EventSelectionModel;
+import ca.odell.glazedlists.swing.EventTableModel;
+import ca.odell.glazedlists.swing.GlazedListsSwing;
+import ca.odell.glazedlists.swing.SearchEngineTextFieldMatcherEditor;
+import ca.odell.glazedlists.swing.TableComparatorChooser;
+import ca.odell.glazedlists.swing.TreeTableSupport;
+
+import com.publicobject.amazonbrowser.Item;
+import com.publicobject.amazonbrowser.ItemLoader;
+import com.publicobject.amazonbrowser.ItemTableFormat;
+import com.publicobject.amazonbrowser.ItemTextFilterator;
+import com.publicobject.amazonbrowser.ItemTreeFormat;
+import com.publicobject.amazonbrowser.TreeCriterion;
 import com.publicobject.misc.Exceptions;
 import com.publicobject.misc.swing.ExceptionHandlerFactory;
 import com.publicobject.misc.swing.GradientPanel;
 import com.publicobject.misc.swing.MacCornerScrollPaneLayoutManager;
 import com.publicobject.misc.swing.RoundedBorder;
 
-import javax.swing.*;
-import javax.swing.table.*;
-import java.awt.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -116,7 +159,7 @@ public class AmazonBrowser implements Runnable {
         filterFieldLabel.setForeground(Color.WHITE);
 
         filterField = new JTextField(10);
-        final SearchEngineTextMatcherEditor<Item> filterFieldMatcherEditor = new SearchEngineTextMatcherEditor<Item>(filterField, new ItemTextFilterator());
+        final SearchEngineTextFieldMatcherEditor<Item> filterFieldMatcherEditor = new SearchEngineTextFieldMatcherEditor<Item>(filterField, new ItemTextFilterator());
 
         final Set<SearchEngineTextMatcherEditor.Field<Item>> filterFields = new HashSet<SearchEngineTextMatcherEditor.Field<Item>>();
         filterFields.add(new SearchEngineTextMatcherEditor.Field<Item>("title", new TitleTextFilterator()));

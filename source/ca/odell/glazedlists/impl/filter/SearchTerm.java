@@ -4,11 +4,11 @@
 package ca.odell.glazedlists.impl.filter;
 
 import ca.odell.glazedlists.impl.GlazedListsImpl;
-import ca.odell.glazedlists.swing.SearchEngineTextMatcherEditor;
+import ca.odell.glazedlists.matchers.SearchEngineTextMatcherEditor;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.Serializable;
 
 /**
  * A SearchTerm object stores metadata around a single piece of text to be
