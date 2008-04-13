@@ -416,12 +416,12 @@ public class EventTableModelTest extends SwingTestCase {
         table.setSelectionModel(selModel);
         // establish a selection
         selModel.setSelectionInterval(1, 1);
-        assertEquals(Arrays.asList("B"), selModel.getSelected());
+        assertEquals(GlazedListsTests.stringToList("B"), selModel.getSelected());
         assertEquals(GlazedListsTests.delimitedStringToList("A C D E F"), selModel.getDeselected());
         list.removeAll(GlazedListsTests.delimitedStringToList("E F"));
         assertEquals(2, counter.getCountAndReset());
-        assertEquals(Arrays.asList("B"), selModel.getSelected());
-        assertEquals(Arrays.asList("A", "C", "D"), selModel.getDeselected());
+        assertEquals(GlazedListsTests.stringToList("B"), selModel.getSelected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A C D"), selModel.getDeselected());
     }
 
     /**
@@ -442,13 +442,13 @@ public class EventTableModelTest extends SwingTestCase {
         table.setSelectionModel(selModel);
         // establish a selection
         selModel.setSelectionInterval(1, 1);
-        assertEquals(Arrays.asList("B"), selModel.getSelected());
+        assertEquals(GlazedListsTests.stringToList("B"), selModel.getSelected());
         assertEquals(GlazedListsTests.delimitedStringToList("A C D E F"), selModel.getDeselected());
         list.removeAll(GlazedListsTests.delimitedStringToList("E F"));
         assertEquals(1, counter.getCountAndReset());
         // unfortunately, JTable will clear the selection for a "data changed" TableModelEvent
         assertEquals(true, selModel.getSelected().isEmpty());
-        assertEquals(Arrays.asList("A", "B", "C", "D"), selModel.getDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A B C D"), selModel.getDeselected());
     }
 
     /**
@@ -472,18 +472,16 @@ public class EventTableModelTest extends SwingTestCase {
 
         // establish a selection
         selModel.setSelectionInterval(1, 1);
-        assertEquals(Arrays.asList("B"), selModel.getSelected());
+        assertEquals(GlazedListsTests.stringToList("B"), selModel.getSelected());
         assertEquals(GlazedListsTests.delimitedStringToList("A C D E F"), selModel.getDeselected());
 
         sortedList.setComparator(GlazedLists.reverseComparator());
         assertEquals(2, counter.getCountAndReset());
-        assertEquals(Arrays.asList("F", "E", "D", "C", "B", "A"), sortedList);
+        assertEquals(GlazedListsTests.delimitedStringToList("F E D C B A"), sortedList);
 
         // unfortunately, JTable will clear the selection for a "data changed" TableModelEvent
-//        assertEquals(Arrays.asList("B"), selModel.getSelected());
-//        assertEquals(Arrays.asList("A", "C", "D", "E", "F"), selModel.getDeselected());
         assertEquals(true, selModel.getSelected().isEmpty());
-        assertEquals(Arrays.asList("A", "B", "C", "D", "E", "F"), selModel.getDeselected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A B C D E F"), selModel.getDeselected());
     }
 
     /**

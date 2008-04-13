@@ -12,7 +12,6 @@ import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import javax.swing.JList;
 
 import java.awt.Color;
-import java.util.Arrays;
 
 /**
  * Test EventListModel from the Swing thread.
@@ -86,12 +85,12 @@ public class EventListModelTest extends SwingTestCase {
         jList.setSelectionModel(selModel);
         // establish a selection
         selModel.setSelectionInterval(1, 1);
-        assertEquals(Arrays.asList("B"), selModel.getSelected());
+        assertEquals(GlazedListsTests.stringToList("B"), selModel.getSelected());
         assertEquals(GlazedListsTests.delimitedStringToList("A C D E F"), selModel.getDeselected());
         // trigger a ListEvent with blocks
         list.removeAll(GlazedListsTests.delimitedStringToList("E F"));
         // selection should be preserved
-        assertEquals(Arrays.asList("B"), selModel.getSelected());
-        assertEquals(Arrays.asList("A", "C", "D"), selModel.getDeselected());
+        assertEquals(GlazedListsTests.stringToList("B"), selModel.getSelected());
+        assertEquals(GlazedListsTests.delimitedStringToList("A C D"), selModel.getDeselected());
     }
 }
