@@ -343,7 +343,8 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
      * TableModel state or the source list during TableModelEvent propagation.
      * A consistent state is only guaranteed after all TableModelEvents for a ListEvent
      * have been fired.</p>
-     * The default value is <code>false</code>.
+     * <p>This setting only applies to non-reordering ListEvents.</p>
+     * <p>The default value is <code>false</code>.</p>
      */
     public void setFireOneTableModelEventOnly(boolean fireOneTableModelEventOnly) {
         this.fireOneTableModelEventOnly = fireOneTableModelEventOnly;
