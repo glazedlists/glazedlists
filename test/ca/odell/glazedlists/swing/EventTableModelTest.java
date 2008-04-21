@@ -455,7 +455,7 @@ public class EventTableModelTest extends SwingTestCase {
      * Tests {@link EventTableModel#setFireOneTableModelEventOnly(boolean)} in combination with
      * a reorder event, for example caused by {@link SortedList#setComparator(java.util.Comparator)}.
      */
-    public void guiTestReorderWithFireOneTableModelEventOnly_FixMe() {
+    public void guiTestReorderWithFireOneTableModelEventOnly() {
         // setup JTable with a EventTableModel and EventSelectionModel
         final EventList<String> list = new BasicEventList<String>();
         list.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
@@ -479,9 +479,8 @@ public class EventTableModelTest extends SwingTestCase {
         assertEquals(2, counter.getCountAndReset());
         assertEquals(GlazedListsTests.delimitedStringToList("F E D C B A"), sortedList);
 
-        // unfortunately, JTable will clear the selection for a "data changed" TableModelEvent
-        assertEquals(true, selModel.getSelected().isEmpty());
-        assertEquals(GlazedListsTests.delimitedStringToList("A B C D E F"), selModel.getDeselected());
+        assertEquals(GlazedListsTests.stringToList("B"), selModel.getSelected());
+        assertEquals(GlazedListsTests.delimitedStringToList("F E D C A"), selModel.getDeselected());
     }
 
     /**

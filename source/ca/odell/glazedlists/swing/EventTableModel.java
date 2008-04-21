@@ -196,7 +196,7 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
      * @see #setFireOneTableModelEventOnly(boolean)
      */
     public void listChanged(ListEvent<E> listChanges) {
-        if (isFireOneTableModelEventOnly()) {
+        if (isFireOneTableModelEventOnly() && !listChanges.isReordering()) {
             // for all changes, only one TableModelEvent
             fireOneTableModelEvent(listChanges);
         } else {
