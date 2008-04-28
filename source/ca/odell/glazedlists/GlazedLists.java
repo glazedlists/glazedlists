@@ -326,9 +326,9 @@ public final class GlazedLists {
      * Creates a {@link TextFilterator} that searches against an Object's
      * {@link Object#toString() toString()} value.
      */
-    public static TextFilterator<Object> toStringTextFilterator() {
+    public static <E> TextFilterator<E> toStringTextFilterator() {
         if(stringTextFilterator == null) stringTextFilterator = new StringTextFilterator();
-        return stringTextFilterator;
+        return (TextFilterator<E>) stringTextFilterator;
     }
 
 

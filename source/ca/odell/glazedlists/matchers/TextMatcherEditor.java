@@ -133,7 +133,7 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
     }
 
     /** the filterator is used as an alternative to implementing the TextFilterable interface */
-    private final TextFilterator<? super E> filterator;
+    private TextFilterator<? super E> filterator;
 
     /** one of {@link #CONTAINS}, {@link #STARTS_WITH}, or {@link #REGULAR_EXPRESSION} */
     private int mode = CONTAINS;
@@ -170,6 +170,21 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      */
     public TextFilterator<? super E> getFilterator() {
         return filterator;
+    }
+
+    /**
+     * Set the filterator used to extract Strings from the matched elements.
+     */
+    public void setFilterator(TextFilterator<? super E> filterator) {
+        if (filterator == this.filterator) return;
+        this.filterator = filterator;
+
+        // if no filter text exists, no Matcher change is necessary
+        final TextMatcher<E> currentTextMatcher = getCurrentTextMatcher();
+        if (currentTextMatcher == null)
+            return;
+
+        fireChanged(currentTextMatcher.newFilterator(filterator));
     }
 
     /**

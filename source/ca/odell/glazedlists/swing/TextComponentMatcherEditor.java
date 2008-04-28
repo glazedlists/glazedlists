@@ -14,6 +14,8 @@ import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
 
 /**
  * A MatcherEditor that matches Objects that contain the filter text located
@@ -27,19 +29,25 @@ import java.awt.event.ActionListener;
  * is extracted) be specified.
  *
  * <p>The MatcherEditor registers itself as a {@link DocumentListener} on the
- * given Document, or {@link ActionListener} for non-live filtering. If this
- * MatcherEditor must be garbage collected before the underlying Document,
- * or JTextComponent, the listener can be unregistered by calling {@link #dispose()}.
+ * given Document, or {@link ActionListener} on the {@link JTextComponent} for
+ * non-live filtering. If a {@link JTextComponent} is given on construction, it
+ * is also watched for changes of its Document and the Document used by this
+ * MatcherEditor is updated to reflect the latest Document behind the text
+ * component.
+ *
+ * If this MatcherEditor must be garbage collected before the underlying
+ * Document, or JTextComponent, the listeners can be unregistered by calling
+ * {@link #dispose()}.
  *
  * @author James Lemieux
  */
 public class TextComponentMatcherEditor<E> extends TextMatcherEditor<E> {
 
-    /** The Document that provides the filter values. */
-    private final Document document;
+    /** the Document that provides the filter values */
+    private Document document;
 
     /** the JTextComponent being observed for actions */
-    private JTextComponent textComponent;
+    private final JTextComponent textComponent;
 
     /** whether we're listening to each keystroke */
     private boolean live;
@@ -120,7 +128,7 @@ public class TextComponentMatcherEditor<E> extends TextMatcherEditor<E> {
      * Whether filtering occurs by the keystroke or not.
      */
     public boolean isLive() {
-        return this.live;
+        return live;
     }
 
     /**
@@ -132,7 +140,7 @@ public class TextComponentMatcherEditor<E> extends TextMatcherEditor<E> {
      *      supported if <code>textComponent</code> is a {@link JTextField}.
      */
     public void setLive(boolean live) {
-        if(live == this.live) return;
+        if (live == this.live) return;
         deregisterListeners(this.live);
         this.live = live;
         registerListeners(this.live);
@@ -143,25 +151,31 @@ public class TextComponentMatcherEditor<E> extends TextMatcherEditor<E> {
      */
     private void registerListeners(boolean live) {
         if(live) {
-            this.document.addDocumentListener(this.filterHandler);
+            document.addDocumentListener(filterHandler);
         } else {
             if(textComponent == null) throw new IllegalArgumentException("Non-live filtering supported only for JTextField (document provided)");
             if(!(textComponent instanceof JTextField)) throw new IllegalArgumentException("Non-live filtering supported only for JTextField (argument class " + textComponent.getClass().getName() + ")");
-            JTextField textField = (JTextField)textComponent;
-            textField.addActionListener(this.filterHandler);
+            JTextField textField = (JTextField) textComponent;
+            textField.addActionListener(filterHandler);
         }
+
+        if (textComponent != null)
+            textComponent.addPropertyChangeListener(filterHandler);
     }
 
     /**
      * Stop listening.
      */
     private void deregisterListeners(boolean live) {
-        if(live) {
-            this.document.removeDocumentListener(this.filterHandler);
+        if (live) {
+            document.removeDocumentListener(filterHandler);
         } else {
-            JTextField textField = (JTextField)textComponent;
-            textField.removeActionListener(this.filterHandler);
+            JTextField textField = (JTextField) textComponent;
+            textField.removeActionListener(filterHandler);
         }
+
+        if (textComponent != null)
+            textComponent.removePropertyChangeListener(filterHandler);
     }
 
     /**
@@ -170,7 +184,7 @@ public class TextComponentMatcherEditor<E> extends TextMatcherEditor<E> {
      * MatcherEditor or Document to be garbage collected.
      */
     public void dispose() {
-        deregisterListeners(this.live);
+        deregisterListeners(live);
     }
 
     /**
@@ -203,10 +217,24 @@ public class TextComponentMatcherEditor<E> extends TextMatcherEditor<E> {
      * This class responds to any change in the Document by setting the filter
      * text of this TextMatcherEditor to the contents of the Document.
      */
-    private class FilterHandler implements DocumentListener, ActionListener {
+    private class FilterHandler implements DocumentListener, ActionListener, PropertyChangeListener {
         public void insertUpdate(DocumentEvent e) { refilter(); }
         public void removeUpdate(DocumentEvent e) { refilter(); }
         public void changedUpdate(DocumentEvent e) { refilter(); }
         public void actionPerformed(ActionEvent e) { refilter(); }
+
+        public void propertyChange(PropertyChangeEvent evt) {
+            if ("document" == evt.getPropertyName()) {
+                // stop listening to the old Document
+                deregisterListeners(live);
+
+                // start listening to the new Document
+                document = textComponent.getDocument();
+                registerListeners(live);
+
+                // refilter based on the new Document
+                refilter();
+            }
+        }
     }
 }

@@ -13,9 +13,9 @@ import java.util.List;
  * @author James Lemieux
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class StringTextFilterator implements TextFilterator<Object> {
+public class StringTextFilterator<E> implements TextFilterator<E> {
     /** {@inheritDoc} */
-    public void getFilterStrings(List<String> baseList, Object element) {
+    public void getFilterStrings(List<String> baseList, E element) {
         if (element != null) baseList.add(element.toString());
     }
 }

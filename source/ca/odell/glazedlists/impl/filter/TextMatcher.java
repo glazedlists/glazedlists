@@ -120,6 +120,14 @@ public class TextMatcher<E> implements Matcher<E> {
 
     /**
      * Return a new TextMatcher identical to this TextMatcher save for the
+     * given <code>filterator</code>.
+     */
+    public TextMatcher<E> newFilterator(TextFilterator<? super E> filterator) {
+        return new TextMatcher<E>(searchTerms, filterator, mode, strategy);
+    }
+
+    /**
+     * Return a new TextMatcher identical to this TextMatcher save for the
      * given <code>strategy</code>.
      */
     public TextMatcher<E> newStrategy(Object strategy) {
