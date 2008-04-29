@@ -23,7 +23,7 @@ import java.util.List;
  * otherwise noted, all methods are only safe to be called from the event
  * dispatch thread. To do this programmatically, use
  * {@link SwingUtilities#invokeAndWait(Runnable)}.
- * 
+ *
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=14">Bug 14</a>
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=146">Bug 146</a>
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=177">Bug 177</a>
@@ -59,7 +59,7 @@ public class EventListModel<E> implements ListEventListener<E>, ListModel {
             source.getReadWriteLock().readLock().unlock();
         }
     }
-    
+
     /**
      * For implementing the ListEventListener interface. This sends changes
      * to the table which can repaint the table cells. Because this class uses
@@ -72,31 +72,32 @@ public class EventListModel<E> implements ListEventListener<E>, ListModel {
      * ListTable accepts large change events.
      */
     public void listChanged(ListEvent<E> listChanges) {
-        // build an "optimized" ListDataEvent describing the precise range of rows in the first block
-        listChanges.nextBlock();
-        final int startIndex = listChanges.getBlockStartIndex();
-        final int endIndex = listChanges.getBlockEndIndex();
-        listDataEvent.setRange(startIndex, endIndex);
+        // when all events have already been processed by clearing the event queue
+        if(!listChanges.hasNext()) return;
 
-        final int changeType = listChanges.getType();
-        switch (changeType) {
-            case ListEvent.INSERT: listDataEvent.setType(ListDataEvent.INTERVAL_ADDED); break;
-            case ListEvent.DELETE: listDataEvent.setType(ListDataEvent.INTERVAL_REMOVED); break;
-            case ListEvent.UPDATE: listDataEvent.setType(ListDataEvent.CONTENTS_CHANGED); break;
+        // for all changes, one block at a time
+        while(listChanges.nextBlock()) {
+            // get the current change info
+            int startIndex = listChanges.getBlockStartIndex();
+            int endIndex = listChanges.getBlockEndIndex();
+            int changeType = listChanges.getType();
+
+            // create a table model event for this block
+            listDataEvent.setRange(startIndex, endIndex);
+            switch (changeType) {
+                case ListEvent.INSERT: listDataEvent.setType(ListDataEvent.INTERVAL_ADDED); break;
+                case ListEvent.DELETE: listDataEvent.setType(ListDataEvent.INTERVAL_REMOVED); break;
+                case ListEvent.UPDATE: listDataEvent.setType(ListDataEvent.CONTENTS_CHANGED); break;
+            }
+
+            // fire an event to notify all listeners
+            fireListDataEvent(listDataEvent);
         }
-
-        // if another block exists, fallback to using a generic "data changed" ListDataEvent
-        if (listChanges.nextBlock()) {
-            listDataEvent.setRange(0, Integer.MAX_VALUE);
-            listDataEvent.setType(ListDataEvent.CONTENTS_CHANGED);
-        }
-
-        fireListDataEvent(listDataEvent);
     }
 
     /**
      * Retrieves the value at the specified location from the table.
-     * 
+     *
      * Before every get, we need to validate the row because there may be an
      * update waiting in the event queue. For example, it is possible that
      * the source list has been updated by a database thread. Such a change
@@ -116,7 +117,7 @@ public class EventListModel<E> implements ListEventListener<E>, ListModel {
             swingSource.getReadWriteLock().readLock().unlock();
         }
     }
-    
+
     /**
      * Gets the size of the list.
      */
@@ -163,7 +164,7 @@ public class EventListModel<E> implements ListEventListener<E>, ListModel {
             }
         }
     }
-    
+
     /**
      * Releases the resources consumed by this {@link EventListModel} so that it
      * may eventually be garbage collected.
@@ -171,10 +172,10 @@ public class EventListModel<E> implements ListEventListener<E>, ListModel {
      * <p>An {@link EventListModel} will be garbage collected without a call to
      * {@link #dispose()}, but not before its source {@link EventList} is garbage
      * collected. By calling {@link #dispose()}, you allow the {@link EventListModel}
-     * to be garbage collected before its source {@link EventList}. This is 
+     * to be garbage collected before its source {@link EventList}. This is
      * necessary for situations where an {@link EventListModel} is short-lived but
      * its source {@link EventList} is long-lived.
-     * 
+     *
      * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
      * to call any method on an {@link EventListModel} after it has been disposed.
      * As such, this {@link EventListModel} should be detached from its
