@@ -72,27 +72,26 @@ public class EventListModel<E> implements ListEventListener<E>, ListModel {
      * ListTable accepts large change events.
      */
     public void listChanged(ListEvent<E> listChanges) {
-        // when all events have already been processed by clearing the event queue
-        if(!listChanges.hasNext()) return;
+        // build an "optimized" ListDataEvent describing the precise range of rows in the first block
+        listChanges.nextBlock();
+        final int startIndex = listChanges.getBlockStartIndex();
+        final int endIndex = listChanges.getBlockEndIndex();
+        listDataEvent.setRange(startIndex, endIndex);
 
-        // for all changes, one block at a time
-        while(listChanges.nextBlock()) {
-            // get the current change info
-            int startIndex = listChanges.getBlockStartIndex();
-            int endIndex = listChanges.getBlockEndIndex();
-            int changeType = listChanges.getType();
-
-            // create a table model event for this block
-            listDataEvent.setRange(startIndex, endIndex);
-            switch (changeType) {
-                case ListEvent.INSERT: listDataEvent.setType(ListDataEvent.INTERVAL_ADDED); break;
-                case ListEvent.DELETE: listDataEvent.setType(ListDataEvent.INTERVAL_REMOVED); break;
-                case ListEvent.UPDATE: listDataEvent.setType(ListDataEvent.CONTENTS_CHANGED); break;
-            }
-
-            // fire an event to notify all listeners
-            fireListDataEvent(listDataEvent);
+        final int changeType = listChanges.getType();
+        switch (changeType) {
+            case ListEvent.INSERT: listDataEvent.setType(ListDataEvent.INTERVAL_ADDED); break;
+            case ListEvent.DELETE: listDataEvent.setType(ListDataEvent.INTERVAL_REMOVED); break;
+            case ListEvent.UPDATE: listDataEvent.setType(ListDataEvent.CONTENTS_CHANGED); break;
         }
+
+        // if another block exists, fallback to using a generic "data changed" ListDataEvent
+        if (listChanges.nextBlock()) {
+            listDataEvent.setRange(0, Integer.MAX_VALUE);
+            listDataEvent.setType(ListDataEvent.CONTENTS_CHANGED);
+        }
+
+        fireListDataEvent(listDataEvent);
     }
 
     /**
