@@ -7,9 +7,9 @@ import ca.odell.glazedlists.Filterator;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.impl.matchers.*;
 
-import java.util.*;
 import java.beans.PropertyChangeEvent;
 import java.lang.reflect.Array;
+import java.util.*;
 
 /**
  * A factory for creating Matchers.
@@ -81,6 +81,22 @@ public final class Matchers {
      */
     public static <E> Matcher<E> invert(Matcher<E> original) {
         return new NotMatcher<E>(original);
+    }
+
+    /**
+     * Get a {@link Matcher} that returns returns <tt>true</tt> iff it is
+     * given a <code>non-null</code> object.
+     */
+    public static <E> Matcher<E> isNull() {
+        return NullMatcher.getInstance();
+    }
+
+    /**
+     * Get a {@link Matcher} that returns returns <tt>true</tt> iff it is
+     * given a <code>null</code> object.
+     */
+    public static <E> Matcher<E> isNotNull() {
+        return NotNullMatcher.getInstance();
     }
 
     /**

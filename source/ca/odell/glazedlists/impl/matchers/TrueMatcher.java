@@ -12,10 +12,12 @@ import ca.odell.glazedlists.matchers.Matcher;
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
-public class TrueMatcher<E> implements Matcher<E> {
+public final class TrueMatcher<E> implements Matcher<E> {
 
 	/** Singleton instance of TrueMatcher. */
 	private static final Matcher INSTANCE = new TrueMatcher();
+
+    private TrueMatcher() {}
 
     /**
 	 * Return a singleton instance.

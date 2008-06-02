@@ -6,17 +6,16 @@ package ca.odell.glazedlists.impl.matchers;
 import ca.odell.glazedlists.matchers.Matcher;
 
 /**
- * A {@link Matcher} implementation that never matches. Use
- * {@link #getInstance()} to obtain the singleton instance.
+ * A simple {@link Matcher} implementation that only matches non-null objects.
  *
- * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
+ * @author James Lemieux
  */
-public final class FalseMatcher<E> implements Matcher<E> {
+public final class NotNullMatcher<E> implements Matcher<E> {
 
-	/** Singleton instance of FalseMatcher. */
-	private static final Matcher INSTANCE = new FalseMatcher();
+    /** Singleton instance of NotNullMatcher. */
+	private static final Matcher INSTANCE = new NotNullMatcher();
 
-    private FalseMatcher() {}
+    private NotNullMatcher() {}
 
     /**
 	 * Return a singleton instance.
@@ -27,6 +26,11 @@ public final class FalseMatcher<E> implements Matcher<E> {
 
     /** {@inheritDoc} */
 	public boolean matches(E item) {
-        return false;
+		return item != null;
+	}
+
+    /** {@inheritDoc} */
+	public String toString() {
+		return "[NotNullMatcher]";
 	}
 }
