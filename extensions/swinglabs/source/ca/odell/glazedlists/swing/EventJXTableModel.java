@@ -17,11 +17,11 @@ import javax.swing.event.TableModelEvent;
  * In particular, this table model implements a different strategy to tranform
  * {@link ListEvent}s to {@link TableModelEvent}s. Whereas EventTableModel
  * converts each ListEvent block to a TableModelEvent, EventJXTableModel tries
- * to create only one TableModelEvent for ListEvents, that do not represent a
+ * to create only one TableModelEvent for a ListEvent, that does not represent a
  * reorder. If the ListEvent contains multiple blocks, a special
  * <em>data changed</em> TableModelEvent will be fired, indicating that all
- * row data has changed. This strategy is not used in EventTableModel, because such a
- * <em>data changed</em> TableModelEvent would lead to a loss of the table selection.
+ * row data has changed. Note, that such a <em>data changed</em> TableModelEvent
+ * can lead to a loss of the table selection.
  * </p>
  *
  * @author Holger Brands
