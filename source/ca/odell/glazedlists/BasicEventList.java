@@ -15,7 +15,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OptionalDataException;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.RandomAccess;
 
 /**
  * An {@link EventList} that wraps any simple {@link List}, such as {@link ArrayList}
@@ -272,7 +278,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
      * <p>The motivation for this is documented <a
      * href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=398">here</a>.
      * Serialization streams with the old format are still readable. Serialization streams with
-     * the new format are not downwards-compatible. 
+     * the new format are not downwards-compatible.
      */
     private void writeObject(ObjectOutputStream out) throws IOException {
         // 1. The elements to write
@@ -291,7 +297,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
         out.writeObject(elements);
         out.writeObject(listeners);
         out.writeObject(getPublisher());
-        out.writeObject(getReadWriteLock());        
+        out.writeObject(getReadWriteLock());
     }
 
     /**
@@ -304,7 +310,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
         final E[] elements = (E[]) in.readObject();
         // 2. Read in the listeners
         final ListEventListener<E>[] listeners = (ListEventListener<E>[]) in.readObject();
-        
+
         // 3. Try to read the ListEventPublisher and ReadWriteLock according to the new wire format
         try {
             this.publisher = (ListEventPublisher) in.readObject();
@@ -314,8 +320,8 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
             if (e.eof)
                 // reading old serialization stream without publisher and lock
                 this.readWriteLock = LockFactory.DEFAULT.createReadWriteLock();
-            else throw e; 
-        }        
+            else throw e;
+        }
         // 4. Populate the EventList data
         this.data = new ArrayList<E>(elements.length);
         this.data.addAll(Arrays.asList(elements));

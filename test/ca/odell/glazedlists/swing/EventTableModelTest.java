@@ -425,65 +425,6 @@ public class EventTableModelTest extends SwingTestCase {
     }
 
     /**
-     * Tests {@link EventTableModel#setFireOneTableModelEventOnly(boolean)}.
-     */
-    public void guiTestFireOneTableModelEventOnly() {
-        // setup JTable with a EventTableModel and EventSelectionModel
-        final EventList<String> list = new BasicEventList<String>();
-        list.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
-        final EventTableModel<String> model = new EventTableModel<String>(list,
-                GlazedLists.tableFormat(new String[] {"bytes"}, new String [] {"Bytes"}));
-        assertEquals(false, model.isFireOneTableModelEventOnly());
-        model.setFireOneTableModelEventOnly(true);
-        final TableModelChangeCounter counter = new TableModelChangeCounter();
-        model.addTableModelListener(counter);
-        final JTable table = new JTable(model);
-        final EventSelectionModel selModel = new EventSelectionModel<String>(list);
-        table.setSelectionModel(selModel);
-        // establish a selection
-        selModel.setSelectionInterval(1, 1);
-        assertEquals(GlazedListsTests.stringToList("B"), selModel.getSelected());
-        assertEquals(GlazedListsTests.delimitedStringToList("A C D E F"), selModel.getDeselected());
-        list.removeAll(GlazedListsTests.delimitedStringToList("E F"));
-        assertEquals(1, counter.getCountAndReset());
-        // unfortunately, JTable will clear the selection for a "data changed" TableModelEvent
-        assertEquals(true, selModel.getSelected().isEmpty());
-        assertEquals(GlazedListsTests.delimitedStringToList("A B C D"), selModel.getDeselected());
-    }
-
-    /**
-     * Tests {@link EventTableModel#setFireOneTableModelEventOnly(boolean)} in combination with
-     * a reorder event, for example caused by {@link SortedList#setComparator(java.util.Comparator)}.
-     */
-    public void guiTestReorderWithFireOneTableModelEventOnly() {
-        // setup JTable with a EventTableModel and EventSelectionModel
-        final EventList<String> list = new BasicEventList<String>();
-        list.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
-        final SortedList<String> sortedList = SortedList.create(list);
-        final EventTableModel<String> model = new EventTableModel<String>(sortedList,
-                GlazedLists.tableFormat(new String[] {"bytes"}, new String [] {"Bytes"}));
-        assertEquals(false, model.isFireOneTableModelEventOnly());
-        model.setFireOneTableModelEventOnly(true);
-        final TableModelChangeCounter counter = new TableModelChangeCounter();
-        model.addTableModelListener(counter);
-        final JTable table = new JTable(model);
-        final EventSelectionModel selModel = new EventSelectionModel<String>(sortedList);
-        table.setSelectionModel(selModel);
-
-        // establish a selection
-        selModel.setSelectionInterval(1, 1);
-        assertEquals(GlazedListsTests.stringToList("B"), selModel.getSelected());
-        assertEquals(GlazedListsTests.delimitedStringToList("A C D E F"), selModel.getDeselected());
-
-        sortedList.setComparator(GlazedLists.reverseComparator());
-        assertEquals(2, counter.getCountAndReset());
-        assertEquals(GlazedListsTests.delimitedStringToList("F E D C B A"), sortedList);
-
-        assertEquals(GlazedListsTests.stringToList("B"), selModel.getSelected());
-        assertEquals(GlazedListsTests.delimitedStringToList("F E D C A"), selModel.getDeselected());
-    }
-
-    /**
      * Fake a click on the specified column. This is useful for tests where the
      * table has not been layed out on screen and may have invalid dimensions.
      */

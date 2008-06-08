@@ -57,7 +57,7 @@ public abstract class TransformedList<S, E> extends AbstractEventList<E> impleme
 
     /**
      * Gets whether the source {@link EventList} is writable via this API.
-     * 
+     *
      * <p>Extending classes must override this method in order to make themselves
      * writable.
      */
@@ -152,10 +152,10 @@ public abstract class TransformedList<S, E> extends AbstractEventList<E> impleme
      * <p>A {@link TransformedList} will be garbage collected without a call to
      * {@link #dispose()}, but not before its source {@link EventList} is garbage
      * collected. By calling {@link #dispose()}, you allow the {@link TransformedList}
-     * to be garbage collected before its source {@link EventList}. This is 
+     * to be garbage collected before its source {@link EventList}. This is
      * necessary for situations where a {@link TransformedList} is short-lived but
      * its source {@link EventList} is long-lived.
-     * 
+     *
      * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
      * to call any method on a {@link TransformedList} after it has been disposed.
      */

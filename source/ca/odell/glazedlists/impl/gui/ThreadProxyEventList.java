@@ -66,16 +66,16 @@ import java.util.RandomAccess;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> implements RandomAccess {
-    
+
     /** a local cache of the source list */
     private List<E> localCache = new ArrayList<E>();
-    
+
     /** propagates events on the proxy thread */
     private UpdateRunner updateRunner = new UpdateRunner();
-    
+
     /** whether the proxy thread has been scheduled */
     private boolean scheduled = false;
-    
+
     /**
      * Create a {@link ThreadProxyEventList} which delivers changes to the
      * given <code>source</code> on a particular {@link Thread}, called the
@@ -86,13 +86,13 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> impl
      */
     public ThreadProxyEventList(EventList<E> source) {
         super(source);
-        
+
         // populate the initial cache value
         localCache.addAll(source);
-        
+
         // handle my own events to update the internal state
         addListEventListener(updateRunner);
-        
+
         // handle changes in the source event list
         source.addListEventListener(this);
     }
@@ -103,29 +103,29 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> impl
         if(!scheduled) {
             updates.beginEvent(true);
         }
-        
+
         // add the changes for this event to our queue
         updates.forwardEvent(listChanges);
-        
+
         // commit the event on the appropriate thread
         if(!scheduled) {
             scheduled = true;
             schedule(updateRunner);
         }
     }
-    
+
     /**
      * Schedule the specified runnable to be executed on the proxy thread.
      *
      * @param runnable a unit of work to be executed on the proxy thread
      */
-    protected abstract void schedule(Runnable runnable);    
+    protected abstract void schedule(Runnable runnable);
 
     /** {@inheritDoc} */
     public final int size() {
         return localCache.size();
     }
-    
+
     /** {@inheritDoc} */
     public final E get(int index) {
         return localCache.get(index);
@@ -200,7 +200,7 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> impl
      * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
      */
     private class UpdateRunner implements Runnable, ListEventListener<E> {
-    
+
         /**
          * When run, this combines all events thus far and forwards them.
          *

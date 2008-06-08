@@ -49,12 +49,6 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
     private final MutableTableModelEvent tableModelEvent = new MutableTableModelEvent(this);
 
     /**
-     * if <code>true</code>, this model translates one ListEvent to one TableModelEvent, else
-     * one TableModelEvent per ListEvent block.
-     */
-    private boolean fireOneTableModelEventOnly;
-
-    /**
      * Creates a new table model that extracts column data from the given
      * <code>source</code> using the the given <code>tableFormat</code>.
      *
@@ -167,50 +161,40 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
     }
 
     /**
-     * Ensures that only one TableModelEvent is created and fired for the given ListEvent.
-     */
-    private void fireOneTableModelEvent(ListEvent<E> listChanges) {
-        // build an "optimized" TableModelEvent describing the precise range of rows in the first block
-        listChanges.nextBlock();
-        final int startIndex = listChanges.getBlockStartIndex();
-        final int endIndex = listChanges.getBlockEndIndex();
-        final int changeType = listChanges.getType();
-        tableModelEvent.setValues(startIndex, endIndex, changeType);
-
-        // if another block exists, fallback to using a generic "data changed" TableModelEvent
-        if (listChanges.nextBlock())
-            tableModelEvent.setAllDataChanged();
-
-        // fire the single TableModelEvent representing the entire ListEvent
-        fireTableChanged(tableModelEvent);
-    }
-
-    /**
      * For implementing the ListEventListener interface. This sends changes
      * to the table which repaints the table cells. Because this class is
      * backed by {@link GlazedListsSwing#swingThreadProxyList}, all natural
      * calls to this method are guaranteed to occur on the Swing EDT.
-     * <p>The translation from the ListEvent to one or more TableModelEvents is
-     * affected by property <code>fireOneTableModelEventOnly</code>.</p>
-     *
-     * @see #setFireOneTableModelEventOnly(boolean)
      */
     public void listChanged(ListEvent<E> listChanges) {
-        if (isFireOneTableModelEventOnly() && !listChanges.isReordering()) {
-            // for all changes, only one TableModelEvent
-            fireOneTableModelEvent(listChanges);
-        } else {
-            // for all changes, one block at a time
-            while (listChanges.nextBlock()) {
-                // get the current change info
-                int startIndex = listChanges.getBlockStartIndex();
-                int endIndex = listChanges.getBlockEndIndex();
-                int changeType = listChanges.getType();
-                // create a table model event for this block
-                tableModelEvent.setValues(startIndex, endIndex, changeType);
-                fireTableChanged(tableModelEvent);
-            }
+        handleListChange(listChanges);
+    }
+
+    /**
+     * Default implementation for converting a {@link ListEvent} to
+     * TableModelEvents. There will be one TableModelEvent per ListEvent block.
+     * Subclasses may choose to implement a different conversion.
+     *
+     * @param listChanges ListEvent to translate
+     */
+    protected void handleListChange(ListEvent<E> listChanges) {
+        // for all changes, one block at a time
+        while (listChanges.nextBlock()) {
+            // get the current change info
+            int startIndex = listChanges.getBlockStartIndex();
+            int endIndex = listChanges.getBlockEndIndex();
+            int changeType = listChanges.getType();
+            // create a table model event for this block
+            tableModelEvent.setValues(startIndex, endIndex, changeType);
+            fireTableChanged(tableModelEvent);
         }
+    }
+
+    /**
+     * @return reusable TableModelEvent for broadcasting changes
+     */
+    protected final MutableTableModelEvent getMutableTableModelEvent() {
+        return tableModelEvent;
     }
 
     /**
@@ -319,35 +303,6 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
         } else {
             throw new UnsupportedOperationException("Unexpected setValueAt() on read-only table");
         }
-    }
-
-    /**
-     * Returns <code>true</code>, if a ListEvent will always be translated to exactly one
-     * TableModelEvent. Returns <code>false</code>, if there will be one TableModelEvent per
-     * ListEvent block. The default value is <code>false</code>.
-     *
-     * @see #setFireOneTableModelEventOnly(boolean)
-     */
-    public boolean isFireOneTableModelEventOnly() {
-        return fireOneTableModelEventOnly;
-    }
-
-    /**
-     * This property affects the translation from ListEvents to TableModelEvents.
-     * <p>If set to <code>true</code>, a ListEvent will always be translated to exactly one
-     * TableModelEvent. If the ListEvent contains multiple blocks, a special <em>data changed</em>
-     * TableModelEvent will be fired, indicating that all row data has changed. Note, this kind of
-     * TableModelEvent will lead to a loss of the table selection.</p>
-     * <p>If set to <code>false</code>, there will be one TableModelEvent per ListEvent block. This
-     * setting could potentially cause problems for TableModel listeners that need to access
-     * TableModel state or the source list during TableModelEvent propagation.
-     * A consistent state is only guaranteed after all TableModelEvents for a ListEvent
-     * have been fired.</p>
-     * <p>This setting only applies to non-reordering ListEvents.</p>
-     * <p>The default value is <code>false</code>.</p>
-     */
-    public void setFireOneTableModelEventOnly(boolean fireOneTableModelEventOnly) {
-        this.fireOneTableModelEventOnly = fireOneTableModelEventOnly;
     }
 
     /**
