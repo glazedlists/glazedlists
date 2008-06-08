@@ -368,6 +368,35 @@ public class EventTableViewerTest extends SwtTestCase {
         assertNull(colorViewerNoProxy.source);
     }
 
+    /**
+     * Tests clearing the source list of {@link EventTableViewer}.
+     */
+    public void guiTestClearOnThreadProxy_FixMe() {
+        final BasicEventList<String> list = new BasicEventList<String>();
+        final Table table = new Table(getShell(), SWT.VIRTUAL | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+        final EventTableViewer<String> viewer = new EventTableViewer<String>(list, table, new SimpleTableFormat());
+        assertEquals(list, viewer.getSourceList());
+        // populate the list
+        list.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
+        assertEquals(list, viewer.getSourceList());
+        assertEquals(6, table.getItemCount());
+        viewer.getTogglingSelected().add("F");
+        viewer.getTogglingSelected().add("A");
+        assertEquals(GlazedListsTests.delimitedStringToList("A F"), viewer.getSelected());
+        assertEquals(2, table.getSelectionCount());
+        viewer.getSourceList().getReadWriteLock().writeLock().lock();
+        try {
+            viewer.getSourceList().clear();
+        } finally {
+            viewer.getSourceList().getReadWriteLock().writeLock().unlock();
+        }
+        assertEquals(list, viewer.getSourceList());
+        assertTrue(list.isEmpty());
+        assertEquals(0, table.getItemCount());
+        assertEquals(Collections.EMPTY_LIST, viewer.getSelected());
+        assertEquals(0, table.getSelectionCount());
+    }
+
     private static class NoProxyingEventTableViewer<E> extends EventTableViewer<E> {
 
         public NoProxyingEventTableViewer(EventList<E> source, Table table, TableFormat<? super E> tableFormat) {
