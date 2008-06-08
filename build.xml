@@ -192,7 +192,9 @@
 			<manifest>
                 <attribute name="Manifest-Version" value="1.0"/>
 				<attribute name="Main-Class" value="ca.odell.glazedlists.impl.Main"/>
+				<!-- do not seal as long as sun bug 6709297 is open
 				<attribute name="Sealed" value="true"/>
+				-->
 				<attribute name="Built-By" value="${user.name}"/>
 				<attribute name="Built-At" value="${datestamp.dateAndTime}"/>
 				<attribute name="Implementation-Version" value="${implementation.version}"/>
