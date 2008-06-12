@@ -15,6 +15,8 @@ import java.util.Random;
 
 public class UndoSupportTest extends SwingTestCase {
 
+    private static final int NUMBER_OF_UNDOS = 500;
+
     private EventList<String> source;
     private TransactionList<String> txSource;
     private UndoManager undoManager;
@@ -24,7 +26,7 @@ public class UndoSupportTest extends SwingTestCase {
         source = new BasicEventList<String>();
         txSource = new TransactionList<String>(source);
         undoManager = new UndoManager();
-        undoManager.setLimit(Integer.MAX_VALUE);
+        undoManager.setLimit(NUMBER_OF_UNDOS);
         undoSupport = UndoSupport.install(undoManager, txSource);
         System.out.println("UndoSupportTest.guiSetUp");
     }
@@ -153,7 +155,7 @@ public class UndoSupportTest extends SwingTestCase {
         Random random = new Random();
 
         // create a series of 500 changes
-        for (int i = 0; i < 500; i++) {
+        for (int i = 0; i < NUMBER_OF_UNDOS; i++) {
             int changeType = txSource.isEmpty() ? ListEvent.INSERT : random.nextInt(3);
             int index = txSource.isEmpty() ? 0 : random.nextInt(txSource.size());
 
@@ -169,13 +171,13 @@ public class UndoSupportTest extends SwingTestCase {
         final List<String> snapshot = new ArrayList<String>(txSource);
 
         // undo all edits (should result in an empty list)
-        for (int i = 0; i < 500; i++)
+        for (int i = 0; i < NUMBER_OF_UNDOS; i++)
             undoManager.undo();
 
         assertTrue(txSource.isEmpty());
 
         // redo all edits (should result in snapshot)
-        for (int i = 0; i < 500; i++)
+        for (int i = 0; i < NUMBER_OF_UNDOS; i++)
             undoManager.redo();
 
         assertEquals(snapshot, txSource);
