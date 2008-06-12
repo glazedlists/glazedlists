@@ -73,6 +73,9 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> impl
     /** propagates events on the proxy thread */
     private UpdateRunner updateRunner = new UpdateRunner();
 
+    /** propagates events immediately. The source events might be fired later */
+    private final ListEventAssembler<E> cacheUpdates = new ListEventAssembler<E>(this, ListEventAssembler.createListEventPublisher());
+
     /** whether the proxy thread has been scheduled */
     private boolean scheduled = false;
 
@@ -91,7 +94,7 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> impl
         localCache.addAll(source);
 
         // handle my own events to update the internal state
-        addListEventListener(updateRunner);
+        cacheUpdates.addListEventListener(updateRunner);
 
         // handle changes in the source event list
         source.addListEventListener(this);
@@ -102,10 +105,12 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> impl
         // if we've haven't scheduled a commit, we need to begin a new event
         if(!scheduled) {
             updates.beginEvent(true);
+            cacheUpdates.beginEvent(true);
         }
 
         // add the changes for this event to our queue
         updates.forwardEvent(listChanges);
+        cacheUpdates.forwardEvent(listChanges);
 
         // commit the event on the appropriate thread
         if(!scheduled) {
@@ -191,7 +196,7 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> impl
     /** {@inheritDoc} */
     public void dispose() {
         super.dispose();
-        removeListEventListener(updateRunner);
+        cacheUpdates.removeListEventListener(updateRunner);
     }
 
     /**
@@ -212,6 +217,12 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> impl
         public void run() {
             getReadWriteLock().writeLock().lock();
             try {
+                // We need to apply the changes to the local cache immediately,
+                // before forwarding the event downstream to other listeners.
+                // This is necessary so that intermediate states in this list
+                // are visible to larger list changes (such as clearing tables,
+                // see bug 447)
+                cacheUpdates.commitEvent(); 
                 updates.commitEvent();
                 scheduled = false;
             } finally {
