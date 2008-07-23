@@ -108,6 +108,11 @@ public class TreeTableCellPanel extends JPanel {
         add(nodeComponent, TreeTableCellLayout.NODE_COMPONENT);
 
         this.nodeComponent = nodeComponent;
+
+        // bring the nodeComponent and its enclosing panel into agreement about their shared UI properties
+        super.setBackground(nodeComponent.getBackground());
+        super.setForeground(nodeComponent.getForeground());
+        super.setFont(nodeComponent.getFont());
     }
 
     /**
