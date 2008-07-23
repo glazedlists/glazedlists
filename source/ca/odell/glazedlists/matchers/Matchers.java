@@ -247,6 +247,25 @@ public final class Matchers {
     }
 
     /**
+     * Returns <tt>true</tt> if the given <code>collection</code> contains an
+     * element that satisfies the given <code>matcher</code>; <tt>false</tt>
+     * otherise.
+     *
+     * @param collection the Collection to search
+     * @param matcher    the criteria for considering an element a match
+     * @return <tt>true</tt> if the given <code>collection</code> contains an
+     *      element that satisfies the given <code>matcher</code>;
+     *      <tt>false</tt> otherise
+     */
+    public static <E> boolean contains(Collection<E> collection, Matcher<? super E> matcher) {
+        for (Iterator<E> i = collection.iterator(); i.hasNext();)
+            if (matcher.matches(i.next()))
+                return true;
+
+        return false;
+    }
+
+    /**
      * Returns the index of the first element from the given <code>list</code>
      * that satisfies the <code>matcher</code> or <tt>-1</tt> if no such
      * element exists.
