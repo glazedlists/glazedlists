@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.beans;
 
-// for being a JUnit test case
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.TableFormat;
@@ -117,9 +116,24 @@ public class BeanTableFormatTest extends TestCase {
         assertEquals(null,                               fullAdvancedFootballFormat.getColumnComparator(3));
         // this returns GlazedLists.comparableComparator() on Java 5, where Boolean implements Comparable,
         // but it returns null on prior versions where Boolean does not implement Comparable
-        boolean booleanIsComparable = (Object)Boolean.TRUE instanceof Comparable;
+        boolean booleanIsComparable = Boolean.TRUE instanceof Comparable;
         assertEquals(booleanIsComparable, GlazedLists.comparableComparator() == fullAdvancedFootballFormat.getColumnComparator(4));
         assertEquals(GlazedLists.comparableComparator(), fullAdvancedFootballFormat.getColumnComparator(5));
+    }
+
+    public void testIdentityColumn() {
+        final String[] propertyNames = {"this"};
+        final String[] columnLabels = {"Summary"};
+        final TableFormat<FootballTeam> footballTeamTableFormat = GlazedLists.tableFormat(propertyNames, columnLabels);
+        assertSame(riders, footballTeamTableFormat.getColumnValue(riders, 0));
+
+        final boolean[] writable = {true};
+        try {
+            GlazedLists.tableFormat(FootballTeam.class, propertyNames, columnLabels, writable);
+            fail("failed to throw an exception for a writable column of property 'this'");
+        } catch (IllegalArgumentException iae) {
+            // expected
+        }
     }
 }
 

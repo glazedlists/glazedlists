@@ -22,6 +22,9 @@ public class BeanProperty<T> {
     /** the property name */
     private final String propertyName;
     
+    /** <tt>true</tt> indicates the getter should simply reflect the value it is given */
+    private final boolean identityProperty;
+
     /** the value class */
     private Class valueClass = null;
 
@@ -49,6 +52,10 @@ public class BeanProperty<T> {
 
         this.beanClass = beanClass;
         this.propertyName = propertyName;
+        this.identityProperty = "this".equals(propertyName);
+
+        if (identityProperty && writable)
+            throw new IllegalArgumentException("The identity property name (this) is never writable");
 
         // look up the common chain
         String[] propertyParts = propertyName.split("\\.");
@@ -61,7 +68,7 @@ public class BeanProperty<T> {
         }
 
         // look up the final getter
-        if(readable) {
+        if(readable && !identityProperty) {
             getterChain = new ArrayList<Method>();
             getterChain.addAll(commonChain);
             Method lastGetter = findGetterMethod(currentClass, propertyParts[propertyParts.length - 1]);
@@ -210,14 +217,14 @@ public class BeanProperty<T> {
      * Gets whether this property can get get.
      */
     public boolean isReadable() {
-        return (getterChain != null);
+        return getterChain != null || identityProperty;
     }
 
     /**
      * Gets whether this property can be set.
      */
     public boolean isWritable() {
-        return (setterChain != null);
+        return setterChain != null;
     }
 
     /**
@@ -225,6 +232,10 @@ public class BeanProperty<T> {
      */
     public Object get(T member) {
         if(!isReadable()) throw new IllegalStateException("Property " + propertyName + " of " + beanClass + " not readable");
+
+        // the identity property simply reflects the member back unchanged
+        if (identityProperty)
+            return member;
 
         try {
             // do all the getters in sequence

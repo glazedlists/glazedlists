@@ -110,7 +110,21 @@ public class BeanPropertyTest extends TestCase {
             assertEquals("Automobile.setColor(Color) cannot be called with an instance of String", e.getMessage());
         }
     }
-    
+
+    public void testThisProperty() {
+        try {
+            new BeanProperty<Truck>(Truck.class, "this", true, true);
+            fail("failed to throw an exception when creating a writable BeanProperty with 'this'");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        BeanProperty<Truck> identity = new BeanProperty<Truck>(Truck.class, "this", true, false);
+
+        Truck truck = new Truck(2);
+        assertSame(truck, identity.get(truck));
+    }
+
     /**
      * Test that BeanProperties work for interfaces.
      *
