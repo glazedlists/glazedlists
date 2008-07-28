@@ -8,6 +8,7 @@ import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 import ca.odell.glazedlists.impl.*;
+import ca.odell.glazedlists.impl.functions.ConstantFunction;
 import ca.odell.glazedlists.impl.beans.*;
 import ca.odell.glazedlists.impl.filter.StringTextFilterator;
 import ca.odell.glazedlists.impl.matchers.FixedMatcherEditor;
@@ -606,6 +607,14 @@ public final class GlazedLists {
     }
 
     // Functions // // // // // // // // // // // // // // // // // // // // //
+
+    /**
+     * Get a {@link FunctionList.Function} that always returns the given
+     * <code>value</code>, regardless of its input.
+     */
+    public static <E,V> FunctionList.Function<E,V> constantFunction(V value) {
+        return new ConstantFunction<E,V>(value);
+    }
 
     /**
      * Get a {@link FunctionList.Function} that extracts the property with the
