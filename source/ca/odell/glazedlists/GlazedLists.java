@@ -619,6 +619,15 @@ public final class GlazedLists {
     /**
      * Get a {@link FunctionList.Function} that extracts the property with the
      * given <code>propertyName</code> from objects of the given
+     * <code>beanClass</code> and then formats the return value as a String.
+     */
+    public static <E> FunctionList.Function<E,String> toStringFunction(Class<E> beanClass, String propertyName) {
+        return new StringBeanFunction<E>(beanClass, propertyName);
+    }
+
+    /**
+     * Get a {@link FunctionList.Function} that extracts the property with the
+     * given <code>propertyName</code> from objects of the given
      * <code>beanClass</code>.
      */
     public static <E,V> FunctionList.Function<E,V> beanFunction(Class<E> beanClass, String propertyName) {
