@@ -325,18 +325,20 @@ public class ObservableElementList<E> extends TransformedList<E, E> {
     private void switchToMultiListenerMode() {
         if (!this.singleListenerMode) throw new IllegalStateException();
 
-        // build a new data structure appropriate for individual storing
+        // build a new data structure appropriate for storing individual
         // listeners for each observed element
         this.multiEventListenerRegistry = new ArrayList<EventListener>(this.source.size());
+        for (int i = 0; i < source.size(); i++)
+            this.multiEventListenerRegistry.add(null);
 
         // for each black entry in the singleEventListenerRegistry create an
         // entry in the multiEventListenerRegistry at the corresponding index
         // for the singleEventListener
         for (BarcodeIterator iter = this.singleEventListenerRegistry.iterator(); iter.hasNextBlack();) {
             iter.nextBlack();
-            this.multiEventListenerRegistry.add(iter.getIndex(), this.singleEventListener);
+            this.multiEventListenerRegistry.set(iter.getIndex(), this.singleEventListener);
         }
-
+        
         // null out the reference to the single EventListener,
         // since we'll now track the EventListener for each element
         this.singleEventListener = null;

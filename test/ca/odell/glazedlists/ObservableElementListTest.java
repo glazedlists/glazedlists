@@ -7,15 +7,14 @@ import ca.odell.glazedlists.impl.beans.BeanConnector;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.Matchers;
-
 import junit.framework.TestCase;
 
 import javax.swing.*;
+import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.*;
 import java.util.List;
-import java.awt.*;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
@@ -316,6 +315,35 @@ public class ObservableElementListTest extends TestCase {
         new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), new ComponentConnector());
     }
 
+	public void testSwitchToMultiListenerMode() {
+        final ObservableElementList<JLabel> list = new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), new BurstOfThreeJLabelConnector());
+
+        // pattern of installed PropertyChangeListeners: _ _ _ A A A _ _ _ B B B
+        for (int i = 0; i < 12; i++)
+            list.add(new JLabel());
+
+        assertEquals(list.get(0).getPropertyChangeListeners().length, list.get(1).getPropertyChangeListeners().length);
+        assertEquals(list.get(1).getPropertyChangeListeners().length, list.get(2).getPropertyChangeListeners().length);
+        assertEquals(list.get(2).getPropertyChangeListeners().length+1, list.get(3).getPropertyChangeListeners().length);
+
+        assertEquals(list.get(3).getPropertyChangeListeners().length, list.get(4).getPropertyChangeListeners().length);
+        assertEquals(list.get(4).getPropertyChangeListeners().length, list.get(5).getPropertyChangeListeners().length);
+        assertEquals(list.get(5).getPropertyChangeListeners().length-1, list.get(6).getPropertyChangeListeners().length);
+
+        assertEquals(list.get(6).getPropertyChangeListeners().length, list.get(7).getPropertyChangeListeners().length);
+        assertEquals(list.get(7).getPropertyChangeListeners().length, list.get(8).getPropertyChangeListeners().length);
+        assertEquals(list.get(8).getPropertyChangeListeners().length+1, list.get(9).getPropertyChangeListeners().length);
+
+        assertEquals(list.get(9).getPropertyChangeListeners().length, list.get(10).getPropertyChangeListeners().length);
+        assertEquals(list.get(10).getPropertyChangeListeners().length, list.get(11).getPropertyChangeListeners().length);
+
+        list.dispose();
+
+        // all Labels should now have the same number of listeners
+        for (Iterator<JLabel> i = list.iterator(); i.hasNext();)
+            assertEquals(list.get(0).getPropertyChangeListeners().length, i.next().getPropertyChangeListeners().length);
+    }
+
     /**
      * This connector installs a common JavaBean listener on every element
      * until bloomCount has been reached, when it begins installing unique
@@ -363,6 +391,47 @@ public class ObservableElementListTest extends TestCase {
             final PropertyChangeListener propertyChangeHandler = new PropertyChangeHandler();
             element.addPropertyChangeListener(propertyChangeHandler);
             return propertyChangeHandler;
+        }
+
+        public void uninstallListener(JLabel element, EventListener listener) {
+            element.removePropertyChangeListener((PropertyChangeListener) listener);
+        }
+    }
+
+    /**
+     * This connector installs a "pattern of PropertyChangeListeners" like this:
+     *
+     * _ _ _ X X X _ _ _ Y Y Y _ _ _ Z Z Z....
+     *
+     * where "_" denotes NO LISTENER INSTALLED, and X, Y, and Z denote different
+     * instances of PropertyChangeListeners.
+     *
+     * https://glazedlists.dev.java.net/issues/show_bug.cgi?id=452
+     */
+    private class BurstOfThreeJLabelConnector extends BeanConnector<JLabel> {
+        private final int groupSize = 3;
+        private int currentGroupSize;
+        private PropertyChangeListener currentGroupListener = new PropertyChangeHandler();
+
+        public BurstOfThreeJLabelConnector() {
+            super(JLabel.class);
+            this.currentGroupSize = -groupSize;
+        }
+
+        public EventListener installListener(JLabel element) {
+            currentGroupSize++;
+
+            if (currentGroupSize > groupSize) {
+                currentGroupSize = -groupSize+1;
+                currentGroupListener = new PropertyChangeHandler();
+            }
+
+            if (currentGroupSize > 0 && currentGroupSize <= groupSize) {
+                element.addPropertyChangeListener(currentGroupListener);
+                return currentGroupListener;
+            }
+
+            return null;
         }
 
         public void uninstallListener(JLabel element, EventListener listener) {
