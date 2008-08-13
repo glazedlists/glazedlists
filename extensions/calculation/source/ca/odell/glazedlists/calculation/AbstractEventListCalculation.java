@@ -107,29 +107,44 @@ public abstract class AbstractEventListCalculation<N, E> extends AbstractCalcula
 
         final List<E> source = listChanges.getSourceList();
 
-        // update our snapshot and update the value of this Calculation by
-        // delegating to the abstract methods which provide that updating logic
-        while (listChanges.next()) {
-            final int index = listChanges.getIndex();
+        if (listChanges.isReordering()) {
+            final int[] reorderMap = listChanges.getReorderMap();
+            for (int i = 0; i < reorderMap.length; i++) {
+                final int oldIndex = reorderMap[i];
 
-            switch (listChanges.getType()) {
-                case ListEvent.INSERT: {
-                    final E element = source.get(index);
-                    snapshot.add(index, element);
-                    inserted(element);
-                    break;
-                }
-
-                case ListEvent.DELETE: {
-                    deleted(snapshot.remove(index));
-                    break;
-                }
-
-                case ListEvent.UPDATE: {
-                    final E newElement = source.get(index);
-                    final E oldElement = snapshot.set(index, newElement);
+                // if the element has changed indexes it must be processed like an update
+                if (oldIndex != i) {
+                    final E newElement = source.get(i);
+                    final E oldElement = snapshot.set(i, newElement);
                     updated(oldElement, newElement);
-                    break;
+                }
+            }
+
+        } else {
+            // update our snapshot and update the value of this Calculation by
+            // delegating to the abstract methods which provide that updating logic
+            while (listChanges.next()) {
+                final int index = listChanges.getIndex();
+
+                switch (listChanges.getType()) {
+                    case ListEvent.INSERT: {
+                        final E element = source.get(index);
+                        snapshot.add(index, element);
+                        inserted(element);
+                        break;
+                    }
+
+                    case ListEvent.DELETE: {
+                        deleted(snapshot.remove(index));
+                        break;
+                    }
+
+                    case ListEvent.UPDATE: {
+                        final E newElement = source.get(index);
+                        final E oldElement = snapshot.set(index, newElement);
+                        updated(oldElement, newElement);
+                        break;
+                    }
                 }
             }
         }

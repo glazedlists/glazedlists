@@ -13,7 +13,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-public class CalculationsTest extends TestCase {
+public class SwingCalculationsTest extends TestCase {
 
     public void testCalculationLabel() {
         final EventList<Float> source = new BasicEventList<Float>();
