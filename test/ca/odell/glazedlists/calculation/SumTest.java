@@ -157,25 +157,25 @@ public final class SumTest extends TestCase {
         sum.addPropertyChangeListener(counter);
         
         // check the initial Sum state
-        assertEquals(Arrays.asList(new Long(1), new Long(2), new Long(3)), sortedSource);
+        assertEquals(Arrays.asList(new Long[] {new Long(1), new Long(2), new Long(3)}), sortedSource);
         assertEquals(6L, sum.getValue().longValue());
         assertEquals(0, counter.getCountAndReset());
 
         // resort the source
         sortedSource.setComparator(GlazedLists.reverseComparator());
-        assertEquals(Arrays.asList(new Long(3), new Long(2), new Long(1)), sortedSource);
+        assertEquals(Arrays.asList(new Long[] {new Long(3), new Long(2), new Long(1)}), sortedSource);
         assertEquals(6L, sum.getValue().longValue());
         assertEquals(0, counter.getCountAndReset());
 
         // deleted the first sorted element
         sortedSource.remove(0);
-        assertEquals(Arrays.asList(new Long(2), new Long(1)), sortedSource);
+        assertEquals(Arrays.asList(new Long[] {new Long(2), new Long(1)}), sortedSource);
         assertEquals(3L, sum.getValue().longValue());
         assertEquals(1, counter.getCountAndReset());
 
         // add a new the first sorted element
         sortedSource.add(new Long(10));
-        assertEquals(Arrays.asList(new Long(10), new Long(2), new Long(1)), sortedSource);
+        assertEquals(Arrays.asList(new Long[] {new Long(10), new Long(2), new Long(1)}), sortedSource);
         assertEquals(13L, sum.getValue().longValue());
         assertEquals(1, counter.getCountAndReset());
     }
