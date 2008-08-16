@@ -3,6 +3,9 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.beans;
 
+import ca.odell.glazedlists.util.reflect.ReturnTypeResolver;
+import ca.odell.glazedlists.util.reflect.ReturnTypeResolverFactory;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -16,6 +19,8 @@ import java.util.List;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class BeanProperty<T> {
+
+    private static final ReturnTypeResolver TYPE_RESOLVER = ReturnTypeResolverFactory.DEFAULT.createReturnTypeResolver();
 
     /** the target class */
     private final Class<T> beanClass;
@@ -55,25 +60,25 @@ public class BeanProperty<T> {
         this.identityProperty = "this".equals(propertyName);
 
         if (identityProperty && writable)
-            throw new IllegalArgumentException("The identity property name (this) is never writable");
+            throw new IllegalArgumentException("The identity property name (this) cannot be writable");
 
         // look up the common chain
-        String[] propertyParts = propertyName.split("\\.");
-        List<Method> commonChain = new ArrayList<Method>();
+        final String[] propertyParts = propertyName.split("\\.");
+        final List<Method> commonChain = new ArrayList<Method>(propertyParts.length);
         Class currentClass = beanClass;
         for(int p = 0; p < propertyParts.length - 1; p++) {
             Method partGetter = findGetterMethod(currentClass, propertyParts[p]);
             commonChain.add(partGetter);
-            currentClass = partGetter.getReturnType();
+            currentClass = TYPE_RESOLVER.getReturnType(currentClass, partGetter);
         }
 
         // look up the final getter
         if(readable && !identityProperty) {
             getterChain = new ArrayList<Method>();
             getterChain.addAll(commonChain);
-            Method lastGetter = findGetterMethod(currentClass, propertyParts[propertyParts.length - 1]);
+            final Method lastGetter = findGetterMethod(currentClass, propertyParts[propertyParts.length - 1]);
             getterChain.add(lastGetter);
-            valueClass = lastGetter.getReturnType();
+            valueClass = TYPE_RESOLVER.getReturnType(currentClass, lastGetter);
         }
 
         // look up the final setter

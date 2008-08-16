@@ -7,6 +7,8 @@ import junit.framework.TestCase;
 
 import java.awt.*;
 
+import ca.odell.glazedlists.util.reflect.ReturnTypeResolverFactory;
+
 /**
  * This test verifies that the BeanProperty works as expected.
  *
@@ -125,6 +127,15 @@ public class BeanPropertyTest extends TestCase {
         assertSame(truck, identity.get(truck));
     }
 
+    public void testResolveGenericReturnType() {
+        // this testcase is only meant for JDK 1.5, so turn it into a no-op otherwise
+        if (!ReturnTypeResolverFactory.DEFAULT.createReturnTypeResolver().getClass().getName().contains("java15"))
+            return;
+        
+        final BeanProperty<Bus> busPassengers = new BeanProperty<Bus>(Bus.class, "passenger", true, true);
+        assertSame(People.class, busPassengers.getValueClass());
+    }
+
     /**
      * Test that BeanProperties work for interfaces.
      *
@@ -169,34 +180,41 @@ class NamedCode implements SubInterface {
 /**
  * A test object.
  */
-class Automobile {
+class Automobile<E extends Passenger> {
+
     private boolean automatic;
     private Color color;
     private boolean fullOfGas;
+    private E passenger;
+
     public Automobile(boolean automatic) {
         this.automatic = automatic;
         color = Color.BLACK;
         fullOfGas = true;
     }
-    public Color getColor() {
-        return color;
-    }
-    public boolean getDrivable() {
-        return fullOfGas;
-    }
-    public void setColor(Color color) {
-        this.color = color;
-    }
-    public boolean isAutomatic() {
-        return automatic;
-    }
-    public void setFullOfGas(boolean fullOfGas) {
-        this.fullOfGas = fullOfGas;
+    public Color getColor() { return color; }
+    public void setColor(Color color) { this.color = color; }
+
+    public boolean getDrivable() { return fullOfGas; }
+    public void setFullOfGas(boolean fullOfGas) { this.fullOfGas = fullOfGas; }
+
+    public boolean isAutomatic() { return automatic; }
+
+    public E getPassenger() { return passenger; }
+    public void setPassenger(E passenger) { this.passenger = passenger; }
+}
+
+class Bus extends Automobile<People> {
+    Bus(boolean automatic) {
+        super(automatic);
     }
 }
-class Truck extends Automobile implements SupportsTrailerHitch {
+
+class Truck<E extends Passenger,T extends Passenger> extends Automobile<E> implements SupportsTrailerHitch<T> {
+
     private int numSeats;
-    private Automobile towedVehicle;
+    private Automobile<T> towedVehicle;
+
     public Truck(int seats) {
         super(false);
         this.numSeats = seats;
@@ -204,19 +222,32 @@ class Truck extends Automobile implements SupportsTrailerHitch {
     public int getNumSeats() {
         return numSeats;
     }
-    public void setTowedVehicle(Automobile towedVehicle) {
+    public void setTowedVehicle(Automobile<T> towedVehicle) {
         this.towedVehicle = towedVehicle;
     }
-    public Automobile getTowedVehicle() {
+    public Automobile<T> getTowedVehicle() {
         return towedVehicle;
     }
 }
-interface SupportsTrailerHitch {
-    public void setTowedVehicle(Automobile towedVehicle);
-    public Automobile getTowedVehicle();
+
+interface SupportsTrailerHitch<T extends Passenger> {
+    public void setTowedVehicle(Automobile<T> towedVehicle);
+    public Automobile<T> getTowedVehicle();
 }
+
 class TowingCompany {
     public SupportsTrailerHitch getTowTruck() {
         return new Truck(3);
     }
+}
+
+interface Passenger {
+    public int getNumLegs();
+}
+
+class People implements Passenger {
+    public int getNumLegs() { return 2; }
+}
+class Cattle implements Passenger {
+    public int getNumLegs() { return 4; }
 }
