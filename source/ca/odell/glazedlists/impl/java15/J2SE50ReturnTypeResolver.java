@@ -18,12 +18,12 @@ public class J2SE50ReturnTypeResolver implements ReturnTypeResolver {
     public Class<?> getReturnType(Class clazz, Method method) {
         // get the raw return type
         final Type type = new TypeResolver(clazz).getReturnType(method);
-        
+
         try {
             // convert the raw return type to a Class type
             return MoreTypes.getRawType(type);
-        } catch (AssertionError e) {
-            // fall back to the method's return value
+        } catch (Throwable t) {
+            // fall back to the method's return value in the event of a problem
             return method.getReturnType();
         }
     }
