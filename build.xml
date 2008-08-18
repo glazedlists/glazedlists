@@ -270,7 +270,22 @@
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
     <target name="calculation" depends="swing">
-        <javac destdir="${classes.dir}" srcdir="extensions/calculation/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off"/>
+        <mkdir dir="extensions/calculation/lib"/>
+        <java classname="ca.odell.glazedlists.impl.HttpClient">
+            <classpath path="${classes.dir}"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/26197/jcommon.jar"/>
+            <arg value="extensions/calculation/lib/jcommon.jar"/>
+        </java>
+        <java classname="ca.odell.glazedlists.impl.HttpClient">
+            <classpath path="${classes.dir}"/>
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/26198/jfreechart.jar"/>
+            <arg value="extensions/calculation/lib/jfreechart.jar"/>
+        </java>
+        <javac destdir="${classes.dir}" srcdir="extensions/calculation/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+            <classpath>
+                <fileset dir="extensions/calculation/lib/" includes="*.jar"/>
+            </classpath>
+        </javac>
     </target>
 
     <target name="swt" depends="core">

@@ -34,6 +34,18 @@ public interface Calculation<N> {
     public void removePropertyChangeListener(PropertyChangeListener pcl);
 
     /**
+     * @return a human readable name for this Calculation
+     */
+    public String getName();
+
+    /**
+     * Adjusts the Calculation to have the new <code>name</code>;
+     *
+     * @param name the new human-readable name of this Calculation
+     */
+    public void setName(String name);
+
+    /**
      * @return the latest calculated value
      */
     public N getValue();

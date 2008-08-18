@@ -3,6 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.calculation;
 
+import ca.odell.glazedlists.impl.GlazedListsImpl;
+
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
@@ -21,6 +23,9 @@ public abstract class AbstractCalculation<N> implements Calculation<N> {
     /** the latest calculated value */
     private N value;
 
+    /** the human-readable name of this Calculation */
+    private String name;
+
     /**
      * @param initialValue the value that should immediately be reported as the
      *      value of this Calculation
@@ -37,6 +42,18 @@ public abstract class AbstractCalculation<N> implements Calculation<N> {
     /** @inheritDoc */
     public void removePropertyChangeListener(PropertyChangeListener pcl) {
         support.removePropertyChangeListener(pcl);
+    }
+
+    /** @inheritDoc */
+    public String getName() { return name; }
+
+    /** @inheritDoc */
+    public void setName(String name) {
+        if (!GlazedListsImpl.equal(this.name, name)) {
+            final String oldName = this.name;
+            this.name = name;
+            support.firePropertyChange("name", oldName, name);
+        }
     }
 
     /** @inheritDoc */
