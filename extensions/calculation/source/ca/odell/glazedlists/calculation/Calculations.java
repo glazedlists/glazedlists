@@ -4,6 +4,10 @@
 package ca.odell.glazedlists.calculation;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.jfreechart.CalculationCategoryDataset;
+
+import java.util.Arrays;
+import java.util.List;
 
 public final class Calculations {
 
@@ -47,4 +51,15 @@ public final class Calculations {
 
     /** A Calculation that reports the mean average of all the <code>numbers</code> as a Double. */
     public static Calculation<Double> meanDoubles(EventList<? extends Number> numbers) { return divideDoubles(sumDoubles(numbers), count(numbers)); }
+
+    //
+    // Datasets
+    //
+
+    /** A CategoryDataset backed by the given <code>calculations</code>; each Calculation is a single-valued series in the CategoryDataset */
+    public static CalculationCategoryDataset calculationCategoryDataset(Calculation<? extends Number>... calculations) {
+        final CalculationCategoryDataset ccd = new CalculationCategoryDataset();
+        ccd.getCalculations().addAll(Arrays.asList(calculations));
+        return ccd;
+    }
 }
