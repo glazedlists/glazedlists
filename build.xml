@@ -642,7 +642,7 @@
         <mkdir dir="${java14_glazedlists.dir}/extensions/calculation/source"/>
         <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
             <arg value="extensions/calculation/source"/>
-            <arg value="${classes.dir}"/>
+            <arg value="${classes.dir}${path.separator}extensions/calculation/lib/jcommon.jar${path.separator}extensions/calculation/lib/jfreechart.jar"/>
             <arg value="${java14_glazedlists.dir}/extensions/calculation/source"/>
         </java>
 
