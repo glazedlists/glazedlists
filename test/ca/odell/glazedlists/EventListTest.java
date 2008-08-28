@@ -638,7 +638,7 @@ public class EventListTest extends TestCase {
     }
 
     public void testGenericsOfListEvent() {
-        final EventList<? extends String> source = GlazedLists.eventListOf(null);
+        final EventList<? extends String> source = GlazedLists.eventListOf((String[]) null);
         source.addListEventListener(new ListEventListener<Object>() {
             public void listChanged(ListEvent<Object> listChanges) {
                 listChanges.next();

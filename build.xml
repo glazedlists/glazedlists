@@ -626,7 +626,7 @@
         <mkdir dir="${java14_glazedlists.dir}/test"/>
         <java classname="com.publicobject.declawer.Declawer" classpath="tools/declawer.jar">
             <arg value="test"/>
-            <arg value="${classes.dir}${path.separator}${ant.home}/lib/junit.jar${path.separator}extensions/jgoodiesforms/lib/forms.jar${path.separator}extensions/hibernate/lib/hibernate.jar${path.separator}extensions/swinglabs/lib/swingx.jar${path.separator}extensions/swt/lib/org.eclipse.core.commands.jar${path.separator}extensions/swt/lib/org.eclipse.jface.jar${path.separator}extensions/swt/lib/${swt.jar.file}"/>
+            <arg value="${classes.dir}${path.separator}${ant.home}/lib/junit.jar${path.separator}extensions/jgoodiesforms/lib/forms.jar${path.separator}extensions/hibernate/lib/hibernate.jar${path.separator}extensions/swinglabs/lib/swingx.jar${path.separator}extensions/swt/lib/org.eclipse.core.commands.jar${path.separator}extensions/swt/lib/org.eclipse.jface.jar${path.separator}extensions/swt/lib/${swt.jar.file}${path.separator}extensions/jfreechart/lib/jcommon.jar${path.separator}extensions/jfreechart/lib/jfreechart.jar"/>
             <arg value="${java14_glazedlists.dir}/test"/>
         </java>
 
