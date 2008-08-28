@@ -62,7 +62,7 @@ public class CalculationCategoryDataset extends AbstractDataset implements Categ
     private final DatasetChangeEvent immutableChangeEvent = new DatasetChangeEvent(this, this);
 
     /** a single column key for each and every row */
-    private static final List<Integer> COLUMN_KEYS = Collections.singletonList(0);
+    private static final List<Integer> COLUMN_KEYS = Collections.singletonList(new Integer(0));
 
     /** the Calculations providing the values of this CategoryDataset */
     private final ObservableElementList<Calculation<? extends Number>> calculations = new ObservableElementList<Calculation<? extends Number>>(new BasicEventList<Calculation<? extends Number>>(), GlazedLists.beanConnector(Calculation.class));
