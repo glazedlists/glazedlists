@@ -73,12 +73,16 @@ public class BeanProperty<T> {
         }
 
         // look up the final getter
-        if(readable && !identityProperty) {
-            getterChain = new ArrayList<Method>();
-            getterChain.addAll(commonChain);
-            final Method lastGetter = findGetterMethod(currentClass, propertyParts[propertyParts.length - 1]);
-            getterChain.add(lastGetter);
-            valueClass = TYPE_RESOLVER.getReturnType(currentClass, lastGetter);
+        if(readable) {
+            if (identityProperty) {
+                valueClass = beanClass;
+            } else {
+                getterChain = new ArrayList<Method>();
+                getterChain.addAll(commonChain);
+                Method lastGetter = findGetterMethod(currentClass, propertyParts[propertyParts.length - 1]);
+                getterChain.add(lastGetter);
+                valueClass = lastGetter.getReturnType();
+            }
         }
 
         // look up the final setter

@@ -125,6 +125,7 @@ public class BeanPropertyTest extends TestCase {
 
         Truck truck = new Truck(2);
         assertSame(truck, identity.get(truck));
+        assertSame(Truck.class, identity.getValueClass());
     }
 
     public void testResolveGenericReturnType() {
