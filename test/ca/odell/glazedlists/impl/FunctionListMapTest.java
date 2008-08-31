@@ -305,6 +305,38 @@ public class FunctionListMapTest extends TestCase {
         }
     }
 
+    public void testPutReplacesExistingValue() {
+        final EventList<String> source = new BasicEventList<String>();
+        final Map<String, String> eventMap = GlazedLists.syncEventListToMap(source, new FirstLetterFunction());
+
+        assertTrue(eventMap.values().isEmpty());
+
+        source.add("James");
+        source.add("Katie");
+
+        assertEquals(2, eventMap.size());
+        assertEquals("James", eventMap.get("J"));
+        assertEquals("Katie", eventMap.get("K"));
+
+        // replacing James through the Map should not alter the position of the source element
+        eventMap.put("J", "Jesse");
+        assertEquals(2, source.size());
+        assertEquals("Jesse", source.get(0));
+        assertEquals("Katie", source.get(1));
+        assertEquals(2, eventMap.size());
+        assertEquals("Jesse", eventMap.get("J"));
+        assertEquals("Katie", eventMap.get("K"));
+
+        // replacing Katie through the Map should not alter the position of the source element
+        eventMap.put("K", "Krusty");
+        assertEquals(2, source.size());
+        assertEquals("Jesse", source.get(0));
+        assertEquals("Krusty", source.get(1));
+        assertEquals(2, eventMap.size());
+        assertEquals("Jesse", eventMap.get("J"));
+        assertEquals("Krusty", eventMap.get("K"));
+    }
+
     public void testPutAll() {
         final EventList<String> source = new BasicEventList<String>();
         final Map<String, String> eventMap = GlazedLists.syncEventListToMap(source, new FirstLetterFunction());

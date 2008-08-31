@@ -129,10 +129,25 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
     public V put(K key, V value) {
         checkKeyValueAgreement(key, value);
 
-        final V removed = remove(key);
-        valueList.add(value);
+        // if no prior value exists for this key, simply add it
+        if (!containsKey(key)) {
+            valueList.add(value);
+            return null;
+        }
 
-        return removed;
+        // otherwise try to replace the old value in place
+        final V toReplace = get(key);
+
+        // try to find the old value by identity in the valueList and replace it
+        for (ListIterator<V> i = valueList.listIterator(); i.hasNext();) {
+            if (i.next() == toReplace) {
+                i.set(value);
+                return toReplace;
+            }
+        }
+
+        // something terrible has happened if a value exists in the delegate Map but not in the valueList
+        throw new IllegalStateException("Found key: " + key + " in delegate map but could not find corresponding value in valueList: " + toReplace);
     }
 
     /** @inheritDoc */
@@ -143,12 +158,11 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
             checkKeyValueAgreement(entry.getKey(), entry.getValue());
         }
 
-        // remove all valueList currently associated with the keyList
-        for (Iterator<? extends K> i = m.keySet().iterator(); i.hasNext();)
-            remove(i.next());
-
-        // add all new valueList into this Map
-        valueList.addAll(m.values());
+        // add each of the elements from m into this Map
+        for (Iterator<? extends Entry<? extends K, ? extends V>> i = m.entrySet().iterator(); i.hasNext();) {
+            final Entry<? extends K, ? extends V> entry = i.next();
+            put(entry.getKey(), entry.getValue());
+        }
     }
 
     /**
@@ -178,7 +192,7 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
             return null;
 
         final V value = get(key);
-        valueList.remove(value);
+        GlazedListsImpl.identityRemove(valueList, value);
         return value;
     }
 

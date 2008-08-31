@@ -220,4 +220,25 @@ public final class GlazedListsImpl {
     public static <P, V> KeyedCollection<P, V> keyedCollection(Comparator<P> positionComparator) {
         return new KeyedCollection<P, V>(positionComparator, new HashMap<V, Object>());
     }
+
+    /**
+     * Removes the given <code>value</code> from <code>c</code> if it can be
+     * located by identity. This method is thus faster than standard removes
+     * from a Collection and conveys a stronger meaning than normal Collection
+     * removes (namely that the exact item must be found in order to be removed)
+     *
+     * @param c the Collection from which to remove
+     * @param value the value to be removed
+     * @return <tt>true</tt> if <code>c</code> was altered as a result of this call
+     */
+    public static <V> boolean identityRemove(Collection<V> c, V value) {
+        for (Iterator<V> i = c.iterator(); i.hasNext();) {
+            if (i.next() == value) {
+                i.remove();
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
