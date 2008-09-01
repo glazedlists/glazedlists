@@ -250,58 +250,58 @@ public class EventTableModel<E> extends AbstractTableModel implements ListEventL
     }
 
     /**
-     * The list table is not editable. For an editable list table, use the
-     * WritableListTable instead.
+     * Delegates the question of whether the cell is editable or not to the
+     * backing TableFormat if it is a {@link WritableTableFormat}. Otherwise,
+     * the column is assumed to be uneditable.
      */
     public boolean isCellEditable(int row, int column) {
-        // ensure this is a writable table
-        if(tableFormat instanceof WritableTableFormat) {
-            WritableTableFormat<E> writableTableFormat = (WritableTableFormat<E>)tableFormat;
-            source.getReadWriteLock().readLock().lock();
-            try {
-                final E toEdit = source.get(row);
-                return writableTableFormat.isEditable(toEdit, column);
-            } finally {
-                source.getReadWriteLock().readLock().unlock();
-            }
-        // this is not a writable table
-        } else {
+        if (!(tableFormat instanceof WritableTableFormat))
             return false;
+
+        source.getReadWriteLock().readLock().lock();
+        try {
+            final E toEdit = source.get(row);
+            return ((WritableTableFormat<E>) tableFormat).isEditable(toEdit, column);
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
         }
     }
 
     /**
-     * The list table is not editable. For an editable list table, use the
-     * WritableListTable instead.
+     * Attempts to update the object for the given row with the
+     * <code>editedValue</code>. This requires the backing TableFormat
+     * be a {@link WritableTableFormat}. {@link WritableTableFormat#setColumnValue}
+     * is expected to contain the logic for updating the object at the given
+     * <code>row</code> with the <code>editedValue</code> which was in the
+     * given <code>column</code>.
      */
     public void setValueAt(Object editedValue, int row, int column) {
         // ensure this is a writable table
-        if(tableFormat instanceof WritableTableFormat) {
-            source.getReadWriteLock().writeLock().lock();
-            try {
-                final WritableTableFormat<E> writableTableFormat = (WritableTableFormat<E>)tableFormat;
-                // get the object being edited from the source list
-                final E baseObject = source.get(row);
-
-                // tell the table format to set the value based on what it knows
-                final E updatedObject = writableTableFormat.setColumnValue(baseObject, editedValue, column);
-
-                // try to update the list with the revised value
-                if(updatedObject != null) {
-                    // check if updating the baseObject has caused it to be removed from this
-                    // TableModel (FilterList) or moved to another location (SortedList)
-                    final boolean baseObjectHasNotMoved = row < getRowCount() && source.get(row) == baseObject;
-
-                    // if the row is still present, update it
-                    if(baseObjectHasNotMoved)
-                        source.set(row, updatedObject);
-                }
-            } finally {
-                source.getReadWriteLock().writeLock().unlock();
-            }
-        // this is not a writable table
-        } else {
+        if (!(tableFormat instanceof WritableTableFormat))
             throw new UnsupportedOperationException("Unexpected setValueAt() on read-only table");
+
+        source.getReadWriteLock().writeLock().lock();
+        try {
+            // get the object being edited from the source list
+            final E baseObject = source.get(row);
+
+            // tell the table format to set the value based
+            final WritableTableFormat<E> writableTableFormat = (WritableTableFormat<E>) tableFormat;
+            final E updatedObject = writableTableFormat.setColumnValue(baseObject, editedValue, column);
+
+            // if the edit was discarded we have nothing to do
+            if (updatedObject != null) {
+                // check if updating the baseObject has caused it to be removed from this
+                // TableModel (FilterList) or moved to another location (SortedList)
+                final boolean baseObjectHasNotMoved = row < getRowCount() && source.get(row) == baseObject;
+
+                // if the row is still present in its original location, update it to induce a
+                // TableModelEvent that will redraw that row in the table
+                if (baseObjectHasNotMoved)
+                    source.set(row, updatedObject);
+            }
+        } finally {
+            source.getReadWriteLock().writeLock().unlock();
         }
     }
 
