@@ -158,81 +158,38 @@
 	   Construct the .jar file for use in a library.
 	 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-	<target name="jar" depends="compileall"
-		description="Creates glazedlists jar file containing all UI libraries.">
+    <target name="jar" depends="compileall"
+        description="Creates glazedlists jar file (which is also a valid OSGi bundle) containing all UI libraries.">
 
         <mkdir dir="tools"/>
-         <!--download the BND library for creating entries in the manifest.mf file which make it a compliant OSGi bundle. See http://www.osgi.org/ -->
+        <!--download the BND library for creating entries in the manifest.mf file which make it a compliant OSGi bundle. See http://www.osgi.org/ -->
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
             <arg value="https://glazedlists.dev.java.net/files/documents/1073/110958/bnd.jar"/>
             <arg value="tools/bnd.jar"/>
         </java>
 
-        <!-- prepare the bndwrap task which generates manifest.mf entries required to turn a jar into a compliant OSGi bundle -->
+        <!-- prepare the bnd task which generates OSGi bundle JARs -->
         <taskdef resource="aQute/bnd/ant/taskdef.properties" classpath="tools/bnd.jar"/>
-        
-        <!-- download the OSGibundleinfo library for creating entries in the manifest.mf file which make it a compliant OSGi bundle. See http://www.osgi.org/ -->
-        <!--<java classname="ca.odell.glazedlists.impl.HttpClient">-->
-            <!--<classpath path="${classes.dir}"/>-->
-            <!--<arg value="https://glazedlists.dev.java.net/files/documents/1073/39631/OSGiBundleInfo.jar"/>-->
-            <!--<arg value="tools/OSGiBundleInfo.jar"/>-->
-        <!--</java>-->
 
-        <!-- prepare the osgiBundleInfo task which extracts information required to make a compliant OSGi bundle -->
-        <!--<taskdef name="osgiBundleInfo" classname="org.knopflerfish.ant.taskdefs.bundle.BundleInfoTask" classpath="tools/OSGiBundleInfo.jar"/>-->
-
-        <!-- execute the osgiBundleInfo task to extract the packagelist value -->
-        <!--<osgiBundleInfo exports="packagelist">-->
-            <!--<fileset dir="${basedir}">-->
-                <!--<include name="**/source/**/*.java"/>-->
-                <!--<exclude name="**/com/publicobject/**/*.java"/>-->
-                <!--<exclude name="**/ca/odell/glazedlists/impl/testing/**/*.java"/>-->
-            <!--</fileset>-->
-            <!--<fileset dir="resources"/>-->
-        <!--</osgiBundleInfo>-->
-
+        <!-- create a normal jar file -->
         <jar destfile="${target.dir}/${jar.file}" update="true" index="true">
-			<fileset dir="${classes.dir}">
+            <fileset dir="${classes.dir}">
                 <exclude name="com/publicobject/**"/> <!-- IssuesBrowser -->
             </fileset>
             <fileset dir=".">
-				<include name="resources/**"/>
+                <include name="resources/**"/>
             </fileset>
-			<manifest>
-                <attribute name="Manifest-Version" value="1.0"/>
-				<attribute name="Main-Class" value="ca.odell.glazedlists.impl.Main"/>
-				<attribute name="Sealed" value="true"/>
+        </jar>
 
-				<attribute name="Built-By" value="${user.name}"/>
-				<attribute name="Built-At" value="${datestamp.dateAndTime}"/>
-				<attribute name="Implementation-Version" value="${implementation.version}"/>
-				<attribute name="Implementation-Title" value="Glazed Lists"/>
-				<attribute name="Implementation-URL" value="http://publicobject.com/glazedlists/"/>
-				<attribute name="Contributors" value="Jesse Wilson, Kevin Maltby, James Lemieux, Rob Eden, Holger Brands"/>
-                <attribute name="Source-Version" value="JDK ${java.target.version}"/>
-
-                <attribute name="Bundle-ManifestVersion" value="2"/>
-                <attribute name="Bundle-Name" value="Glazed Lists Plug-in"/>
-                <attribute name="Bundle-SymbolicName" value="ca.odell.glazedlists"/>
-                <attribute name="Bundle-Version" value="${bundle.version}"/>
-                <attribute name="Bundle-ClassPath" value="."/>
-                <attribute name="Bundle-Localization" value="plugin"/>
-                <!--<attribute name="Export-Package" value="${packagelist}"/>-->
-                <!--<attribute name="Require-Bundle" value="org.eclipse.swt,org.eclipse.jface"/>-->
-            </manifest>
-		</jar>
-
-        <!--use the BND tool to generate an OSGi Bundle (.jar$ file) which includes an updated manifest.mf file with OSGi entries -->
-        <bndwrap output="${target.dir}">
-            <fileset dir="${target.dir}" includes="${jar.file}"/>
-        </bndwrap>
+        <!-- use the BND tool to generate an OSGi jar from scratch, using the original JAR file as input -->
+        <bnd classpath="${target.dir}/${jar.file}" output="${target.dir}/${jar.file}.osgi" exceptions="true" files="glazedlists.bnd"/>
 
         <!-- delete the original jar file -->
         <delete file="${target.dir}/${jar.file}"/>
 
         <!-- rename the OSGi Bundle to the orignal jar file's name -->
-        <move file="${target.dir}/${jar.file}$" toFile="${target.dir}/${jar.file}"/>
+        <move file="${target.dir}/${jar.file}.osgi" toFile="${target.dir}/${jar.file}"/>
     </target>
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
