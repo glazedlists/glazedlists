@@ -27,3 +27,4 @@ Bundle-Localization: plugin
 Include-Resource: resources=resources
 Private-Package: ca.odell.glazedlists.impl.*
 Export-Package: !ca.odell.glazedlists.impl.*,*
+Import-Package: *;resolution:=optional
