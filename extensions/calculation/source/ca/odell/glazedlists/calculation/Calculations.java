@@ -13,8 +13,21 @@ public final class Calculations {
 
     private Calculations() {}
 
+    //
+    // Counts
+    //
+
     /** A Calculation that reports the number of <code>elements</code> as an Integer. */
     public static Calculation<Integer> count(EventList elements) { return new Count(elements); }
+
+    /** A Calculation that reports <tt>true</tt> when the number of <code>elements</code> is <code>0</code>; <tt>false</tt> otherwise. */
+    public static Calculation<Boolean> zeroElements(EventList elements) { return new ZeroElements(elements); }
+
+    /** A Calculation that reports <tt>true</tt> when the number of <code>elements</code> is <code>1</code>; <tt>false</tt> otherwise. */
+    public static Calculation<Boolean> oneElement(EventList elements) { return new OneElement(elements); }
+
+    /** A Calculation that reports <tt>true</tt> when the number of <code>elements</code> is &gt; <code>1</code>; <tt>false</tt> otherwise. */
+    public static Calculation<Boolean> manyElements(EventList elements) { return new ManyElements(elements); }
 
     //
     // Sum

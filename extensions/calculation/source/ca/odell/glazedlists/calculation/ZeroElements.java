@@ -8,20 +8,20 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
 /**
- * Reports the size of the backing EventList as the value of this Calculation.
+ * Reports <tt>true</tt> when the size of the backing EventList is
+ * <code>0</code>; <tt>false</tt> otherwise.
  *
  * @author James Lemieux
  */
-final class Count extends AbstractCalculation<Integer> implements ListEventListener {
+final class ZeroElements extends AbstractCalculation<Boolean> implements ListEventListener {
 
     private final EventList source;
 
     /**
-     * @param source the List whose size is reported as the value of this
-     *      Calculation
+     * @param source the List whose size is compared against 0
      */
-    public Count(EventList source) {
-        super(new Integer(source.size()));
+    public ZeroElements(EventList source) {
+        super(source.isEmpty());
 
         this.source = source;
         this.source.addListEventListener(this);
@@ -34,9 +34,9 @@ final class Count extends AbstractCalculation<Integer> implements ListEventListe
 
     /** @inheritDoc */
     public void listChanged(ListEvent listChanges) {
-        final Integer oldValue = getValue();
-        setValue(new Integer(listChanges.getSourceList().size()));
-        final Integer newValue = getValue();
+        final Boolean oldValue = getValue();
+        setValue(new Boolean(listChanges.getSourceList().isEmpty()));
+        final Boolean newValue = getValue();
         fireValueChange(oldValue, newValue);
     }
 }
