@@ -21,7 +21,7 @@ final class ZeroElements extends AbstractCalculation<Boolean> implements ListEve
      * @param source the List whose size is compared against 0
      */
     public ZeroElements(EventList source) {
-        super(source.isEmpty());
+        super(new Boolean(source.isEmpty()));
 
         this.source = source;
         this.source.addListEventListener(this);

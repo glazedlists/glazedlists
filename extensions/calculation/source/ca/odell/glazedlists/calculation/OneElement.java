@@ -21,7 +21,7 @@ final class OneElement extends AbstractCalculation<Boolean> implements ListEvent
      * @param source the List whose size is compared against 1
      */
     public OneElement(EventList source) {
-        super(source.size() == 1);
+        super(new Boolean(source.size() == 1));
 
         this.source = source;
         this.source.addListEventListener(this);

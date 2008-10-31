@@ -21,7 +21,7 @@ final class ManyElements extends AbstractCalculation<Boolean> implements ListEve
      * @param source the List whose size is verified to be &gt; 1
      */
     public ManyElements(EventList source) {
-        super(source.size() > 1);
+        super(new Boolean(source.size() > 1));
 
         this.source = source;
         this.source.addListEventListener(this);
