@@ -6,6 +6,7 @@ package ca.odell.glazedlists.swing;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ListSelection;
 import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.matchers.Matcher;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -430,6 +431,26 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
      */
     public int getSelectionMode() {
         return listSelection.getSelectionMode();
+    }
+
+    /**
+     * Add a matcher which decides when source elements are valid for selection.
+     *
+     * @param validSelectionMatcher returns <tt>true</tt> if a source element
+     *      can be selected; <tt>false</tt> otherwise
+     */
+    public void addValidSelectionMatcher(Matcher<E> validSelectionMatcher) {
+        listSelection.addValidSelectionMatcher(validSelectionMatcher);
+    }
+
+    /**
+     * Remove a matcher which decides when source elements are valid for selection.
+     *
+     * @param validSelectionMatcher returns <tt>true</tt> if a source element
+     *      can be selected; <tt>false</tt> otherwise
+     */
+    public void removeValidSelectionMatcher(Matcher<E> validSelectionMatcher) {
+        listSelection.removeValidSelectionMatcher(validSelectionMatcher);
     }
 
     /**

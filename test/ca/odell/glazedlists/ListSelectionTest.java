@@ -4,10 +4,9 @@
 package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import ca.odell.glazedlists.matchers.Matcher;
 import junit.framework.TestCase;
 
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.ListSelectionEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -643,7 +642,6 @@ public class ListSelectionTest extends TestCase {
         assertEquals(6, source.size());
         assertEquals(6, deselectedToggler.size());
 
-
         try {
             listSelection.getTogglingSelected().remove(6);
             fail("IndexOutOfBoundsException not thrown when removing beyond end");
@@ -652,7 +650,6 @@ public class ListSelectionTest extends TestCase {
             listSelection.getTogglingDeselected().remove(6);
             fail("IndexOutOfBoundsException not thrown when removing beyond end");
         } catch(IndexOutOfBoundsException e) {}
-
     }
 
     public void testAddingItemNotInSourceToTogglingView(){
@@ -737,6 +734,98 @@ public class ListSelectionTest extends TestCase {
         assertEquals(2, counter.callbacks);
         assertEquals(10, listSelection.getAnchorSelectionIndex());
         assertEquals(10, listSelection.getLeadSelectionIndex());
+    }
+
+    public void testValidSelectionMatchers() {
+        // add a bunch of data to the source
+        for (int i = 0; i < 100; i++)
+            source.add(new Integer(i));
+        
+        // no odd numbers may be selected
+        final Matcher<Integer> noOddsMatcher = new OddNumbersUnselectableMatcher();
+        listSelection.addValidSelectionMatcher(noOddsMatcher);
+
+        // try to select everything from 0 -> 9
+        listSelection.select(0, 9);
+
+        // only even numbers should be selected
+        assertTrue(listSelection.isSelected(0));
+        assertFalse(listSelection.isSelected(1));
+        assertTrue(listSelection.isSelected(2));
+        assertFalse(listSelection.isSelected(3));
+        assertTrue(listSelection.isSelected(4));
+        assertFalse(listSelection.isSelected(5));
+        assertTrue(listSelection.isSelected(6));
+        assertFalse(listSelection.isSelected(7));
+        assertTrue(listSelection.isSelected(8));
+        assertFalse(listSelection.isSelected(9));
+        assertFalse(listSelection.isSelected(10));
+        assertFalse(listSelection.isSelected(11));
+
+        // disable the selection of the even numbers too
+        final Matcher<Integer> noEvensMatcher = new EvenNumbersUnselectableMatcher();
+        listSelection.addValidSelectionMatcher(noEvensMatcher);
+
+        // verify that no selections exist
+        for (int i = 0; i < 10; i++)
+            assertFalse(listSelection.isSelected(1));
+
+        // try to establish new selections - all should fail
+        listSelection.select(0, 9);
+        for (int i = 0; i < 10; i++)
+            assertFalse(listSelection.isSelected(1));
+
+        // remove the noOdds restriction
+        listSelection.removeValidSelectionMatcher(noOddsMatcher);
+
+        // try to select everything from 0 -> 9
+        listSelection.select(0, 9);
+
+        // verify that odd numbers are now selectable
+        assertFalse(listSelection.isSelected(0));
+        assertTrue(listSelection.isSelected(1));
+        assertFalse(listSelection.isSelected(2));
+        assertTrue(listSelection.isSelected(3));
+        assertFalse(listSelection.isSelected(4));
+        assertTrue(listSelection.isSelected(5));
+        assertFalse(listSelection.isSelected(6));
+        assertTrue(listSelection.isSelected(7));
+        assertFalse(listSelection.isSelected(8));
+        assertTrue(listSelection.isSelected(9));
+        assertFalse(listSelection.isSelected(10));
+        assertFalse(listSelection.isSelected(11));
+
+        // remove the noOdds restriction
+        listSelection.removeValidSelectionMatcher(noEvensMatcher);
+
+        // try to select everything from 0 -> 9
+        listSelection.select(0, 9);
+
+        // verify that all numbers are now selectable
+        assertTrue(listSelection.isSelected(0));
+        assertTrue(listSelection.isSelected(1));
+        assertTrue(listSelection.isSelected(2));
+        assertTrue(listSelection.isSelected(3));
+        assertTrue(listSelection.isSelected(4));
+        assertTrue(listSelection.isSelected(5));
+        assertTrue(listSelection.isSelected(6));
+        assertTrue(listSelection.isSelected(7));
+        assertTrue(listSelection.isSelected(8));
+        assertTrue(listSelection.isSelected(9));
+        assertFalse(listSelection.isSelected(10));
+        assertFalse(listSelection.isSelected(11));
+    }
+
+    private class OddNumbersUnselectableMatcher implements Matcher<Integer> {
+        public boolean matches(Integer item) {
+            return item.intValue() % 2 == 0;
+        }
+    }
+
+    private class EvenNumbersUnselectableMatcher implements Matcher<Integer> {
+        public boolean matches(Integer item) {
+            return item.intValue() % 2 == 1;
+        }
     }
 
     private class ListSelectionCounter implements ListSelection.Listener {

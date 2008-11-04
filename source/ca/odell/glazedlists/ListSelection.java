@@ -8,6 +8,7 @@ import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.impl.adt.Barcode;
 import ca.odell.glazedlists.impl.adt.BarcodeIterator;
+import ca.odell.glazedlists.matchers.Matcher;
 
 import java.util.*;
 
@@ -89,6 +90,9 @@ public class ListSelection<E> implements ListEventListener<E> {
 
     /** the selection mode defines characteristics of the selection */
     private int selectionMode = MULTIPLE_INTERVAL_SELECTION_DEFENSIVE;
+
+    /** the Matchers, if any, which decide whether a source element can be selected or not */
+    private final Collection<Matcher<E>> validSelectionMatchers = new ArrayList<Matcher<E>>();
 
     /**
      * the registered SelectionListeners; also used as a mutex to ensure we
@@ -273,6 +277,31 @@ public class ListSelection<E> implements ListEventListener<E> {
 
             fireSelectionChanged(changeStart, changeFinish);
         }
+    }
+
+    /**
+     * Add a matcher which decides when source elements are valid for selection.
+     *
+     * @param validSelectionMatcher returns <tt>true</tt> if a source elements
+     *      can be selected; <tt>false</tt> otherwise
+     */
+    public void addValidSelectionMatcher(Matcher<E> validSelectionMatcher) {
+        validSelectionMatchers.add(validSelectionMatcher);
+
+        // walk through the existing selections deselecting anything that is no longer selectable
+        for (int i = getMinSelectionIndex(), n = getMaxSelectionIndex(); i <= n; i++)
+            if (isSelected(i) && !isSelectable(i))
+                deselect(i);
+    }
+
+    /**
+     * Remove a matcher which decides when source elements are valid for selection.
+     *
+     * @param validSelectionMatcher returns <tt>true</tt> if a source elements
+     *      can be selected; <tt>false</tt> otherwise
+     */
+    public void removeValidSelectionMatcher(Matcher<E> validSelectionMatcher) {
+        validSelectionMatchers.remove(validSelectionMatcher);
     }
 
     /**
@@ -1002,12 +1031,13 @@ public class ListSelection<E> implements ListEventListener<E> {
         int minChangedIndex = maxUnionIndex + 1;
         int maxChangedIndex = minUnionIndex - 1;
         beginAll();
-        // walk through the affect range updating selection
+
+        // walk through the effected range updating selection
         for(int i = minUnionIndex; i <= maxUnionIndex; i++) {
             int selectionIndex = barcode.getColourIndex(i, SELECTED);
             boolean selectedBefore = (selectionIndex != -1);
             boolean inChangeRange = (i >= minChangeIndex && i <= maxChangeIndex);
-            boolean selectedAfter = (inChangeRange == select);
+            boolean selectedAfter = (inChangeRange == select) && isSelectable(i);
 
             // when there's a change
             if(selectedBefore != selectedAfter) {
@@ -1046,6 +1076,28 @@ public class ListSelection<E> implements ListEventListener<E> {
 
         // notify selection listeners
         if(minChangedIndex <= maxChangedIndex) fireSelectionChanged(minChangedIndex, maxChangedIndex);
+    }
+
+    /**
+     * Checks the {@link #validSelectionMatchers} to determine if the value at
+     * the given <code>index</code> is allowed to be selected.
+     *
+     * @param index the index to check
+     * @return <tt>true</tt> if the index can be selected; <tt>false</tt>
+     *      otherwise
+     */
+    private boolean isSelectable(int index) {
+        // no matchers implies the index is selectable
+        if (validSelectionMatchers.isEmpty())
+            return true;
+
+        // otherwise fetch the row object and validate it against all matchers
+        final E rowObject = source.get(index);
+        for (Iterator<Matcher<E>> iterator = validSelectionMatchers.iterator(); iterator.hasNext();)
+            if (!iterator.next().matches(rowObject))
+                return false;
+
+        return true;
     }
 
     /**
