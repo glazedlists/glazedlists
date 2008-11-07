@@ -3,11 +3,10 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.calculation;
 
+import java.util.Arrays;
+
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.jfreechart.CalculationCategoryDataset;
-
-import java.util.Arrays;
-import java.util.List;
 
 public final class Calculations {
 
@@ -21,13 +20,16 @@ public final class Calculations {
     public static Calculation<Integer> count(EventList elements) { return new Count(elements); }
 
     /** A Calculation that reports <tt>true</tt> when the number of <code>elements</code> is <code>0</code>; <tt>false</tt> otherwise. */
-    public static Calculation<Boolean> zeroElements(EventList elements) { return new ZeroElements(elements); }
+    public static Calculation<Boolean> zeroElements(EventList elements) { return new SizeInRange(elements, 0, 0); }
 
     /** A Calculation that reports <tt>true</tt> when the number of <code>elements</code> is <code>1</code>; <tt>false</tt> otherwise. */
-    public static Calculation<Boolean> oneElement(EventList elements) { return new OneElement(elements); }
+    public static Calculation<Boolean> oneElement(EventList elements) { return new SizeInRange(elements, 1, 1); }
+
+    /** A Calculation that reports <tt>true</tt> when the number of <code>elements</code> is &gt; <code>0</code>; <tt>false</tt> otherwise. */
+    public static Calculation<Boolean> oneOrMoreElements(EventList elements) { return new SizeInRange(elements, 1, Integer.MAX_VALUE); }
 
     /** A Calculation that reports <tt>true</tt> when the number of <code>elements</code> is &gt; <code>1</code>; <tt>false</tt> otherwise. */
-    public static Calculation<Boolean> manyElements(EventList elements) { return new ManyElements(elements); }
+    public static Calculation<Boolean> manyElements(EventList elements) { return new SizeInRange(elements, 2, Integer.MAX_VALUE); }
 
     //
     // Sum
