@@ -58,6 +58,22 @@ public final class Calculations {
     public static Calculation<Double> divideDoubles(Calculation<? extends Number> numerator, Calculation<? extends Number> denominator) { return new Division.DivisionDouble(numerator, denominator); }
 
     //
+    // Subtraction
+    //
+
+    /** A Calculation that subtracts <code>b</code> from <code>a</code> as Floats. */
+    public static Calculation<Float> subtractFloats(Calculation<? extends Number> a, Calculation<? extends Number> b) { return new Subtraction.SubtractionFloat(a, b); }
+
+    /** A Calculation that subtracts <code>b</code> from <code>a</code> as Doubles. */
+    public static Calculation<Double> subtractDoubles(Calculation<? extends Number> a, Calculation<? extends Number> b) { return new Subtraction.SubtractionDouble(a, b); }
+
+    /** A Calculation that subtracts <code>b</code> from <code>a</code> as Integers. */
+    public static Calculation<Integer> subtractIntegers(Calculation<? extends Number> a, Calculation<? extends Number> b) { return new Subtraction.SubtractionInteger(a, b); }
+
+    /** A Calculation that subtracts <code>b</code> from <code>a</code> as Longs. */
+    public static Calculation<Long> subtractLongs(Calculation<? extends Number> a, Calculation<? extends Number> b) { return new Subtraction.SubtractionLong(a, b); }
+
+    //
     // Mean Average
     //
 
