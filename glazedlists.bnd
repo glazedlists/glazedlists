@@ -21,7 +21,6 @@ Bundle-Name: Glazed Lists
 Bundle-SymbolicName: ca.odell.glazedlists
 Bundle-Version: ${bundle.version}
 Bundle-ClassPath: .
-Bundle-Localization: plugin
 
 # Define all .impl packages to be private to this OSGi bundle
 Include-Resource: resources=resources
