@@ -88,6 +88,13 @@ public final class Calculations {
     public static Calculation<Double> meanDoubles(EventList<? extends Number> numbers) { return divideDoubles(sumDoubles(numbers), count(numbers)); }
 
     //
+    // Miscellaneous
+    //
+
+    /** A Calculation that value at the given <code>index</code> in the given <code>elements</code>. If <code>elements</code> does not contain enough items, the given <code>defaultValue</code> is returned. */
+    public static <E> Calculation<E> elementAt(EventList<E> elements, int index, E defaultValue) { return new ElementAt(elements, index, defaultValue); }
+
+    //
     // Datasets
     //
 
