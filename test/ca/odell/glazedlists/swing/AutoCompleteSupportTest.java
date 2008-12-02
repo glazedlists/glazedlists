@@ -32,7 +32,6 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         final ComboBoxModel originalModel = combo.getModel();
         final boolean originalEditable = combo.isEditable();
         final ComboBoxEditor originalEditor = combo.getEditor();
-        final int originalEditorPropertyChangeListenerCount = originalEditor.getEditorComponent().getPropertyChangeListeners().length;
         final int originalEditorKeyListenerCount = originalEditor.getEditorComponent().getKeyListeners().length;
         final AbstractDocument originalEditorDocument = (AbstractDocument) ((JTextField) combo.getEditor().getEditorComponent()).getDocument();
         final int originalComboBoxPropertyChangeListenerCount = combo.getPropertyChangeListeners().length;
@@ -78,9 +77,6 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         // one PopupMenuListener is added to the JComboBox to size the popup before it is shown on the screen
         assertEquals(originalComboBoxPopupMouseListenerCount + 1, ((ComboPopup) combo.getUI().getAccessibleChild(combo, 0)).getList().getMouseListeners().length);
 
-        // one PropertyChangeListener is added to the ComboBoxEditor to watch for Document changes
-        assertEquals(originalEditorPropertyChangeListenerCount + 1, currentEditor.getPropertyChangeListeners().length);
-
         // one KeyListener is added to the ComboBoxEditor to watch for Backspace in strict mode
         assertEquals(originalEditorKeyListenerCount + 1, currentEditor.getKeyListeners().length);
 
@@ -97,7 +93,6 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertSame(originalEditorDocument, currentEditorDocument);
         assertSame(currentEditorDocument.getDocumentFilter(), null);
         assertEquals(originalComboBoxPropertyChangeListenerCount, combo.getPropertyChangeListeners().length);
-        assertEquals(originalEditorPropertyChangeListenerCount, currentEditor.getPropertyChangeListeners().length);
         assertEquals(originalEditorKeyListenerCount, currentEditor.getKeyListeners().length);
         assertEquals(originalMaxRowCount, combo.getMaximumRowCount());
         assertEquals(originalComboBoxPopupMenuListenerCount, ((JPopupMenu) combo.getUI().getAccessibleChild(combo, 0)).getPopupMenuListeners().length);
