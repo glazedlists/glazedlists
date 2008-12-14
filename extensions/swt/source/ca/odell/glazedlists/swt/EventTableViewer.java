@@ -52,7 +52,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
     private TableFormat<? super E> tableFormat;
 
     /** Specifies how to render column values represented by TableItems. */
-    private TableItemConfigurer<? super E> tableItemConfigurer = TableItemConfigurer.DEFAULT;
+    private TableItemConfigurer<? super E> tableItemConfigurer;
 
     /** For selection management */
     private SelectionManager<E> selection;
@@ -67,13 +67,18 @@ public class EventTableViewer<E> implements ListEventListener<E> {
      * @param source the EventList that provides the row objects
      * @param table the Table viewing the source objects
      * @param propertyNames an array of property names in the JavaBeans format.
-     *      For example, if your list contains Objects with the methods getFirstName(),
-     *      setFirstName(String), getAge(), setAge(Integer), then this array should
-     *      contain the two strings "firstName" and "age". This format is specified
-     *      by the JavaBeans {@link java.beans.PropertyDescriptor}.
-     * @param columnLabels the corresponding column names for the listed property
-     *      names. For example, if your columns are "firstName" and "age", then
-     *      your labels might be "First Name" and "Age".
+     *        For example, if your list contains Objects with the methods
+     *        getFirstName(), setFirstName(String), getAge(), setAge(Integer),
+     *        then this array should contain the two strings "firstName" and
+     *        "age". This format is specified by the JavaBeans
+     *        {@link java.beans.PropertyDescriptor}.
+     * @param columnLabels the corresponding column names for the listed
+     *        property names. For example, if your columns are "firstName" and
+     *        "age", then your labels might be "First Name" and "Age".
+     * @deprecated use a combination of
+     *             {@link GlazedLists#tableFormat(String[], String[])} and
+     *             {@link #EventTableViewer(EventList, Table, TableFormat)}
+     *             instead
      */
     public EventTableViewer(EventList<E> source, Table table, String[] propertyNames, String[] columnLabels) {
         this(source, table, (TableFormat<E>)GlazedLists.tableFormat(propertyNames, columnLabels));
@@ -90,6 +95,32 @@ public class EventTableViewer<E> implements ListEventListener<E> {
      *      from the row objects
      */
     public EventTableViewer(EventList<E> source, Table table, TableFormat<? super E> tableFormat) {
+        this(source, table, tableFormat, TableItemConfigurer.DEFAULT);
+    }
+
+    /**
+     * Creates a new viewer for the given {@link Table} that updates the table
+     * contents in response to changes on the specified {@link EventList}. The
+     * {@link Table} is formatted with the specified {@link TableFormat}.
+     *
+     * @param source the EventList that provides the row objects
+     * @param table the Table viewing the source objects
+     * @param tableFormat the object responsible for extracting column data
+     *      from the row objects
+     * @param tableItemConfigurer responsible for configuring table items
+     */
+    public EventTableViewer(EventList<E> source, Table table, TableFormat<? super E> tableFormat,
+            TableItemConfigurer<? super E> tableItemConfigurer) {
+        // check for valid arguments early
+        if (source == null)
+            throw new IllegalArgumentException("source list may not be null");
+        if (table == null)
+            throw new IllegalArgumentException("Table may not be null");
+        if (tableFormat == null)
+            throw new IllegalArgumentException("TableFormat may not be null");
+        if (tableItemConfigurer == null)
+            throw new IllegalArgumentException("TableItemConfigurer may not be null");
+
         // lock the source list for reading since we want to prevent writes
         // from occurring until we fully initialize this EventTableViewer
         source.getReadWriteLock().writeLock().lock();
@@ -107,6 +138,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
 
             this.table = table;
             this.tableFormat = tableFormat;
+            this.tableItemConfigurer = tableItemConfigurer;
 
             // enable the selection lists
             selection = new SelectionManager<E>(this.source, new SelectableTable());
