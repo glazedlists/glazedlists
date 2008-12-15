@@ -113,9 +113,9 @@ public class JSeparatorTable extends JTable {
 
     /** {@inheritDoc} */
     public boolean isCellEditable(int row, int column) {
-        // if it's the separator row, it can never be edited
+        // if it's the separator row, it is always editable (so that the separator can be collapsed/expanded)
         if(getEventTableModel().getElementAt(row) instanceof SeparatorList.Separator)
-            return false;
+            return true;
 
         // otherwise it's business as usual
         return super.isCellEditable(row, column);
