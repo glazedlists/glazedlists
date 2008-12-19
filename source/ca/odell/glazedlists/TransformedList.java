@@ -29,7 +29,7 @@ import java.util.Collection;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public abstract class TransformedList<S, E> extends AbstractEventList<E> implements ListEventListener<S> {
+public abstract class TransformedList<S, E> extends AbstractEventList<E> implements ListEventListener<S>, DisposableEventList<E> {
 
     /** the event list to transform */
     protected EventList<S> source;
