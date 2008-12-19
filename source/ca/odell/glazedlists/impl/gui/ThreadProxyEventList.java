@@ -224,8 +224,8 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> impl
                 // see bug 447)
                 cacheUpdates.commitEvent(); 
                 updates.commitEvent();
-                scheduled = false;
             } finally {
+                scheduled = false;
                 getReadWriteLock().writeLock().unlock();
             }
         }
