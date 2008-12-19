@@ -3,8 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.swing;
 
+import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.GlazedListsSwing;
@@ -15,7 +15,7 @@ import javax.swing.*;
 public class SwingThreadProxyEventListTest extends TestCase {
 
     public void testExceptionInListenerCausesNextListEventToBeDeliveredOnWrongThread() throws Exception {
-        final EventList<String> source = GlazedLists.eventListOf("Blah");
+        final EventList<String> source = new BasicEventList<String>();
         final EventList<String> threadProxy = GlazedListsSwing.swingThreadProxyList(source);
 
         final ListEventRecorder recorder = new ListEventRecorder();
