@@ -3,6 +3,17 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import javax.swing.DefaultListSelectionModel;
+import javax.swing.JList;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.DelayList;
 import ca.odell.glazedlists.EventList;
@@ -10,15 +21,9 @@ import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.ThreadRecorderEventList;
+import ca.odell.glazedlists.TreeList;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.matchers.Matchers;
-
-import javax.swing.DefaultListSelectionModel;
-import javax.swing.JList;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-
-import java.util.Collections;
 
 /**
  * This test verifies that the EventSelectionModel works.
@@ -394,6 +399,39 @@ public class EventSelectionModelTest extends SwingTestCase {
         assertEquals(1, counter.getCountAndReset());
     }
 
+    /**
+     * Tests, that a selection is preserved when the source is a TreeList and an update event
+     * happens for the selected element.
+     */
+    public void guiTestSelectionOnTreeListUpdate_FixMe() {
+        final EventList<String> source = GlazedLists.eventListOf(new String[] {"zero", "one", "two", "three"});
+
+        final EventList<String> sourceProxy = GlazedListsSwing.swingThreadProxyList(source);
+        final TreeList<String> treeList = new TreeList<String>(sourceProxy, new StringFormat(),
+                TreeList.NODES_START_EXPANDED);
+        final EventSelectionModel<String> selModel = new EventSelectionModel<String>(treeList);
+        selModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        selModel.setSelectionInterval(2, 2);
+        assertEquals(Arrays.asList(new String[] {"two"}), selModel.getSelected());
+        source.set(2, source.get(2));
+        assertEquals(Arrays.asList(new String[] {"two"}), selModel.getSelected());
+    }
+
+    /** Simple Format for TreeList testing. */
+    private static class StringFormat implements TreeList.Format<String> {
+        public boolean allowsChildren(String element) {
+            return element.equals("zero");
+        }
+        public Comparator<? extends String> getComparator(int depth) {
+            return null;
+        }
+        public void getPath(List<String> path, String element) {
+             if (!element.equals("zero")) {
+                 getPath(path, "zero");
+             }
+             path.add(element);
+        }
+    }
     /**
      * Counts the number of ListSelectionEvents fired.
      */
