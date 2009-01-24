@@ -7,24 +7,20 @@ import ca.odell.glazedlists.util.reflect.ReturnTypeResolver;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.List;
 
 /**
  * An implementation of {@link ReturnTypeResolver} that adapt's Google's
- * {@link TypeResolver generic type resolver}.
+ * {@link TypeLiteral generic type resolver}.
  *
  * @author James Lemieux
  */
 public class J2SE50ReturnTypeResolver implements ReturnTypeResolver {
-    public Class<?> getReturnType(Class clazz, Method method) {
-        // get the raw return type
-        final Type type = new TypeResolver(clazz).getReturnType(method);
+    public Class<?> getReturnType(Class<?> clazz, Method method) {
+        return new TypeLiteral<Object>(clazz).getReturnType(method).getRawType();
+    }
 
-        try {
-            // convert the raw return type to a Class type
-            return MoreTypes.getRawType(type);
-        } catch (Throwable t) {
-            // fall back to the method's return value in the event of a problem
-            return method.getReturnType();
-        }
+    public Class<?> getFirstParameterType(Class<?> clazz, Method method) {
+        return new TypeLiteral<Object>(clazz).getParameterTypes(method).get(0).getRawType();
     }
 }

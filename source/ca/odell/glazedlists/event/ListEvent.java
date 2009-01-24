@@ -133,15 +133,6 @@ public abstract class ListEvent<E> extends EventObject {
     public abstract E getNewValue();
 
     /**
-     * Get the List of ListEventBlocks for this change.
-     *
-     * @deprecated this method depends on a particular implementation of
-     *      how list events are stored internally, and this implementation has
-     *      since changed.
-     */
-    abstract List<Block> getBlocks();
-
-    /**
      * Gets the number of blocks currently remaining in this atomic change.
      *
      * @deprecated this method depends on a particular implementation of

@@ -81,7 +81,7 @@ public class BeanProperty<T> {
                 getterChain.addAll(commonChain);
                 Method lastGetter = findGetterMethod(currentClass, propertyParts[propertyParts.length - 1]);
                 getterChain.add(lastGetter);
-                valueClass = lastGetter.getReturnType();
+                valueClass = TYPE_RESOLVER.getReturnType(currentClass, lastGetter);
             }
         }
 
@@ -91,7 +91,7 @@ public class BeanProperty<T> {
             setterChain.addAll(commonChain);
             Method lastSetter = findSetterMethod(currentClass, propertyParts[propertyParts.length - 1]);
             setterChain.add(lastSetter);
-            if(valueClass == null) valueClass = lastSetter.getParameterTypes()[0];
+            if(valueClass == null) valueClass = TYPE_RESOLVER.getFirstParameterType(currentClass, lastSetter);
         }
     }
 

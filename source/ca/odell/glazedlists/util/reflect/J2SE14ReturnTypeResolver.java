@@ -12,7 +12,11 @@ import java.lang.reflect.Method;
  * @author James Lemieux
  */
 final class J2SE14ReturnTypeResolver implements ReturnTypeResolver {
-    public Class<?> getReturnType(Class clazz, Method method) {
+    public Class<?> getReturnType(Class<?> clazz, Method method) {
         return method.getReturnType();
+    }
+
+    public Class<?> getFirstParameterType(Class<?> clazz, Method method) {
+        return method.getParameterTypes()[0];
     }
 }

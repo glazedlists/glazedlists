@@ -112,10 +112,6 @@ class Tree4DeltasListEvent<E> extends ListEvent<E> {
         return (E)ListEvent.UNKNOWN_VALUE;
     }
 
-    List getBlocks() {
-        throw new UnsupportedOperationException();
-    }
-
     public int getBlocksRemaining() {
         throw new UnsupportedOperationException();
     }

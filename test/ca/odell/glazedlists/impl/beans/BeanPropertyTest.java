@@ -137,6 +137,15 @@ public class BeanPropertyTest extends TestCase {
         assertSame(People.class, busPassengers.getValueClass());
     }
 
+    public void testResolveGenericParameterType() {
+        // this testcase is only meant for JDK 1.5, so turn it into a no-op otherwise
+        if (!ReturnTypeResolverFactory.DEFAULT.createReturnTypeResolver().getClass().getName().contains("java15"))
+            return;
+
+        final BeanProperty<Bus> busDriver = new BeanProperty<Bus>(Bus.class, "driver", false, true);
+        assertSame(People.class, busDriver.getValueClass());
+    }
+
     /**
      * Test that BeanProperties work for interfaces.
      *
@@ -203,6 +212,12 @@ class Automobile<E extends Passenger> {
 
     public E getPassenger() { return passenger; }
     public void setPassenger(E passenger) { this.passenger = passenger; }
+
+    // generic array
+    public E[] getAllPassengers() { return null; }
+
+    // generic setter only
+    public void setDriver(E driver) { }
 }
 
 class Bus extends Automobile<People> {

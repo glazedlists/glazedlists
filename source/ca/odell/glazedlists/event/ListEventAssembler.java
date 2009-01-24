@@ -5,10 +5,11 @@ package ca.odell.glazedlists.event;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.impl.WeakReferenceProxy;
-import ca.odell.glazedlists.impl.event.Tree4Deltas;
 import ca.odell.glazedlists.impl.event.BlockSequence;
+import ca.odell.glazedlists.impl.event.Tree4Deltas;
 
-import java.util.*;
+import java.util.ConcurrentModificationException;
+import java.util.List;
 
 /**
  * Models a continuous stream of changes on a list. Changes of the same type
@@ -28,44 +29,10 @@ public final class ListEventAssembler<E> {
     private final AssemblerHelper<E> delegate;
 
     /**
-     * Our strategy will be for the list event assembler.
-     * We support 4 possible strategies:
-     * <li>blockdeltas: originally the only strategy, this uses a bubblesort
-     *     which causes certain sortedlist events to be very slow
-     * <li>barcodedeltas: a proof of concept based on the barcode class, this
-     *     strategy is particularly performant, although not very elegant!
-     * <li>treedeltas: a strategy that tweaks the code in the general tree to
-     *     be particularly performant for tracking list changes
-     *
-     * <p>Ideally we will support fewer strategies in the future. In particular,
-     * we plan on keeping only treedeltas and removing the other strategies.
-     */
-    private static final String assemblerName;
-
-    // look up strategies using System properties
-    static {
-        String assemblerProperty = null;
-        try {
-            assemblerProperty = System.getProperty("GlazedLists.ListEventAssemblerDelegate");
-        } catch(SecurityException e) {
-            // do nothing
-        }
-        assemblerName = assemblerProperty != null ? assemblerProperty : "treedeltas";
-    }
-
-    /**
      * Create a delegate using the current assembler.
      */
     private static <E> AssemblerHelper<E> createAssemblerDelegate(EventList<E> sourceList, ListEventPublisher publisher) {
-        if(assemblerName.equals("treedeltas")) {
-            return new Tree4DeltasAssembler<E>(sourceList, publisher);
-        } else if(assemblerName.equals("blockdeltas")) {
-            return new BlockDeltasAssembler<E>(sourceList, publisher);
-        } else if(assemblerName.equals("barcodedeltas")) {
-            return new BarcodeDeltasAssembler<E>(sourceList, publisher);
-        } else {
-            throw new IllegalStateException();
-        }
+      return new Tree4DeltasAssembler<E>(sourceList, publisher);
     }
 
     /**
@@ -493,58 +460,6 @@ public final class ListEventAssembler<E> {
     }
 
     /**
-     * ListEventAssembler using {@link BarcodeListDeltas} to store list changes.
-     *
-     * @deprecated replaced with {@link Tree4DeltasAssembler}
-     */
-    static class BarcodeDeltasAssembler<E> extends AssemblerHelper<E> {
-
-        private BarcodeListDeltas listDeltas = new BarcodeListDeltas();
-
-        /**
-         * Creates a new ListEventAssembler that tracks changes for the specified list.
-         */
-        public BarcodeDeltasAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
-            super(sourceList, publisher);
-        }
-
-        protected void prepareEvent() {
-            listDeltas.reset(sourceList.size());
-        }
-
-        public void addChange(int type, int startIndex, int endIndex, E oldValue, E newValue) {
-            for(int i = startIndex; i <= endIndex; i++) {
-                if(type == ListEvent.INSERT) {
-                    listDeltas.add(i);
-                } else if(type == ListEvent.UPDATE) {
-                    listDeltas.update(i);
-                } else if(type == ListEvent.DELETE) {
-                    listDeltas.remove(startIndex);
-                }
-            }
-        }
-
-        public BarcodeListDeltas getListDeltas() {
-            return listDeltas;
-        }
-
-        public boolean isEventEmpty() {
-            return listDeltas.isEmpty();
-        }
-
-        /** {@inheritDoc} */
-        public void cleanup() {
-            listDeltas.reset(0);
-            reorderMap = null;
-            setAllowContradictingEvents(false);
-        }
-
-        protected ListEvent<E> createListEvent() {
-            return new BarcodeListDeltasListEvent<E>(this, sourceList);
-        }
-    }
-
-    /**
      * ListEventAssembler using {@link Tree4Deltas} to store list changes.
      */
     static class Tree4DeltasAssembler<E> extends AssemblerHelper<E> {
@@ -618,81 +533,6 @@ public final class ListEventAssembler<E> {
 
         public String toString() {
             return listDeltas.toString();
-        }
-    }
-
-
-
-    /**
-     * ListEventAssembler using {@link Block}s to store list changes.
-     *
-     * @deprecated replaced with {@link Tree4DeltasAssembler}
-     */
-    static class BlockDeltasAssembler<E> extends AssemblerHelper<E> {
-
-        /** the current working copy of the atomic change */
-        private List<Block> atomicChangeBlocks = null;
-        /** the most recent list change; this is the only change we can append to */
-        private Block atomicLatestBlock = null;
-
-        /**
-         * Creates a new ListEventAssembler that tracks changes for the specified list.
-         */
-        public BlockDeltasAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
-            super(sourceList, publisher);
-        }
-
-        /** {@inheritDoc} */
-        protected ListEvent<E> createListEvent() {
-            return new BlockDeltasListEvent<E>(this, sourceList);
-        }
-
-        /** {@inheritDoc} */
-        protected void prepareEvent() {
-            atomicChangeBlocks = new ArrayList<Block>();
-            atomicLatestBlock = null;
-            reorderMap = null;
-        }
-
-        /** {@inheritDoc} */
-        public void addChange(int type, int startIndex, int endIndex, E oldValue, E newValue) {
-            // attempt to merge this into the most recent block
-            if(atomicLatestBlock != null) {
-                boolean appendSuccess = atomicLatestBlock.append(startIndex, endIndex, type);
-                if(appendSuccess) return;
-            }
-
-            // create a new block for the change
-            atomicLatestBlock = new Block(startIndex, endIndex, type);
-            atomicChangeBlocks.add(atomicLatestBlock);
-        }
-
-        /** {@inheritDoc} */
-        public boolean isEventEmpty() {
-            return this.atomicChangeBlocks == null || this.atomicChangeBlocks.isEmpty();
-        }
-
-        /** {@inheritDoc} */
-        protected void beforeFireEvent() {
-            Block.sortListEventBlocks(atomicChangeBlocks, getAllowContradictingEvents());
-        }
-
-        /** {@inheritDoc} */
-        public void cleanup() {
-            atomicChangeBlocks = null;
-            atomicLatestBlock = null;
-            reorderMap = null;
-            setAllowContradictingEvents(false);
-        }
-
-        /**
-         * Gets the list of blocks for the specified atomic change.
-         *
-         * @return a List containing the sequence of {@link Block}s modelling
-         *      the specified change. It is an error to modify this list or its contents.
-         */
-        List<Block> getBlocks() {
-            return atomicChangeBlocks;
         }
     }
 

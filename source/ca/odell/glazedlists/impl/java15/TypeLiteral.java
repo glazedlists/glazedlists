@@ -16,22 +16,25 @@
 
 package ca.odell.glazedlists.impl.java15;
 
-import java.io.Serializable;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import static ca.odell.glazedlists.impl.Preconditions.checkArgument;
+import static ca.odell.glazedlists.impl.Preconditions.checkNotNull;
+
+import java.lang.reflect.*;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Represents a generic type {@code T}. Java doesn't yet provide a way to
  * represent generic types, so this class does. Forces clients to create a
  * subclass of this class which enables retrieval the type information even at
  * runtime.
- * <p/>
+ *
  * <p>For example, to create a type literal for {@code List<String>}, you can
  * create an empty anonymous inner class:
- * <p/>
- * <p/>
+ *
+ * <p>
  * {@code TypeLiteral<List<String>> list = new TypeLiteral<List<String>>() {};}
- * <p/>
+ *
  * <p>Assumes that type {@code T} implements {@link Object#equals} and
  * {@link Object#hashCode()} as value (as opposed to identity) comparison.
  *
@@ -40,110 +43,160 @@ import java.lang.reflect.Type;
  * found <a href="http://code.google.com/p/google-guice/source/browse/trunk/src/com/google/inject/TypeLiteral.java">here</a>.
  *
  * @author crazybob@google.com (Bob Lee)
+ * @author jessewilson@google.com (Jesse Wilson)
  * @author James Lemieux
  */
-class TypeLiteral<T> implements Serializable {
+public class TypeLiteral<T> {
 
-    private static final long serialVersionUID = 0;
+  final Class<? super T> rawType;
+  final Type type;
+  final int hashCode;
 
-    final Class<? super T> rawType;
-    final Type type;
-    final int hashCode;
+  /**
+   * Unsafe. Constructs a type literal manually.
+   */
+  @SuppressWarnings("unchecked")
+  TypeLiteral(Type type) {
+    this.type = MoreTypes.canonicalize(checkNotNull(type, "type"));
+    this.rawType = (Class<? super T>) MoreTypes.getRawType(this.type);
+    this.hashCode = MoreTypes.hashCode(this.type);
+  }
 
-    /**
-     * Constructs a new type literal. Derives represented class from type
-     * parameter.
-     * <p/>
-     * <p>Clients create an empty anonymous subclass. Doing so embeds the type
-     * parameter in the anonymous class's type hierarchy so we can reconstitute it
-     * at runtime despite erasure.
-     */
-    @SuppressWarnings("unchecked")
-    protected TypeLiteral() {
-        this.type = getSuperclassTypeParameter(getClass());
-        this.rawType = (Class<? super T>) ca.odell.glazedlists.impl.java15.MoreTypes.getRawType(type);
-        this.hashCode = ca.odell.glazedlists.impl.java15.MoreTypes.hashCode(type);
+  /**
+   * Returns the raw (non-generic) type for this type.
+   *
+   * @since 2.0
+   */
+  public final Class<? super T> getRawType() {
+    return rawType;
+  }
+
+  /**
+   * Gets underlying {@code Type} instance.
+   */
+  public final Type getType() {
+    return type;
+  }
+
+  @Override public final int hashCode() {
+    return this.hashCode;
+  }
+
+  @Override public final boolean equals(Object o) {
+    return o instanceof TypeLiteral<?>
+        && MoreTypes.equals(type, ((TypeLiteral) o).type);
+  }
+
+  @Override public final String toString() {
+    return MoreTypes.toString(type);
+  }
+
+  /**
+   * Gets type literal for the given {@code Type} instance.
+   */
+  public static TypeLiteral<?> get(Type type) {
+    return new TypeLiteral<Object>(type);
+  }
+
+  /**
+   * Gets type literal for the given {@code Class} instance.
+   */
+  public static <T> TypeLiteral<T> get(Class<T> type) {
+    return new TypeLiteral<T>(type);
+  }
+
+
+  /** Returns an immutable list of the resolved types. */
+  private List<TypeLiteral<?>> resolveAll(Type[] types) {
+    TypeLiteral<?>[] result = new TypeLiteral<?>[types.length];
+    for (int t = 0; t < types.length; t++) {
+      result[t] = resolve(types[t]);
     }
+    return Arrays.asList(result);
+  }
 
-    /**
-     * Unsafe. Constructs a type literal manually.
-     */
-    @SuppressWarnings("unchecked")
-    TypeLiteral(Type type) {
-        if (type == null)
-            throw new IllegalArgumentException("type may not be null");
+  /**
+   * Resolves known type parameters in {@code toResolve} and returns the result.
+   */
+  TypeLiteral<?> resolve(Type toResolve) {
+    return TypeLiteral.get(resolveType(toResolve));
+  }
 
-        this.type = ca.odell.glazedlists.impl.java15.MoreTypes.canonicalize(type);
-        this.rawType = (Class<? super T>) ca.odell.glazedlists.impl.java15.MoreTypes.getRawType(this.type);
-        this.hashCode = ca.odell.glazedlists.impl.java15.MoreTypes.hashCode(this.type);
-    }
-
-    /**
-     * Returns the type from super class's type parameter in
-     * {@link ca.odell.glazedlists.impl.java15.MoreTypes#canonicalize(Type) canonical form}.
-     */
-    static Type getSuperclassTypeParameter(Class<?> subclass) {
-        Type superclass = subclass.getGenericSuperclass();
-        if (superclass instanceof Class) {
-            throw new RuntimeException("Missing type parameter.");
+  Type resolveType(Type toResolve) {
+    // this implementation is made a little more complicated in an attempt to avoid object-creation
+    while (true) {
+      if (toResolve instanceof TypeVariable) {
+        TypeVariable original = (TypeVariable) toResolve;
+        toResolve = MoreTypes.resolveTypeVariable(type, rawType, original);
+        if (toResolve == original) {
+          return toResolve;
         }
-        ParameterizedType parameterized = (ParameterizedType) superclass;
-        return ca.odell.glazedlists.impl.java15.MoreTypes.canonicalize(parameterized.getActualTypeArguments()[0]);
+
+      } else if (toResolve instanceof ParameterizedType) {
+        ParameterizedType original = (ParameterizedType) toResolve;
+        Type ownerType = original.getOwnerType();
+        Type newOwnerType = resolveType(ownerType);
+        boolean changed = newOwnerType != ownerType;
+
+        Type[] args = original.getActualTypeArguments();
+        for (int t = 0, length = args.length; t < length; t++) {
+          Type resolvedTypeArgument = resolveType(args[t]);
+          if (resolvedTypeArgument != args[t]) {
+            if (!changed) {
+              args = args.clone();
+              changed = true;
+            }
+            args[t] = resolvedTypeArgument;
+          }
+        }
+
+          return changed
+            ? new MoreTypes.ParameterizedTypeImpl(newOwnerType, original.getRawType(), args)
+            : original;
+
+      } else {
+        return toResolve;
+      }
+    }
+  }
+
+  /**
+   * Returns the resolved generic parameter types of {@code methodOrConstructor}.
+   *
+   * @param methodOrConstructor a method or constructor defined by this or any supertype.
+   * @since 2.0
+   */
+  public List<TypeLiteral<?>> getParameterTypes(Member methodOrConstructor) {
+    Type[] genericParameterTypes;
+
+    if (methodOrConstructor instanceof Method) {
+      Method method = (Method) methodOrConstructor;
+      checkArgument(method.getDeclaringClass().isAssignableFrom(rawType),
+          "%s is not defined by a supertype of %s", method, type);
+      genericParameterTypes = method.getGenericParameterTypes();
+
+    } else if (methodOrConstructor instanceof Constructor) {
+      Constructor constructor = (Constructor) methodOrConstructor;
+      checkArgument(constructor.getDeclaringClass().isAssignableFrom(rawType),
+          "%s does not construct a supertype of %s", constructor, type);
+      genericParameterTypes = constructor.getGenericParameterTypes();
+
+    } else {
+      throw new IllegalArgumentException("Not a method or a constructor: " + methodOrConstructor);
     }
 
-    /**
-     * Gets type literal from super class's type parameter.
-     */
-    static TypeLiteral<?> fromSuperclassTypeParameter(Class<?> subclass) {
-        return new TypeLiteral<Object>(getSuperclassTypeParameter(subclass));
-    }
+    return resolveAll(genericParameterTypes);
+  }
 
-    /**
-     * Gets the raw type.
-     */
-    final Class<? super T> getRawType() {
-        return rawType;
-    }
-
-    /**
-     * Gets underlying {@code Type} instance.
-     */
-    public final Type getType() {
-        return type;
-    }
-
-    public final int hashCode() {
-        return this.hashCode;
-    }
-
-    public final boolean equals(Object o) {
-        return o instanceof TypeLiteral<?> && ca.odell.glazedlists.impl.java15.MoreTypes.equals(type, ((TypeLiteral) o).type);
-    }
-
-    public final String toString() {
-        return ca.odell.glazedlists.impl.java15.MoreTypes.toString(type);
-    }
-
-    /**
-     * Gets type literal for the given {@code Type} instance.
-     */
-    public static TypeLiteral<?> get(Type type) {
-        return new TypeLiteral<Object>(type);
-    }
-
-    /**
-     * Gets type literal for the given {@code Class} instance.
-     */
-    public static <T> TypeLiteral<T> get(Class<T> type) {
-        return new TypeLiteral<T>(type);
-    }
-
-    /**
-     * Returns the canonical form of this type literal for serialization. The
-     * returned instance is always a {@code TypeLiteral}, never a subclass. This
-     * prevents problems caused by serializing anonymous types.
-     */
-    protected final Object writeReplace() {
-        return getClass() == TypeLiteral.class ? this : get(type);
-    }
+  /**
+   * Returns the resolved generic return type of {@code method}.
+   *
+   * @param method a method defined by this or any supertype.
+   * @since 2.0
+   */
+  public TypeLiteral<?> getReturnType(Method method) {
+    checkArgument(method.getDeclaringClass().isAssignableFrom(rawType),
+        "%s is not defined by a supertype of %s", method, type);
+    return resolve(method.getGenericReturnType());
+  }
 }

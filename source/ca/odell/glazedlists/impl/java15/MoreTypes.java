@@ -16,13 +16,8 @@
 package ca.odell.glazedlists.impl.java15;
 
 import java.io.Serializable;
-import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Collections;
+import java.lang.reflect.*;
+import java.util.*;
 
 /**
  * Static methods for working with types that we aren't publishing in the
@@ -74,22 +69,12 @@ class MoreTypes {
      * type is {@link Serializable}.
      */
     public static Type canonicalize(Type type) {
-        if (type instanceof ParameterizedTypeImpl
-                || type instanceof GenericArrayTypeImpl) {
+        if (type instanceof ParameterizedTypeImpl) {
             return type;
 
         } else if (type instanceof ParameterizedType) {
             ParameterizedType p = (ParameterizedType) type;
-            return Types.newParameterizedTypeWithOwner(p.getOwnerType(),
-                    p.getRawType(), p.getActualTypeArguments());
-
-        } else if (type instanceof GenericArrayType) {
-            GenericArrayType g = (GenericArrayType) type;
-            return Types.arrayOf(g.getGenericComponentType());
-
-        } else if (type instanceof Class<?> && ((Class<?>) type).isArray()) {
-            Class<?> c = (Class<?>) type;
-            return Types.arrayOf(c.getComponentType());
+            return new ParameterizedTypeImpl(p.getOwnerType(), p.getRawType(), p.getActualTypeArguments());
 
         } else {
             // type is either serializable as-is or unsupported
@@ -230,6 +215,73 @@ class MoreTypes {
         }
     }
 
+    /**
+     * Returns the generic supertype for {@code supertype}. For example, given a class {@code
+     * IntegerSet}, the result for when supertype is {@code Set.class} is {@code Set<Integer>} and the
+     * result when the supertype is {@code Collection.class} is {@code Collection<Integer>}.
+     */
+    public static Type getGenericSupertype(Type type, Class<?> rawType, Class<?> toResolve) {
+        if (toResolve == rawType) {
+            return type;
+        }
+
+        // we skip searching through interfaces if unknown is an interface
+        if (toResolve.isInterface()) {
+            Class[] interfaces = rawType.getInterfaces();
+            for (int i = 0, length = interfaces.length; i < length; i++) {
+                if (interfaces[i] == toResolve) {
+                    return rawType.getGenericInterfaces()[i];
+                } else if (toResolve.isAssignableFrom(interfaces[i])) {
+                    return getGenericSupertype(rawType.getGenericInterfaces()[i], interfaces[i], toResolve);
+                }
+            }
+        }
+
+        // check our supertypes
+        if (!rawType.isInterface()) {
+            while (rawType != Object.class) {
+                Class<?> rawSupertype = rawType.getSuperclass();
+                if (rawSupertype == toResolve) {
+                    return rawType.getGenericSuperclass();
+                } else if (toResolve.isAssignableFrom(rawSupertype)) {
+                    return getGenericSupertype(rawType.getGenericSuperclass(), rawSupertype, toResolve);
+                }
+                rawType = rawSupertype;
+            }
+        }
+
+        // we can't resolve this further
+        return toResolve;
+    }
+
+    public static Type resolveTypeVariable(Type type, Class<?> rawType, TypeVariable unknown) {
+        Class<?> declaredByRaw = declaringClassOf(unknown);
+
+        // we can't reduce this further
+        if (declaredByRaw == null) {
+            return unknown;
+        }
+
+        Type declaredBy = getGenericSupertype(type, rawType, declaredByRaw);
+        if (declaredBy instanceof ParameterizedType) {
+            int index = Arrays.asList(declaredByRaw.getTypeParameters()).indexOf(unknown);
+            return ((ParameterizedType) declaredBy).getActualTypeArguments()[index];
+        }
+
+        return unknown;
+    }
+
+    /**
+     * Returns the declaring class of {@code typeVariable}, or {@code null} if it was not declared by
+     * a class.
+     */
+    private static Class<?> declaringClassOf(TypeVariable typeVariable) {
+      GenericDeclaration genericDeclaration = typeVariable.getGenericDeclaration();
+      return genericDeclaration instanceof Class
+          ? (Class<?>) genericDeclaration
+          : null;
+    }
+
     public static class ParameterizedTypeImpl implements ParameterizedType, Serializable {
         private final Type ownerType;
         private final Type rawType;
@@ -281,35 +333,5 @@ class MoreTypes {
           if (!expression)
             throw new IllegalArgumentException(String.format(errorMessageFormat, errorMessageArgs));
         }
-    }
-
-    public static class GenericArrayTypeImpl implements GenericArrayType, Serializable {
-        private final Type componentType;
-
-        public GenericArrayTypeImpl(Type componentType) {
-            this.componentType = canonicalize(componentType);
-        }
-
-        public Type getGenericComponentType() {
-            return componentType;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            return o instanceof GenericArrayType
-                    && MoreTypes.equals(this, (GenericArrayType) o);
-        }
-
-        @Override
-        public int hashCode() {
-            return MoreTypes.hashCode(this);
-        }
-
-        @Override
-        public String toString() {
-            return MoreTypes.toString(this);
-        }
-
-        private static final long serialVersionUID = 0;
     }
 }
