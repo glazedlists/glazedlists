@@ -338,7 +338,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals("NEW Brunswick", textField.getText());
         assertEquals(1, listener.getCount());
 
-        // switching to strict mode should correct the case
+        // switching to strict mode should correct the case and fire an ActionEvent
         support.setStrict(true);
         assertEquals(4, combo.getItemCount());
         assertEquals("New Brunswick", textField.getText());
@@ -809,6 +809,100 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertSame("one", comboBoxModel.getElementAt(1));
         assertSame("two", comboBoxModel.getElementAt(2));
         assertSame("three", comboBoxModel.getElementAt(3));
+    }
+
+    /**
+     * This is a text case sent in by Andy Depue. It highlighted this problem:
+     *
+     * 1. a new item is added into the EventList pipeline
+     * 2. AutoCompleteComboBoxModel receives the ListEvent
+     * 3. AutoCompleteComboBoxModel broadcasts a ListDataEvent
+     * 4. BasicComboBoxUI.Handler receives the ListDataEvent
+     * 5. BasicComboBoxUI.Handler tries to set the ComboBoxEditor text to be the selectedItem
+     *
+     * To fix the problem we set the doNotChangeDocument flag when *any* ListDataEvent
+     * is fired from AutoCompleteComboBoxModel so that AutoCompleteSupport retains
+     * ultimate control over the text in the ComboBoxEditor.
+     */
+    public void guiTestChangingComboBoxDataDoesNotAlterComboBoxEditor() throws BadLocationException {
+        final JComboBox combo = new JComboBox();
+
+        final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
+        final AbstractDocument doc = (AbstractDocument) textField.getDocument();
+
+        final EventList<String> items = new BasicEventList<String>();
+        items.add("foobar");
+
+        AutoCompleteSupport.install(combo, items);
+        final ComboBoxModel model = combo.getModel();
+        doc.replace(0, doc.getLength(), "fobar", null);
+
+        assertEquals("fobar", textField.getText());
+        assertEquals(null, model.getSelectedItem());
+
+        // Adding a new item should not alter the filter text
+        items.add("fobar");
+        assertEquals("fobar", textField.getText());
+        assertEquals(null, model.getSelectedItem());
+
+        // Changing an existing item should not alter the filter text
+        items.set(1, "wheeble");
+        assertEquals("fobar", textField.getText());
+        assertEquals(null, model.getSelectedItem());
+
+        // Deleting an existing item should not alter the filter text
+        items.remove(1);
+        assertEquals("fobar", textField.getText());
+        assertEquals(null, model.getSelectedItem());
+    }
+
+    /**
+     * When the data under a strict-mode AutoCompleting JComboBox is changed we
+     * must recheck the strict-mode invariant that the filter text matches (at
+     * least partially) an element in the ComboBoxModel. This test case
+     * verifies that the invariant is maintained while data changes underneath.
+     */
+    public void testOnMainThreadChangingComboBoxDataRetainsStrictModeInvariant() throws Exception {
+        final JComboBox combo = new JComboBox();
+
+        final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
+
+        final EventList<String> items = new BasicEventList<String>();
+        items.add("foobar");
+
+        SwingUtilities.invokeAndWait(new Runnable() {
+            public void run() {
+                final AutoCompleteSupport support = AutoCompleteSupport.install(combo, items);
+                support.setStrict(true);
+            }
+        });
+
+        assertEquals("foobar", textField.getText());
+        assertEquals("foobar", combo.getSelectedItem());
+
+        // add a new item
+        items.add("whiggedy");
+        Thread.sleep(250); // wait for the EDT to process the change to items
+        assertEquals("foobar", textField.getText());
+        assertEquals("foobar", combo.getSelectedItem());
+
+        // change an existing item
+        items.set(1, "whack");
+        Thread.sleep(250); // wait for the EDT to process the change to items
+        assertEquals("foobar", textField.getText());
+        assertEquals("foobar", combo.getSelectedItem());
+
+        // remove an existing item
+        items.remove(1);
+        Thread.sleep(250); // wait for the EDT to process the change to items
+        assertEquals("foobar", textField.getText());
+        assertEquals("foobar", combo.getSelectedItem());
+
+        // add an existing item and remove the current strict-mode selection
+        items.set(0, "hoobedy");
+        Thread.sleep(250); // wait for the EDT to process the change to items
+        assertEquals("hoobedy", textField.getText());
+        assertEquals("hoobedy", combo.getSelectedItem());
     }
 
     private static class NoopDocument implements Document {

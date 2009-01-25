@@ -11,6 +11,7 @@ import ca.odell.glazedlists.FunctionList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.UniqueList;
+import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.impl.filter.SearchTerm;
@@ -314,6 +315,9 @@ public final class AutoCompleteSupport<E> {
 
     /** The Matcher that decides if a ComboBoxModel element is filtered out. */
     private Matcher<String> filterMatcher = Matchers.trueMatcher();
+
+    /** <tt>true</tt> while processing a text change to the {@link #comboBoxEditorComponent}; <tt>false</tt> otherwise. */
+    private boolean isFiltering = false;
 
     /** Controls the selection behavior of the JComboBox when it is used in a JTable DefaultCellEditor. */
     private final boolean isTableCellEditor;
@@ -938,26 +942,34 @@ public final class AutoCompleteSupport<E> {
         // if strict mode was just turned on, ensure the comboBox contains a
         // value from the ComboBoxModel (i.e. start being strict!)
         if (strict) {
-            final String value = comboBoxEditorComponent.getText();
-            String strictValue = findAutoCompleteTerm(value);
-
-            // if the value in the editor already IS the autocompletion term,
-            // short circuit to avoid broadcasting a needless ActionEvent
-            if (value.equals(strictValue)) return;
+            final String currentText = comboBoxEditorComponent.getText();
+            Object currentItem = findAutoCompleteTerm(currentText);
+            String currentItemText = convertToString(currentItem);
+            boolean itemMatches = currentItem == comboBox.getSelectedItem();
+            boolean textMatches = GlazedListsImpl.equal(currentItemText, currentText);
 
             // select the first element if no autocompletion term could be found
-            if (strictValue == null && !allItemsUnfiltered.isEmpty())
-                strictValue = convertToString(allItemsUnfiltered.get(0));
+            if (currentItem == null && !allItemsUnfiltered.isEmpty()) {
+                currentItem = allItemsUnfiltered.get(0);
+                currentItemText = convertToString(currentItem);
+                itemMatches = currentItem == comboBox.getSelectedItem();
+                textMatches = GlazedListsImpl.equal(currentItemText, currentText);
+            }
 
             // return all elements to the ComboBoxModel
             applyFilter("");
 
-            // adjust the editor to contain the autocompletion term
-            doNotFilter = true;
+            doNotPostProcessDocumentChanges = true;
             try {
-                comboBoxEditorComponent.setText(strictValue);
+                // adjust the editor's text, if necessary
+                if (!textMatches)
+                    comboBoxEditorComponent.setText(currentItemText);
+
+                // adjust the model's selected item, if necessary
+                if (!itemMatches)
+                    comboBox.setSelectedItem(currentItem);
             } finally {
-                doNotFilter = false;
+                doNotPostProcessDocumentChanges = false;
             }
         }
     }
@@ -1254,9 +1266,11 @@ public final class AutoCompleteSupport<E> {
         // the filtering is taking place
         doNotChangeDocument = true;
         final ActionListener[] listeners = unregisterAllActionListeners(comboBox);
+        isFiltering = true;
         try {
             filterMatcherEditor.setFilterText(new String[] {newFilter});
         } finally {
+            isFiltering = false;
             registerAllActionListeners(comboBox, listeners);
             doNotChangeDocument = false;
         }
@@ -1292,38 +1306,39 @@ public final class AutoCompleteSupport<E> {
     /**
      * Performs a linear scan of ALL ITEMS, regardless of the filtering state
      * of the ComboBoxModel, to locate the autocomplete term. If an exact
-     * match of the given <code>value</code> can be found, then the value is
+     * match of the given <code>value</code> can be found, then the item is
      * returned. If an exact match cannot be found, the first term that
      * <strong>starts with</strong> the given <code>value</code> is returned.
      *
      * <p>If no exact or partial match can be located, <code>null</code> is
      * returned.
      */
-    private String findAutoCompleteTerm(String value) {
+    private Object findAutoCompleteTerm(String value) {
         // determine if our value is empty
         final boolean prefixIsEmpty = "".equals(value);
 
         final Matcher<String> valueMatcher = new TextMatcher<String>(new SearchTerm[] {new SearchTerm(value)}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH, getTextMatchingStrategy());
 
-        String partialMatchTerm = null;
+        Object partialMatchItem = null;
 
         // search the list of ALL UNFILTERED items for an autocompletion term for the given value
         for (int i = 0, n = allItemsUnfiltered.size(); i < n; i++) {
-            final String itemString = convertToString(allItemsUnfiltered.get(i));
+            final E item = allItemsUnfiltered.get(i);
+            final String itemString = convertToString(item);
 
             // if we have an exact match, return the given value immediately
             if (value.equals(itemString))
-                return value;
+                return item;
 
             // if we have not yet located a partial match, check the current itemString for a partial match
             // (to be returned if an exact match cannot be found)
-            if (partialMatchTerm == null) {
+            if (partialMatchItem == null) {
                 if (prefixIsEmpty ? "".equals(itemString) : valueMatcher.matches(itemString))
-                    partialMatchTerm = itemString;
+                    partialMatchItem = item;
             }
         }
 
-        return partialMatchTerm;
+        return partialMatchItem;
     }
 
     /**
@@ -1338,6 +1353,11 @@ public final class AutoCompleteSupport<E> {
         public AutoCompleteComboBoxModel(EventList<E> source) {
             super(source);
         }
+
+        /**
+         * Overridden because AutoCompleteSupport needs absolute control over
+         * when a JComboBox's ActionListeners are notified.
+         */
         public void setSelectedItem(Object selected) {
             doNotFilter = true;
             doNotAutoComplete = true;
@@ -1355,6 +1375,25 @@ public final class AutoCompleteSupport<E> {
                 registerAllActionListeners(comboBox, listeners);
                 doNotFilter = false;
                 doNotAutoComplete = false;
+            }
+        }
+
+        /**
+         * Overridden because ListEvents produce ListDataEvents from this
+         * ComboBoxModel, which notify the BasicComboBoxUI of the data change,
+         * which in turn tries to set the text of the ComboBoxEditor to match
+         * the text of the selected item. We don't want that. AutoCompleteSupport
+         * is the ultimate authority on the text value in the ComboBoxEditor.
+         * We override this method to set doNotChangeDocument to ensure that
+         * attempts to change the ComboBoxEditor's Document are ignored and
+         * our control is absolute.
+         */
+        public void listChanged(ListEvent<E> listChanges) {
+            doNotChangeDocument = true;
+            try {
+                super.listChanged(listChanges);
+            } finally {
+                doNotChangeDocument = false;
             }
         }
     }
@@ -1707,14 +1746,15 @@ public final class AutoCompleteSupport<E> {
             }
 
             // if the comboBoxModel was changed and it wasn't due to the filter changing
-            // (i.e. !doNotChangeDocument) and it wasn't because the user selected a new
-            // selectedItem (i.e. getIndex0() != -1 && e.getIndex1() != -1) then those
-            // changes may have invalidated the invariant that strict mode places on the
-            // text in the JTextField, so we must either:
+            // (i.e. !isFiltering) and it wasn't because the user selected a new
+            // selectedItem (i.e. !userSelectedNewItem) then those changes may have
+            // invalidated the invariant that strict mode places on the text in the
+            // JTextField, so we must either:
             //
             // a) locate the text within the model (proving that the strict mode invariant still holds)
             // b) set the text to that of the first element in the model (to reestablish the invariant)
-            if (isStrict() && e.getIndex0() != -1 && e.getIndex1() != -1 && !doNotChangeDocument) {
+            final boolean userSelectedNewItem = e.getIndex0() == -1 || e.getIndex1() == -1;
+            if (isStrict() && !userSelectedNewItem && !isFiltering) {
                 // notice that instead of doing the work directly, we post a Runnable here
                 // to check the strict mode invariant and repair it if it is broken. That's
                 // important. It's necessary because we must let the current ListEvent
@@ -1730,16 +1770,17 @@ public final class AutoCompleteSupport<E> {
         private class CheckStrictModeInvariantRunnable implements Runnable {
             public void run() {
                 final String currentText = comboBoxEditorComponent.getText();
-                String newStrictValue = findAutoCompleteTerm(currentText);
+                final Object item = findAutoCompleteTerm(currentText);
+                String itemText = convertToString(item);
 
                 // if we did not find the same autocomplete term
-                if (!currentText.equals(newStrictValue)) {
+                if (!currentText.equals(itemText)) {
                     // select the first item if we could not find an autocomplete term with the currentText
-                    if (newStrictValue == null && !allItemsUnfiltered.isEmpty())
-                        newStrictValue = convertToString(allItemsUnfiltered.get(0));
+                    if (item == null && !allItemsUnfiltered.isEmpty())
+                        itemText = convertToString(allItemsUnfiltered.get(0));
 
                     // set the new strict value text into the editor component
-                    comboBoxEditorComponent.setText(newStrictValue);
+                    comboBoxEditorComponent.setText(itemText);
                 }
             }
         }
