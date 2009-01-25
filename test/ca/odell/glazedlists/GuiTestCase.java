@@ -31,6 +31,7 @@ public abstract class GuiTestCase extends TestCase {
     private static final String TEAR_DOWN_METHOD = "guiTearDown";
     private static final String JUNIT_BAD_PREFIX = "test";
     private static final String JUNIT_OK_METHOD = "testGui";
+    private static final String JUNIT_OK_METHOD2 = "testOnMainThread";
 
     /** useful empty arrays */
     private static final Class[] DECLARE_NO_PARAMETERS = new Class[0];
@@ -97,7 +98,7 @@ public abstract class GuiTestCase extends TestCase {
                 final Method[] allMethods = guiTestClass.getMethods();
                 for (int i = 0; i < allMethods.length; i++) {
                     final String methodName = allMethods[i].getName();
-                    if (methodName.startsWith(JUNIT_BAD_PREFIX) && !methodName.equals(JUNIT_OK_METHOD))
+                    if (methodName.startsWith(JUNIT_BAD_PREFIX) && !methodName.equals(JUNIT_OK_METHOD) && !methodName.startsWith(JUNIT_OK_METHOD2))
                         throw new IllegalStateException(methodName + "() must be renamed to guiT" + methodName.substring(1) +"()");
                 }
 
