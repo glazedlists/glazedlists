@@ -3,11 +3,9 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.java15;
 
-import ca.odell.glazedlists.util.reflect.ReturnTypeResolver;
+import ca.odell.glazedlists.impl.reflect.ReturnTypeResolver;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.List;
 
 /**
  * An implementation of {@link ReturnTypeResolver} that adapt's Google's

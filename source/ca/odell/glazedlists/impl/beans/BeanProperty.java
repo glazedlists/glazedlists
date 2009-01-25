@@ -3,8 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.beans;
 
-import ca.odell.glazedlists.util.reflect.ReturnTypeResolver;
-import ca.odell.glazedlists.util.reflect.ReturnTypeResolverFactory;
+import ca.odell.glazedlists.impl.reflect.ReturnTypeResolver;
+import ca.odell.glazedlists.impl.reflect.ReturnTypeResolverFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

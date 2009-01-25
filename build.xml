@@ -1,6 +1,6 @@
 <!--
    Glazed Lists
-   Copyright 2003-2006 publicobject.com, O'Dell Engineering Ltd.
+   Copyright 2003 publicobject.com, O'Dell Engineering Ltd.
 -->
 
 <project name="glazedlists" default="jar" basedir=".">
@@ -131,6 +131,7 @@
 		<javadoc
 			destdir="${docs.dir}/api" author="true" use="true" windowtitle="Glazed Lists" source="${java.target.version}">
 			<packageset dir="source"><exclude name="**/impl/**"/><exclude name="**/migrationkit/**"/></packageset>
+			<packageset dir="extensions/calculation/source"><exclude name="**/impl/**"/></packageset>
 			<packageset dir="extensions/swt/source"><exclude name="**/impl/**"/><exclude name="**/migrationkit/**"/></packageset>
 			<packageset dir="extensions/ktable/source"><exclude name="**/impl/**"/></packageset>
 			<packageset dir="extensions/jgoodiesforms/source"><exclude name="**/impl/**"/></packageset>
@@ -148,7 +149,7 @@
             <link href="http://download.java.net/javadesktop/swinglabs/releases/0.8/docs/api/"/>
 			<link href="http://www.hibernate.org/hib_docs/v3/api/"/>
             <doctitle><![CDATA[<h1>${doctitle}</h1>]]></doctitle>
-			<bottom><![CDATA[<a href="http://publicobject.com/glazedlists/" target="_top">Glazed Lists</a>, Copyright &#169; 2003-2006 publicobject.com, O'Dell Engineering.<br>Documentation build by ${user.name} at ${datestamp.dateAndTime}]]></bottom>
+			<bottom><![CDATA[<a href="http://publicobject.com/glazedlists/" target="_top">Glazed Lists</a>, Copyright &#169; 2003 publicobject.com, O'Dell Engineering.<br>Documentation build by ${user.name} at ${datestamp.dateAndTime}]]></bottom>
 		</javadoc>
 	</target>
 

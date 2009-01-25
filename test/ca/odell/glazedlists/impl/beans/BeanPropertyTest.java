@@ -7,7 +7,7 @@ import junit.framework.TestCase;
 
 import java.awt.*;
 
-import ca.odell.glazedlists.util.reflect.ReturnTypeResolverFactory;
+import ca.odell.glazedlists.impl.reflect.ReturnTypeResolverFactory;
 
 /**
  * This test verifies that the BeanProperty works as expected.
