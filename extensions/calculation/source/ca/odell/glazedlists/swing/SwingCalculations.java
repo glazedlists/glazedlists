@@ -9,8 +9,12 @@ import javax.swing.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.Format;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 public final class SwingCalculations {
+    private static final Float FLOAT_NAN = new Float(Float.NaN);
+    private static final Double DOUBLE_NAN = new Double(Double.NaN);
 
     private SwingCalculations() {}
 
@@ -54,10 +58,11 @@ public final class SwingCalculations {
         }
 
         private void update(Object value) {
-            if (formatter == null) {
-                label.setText(value != null ? String.valueOf(value) : "");
+            // special case out null and NaN 'cause otherwise they're ugly!
+            if (null == value || FLOAT_NAN.equals(value) || DOUBLE_NAN.equals(value)) {
+                label.setText("");
             } else {
-                label.setText(formatter.format(value));
+                label.setText(formatter != null ? formatter.format(value) : String.valueOf(value));
             }
         }
 
