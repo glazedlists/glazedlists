@@ -127,6 +127,8 @@ public class ListConsistencyListener<E> {
     private class ListChangeHandler implements ListEventListener<E> {
 
         public void listChanged(ListEvent<E> listChanges) {
+            try {
+
             assertTrue(source == listChanges.getSource());
             assertEventsInIncreasingOrder(listChanges);
 
@@ -204,6 +206,9 @@ public class ListConsistencyListener<E> {
 
             // verify the source is consistent with what we expect
             assertConsistent();
+            } catch (RuntimeException unexpected) {
+                throw new RuntimeException("Failure for " + name, unexpected);
+            }
         }
 
         public String toString() {

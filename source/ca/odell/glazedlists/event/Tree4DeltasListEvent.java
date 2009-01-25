@@ -4,10 +4,8 @@
 package ca.odell.glazedlists.event;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.impl.event.Tree4Deltas;
 import ca.odell.glazedlists.impl.event.BlockSequence;
-
-import java.util.List;
+import ca.odell.glazedlists.impl.event.Tree4Deltas;
 
 /**
  * A list event that iterates {@link Tree4Deltas} as the
@@ -20,9 +18,9 @@ class Tree4DeltasListEvent<E> extends ListEvent<E> {
     private Tree4Deltas.Iterator deltasIterator;
     private BlockSequence.Iterator linearIterator;
 
-    private ListEventAssembler.Tree4DeltasAssembler deltasAssembler;
+    private ListEventAssembler deltasAssembler;
 
-    public Tree4DeltasListEvent(ListEventAssembler.Tree4DeltasAssembler deltasAssembler, EventList<E> sourceList) {
+    public Tree4DeltasListEvent(ListEventAssembler deltasAssembler, EventList<E> sourceList) {
         super(sourceList);
         this.deltasAssembler = deltasAssembler;
     }
@@ -30,7 +28,7 @@ class Tree4DeltasListEvent<E> extends ListEvent<E> {
     /**
      * Create a copy of this list event.
      */
-    public ListEvent copy() {
+    public ListEvent<E> copy() {
         Tree4DeltasListEvent<E> result = new Tree4DeltasListEvent<E>(deltasAssembler, sourceList);
         result.deltasIterator = deltasIterator != null ? deltasIterator.copy() : null;
         result.linearIterator = linearIterator != null ? linearIterator.copy() : null;
