@@ -257,6 +257,11 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
     }
 
     /**
+     * This method does nothing. It is not necessary to dispose a BasicEventList.
+     */
+    public void dispose() { }
+
+    /**
      * Although {@link EventList}s are not in general, {@link BasicEventList} is
      * {@link Serializable}. All of the {@link ListEventListener}s that are themselves
      * {@link Serializable} will be serialized, but others will not. Note that there

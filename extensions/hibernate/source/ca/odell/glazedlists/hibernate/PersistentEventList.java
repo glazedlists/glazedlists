@@ -114,6 +114,11 @@ public final class PersistentEventList extends PersistentList implements EventLi
             updates.forwardEvent(listChanges);
     }
 
+    /** {@inheritDoc} */
+    public void dispose() {
+        // TODO Holger please implement me!
+    }
+
     /**
      * Serializes this list and all serializable listeners
      */

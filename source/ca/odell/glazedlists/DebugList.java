@@ -53,7 +53,10 @@ public class DebugList<E> extends AbstractEventList<E> {
     private final Set<Thread> sanctionedWriterThreads = new HashSet<Thread>();
 
     /** A delegate EventList that implements the actual List operations. */
-    private final EventList<E> delegate;
+    private EventList<E> delegate;
+
+    /** Forwards ListEvents received from the {@link #delegate} */
+    private final ListEventListener<E> delegateWatcher = new ListEventForwarder();
 
     /** A special ReadWriteLock that reports the Threads that own the read lock and write lock at any given time. */
     private final DebugReadWriteLock debugReadWriteLock;
@@ -78,7 +81,7 @@ public class DebugList<E> extends AbstractEventList<E> {
 
         // use a normal BasicEventList as the delegate implementation
         this.delegate = new BasicEventList<E>(publisher, this.debugReadWriteLock);
-        this.delegate.addListEventListener(new ListEventForwarder());
+        this.delegate.addListEventListener(delegateWatcher);
     }
 
     /**
@@ -406,6 +409,12 @@ public class DebugList<E> extends AbstractEventList<E> {
         } finally {
             afterWriteOperation();
         }
+    }
+
+    /** {@inheritDoc} */
+    public void dispose() {
+        delegate.removeListEventListener(this.delegateWatcher);
+        delegate = null;
     }
 
     /**

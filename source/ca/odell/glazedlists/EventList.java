@@ -22,7 +22,8 @@ import java.util.List;
  * are thread ready but not thread safe. If you are sharing an {@link EventList}
  * between multiple threads, you can add thread safety by using the built-in
  * locks:
- * <pre> EventList myList = ...
+ * <pre>
+ * EventList myList = ...
  * myList.getReadWriteLock().writeLock().lock();
  * try {
  *    // access myList here
@@ -32,7 +33,23 @@ import java.util.List;
  *    }
  * } finally {
  *    myList.getReadWriteLock().writeLock().unlock();
- * }</pre>
+ * }
+ * </pre>
+ *
+ * Note that you are also required to acquire and hold the lock during the
+ * construction of an EventList if concurrent modifications are possible in
+ * your environment, like so:
+ *
+ * <pre>
+ * EventList source = ...
+ * SortedList sorted;
+ * source.getReadWriteLock().readLock().lock();
+ * try {
+ *    sorted = new SortedList(source);
+ * } finally {
+ *    source.getReadWriteLock().readLock().unlock();
+ * }
+ * </pre>
  *
  * <p><strong><font color="#FF0000">Warning:</font></strong> {@link EventList}s
  * may break the contract required by {@link java.util.List}. For example, when
@@ -71,4 +88,14 @@ public interface EventList<E> extends List<E> {
      * Get the publisher used to distribute {@link ListEvent}s.
      */
     public ListEventPublisher getPublisher();
+
+    /**
+     * Disposing an EventList will make it eligible for garbage collection.
+     * Some EventLists install themselves as listeners to related objects so
+     * disposing them is necessary.
+     *
+     * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
+     * to call any method on an {@link EventList} after it has been disposed.
+     */
+    public void dispose();
 }
