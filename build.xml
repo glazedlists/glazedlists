@@ -23,7 +23,7 @@
     </tstamp>
 
 	<!-- Version number for the next planned release -->
-	<property name="next.release.version" value="1.8"/>
+	<property name="next.release.version" value="1.9"/>
 	
 	<!-- Default implementation version for jar file, overridden by release target -->
 	<property name="implementation.version" value="${next.release.version}.alpha${datestamp.DSTAMP}"/>
