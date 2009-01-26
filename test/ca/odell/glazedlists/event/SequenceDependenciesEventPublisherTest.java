@@ -585,21 +585,9 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
      */
     public void testEventStateAfterForwardEvent() {
         EventList<String> source = new BasicEventList<String>();
-        CountingList<String> counting = new CountingList<String>(source);
+        ListConsistencyListener lcl = ListConsistencyListener.install(source);
+        
         source.add("Hello");
-        assertEquals(1, counting.changeCount);
-    }
-    public static class CountingList<T> extends TransformedList<T,T> {
-        public int changeCount = 0;
-        protected CountingList(EventList<T> source) {
-            super(source);
-            source.addListEventListener(this);
-        }
-        public void listChanged(ListEvent<T> listChanges) {
-            updates.forwardEvent(listChanges);
-            while(listChanges.next()) {
-                changeCount++;
-            }
-        }
+        assertEquals(1, lcl.getChangeCount(0));
     }
 }

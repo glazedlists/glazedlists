@@ -153,6 +153,9 @@ public class ForwardEventTest extends TestCase {
             super(source);
             source.addListEventListener(this);
         }
+        protected boolean isWritable() {
+            return false;
+        }
         public void listChanged(ListEvent<E> e) {
             updates.forwardEvent(e);
         }

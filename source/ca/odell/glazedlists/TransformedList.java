@@ -61,9 +61,7 @@ public abstract class TransformedList<S, E> extends AbstractEventList<E> impleme
      * <p>Extending classes must override this method in order to make themselves
      * writable.
      */
-    protected boolean isWritable() {
-        return false;
-    }
+    protected abstract boolean isWritable();
 
     /** {@inheritDoc} */
     public abstract void listChanged(ListEvent<S> listChanges);

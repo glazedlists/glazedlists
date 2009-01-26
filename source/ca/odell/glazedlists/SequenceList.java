@@ -99,6 +99,13 @@ public final class SequenceList<E> extends TransformedList<E,E> implements Rando
         source.addListEventListener(this);
     }
 
+    /**
+     * @return <tt>false</tt>; SequenceList is readonly
+     */
+    protected boolean isWritable() {
+        return false;
+    }
+
     /** {@inheritDoc} */
     public int size() {
         return this.sequence.size();

@@ -45,6 +45,13 @@ public final class ReadOnlyList<E> extends TransformedList<E, E> {
         source.addListEventListener(this);
     }
 
+    /**
+     * @return <tt>false</tt>; ReadOnlyList is... ahem... readonly
+     */
+    protected boolean isWritable() {
+        return false;
+    }
+
     /** {@inheritDoc} */
     public void listChanged(ListEvent<E> listChanges) {
         // just pass on the changes

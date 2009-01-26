@@ -103,6 +103,14 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
         source.addListEventListener(this);
     }
 
+    /**
+     * @return <tt>false</tt> because we cannot support {@link #add(int, Object)};
+     *      though we do support {@link #set(int, Object)} and {@link #remove(int)}
+     */
+    protected boolean isWritable() {
+        return false;
+    }
+
     /** {@inheritDoc} */
     public int size() {
         // size of the child nodes only

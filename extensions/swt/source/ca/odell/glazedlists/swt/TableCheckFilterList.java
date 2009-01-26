@@ -110,6 +110,13 @@ final class TableCheckFilterList<S, E> extends TransformedList<S, E> implements 
     }
 
     /**
+     * @return <tt>false</tt>; TableCheckFilterList is readonly
+     */
+    protected boolean isWritable() {
+        return false;
+    }
+
+    /**
      * Set the specified list element in the source list as checked.
      */
     private void setChecked(Object element, boolean checked) {
@@ -325,6 +332,13 @@ class CheckableWrapperList<S> extends TransformedList<S, CheckWrapped<S>> {
 
         prepareElements();
         source.addListEventListener(this);
+    }
+
+    /**
+     * @return <tt>false</tt>; CheckableWrapperList is readonly
+     */
+    protected boolean isWritable() {
+        return false;
     }
 
     /**
