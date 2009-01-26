@@ -1367,9 +1367,11 @@ public final class AutoCompleteSupport<E> {
             try {
                 super.setSelectedItem(selected);
 
-                // remove any text selection that might exist when an item is selected
-                final int caretPos = comboBoxEditorComponent.getCaretPosition();
-                comboBoxEditorComponent.select(caretPos, caretPos);
+                if (comboBoxEditorComponent != null) {
+                    // remove any text selection that might exist when an item is selected
+                    final int caretPos = comboBoxEditorComponent.getCaretPosition();
+                    comboBoxEditorComponent.select(caretPos, caretPos);
+                }
             } finally {
                 // reinstall the ActionListeners we removed
                 registerAllActionListeners(comboBox, listeners);
