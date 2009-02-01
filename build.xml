@@ -177,6 +177,7 @@
         <jar destfile="${target.dir}/${jar.file}" update="true" index="true">
             <fileset dir="${classes.dir}">
                 <exclude name="com/publicobject/**"/> <!-- IssuesBrowser -->
+            	<exclude name="com"/>
             </fileset>
             <fileset dir=".">
                 <include name="resources/**"/>
