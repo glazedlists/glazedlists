@@ -302,9 +302,12 @@ class SpanTableUI extends BasicTableUI {
             int x;
             if (table.getComponentOrientation().isLeftToRight()) {
                 x = damagedArea.x;
-                for (int column = cMin; column <= cMax; column++) {
+                for (int column = 0; column <= cMax; column++) {
                     x += cm.getColumn(column).getWidth();
-                    g.drawLine(x - 1, 0, x - 1, tableHeight - 1);
+
+                    // redraw the grid lines for this column if it is damaged
+                    if (column >= cMin)
+                        g.drawLine(x - 1, 0, x - 1, tableHeight - 1);
                 }
             } else {
                 x = damagedArea.x + damagedArea.width;
