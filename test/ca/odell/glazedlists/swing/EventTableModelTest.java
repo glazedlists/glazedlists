@@ -3,6 +3,24 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.swing.Action;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableCellRenderer;
+
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.DelayList;
 import ca.odell.glazedlists.EventList;
@@ -16,22 +34,6 @@ import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.matchers.Matcher;
-
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.JLabel;
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.TableCellRenderer;
-
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Rectangle;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Test EventTableModel from the Swing thread.
@@ -422,6 +424,48 @@ public class EventTableModelTest extends SwingTestCase {
         assertEquals(2, counter.getCountAndReset());
         assertEquals(GlazedListsTests.stringToList("B"), selModel.getSelected());
         assertEquals(GlazedListsTests.delimitedStringToList("A C D"), selModel.getDeselected());
+    }
+
+
+    /**
+     * Tests that a table selection is correctly reflected when the user presses UP- and DOWN-arrow
+     * keys while the table is in sorted state.
+     */
+    public void guiTestChangeSelectionByKeysInSortedState_FixMe() {
+        // build the data
+        final EventList<JLabel> labels = new BasicEventList<JLabel>();
+        labels.add(new JLabel("def"));
+        labels.add(new JLabel("ghi"));
+        labels.add(new JLabel("abc"));
+        final SortedList<JLabel> sortedLabels = new SortedList<JLabel>(labels, null);
+        // build a sorted table and model
+        final EventTableModel<JLabel> tableModel = new EventTableModel<JLabel>(sortedLabels, new LabelTableFormat());
+        final EventSelectionModel<JLabel> selectionModel = new EventSelectionModel<JLabel>(sortedLabels);
+        final JTable table = new JTable(tableModel);
+        table.setSelectionModel(selectionModel);
+        // set an initial selection
+        selectionModel.setSelectionInterval(1, 1);
+        assertEquals(Arrays.asList(new JLabel[] { labels.get(1)}), selectionModel.getSelected());
+        assertEquals(labels, sortedLabels);
+        final TableComparatorChooser<JLabel> tableComparatorChooser = TableComparatorChooser.install(table, sortedLabels, TableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD);
+        // sort the table by the first column
+        clickColumnHeader(table, 0);
+        // check that selected element is preserved
+        assertEquals(Arrays.asList(new JLabel[] { labels.get(1)}), selectionModel.getSelected());
+        assertEquals(Arrays.asList(new JLabel[] { labels.get(2), labels.get(0), labels.get(1)}), sortedLabels);
+        // check current indexes of selection model
+        assertEquals(2, selectionModel.getMinSelectionIndex());
+        assertEquals(2, selectionModel.getMaxSelectionIndex());
+        // this could be the problem for the following failure: the lead selection index is -1
+        assertEquals(-1, selectionModel.getLeadSelectionIndex());
+        // call the action that is triggered on an UP-arrow-key press
+        final Action action = table.getActionMap().get("selectPreviousRow");
+        assertNotNull("Action 'selectPreviousRow' not found", action);
+        action.actionPerformed(new ActionEvent(table, 1, "selectPreviousRow"));
+        // the element of the previous row should be selected
+        assertEquals(1, selectionModel.getMinSelectionIndex());
+        assertEquals(1, selectionModel.getMaxSelectionIndex());
+        assertEquals(Arrays.asList(new JLabel[] { labels.get(0)}), selectionModel.getSelected());
     }
 
     /**
