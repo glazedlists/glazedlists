@@ -110,7 +110,7 @@ public class CompositeList<E> extends CollectionList<EventList<E>, E> {
      * @return a new EventList appropriate for use as a
      *      {#link #addMemberList member list} of this CompositeList
      */
-    public EventList<E> createMemberList() {
+    public <E> EventList<E> createMemberList() {
         return new BasicEventList<E>(getPublisher(), getReadWriteLock());
     }
     
