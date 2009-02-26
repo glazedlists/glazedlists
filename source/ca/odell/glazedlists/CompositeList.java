@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-// the core Glazed Lists package
 import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
@@ -89,23 +88,29 @@ public class CompositeList<E> extends CollectionList<EventList<E>, E> {
      *         {@link ReadWriteLock} or {@link ListEventPublisher}
      * @see #createMemberList()
      */
-    public void addMemberList(EventList<E> list) {
-        if(!getPublisher().equals(list.getPublisher()))
+    public void addMemberList(EventList<E> member) {
+        if (!getPublisher().equals(member.getPublisher()))
             throw new IllegalArgumentException("Member list must share publisher with CompositeList");
-        if(!getReadWriteLock().equals(list.getReadWriteLock()))
+
+        if (!getReadWriteLock().equals(member.getReadWriteLock()))
             throw new IllegalArgumentException("Member list must share lock with CompositeList");
-        source.add(list);
+
+        source.add(member);
     }
     
     /**
-     * Creates a new {@link EventList} that shares its {@link ReadWriteLock} with
-     * this {@link CompositeList}. This is necessary when this {@link CompositeList}
-     * will be used by multiple threads.
+     * Creates a new {@link EventList} that shares its {@link ReadWriteLock} and
+     * {@link ListEventPublisher} with this {@link CompositeList}. This is
+     * necessary when this {@link CompositeList} will be used by multiple
+     * threads.
      *
      * <p>Note that the created {@link EventList} must be explicitly added as a member
      * to this {@link CompositeList} using {@link #addMemberList(EventList)}.
+     *
+     * @return a new EventList appropriate for use as a
+     *      {#link #addMemberList member list} of this CompositeList
      */
-    public <E> EventList<E> createMemberList() {
+    public EventList<E> createMemberList() {
         return new BasicEventList<E>(getPublisher(), getReadWriteLock());
     }
     
