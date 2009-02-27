@@ -4,6 +4,8 @@
 package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventPublisher;
+import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 /**
  * An {@link EventList} which delegates all List methods to a given source
@@ -11,13 +13,11 @@ import ca.odell.glazedlists.event.ListEvent;
  * {@link #setSource(EventList)}.
  *
  * <p>Note that the source {@link EventList} must use the same
- * {@link ca.odell.glazedlists.event.ListEventPublisher} and
- * {@link ca.odell.glazedlists.util.concurrent.ReadWriteLock}, particularly if
- * this {@link EventList} is to be used my multiple threads concurrently. To
- * construct an {@link EventList} that shares the
- * {@link ca.odell.glazedlists.event.ListEventPublisher} and
- * {@link ca.odell.glazedlists.util.concurrent.ReadWriteLock} with this
- * {@link PluggableList}, use {@link #createSourceList()}.
+ * {@link ListEventPublisher} and {@link ReadWriteLock}, particularly if this
+ * {@link EventList} is to be used by multiple threads concurrently. To
+ * construct an {@link EventList} that shares the {@link ListEventPublisher}
+ * and {@link ReadWriteLock} with this {@link PluggableList}, use
+ * {@link #createSourceList()}.
  *
  * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
  * thread ready but not thread safe. See {@link EventList} for an example
@@ -36,6 +36,19 @@ import ca.odell.glazedlists.event.ListEvent;
  * @author James Lemieux
  */
 public class PluggableList<E> extends TransformedList<E, E> {
+
+    /**
+     * Constructs a PluggableList which uses the given <code>publisher</code>
+     * and <code>lock</code>. The PluggableList will default to use a
+     * {@link BasicEventList} that also uses the same <code>publisher</code>
+     * and <code>lock</code>.
+     *
+     * @param publisher the {@link ListEventPublisher} to use within the {@link PluggableList}
+     * @param lock the {@link ReadWriteLock} to use within the {@link PluggableList}
+     */
+    public PluggableList(ListEventPublisher publisher, ReadWriteLock lock) {
+        this(new BasicEventList<E>(publisher, lock));
+    }
 
     /**
      * Constructs a PluggableList which delegates all List methods to the given
@@ -79,6 +92,13 @@ public class PluggableList<E> extends TransformedList<E, E> {
      *
      * @param source the new source of data for this PluggableList, and all
      *      downstream EventLists
+     * @throws IllegalStateException if this PluggableList is already disposed
+     * @throws IllegalArgumentException if any of the following are true
+     *         <ul>
+     *           <li>the given source is null</li>
+     *           <li>the given source has a different ListEventPublisher than this PluggableList</li>
+     *           <li>the given source has a different ReadWriteLock than this PluggableList</li>
+     *         </ul>
      */
     public void setSource(EventList<E> source) {
         // lock the pipeline while the source list is swapped
@@ -112,6 +132,7 @@ public class PluggableList<E> extends TransformedList<E, E> {
             for (int i = 0, n = size(); i < n; i++)
                 updates.elementInserted(i, get(i));
 
+            // broadcast the ListEvent that describes the data change
             updates.commitEvent();
         } finally {
             getReadWriteLock().writeLock().unlock();
