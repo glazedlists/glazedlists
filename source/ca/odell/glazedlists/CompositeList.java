@@ -13,7 +13,7 @@ import java.util.Iterator;
  * shows the contents of its source lists.
  *
  * <p>Note that all contained {@link EventList}s must use the same {@link ListEventPublisher} and 
- * {@link ReadWriteLock}, particularly if this {@link EventList} is to be used my multiple threads 
+ * {@link ReadWriteLock}, particularly if this {@link EventList} is to be used by multiple threads 
  * concurrently. To construct an {@link EventList} that shares the {@link ListEventPublisher} and 
  * {@link ReadWriteLock} with this {@link CompositeList}, use {@link #createMemberList()}.
  *
