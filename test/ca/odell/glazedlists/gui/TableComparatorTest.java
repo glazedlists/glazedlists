@@ -3,18 +3,20 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.gui;
 
+import java.awt.event.MouseEvent;
+
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumnModel;
+
+import junit.framework.TestCase;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.swing.DefaultEventTableModel;
 import ca.odell.glazedlists.swing.EventTableModel;
 import ca.odell.glazedlists.swing.TableComparatorChooser;
-import junit.framework.TestCase;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumnModel;
-import java.awt.event.MouseEvent;
 
 /**
  * Verify that the {@link AbstractTableComparatorChooser} works, especially
@@ -123,13 +125,13 @@ public class TableComparatorTest extends TestCase {
         final SortedList<String> sorted = new SortedList<String>(source, null);
 
         final JTable table = new JTable();
-        final EventTableModel<String> firstModel;
-        final EventTableModel<String> secondModel;
+        final DefaultEventTableModel<String> firstModel;
+        final DefaultEventTableModel<String> secondModel;
 
         final int initialNumPropertyChangeListenersOnJTable = table.getPropertyChangeListeners().length;
 
         // 1. set up an EventTableModel to display 3 columns
-        firstModel = new EventTableModel<String>(sorted, new TestTableFormat(3));
+        firstModel = new DefaultEventTableModel<String>(sorted, new TestTableFormat(3));
         table.setModel(firstModel);
 
         assertEquals(1, firstModel.getTableModelListeners().length);
@@ -165,7 +167,7 @@ public class TableComparatorTest extends TestCase {
 
 
         // 5. set a new EventTableModel that only uses 2 columns
-        secondModel = new EventTableModel<String>(sorted, new TestTableFormat(2));
+        secondModel = new DefaultEventTableModel<String>(sorted, new TestTableFormat(2));
         table.setModel(secondModel);
 
         // nothing should listen to firstModel, and secondModel is now active
@@ -192,7 +194,7 @@ public class TableComparatorTest extends TestCase {
 
     public void testMouseOnlySortingStrategyWithUndo() {
         final TestTableFormat tableFormat = new TestTableFormat(10);
-        final JTable table = new JTable(new EventTableModel<String>(new BasicEventList<String>(), tableFormat));
+        final JTable table = new JTable(new DefaultEventTableModel<String>(new BasicEventList<String>(), tableFormat));
         tableComparatorChooser = TableComparatorChooser.install(table, sortedList, AbstractTableComparatorChooser.MULTIPLE_COLUMN_MOUSE_WITH_UNDO, tableFormat);
 
         // add some comparators to column 1 (for a total of 3 comparators)

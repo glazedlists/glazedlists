@@ -102,7 +102,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      * performed and fixes an API flaw by explicitly requiring the TableFormat.
      */
     public TableComparatorChooser(JTable table, SortedList<E> sortedList, Object strategy) {
-        this(table, sortedList,strategy,((EventTableModel<E>)table.getModel()).getTableFormat());
+        this(table, sortedList,strategy,((DefaultEventTableModel<E>)table.getModel()).getTableFormat());
     }
 
     /**
@@ -179,7 +179,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      *      mouse clicks on the table header into sorting actions on the sortedList.
      */
     public static <E> TableComparatorChooser<E> install(JTable table, SortedList<E> sortedList, Object strategy) {
-        return install(table, sortedList, strategy, ((EventTableModel<E>)table.getModel()).getTableFormat());
+        return install(table, sortedList, strategy, ((DefaultEventTableModel<E>)table.getModel()).getTableFormat());
     }
 
     /**
@@ -405,8 +405,8 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
          */
         public void propertyChange(PropertyChangeEvent evt) {
             // get the two EventTableModels
-            final EventTableModel<E> oldModel = evt.getOldValue() instanceof EventTableModel ? (EventTableModel<E>) evt.getOldValue() : null;
-            final EventTableModel<E> newModel = evt.getNewValue() instanceof EventTableModel ? (EventTableModel<E>) evt.getNewValue() : null;
+            final DefaultEventTableModel<E> oldModel = evt.getOldValue() instanceof DefaultEventTableModel ? (DefaultEventTableModel<E>) evt.getOldValue() : null;
+            final DefaultEventTableModel<E> newModel = evt.getNewValue() instanceof DefaultEventTableModel ? (DefaultEventTableModel<E>) evt.getNewValue() : null;
 
             // stop listening for TableModelEvents in the oldModel and start for the newModel, if possible
             if (oldModel != null) oldModel.removeTableModelListener(this);
@@ -425,10 +425,10 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
          */
         public void tableChanged(TableModelEvent event) {
             if(event.getFirstRow() == TableModelEvent.HEADER_ROW && event.getColumn() == TableModelEvent.ALL_COLUMNS) {
-                if (table.getModel() instanceof EventTableModel) {
+                if (table.getModel() instanceof DefaultEventTableModel) {
                     // the table structure may have changed due to a change in the table format
                     // so we conservatively reset the TableFormat on this TableComparatorChooser
-                    setTableFormat(((EventTableModel<E>) table.getModel()).getTableFormat());
+                    setTableFormat(((DefaultEventTableModel<E>) table.getModel()).getTableFormat());
                 }
             }
 

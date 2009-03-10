@@ -3,16 +3,18 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ListSelection;
 import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.matchers.Matcher;
-
-import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * An {@link EventSelectionModel} is a class that performs two simulaneous
@@ -73,7 +75,7 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
      *
      * @param source the {@link EventList} whose selection will be managed. This should
      *      be the same {@link EventList} passed to the constructor of your
-     *      {@link EventTableModel} or {@link EventListModel}.
+     *      {@link DefaultEventTableModel} or {@link EventListModel}.
      */
     public EventSelectionModel(EventList<E> source) {
         // lock the source list for reading since we want to prevent writes
@@ -103,7 +105,7 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
     /**
      * Gets an {@link EventList} that contains only selected
      * values and modifies the source list on mutation.
-     * 
+     *
      * Adding and removing items from this list performs the same operation on
      * the source list.
      */
@@ -119,7 +121,7 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
     /**
      * Gets an {@link EventList} that contains only selected
      * values and modifies the selection state on mutation.
-     * 
+     *
      * Adding an item to this list selects it and removing an item deselects it.
      * If an item not in the source list is added an
      * {@link IllegalArgumentException} is thrown.
@@ -136,7 +138,7 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
     /**
      * Gets an {@link EventList} that contains only deselected values and
      * modifies the source list on mutation.
-     * 
+     *
      * Adding and removing items from this list performs the same operation on
      * the source list.
      */
@@ -148,11 +150,11 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
             swingThreadSource.getReadWriteLock().readLock().unlock();
         }
     }
-    
+
     /**
      * Gets an {@link EventList} that contains only deselected values and
      * modifies the selection state on mutation.
-     * 
+     *
      * Adding an item to this list deselects it and removing an item selects it.
      * If an item not in the source list is added an
      * {@link IllegalArgumentException} is thrown

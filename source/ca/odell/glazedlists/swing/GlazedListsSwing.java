@@ -3,14 +3,17 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
+import javax.swing.BoundedRangeModel;
+import javax.swing.table.TableModel;
+
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ThresholdList;
 import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.swing.LowerThresholdRangeModel;
 import ca.odell.glazedlists.impl.swing.SwingThreadProxyEventList;
 import ca.odell.glazedlists.impl.swing.UpperThresholdRangeModel;
-
-import javax.swing.*;
 
 /**
  * A factory for creating all sorts of objects to be used with Glazed Lists.
@@ -65,4 +68,32 @@ public final class GlazedListsSwing {
     public static BoundedRangeModel upperRangeModel(ThresholdList target) {
         return new UpperThresholdRangeModel(target);
     }
+    
+    // TableModel convenience creators
+    
+    /**
+     * Creates a new table model that renders the specified list with an automatically
+     * generated {@link TableFormat}. It uses JavaBeans and reflection to create
+     * a {@link TableFormat} as specified.
+     *
+     * <p>Note that classes that will be obfuscated may not work with
+     * reflection. In this case, implement a {@link TableFormat} manually.
+     *
+     * @param source the EventList that provides the row objects
+     * @param propertyNames an array of property names in the JavaBeans format.
+     *      For example, if your list contains Objects with the methods getFirstName(),
+     *      setFirstName(String), getAge(), setAge(Integer), then this array should
+     *      contain the two strings "firstName" and "age". This format is specified
+     *      by the JavaBeans {@link java.beans.PropertyDescriptor}.
+     * @param columnLabels the corresponding column names for the listed property
+     *      names. For example, if your columns are "firstName" and "age", then
+     *      your labels might be "First Name" and "Age".
+     * @param writable an array of booleans specifying which of the columns in
+     *      your table are writable.
+     *      
+     */
+    public static <E> TableModel createEventTableModel(EventList<E> source, String[] propertyNames, String[] columnLabels, boolean[] writable) {
+        return new DefaultEventTableModel<E>(source, GlazedLists.tableFormat(propertyNames, columnLabels, writable));
+    }
+
 }

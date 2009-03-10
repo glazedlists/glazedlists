@@ -8,7 +8,7 @@ package ca.odell.glazedlists.gui;
  *
  * <p>This class can be used as an alternative to the simple {@link TableFormat}
  * class to provide editable cells. The 
- * {@link ca.odell.glazedlists.swing.EventTableModel EventTableModel} detects if a
+ * {@link ca.odell.glazedlists.swing.DefaultEventTableModel EventTableModel} detects if a
  * class implements {@link WritableTableFormat} for modifying the table. If a table
  * is not editable at all, it is sufficient to implement {@link TableFormat}
  * only.
