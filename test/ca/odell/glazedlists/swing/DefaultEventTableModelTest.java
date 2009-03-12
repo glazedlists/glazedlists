@@ -22,14 +22,11 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableCellRenderer;
 
 import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.DelayList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList;
 import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.ThreadRecorderEventList;
-import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
@@ -41,6 +38,25 @@ import ca.odell.glazedlists.matchers.Matcher;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class DefaultEventTableModelTest extends SwingTestCase {
+
+    /**
+     * Verifies that the EDT check works, e.g. an IllegalStateException is thrown when a ListEvent
+     * arrives on a non-EDT thread
+     */
+    public void testOnMainThreadEDTViolation() {
+        EventList<Color> colors = new BasicEventList<Color>();
+        colors.add(Color.RED);
+        colors.add(Color.GREEN);
+
+        final TableFormat<Color> colorTableFormat = GlazedLists.tableFormat(new String[] { "red", "green", "blue" }, new String[] { "Red", "Green", "Blue" });
+        final DefaultEventTableModel<Color> tableModel = new DefaultEventTableModel<Color>(colors, colorTableFormat);
+        try {
+            colors.add(Color.BLUE);
+            fail("failed to receive IllegalStateException because of missing ThreadProxyList");
+        } catch (IllegalStateException ex) {
+            // expected
+        }
+    }
 
     /**
      * Verifies that the new getElementAt() method of EventTableModel works.
