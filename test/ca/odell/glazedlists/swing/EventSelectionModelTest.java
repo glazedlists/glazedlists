@@ -412,9 +412,9 @@ public class EventSelectionModelTest extends SwingTestCase {
         final EventSelectionModel<String> selModel = new EventSelectionModel<String>(treeList);
         selModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         selModel.setSelectionInterval(2, 2);
-        assertEquals(Arrays.asList(new String[] {"two"}), selModel.getSelected());
+        assertEquals(Arrays.asList("two"), selModel.getSelected());
         source.set(2, source.get(2));
-        assertEquals(Arrays.asList(new String[] {"two"}), selModel.getSelected());
+        assertEquals(Arrays.asList("two"), selModel.getSelected());
     }
 
     /** Simple Format for TreeList testing. */

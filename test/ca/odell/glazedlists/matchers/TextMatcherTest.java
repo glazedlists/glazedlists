@@ -3,20 +3,30 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.matchers;
 
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.impl.filter.TextMatcher;
-import ca.odell.glazedlists.impl.filter.TextMatchers;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
+
 import junit.framework.TestCase;
 
-import java.util.*;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.impl.filter.TextMatcher;
+import ca.odell.glazedlists.impl.filter.TextMatchers;
 
 public class TextMatcherTest extends TestCase {
 
-    private List<String> numbers = Arrays.asList(new String[] {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"});
+    private List<String> numbers = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
 
-    private List<String> monotonicAlphabet = Arrays.asList(new String[] {"0", "01", "012", "0123", "01234", "012345", "0123456", "01234567", "012345678", "0123456789"});
+    private List<String> monotonicAlphabet = Arrays.asList("0", "01", "012", "0123", "01234", "012345", "0123456", "01234567", "012345678", "0123456789");
 
-    private List<String> dictionary = Arrays.asList(new String[] {"act", "actor", "enact", "reactor"});
+    private List<String> dictionary = Arrays.asList("act", "actor", "enact", "reactor");
 
     public void testConstrainingFilter() {
         TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
@@ -29,7 +39,7 @@ public class TextMatcherTest extends TestCase {
         textMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"0"});		// constrained
-        assertEquals(Arrays.asList(new Object[] {"0"}), list);
+        assertEquals(Arrays.asList("0"), list);
 		counter.assertCounterState(0, 0, 0, 1, 0);
     }
 
@@ -43,7 +53,7 @@ public class TextMatcherTest extends TestCase {
         textMatcherEditor.addMatcherEditorListener(counter);
 
 		textMatcherEditor.setFilterText(new String[] {"0"});		// constrained
-        assertEquals(Arrays.asList(new Object[] {"0"}), list);
+        assertEquals(Arrays.asList("0"), list);
         textMatcherEditor.setFilterText(new String[0]);				// match all
         assertEquals(numbers, list);
 		counter.assertCounterState(1, 0, 0, 1, 0);
@@ -52,14 +62,14 @@ public class TextMatcherTest extends TestCase {
 		textMatcherEditor.setFilterText(new String[] {"01"});		// constrained
         assertEquals(Collections.EMPTY_LIST, list);
         textMatcherEditor.setFilterText(new String[] {"0"});		// relaxed
-        assertEquals(Arrays.asList(new Object[] {"0"}), list);
+        assertEquals(Arrays.asList("0"), list);
 		counter.assertCounterState(0, 0, 0, 1, 1);
 		counter.resetCounterState();
 
         textMatcherEditor.setFilterText(new String[] {"0", "1"});	// constrained
         assertEquals(Collections.EMPTY_LIST, list);
         textMatcherEditor.setFilterText(new String[] {"0"});
-        assertEquals(Arrays.asList(new Object[] {"0"}), list);		// relaxed
+        assertEquals(Arrays.asList("0"), list);		// relaxed
 		counter.assertCounterState(0, 0, 0, 1, 1);
     }
 
@@ -119,7 +129,7 @@ public class TextMatcherTest extends TestCase {
         textMatcherEditor.setFilterText(new String[] {"6"});		// constrained
 		counter.assertCounterState(0, 0, 0, 1, 0);
 		counter.resetCounterState();
-		assertEquals(Arrays.asList(new String[] {"6"}), list);
+		assertEquals(Arrays.asList("6"), list);
 
 		textMatcherEditor.setFilterText(new String[0]);				// match all
 		counter.assertCounterState(1, 0, 0, 0, 0);
@@ -153,13 +163,13 @@ public class TextMatcherTest extends TestCase {
         list.addAll(monotonicAlphabet);
 
         textMatcherEditor.setFilterText(new String[] {"789"});
-        assertEquals(Arrays.asList(new String[] {"0123456789"}), list);
+        assertEquals(Arrays.asList("0123456789"), list);
 
         textMatcherEditor.setMode(TextMatcherEditor.STARTS_WITH);
         assertEquals(Collections.EMPTY_LIST, list);
 
         textMatcherEditor.setMode(TextMatcherEditor.CONTAINS);
-        assertEquals(Arrays.asList(new String[] {"0123456789"}), list);
+        assertEquals(Arrays.asList("0123456789"), list);
 
         list.clear();
         list.addAll(dictionary);
@@ -169,16 +179,16 @@ public class TextMatcherTest extends TestCase {
         assertEquals(dictionary, list);
 
         textMatcherEditor.setMode(TextMatcherEditor.STARTS_WITH);
-        assertEquals(Arrays.asList(new String[] {"act", "actor"}), list);
+        assertEquals(Arrays.asList("act", "actor"), list);
 
         textMatcherEditor.setMode(TextMatcherEditor.CONTAINS);
         assertEquals(dictionary, list);
 
         textMatcherEditor.setMode(TextMatcherEditor.EXACT);
-        assertEquals(Arrays.asList(new String[] {"act"}), list);
+        assertEquals(Arrays.asList("act"), list);
 
         textMatcherEditor.setFilterText(new String[] {"actor"});
-        assertEquals(Arrays.asList(new String[] {"actor"}), list);
+        assertEquals(Arrays.asList("actor"), list);
 
         textMatcherEditor.setFilterText(new String[] {"badvalue"});
         assertEquals(Arrays.asList(new String[0]), list);

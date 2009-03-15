@@ -4,12 +4,13 @@
 package ca.odell.glazedlists;
 
 // for being a JUnit test case
-import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import junit.framework.TestCase;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
+
+import junit.framework.TestCase;
+
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 
 /**
  * This test verifies that the ThresholdList works as expected.
@@ -58,8 +59,7 @@ public class ThresholdListTest extends TestCase {
      */
     public void testEventFiringLower() {
         // populate our sample list
-        source.addAll(Arrays.asList(new Integer[] { new Integer(25), new Integer(50),
-            new Integer(50), new Integer(75), new Integer(75), new Integer(100) }));
+        source.addAll(Arrays.asList(25, 50, 50, 75, 75, 100));
 
         // make some dealbreaking changes
         thresholdList.setLowerThreshold(27);
@@ -71,8 +71,7 @@ public class ThresholdListTest extends TestCase {
      */
     public void testEventFiringUpper() {
         // populate our sample list
-        source.addAll(Arrays.asList(new Integer[] { new Integer(25), new Integer(50),
-            new Integer(50), new Integer(75), new Integer(75), new Integer(100) }));
+        source.addAll(Arrays.asList(25, 50, 50, 75, 75, 100));
 
         // make some dealbreaking changes
         thresholdList.setUpperThreshold(77);
@@ -87,8 +86,7 @@ public class ThresholdListTest extends TestCase {
         thresholdList.setLowerThreshold(100);
 
         // populate our sample list
-        source.addAll(Arrays.asList(new Integer[] { new Integer(25), new Integer(50),
-            new Integer(50), new Integer(75), new Integer(75), new Integer(100) }));
+        source.addAll(Arrays.asList(25, 50, 50, 75, 75, 100));
 
         assertEquals(1, thresholdList.size());
 
@@ -106,8 +104,7 @@ public class ThresholdListTest extends TestCase {
         thresholdList.setLowerThreshold(25);
 
         // populate our sample list
-        source.addAll(Arrays.asList(new Integer[] { new Integer(25), new Integer(50),
-            new Integer(50), new Integer(75), new Integer(75), new Integer(100) }));
+        source.addAll(Arrays.asList(25, 50, 50, 75, 75, 100));
 
         assertEquals(1, thresholdList.size());
 
@@ -1141,7 +1138,7 @@ public class ThresholdListTest extends TestCase {
     public void testNonIntegers() {
         final BasicEventList<String> stringSource = new BasicEventList<String>();
         final ThresholdList<String> stringThresholdList = new ThresholdList<String>(stringSource, new IntegerAsStringEvaluator());
-        
+
         stringSource.add("0");
         stringSource.add("25");
         stringSource.add("50");

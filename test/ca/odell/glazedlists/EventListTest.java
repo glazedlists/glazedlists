@@ -3,14 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
-import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import ca.odell.glazedlists.matchers.Matchers;
-
-import junit.framework.TestCase;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -19,6 +11,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import junit.framework.TestCase;
+
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import ca.odell.glazedlists.matchers.Matchers;
 
 /**
  * Verifies that EventList matches the List API.
@@ -101,13 +101,13 @@ public class EventListTest extends TestCase {
 
             // test a list that doesn't contain nulls
             list.clear();
-            list.addAll(Arrays.asList(new String[] { "Molson", "Sleeman", "Labatts", "Western" }));
+            list.addAll(Arrays.asList("Molson", "Sleeman", "Labatts", "Western"));
             assertEquals(false, list.contains(null));
             assertEquals(true,  list.contains("Western"));
 
             // test a list that does contain nulls
             list.clear();
-            list.addAll(Arrays.asList(new String[] { null, "Sleeman", null, "Western" }));
+            list.addAll(Arrays.asList(null, "Sleeman", null, "Western"));
             assertEquals(true, list.contains(null));
             assertEquals(true, list.contains("Western"));
             assertEquals(false, list.contains("Molson"));
@@ -130,18 +130,18 @@ public class EventListTest extends TestCase {
 
             // test a list that doesn't contain nulls
             list.clear();
-            list.addAll(Arrays.asList(new String[] { "Molson", "Sleeman", "Labatts", "Western" }));
-            assertEquals(true, list.containsAll(Arrays.asList(new String[] { "Sleeman", "Molson" })));
-            assertEquals(false, list.containsAll(Arrays.asList(new String[] { "Molson", null })));
-            assertEquals(false, list.containsAll(Arrays.asList(new String[] { "Molson", "Busch" })));
+            list.addAll(Arrays.asList("Molson", "Sleeman", "Labatts", "Western"));
+            assertEquals(true, list.containsAll(Arrays.asList("Sleeman", "Molson")));
+            assertEquals(false, list.containsAll(Arrays.asList("Molson", null)));
+            assertEquals(false, list.containsAll(Arrays.asList("Molson", "Busch")));
 
             // test a list that does contain nulls
             list.clear();
-            list.addAll(Arrays.asList(new String[] { null, "Sleeman", null, "Western" }));
-            assertEquals(false, list.containsAll(Arrays.asList(new String[] { "Sleeman", "Molson" })));
-            assertEquals(true, list.containsAll(Arrays.asList(new String[] { "Sleeman", "Western" })));
-            assertEquals(true, list.containsAll(Arrays.asList(new String[] { "Western", null })));
-            assertEquals(true, list.containsAll(Arrays.asList(new String[] { null, null })));
+            list.addAll(Arrays.asList(null, "Sleeman", null, "Western"));
+            assertEquals(false, list.containsAll(Arrays.asList("Sleeman", "Molson")));
+            assertEquals(true, list.containsAll(Arrays.asList("Sleeman", "Western")));
+            assertEquals(true, list.containsAll(Arrays.asList("Western", null)));
+            assertEquals(true, list.containsAll(Arrays.asList(null, null)));
         }
     }
 
@@ -161,13 +161,13 @@ public class EventListTest extends TestCase {
 
             // test a list that doesn't contain nulls
             list.clear();
-            list.addAll(Arrays.asList(new String[] { "Molson", "Sleeman", "Labatts", "Western" }));
+            list.addAll(Arrays.asList("Molson", "Sleeman", "Labatts", "Western"));
             assertTrue(-1 == list.indexOf(null));
             assertTrue(-1 != list.indexOf("Western"));
 
             // test a list that does contain nulls
             list.clear();
-            list.addAll(Arrays.asList(new String[] { null, "Sleeman", null, "Western" }));
+            list.addAll(Arrays.asList(null, "Sleeman", null, "Western"));
             assertTrue(-1 != list.indexOf(null));
             assertTrue(-1 != list.indexOf("Western"));
             assertTrue(-1 == list.indexOf("Molson"));
@@ -190,13 +190,13 @@ public class EventListTest extends TestCase {
 
             // test a list that doesn't contain nulls
             list.clear();
-            list.addAll(Arrays.asList(new String[] { "Molson", "Sleeman", "Labatts", "Western" }));
+            list.addAll(Arrays.asList("Molson", "Sleeman", "Labatts", "Western"));
             assertTrue(-1 == list.lastIndexOf(null));
             assertTrue(-1 != list.lastIndexOf("Western"));
 
             // test a list that does contain nulls
             list.clear();
-            list.addAll(Arrays.asList(new String[] { null, "Sleeman", null, "Western" }));
+            list.addAll(Arrays.asList(null, "Sleeman", null, "Western"));
             assertTrue(-1 != list.lastIndexOf(null));
             assertTrue(-1 != list.lastIndexOf("Western"));
             assertTrue(-1 == list.lastIndexOf("Molson"));
@@ -220,13 +220,13 @@ public class EventListTest extends TestCase {
 
             // test a list that doesn't contain nulls
             list.clear();
-            list.addAll(Arrays.asList(new String[] { "Molson", "Sleeman", "Labatts", "Western" }));
+            list.addAll(Arrays.asList("Molson", "Sleeman", "Labatts", "Western"));
             assertEquals(false, list.remove(null));
             assertEquals(true,  list.remove("Sleeman"));
 
             // test a list that does contain nulls
             list.clear();
-            list.addAll(Arrays.asList(new String[] { null, "Sleeman", null, "Western" }));
+            list.addAll(Arrays.asList(null, "Sleeman", null, "Western"));
             assertEquals(true, list.remove(null));
             assertEquals(true, list.remove("Western"));
             assertEquals(false, list.remove("Molson"));
@@ -249,16 +249,16 @@ public class EventListTest extends TestCase {
 
             // test a list that doesn't contain nulls
             list.clear();
-            list.addAll(Arrays.asList(new String[] { "Molson", "Sleeman", "Labatts", "Western" }));
-            assertEquals(true, list.removeAll(Arrays.asList(new String[] { "Western", null })));
-            assertEquals(false,  list.removeAll(Arrays.asList(new String[] { null, "Busch" })));
+            list.addAll(Arrays.asList("Molson", "Sleeman", "Labatts", "Western"));
+            assertEquals(true, list.removeAll(Arrays.asList("Western", null)));
+            assertEquals(false,  list.removeAll(Arrays.asList(null, "Busch")));
 
             // test a list that does contain nulls
             list.clear();
-            list.addAll(Arrays.asList(new String[] { null, "Sleeman", null, "Western" }));
-            assertEquals(true, list.removeAll(Arrays.asList(new String[] { "Western", "Busch" })));
-            assertEquals(true, list.removeAll(Arrays.asList(new String[] { "Sleeman", null })));
-            assertEquals(false, list.removeAll(Arrays.asList(new String[] { "Western", null })));
+            list.addAll(Arrays.asList(null, "Sleeman", null, "Western"));
+            assertEquals(true, list.removeAll(Arrays.asList("Western", "Busch")));
+            assertEquals(true, list.removeAll(Arrays.asList("Sleeman", null)));
+            assertEquals(false, list.removeAll(Arrays.asList("Western", null)));
         }
     }
 
@@ -278,15 +278,15 @@ public class EventListTest extends TestCase {
 
             // test a list that doesn't contain nulls
             list.clear();
-            list.addAll(Arrays.asList(new String[] { "Molson", "Sleeman", "Labatts", "Western" }));
-            assertEquals(true,  list.retainAll(Arrays.asList(new String[] { "Western", null })));
-            assertEquals(true, list.retainAll(Arrays.asList(new String[] { "Moslon", null })));
+            list.addAll(Arrays.asList("Molson", "Sleeman", "Labatts", "Western"));
+            assertEquals(true,  list.retainAll(Arrays.asList("Western", null)));
+            assertEquals(true, list.retainAll(Arrays.asList("Moslon", null)));
 
             // test a list that does contain nulls
             list.clear();
-            list.addAll(Arrays.asList(new String[] { null, "Sleeman", null, "Western" }));
-            assertEquals(true,  list.retainAll(Arrays.asList(new String[] { "Western", null })));
-            assertEquals(true, list.retainAll(Arrays.asList(new String[] { "Moslon", null })));
+            list.addAll(Arrays.asList(null, "Sleeman", null, "Western"));
+            assertEquals(true,  list.retainAll(Arrays.asList("Western", null)));
+            assertEquals(true, list.retainAll(Arrays.asList("Moslon", null)));
         }
     }
 
@@ -308,7 +308,7 @@ public class EventListTest extends TestCase {
             // test a list that doesn't contain nulls
             list.clear();
             copy.clear();
-            list.addAll(Arrays.asList(new String[] { "Molson", "Sleeman", "Labatts", "Western" }));
+            list.addAll(Arrays.asList("Molson", "Sleeman", "Labatts", "Western"));
             copy.addAll(list);
             assertEquals(copy.hashCode(), list.hashCode());
             assertTrue(list.equals(copy));
@@ -318,7 +318,7 @@ public class EventListTest extends TestCase {
             // test a list that does contain nulls
             list.clear();
             copy.clear();
-            list.addAll(Arrays.asList(new String[] { null, "Sleeman", null, "Western" }));
+            list.addAll(Arrays.asList(null, "Sleeman", null, "Western"));
             copy.addAll(list);
             assertEquals(copy.hashCode(), list.hashCode());
             assertTrue(list.equals(copy));
@@ -333,8 +333,8 @@ public class EventListTest extends TestCase {
      */
     public void testGlazedListsEventListUsingVarArgs() {
         // make sure they have different backing stores
-        EventList<String> eventList = GlazedLists.eventListOf(new String[] {"A", "B"});
-        assertEquals(Arrays.asList(new String[] {"A", "B"}), eventList);
+        EventList<String> eventList = GlazedLists.eventListOf("A", "B");
+        assertEquals(Arrays.asList("A", "B"), eventList);
 
         // make sure null is supported
         EventList<String> empty = GlazedLists.eventListOf((String[]) null);
@@ -381,7 +381,7 @@ public class EventListTest extends TestCase {
         source.add("Szakra");
         assertEquals(source, target);
 
-        source.addAll(Arrays.asList(new String[] { "Moore", "Holmes" }));
+        source.addAll(Arrays.asList("Moore", "Holmes"));
         assertEquals(source, target);
 
         source.add(1, "Burris");
@@ -496,10 +496,10 @@ public class EventListTest extends TestCase {
 
     public void testAddAllFromView() {
         EventList<Integer> original = new BasicEventList<Integer>();
-        original.addAll(Arrays.asList(new Integer[] { new Integer(0), new Integer(10), new Integer(20), new Integer(30), new Integer(40) }));
+        original.addAll(Arrays.asList(0, 10, 20, 30, 40));
         FilterList<Integer> filtered = new FilterList<Integer>(original, GlazedListsTests.matchAtLeast(20));
         original.addAll(filtered);
-        assertEquals(Arrays.asList(new Integer[] { new Integer(0), new Integer(10), new Integer(20), new Integer(30), new Integer(40), new Integer(20), new Integer(30), new Integer(40) }), original);
+        assertEquals(Arrays.asList(0, 10, 20, 30, 40, 20, 30, 40), original);
     }
 
     public void testSimpleAddAll() {

@@ -1,10 +1,26 @@
 package ca.odell.glazedlists.impl;
 
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Set;
+
 import junit.framework.TestCase;
 
-import java.util.*;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.DisposableMap;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FunctionList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 
 public class GroupingListMultiMapTest extends TestCase {
 
@@ -320,7 +336,7 @@ public class GroupingListMultiMapTest extends TestCase {
         assertEquals(8, source.size());
         assertEquals(5, eventMap.size());
         assertEquals(5, eventMap.keySet().size());
-        assertEquals(new HashSet<String>(Arrays.asList(new String[] {"A", "J", "K", "L", "W"})), eventMap.keySet());
+        assertEquals(new HashSet<String>(Arrays.asList("A", "J", "K", "L", "W")), eventMap.keySet());
         assertTrue(eventMap.keySet().contains("A"));
         assertTrue(eventMap.keySet().contains("J"));
         assertTrue(eventMap.keySet().contains("K"));
@@ -331,13 +347,13 @@ public class GroupingListMultiMapTest extends TestCase {
         assertEquals(7, source.size());
         assertEquals(4, eventMap.size());
         assertEquals(4, eventMap.keySet().size());
-        assertEquals(new HashSet<String>(Arrays.asList(new String[] {"A", "J", "K", "L"})), eventMap.keySet());
+        assertEquals(new HashSet<String>(Arrays.asList("A", "J", "K", "L")), eventMap.keySet());
 
         assertTrue(eventMap.keySet().remove("J"));
         assertEquals(3, source.size());
         assertEquals(3, eventMap.size());
         assertEquals(3, eventMap.keySet().size());
-        assertEquals(new HashSet<String>(Arrays.asList(new String[] {"A", "K", "L"})), eventMap.keySet());
+        assertEquals(new HashSet<String>(Arrays.asList("A", "K", "L")), eventMap.keySet());
 
         try {
             eventMap.keySet().add("J");
@@ -698,9 +714,9 @@ public class GroupingListMultiMapTest extends TestCase {
         assertEquals(Collections.singletonList(value1), eventMap.get(key3));
 
         source.add(value3);
-        assertEquals(Arrays.asList(new Object[] {value1, value3}), eventMap.get(key1));
+        assertEquals(Arrays.asList(value1, value3), eventMap.get(key1));
         assertEquals(Collections.singletonList(value2), eventMap.get(key2));
-        assertEquals(Arrays.asList(new Object[] {value1, value3}), eventMap.get(key3));
+        assertEquals(Arrays.asList(value1, value3), eventMap.get(key3));
     }
 
     public void testExplicitComparatorForUncomparableValues2() {
@@ -722,7 +738,7 @@ public class GroupingListMultiMapTest extends TestCase {
 
         assertEquals(3, naturalMap.size());
         assertEquals(expectedKeys, naturalMap.keySet());
-        assertEquals(naturalMap.get(new AFirstLetterComparable(new ComparableKey("James"))), Arrays.asList(new Object[] {source.get(0), source.get(1), source.get(2), source.get(5)}));
+        assertEquals(naturalMap.get(new AFirstLetterComparable(new ComparableKey("James"))), Arrays.asList(source.get(0), source.get(1), source.get(2), source.get(5)));
         assertEquals(naturalMap.get(new AFirstLetterComparable(new ComparableKey("Andy"))), Collections.singletonList(source.get(3)));
         assertEquals(naturalMap.get(new AFirstLetterComparable(new ComparableKey("Fred"))), Collections.singletonList(source.get(4)));
     }
@@ -747,8 +763,8 @@ public class GroupingListMultiMapTest extends TestCase {
 
         assertEquals(4, naturalMap.size());
         assertEquals(expectedKeys, naturalMap.keySet());
-        assertEquals(naturalMap.get(new ComparableKey("James")), Arrays.asList(new Object[] {source.get(0), source.get(2)}));
-        assertEquals(naturalMap.get(new ComparableKey("Jesse")), Arrays.asList(new Object[] {source.get(1), source.get(5)}));
+        assertEquals(naturalMap.get(new ComparableKey("James")), Arrays.asList(source.get(0), source.get(2)));
+        assertEquals(naturalMap.get(new ComparableKey("Jesse")), Arrays.asList(source.get(1), source.get(5)));
         assertEquals(naturalMap.get(new ComparableKey("Andy")), Collections.singletonList(source.get(3)));
         assertEquals(naturalMap.get(new ComparableKey("Fred")), Collections.singletonList(source.get(4)));
     }
@@ -771,7 +787,7 @@ public class GroupingListMultiMapTest extends TestCase {
 
         assertEquals(3, naturalMap.size());
         assertEquals(expectedKeys, naturalMap.keySet());
-        assertEquals(naturalMap.get("J"), Arrays.asList(new Object[] {source.get(0), source.get(1), source.get(2), source.get(5)}));
+        assertEquals(naturalMap.get("J"), Arrays.asList(source.get(0), source.get(1), source.get(2), source.get(5)));
         assertEquals(naturalMap.get("A"), Collections.singletonList(source.get(3)));
         assertEquals(naturalMap.get("F"), Collections.singletonList(source.get(4)));
     }
@@ -826,14 +842,14 @@ public class GroupingListMultiMapTest extends TestCase {
         }
 
         try {
-            names.addAll(Arrays.asList(new String[] {"****"}));
+            names.addAll(Arrays.asList("****"));
             fail("failed to receive IllegalArgumentException");
         } catch (IllegalArgumentException e) {
             // expected
         }
 
         try {
-            names.addAll(0, Arrays.asList(new String[] {"****"}));
+            names.addAll(0, Arrays.asList("****"));
             fail("failed to receive IllegalArgumentException");
         } catch (IllegalArgumentException e) {
             // expected
@@ -848,8 +864,8 @@ public class GroupingListMultiMapTest extends TestCase {
 
         names.add(key + "****");
         names.add(0, key + "****");
-        names.addAll(Arrays.asList(new String[] {key + "****"}));
-        names.addAll(0, Arrays.asList(new String[] {key + "****"}));
+        names.addAll(Arrays.asList(key + "****"));
+        names.addAll(0, Arrays.asList(key + "****"));
         names.set(0, key + "****");
     }
 

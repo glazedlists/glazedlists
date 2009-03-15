@@ -3,13 +3,13 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import junit.framework.TestCase;
-
 import java.util.Arrays;
 
+import junit.framework.TestCase;
+
+import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
-import ca.odell.glazedlists.event.ListEventAssembler;
 
 public class PluggableListTest extends TestCase {
 
@@ -33,7 +33,7 @@ public class PluggableListTest extends TestCase {
     public void testNormalOperation() {
         source.add("first");
         assertSame("first", pl.get(0));
-        
+
         source.set(0, "second");
         assertSame("second", pl.get(0));
 
@@ -79,15 +79,15 @@ public class PluggableListTest extends TestCase {
 
     public void testListEventFireBySourceSwap() {
         // add some data to the existing source list
-        source.addAll(Arrays.asList(new String[] {"james", "kevin", "sam"}));
-        assertEquals(Arrays.asList(new String[] {"james", "kevin", "sam"}), pl);
+        source.addAll(Arrays.asList("james", "kevin", "sam"));
+        assertEquals(Arrays.asList("james", "kevin", "sam"), pl);
 
         // create and build a new source list
         final EventList<String> source2 = pl.createSourceList();
-        source2.addAll(Arrays.asList(new String[] {"kermit", "animal", "piggy"}));
+        source2.addAll(Arrays.asList("kermit", "animal", "piggy"));
 
         // set the source list and verify the new data is present
         pl.setSource(source2);
-        assertEquals(Arrays.asList(new String[] {"kermit", "animal", "piggy"}), pl);
+        assertEquals(Arrays.asList("kermit", "animal", "piggy"), pl);
     }
 }

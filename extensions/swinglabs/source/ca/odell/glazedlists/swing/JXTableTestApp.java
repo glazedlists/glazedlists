@@ -3,17 +3,34 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import ca.odell.glazedlists.*;
-import com.publicobject.issuesbrowser.*;
-import org.jdesktop.swingx.JXTable;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+
+import org.jdesktop.swingx.JXTable;
+
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.SortedList;
+
+import com.publicobject.issuesbrowser.Issue;
+import com.publicobject.issuesbrowser.IssueTableFormat;
+import com.publicobject.issuesbrowser.IssueTextFilterator;
+import com.publicobject.issuesbrowser.IssuezillaXMLParser;
+import com.publicobject.issuesbrowser.Project;
 
 /**
  * Demonstrate sorting using JXTable's header indicator icons and Glazed Lists'
@@ -88,7 +105,7 @@ class JXTableTestApp implements Runnable {
     }
 
     private static class IssueStateComparator implements Comparator {
-        private static final List STATES = Arrays.asList(new String[] { "UNCONFIRMED", "NEW", "STARTED", "REOPENED", "RESOLVED", "VERIFIED", "CLOSED" });
+        private static final List STATES = Arrays.asList("UNCONFIRMED", "NEW", "STARTED", "REOPENED", "RESOLVED", "VERIFIED", "CLOSED");
         public int compare(Object a, Object b) {
             int stateIndexA = STATES.indexOf(a);
             int stateIndexB = STATES.indexOf(b);

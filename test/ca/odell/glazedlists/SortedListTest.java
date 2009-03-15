@@ -4,12 +4,6 @@
 package ca.odell.glazedlists;
 
 // for being a JUnit test case
-import ca.odell.glazedlists.impl.filter.StringLengthComparator;
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
-import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-
-import junit.framework.TestCase;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,6 +12,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
+
+import junit.framework.TestCase;
+
+import ca.odell.glazedlists.impl.filter.StringLengthComparator;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 
 /**
  * This test verifies that the SortedList works.
@@ -1107,7 +1107,7 @@ public class SortedListTest extends TestCase {
         // sorted by artist, then by song
         sortedList.setComparator(songComparator);
         expectedOrder = new ArrayList<Comparable>(unsortedList);
-        Collections.sort(expectedOrder, GlazedLists.chainComparators((List)Arrays.asList(new Comparator[] { artistComparator, songComparator })));
+        Collections.sort(expectedOrder, GlazedLists.chainComparators((List)Arrays.asList(artistComparator, songComparator)));
         assertEquals(expectedOrder, sortedAgain);
 
         // sorted just by artist again
@@ -1129,7 +1129,7 @@ public class SortedListTest extends TestCase {
         // sorted by artist, then by song
         sortedList.setComparator(songComparator);
         expectedOrder = new ArrayList<Comparable>(unsortedList);
-        Collections.sort(expectedOrder, GlazedLists.chainComparators((List)Arrays.asList(new Comparator[] { artistComparator, songComparator })));
+        Collections.sort(expectedOrder, GlazedLists.chainComparators((List)Arrays.asList(artistComparator, songComparator)));
         assertEquals(expectedOrder, sortedAgain);
 
         // sorted just by artist again
@@ -1144,18 +1144,18 @@ public class SortedListTest extends TestCase {
         Comparator<String> length = GlazedLists.reverseComparator(new StringLengthComparator());
 
         sortedList.setComparator(null);
-        unsortedList.addAll(Arrays.asList(new String[] { "dddd", "aaa", "c", "bb" }));
-        assertEquals(Arrays.asList(new String[] { "dddd", "aaa", "c", "bb" }), sortedList);
+        unsortedList.addAll(Arrays.asList("dddd", "aaa", "c", "bb"));
+        assertEquals(Arrays.asList("dddd", "aaa", "c", "bb"), sortedList);
 
         SortedList<String> resortedList = new SortedList(sortedList, length);
         ListConsistencyListener.install(resortedList);
-        assertEquals(Arrays.asList(new String[] { "c", "bb", "aaa", "dddd" }), resortedList);
+        assertEquals(Arrays.asList("c", "bb", "aaa", "dddd"), resortedList);
 
         sortedList.setComparator(alphabetical);
         assertSortedEquals(sortedList, resortedList);
 
         // now add some duplicates
-        unsortedList.addAll(Arrays.asList(new String[] { "c", "dddd", "aaa", "bb" }));
+        unsortedList.addAll(Arrays.asList("c", "dddd", "aaa", "bb"));
         assertSortedEquals(sortedList, resortedList);
 
         // now change the comparator
@@ -1165,7 +1165,7 @@ public class SortedListTest extends TestCase {
 
     public void testIteratorIsConsistent() {
         ListConsistencyListener.install(sortedList);
-        unsortedList.addAll(Arrays.asList(new String[] { "d", "c", "a", "b" }));
+        unsortedList.addAll(Arrays.asList("d", "c", "a", "b"));
 
         Iterator<Comparable> iterator = sortedList.iterator();
         assertEquals("a", iterator.next());

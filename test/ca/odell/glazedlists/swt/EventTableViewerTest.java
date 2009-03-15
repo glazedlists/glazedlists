@@ -1,5 +1,16 @@
 package ca.odell.glazedlists.swt;
 
+import java.awt.Color;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
@@ -9,17 +20,6 @@ import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.io.IntegerTableFormat;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
-
-import java.awt.Color;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 /**
  * Tests for the {@link EventTableViewer}.
  *
@@ -27,8 +27,8 @@ import java.util.List;
  */
 public class EventTableViewerTest extends SwtTestCase {
 
-    private static final List<Color> RGB = Arrays.asList(new Color[] { Color.RED, Color.GREEN, Color.BLUE });
-    private static final List<Color> RGBNull = Arrays.asList(new Color[] { Color.RED, Color.GREEN, Color.BLUE, null });
+    private static final List<Color> RGB = Arrays.asList(Color.RED, Color.GREEN, Color.BLUE);
+    private static final List<Color> RGBNull = Arrays.asList(Color.RED, Color.GREEN, Color.BLUE, null);
 
     /** Tests creation of EventTableViewer with checkable table. */
     public void guiTestConstructorWithCheckableTable() {

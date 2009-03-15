@@ -1,13 +1,20 @@
 package ca.odell.glazedlists.swing;
 
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
-import ca.odell.glazedlists.matchers.Matchers;
+import java.util.Arrays;
+import java.util.Collections;
 
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import java.util.Arrays;
-import java.util.Collections;
+
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.DelayList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.ThreadRecorderEventList;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.matchers.Matchers;
 
 /**
  * This test verifies that the EventSelectionModel works.
@@ -36,15 +43,15 @@ public class EventSelectionModelSwingTest extends SwingTestCase {
         // select the vowels
         eventSelectionModel.addSelectionInterval(0, 0);
         eventSelectionModel.addSelectionInterval(4, 4);
-        assertEquals(Arrays.asList(new String[] { "E", "A" }), eventSelectionModel.getSelected());
+        assertEquals(Arrays.asList("E", "A"), eventSelectionModel.getSelected());
 
         // flip the list
         sorted.setComparator(GlazedLists.comparableComparator());
-        assertEquals(Arrays.asList(new String[] { "A", "E" }), eventSelectionModel.getSelected());
+        assertEquals(Arrays.asList("A", "E"), eventSelectionModel.getSelected());
 
         // flip the list again
         sorted.setComparator(GlazedLists.reverseComparator());
-        assertEquals(Arrays.asList(new String[] { "E", "A" }), eventSelectionModel.getSelected());
+        assertEquals(Arrays.asList("E", "A"), eventSelectionModel.getSelected());
     }
 
     /**
@@ -85,7 +92,7 @@ public class EventSelectionModelSwingTest extends SwingTestCase {
      */
     public void guiTestSelectionModel() {
         EventList<Object> source = new BasicEventList<Object>();
-        source.addAll(Arrays.asList(new String[] { "one", "two", "three" }));
+        source.addAll(Arrays.asList("one", "two", "three"));
         FilterList<Object> filtered = new FilterList<Object>(source, Matchers.trueMatcher());
 
         // create selection model

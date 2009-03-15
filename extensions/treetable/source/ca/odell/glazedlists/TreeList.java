@@ -3,14 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.impl.GlazedListsImpl;
-import ca.odell.glazedlists.impl.adt.CircularArrayList;
-import ca.odell.glazedlists.impl.adt.KeyedCollection;
-import ca.odell.glazedlists.impl.adt.barcode2.Element;
-import ca.odell.glazedlists.impl.adt.barcode2.FourColorTree;
-import ca.odell.glazedlists.impl.adt.barcode2.ListToByteCoder;
-
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,6 +10,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.impl.GlazedListsImpl;
+import ca.odell.glazedlists.impl.adt.CircularArrayList;
+import ca.odell.glazedlists.impl.adt.KeyedCollection;
+import ca.odell.glazedlists.impl.adt.barcode2.Element;
+import ca.odell.glazedlists.impl.adt.barcode2.FourColorTree;
+import ca.odell.glazedlists.impl.adt.barcode2.ListToByteCoder;
 
 /**
  * A hierarchial EventList that infers its structure from a flat list.
@@ -48,17 +48,17 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     private ExpansionModel<E> expansionModel;
 
     /** node colors define where it is in the source and where it is here */
-    private static final ListToByteCoder BYTE_CODER = new ListToByteCoder(Arrays.asList(new String[] { "R", "V", "r", "v" }));
+    private static final ListToByteCoder BYTE_CODER = new ListToByteCoder(Arrays.asList("R", "V", "r", "v"));
     private static final byte VISIBLE_REAL = BYTE_CODER.colorToByte("R");
     private static final byte VISIBLE_VIRTUAL = BYTE_CODER.colorToByte("V");
     private static final byte HIDDEN_REAL = BYTE_CODER.colorToByte("r");
     private static final byte HIDDEN_VIRTUAL = BYTE_CODER.colorToByte("v");
 
     /** node classes let us search through nodes more efficiently */
-    private static final byte ALL_NODES = BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "R", "V", "r", "v" }));
-    private static final byte VISIBLE_NODES = BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "R", "V" }));
-    private static final byte HIDDEN_NODES = BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "r", "v" }));
-    private static final byte REAL_NODES = BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "R", "r" }));
+    private static final byte ALL_NODES = BYTE_CODER.colorsToByte(Arrays.asList("R", "V", "r", "v"));
+    private static final byte VISIBLE_NODES = BYTE_CODER.colorsToByte(Arrays.asList("R", "V"));
+    private static final byte HIDDEN_NODES = BYTE_CODER.colorsToByte(Arrays.asList("r", "v"));
+    private static final byte REAL_NODES = BYTE_CODER.colorsToByte(Arrays.asList("R", "r"));
 
     /** compare nodes by value */
     private final NodeComparator<E> nodeComparator;

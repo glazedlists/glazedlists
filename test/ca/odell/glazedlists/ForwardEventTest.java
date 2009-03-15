@@ -4,12 +4,13 @@
 package ca.odell.glazedlists;
 
 // for being a JUnit test case
+import java.util.Arrays;
+
+import junit.framework.TestCase;
+
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import junit.framework.TestCase;
-
-import java.util.Arrays;
 
 /**
  * Ensures that ListEventAssembler.forwardEvent() works.
@@ -20,10 +21,10 @@ public class ForwardEventTest extends TestCase {
 
     /** the origin of all events */
     private EventList<String> source;
-    
+
     /** gossipy list that forwards everything it hears */
     private ForwardingList<String> forwarding;
-    
+
     /** listens to anything the forwarding list will say, and validates it */
     private ListConsistencyListener test;
 
@@ -47,7 +48,7 @@ public class ForwardEventTest extends TestCase {
         forwarding = null;
         test = null;
     }
-    
+
     /**
      * Tests that forwardEvent works.
      */
@@ -56,9 +57,9 @@ public class ForwardEventTest extends TestCase {
         source.add("Coke");
         source.add("RC");
         test.assertConsistent();
-        
-        source.addAll(Arrays.asList(new String[] { "7-up", "Dr. Pepper", "Sprite" }));
-        source.retainAll(Arrays.asList(new String[] { "Pepsi", "7-up", "RC" }));
+
+        source.addAll(Arrays.asList("7-up", "Dr. Pepper", "Sprite"));
+        source.retainAll(Arrays.asList("Pepsi", "7-up", "RC"));
         test.assertConsistent();
     }
 
@@ -72,10 +73,10 @@ public class ForwardEventTest extends TestCase {
         source.add("RC");
         forwarding.commitEvent();
         test.assertConsistent();
-        
+
         forwarding.beginEvent();
-        source.addAll(Arrays.asList(new String[] { "7-up", "Dr. Pepper", "Sprite" }));
-        source.retainAll(Arrays.asList(new String[] { "Pepsi", "7-up", "RC" }));
+        source.addAll(Arrays.asList("7-up", "Dr. Pepper", "Sprite"));
+        source.retainAll(Arrays.asList("Pepsi", "7-up", "RC"));
         forwarding.commitEvent();
         test.assertConsistent();
     }

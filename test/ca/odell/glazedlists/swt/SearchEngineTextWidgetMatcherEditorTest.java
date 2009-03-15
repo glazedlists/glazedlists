@@ -4,6 +4,16 @@
 
 package ca.odell.glazedlists.swt;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.swing.JTextField;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Text;
+
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
@@ -11,16 +21,6 @@ import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.matchers.SearchEngineTextMatcherEditor;
 import ca.odell.glazedlists.swing.SearchEngineTextFieldMatcherEditor;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Text;
-
-import javax.swing.JTextField;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Tests the class {@link SearchEngineTextWidgetMatcherEditor}.
@@ -115,15 +115,15 @@ public class SearchEngineTextWidgetMatcherEditorTest extends SwtTestCase {
         matcherEditor.setFields(fields);
         filteredCustomers.setMatcherEditor(matcherEditor);
 
-        assertEquals(Arrays.asList(new Customer[] {jesse, james, holger, kevin}), filteredCustomers);
+        assertEquals(Arrays.asList(jesse, james, holger, kevin), filteredCustomers);
 
         customerFilterField.setText("J");
         customerFilterField.postActionEvent();
-        assertEquals(Arrays.asList(new Customer[] {jesse, james}), filteredCustomers);
+        assertEquals(Arrays.asList(jesse, james), filteredCustomers);
 
         customerFilterField.setText("first:J");
         customerFilterField.postActionEvent();
-        assertEquals(Arrays.asList(new Customer[] {jesse, james}), filteredCustomers);
+        assertEquals(Arrays.asList(jesse, james), filteredCustomers);
 
         customerFilterField.setText("last:J");
         customerFilterField.postActionEvent();
@@ -131,31 +131,31 @@ public class SearchEngineTextWidgetMatcherEditorTest extends SwtTestCase {
 
         customerFilterField.setText("last:B");
         customerFilterField.postActionEvent();
-        assertEquals(Arrays.asList(new Customer[] {holger, kevin}), filteredCustomers);
+        assertEquals(Arrays.asList(holger, kevin), filteredCustomers);
 
         customerFilterField.setText("first:e");
         customerFilterField.postActionEvent();
-        assertEquals(Arrays.asList(new Customer[] {jesse, james, holger, kevin}), filteredCustomers);
+        assertEquals(Arrays.asList(jesse, james, holger, kevin), filteredCustomers);
 
         customerFilterField.setText("first:e last:B");
         customerFilterField.postActionEvent();
-        assertEquals(Arrays.asList(new Customer[] {holger, kevin}), filteredCustomers);
+        assertEquals(Arrays.asList(holger, kevin), filteredCustomers);
 
         customerFilterField.setText("first:e last:-B");
         customerFilterField.postActionEvent();
-        assertEquals(Arrays.asList(new Customer[] {jesse, james}), filteredCustomers);
+        assertEquals(Arrays.asList(jesse, james), filteredCustomers);
 
         customerFilterField.setText("first:e last:-B last:+W");
         customerFilterField.postActionEvent();
-        assertEquals(Arrays.asList(new Customer[] {jesse}), filteredCustomers);
+        assertEquals(Arrays.asList(jesse), filteredCustomers);
 
         customerFilterField.setText("first:e last:-B +\"James\"");
         customerFilterField.postActionEvent();
-        assertEquals(Arrays.asList(new Customer[] {james}), filteredCustomers);
+        assertEquals(Arrays.asList(james), filteredCustomers);
 
         customerFilterField.setText("first:e last:-B -\"James\"");
         customerFilterField.postActionEvent();
-        assertEquals(Arrays.asList(new Customer[] {jesse}), filteredCustomers);
+        assertEquals(Arrays.asList(jesse), filteredCustomers);
 
         customerFilterField.setText("first:-e last:B");
         customerFilterField.postActionEvent();
@@ -163,19 +163,19 @@ public class SearchEngineTextWidgetMatcherEditorTest extends SwtTestCase {
 
         customerFilterField.setText("a");
         customerFilterField.postActionEvent();
-        assertEquals(Arrays.asList(new Customer[] {james, holger, kevin}), filteredCustomers);
+        assertEquals(Arrays.asList(james, holger, kevin), filteredCustomers);
 
         customerFilterField.setText("a -B");
         customerFilterField.postActionEvent();
-        assertEquals(Arrays.asList(new Customer[] {james}), filteredCustomers);
+        assertEquals(Arrays.asList(james), filteredCustomers);
 
         customerFilterField.setText("-B");
         customerFilterField.postActionEvent();
-        assertEquals(Arrays.asList(new Customer[] {jesse, james}), filteredCustomers);
+        assertEquals(Arrays.asList(jesse, james), filteredCustomers);
 
         customerFilterField.setText("-B +esse");
         customerFilterField.postActionEvent();
-        assertEquals(Arrays.asList(new Customer[] {jesse}), filteredCustomers);
+        assertEquals(Arrays.asList(jesse), filteredCustomers);
 
         matcherEditor.setFields(Collections.EMPTY_SET);
         customerFilterField.setText("first:e");

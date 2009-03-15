@@ -3,13 +3,13 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.event;
 
+import java.util.Arrays;
+
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.impl.adt.barcode2.Element;
 import ca.odell.glazedlists.impl.adt.barcode2.FourColorTree;
 import ca.odell.glazedlists.impl.adt.barcode2.FourColorTreeIterator;
 import ca.odell.glazedlists.impl.adt.barcode2.ListToByteCoder;
-
-import java.util.Arrays;
 
 /**
  * Manage and describe the differences between two revisions of the
@@ -24,16 +24,16 @@ import java.util.Arrays;
 public class Tree4Deltas<E> {
 
     /** all the names of the index sets are with respect to the target */
-    private static final ListToByteCoder<String> BYTE_CODER = new ListToByteCoder<String>(Arrays.asList(new String[] { "+", "U", "X", "_" }));
+    private static final ListToByteCoder<String> BYTE_CODER = new ListToByteCoder<String>(Arrays.asList("+", "U", "X", "_"));
     public static final byte INSERT = BYTE_CODER.colorToByte("+");
     public static final byte UPDATE = BYTE_CODER.colorToByte("U");
     public static final byte DELETE = BYTE_CODER.colorToByte("X");
     public static final byte NO_CHANGE = BYTE_CODER.colorToByte("_");
 
-    private static final byte SOURCE_INDICES = BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "U", "X", "_" }));
-    private static final byte TARGET_INDICES = BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "U", "+", "_" }));
-    private static final byte ALL_INDICES = BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "U", "X", "+", "_" }));
-    private static final byte CHANGE_INDICES = BYTE_CODER.colorsToByte(Arrays.asList(new String[] { "U", "X", "+" }));
+    private static final byte SOURCE_INDICES = BYTE_CODER.colorsToByte(Arrays.asList("U", "X", "_"));
+    private static final byte TARGET_INDICES = BYTE_CODER.colorsToByte(Arrays.asList("U", "+", "_"));
+    private static final byte ALL_INDICES = BYTE_CODER.colorsToByte(Arrays.asList("U", "X", "+", "_"));
+    private static final byte CHANGE_INDICES = BYTE_CODER.colorsToByte(Arrays.asList("U", "X", "+"));
 
     /** the trees values include removed elements */
     private FourColorTree<E> tree = new FourColorTree<E>(BYTE_CODER);
@@ -179,7 +179,7 @@ public class Tree4Deltas<E> {
      *
      * @return the value, or {@link ListEvent#UNKNOWN_VALUE} if this index
      *     holds a value that hasn't been buffered. In this case, the value
-     *     can be obtained from the source list. 
+     *     can be obtained from the source list.
      */
     public E getTargetValue(int targetIndex) {
         return tree.get(targetIndex, TARGET_INDICES).get();
@@ -270,7 +270,7 @@ public class Tree4Deltas<E> {
             // this is peculiar. We add mixed types - an index of current indices
             // plus the size of "all indices". . . this is because we describe the
             // range of deleted indices from its start to finish, although it's
-            // finish will ultimately go to zero once the change is applied. 
+            // finish will ultimately go to zero once the change is applied.
             return treeIterator.nodeStartIndex(TARGET_INDICES) + treeIterator.nodeSize(ALL_INDICES);
         }
 

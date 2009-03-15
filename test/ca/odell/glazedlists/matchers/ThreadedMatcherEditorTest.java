@@ -1,11 +1,12 @@
 package ca.odell.glazedlists.matchers;
 
+import java.util.Arrays;
+
+import junit.framework.TestCase;
+
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
-import junit.framework.TestCase;
-
-import java.util.Arrays;
 
 /**
  * Test the {@link ThreadedMatcherEditor}.
@@ -134,7 +135,7 @@ public class ThreadedMatcherEditorTest extends TestCase {
 
 
     public void testFiltering() throws InterruptedException {
-        filterList.addAll(Arrays.asList(new Object[] {"Andy", "Barry", "Colin", "James", "Jesse", "Jesus", "Trevor", "Ursula", "Vanessa", "Zack"}));
+        filterList.addAll(Arrays.asList("Andy", "Barry", "Colin", "James", "Jesse", "Jesus", "Trevor", "Ursula", "Vanessa", "Zack"));
         assertEquals(10, filterList.size());
 
         textMatcherEditor.setFilterText(new String[] {"J"});

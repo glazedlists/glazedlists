@@ -3,11 +3,24 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl;
 
-import junit.framework.TestCase;
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.NoSuchElementException;
 
-import java.util.*;
+import junit.framework.TestCase;
+
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.DisposableMap;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FunctionList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.TransactionList;
+import ca.odell.glazedlists.UniqueList;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 
 public class FunctionListMapTest extends TestCase {
 
@@ -384,7 +397,7 @@ public class FunctionListMapTest extends TestCase {
         assertEquals(4, source.size());
         assertEquals(4, eventMap.size());
         assertEquals(4, eventMap.keySet().size());
-        assertEquals(new HashSet<String>(Arrays.asList(new String[] {"J", "K", "A", "H"})), eventMap.keySet());
+        assertEquals(new HashSet<String>(Arrays.asList("J", "K", "A", "H")), eventMap.keySet());
         assertTrue(eventMap.keySet().contains("J"));
         assertTrue(eventMap.keySet().contains("K"));
         assertTrue(eventMap.keySet().contains("A"));
@@ -394,13 +407,13 @@ public class FunctionListMapTest extends TestCase {
         assertEquals(3, source.size());
         assertEquals(3, eventMap.size());
         assertEquals(3, eventMap.keySet().size());
-        assertEquals(new HashSet<String>(Arrays.asList(new String[] {"K", "A", "H"})), eventMap.keySet());
+        assertEquals(new HashSet<String>(Arrays.asList("K", "A", "H")), eventMap.keySet());
 
         assertFalse(eventMap.keySet().remove("J"));
         assertEquals(3, source.size());
         assertEquals(3, eventMap.size());
         assertEquals(3, eventMap.keySet().size());
-        assertEquals(new HashSet<String>(Arrays.asList(new String[] {"K", "A", "H"})), eventMap.keySet());
+        assertEquals(new HashSet<String>(Arrays.asList("K", "A", "H")), eventMap.keySet());
 
         try {
             eventMap.keySet().add("J");

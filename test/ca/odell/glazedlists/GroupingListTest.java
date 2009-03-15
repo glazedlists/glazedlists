@@ -1,12 +1,12 @@
 package ca.odell.glazedlists;
 
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
-import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import java.util.Arrays;
+import java.util.List;
+
 import junit.framework.TestCase;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Arrays;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 
 public class GroupingListTest extends TestCase {
 
@@ -487,23 +487,23 @@ public class GroupingListTest extends TestCase {
         source.add("Bling");
 
         assertEquals(1, groupingList.size());
-        assertEquals(Arrays.asList(new String[] {"Black", "Blind", "Bling"}), groupingList.get(0));
+        assertEquals(Arrays.asList("Black", "Blind", "Bling"), groupingList.get(0));
 
         groupingList.setComparator(GlazedListsTests.getLastLetterComparator());
         assertEquals(3, groupingList.size());
-        assertEquals(Arrays.asList(new String[] {"Blind"}), groupingList.get(0));
-        assertEquals(Arrays.asList(new String[] {"Bling"}), groupingList.get(1));
-        assertEquals(Arrays.asList(new String[] {"Black"}), groupingList.get(2));
+        assertEquals(Arrays.asList("Blind"), groupingList.get(0));
+        assertEquals(Arrays.asList("Bling"), groupingList.get(1));
+        assertEquals(Arrays.asList("Black"), groupingList.get(2));
 
         groupingList.setComparator(GlazedListsTests.getFirstLetterComparator());
         assertEquals(1, groupingList.size());
-        assertEquals(Arrays.asList(new String[] {"Black", "Blind", "Bling"}), groupingList.get(0));
+        assertEquals(Arrays.asList("Black", "Blind", "Bling"), groupingList.get(0));
 
         groupingList.setComparator(null);
         assertEquals(3, groupingList.size());
-        assertEquals(Arrays.asList(new String[] {"Black"}), groupingList.get(0));
-        assertEquals(Arrays.asList(new String[] {"Blind"}), groupingList.get(1));
-        assertEquals(Arrays.asList(new String[] {"Bling"}), groupingList.get(2));
+        assertEquals(Arrays.asList("Black"), groupingList.get(0));
+        assertEquals(Arrays.asList("Blind"), groupingList.get(1));
+        assertEquals(Arrays.asList("Bling"), groupingList.get(2));
     }
 
     public void testIndexOfGroup() {

@@ -302,9 +302,9 @@ public class EventTableModelTest extends SwingTestCase {
         }
     }
 
-    private static final List<Color> rgb = Arrays.asList(new Color[] { Color.RED, Color.GREEN, Color.BLUE });
-    private static final List<Color> rbg = Arrays.asList(new Color[] { Color.RED, Color.BLUE, Color.GREEN });
-    private static final List<Color> gbr = Arrays.asList(new Color[] { Color.GREEN, Color.BLUE, Color.RED });
+    private static final List<Color> rgb = Arrays.asList(Color.RED, Color.GREEN, Color.BLUE);
+    private static final List<Color> rbg = Arrays.asList(Color.RED, Color.BLUE, Color.GREEN);
+    private static final List<Color> gbr = Arrays.asList(Color.GREEN, Color.BLUE, Color.RED);
 
     /**
      * Perform a quick run through the basics of TableComparatorChooser.
@@ -446,14 +446,14 @@ public class EventTableModelTest extends SwingTestCase {
         table.setSelectionModel(selectionModel);
         // set an initial selection
         selectionModel.setSelectionInterval(1, 1);
-        assertEquals(Arrays.asList(new JLabel[] { labels.get(1)}), selectionModel.getSelected());
+        assertEquals(Arrays.asList(labels.get(1)), selectionModel.getSelected());
         assertEquals(labels, sortedLabels);
         final TableComparatorChooser<JLabel> tableComparatorChooser = TableComparatorChooser.install(table, sortedLabels, TableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD);
         // sort the table by the first column
         clickColumnHeader(table, 0);
         // check that selected element is preserved
-        assertEquals(Arrays.asList(new JLabel[] { labels.get(1)}), selectionModel.getSelected());
-        assertEquals(Arrays.asList(new JLabel[] { labels.get(2), labels.get(0), labels.get(1)}), sortedLabels);
+        assertEquals(Arrays.asList(labels.get(1)), selectionModel.getSelected());
+        assertEquals(Arrays.asList(labels.get(2), labels.get(0), labels.get(1)), sortedLabels);
         // check current indexes of selection model
         assertEquals(2, selectionModel.getMinSelectionIndex());
         assertEquals(2, selectionModel.getMaxSelectionIndex());
@@ -466,7 +466,7 @@ public class EventTableModelTest extends SwingTestCase {
         // the element of the previous row should be selected
         assertEquals(1, selectionModel.getMinSelectionIndex());
         assertEquals(1, selectionModel.getMaxSelectionIndex());
-        assertEquals(Arrays.asList(new JLabel[] { labels.get(0)}), selectionModel.getSelected());
+        assertEquals(Arrays.asList(labels.get(0)), selectionModel.getSelected());
     }
 
     /**

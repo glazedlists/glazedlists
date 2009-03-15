@@ -3,13 +3,14 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.calculation;
 
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.GlazedLists;
+import java.util.Arrays;
+
 import junit.framework.TestCase;
 
-import java.util.Arrays;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.SortedList;
 
 public final class SumTest extends TestCase {
 
@@ -155,27 +156,27 @@ public final class SumTest extends TestCase {
         final PropertyChangeCounter counter = new PropertyChangeCounter();
         final Calculation<Long> sum = Calculations.sumLongs(sortedSource);
         sum.addPropertyChangeListener(counter);
-        
+
         // check the initial Sum state
-        assertEquals(Arrays.asList(new Long[] {new Long(1), new Long(2), new Long(3)}), sortedSource);
+        assertEquals(Arrays.asList(new Long(1), new Long(2), new Long(3)), sortedSource);
         assertEquals(6L, sum.getValue().longValue());
         assertEquals(0, counter.getCountAndReset());
 
         // resort the source
         sortedSource.setComparator(GlazedLists.reverseComparator());
-        assertEquals(Arrays.asList(new Long[] {new Long(3), new Long(2), new Long(1)}), sortedSource);
+        assertEquals(Arrays.asList(new Long(3), new Long(2), new Long(1)), sortedSource);
         assertEquals(6L, sum.getValue().longValue());
         assertEquals(0, counter.getCountAndReset());
 
         // deleted the first sorted element
         sortedSource.remove(0);
-        assertEquals(Arrays.asList(new Long[] {new Long(2), new Long(1)}), sortedSource);
+        assertEquals(Arrays.asList(new Long(2), new Long(1)), sortedSource);
         assertEquals(3L, sum.getValue().longValue());
         assertEquals(1, counter.getCountAndReset());
 
         // add a new the first sorted element
         sortedSource.add(new Long(10));
-        assertEquals(Arrays.asList(new Long[] {new Long(10), new Long(2), new Long(1)}), sortedSource);
+        assertEquals(Arrays.asList(new Long(10), new Long(2), new Long(1)), sortedSource);
         assertEquals(13L, sum.getValue().longValue());
         assertEquals(1, counter.getCountAndReset());
     }

@@ -3,10 +3,15 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.adt.barcode2;
 
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
+
 import junit.framework.TestCase;
 
-import java.util.*;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
@@ -433,7 +438,7 @@ public class Tree4Test extends TestCase {
         tree.addInSortedOrder(Tree4Test.a, Tree4Test.april, 1);
         tree.addInSortedOrder(Tree4Test.a, Tree4Test.may, 1);
 
-        assertEquals(Arrays.asList(new String[] { Tree4Test.april, Tree4Test.february, Tree4Test.january, Tree4Test.march, Tree4Test.may }), new FourColorTreeAsList<String>(tree));
+        assertEquals(Arrays.asList(Tree4Test.april, Tree4Test.february, Tree4Test.january, Tree4Test.march, Tree4Test.may), new FourColorTreeAsList<String>(tree));
     }
 
     public void testSortedTreeIndexOf() {

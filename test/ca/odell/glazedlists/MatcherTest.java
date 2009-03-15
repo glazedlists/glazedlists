@@ -1,15 +1,5 @@
 package ca.odell.glazedlists;
 
-import ca.odell.glazedlists.impl.matchers.NotMatcher;
-import ca.odell.glazedlists.impl.matchers.PropertyEventNameMatcher;
-import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
-import ca.odell.glazedlists.matchers.Matcher;
-import ca.odell.glazedlists.matchers.MatcherEditor;
-import ca.odell.glazedlists.matchers.Matchers;
-import ca.odell.glazedlists.matchers.TextMatcherEditor;
-
-import junit.framework.TestCase;
-
 import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +7,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+
+import junit.framework.TestCase;
+
+import ca.odell.glazedlists.impl.matchers.NotMatcher;
+import ca.odell.glazedlists.impl.matchers.PropertyEventNameMatcher;
+import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
+import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.matchers.MatcherEditor;
+import ca.odell.glazedlists.matchers.Matchers;
+import ca.odell.glazedlists.matchers.TextMatcherEditor;
 
 public class MatcherTest extends TestCase {
 
@@ -146,7 +146,7 @@ public class MatcherTest extends TestCase {
         assertEquals(true, matcher.matches(Collections.EMPTY_LIST));
         assertEquals(false, matcher.matches(Collections.singletonList("A")));
         assertEquals(true, matcher.matches(Arrays.asList(new Object[0])));
-        assertEquals(false, matcher.matches(Arrays.asList(new Object[] { "B" })));
+        assertEquals(false, matcher.matches(Arrays.asList("B")));
         assertEquals(true, matcher.matches(Collections.EMPTY_SET));
         assertEquals(false, matcher.matches(null));
     }
@@ -233,7 +233,7 @@ public class MatcherTest extends TestCase {
         assertEquals(true, matcher.matches(event4));
         assertEquals(true, matcher.matches(event5));
 
-        matcher = new PropertyEventNameMatcher(true, Arrays.asList(new String[] {"test", null}));
+        matcher = new PropertyEventNameMatcher(true, Arrays.asList("test", null));
         assertEquals(true, matcher.matches(event1));
         assertEquals(true, matcher.matches(event2));
         assertEquals(false, matcher.matches(event3));
@@ -253,11 +253,11 @@ public class MatcherTest extends TestCase {
 
         final Matcher<Number> intAndLongMatcher = Matchers.types(new Class[] {Long.class, Integer.class});
         selected = Matchers.select(numbers, intAndLongMatcher);
-        assertEquals(Arrays.asList(new Number[] {new Integer(3), new Long(4)}), selected);
+        assertEquals(Arrays.asList(new Integer(3), new Long(4)), selected);
 
         final Matcher<Number> numberMatcher = Matchers.types(new Class[] {Number.class});
         selected = Matchers.select(numbers, numberMatcher);
-        assertEquals(Arrays.asList(new Number[] {new Float(0), new Double(1), new Short((short) 2), new Integer(3), new Long(4)}), selected);
+        assertEquals(Arrays.asList(new Float(0), new Double(1), new Short((short) 2), new Integer(3), new Long(4)), selected);
 
         final Matcher<Number> stringMatcher = Matchers.types(new Class[] {String.class});
         selected = Matchers.select(numbers, stringMatcher);

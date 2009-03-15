@@ -1,11 +1,17 @@
 package ca.odell.glazedlists;
 
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
-import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+
 import junit.framework.TestCase;
 
-import java.lang.reflect.Method;
-import java.util.*;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 
 /**
  * Verifies that TreeList behaves as expected.
@@ -379,12 +385,12 @@ public class TreeListTest extends TestCase {
         assertEquals(3, treeList.size());
         assertEquals(4, treeList.getAllNodesList().size());
 
-        source.addAll(Arrays.asList(new String[] {
+        source.addAll(Arrays.asList(
                 "ABD",
                 "ABE",
                 "ABF",
-                "ABG",
-        }));
+                "ABG"
+        ));
         assertEquals(3, treeList.size());
         assertEquals(8, treeList.getAllNodesList().size());
         assertTreeStructure(treeList, new String[] {
@@ -407,10 +413,10 @@ public class TreeListTest extends TestCase {
         assertEquals(1, treeList.size());
         assertEquals(8, treeList.getAllNodesList().size());
 
-        source.addAll(Arrays.asList(new String[] {
+        source.addAll(Arrays.asList(
                 "ABH",
-                "ABI",
-        }));
+                "ABI"
+        ));
         assertEquals(1, treeList.size());
         assertEquals(10, treeList.getAllNodesList().size());
 
@@ -467,10 +473,10 @@ public class TreeListTest extends TestCase {
         assertEquals(1, treeList.size());
         assertEquals(10, treeList.getAllNodesList().size());
 
-        source.removeAll(Arrays.asList(new String[] {
+        source.removeAll(Arrays.asList(
                 "ABF",
-                "ABG",
-        }));
+                "ABG"
+        ));
         assertEquals(1, treeList.size());
         assertEquals(8, treeList.getAllNodesList().size());
 
@@ -502,7 +508,7 @@ public class TreeListTest extends TestCase {
     public void assertTreeStructure(TreeList<String> treeList, String[] structure) {
         assertEquals(Arrays.asList(structure), nodeListAsString(treeList.getNodesList()));
     }
-    
+
     public void assertFullTreeStructure(TreeList<String> treeList, String[] fullStructure) {
         assertEquals(Arrays.asList(fullStructure), nodeListAsString(treeList.getAllNodesList()));
     }
@@ -886,8 +892,8 @@ public class TreeListTest extends TestCase {
         source.commitEvent();
 
         source.beginEvent();
-            source.addAll(0, Arrays.asList(new String[] { "A", "AB" }));
-            source.addAll(3, Arrays.asList(new String[] { "A", "AB" }));
+            source.addAll(0, Arrays.asList("A", "AB"));
+            source.addAll(3, Arrays.asList("A", "AB"));
         source.commitEvent();
 
         assertTreeStructure(treeList, new String[] {
@@ -932,7 +938,7 @@ public class TreeListTest extends TestCase {
         source.add("PIS");
         source.add("PIU");
         source.add("PY");
-        source.removeAll(Arrays.asList(new String[] { "PI", "PIS" }));
+        source.removeAll(Arrays.asList("PI", "PIS"));
         assertTreeStructure(treeList, new String[] {
                 "P",
                 "PD",
@@ -952,7 +958,7 @@ public class TreeListTest extends TestCase {
         source.add("ABC");
         source.add("DEF");
         source.add("GHI");
-        source.addAll(1, Arrays.asList(new String[] { "D", "DE" }));
+        source.addAll(1, Arrays.asList("D", "DE"));
         assertTreeStructure(treeList, new String[] {
                 "A",
                 "AB",
@@ -975,7 +981,7 @@ public class TreeListTest extends TestCase {
 
         source.add("ABC");
         source.add("AWX");
-        source.addAll(1, Arrays.asList(new String[] { "AE", "AEF", "AW" }));
+        source.addAll(1, Arrays.asList("AE", "AEF", "AW"));
         assertTreeStructure(treeList, new String[] {
                 "A",
                 "AB",
@@ -1061,10 +1067,10 @@ public class TreeListTest extends TestCase {
 
         source.add("ABC");
         treeList.setExpanded(0, false);
-        source.addAll(0, Arrays.asList(new String[] {
+        source.addAll(0, Arrays.asList(
                 "A",
-                "AB",
-        }));
+                "AB"
+        ));
 
         treeList.setExpanded(0, true);
         assertTreeStructure(treeList, new String[] {
@@ -1103,13 +1109,13 @@ public class TreeListTest extends TestCase {
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
-        source.addAll(Arrays.asList(new String[] {
+        source.addAll(Arrays.asList(
                 "PB",
                 "PNMA",
                 "PNM",
                 "PNMA",
                 "PDEB"
-        }));
+        ));
         sortedList.setComparator(new LastCharComparator());
     }
 
@@ -1120,11 +1126,11 @@ public class TreeListTest extends TestCase {
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
-        source.addAll(Arrays.asList(new String[] {
+        source.addAll(Arrays.asList(
                 "AD",
                 "ADCE",
                 "ADCA"
-        }));
+        ));
         sortedList.setComparator(new LastCharComparator());
         sortedList.setComparator(null);
     }
@@ -1184,11 +1190,11 @@ public class TreeListTest extends TestCase {
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
-        source.addAll(Arrays.asList(new String[] {
+        source.addAll(Arrays.asList(
                 "PMMP",
                 "PMMP",
                 "PSU"
-        }));
+        ));
 
         source.add(1, "PDDS");
 
@@ -1215,11 +1221,11 @@ public class TreeListTest extends TestCase {
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
-        source.addAll(Arrays.asList(new String[] {
+        source.addAll(Arrays.asList(
                 "PMMP",
                 "PMMP",
                 "PSU"
-        }));
+        ));
 
         source.add(1, "PP");
 
@@ -1244,18 +1250,18 @@ public class TreeListTest extends TestCase {
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
-        source.addAll(Arrays.asList(new String[] {
+        source.addAll(Arrays.asList(
                 "PSU",
-                "PMMA",
-        }));
+                "PMMA"
+        ));
 
         // when we're inserting the 'p' node, we need to be careful about the
         // virtual ancestry of the existing 'pmma' node that precedes it, making
         // sure not to attach p as a child of a deeper node
-        source.addAll(1, Arrays.asList(new String[] {
+        source.addAll(1, Arrays.asList(
                 "PDDS",
-                "P",
-        }));
+                "P"
+        ));
 
         assertTreeStructure(treeList, new String[] {
                 "P",
@@ -1277,18 +1283,18 @@ public class TreeListTest extends TestCase {
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
-        source.addAll(Arrays.asList(new String[] {
+        source.addAll(Arrays.asList(
                 "PMMU",
                 "PMMP",
-                "PN",
-        }));
+                "PN"
+        ));
 
         // this insert causes ancestry to be added for the existing node 'pmmp',
         // which needs to be attached as a sibling to the parent node 'pm'.
-        source.addAll(1, Arrays.asList(new String[] {
+        source.addAll(1, Arrays.asList(
                 "PDDS",
-                "P",
-        }));
+                "P"
+        ));
 
         assertTreeStructure(treeList, new String[] {
                 "P",
@@ -1312,16 +1318,16 @@ public class TreeListTest extends TestCase {
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
-        source.addAll(Arrays.asList(new String[] {
+        source.addAll(Arrays.asList(
                 "PMMU",
                 "PMMP",
                 "PMMP",
-                "PN",
-        }));
+                "PN"
+        ));
 
-        source.addAll(1, Arrays.asList(new String[] {
-                "P",
-        }));
+        source.addAll(1, Arrays.asList(
+                "P"
+        ));
 
         assertTreeStructure(treeList, new String[] {
                 "P",
@@ -1343,15 +1349,15 @@ public class TreeListTest extends TestCase {
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
-        source.addAll(Arrays.asList(new String[] {
+        source.addAll(Arrays.asList(
                 "AC",
-                "A",
-        }));
+                "A"
+        ));
 
-        source.addAll(0, Arrays.asList(new String[] {
+        source.addAll(0, Arrays.asList(
                 "A",
-                "AB",
-        }));
+                "AB"
+        ));
 
         assertTreeStructure(treeList, new String[] {
                 "A",
@@ -1368,10 +1374,10 @@ public class TreeListTest extends TestCase {
         listConsistencyListener.setPreviousElementTracked(false);
 
         source.beginEvent();
-        source.addAll(Arrays.asList(new String[] {
+        source.addAll(Arrays.asList(
                 "PMMP",
-                "PMMS",
-        }));
+                "PMMS"
+        ));
         source.commitEvent();
 
         source.beginEvent();
@@ -1427,13 +1433,13 @@ public class TreeListTest extends TestCase {
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
-        source.addAll(Arrays.asList(new String[] {
+        source.addAll(Arrays.asList(
                 "L",
                 "LL",
                 "LLG",
                 "LL",
-                "LLM",
-        }));
+                "LLM"
+        ));
 
         treeList.setExpanded(1, false);
         treeList.setExpanded(0, false);
@@ -1459,11 +1465,11 @@ public class TreeListTest extends TestCase {
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
-        source.addAll(Arrays.asList(new String[] {
+        source.addAll(Arrays.asList(
                 "ABC",
                 "ABD",
-                "EFG",
-        }));
+                "EFG"
+        ));
         assertTreeStructure(treeList, new String[] {
                 "A",
                 "E",
@@ -1481,11 +1487,11 @@ public class TreeListTest extends TestCase {
 
     public void testCollapsedByDefaultOnCreate() {
         BasicEventList<String> source = new BasicEventList<String>();
-        source.addAll(Arrays.asList(new String[] {
+        source.addAll(Arrays.asList(
                 "ABC",
                 "ABD",
-                "EFG",
-        }));
+                "EFG"
+        ));
 
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_COLLAPSED);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
@@ -1512,10 +1518,10 @@ public class TreeListTest extends TestCase {
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(treeList);
         listConsistencyListener.setPreviousElementTracked(false);
 
-        source.addAll(Arrays.asList(new String[] {
+        source.addAll(Arrays.asList(
                 "ABCD",
-                "ABCE",
-        }));
+                "ABCE"
+        ));
         treeList.setExpanded(0, true);
         source.add(1, "EFGH");
         assertTreeStructure(treeList, new String[] {
@@ -1552,7 +1558,7 @@ public class TreeListTest extends TestCase {
      * Validate that a virtual parent's state is maintained even if all the
      * children are deleted new children inserted in a single event.
      */
-    public void testDeleteAndReinsertLeafRetainsParentState() {
+    public void testDeleteAndReinsertLeafRetainsParentState_FixMe() {
         TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
 
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
@@ -1591,10 +1597,10 @@ public class TreeListTest extends TestCase {
         treeList.setExpanded(1, true);
         treeList.setExpanded(2, true);
 
-        source.addAll(1, Arrays.asList(new String[] {
+        source.addAll(1, Arrays.asList(
                 "PMM",
-                "PMMP",
-        }));
+                "PMMP"
+        ));
     }
 
     /**
@@ -1789,7 +1795,7 @@ public class TreeListTest extends TestCase {
 
         TreeList.Node<String> abc = new TreeList.Node<String>(false, GlazedListsTests.stringToList("ABC"));
         TreeList.Node<String> abcd = new TreeList.Node<String>(false, GlazedListsTests.stringToList("ABCd"));
-        
+
         assertTrue(nodeComparator.compare(abc, abcd) < 0);
     }
 

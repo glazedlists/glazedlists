@@ -3,14 +3,15 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import junit.framework.TestCase;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
+
+import junit.framework.TestCase;
+
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 
 public class DebugListTest extends TestCase {
 
@@ -19,11 +20,11 @@ public class DebugListTest extends TestCase {
 
     private DebugList<String> list;
 
-    private final List<Runnable> READ_OPERATIONS = Arrays.asList(new Runnable[] {
+    private final List<Runnable> READ_OPERATIONS = Arrays.asList(
         new Get(0),
         new Size(),
         new Contains("one"),
-        new ContainsAll(Arrays.asList(new String[] {"one", "five"})),
+        new ContainsAll(Arrays.asList("one", "five")),
         new IndexOf("two"),
         new LastIndexOf("three"),
         new IsEmpty(),
@@ -32,25 +33,25 @@ public class DebugListTest extends TestCase {
         new Equals(null),
         new HashCode(),
         new ToString()
-    });
+    );
 
-    private final List<Runnable> WRITE_OPERATIONS = Arrays.asList(new Runnable[] {
+    private final List<Runnable> WRITE_OPERATIONS = Arrays.asList(
         new Add("six"),
         new Remove("six"),
-        new AddAll(Arrays.asList(new String[] {"six", "seven", "eight"})),
-        new RemoveAll(Arrays.asList(new String[] {"six", "seven", "eight"})),
-        new AddAll_Index(0, Arrays.asList(new String[] {"six", "seven", "eight"})),
-        new RetainAll(Arrays.asList(new String[] {"one", "two", "three"})),
+        new AddAll(Arrays.asList("six", "seven", "eight")),
+        new RemoveAll(Arrays.asList("six", "seven", "eight")),
+        new AddAll_Index(0, Arrays.asList("six", "seven", "eight")),
+        new RetainAll(Arrays.asList("one", "two", "three")),
         new Set(0, "four"),
         new Add_Index(1, "five"),
         new Remove_Index(0),
-        new Clear(),
-    });
+        new Clear()
+    );
 
     @Override
     protected void setUp() {
         list = new DebugList<String>();
-        list.addAll(Arrays.asList(new String[] {"one", "two", "three", "four", "five"}));
+        list.addAll(Arrays.asList("one", "two", "three", "four", "five"));
         ListConsistencyListener.install(list);
     }
 
@@ -117,13 +118,13 @@ public class DebugListTest extends TestCase {
 
         // All writes from THIS Thread should succeed
         list.clear();
-        list.addAll(Arrays.asList(new String[] {"one", "two", "three", "four", "five"}));
+        list.addAll(Arrays.asList("one", "two", "three", "four", "five"));
         for (Iterator<Runnable> i = WRITE_OPERATIONS.iterator(); i.hasNext();)
             i.next().run();
 
         // Now, writes from an alterate Thread should fail, since we have specified which writer Threads are valid
         list.clear();
-        list.addAll(Arrays.asList(new String[] {"one", "two", "three", "four", "five"}));
+        list.addAll(Arrays.asList("one", "two", "three", "four", "five"));
         for (Iterator<Runnable> i = WRITE_OPERATIONS.iterator(); i.hasNext();) {
             RecorderRunnable recorderRunnable = new RecorderRunnable(i.next());
             Thread t = new Thread(recorderRunnable);
@@ -166,7 +167,7 @@ public class DebugListTest extends TestCase {
             i.next().run();
 
         list.clear();
-        list.addAll(Arrays.asList(new String[] {"one", "two", "three", "four", "five"}));
+        list.addAll(Arrays.asList("one", "two", "three", "four", "five"));
         list.setLockCheckingEnabled(true);
 
         // all write operations should now fail without locks

@@ -3,14 +3,20 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
-import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import ca.odell.glazedlists.impl.filter.StringLengthComparator;
-import ca.odell.glazedlists.matchers.Matcher;
-import ca.odell.glazedlists.matchers.Matchers;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Random;
+
 import junit.framework.TestCase;
 
-import java.util.*;
+import ca.odell.glazedlists.impl.filter.StringLengthComparator;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.matchers.Matchers;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
@@ -34,7 +40,7 @@ public class SeparatorListTest extends TestCase {
         assertSeparatorEquals(separatorList.get(0), 1, "A");
         assertSeparatorEquals(separatorList.get(2), 2, "B");
     }
-    
+
     public void testUpdate1() {
         EventList<String> source = new BasicEventList<String>();
         SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
@@ -50,7 +56,7 @@ public class SeparatorListTest extends TestCase {
 
     /**
      * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=364">Bug 364</a>
-     */    
+     */
     public void testUpdateProblem2() {
         EventList<String> source = new BasicEventList<String>();
         SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
@@ -62,7 +68,7 @@ public class SeparatorListTest extends TestCase {
         assertSeparatorEquals(separatorList.get(3), 1, "B");
         assertSeparatorEquals(separatorList.get(5), 2, "C");
     }
-    
+
     public void testUpdate3() {
         EventList<String> source = new BasicEventList<String>();
         SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
@@ -74,8 +80,8 @@ public class SeparatorListTest extends TestCase {
         assertSeparatorEquals(separatorList.get(3), 1, "B");
         assertSeparatorEquals(separatorList.get(5), 2, "C");
     }
-    
-    
+
+
     public void testUpdate4() {
         EventList<String> source = new BasicEventList<String>();
         SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
@@ -88,7 +94,7 @@ public class SeparatorListTest extends TestCase {
         assertSeparatorEquals(separatorList.get(0), 2, "B");
         assertSeparatorEquals(separatorList.get(3), 1, "C");
     }
-    
+
     /**
      * Update element in singleton list.
      */
@@ -99,7 +105,7 @@ public class SeparatorListTest extends TestCase {
         listConsistencyListener.setPreviousElementTracked(false);
         source.addAll(0, GlazedListsTests.stringToList("A"));
         source.set(0, "B");
-        assertSeparatorEquals(separatorList.get(0), 1, "B");        
+        assertSeparatorEquals(separatorList.get(0), 1, "B");
         source.set(0, "A");
         assertSeparatorEquals(separatorList.get(0), 1, "A");
     }
@@ -117,7 +123,7 @@ public class SeparatorListTest extends TestCase {
         assertSeparatorEquals(separatorList.get(0), 1, "A");
         assertSeparatorEquals(separatorList.get(2), 2, "C");
     }
-    
+
     /**
      * Removing element leads to group removal.
      */
@@ -133,7 +139,7 @@ public class SeparatorListTest extends TestCase {
         source.remove(2);
         assertSeparatorEquals(separatorList.get(0), 2, "B");
     }
-    
+
     /**
      * Adding element leads to group addition.
      */
@@ -449,7 +455,7 @@ public class SeparatorListTest extends TestCase {
 
         BasicEventList<String> unsortedSource = new BasicEventList<String>();
         SortedList<String> source = new SortedList<String>(unsortedSource, null);
-        unsortedSource.addAll(Arrays.asList(new String[] { "apple", "banana", "cat", "dear", "frog", "boat", "car", "jesse", "glazed", "shirt", "hat", "art", "dog", "puppy", "foot" }));
+        unsortedSource.addAll(Arrays.asList("apple", "banana", "cat", "dear", "frog", "boat", "car", "jesse", "glazed", "shirt", "hat", "art", "dog", "puppy", "foot"));
 
         SeparatorList<String> separatorList = new SeparatorList<String>(source, length, 0, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
@@ -461,7 +467,7 @@ public class SeparatorListTest extends TestCase {
         assertEqualsIgnoreSeparators(source, separatorList, length);
 
         // now add some duplicates
-        unsortedSource.addAll(Arrays.asList(new String[] { "apple", "banana", "cat", "art", "dog", "puppy", "foot", "carrot", "beer" }));
+        unsortedSource.addAll(Arrays.asList("apple", "banana", "cat", "art", "dog", "puppy", "foot", "carrot", "beer"));
         assertEqualsIgnoreSeparators(source, separatorList, length);
 
         source.setComparator(alphabetical);
@@ -813,7 +819,7 @@ public class SeparatorListTest extends TestCase {
     public void testSet() {
         EventList<String> source = new BasicEventList<String>();
         SeparatorList<String> separated = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
-        
+
         source.addAll(GlazedListsTests.stringToList("ABCABCABC"));
         assertEquals(9, source.size());
         assertEquals(12, separated.size());
