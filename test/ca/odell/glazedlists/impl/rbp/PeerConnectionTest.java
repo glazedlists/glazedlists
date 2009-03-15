@@ -24,6 +24,7 @@ public class PeerConnectionTest extends TestCase {
     /**
      * Prepare for the test.
      */
+    @Override
     public void setUp() {
         try {
             // increment the server port as to not bind to a previously used one
@@ -38,6 +39,7 @@ public class PeerConnectionTest extends TestCase {
     /**
      * Clean up after the test.
      */
+    @Override
     public void tearDown() {
         peer.stop();
     }

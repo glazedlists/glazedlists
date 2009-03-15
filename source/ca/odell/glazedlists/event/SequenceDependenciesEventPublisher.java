@@ -448,6 +448,7 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher, Se
             }
         }
 
+        @Override
         public String toString() {
             String separator = hasPendingEvent() ? ">>>" : "-->";
             return subject + separator + listener;

@@ -9,8 +9,6 @@ import javax.swing.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.Format;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 
 public final class SwingCalculations {
     private static final Float FLOAT_NAN = new Float(Float.NaN);

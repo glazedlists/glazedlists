@@ -141,6 +141,7 @@ public class DefaultEventTableModel<E> extends AbstractTableModel implements Lis
     /**
      * Fetch the name for the specified column.
      */
+    @Override
     public String getColumnName(int column) {
         return tableFormat.getColumnName(column);
     }
@@ -168,7 +169,8 @@ public class DefaultEventTableModel<E> extends AbstractTableModel implements Lis
      * Gets the class of elements in the specified column. This behaviour can be
      * customized by implementing the {@link AdvancedTableFormat} interface.
 	 */
-	public Class getColumnClass(int columnIndex) {
+	@Override
+    public Class getColumnClass(int columnIndex) {
 		// See if the TableFormat is specifies a column class
 		if(tableFormat instanceof AdvancedTableFormat) {
 			return ((AdvancedTableFormat)tableFormat).getColumnClass(columnIndex);
@@ -195,6 +197,7 @@ public class DefaultEventTableModel<E> extends AbstractTableModel implements Lis
      * backing TableFormat if it is a {@link WritableTableFormat}. Otherwise,
      * the column is assumed to be uneditable.
      */
+    @Override
     public boolean isCellEditable(int row, int column) {
         if (!(tableFormat instanceof WritableTableFormat))
             return false;
@@ -216,6 +219,7 @@ public class DefaultEventTableModel<E> extends AbstractTableModel implements Lis
      * <code>row</code> with the <code>editedValue</code> which was in the
      * given <code>column</code>.
      */
+    @Override
     public void setValueAt(Object editedValue, int row, int column) {
         // ensure this is a writable table
         if (!(tableFormat instanceof WritableTableFormat))

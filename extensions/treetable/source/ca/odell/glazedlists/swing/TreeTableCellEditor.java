@@ -153,6 +153,7 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
     * @param event the event attempting to begin a cell edit
     * @return true if cell is ready for editing, false otherwise
     */
+    @Override
     public boolean isCellEditable(EventObject event) {
         if (event instanceof MouseEvent) {
             final MouseEvent me = (MouseEvent) event;
@@ -191,6 +192,7 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
     }
 
     /** @inheritDoc */
+    @Override
     public boolean shouldSelectCell(EventObject anEvent) {
         return delegate.shouldSelectCell(anEvent);
     }

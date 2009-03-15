@@ -91,11 +91,13 @@ public final class FileList extends TransformedList {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isWritable() {
         return writable;
     }
 
     /** {@inheritDoc} */
+    @Override
     public void listChanged(ListEvent listChanges) {
         // write the change to disc
         try {
@@ -123,6 +125,7 @@ public final class FileList extends TransformedList {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void dispose() {
         close();
         super.dispose();

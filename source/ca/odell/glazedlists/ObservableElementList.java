@@ -136,6 +136,7 @@ public class ObservableElementList<E> extends TransformedList<E, E> {
         source.addListEventListener(this);
     }
 
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
         if (this.observedElements == null)
             throw new IllegalStateException("This list has been disposed and can no longer be used.");
@@ -352,6 +353,7 @@ public class ObservableElementList<E> extends TransformedList<E, E> {
         this.singleListenerMode = false;
     }
 
+    @Override
     protected boolean isWritable() {
         return true;
     }
@@ -370,6 +372,7 @@ public class ObservableElementList<E> extends TransformedList<E, E> {
      * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
      * to call any method on a {@link TransformedList} after it has been disposed.
      */
+    @Override
     public void dispose() {
         // remove all listeners from all list elements
         for (int i = 0, n = this.observedElements.size(); i < n; i++) {

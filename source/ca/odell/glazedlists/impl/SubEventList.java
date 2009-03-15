@@ -71,21 +71,25 @@ public final class SubEventList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int size() {
         return endIndex - startIndex;
     }
 
     /** {@inheritDoc} */
+    @Override
     protected int getSourceIndex(int mutationIndex) {
         return mutationIndex + startIndex;
     }
 
     /** {@inheritDoc} */
+    @Override
     protected boolean isWritable() {
         return true;
     }
 
     /** {@inheritDoc} */
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
         updates.beginEvent();
 

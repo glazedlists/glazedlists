@@ -191,6 +191,7 @@ public class EventListPieDataset<E,K> extends AbstractDataset implements PieData
      * We override this method for speed reasons, since the super needlessly
      * constructs a new DatasetChangedEvent each time this method is called.
      */
+    @Override
     protected void fireDatasetChanged() {
         notifyListeners(immutableChangeEvent);
     }

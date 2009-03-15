@@ -196,17 +196,20 @@ public class TextFilterList extends TransformedList {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void listChanged(ListEvent listChanges) {
         // just pass on the changes
         updates.forwardEvent(listChanges);
     }
 
     /** {@inheritDoc} */
+    @Override
     protected boolean isWritable() {
         return true;
     }
 
     /** {@inheritDoc} */
+    @Override
     public void dispose() {
         FilterList filteredSource = (FilterList)source;
         super.dispose();

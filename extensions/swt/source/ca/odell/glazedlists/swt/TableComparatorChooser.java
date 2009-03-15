@@ -138,6 +138,7 @@ public final class TableComparatorChooser<E> extends AbstractTableComparatorChoo
      *
      * <p>This method is called when the sorting state changed.</p>
      */
+    @Override
     protected final void rebuildComparator() {
         super.rebuildComparator();
         // update sorting icon in SWT table
@@ -164,6 +165,7 @@ public final class TableComparatorChooser<E> extends AbstractTableComparatorChoo
      * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
      * to call any method on a {@link TableComparatorChooser} after it has been disposed.
      */
+    @Override
     public void dispose() {
         // stop listening for events on the specified table
         for(int c = 0; c < table.getColumnCount(); c++) {

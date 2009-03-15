@@ -101,6 +101,7 @@ public class RangeMatcher<D extends Comparable,E> implements Matcher<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public String toString() {
         return "[RangeMatcher between " + start + " and " + end + "]";
     }

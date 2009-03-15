@@ -106,6 +106,7 @@ public class ListEventPublisher2Test extends TestCase {
             this.value = value;
             publisher.fireEvent(this, "[" + name + ":" + this.value + "]", SimpleSubjectListenerEventformat.INSTANCE);
         }
+        @Override
         public String toString() {
             return name;
         }

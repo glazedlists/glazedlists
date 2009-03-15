@@ -38,6 +38,7 @@ public class ThreadedMatcherEditorTest extends TestCase {
     /**
      * Prepare for the test.
      */
+    @Override
     public void setUp() {
         textMatcherEditor = new TextMatcherEditor(GlazedLists.toStringTextFilterator());
         threadedMatcherEditor = new ThreadedMatcherEditor(textMatcherEditor);
@@ -53,6 +54,7 @@ public class ThreadedMatcherEditorTest extends TestCase {
     /**
      * Clean up after the test.
      */
+    @Override
     public void tearDown() {
         threadedMatcherEditor = null;
         textMatcherEditor = null;

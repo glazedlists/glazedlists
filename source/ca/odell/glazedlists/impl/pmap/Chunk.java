@@ -360,6 +360,7 @@ public final class Chunk {
         return valueBytes;
     }
 
+    @Override
     public String toString() {
         StringBuffer result = new StringBuffer();
         result.append("<chunk      offset=\"").append(offset).append("\"");

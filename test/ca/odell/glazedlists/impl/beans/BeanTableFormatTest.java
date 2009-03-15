@@ -29,6 +29,7 @@ public class BeanTableFormatTest extends TestCase {
     /**
      * Prepare for the test.
      */
+    @Override
     public void setUp() {
         String[] propertyNames = new String[] { "name", "home", "primary", "secondary", "yearWinner", "matchCount"};
         String[] columnNames = new String[] { "Name", "Home", "Primary Color", "Secondary Color", "Has won this year", "Match count" };
@@ -40,6 +41,7 @@ public class BeanTableFormatTest extends TestCase {
     /**
      * Clean up after the test.
      */
+    @Override
     public void tearDown() {
         footballFormat = null;
         classedFootballFormat = null;

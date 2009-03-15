@@ -137,6 +137,7 @@ public class CalculationCategoryDataset extends AbstractDataset implements Categ
      * We override this method for speed reasons, since the super needlessly
      * constructs a new DatasetChangeEvent each time this method is called.
      */
+    @Override
     protected void fireDatasetChanged() {
         notifyListeners(immutableChangeEvent);
     }

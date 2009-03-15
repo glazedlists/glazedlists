@@ -46,6 +46,7 @@ public class Item implements Comparable<Item> {
     }
 
     /** inheritDoc */
+    @Override
     public String toString() {
         final String asin = getASIN() == null ? "" : (getASIN() + " ");
         final String title = itemAttributes.getTitle() == null ? "" : itemAttributes.getTitle();

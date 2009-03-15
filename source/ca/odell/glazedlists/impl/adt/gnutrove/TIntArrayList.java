@@ -34,7 +34,7 @@ import java.util.Random;
  * Created: Sat Dec 29 14:21:12 2001
  *
  * @author Eric D. Friedman
- * @version $Id: TIntArrayList.java,v 1.2 2006-12-24 09:03:51 jplemieux Exp $
+ * @version $Id: TIntArrayList.java,v 1.3 2009-03-15 12:37:10 brands Exp $
  */
 public class TIntArrayList implements Cloneable {
 
@@ -463,6 +463,7 @@ public class TIntArrayList implements Cloneable {
      *
      * @return a deep clone of the list.
      */
+    @Override
     public Object clone() {
         TIntArrayList clone = null;
         try {
@@ -522,6 +523,7 @@ public class TIntArrayList implements Cloneable {
      * @return true if other is a TIntArrayList and has exactly the
      * same values.
      */
+    @Override
     public boolean equals(Object other) {
         if (other == this) {
             return true;
@@ -542,6 +544,7 @@ public class TIntArrayList implements Cloneable {
         }
     }
 
+    @Override
     public int hashCode() {
         int h = 0;
         for (int i = _pos; i-- > 0;) {
@@ -773,6 +776,7 @@ public class TIntArrayList implements Cloneable {
      *
      * @return a <code>String</code> value
      */
+    @Override
     public String toString() {
         StringBuffer buf = new StringBuffer("{");
         for (int i = 0, end = _pos - 1; i < end; i++) {

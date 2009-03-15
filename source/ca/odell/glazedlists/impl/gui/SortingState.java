@@ -195,6 +195,7 @@ public class SortingState {
         return recentlyClickedColumns;
     }
 
+    @Override
     public String toString() {
         final StringBuffer result = new StringBuffer();
         for(Iterator<Integer> i = getSortingColumnIndexes().iterator(); i.hasNext();) {

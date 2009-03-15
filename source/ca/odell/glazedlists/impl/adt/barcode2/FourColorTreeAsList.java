@@ -102,16 +102,19 @@ public class FourColorTreeAsList <  T0>   extends AbstractList<T0> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public T0 get(int index) {
         return tree.get(index  , colors   ).get();
     }
 
     /** {@inheritDoc} */
+    @Override
     public void add(int index, T0 element) {
         tree.add(index,   colors, color,    element, 1);
     }
 
     /** {@inheritDoc} */
+    @Override
     public T0 set(int index, T0 element) {
         T0 replaced = get(index);
         tree.set(index,   colors, color,    element, 1);
@@ -119,6 +122,7 @@ public class FourColorTreeAsList <  T0>   extends AbstractList<T0> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public T0 remove(int index) {
         T0 removed = get(index);
         tree.remove(index,   colors,    1);
@@ -126,6 +130,7 @@ public class FourColorTreeAsList <  T0>   extends AbstractList<T0> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int size() {
         return tree.size(  colors   );
     }

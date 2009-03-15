@@ -30,6 +30,7 @@ public class TableFormatKTableFormat extends AbstractKTableFormat {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getFixedHeaderRowCount() {
         return 1;
     }

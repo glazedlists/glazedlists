@@ -28,6 +28,7 @@ class JEventListPanelDemo {
 //            super("0dlu, pref, 0dlu, pref, 0dlu", "0dlu, pref, 0dlu, fill:pref:grow, 0dlu", null, null, new String[] { "2, 2, 1, 3", "4, 2", "4, 4" });
         }
 
+        @Override
         public int getComponentsPerElement() {
             return 3;
         }

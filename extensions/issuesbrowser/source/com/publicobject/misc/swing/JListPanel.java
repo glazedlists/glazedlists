@@ -143,6 +143,7 @@ public class JListPanel<C extends Component> extends JPanel implements ListEvent
      * this way, the visual effects of drag and drop gestures are recreated.
      */
     private class DnDMouseListener extends MouseAdapter implements MouseMotionListener {
+        @Override
         public void mousePressed(MouseEvent e) {
             // record the particulars of the new DND component
             dndComponent = (C) e.getComponent();
@@ -153,6 +154,7 @@ public class JListPanel<C extends Component> extends JPanel implements ListEvent
             relayout();
         }
 
+        @Override
         public void mouseReleased(MouseEvent e) {
             // when the mouse is released, we must try to insert the component into its new location
             final Point p = SwingUtilities.convertPoint(e.getComponent(), e.getPoint(), JListPanel.this);

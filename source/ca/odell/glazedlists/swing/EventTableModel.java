@@ -141,6 +141,7 @@ public class EventTableModel<E> extends DefaultEventTableModel<E> {
      * As such, this {@link EventTableModel} should be detached from its
      * corresponding Component <strong>before</strong> it is disposed.
      */
+    @Override
     public void dispose() {
         // if we created the swingThreadSource then we must also dispose it
         if (swingThreadSource != null)

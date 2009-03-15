@@ -65,6 +65,7 @@ public class Email implements Serializable {
     /**
      * Equality depends on address.
      */
+    @Override
     public boolean equals(Object that) {
         if (!(that instanceof Email)) return false;
         final Email p = (Email) that;
@@ -74,6 +75,7 @@ public class Email implements Serializable {
     /**
      * Hashcode depends on address.
      */
+    @Override
     public int hashCode() {
         return address.hashCode();
     }

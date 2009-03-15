@@ -132,6 +132,7 @@ class IssueSummaryChartsComponent {
             this.setOutlinePaint(PIE_CHART_PLOT_PAINT);
         }
 
+        @Override
         public Paint getSectionPaint(int section) {
             final String rowKeyForSeries = (String) this.getDataset().getKey(section);
             return issuesStatusToPaintMap.get(rowKeyForSeries);
@@ -149,6 +150,7 @@ class IssueSummaryChartsComponent {
             this.setShapesVisible(false);
         }
 
+        @Override
         public Paint getSeriesPaint(int series) {
             final String rowKeyForSeries = (String) this.dataset.getRowKey(series);
             return issuesStatusToPaintMap.get(rowKeyForSeries);
@@ -169,6 +171,7 @@ class IssueSummaryChartsComponent {
             this.setCategoryLabelPositions(CategoryLabelPositions.UP_90);
         }
 
+        @Override
         protected TextBlock createLabel(Comparable category, float width, RectangleEdge edge, Graphics2D g2) {
             // check the cache for an existing formatted string
             String labelString = labelMap.get(category);

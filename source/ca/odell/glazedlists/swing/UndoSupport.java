@@ -162,9 +162,13 @@ public final class UndoSupport<E> {
                 this.edit = edit;
             }
 
+            @Override
             public void undo() { edit.undo(); }
+            @Override
             public boolean canUndo() { return edit.canUndo(); }
+            @Override
             public void redo() { edit.redo(); }
+            @Override
             public boolean canRedo() { return edit.canRedo(); }
         }
     }

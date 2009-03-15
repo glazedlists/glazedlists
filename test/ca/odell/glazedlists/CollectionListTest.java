@@ -33,6 +33,7 @@ public class CollectionListTest extends TestCase {
     /**
      * Do basic setup for the tests.
      */
+    @Override
     public void setUp() {
         parentList = new BasicEventList<String>();
         collectionList = new CollectionList<String, String>(parentList, new StringDecomposerModel());
@@ -47,6 +48,7 @@ public class CollectionListTest extends TestCase {
     /**
      * Clean up after the tests.
      */
+    @Override
     public void tearDown() {
         collectionList.dispose();
         collectionList = null;

@@ -149,6 +149,7 @@ public final class FilterList<E> extends TransformedList<E,E> {
     }
 
     /** @inheritDoc */
+    @Override
     public void dispose() {
         super.dispose();
 
@@ -162,6 +163,7 @@ public final class FilterList<E> extends TransformedList<E,E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public final void listChanged(ListEvent<E> listChanges) {
         // all of these changes to this list happen "atomically"
         updates.beginEvent();
@@ -445,16 +447,19 @@ public final class FilterList<E> extends TransformedList<E,E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public final int size() {
         return flagList.blackSize();
     }
 
     /** {@inheritDoc} */
+    @Override
     protected final int getSourceIndex(int mutationIndex) {
         return flagList.getIndex(mutationIndex, Barcode.BLACK);
     }
 
     /** {@inheritDoc} */
+    @Override
     protected boolean isWritable() {
         return true;
     }

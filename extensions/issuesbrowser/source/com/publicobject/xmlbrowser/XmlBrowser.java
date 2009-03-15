@@ -164,6 +164,7 @@ public class XmlBrowser {
      * TODO: make this available as an API via a factory method?
      */
     private static class TreeListNodeRenderer extends DefaultTreeCellRenderer {
+        @Override
         public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
             Object renderValue;
             if(value instanceof TreeList.Node) {

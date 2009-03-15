@@ -16,6 +16,7 @@ final class Division {
             super(new Calculation[] {numerator, denominator});
         }
 
+        @Override
         protected Float recompute(Number[] inputs) {
             final float numerator = inputs[0].floatValue();
             final float denominator = inputs[1].floatValue();
@@ -28,6 +29,7 @@ final class Division {
             super(new Calculation[] {numerator, denominator});
         }
 
+        @Override
         protected Double recompute(Number[] inputs) {
             final double numerator = inputs[0].doubleValue();
             final double denominator = inputs[1].doubleValue();

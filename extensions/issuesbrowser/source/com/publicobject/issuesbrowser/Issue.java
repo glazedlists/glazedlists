@@ -364,6 +364,7 @@ public class Issue implements Comparable {
     /**
      * Write this issue for debugging.
      */
+    @Override
     public String toString() {
         return "Issue " + id + ": " + getPriority().getRating();
     }

@@ -24,6 +24,7 @@ public class SearchEngineTextMatcherEditorTest extends TestCase {
     private FilterList<String> filterList;
     private JTextField textField = new JTextField();
 
+    @Override
     protected void setUp() throws Exception {
         filterList = new FilterList<String>(new BasicEventList<String>());
         filterList.addAll(GlazedListsTests.delimitedStringToList("James Jesse Jodie Jimney Jocelyn"));

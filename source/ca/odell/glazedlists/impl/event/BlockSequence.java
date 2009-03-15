@@ -122,6 +122,7 @@ public class BlockSequence<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public String toString() {
         StringBuffer result = new StringBuffer();
         for(int i = 0; i < types.size(); i++) {

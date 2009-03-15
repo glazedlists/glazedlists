@@ -27,6 +27,7 @@ public class SparseListTest extends TestCase {
     /**
      * Prepare for the test.
      */
+    @Override
     public void setUp() {
         sparseTree = new SparseList();
     }
@@ -34,6 +35,7 @@ public class SparseListTest extends TestCase {
     /**
      * Clean up after the test.
      */
+    @Override
     public void tearDown() {
         sparseTree.clear();
         sparseTree = null;

@@ -22,6 +22,7 @@ public class UndoSupportTest extends SwingTestCase {
     private UndoManager undoManager;
     private UndoSupport undoSupport;
 
+    @Override
     public void guiSetUp() {
         source = new BasicEventList<String>();
         txSource = new TransactionList<String>(source);
@@ -31,6 +32,7 @@ public class UndoSupportTest extends SwingTestCase {
         System.out.println("UndoSupportTest.guiSetUp");
     }
 
+    @Override
     public void guiTearDown() {
         undoSupport.uninstall();
         txSource.dispose();

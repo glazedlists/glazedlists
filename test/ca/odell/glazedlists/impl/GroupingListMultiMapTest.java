@@ -874,10 +874,12 @@ public class GroupingListMultiMapTest extends TestCase {
             return name.compareTo(o.name);
         }
 
+        @Override
         public String toString() {
             return "A{" + name + "}";
         }
 
+        @Override
         public boolean equals(final Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
@@ -885,6 +887,7 @@ public class GroupingListMultiMapTest extends TestCase {
             return name != null ? name.equals(a.name) : a.name == null;
         }
 
+        @Override
         public int hashCode() {
             return (name != null ? name.hashCode() : 0);
         }
@@ -907,10 +910,12 @@ public class GroupingListMultiMapTest extends TestCase {
             return note;
         }
 
+        @Override
         public String toString() {
             return "B{a=" + a + ", note='" + note + "'}";
         }
 
+        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
@@ -923,6 +928,7 @@ public class GroupingListMultiMapTest extends TestCase {
             return true;
         }
 
+        @Override
         public int hashCode() {
             int result;
             result = (a != null ? a.hashCode() : 0);
@@ -955,10 +961,12 @@ public class GroupingListMultiMapTest extends TestCase {
             return new Character(contained.getName().charAt(0)).compareTo(new Character(o.contained.getName().charAt(0)));
         }
 
+        @Override
         public String toString() {
             return "AFLC{" + contained.getName().charAt(0) + "}";
         }
 
+        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
@@ -967,6 +975,7 @@ public class GroupingListMultiMapTest extends TestCase {
             return contained.getName().charAt(0) == that.contained.getName().charAt(0);
         }
 
+        @Override
         public int hashCode() {
             return new Character(contained.getName().charAt(0)).hashCode();
         }
@@ -983,6 +992,7 @@ public class GroupingListMultiMapTest extends TestCase {
             return key;
         }
 
+        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
@@ -994,6 +1004,7 @@ public class GroupingListMultiMapTest extends TestCase {
             return true;
         }
 
+        @Override
         public int hashCode() {
             return key.hashCode();
         }
@@ -1010,6 +1021,7 @@ public class GroupingListMultiMapTest extends TestCase {
             return name;
         }
 
+        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
@@ -1021,6 +1033,7 @@ public class GroupingListMultiMapTest extends TestCase {
             return true;
         }
 
+        @Override
         public int hashCode() {
             return name.hashCode();
         }

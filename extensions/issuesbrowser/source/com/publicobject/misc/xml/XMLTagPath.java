@@ -150,6 +150,7 @@ public final class XMLTagPath {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean equals(Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
@@ -163,6 +164,7 @@ public final class XMLTagPath {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int hashCode() {
         int result;
         result = path.hashCode();
@@ -171,6 +173,7 @@ public final class XMLTagPath {
     }
 
     /** @inheritDoc */
+    @Override
     public String toString() {
         final StringBuffer formattedPath = new StringBuffer();
 

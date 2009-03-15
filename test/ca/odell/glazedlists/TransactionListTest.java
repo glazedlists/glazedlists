@@ -14,6 +14,7 @@ public class TransactionListTest extends TestCase {
     private TransactionList<String> txList;
     private GlazedListsTests.ListEventCounter<String> counter;
 
+    @Override
     protected void setUp() {
         source = new BasicEventList<String>();
         txList = new TransactionList<String>(source);
@@ -21,6 +22,7 @@ public class TransactionListTest extends TestCase {
         txList.addListEventListener(counter);
     }
 
+    @Override
     protected void tearDown() {
         txList.removeListEventListener(counter);
         txList.dispose();

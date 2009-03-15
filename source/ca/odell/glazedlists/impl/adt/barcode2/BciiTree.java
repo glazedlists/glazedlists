@@ -898,6 +898,7 @@ public class BciiTree/*[ TYPELIST_START ]*/ <T0,T1> /*[ TYPELIST_END ]*/ {
     /**
      * Print this tree as a list of values.
      */
+    @Override
     public String toString() {
         if(root == null) return "";
         return root.toString(/*[ COLORED_START ]*/ coder.getColors() /*[ COLORED_END ]*/);

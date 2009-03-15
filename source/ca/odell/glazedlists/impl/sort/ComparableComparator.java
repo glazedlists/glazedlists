@@ -39,6 +39,7 @@ public final class ComparableComparator implements Comparator<Comparable> {
     /**
      * This is equal to another comparator if it is a ComparableComparable.
      */
+    @Override
     public boolean equals(Object other) {
         return (other instanceof ComparableComparator);
     }

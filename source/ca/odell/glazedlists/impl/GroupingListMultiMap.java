@@ -226,11 +226,13 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
     }
 
     /** @inheritDoc */
+    @Override
     public boolean equals(Object o) {
         return delegate.equals(o);
     }
 
     /** @inheritDoc */
+    @Override
     public int hashCode() {
         return delegate.hashCode();
     }
@@ -295,16 +297,19 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
      */
     private class EntrySet extends AbstractSet<Entry<K, List<V>>> {
         /** {@inheritDoc} */
+        @Override
         public int size() {
             return keyList.size();
         }
 
         /** {@inheritDoc} */
+        @Override
         public Iterator<Entry<K, List<V>>> iterator() {
             return new EntrySetIterator(keyList.listIterator());
         }
 
         /** {@inheritDoc} */
+        @Override
         public boolean contains(Object o) {
             if (!(o instanceof Map.Entry))
                 return false;
@@ -319,6 +324,7 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
         }
 
         /** {@inheritDoc} */
+        @Override
         public boolean remove(Object o) {
             if (!contains(o)) return false;
             GroupingListMultiMap.this.remove(((Map.Entry) o).getKey());
@@ -326,6 +332,7 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
         }
 
         /** {@inheritDoc} */
+        @Override
         public void clear() {
             GroupingListMultiMap.this.clear();
         }
@@ -446,6 +453,7 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
          * Two MultiMapEntry entry objects are equal iff their keys and values
          * are equal.
          */
+        @Override
         public boolean equals(Object o) {
             if (!(o instanceof Map.Entry))
                 return false;
@@ -456,11 +464,13 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
         }
 
         /** {@inheritDoc} */
+        @Override
         public int hashCode() {
             return (key == null ? 0 : key.hashCode()) ^ value.hashCode();
         }
 
         /** {@inheritDoc} */
+        @Override
         public String toString() {
             return getKey() + "=" + getValue();
         }
@@ -474,26 +484,31 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
      */
     private class KeySet extends AbstractSet<K> {
         /** {@inheritDoc} */
+        @Override
         public int size() {
             return keyList.size();
         }
 
         /** {@inheritDoc} */
+        @Override
         public Iterator<K> iterator() {
             return new KeySetIterator(keyList.listIterator());
         }
 
         /** {@inheritDoc} */
+        @Override
         public boolean contains(Object o) {
             return GroupingListMultiMap.this.containsKey(o);
         }
 
         /** {@inheritDoc} */
+        @Override
         public boolean remove(Object o) {
             return GroupingListMultiMap.this.remove(o) != null;
         }
 
         /** {@inheritDoc} */
+        @Override
         public void clear() {
             GroupingListMultiMap.this.clear();
         }
@@ -648,12 +663,15 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
         public boolean removeAll(Collection<?> c) { return delegate.removeAll(c); }
         public boolean retainAll(Collection<?> c) { return delegate.retainAll(c); }
         public void clear() { delegate.clear(); }
+        @Override
         public boolean equals(Object o) { return delegate.equals(o); }
+        @Override
         public int hashCode() { return delegate.hashCode(); }
         public V get(int index) { return delegate.get(index); }
         public V remove(int index) { return delegate.remove(index); }
         public int indexOf(Object o) { return delegate.indexOf(o); }
         public int lastIndexOf(Object o) { return delegate.lastIndexOf(o); }
+        @Override
         public String toString() { return delegate.toString(); }
 
         /**

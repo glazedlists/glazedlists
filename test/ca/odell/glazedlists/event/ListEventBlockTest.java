@@ -205,6 +205,7 @@ public class ListEventBlockTest extends TestCase {
             changeIndex = 0;
         }
 
+        @Override
         public String toString() {
             String changeTypeAsString;
             if(changeType == ListEvent.INSERT) changeTypeAsString = "I";

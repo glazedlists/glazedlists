@@ -618,6 +618,7 @@ public final class TreeTableSupport {
          */
         private Runnable restoreStateRunnable;
 
+        @Override
         public void keyPressed(KeyEvent e) {
             // if the table isn't enabled, break early
             if (!table.isEnabled())
@@ -659,6 +660,7 @@ public final class TreeTableSupport {
          * When the key is released, execute the Runnable which restores the
          * state of the selection model and "JTable.autoStartsEdit" client property.
          */
+        @Override
         public void keyReleased(KeyEvent e) {
             if (restoreStateRunnable != null) {
                 restoreStateRunnable.run();
@@ -673,6 +675,7 @@ public final class TreeTableSupport {
      * possible.
      */
     private class ArrowKeyListener extends KeyAdapter {
+        @Override
         public void keyPressed(KeyEvent e) {
             if (!arrowKeyExpansionEnabled)
                 return;

@@ -311,6 +311,7 @@ public class Bufferlo implements CharSequence {
      * Write to the Bufferlo as a Stream.
      */
     class BufferloOutputStream extends OutputStream {
+        @Override
         public void write(int b) {
             ByteBuffer writeBuffer = getWriteIntoBuffer();
             writeBuffer.put((byte)b);
@@ -322,6 +323,7 @@ public class Bufferlo implements CharSequence {
      * Read from the Bufferlo as a Stream.
      */
     class BufferloInputStream extends InputStream {
+        @Override
         public int read() {
             ByteBuffer readBuffer = getReadFromBuffer();
             if(readBuffer == null) return -1;
@@ -435,6 +437,7 @@ public class Bufferlo implements CharSequence {
     /**
      * Gets this Bufferlo as a String.
      */
+    @Override
     public String toString() {
         StringBuffer result = new StringBuffer();
         for(int c = 0; c < length(); c++) {

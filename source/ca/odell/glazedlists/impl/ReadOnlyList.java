@@ -48,11 +48,13 @@ public final class ReadOnlyList<E> extends TransformedList<E, E> {
     /**
      * @return <tt>false</tt>; ReadOnlyList is... ahem... readonly
      */
+    @Override
     protected boolean isWritable() {
         return false;
     }
 
     /** {@inheritDoc} */
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
         // just pass on the changes
         updates.forwardEvent(listChanges);
@@ -64,41 +66,49 @@ public final class ReadOnlyList<E> extends TransformedList<E, E> {
     //
 
     /** {@inheritDoc} */
+    @Override
     public boolean contains(Object object) {
         return source.contains(object);
     }
 
     /** {@inheritDoc} */
+    @Override
     public Object[] toArray() {
         return source.toArray();
     }
 
     /** {@inheritDoc} */
+    @Override
     public <T>T[] toArray(T[] array) {
         return source.toArray(array);
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean containsAll(Collection<?> values) {
         return source.containsAll(values);
     }
 
     /** {@inheritDoc} */
+    @Override
     public int indexOf(Object object) {
         return source.indexOf(object);
     }
 
     /** {@inheritDoc} */
+    @Override
     public int lastIndexOf(Object object) {
         return source.lastIndexOf(object);
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean equals(Object object) {
         return source.equals(object);
     }
 
     /** {@inheritDoc} */
+    @Override
     public int hashCode() {
         return source.hashCode();
     }
@@ -109,51 +119,61 @@ public final class ReadOnlyList<E> extends TransformedList<E, E> {
     //
 
     /** @throws UnsupportedOperationException since ReadOnlyList cannot be modified */
+    @Override
     public boolean add(E value) {
         throw new UnsupportedOperationException("ReadOnlyList cannot be modified");
     }
 
     /** @throws UnsupportedOperationException since ReadOnlyList cannot be modified */
+    @Override
     public void add(int index, E value) {
         throw new UnsupportedOperationException("ReadOnlyList cannot be modified");
     }
 
     /** @throws UnsupportedOperationException since ReadOnlyList cannot be modified */
+    @Override
     public boolean addAll(Collection<? extends E> values) {
         throw new UnsupportedOperationException("ReadOnlyList cannot be modified");
     }
 
     /** @throws UnsupportedOperationException since ReadOnlyList cannot be modified */
+    @Override
     public boolean addAll(int index, Collection<? extends E> values) {
         throw new UnsupportedOperationException("ReadOnlyList cannot be modified");
     }
 
     /** @throws UnsupportedOperationException since ReadOnlyList cannot be modified */
+    @Override
     public void clear() {
         throw new UnsupportedOperationException("ReadOnlyList cannot be modified");
     }
 
     /** @throws UnsupportedOperationException since ReadOnlyList cannot be modified */
+    @Override
     public boolean remove(Object toRemove) {
         throw new UnsupportedOperationException("ReadOnlyList cannot be modified");
     }
 
     /** @throws UnsupportedOperationException since ReadOnlyList cannot be modified */
+    @Override
     public E remove(int index) {
         throw new UnsupportedOperationException("ReadOnlyList cannot be modified");
     }
 
     /** @throws UnsupportedOperationException since ReadOnlyList cannot be modified */
+    @Override
     public boolean removeAll(Collection<?> collection) {
         throw new UnsupportedOperationException("ReadOnlyList cannot be modified");
     }
 
     /** @throws UnsupportedOperationException since ReadOnlyList cannot be modified */
+    @Override
     public boolean retainAll(Collection<?> values) {
         throw new UnsupportedOperationException("ReadOnlyList cannot be modified");
     }
 
     /** @throws UnsupportedOperationException since ReadOnlyList cannot be modified */
+    @Override
     public E set(int index, E value) {
         throw new UnsupportedOperationException("ReadOnlyList cannot be modified");
     }

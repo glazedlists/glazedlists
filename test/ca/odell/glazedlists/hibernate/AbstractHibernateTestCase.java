@@ -162,6 +162,7 @@ public abstract class AbstractHibernateTestCase extends TestCase {
      * Setup of testcase.
      * <p>Builds session factory if it's the first execution of test class. 
      */
+    @Override
     protected void setUp() throws Exception {
         if (getSessions() == null || lastTestClass != getClass()) {
             buildSessionFactory(getMappings());
@@ -173,6 +174,7 @@ public abstract class AbstractHibernateTestCase extends TestCase {
      * Handles test run.
      * <p>Closes open sessions and optionally drops session factory after test failure.
      */
+    @Override
     protected void runTest() throws Throwable {
         final boolean stats = ((SessionFactoryImplementor) sessions).getStatistics()
                 .isStatisticsEnabled();

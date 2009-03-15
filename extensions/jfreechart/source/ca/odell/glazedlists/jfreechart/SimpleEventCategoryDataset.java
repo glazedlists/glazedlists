@@ -211,6 +211,7 @@ public final class SimpleEventCategoryDataset<R extends Comparable, C extends Co
      * We override this method for speed reasons, since the super needlessly
      * constructs a new DatasetChangeEvent each time this method is called.
      */
+    @Override
     protected void fireDatasetChanged() {
         notifyListeners(immutableChangeEvent);
     }

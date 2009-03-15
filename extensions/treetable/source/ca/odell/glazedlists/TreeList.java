@@ -253,21 +253,25 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int size() {
         return data.size(VISIBLE_NODES);
     }
 
     /** {@inheritDoc} */
+    @Override
     protected boolean isWritable() {
         return true;
     }
 
     /** {@inheritDoc} */
+    @Override
     protected int getSourceIndex(int mutationIndex) {
         return data.convertIndexColor(mutationIndex, VISIBLE_NODES, REAL_NODES);
     }
 
     /** {@inheritDoc} */
+    @Override
     public E get(int visibleIndex) {
         return getTreeNode(visibleIndex).getElement();
     }
@@ -448,6 +452,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void listChanged(ListEvent<Node<E>> listChanges) {
         updates.beginEvent(true);
 
@@ -1210,6 +1215,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void dispose() {
         source.removeListEventListener(this);
         initializationData.dispose();
@@ -1497,6 +1503,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         }
 
         /** {@inheritDoc} */
+        @Override
         public String toString() {
             return path.toString();
         }
@@ -1605,6 +1612,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         }
 
         /** {@inheritDoc} */
+        @Override
         public boolean equals(Object o) {
             if(this == o) return true;
             final Node node = (Node) o;
@@ -1612,6 +1620,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         }
 
         /** {@inheritDoc} */
+        @Override
         public int hashCode() {
             return path.hashCode();
         }
@@ -1627,14 +1636,17 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             TreeList.this.addListEventListener(this);
         }
 
+        @Override
         protected boolean isWritable() {
             return true;
         }
 
+        @Override
         public Node<E> get(int index) {
             return getTreeNode(index);
         }
 
+        @Override
         public void listChanged(ListEvent<E> listChanges) {
             updates.forwardEvent(listChanges);
         }
@@ -1644,10 +1656,12 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * Expose the entire tree (including collapsed and uncollapsed Node<E>s.
      */
     private class AllNodesList extends AbstractList<Node<E>> {
+        @Override
         public Node<E> get(int index) {
             return data.get(index, ALL_NODES).get();
         }
 
+        @Override
         public int size() {
             return data.size(ALL_NODES);
         }

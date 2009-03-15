@@ -30,6 +30,7 @@ public class ForwardEventTest extends TestCase {
     /**
      * Prepare for the test.
      */
+    @Override
     public void setUp() {
         source = new BasicEventList<String>();
         forwarding = new ForwardingList<String>(source);
@@ -40,6 +41,7 @@ public class ForwardEventTest extends TestCase {
     /**
      * Clean up after the test.
      */
+    @Override
     public void tearDown() {
         source = null;
         forwarding = null;
@@ -89,27 +91,35 @@ public class ForwardEventTest extends TestCase {
         assertIllegalStateExceptionIsThrown(source, new GetIndexTooFarListener());
     }
     private class GetTypeListener extends DoNotStartIteratingListEventListener {
+        @Override
         protected void breakListEvent(ListEvent l) { l.getType(); }
     }
     private class GetBlockStartIndexListener extends DoNotStartIteratingListEventListener {
+        @Override
         protected void breakListEvent(ListEvent l) { l.getBlockStartIndex(); }
     }
     private class GetBlockEndIndexListener extends DoNotStartIteratingListEventListener {
+        @Override
         protected void breakListEvent(ListEvent l) { l.getBlockEndIndex(); }
     }
     private class GetIndexListener extends DoNotStartIteratingListEventListener {
+        @Override
         protected void breakListEvent(ListEvent l) { l.getIndex(); }
     }
     private class GetTypeTooFarListener extends IterateTooFarListEventListener {
+        @Override
         protected void breakListEvent(ListEvent l) { l.getType(); }
     }
     private class GetBlockStartIndexTooFarListener extends IterateTooFarListEventListener {
+        @Override
         protected void breakListEvent(ListEvent l) { l.getBlockStartIndex(); }
     }
     private class GetBlockEndIndexTooFarListener extends IterateTooFarListEventListener {
+        @Override
         protected void breakListEvent(ListEvent l) { l.getBlockEndIndex(); }
     }
     private class GetIndexTooFarListener extends IterateTooFarListEventListener {
+        @Override
         protected void breakListEvent(ListEvent l) { l.getIndex(); }
     }
 
@@ -153,9 +163,11 @@ public class ForwardEventTest extends TestCase {
             super(source);
             source.addListEventListener(this);
         }
+        @Override
         protected boolean isWritable() {
             return false;
         }
+        @Override
         public void listChanged(ListEvent<E> e) {
             updates.forwardEvent(e);
         }

@@ -28,12 +28,14 @@ public class ObservableElementListTest extends TestCase {
         super("Observable Elements - RFE 157");
     }
 
+    @Override
     public void setUp() {
         labels = new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), GlazedLists.beanConnector(JLabel.class));
         counter = ListConsistencyListener.install(labels);
         assertEquals(0, counter.getEventCount());
     }
 
+    @Override
     public void tearDown() {
         labels = null;
         counter = null;
@@ -358,6 +360,7 @@ public class ObservableElementListTest extends TestCase {
             this.bloomCount = bloomCount;
         }
 
+        @Override
         public EventListener installListener(JLabel element) {
             // install a common PropertyChangeListener until the bloomCount is reached
             // and then begin installing unique PropertyChangeListeners
@@ -384,6 +387,7 @@ public class ObservableElementListTest extends TestCase {
             this.picky = picky;
         }
 
+        @Override
         public EventListener installListener(JLabel element) {
             if (this.picky && this.elementCount++ % 2 == 0)
                 return null;
@@ -393,6 +397,7 @@ public class ObservableElementListTest extends TestCase {
             return propertyChangeHandler;
         }
 
+        @Override
         public void uninstallListener(JLabel element, EventListener listener) {
             element.removePropertyChangeListener((PropertyChangeListener) listener);
         }
@@ -418,6 +423,7 @@ public class ObservableElementListTest extends TestCase {
             this.currentGroupSize = -groupSize;
         }
 
+        @Override
         public EventListener installListener(JLabel element) {
             currentGroupSize++;
 
@@ -434,6 +440,7 @@ public class ObservableElementListTest extends TestCase {
             return null;
         }
 
+        @Override
         public void uninstallListener(JLabel element, EventListener listener) {
             element.removePropertyChangeListener((PropertyChangeListener) listener);
         }
@@ -456,6 +463,7 @@ public class ObservableElementListTest extends TestCase {
             super(JLabel.class);
         }
 
+        @Override
         public EventListener installListener(JLabel element) {
             if (this.elementCount++ % 2 == 0)
                 return null;
@@ -476,6 +484,7 @@ public class ObservableElementListTest extends TestCase {
             super(JLabel.class);
         }
 
+        @Override
         protected PropertyChangeListener createPropertyChangeListener() {
             return new LazyThreadedPropertyChangeHandler();
         }
@@ -494,6 +503,7 @@ public class ObservableElementListTest extends TestCase {
          * list elements.
          */
         protected class LazyThreadedPropertyChangeHandler extends PropertyChangeHandler {
+            @Override
             public void propertyChange(final PropertyChangeEvent event) {
                 // start another thread which, in half a second, will notify the list of the
                 // update (which allows us time to modify the list in our TestCase thread)

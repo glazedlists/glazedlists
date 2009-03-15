@@ -48,12 +48,15 @@ final class MutableListDataEvent extends ListDataEvent {
      * Accessors for the change information do not use any information
      * in the parent class.
      */
+    @Override
     public int getIndex0() {
         return index0;
     }
+    @Override
     public int getIndex1() {
         return index1;
     }
+    @Override
     public int getType() {
         return type;
     }
@@ -61,6 +64,7 @@ final class MutableListDataEvent extends ListDataEvent {
     /**
      * Gets this event as a String for debugging.
      */
+    @Override
     public String toString() {
         return "" + type + "[" + index0 + "," + index1 + "]";
     }

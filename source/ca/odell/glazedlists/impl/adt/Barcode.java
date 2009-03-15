@@ -508,6 +508,7 @@ public final class Barcode {
         return new BarcodeIterator(this);
     }
 
+    @Override
     public String toString() {
         StringBuffer result = new StringBuffer();
         for(BarcodeIterator bi = iterator(); bi.hasNext(); ) {

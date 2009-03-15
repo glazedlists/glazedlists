@@ -111,17 +111,20 @@ public class ThreadRecorderEventList<S> extends TransformedList<S,S> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public S get(int index) {
         record(READ_OPERATION);
         return super.get(index);
     }
 
     /** {@inheritDoc} */
+    @Override
     protected boolean isWritable() {
         return true;
     }
 
     /** {@inheritDoc} */
+    @Override
     public void listChanged(ListEvent<S> listChanges) {
         // record each of the WRITES one at a time
         while (listChanges.next()) {

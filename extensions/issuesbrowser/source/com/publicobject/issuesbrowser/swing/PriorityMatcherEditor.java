@@ -47,6 +47,7 @@ public class PriorityMatcherEditor implements FilterComponent<Issue>, ChangeList
         slider.setLabelTable(prioritySliderLabels);
     }
 
+    @Override
     public String toString() {
         return "Priority";
     }

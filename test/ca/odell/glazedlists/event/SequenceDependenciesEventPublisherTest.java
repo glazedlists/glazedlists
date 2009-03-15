@@ -125,6 +125,7 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
             this.value = value;
             publisher.fireEvent(this, "[" + name + ":" + this.value + "]", SimpleSubjectListenerEventFormat.INSTANCE);
         }
+        @Override
         public String toString() {
             return name;
         }
@@ -282,6 +283,7 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
             this.publisher = publisher;
             this.name = name;
         }
+        @Override
         public String toString() {
             return name + ":" + latestRevision;
         }
@@ -520,6 +522,7 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
             this.name = name;
             this.publisher = publisher;
         }
+        @Override
         public String toString() {
             return name;
         }
@@ -552,6 +555,7 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
             public Listener(DetachedSubject subject) {
                 this.subject = subject;
             }
+            @Override
             public String toString() {
                 return "L(" + subject.name + ")";
             }

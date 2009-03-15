@@ -4,7 +4,6 @@
 package ca.odell.glazedlists.calculation;
 
 import junit.framework.TestCase;
-import junit.framework.Assert;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.BasicEventList;
 

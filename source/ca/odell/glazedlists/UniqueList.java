@@ -140,11 +140,13 @@ public final class UniqueList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int size() {
         return grouper.getBarcode().colourSize(Grouper.UNIQUE);
     }
 
     /** {@inheritDoc} */
+    @Override
     protected int getSourceIndex(int index) {
         if(index == size()) return source.size();
         return grouper.getBarcode().getIndex(index, Grouper.UNIQUE);
@@ -161,6 +163,7 @@ public final class UniqueList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public E remove(int index) {
         if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot remove at " + index + " on list of size " + size());
 
@@ -180,6 +183,7 @@ public final class UniqueList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public E set(int index, E value) {
         if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot set at " + index + " on list of size " + size());
 
@@ -217,6 +221,7 @@ public final class UniqueList<E> extends TransformedList<E, E> {
      * @throws ClassCastException if the type of the specified element
      *         is incompatible with this list
      */
+    @Override
     public int indexOf(Object element) {
         final int index = Collections.binarySearch(this, (E) element, ((SortedList<E>)source).getComparator());
 
@@ -225,11 +230,13 @@ public final class UniqueList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected boolean isWritable() {
         return true;
     }
 
     /** {@inheritDoc} */
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
         updates.beginEvent(true);
 
@@ -313,6 +320,7 @@ public final class UniqueList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void dispose() {
         ((SortedList)source).dispose();
         super.dispose();

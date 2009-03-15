@@ -1173,16 +1173,19 @@ public class ListSelection<E> implements ListEventListener<E> {
         }
 
         /** {@inheritDoc} */
+        @Override
         public int size() {
             return barcode.colourSize(SELECTED);
         }
 
         /** {@inheritDoc} */
+        @Override
         protected int getSourceIndex(int mutationIndex) {
             return barcode.getIndex(mutationIndex, SELECTED);
         }
 
         /** {@inheritDoc} */
+        @Override
         public void listChanged(ListEvent<E> listChanges) {
             // Do nothing as all state changes are handled in ListSelection.listChanged()
         }
@@ -1195,6 +1198,7 @@ public class ListSelection<E> implements ListEventListener<E> {
         }
 
         /** {@inheritDoc} */
+        @Override
         protected boolean isWritable() {
             return true;
         }
@@ -1204,6 +1208,7 @@ public class ListSelection<E> implements ListEventListener<E> {
          * in the foot. To dispose a {@link ListSelection}, call
          * {@link ListSelection#dispose()} on that class directly.
          */
+        @Override
         public void dispose() {
             // Do Nothing
         }
@@ -1219,6 +1224,7 @@ public class ListSelection<E> implements ListEventListener<E> {
         }
 
         /** @throws UnsupportedOperationException unconditionally */
+        @Override
         public E set(int index, E item){
             throw new UnsupportedOperationException("Toggling lists don't support setting items");
         }
@@ -1229,6 +1235,7 @@ public class ListSelection<E> implements ListEventListener<E> {
          *
          * @throws IllegalArgumentException if the element isn't found
          */
+        @Override
         public void add(int index, E item) {
             index = source.indexOf(item);
             if(index != -1) {
@@ -1241,6 +1248,7 @@ public class ListSelection<E> implements ListEventListener<E> {
         /**
          * Deselect the specified index.
          */
+        @Override
         public E remove(int index){
             if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot remove at " + index + " on list of size " + size());
             int sourceIndex = getSourceIndex(index);
@@ -1264,16 +1272,19 @@ public class ListSelection<E> implements ListEventListener<E> {
         }
 
         /** {@inheritDoc} */
+        @Override
         public int size() {
             return barcode.colourSize(DESELECTED);
         }
 
         /** {@inheritDoc} */
+        @Override
         protected int getSourceIndex(int mutationIndex) {
             return barcode.getIndex(mutationIndex, DESELECTED);
         }
 
         /** {@inheritDoc} */
+        @Override
         public void listChanged(ListEvent<E> listChanges) {
             // Do nothing as all state changes are handled in ListSelection.listChanged()
         }
@@ -1286,6 +1297,7 @@ public class ListSelection<E> implements ListEventListener<E> {
         }
 
         /** {@inheritDoc} */
+        @Override
         protected boolean isWritable() {
             return true;
         }
@@ -1295,6 +1307,7 @@ public class ListSelection<E> implements ListEventListener<E> {
          * in the foot. To dispose a {@link ListSelection}, call
          * {@link ListSelection#dispose()} on that class directly.
          */
+        @Override
         public void dispose() {
             // Do Nothing
         }
@@ -1310,6 +1323,7 @@ public class ListSelection<E> implements ListEventListener<E> {
         }
 
         /** @throws UnsupportedOperationException unconditionally */
+        @Override
         public E set(int index, E item){
             throw new UnsupportedOperationException("Toggling lists don't support setting items");
         }
@@ -1319,6 +1333,7 @@ public class ListSelection<E> implements ListEventListener<E> {
          *
          * @throws IllegalArgumentException if the element isn't found
          */
+        @Override
         public void add(int index, E item) {
             index = source.indexOf(item);
             if(index != -1) {
@@ -1331,6 +1346,7 @@ public class ListSelection<E> implements ListEventListener<E> {
         /**
          * Select the specified index.
          */
+        @Override
         public E remove(int index){
             if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot remove at " + index + " on list of size " + size());
             int sourceIndex = getSourceIndex(index);

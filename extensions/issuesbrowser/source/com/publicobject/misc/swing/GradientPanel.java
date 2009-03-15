@@ -22,6 +22,7 @@ public class GradientPanel extends JPanel {
         this.vertical = vertical;
     }
 
+    @Override
     public void paintComponent(Graphics g) {
         paintGradient((Graphics2D) g, this.gradientStartColor, this.gradientEndColor, vertical ? this.getHeight() : this.getWidth(), vertical);
     }

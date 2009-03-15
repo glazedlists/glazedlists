@@ -49,6 +49,7 @@ public final class ComparatorChain<T> implements Comparator<T> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean equals(Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
@@ -61,6 +62,7 @@ public final class ComparatorChain<T> implements Comparator<T> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int hashCode() {
         return 0;
     }

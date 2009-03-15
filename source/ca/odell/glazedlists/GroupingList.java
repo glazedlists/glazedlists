@@ -202,16 +202,19 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected int getSourceIndex(int index) {
         return grouper.getBarcode().getIndex(index, Grouper.UNIQUE);
     }
 
     /** {@inheritDoc} */
+    @Override
     protected boolean isWritable() {
         return true;
     }
 
     /** {@inheritDoc} */
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
         updates.beginEvent(true);
 
@@ -243,11 +246,13 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public List<E> get(int index) {
         return groupLists.get(index).get();
     }
 
     /** {@inheritDoc} */
+    @Override
     public List<E> remove(int index) {
         if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot remove at " + index + " on list of size " + size());
 
@@ -262,6 +267,7 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public List<E> set(int index, List<E> value) {
         if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot set at " + index + " on list of size " + size());
 
@@ -284,16 +290,19 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
      * <p><strong><font color="#FF0000">Warning:</font></strong> This method
      * breaks the contract required by {@link List#add(int, Object)}.
      */
+    @Override
     public void add(int index, List<E> value) {
         source.addAll(value);
     }
 
     /** {@inheritDoc} */
+    @Override
     public int size() {
         return grouper.getBarcode().colourSize(Grouper.UNIQUE);
     }
 
     /** {@inheritDoc} */
+    @Override
     public void dispose() {
         ((SortedList) source).dispose();
         super.dispose();
@@ -353,31 +362,37 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
         }
 
         /** {@inheritDoc} */
+        @Override
         public E set(int index, E element) {
             return source.set(getSourceIndex(index), element);
         }
 
         /** {@inheritDoc} */
+        @Override
         public E get(int index) {
             return source.get(getSourceIndex(index));
         }
 
         /** {@inheritDoc} */
+        @Override
         public int size() {
             return getEndIndex() - getStartIndex();
         }
 
         /** {@inheritDoc} */
+        @Override
         public void clear() {
             source.subList(getStartIndex(), getEndIndex()).clear();
         }
 
         /** {@inheritDoc} */
+        @Override
         public E remove(int index) {
             return source.remove(getSourceIndex(index));
         }
 
         /** {@inheritDoc} */
+        @Override
         public void add(int index, E element) {
             source.add(getSourceIndex(index), element);
         }

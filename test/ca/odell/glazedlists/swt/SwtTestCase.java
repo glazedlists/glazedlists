@@ -32,6 +32,7 @@ public class SwtTestCase extends GuiTestCase {
     private Display display;
     private Shell shell;
 
+    @Override
     protected final void executeOnGUIThread(Runnable runnable) {
         display = new Display();
         shell = new Shell(display);

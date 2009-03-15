@@ -53,6 +53,7 @@ class EventListXmlContentHandler extends DefaultHandler {
         }
     }
 
+    @Override
     public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         Tag child;
         if(!stack.isEmpty()) {
@@ -67,10 +68,12 @@ class EventListXmlContentHandler extends DefaultHandler {
         stack.add(child);
     }
 
+    @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         stack.remove(stack.size() - 1);
     }
 
+    @Override
     public void characters(char[] ch, int start, int length) throws SAXException {
         Tag last = stack.get(stack.size() - 1);
         last.append(new String(ch, start, length));

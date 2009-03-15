@@ -67,6 +67,7 @@ public class Project {
         return (projectName != null);
     }
 
+    @Override
     public String toString() {
         return projectTitle;
     }

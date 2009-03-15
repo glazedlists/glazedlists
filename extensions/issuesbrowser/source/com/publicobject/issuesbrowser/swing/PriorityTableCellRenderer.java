@@ -28,6 +28,7 @@ class PriorityTableCellRenderer extends DefaultTableCellRenderer {
         PRIORITY_COLOR_MAP.put(Priority.P5, Color.GRAY);
     }
 
+    @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         final Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 

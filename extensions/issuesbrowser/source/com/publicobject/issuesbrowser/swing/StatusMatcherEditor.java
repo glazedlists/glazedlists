@@ -77,6 +77,7 @@ class StatusMatcherEditor extends AbstractMatcherEditor<Issue> implements ListEv
         return this.checkBoxPanel;
     }
 
+    @Override
     public String toString() {
         return "Status";
     }

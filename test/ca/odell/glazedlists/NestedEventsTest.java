@@ -25,6 +25,7 @@ public class NestedEventsTest extends TestCase {
     /**
      * Prepare for the test.
      */
+    @Override
     public void setUp() {
         source  = new BasicEventList<String>();
         nestableSource = new NestableEventsList<String>(source);
@@ -34,6 +35,7 @@ public class NestedEventsTest extends TestCase {
     /**
      * Clean up after the test.
      */
+    @Override
     public void tearDown() {
         counter = null;
         nestableSource = null;

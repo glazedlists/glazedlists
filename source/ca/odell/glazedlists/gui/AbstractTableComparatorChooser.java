@@ -281,6 +281,7 @@ public abstract class AbstractTableComparatorChooser<E> {
      * state of this {@link AbstractTableComparatorChooser} can be restored
      * by passing the return value of this method to {@link #fromString(String)}.
      */
+    @Override
     public String toString() {
         return sortingState.toString();
     }

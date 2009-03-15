@@ -141,12 +141,14 @@ public abstract class AbstractFilterList extends TransformedList {
     public abstract boolean filterMatches(Object element);
 
     /** {@inheritDoc} */
+    @Override
     public void listChanged(ListEvent listChanges) {
         // just pass on the changes
         updates.forwardEvent(listChanges);
     }
 
     /** {@inheritDoc} */
+    @Override
     protected boolean isWritable() {
         return true;
     }
@@ -175,6 +177,7 @@ public abstract class AbstractFilterList extends TransformedList {
 
 
     /** {@inheritDoc} */
+    @Override
     public void dispose() {
         FilterList filteredSource = (FilterList)source;
         super.dispose();

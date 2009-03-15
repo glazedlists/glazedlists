@@ -156,6 +156,7 @@ public class Parser {
         }
 
         /** @inheritDoc */
+        @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) {
             // update the XMLTagPath by pushing on the latest start tag
             currentTagPath = currentTagPath.child(qName).start();
@@ -178,6 +179,7 @@ public class Parser {
         }
 
         /** @inheritDoc */
+        @Override
         public void endElement(String uri, String localName, String qName) {
             // update the XMLTagPath by indicating the path is to the *end* tag
             currentTagPath = currentTagPath.end();
@@ -216,6 +218,7 @@ public class Parser {
         }
 
         /** @inheritDoc */
+        @Override
         public void characters(char ch[], int start, int length) {
             currentChars.append(ch, start, length);
         }

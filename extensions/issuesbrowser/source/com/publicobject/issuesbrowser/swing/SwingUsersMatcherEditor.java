@@ -56,6 +56,7 @@ class SwingUsersMatcherEditor extends UsersMatcherEditor implements FilterCompon
         return userSelect;
     }
 
+    @Override
     public String toString() {
         return "Users";
     }

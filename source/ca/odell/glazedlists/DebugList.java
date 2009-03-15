@@ -182,16 +182,19 @@ public class DebugList<E> extends AbstractEventList<E> {
     protected void afterWriteOperation() { }
 
     /** {@inheritDoc} */
+    @Override
     public ReadWriteLock getReadWriteLock() {
         return delegate.getReadWriteLock();
     }
 
     /** {@inheritDoc} */
+    @Override
     public ListEventPublisher getPublisher() {
         return delegate.getPublisher();
     }
 
     /** {@inheritDoc} */
+    @Override
     public E get(int index) {
         beforeReadOperation();
         try {
@@ -202,6 +205,7 @@ public class DebugList<E> extends AbstractEventList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int size() {
         beforeReadOperation();
         try {
@@ -212,6 +216,7 @@ public class DebugList<E> extends AbstractEventList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean contains(Object object) {
         beforeReadOperation();
         try {
@@ -222,6 +227,7 @@ public class DebugList<E> extends AbstractEventList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean containsAll(Collection<?> collection) {
         beforeReadOperation();
         try {
@@ -232,6 +238,7 @@ public class DebugList<E> extends AbstractEventList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean equals(Object object) {
         beforeReadOperation();
         try {
@@ -242,6 +249,7 @@ public class DebugList<E> extends AbstractEventList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int hashCode() {
         beforeReadOperation();
         try {
@@ -252,6 +260,7 @@ public class DebugList<E> extends AbstractEventList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int indexOf(Object object) {
         beforeReadOperation();
         try {
@@ -262,6 +271,7 @@ public class DebugList<E> extends AbstractEventList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int lastIndexOf(Object object) {
         beforeReadOperation();
         try {
@@ -272,6 +282,7 @@ public class DebugList<E> extends AbstractEventList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isEmpty() {
         beforeReadOperation();
         try {
@@ -282,6 +293,7 @@ public class DebugList<E> extends AbstractEventList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public Object[] toArray() {
         beforeReadOperation();
         try {
@@ -292,6 +304,7 @@ public class DebugList<E> extends AbstractEventList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public <T> T[] toArray(T[] array) {
         beforeReadOperation();
         try {
@@ -302,6 +315,7 @@ public class DebugList<E> extends AbstractEventList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public String toString() {
         beforeReadOperation();
         try {
@@ -312,6 +326,7 @@ public class DebugList<E> extends AbstractEventList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean add(E value) {
         beforeWriteOperation();
         try {
@@ -322,6 +337,7 @@ public class DebugList<E> extends AbstractEventList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean remove(Object toRemove) {
         beforeWriteOperation();
         try {
@@ -332,6 +348,7 @@ public class DebugList<E> extends AbstractEventList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean addAll(Collection<? extends E> values) {
         beforeWriteOperation();
         try {
@@ -342,6 +359,7 @@ public class DebugList<E> extends AbstractEventList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean addAll(int index, Collection<? extends E> values) {
         beforeWriteOperation();
         try {
@@ -352,6 +370,7 @@ public class DebugList<E> extends AbstractEventList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean removeAll(Collection<?> values) {
         beforeWriteOperation();
         try {
@@ -362,6 +381,7 @@ public class DebugList<E> extends AbstractEventList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean retainAll(Collection<?> values) {
         beforeWriteOperation();
         try {
@@ -372,6 +392,7 @@ public class DebugList<E> extends AbstractEventList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void clear() {
         beforeWriteOperation();
         try {
@@ -382,6 +403,7 @@ public class DebugList<E> extends AbstractEventList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public E set(int index, E value) {
         beforeWriteOperation();
         try {
@@ -392,6 +414,7 @@ public class DebugList<E> extends AbstractEventList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void add(int index, E value) {
         beforeWriteOperation();
         try {
@@ -402,6 +425,7 @@ public class DebugList<E> extends AbstractEventList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public E remove(int index) {
         beforeWriteOperation();
         try {

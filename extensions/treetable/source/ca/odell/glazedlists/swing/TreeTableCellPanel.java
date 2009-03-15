@@ -118,6 +118,7 @@ public class TreeTableCellPanel extends JPanel {
     /**
      * Set the background color of the TreeTableCellPanel and node component.
      */
+    @Override
     public void setBackground(Color bg) {
         super.setBackground(bg);
 
@@ -128,6 +129,7 @@ public class TreeTableCellPanel extends JPanel {
     /**
      * Set the foreground color of the TreeTableCellPanel and node component.
      */
+    @Override
     public void setForeground(Color fg) {
         super.setForeground(fg);
 
@@ -138,6 +140,7 @@ public class TreeTableCellPanel extends JPanel {
     /**
      * Set the font of the TreeTableCellPanel and its inner node component.
      */
+    @Override
     public void setFont(Font font) {
         super.setFont(font);
 
@@ -202,6 +205,7 @@ public class TreeTableCellPanel extends JPanel {
      * after which time the focus will be within the {@link #nodeComponent} and
      * subsequent keystrokes should be ignored.
      */
+    @Override
     protected boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed) {
         // let the nodeComponent have a crack at processing the KeyEvent
         // (we'd love to call nodeComponent.processKeyBinding(ks, e, condition, pressed) but it's protected and thus out of scope)
@@ -222,6 +226,7 @@ public class TreeTableCellPanel extends JPanel {
      * cell edit is complete, focus is returned to the JTable in that case as
      * well.
      */
+    @Override
     public void setNextFocusableComponent(Component aComponent) {
         super.setNextFocusableComponent(aComponent);
 

@@ -158,6 +158,7 @@ public class TextMatcher<E> implements Matcher<E> {
      * TextMatcher objects are considered equal if they agree on the mode,
      * strategy, and set of SearchTerms.
      */
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -175,6 +176,7 @@ public class TextMatcher<E> implements Matcher<E> {
     }
 
     /** @inheritDoc */
+    @Override
     public int hashCode() {
         int result;
         result = mode;

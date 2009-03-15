@@ -50,12 +50,14 @@ public final class ThreadSafeList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
         // just pass on the changes
         updates.forwardEvent(listChanges);
     }
 
     /** {@inheritDoc} */
+    @Override
     public E get(int index) {
         getReadWriteLock().readLock().lock();
         try {
@@ -66,6 +68,7 @@ public final class ThreadSafeList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int size() {
         getReadWriteLock().readLock().lock();
         try {
@@ -76,11 +79,13 @@ public final class ThreadSafeList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected boolean isWritable() {
         return true;
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean contains(Object object) {
         getReadWriteLock().readLock().lock();
         try {
@@ -91,6 +96,7 @@ public final class ThreadSafeList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean containsAll(Collection<?> collection) {
         getReadWriteLock().readLock().lock();
         try {
@@ -101,6 +107,7 @@ public final class ThreadSafeList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean equals(Object object) {
         getReadWriteLock().readLock().lock();
         try {
@@ -111,6 +118,7 @@ public final class ThreadSafeList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int hashCode() {
         getReadWriteLock().readLock().lock();
         try {
@@ -121,6 +129,7 @@ public final class ThreadSafeList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int indexOf(Object object) {
         getReadWriteLock().readLock().lock();
         try {
@@ -131,6 +140,7 @@ public final class ThreadSafeList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int lastIndexOf(Object object) {
         getReadWriteLock().readLock().lock();
         try {
@@ -141,6 +151,7 @@ public final class ThreadSafeList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isEmpty() {
         getReadWriteLock().readLock().lock();
         try {
@@ -151,6 +162,7 @@ public final class ThreadSafeList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public Object[] toArray() {
         getReadWriteLock().readLock().lock();
         try {
@@ -161,6 +173,7 @@ public final class ThreadSafeList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public <T> T[] toArray(T[] array) {
         getReadWriteLock().readLock().lock();
         try {
@@ -171,6 +184,7 @@ public final class ThreadSafeList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean add(E value) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -181,6 +195,7 @@ public final class ThreadSafeList<E> extends TransformedList<E, E> {
     }
         
     /** {@inheritDoc} */
+    @Override
     public boolean remove(Object toRemove) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -191,6 +206,7 @@ public final class ThreadSafeList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean addAll(Collection<? extends E> values) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -201,6 +217,7 @@ public final class ThreadSafeList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean addAll(int index, Collection<? extends E> values) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -211,6 +228,7 @@ public final class ThreadSafeList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean removeAll(Collection<?> values) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -221,6 +239,7 @@ public final class ThreadSafeList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean retainAll(Collection<?> values) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -231,6 +250,7 @@ public final class ThreadSafeList<E> extends TransformedList<E, E> {
     }
         
     /** {@inheritDoc} */
+    @Override
     public void clear() {
         getReadWriteLock().writeLock().lock();
         try {
@@ -241,6 +261,7 @@ public final class ThreadSafeList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public E set(int index, E value) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -251,6 +272,7 @@ public final class ThreadSafeList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void add(int index, E value) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -261,6 +283,7 @@ public final class ThreadSafeList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public E remove(int index) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -271,6 +294,7 @@ public final class ThreadSafeList<E> extends TransformedList<E, E> {
     }
     
     /** {@inheritDoc} */
+    @Override
     public String toString() {
         getReadWriteLock().readLock().lock();
         try {

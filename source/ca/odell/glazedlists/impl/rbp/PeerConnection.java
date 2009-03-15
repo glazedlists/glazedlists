@@ -198,6 +198,7 @@ class PeerConnection implements CTPHandler {
     /**
      * Gets this connection as a String.
      */
+    @Override
     public String toString() {
         if(state == AWAITING_CONNECT) return "pending";
         else if(state == READY) return connection.toString();

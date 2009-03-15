@@ -25,11 +25,13 @@ public class CircularArrayList<T> extends AbstractList<T> {
 
   int arrayLength = values.length;
 
-  public T get(int index) {
+  @Override
+public T get(int index) {
     return (T)values[toCircularIndex(index)];
   }
 
-  public void add(int index, T element) {
+  @Override
+public void add(int index, T element) {
     growIfNecessary();
 
     int indexToAdd = toCircularIndex(index);
@@ -81,7 +83,8 @@ public class CircularArrayList<T> extends AbstractList<T> {
     head = 0;
   }
 
-  public T remove(int index) {
+  @Override
+public T remove(int index) {
     int indexToRemove = toCircularIndex(index);
     int distToHead = distanceToHead(indexToRemove);
     int distToTail = distanceToTail(indexToRemove);
@@ -192,7 +195,8 @@ public class CircularArrayList<T> extends AbstractList<T> {
       : index + arrayLength - head;
   }
 
-  public int size() {
+  @Override
+public int size() {
     return size;
   }
 

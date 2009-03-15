@@ -186,6 +186,7 @@ class Expected {
     /** 
      * Print the expected string.
      */
+    @Override
     public String toString() {
         if(expected.length() > 30) return "Expected \"" + expected.length() + ":" + expected.substring(0, 30) + "\"";
         else return "Expected \"" + expected + "\"";
@@ -207,6 +208,7 @@ class Enqueued {
         return data;
     }
     
+    @Override
     public String toString() {
         if(data.length() > 30) return "Enqueued \"" + data.length() + ":" + data.toString().substring(0, 30) + "\"";
         else return "Enqueued \"" + data + "\"";

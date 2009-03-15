@@ -55,6 +55,7 @@ public final class FreezableList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public E get(int index) {
         if(frozen) {
             return frozenData.get(index);
@@ -64,6 +65,7 @@ public final class FreezableList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int size() {
         if(frozen) {
             return frozenData.size();
@@ -73,6 +75,7 @@ public final class FreezableList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected boolean isWritable() {
         return !frozen;
     }
@@ -144,6 +147,7 @@ public final class FreezableList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
         if(frozen) {
             // when a list change event arrives and this list is frozen,

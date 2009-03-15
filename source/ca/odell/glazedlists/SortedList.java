@@ -150,6 +150,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
         // handle reordering events
         if(listChanges.isReordering()) {
@@ -388,6 +389,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected int getSourceIndex(int mutationIndex) {
         Element sortedNode = sorted.get(mutationIndex);
         Element unsortedNode = (Element)sortedNode.get();
@@ -395,6 +397,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected boolean isWritable() {
         return true;
     }
@@ -479,6 +482,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int indexOf(Object object) {
         if(mode != STRICT_SORT_ORDER || comparator == null) return source.indexOf(object);
 
@@ -507,6 +511,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int lastIndexOf(Object object) {
         if(mode != STRICT_SORT_ORDER || comparator == null) return source.lastIndexOf(object);
 
@@ -590,6 +595,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean contains(Object object) {
         return indexOf(object) != -1;
     }
@@ -662,6 +668,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public Iterator<E> iterator() {
         return new SortedListIterator();
     }

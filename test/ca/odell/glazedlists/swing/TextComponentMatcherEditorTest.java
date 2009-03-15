@@ -21,10 +21,12 @@ public class TextComponentMatcherEditorTest extends SwingTestCase {
 
     private SimpleMatcherEditorListener eventCounter;
 
+    @Override
     public void guiSetUp() {
         eventCounter = new SimpleMatcherEditorListener();
     }
 
+    @Override
     public void guiTearDown() {
         eventCounter = null;
     }

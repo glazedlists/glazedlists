@@ -296,10 +296,12 @@ public class AmazonBrowser implements Runnable {
             setSurrendersFocusOnKeystroke(true);
         }
 
+        @Override
         public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
             return normalize(super.prepareRenderer(renderer, row, column), row);
         }
 
+        @Override
         public Component prepareEditor(TableCellEditor editor, int row, int column) {
             return normalize(super.prepareEditor(editor, row, column), row);
         }

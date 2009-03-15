@@ -70,6 +70,7 @@ public final class AudienceRating implements Comparable<AudienceRating> {
         return description;
     }
 
+    @Override
     public String toString() {
 		return name;
 	}

@@ -31,6 +31,7 @@ public class LowerThresholdRangeModel extends DefaultBoundedRangeModel implement
     /**
      * Returns the model's maximum.
      */
+    @Override
     public int getMaximum() {
         target.getReadWriteLock().readLock().lock();
         try {
@@ -43,6 +44,7 @@ public class LowerThresholdRangeModel extends DefaultBoundedRangeModel implement
     /**
      * Returns the model's current value.
      */
+    @Override
     public int getValue() {
         target.getReadWriteLock().readLock().lock();
         try {
@@ -59,6 +61,7 @@ public class LowerThresholdRangeModel extends DefaultBoundedRangeModel implement
      * in the JDK source for DefaultBoundedRangeModel.  Just giving credit where
      * credit is due.
      */
+    @Override
     public void setRangeProperties(int newValue, int newExtent, int newMin, int newMax, boolean adjusting) {
         target.getReadWriteLock().writeLock().lock();
         try {

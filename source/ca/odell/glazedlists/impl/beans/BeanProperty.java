@@ -344,6 +344,7 @@ public class BeanProperty<T> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean equals(Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
@@ -357,6 +358,7 @@ public class BeanProperty<T> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int hashCode() {
         int result;
         result = beanClass.hashCode();

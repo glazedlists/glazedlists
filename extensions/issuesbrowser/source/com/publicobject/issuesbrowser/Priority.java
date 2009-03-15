@@ -50,7 +50,8 @@ public final class Priority implements Comparable<Priority> {
 		return rating;
 	}
 
-	public String toString() {
+	@Override
+    public String toString() {
 		return name;
 	}
 

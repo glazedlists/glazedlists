@@ -406,6 +406,7 @@ public class EventTableViewerTest extends SwtTestCase {
         /**
          * Returning null implies no ThreadProxyEventList is necessary.
          */
+        @Override
         protected TransformedList<E, E> createSwtThreadProxyList(EventList<E> source, Display display) {
             return null;
         }

@@ -46,6 +46,7 @@ public class AutoCompleteSupportComplexTestApp {
             return new Url(s);
         }
 
+        @Override
         public String toString() {
             return "Url: " + getLocation();
         }
@@ -530,12 +531,14 @@ public class AutoCompleteSupportComplexTestApp {
     }
 
     private static final class UrlFormat extends Format {
+        @Override
         public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
             if (obj != null)
                 toAppendTo.append(((Url) obj).getLocation());
             return toAppendTo;
         }
 
+        @Override
         public Object parseObject(String source, ParsePosition pos) {
             return new Url(source);
         }

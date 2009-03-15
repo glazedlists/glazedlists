@@ -144,6 +144,7 @@ public abstract class TreeCriterion {
          * Returns a synthetic Item whose title is the first Character
          * of the title of the given <code>item</code>.
          */
+        @Override
         public Item getPathItem(Item item) {
             // extract the first char from the title of the item
             final String title = item.getItemAttributes().getTitle();
@@ -161,6 +162,7 @@ public abstract class TreeCriterion {
          * {@link AudienceRating}, if one exists, or <code>"Unknown"</code>
          * if an {@link AudienceRating} does not exist.
          */
+        @Override
         public Item getPathItem(Item item) {
             final AudienceRating rating = item.getItemAttributes().getAudienceRating();
             return getOrCreateItem(rating == null ? "Unknown" : rating.getDescription());
@@ -177,6 +179,7 @@ public abstract class TreeCriterion {
             super("Price", false);
         }
 
+        @Override
         public Item getPathItem(Item item) {
             return getOrCreateItem("Not Yet Implemented");
         }
@@ -191,6 +194,7 @@ public abstract class TreeCriterion {
          * Returns a synthetic Item whose title is a String representing the
          * decade of the release date of the <code>item</code>.
          */
+        @Override
         public Item getPathItem(Item item) {
             // extract the release year of the Item
             final Date releaseDate = item.getItemAttributes().getReleaseDate();

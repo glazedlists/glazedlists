@@ -21,6 +21,7 @@ public class MacCornerScrollPaneLayoutManager extends ScrollPaneLayout {
             scrollPane.setLayout(new MacCornerScrollPaneLayoutManager());
         }
     }
+    @Override
     public void layoutContainer(Container container) {
         super.layoutContainer(container);
         if(!hsb.isVisible() && vsb != null) {

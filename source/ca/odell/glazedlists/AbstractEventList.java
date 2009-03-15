@@ -439,6 +439,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      * @param object the object to be compared for equality with this list.
      * @return <tt>true</tt> if the specified object is equal to this list.
      */
+    @Override
     public boolean equals(Object object) {
         if(object == this) return true;
         if(object == null) return false;
@@ -480,6 +481,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      * @see Object#equals(Object)
      * @see #equals(Object)
      */
+    @Override
     public int hashCode() {
         int hashCode = 1;
         for(Iterator<E> i = iterator(); i.hasNext(); ) {
@@ -711,6 +713,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      *
      * @return a string representation of this collection.
      */
+    @Override
     public String toString() {
         StringBuffer result = new StringBuffer();
         result.append("[");

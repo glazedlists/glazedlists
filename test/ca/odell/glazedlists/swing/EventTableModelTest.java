@@ -490,6 +490,7 @@ public class EventTableModelTest extends SwingTestCase {
         /**
          * Returning null implies no ThreadProxyEventList is necessary.
          */
+        @Override
         protected TransformedList<E, E> createSwingThreadProxyList(EventList<E> source) {
             return null;
         }

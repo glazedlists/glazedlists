@@ -101,6 +101,7 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> impl
     }
 
     /** {@inheritDoc} */
+    @Override
     public final void listChanged(ListEvent<E> listChanges) {
         // if we've haven't scheduled a commit, we need to begin a new event
         if(!scheduled) {
@@ -127,16 +128,19 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> impl
     protected abstract void schedule(Runnable runnable);
 
     /** {@inheritDoc} */
+    @Override
     public final int size() {
         return localCache.size();
     }
 
     /** {@inheritDoc} */
+    @Override
     public final E get(int index) {
         return localCache.get(index);
     }
 
     /** {@inheritDoc} */
+    @Override
     protected final boolean isWritable() {
         return true;
     }
@@ -194,6 +198,7 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> impl
     }
 
     /** {@inheritDoc} */
+    @Override
     public void dispose() {
         super.dispose();
         cacheUpdates.removeListEventListener(updateRunner);

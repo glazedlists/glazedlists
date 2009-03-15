@@ -23,6 +23,7 @@ public class CompositeMatcherEditorTest extends TestCase {
     /**
      * Prepare for the test.
      */
+    @Override
     public void setUp() {
         compositeMatcherEditor = new CompositeMatcherEditor<String>();
         textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
@@ -32,6 +33,7 @@ public class CompositeMatcherEditorTest extends TestCase {
     /**
      * Clean up after the test.
      */
+    @Override
     public void tearDown() {
         compositeMatcherEditor = null;
         textMatcherEditor = null;

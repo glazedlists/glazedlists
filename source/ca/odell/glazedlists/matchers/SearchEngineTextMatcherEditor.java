@@ -161,6 +161,7 @@ public class SearchEngineTextMatcherEditor<E> extends TextMatcherEditor<E> {
         }
 
         /** @inheritDoc */
+        @Override
         public boolean equals(Object o) {
             if (this == o)
                 return true;
@@ -173,6 +174,7 @@ public class SearchEngineTextMatcherEditor<E> extends TextMatcherEditor<E> {
         }
 
         /** @inheritDoc */
+        @Override
         public int hashCode() {
             return name.hashCode();
         }

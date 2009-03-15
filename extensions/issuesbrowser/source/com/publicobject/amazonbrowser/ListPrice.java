@@ -42,6 +42,7 @@ public class ListPrice implements Comparable<ListPrice> {
     }
 
     /** inheritDoc */
+    @Override
     public String toString() {
         return formattedPrice;
     }

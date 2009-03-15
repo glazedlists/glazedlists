@@ -554,6 +554,7 @@ public class J2SE14ReadWriteLock implements ReadWriteLock, java.io.Serializable 
          *
          * @return a string identifying this lock, as well as its lock state
          */
+        @Override
         public String toString() {
             int r = lock.getReadLockCount();
             return super.toString() +
@@ -764,6 +765,7 @@ public class J2SE14ReadWriteLock implements ReadWriteLock, java.io.Serializable 
          *
          * @return a string identifying this lock, as well as its lock state
          */
+        @Override
         public String toString() {
             Thread o = lock.getOwner();
             return super.toString() + ((o == null) ?
@@ -923,6 +925,7 @@ public class J2SE14ReadWriteLock implements ReadWriteLock, java.io.Serializable 
      *
      * @return a string identifying this lock, as well as its lock state
      */
+    @Override
     public String toString() {
         return super.toString() +
             "[Write locks = " + getWriteHoldCount() +

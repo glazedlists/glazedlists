@@ -82,16 +82,19 @@ public final class PopularityList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected boolean isWritable() {
         return true;
     }
 
     /** {@inheritDoc} */
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
         updates.forwardEvent(listChanges);
     }
 
     /** {@inheritDoc} */
+    @Override
     public void dispose() {
         SortedList sortedSource = (SortedList)source;
         super.dispose();

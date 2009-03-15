@@ -119,6 +119,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
     }
 
     /** {@inheritDoc} */
+    @Override
     public void add(int index, E element) {
         // create the change event
         updates.beginEvent();
@@ -130,6 +131,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean add(E element) {
         // create the change event
         updates.beginEvent();
@@ -142,11 +144,13 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean addAll(Collection<? extends E> collection) {
         return addAll(size(), collection);
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean addAll(int index, Collection<? extends E> collection) {
         // don't do an add of an empty set
         if(collection.size() == 0) return false;
@@ -165,6 +169,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
     }
 
     /** {@inheritDoc} */
+    @Override
     public E remove(int index) {
         // create the change event
         updates.beginEvent();
@@ -177,6 +182,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean remove(Object element) {
         int index = data.indexOf(element);
         if(index == -1) return false;
@@ -185,6 +191,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
     }
 
     /** {@inheritDoc} */
+    @Override
     public void clear() {
         // don't do a clear on an empty set
         if(isEmpty()) return;
@@ -200,6 +207,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
     }
 
     /** {@inheritDoc} */
+    @Override
     public E set(int index, E element) {
         // create the change event
         updates.beginEvent();
@@ -212,16 +220,19 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
     }
 
     /** {@inheritDoc} */
+    @Override
     public E get(int index) {
         return data.get(index);
     }
 
     /** {@inheritDoc} */
+    @Override
     public int size() {
         return data.size();
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean removeAll(Collection<?> collection) {
         boolean changed = false;
         updates.beginEvent();
@@ -239,6 +250,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean retainAll(Collection<?> collection) {
         boolean changed = false;
         updates.beginEvent();

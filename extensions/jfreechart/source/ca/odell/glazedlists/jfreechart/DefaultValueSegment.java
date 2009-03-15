@@ -85,6 +85,7 @@ public class DefaultValueSegment<T extends Comparable, V extends Comparable> imp
     }
 
     /** {@inheritDoc} */
+    @Override
     public String toString() {
         return "(" + start + ", " + end + ")";
     }

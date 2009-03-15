@@ -617,6 +617,7 @@ public final class SparseListNode {
     /**
      * For debugging purposes.
      */
+    @Override
     public String toString() {
         return "[ " + left + " <"+emptySpace+"> " + value +" <"+height+"> "
             + right + " ]";
@@ -816,6 +817,7 @@ public final class SparseListNode {
             throw new UnsupportedOperationException("Not implemented yet.");
         }
 
+        @Override
         public String toString() {
             return "Accessing " + currentNode + " for the " + timesRequested + " time.";
         }

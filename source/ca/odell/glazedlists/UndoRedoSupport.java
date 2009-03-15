@@ -284,6 +284,7 @@ public final class UndoRedoSupport<E> {
         /** Returns the single Edit contained within this composite, if only one exists, otherwise it returns this entire CompositeEdit. */
         private Edit getSimplestEdit() { return edits.size() == 1 ? edits.get(0) : this; }
 
+        @Override
         public void undoImpl() {
             txSource.beginEvent();
             try {
@@ -295,6 +296,7 @@ public final class UndoRedoSupport<E> {
             }
         }
 
+        @Override
         public void redoImpl() {
             txSource.beginEvent();
             try {
@@ -332,7 +334,9 @@ public final class UndoRedoSupport<E> {
             super(source, index, value);
         }
 
+        @Override
         public void undoImpl() { source.remove(index); }
+        @Override
         public void redoImpl() { source.add(index, value); }
     }
 
@@ -344,7 +348,9 @@ public final class UndoRedoSupport<E> {
             super(source, index, value);
         }
 
+        @Override
         public void undoImpl() { source.add(index, value); }
+        @Override
         public void redoImpl() { source.remove(index); }
     }
 
@@ -359,7 +365,9 @@ public final class UndoRedoSupport<E> {
             this.oldValue = oldValue;
         }
 
+        @Override
         public void undoImpl() { source.set(index, oldValue); }
+        @Override
         public void redoImpl() { source.set(index, value); }
     }
 }

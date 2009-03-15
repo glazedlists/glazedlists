@@ -24,6 +24,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Prepare for the test.
      */
+    @Override
     public void setUp() {
         source = new BasicEventList<Object>();
         unique = new UniqueList<Object>(source);
@@ -32,6 +33,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Clean up after the test.
      */
+    @Override
     public void tearDown() {
         unique = null;
         source = null;

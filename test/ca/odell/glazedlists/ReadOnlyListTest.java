@@ -28,6 +28,7 @@ public class ReadOnlyListTest extends TestCase {
     /**
      * Prepare for the test.
      */
+    @Override
     public void setUp() {
         // create a list of data
         readOnlyData = new BasicEventList<String>();
@@ -42,6 +43,7 @@ public class ReadOnlyListTest extends TestCase {
     /**
      * Clean up after the test.
      */
+    @Override
     public void tearDown() {
         readOnlyData = null;
         readOnly = null;

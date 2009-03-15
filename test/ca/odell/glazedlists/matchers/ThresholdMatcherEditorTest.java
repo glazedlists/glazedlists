@@ -46,13 +46,15 @@ public class ThresholdMatcherEditorTest extends TestCase {
 	FilterList<Integer> filterList;
 	ThresholdMatcherEditor<Integer,Integer> thresholdMatcherEditor;
 
-	protected void setUp() throws Exception {
+	@Override
+    protected void setUp() throws Exception {
 		sourceList = GlazedLists.eventList(INITIAL_LIST);
 		thresholdMatcherEditor = new ThresholdMatcherEditor<Integer,Integer>();
 		filterList = new FilterList<Integer>(sourceList, thresholdMatcherEditor);
 	}
 
-	protected void tearDown() throws Exception {
+	@Override
+    protected void tearDown() throws Exception {
 		filterList.dispose();
 		filterList = null;
 		sourceList = null;

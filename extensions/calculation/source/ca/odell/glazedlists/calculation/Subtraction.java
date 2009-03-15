@@ -16,6 +16,7 @@ final class Subtraction {
             super(new Calculation[] {a, b});
         }
 
+        @Override
         protected Float recompute(Number[] inputs) {
             final float a = inputs[0].floatValue();
             final float b = inputs[1].floatValue();
@@ -28,6 +29,7 @@ final class Subtraction {
             super(new Calculation[] {a, b});
         }
 
+        @Override
         protected Double recompute(Number[] inputs) {
             final double a = inputs[0].doubleValue();
             final double b = inputs[1].doubleValue();
@@ -40,6 +42,7 @@ final class Subtraction {
             super(new Calculation[] {a, b});
         }
 
+        @Override
         protected Integer recompute(Number[] inputs) {
             final int a = inputs[0].intValue();
             final int b = inputs[1].intValue();
@@ -52,6 +55,7 @@ final class Subtraction {
             super(new Calculation[] {a, b});
         }
 
+        @Override
         protected Long recompute(Number[] inputs) {
             final long a = inputs[0].longValue();
             final long b = inputs[1].longValue();

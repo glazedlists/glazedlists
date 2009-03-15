@@ -36,6 +36,7 @@ public class ListSelectionTest extends TestCase {
     /**
      * Prepare for the test.
      */
+    @Override
     public void setUp() {
         source = new BasicEventList<Integer>();
         listSelection = new ListSelection<Integer>(source);
@@ -51,6 +52,7 @@ public class ListSelectionTest extends TestCase {
     /**
      * Clean up after the test.
      */
+    @Override
     public void tearDown() {
         listSelection.dispose();
         listSelection = null;

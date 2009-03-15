@@ -92,17 +92,21 @@ public class DiffTest extends TestCase {
         public ReallyBigList(int size) {
             this.size = size;
         }
+        @Override
         public Object get(int index) {
             return new Integer(index);
         }
 
+        @Override
         public int size() {
             return size;
         }
+        @Override
         public Object remove(int index) {
             size--;
             return new Integer(index);
         }
+        @Override
         public void add(int index, Object value) {
             size++;
         }
@@ -117,23 +121,28 @@ public class DiffTest extends TestCase {
         public SparseDifferencesList(List delegate) {
             this.delegate = delegate;
         }
+        @Override
         public Object get(int index) {
             Object mapValue = values.get(new Integer(index));
             if(mapValue != null) return mapValue;
 
             return delegate.get(index);
         }
+        @Override
         public int size() {
             return delegate.size();
         }
 
+        @Override
         public Object set(int index, Object value) {
             return values.put(new Integer(index), value);
         }
+        @Override
         public void add(int index, Object element) {
             delegate.add(index, element);
             set(index, element);
         }
+        @Override
         public Object remove(int index) {
             return delegate.remove(index);
         }

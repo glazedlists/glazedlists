@@ -117,6 +117,7 @@ public final class NetworkList<E> extends TransformedList<E, E> {
         this.writable = writable;
     }
     /** {@inheritDoc} */
+    @Override
     public boolean isWritable() {
         return writable;
     }
@@ -129,6 +130,7 @@ public final class NetworkList<E> extends TransformedList<E, E> {
     }
     
     /** {@inheritDoc} */
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
         // notify resource listeners
         try {
@@ -253,6 +255,7 @@ public final class NetworkList<E> extends TransformedList<E, E> {
         public ReadWriteLock getReadWriteLock() {
              return NetworkList.this.getReadWriteLock();
         }
+        @Override
         public String toString() {
             return NetworkList.this.toString();
         }
@@ -275,6 +278,7 @@ public final class NetworkList<E> extends TransformedList<E, E> {
     }
     
     /** {@inheritDoc} */
+    @Override
     public void dispose() {
         resourceStatus.removeResourceStatusListener(privateInterfaces);
         disconnect();

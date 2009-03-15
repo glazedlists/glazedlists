@@ -24,6 +24,7 @@ public class CachingListTest extends TestCase {
     /**
      * Prepare for the test.
      */
+    @Override
     public void setUp() {
         source  = new BasicEventList();
         cache = new CachingList(source, 15);
@@ -32,6 +33,7 @@ public class CachingListTest extends TestCase {
     /**
      * Clean up after the test.
      */
+    @Override
     public void tearDown() {
         cache.dispose();
         cache = null;
@@ -405,6 +407,7 @@ class WaitEventList extends TransformedList {
         this.waitDuration = waitDuration;
     }
 
+    @Override
     public Object get(int index) {
         try {
             Thread.sleep(waitDuration);
@@ -418,6 +421,7 @@ class WaitEventList extends TransformedList {
      * For implementing the ListEventListener interface. When the underlying list
      * changes, this sends notification to listening lists.
      */
+    @Override
     public void listChanged(ListEvent listChanges) {
         // just pass on the changes
         updates.beginEvent();
@@ -427,6 +431,7 @@ class WaitEventList extends TransformedList {
         updates.commitEvent();
     }
 
+    @Override
     protected boolean isWritable() {
         return true;
     }

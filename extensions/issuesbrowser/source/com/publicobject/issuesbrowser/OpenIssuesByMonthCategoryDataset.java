@@ -63,6 +63,7 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
      * to chop off the last value since it is beyond any of the data values to
      * be shown in the chart.
      */
+    @Override
     protected List<? extends Comparable> createColumnKeyList() {
         this.rawColumnKeys = new BasicEventList();
 
@@ -77,6 +78,7 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
     }
 
     /** @inheritDoc */
+    @Override
     public Number getValue(Comparable rowKey, Comparable columnKey) {
         // the columnKey is expected to be a Date
         final Date start = (Date) columnKey;
@@ -117,6 +119,7 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
      *
      * @param segment the {@link ValueSegment} that was added to the Dataset
      */
+    @Override
     protected void postInsert(ValueSegment<Date,String> segment) {
         final String value = segment.getValue();
 
@@ -142,6 +145,7 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
      *
      * @param segment the {@link ValueSegment} that was added to the Dataset
      */
+    @Override
     protected void postDelete(ValueSegment<Date,String> segment) {
         final String value = segment.getValue();
 

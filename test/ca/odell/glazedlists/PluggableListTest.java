@@ -16,12 +16,14 @@ public class PluggableListTest extends TestCase {
     private EventList<String> source;
     private PluggableList<String> pl;
 
+    @Override
     protected void setUp() throws Exception {
         source = new BasicEventList<String>();
         pl = new PluggableList<String>(source);
         ListConsistencyListener.install(pl);
     }
 
+    @Override
     protected void tearDown() throws Exception {
         pl.dispose();
         source = null;

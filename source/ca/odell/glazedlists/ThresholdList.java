@@ -173,6 +173,7 @@ public final class ThresholdList<E> extends RangeList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean contains(Object object) {
         // Fast fail if the object isn't within the thresholds
         // Note: this technically breaks the contract for contains.
@@ -182,6 +183,7 @@ public final class ThresholdList<E> extends RangeList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int indexOf(Object object) {
         // Fast fail if the object isn't within the thresholds
         // Note: this technically breaks the contract for indexOf.
@@ -191,6 +193,7 @@ public final class ThresholdList<E> extends RangeList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int lastIndexOf(Object object) {
         // Fast fail if the object isn't within the thresholds
         // Note: this technically breaks the contract for lastIndexOf.
@@ -208,6 +211,7 @@ public final class ThresholdList<E> extends RangeList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setRange(int startIndex, int endIndex) {
         // this implementation is slightly inconsistent with the superclass
         // because the super treats endIndex as exclusive wheras we treat
@@ -218,6 +222,7 @@ public final class ThresholdList<E> extends RangeList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setTailRange(int startIndex, int endIndex) {
         // this implementation is slightly inconsistent with the superclass
         // because the super treats endIndex as exclusive wheras we treat
@@ -242,11 +247,13 @@ public final class ThresholdList<E> extends RangeList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getStartIndex() {
         return sortedSource.sortIndex(new Integer(lowerThreshold));
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getEndIndex() {
         // search for the upperThreshold value
         int index = sortedSource.lastSortIndex(new Integer(upperThreshold));
@@ -259,6 +266,7 @@ public final class ThresholdList<E> extends RangeList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void dispose() {
         sortedSource.dispose();
         super.dispose();
@@ -322,6 +330,7 @@ public final class ThresholdList<E> extends RangeList<E> {
         }
 
         /** {@inheritDoc} */
+        @Override
         public boolean equals(Object o) {
             if(this == o) return true;
             if(o == null || getClass() != o.getClass()) return false;
@@ -334,6 +343,7 @@ public final class ThresholdList<E> extends RangeList<E> {
         }
 
         /** {@inheritDoc} */
+        @Override
         public int hashCode() {
             return evaluator.hashCode();
         }

@@ -47,12 +47,14 @@ public class DebugListTest extends TestCase {
         new Clear(),
     });
 
+    @Override
     protected void setUp() {
         list = new DebugList<String>();
         list.addAll(Arrays.asList(new String[] {"one", "two", "three", "four", "five"}));
         ListConsistencyListener.install(list);
     }
 
+    @Override
     protected void tearDown() {
         list = null;
     }

@@ -237,6 +237,7 @@ public class Tree4Deltas<E> {
         return new Iterator<E>(tree);
     }
 
+    @Override
     public String toString() {
         return tree.asSequenceOfColors();
     }

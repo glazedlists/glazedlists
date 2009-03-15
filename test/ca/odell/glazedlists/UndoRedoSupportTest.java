@@ -16,6 +16,7 @@ public class UndoRedoSupportTest extends TestCase {
     private UndoRedoSupport undoRedoSupport;
     private UndoSupportWatcher undoSupportWatcher;
 
+    @Override
     protected void setUp() {
         source = new BasicEventList<String>();
         nestedSource = new TransactionList<String>(source, true);
@@ -25,6 +26,7 @@ public class UndoRedoSupportTest extends TestCase {
         undoRedoSupport.addUndoSupportListener(undoSupportWatcher);
     }
 
+    @Override
     protected void tearDown() {
         source = null;
         nestedSource = null;

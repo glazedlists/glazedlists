@@ -107,17 +107,20 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
      * @return <tt>false</tt> because we cannot support {@link #add(int, Object)};
      *      though we do support {@link #set(int, Object)} and {@link #remove(int)}
      */
+    @Override
     protected boolean isWritable() {
         return false;
     }
 
     /** {@inheritDoc} */
+    @Override
     public int size() {
         // size of the child nodes only
         return barcode.whiteSize();
     }
 
     /** {@inheritDoc} */
+    @Override
     public E get(int index) {
         // get the child
         final ChildElement<E> childElement = getChildElement(index);
@@ -126,6 +129,7 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
     }
 
     /** {@inheritDoc} */
+    @Override
     public E set(int index, E value) {
         // set on the child
         final ChildElement<E> childElement = getChildElement(index);
@@ -134,6 +138,7 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
     }
 
     /** {@inheritDoc} */
+    @Override
     public E remove(int index) {
         // remove from the child
         final ChildElement<E> childElement = getChildElement(index);
@@ -196,6 +201,7 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
      * Handle changes in the parent list. We'll need to update our node list
      * sizes.
      */
+    @Override
     public void listChanged(ListEvent<S> listChanges) {
         // need to process the changes so that our size caches are up to date.
         updates.beginEvent();
@@ -220,6 +226,7 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
     }
     
     /** @inheritDoc */
+    @Override
     public void dispose() {
         super.dispose();
         
@@ -482,6 +489,7 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
             children.getPublisher().clearRelatedSubject(this);
         }
 
+        @Override
         public String toString() {
             return "[" + childElements.indexOfNode(node, (byte)0) + ":" + children + "]";
         }

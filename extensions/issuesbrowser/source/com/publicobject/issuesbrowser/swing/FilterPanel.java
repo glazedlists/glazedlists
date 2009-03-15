@@ -143,6 +143,7 @@ class FilterPanel {
         public JPanel getWrapPanel() {
             return wrapPanel;
         }
+        @Override
         public String toString() {
             return filterComponent.toString();
         }

@@ -29,6 +29,7 @@ public class EventTableColumnModelTest extends SwingTestCase {
     // so they can be compared for consistency at a later time
     private TableColumnEventWatcher watcher;
 
+    @Override
     public void guiSetUp() {
         watcher = new TableColumnEventWatcher();
     }

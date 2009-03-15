@@ -112,6 +112,7 @@ final class TableCheckFilterList<S, E> extends TransformedList<S, E> implements 
     /**
      * @return <tt>false</tt>; TableCheckFilterList is readonly
      */
+    @Override
     protected boolean isWritable() {
         return false;
     }
@@ -203,6 +204,7 @@ final class TableCheckFilterList<S, E> extends TransformedList<S, E> implements 
      * Returns the element at the specified position in this list. This unwraps
      * a {@link CheckWrapped} object from the source if necessary.
      */
+    @Override
     public E get(int index) {
         if(checkableTableFormat != null) {
             return super.get(index);
@@ -213,6 +215,7 @@ final class TableCheckFilterList<S, E> extends TransformedList<S, E> implements 
     }
 
     /** {@inheritDoc} */
+    @Override
     public void listChanged(ListEvent listChanges) {
         updates.forwardEvent(listChanges);
     }
@@ -265,6 +268,7 @@ final class TableCheckFilterList<S, E> extends TransformedList<S, E> implements 
         source.set(sourceIndex, source.get(sourceIndex));
     }
 
+    @Override
     public void addListEventListener(ListEventListener<? super E> listChangeListener) {
         super.addListEventListener(listChangeListener);
 
@@ -276,6 +280,7 @@ final class TableCheckFilterList<S, E> extends TransformedList<S, E> implements 
     }
 
     /** {@inheritDoc} */
+    @Override
     public void dispose() {
         if (checkableWrapperList != null)
             checkableWrapperList.dispose();
@@ -337,6 +342,7 @@ class CheckableWrapperList<S> extends TransformedList<S, CheckWrapped<S>> {
     /**
      * @return <tt>false</tt>; CheckableWrapperList is readonly
      */
+    @Override
     protected boolean isWritable() {
         return false;
     }
@@ -347,6 +353,7 @@ class CheckableWrapperList<S> extends TransformedList<S, CheckWrapped<S>> {
      * value is an instance of CheckWrapped, which is the only value that this
      * list supports.
      */
+    @Override
     public CheckWrapped<S> set(int index, CheckWrapped<S> value) {
         source.set(index, value.getWrapped());
         return value;
@@ -358,10 +365,12 @@ class CheckableWrapperList<S> extends TransformedList<S, CheckWrapped<S>> {
         }
     }
 
+    @Override
     public CheckWrapped<S> get(int index) {
         return wrappedSource.get(index);
     }
 
+    @Override
     public void listChanged(ListEvent listChanges) {
         updates.beginEvent();
         while (listChanges.next()) {
@@ -396,6 +405,7 @@ class CheckWrapped<E> {
     public boolean getChecked() { return checked; }
     public void setChecked(boolean checked) { this.checked = checked; }
 
+    @Override
     public String toString() {
         if(checked) return "[*] " + wrapped;
         else return "[ ] " + wrapped;

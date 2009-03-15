@@ -55,6 +55,7 @@ public class RangeList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public final void listChanged(ListEvent<E> listChanges) {
         // This EventList handles changes to the source EventList using a
         // two-phase approach:
@@ -208,16 +209,19 @@ public class RangeList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public final int size() {
         return currentEndIndex - currentStartIndex;
     }
 
     /** {@inheritDoc} */
+    @Override
     protected final int getSourceIndex(int mutationIndex) {
         return mutationIndex + currentStartIndex;
     }
 
     /** {@inheritDoc} */
+    @Override
     protected final boolean isWritable() {
         return true;
     }

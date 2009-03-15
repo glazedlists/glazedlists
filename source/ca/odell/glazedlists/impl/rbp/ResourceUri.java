@@ -112,6 +112,7 @@ class ResourceUri implements Comparable {
             return "glazedlists://" + host + ":" + port + path;
         }
     }
+    @Override
     public String toString() {
         return "Resource URI [local=" + local + ", host=" + host + ", port=" + port + ", path=" + path + "]";
     }
@@ -119,6 +120,7 @@ class ResourceUri implements Comparable {
     /**
      * Computes a hash of this resource uri.
      */
+    @Override
     public int hashCode() {
         int result = path.hashCode();
         if(!local) {
@@ -153,6 +155,7 @@ class ResourceUri implements Comparable {
     /**
      * Tests if this ResourceUri equals that ResourceUri.
      */
+    @Override
     public boolean equals(Object other) {
         return (compareTo(other) == 0);
     }

@@ -218,11 +218,13 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
     }
 
     /** @inheritDoc */
+    @Override
     public boolean equals(Object o) {
         return delegate.equals(o);
     }
 
     /** @inheritDoc */
+    @Override
     public int hashCode() {
         return delegate.hashCode();
     }
@@ -322,16 +324,19 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
      */
     private class EntrySet extends AbstractSet<Entry<K, V>> {
         /** {@inheritDoc} */
+        @Override
         public int size() {
             return keyList.size();
         }
 
         /** {@inheritDoc} */
+        @Override
         public Iterator<Entry<K, V>> iterator() {
             return new EntrySetIterator(keyList.listIterator());
         }
 
         /** {@inheritDoc} */
+        @Override
         public boolean contains(Object o) {
             if (!(o instanceof Map.Entry))
                 return false;
@@ -346,6 +351,7 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
         }
 
         /** {@inheritDoc} */
+        @Override
         public boolean remove(Object o) {
             if (!contains(o)) return false;
             FunctionListMap.this.remove(((Map.Entry) o).getKey());
@@ -353,6 +359,7 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
         }
 
         /** {@inheritDoc} */
+        @Override
         public void clear() {
             FunctionListMap.this.clear();
         }
@@ -454,6 +461,7 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
          * Two MapEntry entry objects are equal iff their keys and values
          * are equal.
          */
+        @Override
         public boolean equals(Object o) {
             if (!(o instanceof Map.Entry))
                 return false;
@@ -464,11 +472,13 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
         }
 
         /** {@inheritDoc} */
+        @Override
         public int hashCode() {
             return (key == null ? 0 : key.hashCode()) ^ value.hashCode();
         }
 
         /** {@inheritDoc} */
+        @Override
         public String toString() {
             return getKey() + "=" + getValue();
         }
@@ -482,26 +492,31 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
      */
     private class KeySet extends AbstractSet<K> {
         /** {@inheritDoc} */
+        @Override
         public int size() {
             return keyList.size();
         }
 
         /** {@inheritDoc} */
+        @Override
         public Iterator<K> iterator() {
             return new KeySetIterator(keyList.listIterator());
         }
 
         /** {@inheritDoc} */
+        @Override
         public boolean contains(Object o) {
             return FunctionListMap.this.containsKey(o);
         }
 
         /** {@inheritDoc} */
+        @Override
         public boolean remove(Object o) {
             return FunctionListMap.this.remove(o) != null;
         }
 
         /** {@inheritDoc} */
+        @Override
         public void clear() {
             FunctionListMap.this.clear();
         }

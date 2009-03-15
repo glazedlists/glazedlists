@@ -75,10 +75,12 @@ public class RemovedValueTest extends TestCase {
             source.addListEventListener(this);
         }
 
+        @Override
         protected boolean isWritable() {
             return true;
         }
 
+        @Override
         public void listChanged(ListEvent<E> listChanges) {
             updates.beginEvent();
             while(listChanges.next()) {

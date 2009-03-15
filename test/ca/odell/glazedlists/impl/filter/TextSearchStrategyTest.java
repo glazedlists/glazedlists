@@ -19,6 +19,7 @@ public class TextSearchStrategyTest extends TestCase {
     /**
      * Prepare for the test.
      */
+    @Override
     public void setUp() {
         strategies = new TextSearchStrategy[] {
             new BoyerMooreCaseInsensitiveTextSearchStrategy()
@@ -28,6 +29,7 @@ public class TextSearchStrategyTest extends TestCase {
     /**
      * Clean up after the test.
      */
+    @Override
     public void tearDown() {
         strategies = null;
     }

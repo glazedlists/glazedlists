@@ -33,6 +33,7 @@ public class ThresholdListTest extends TestCase {
     /**
      * Prepare for the test.
      */
+    @Override
     public void setUp() {
         source = new BasicEventList<Integer>();
         evaluator = new IntegerEvaluator();
@@ -44,6 +45,7 @@ public class ThresholdListTest extends TestCase {
     /**
      * Clean up after the test.
      */
+    @Override
     public void tearDown() {
         thresholdList.dispose();
         thresholdList = null;

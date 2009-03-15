@@ -166,7 +166,8 @@ public class ThreadContentionPerformance {
 			return num_ops;
 		}
 
-		public void run() {
+		@Override
+        public void run() {
 			while (!isInterrupted()) {
 				// Wait
 				long sleep = min_wait + wait_diff == 0 ? 0 : random.nextInt(wait_diff);
@@ -232,7 +233,8 @@ public class ThreadContentionPerformance {
 		}
 
 
-		public void run() {
+		@Override
+        public void run() {
 			while (!isInterrupted()) {
 				// Wait
 				long sleep = min_wait + wait_diff == 0 ? 0 : random.nextInt(wait_diff);

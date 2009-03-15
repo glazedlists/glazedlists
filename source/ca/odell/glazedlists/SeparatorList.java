@@ -97,16 +97,19 @@ public class SeparatorList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int size() {
         return collapsedElements.colourSize(Barcode.BLACK);
     }
 
     /** {@inheritDoc} */
+    @Override
     protected int getSourceIndex(int mutationIndex) {
         return collapsedElements.getIndex(mutationIndex, Barcode.BLACK);
     }
 
     /** {@inheritDoc} */
+    @Override
     protected boolean isWritable() {
         return true;
     }
@@ -174,6 +177,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
         updates.beginEvent(true);
 
@@ -519,6 +523,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         }
 
         /** {@inheritDoc} */
+        @Override
         public E get(int index) {
             Object type = insertedSeparators.get(index);
             if(type == SEPARATOR) return (E)separators.get(getSeparatorIndex(index)).get();
@@ -527,6 +532,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         }
 
         /** {@inheritDoc} */
+        @Override
         protected int getSourceIndex(int mutationIndex) {
             Object type = insertedSeparators.get(mutationIndex);
             if(type == SEPARATOR) throw new IllegalArgumentException("No source index exists for the separator located at index " + mutationIndex);
@@ -541,16 +547,19 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         }
 
         /** {@inheritDoc} */
+        @Override
         protected boolean isWritable() {
             return true;
         }
 
         /** {@inheritDoc} */
+        @Override
         public int size() {
             return insertedSeparators.size();
         }
 
         /** {@inheritDoc} */
+        @Override
         public void listChanged(ListEvent<E> listChanges) {
             // when the separator comparator is changed in the source list, let
             // the grouper know so we can rebuild our groups, then bail since
@@ -807,6 +816,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
             }
 
             /** {@inheritDoc} */
+            @Override
             public String toString() {
                 return "" + size() + " elements starting with \"" + first() + "\"";
             }

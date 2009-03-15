@@ -26,6 +26,7 @@ public class CreationDateMatcherEditor extends NachoDateRangeMatcherEditor<Issue
         super(ISSUE_CREATION_DATE_FILTERATOR);
     }
 
+    @Override
     public String toString() {
         return "Creation Date";
     }

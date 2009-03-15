@@ -77,11 +77,13 @@ class ReentrantWriterPreferenceReadWriteLock extends WriterPreferenceReadWriteLo
     /** cache/reuse the special Integer value one to speed up readlocks */
     protected static final Integer IONE = new Integer(1);
 
+    @Override
     protected boolean allowReader() {
         return (activeWriter_ == null && waitingWriters_ == 0) ||
         activeWriter_ == Thread.currentThread();
     }
 
+    @Override
     protected synchronized boolean startRead() {
         Thread t = Thread.currentThread();
         Integer c = readers_.get(t);
@@ -99,6 +101,7 @@ class ReentrantWriterPreferenceReadWriteLock extends WriterPreferenceReadWriteLo
             return false;
     }
 
+    @Override
     protected synchronized boolean startWrite() {
         if (activeWriter_ == Thread.currentThread()) { // already held; re-acquire
             ++writeHolds_;
@@ -119,6 +122,7 @@ class ReentrantWriterPreferenceReadWriteLock extends WriterPreferenceReadWriteLo
             return false;
     }
 
+    @Override
     protected synchronized Signaller endRead() {
         Thread t = Thread.currentThread();
         Integer c = readers_.get(t);
@@ -143,6 +147,7 @@ class ReentrantWriterPreferenceReadWriteLock extends WriterPreferenceReadWriteLo
         }
     }
 
+    @Override
     protected synchronized Signaller endWrite() {
         if (activeWriter_ == null)
             throw new IllegalMonitorStateException("Attempted to unlock a writelock which was not locked. Please ensure the writelock is always locked and unlocked symmetrically.");
@@ -345,6 +350,7 @@ class WriterPreferenceReadWriteLock implements ReadWriteLock {
         }
 
 
+        @Override
         synchronized void signalWaiters() { ReaderLock.this.notifyAll(); }
 
         public boolean tryLock() {
@@ -421,6 +427,7 @@ class WriterPreferenceReadWriteLock implements ReadWriteLock {
             if (s != null) s.signalWaiters();
         }
 
+        @Override
         synchronized void signalWaiters() { WriterLock.this.notify(); }
 
         public boolean tryLock() {

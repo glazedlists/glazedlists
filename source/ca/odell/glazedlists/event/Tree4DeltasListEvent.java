@@ -28,6 +28,7 @@ class Tree4DeltasListEvent<E> extends ListEvent<E> {
     /**
      * Create a copy of this list event.
      */
+    @Override
     public ListEvent<E> copy() {
         Tree4DeltasListEvent<E> result = new Tree4DeltasListEvent<E>(deltasAssembler, sourceList);
         result.deltasIterator = deltasIterator != null ? deltasIterator.copy() : null;
@@ -36,6 +37,7 @@ class Tree4DeltasListEvent<E> extends ListEvent<E> {
         return result;
     }
 
+    @Override
     public void reset() {
         // prefer to use the linear blocks, which are faster
         if(deltasAssembler.getUseListBlocksLinear()) {
@@ -49,46 +51,55 @@ class Tree4DeltasListEvent<E> extends ListEvent<E> {
         }
     }
 
+    @Override
     public boolean next() {
         if(linearIterator != null) return linearIterator.next();
         else return deltasIterator.next();
     }
 
+    @Override
     public boolean hasNext() {
         if(linearIterator != null) return linearIterator.hasNext();
         else return deltasIterator.hasNext();
     }
 
+    @Override
     public boolean nextBlock() {
         if(linearIterator != null) return linearIterator.nextBlock();
         else return deltasIterator.nextNode();
     }
 
+    @Override
     public boolean isReordering() {
         return (deltasAssembler.getReorderMap() != null);
     }
 
+    @Override
     public int[] getReorderMap() {
         int[] reorderMap = deltasAssembler.getReorderMap();
         if(reorderMap == null) throw new IllegalStateException("Cannot get reorder map for a non-reordering change");
         return reorderMap;
     }
 
+    @Override
     public int getIndex() {
         if(linearIterator != null) return linearIterator.getIndex();
         else return deltasIterator.getIndex();
     }
 
+    @Override
     public int getBlockStartIndex() {
         if(linearIterator != null) return linearIterator.getBlockStart();
         else return deltasIterator.getIndex();
     }
 
+    @Override
     public int getBlockEndIndex() {
         if(linearIterator != null) return linearIterator.getBlockEnd() - 1;
         else return deltasIterator.getEndIndex() - 1;
     }
 
+    @Override
     public int getType() {
         if(linearIterator != null) {
             return linearIterator.getType();
@@ -97,6 +108,7 @@ class Tree4DeltasListEvent<E> extends ListEvent<E> {
         }
     }
 
+    @Override
     public E getOldValue() {
         if(linearIterator != null) {
             return (E)linearIterator.getOldValue();
@@ -105,15 +117,18 @@ class Tree4DeltasListEvent<E> extends ListEvent<E> {
         }
     }
 
+    @Override
     public E getNewValue() {
         // TODO(jessewilson):
         return (E)ListEvent.UNKNOWN_VALUE;
     }
 
+    @Override
     public int getBlocksRemaining() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public String toString() {
         if(linearIterator != null) {
             return "ListEvent: " + deltasAssembler.getListBlocksLinear().toString();

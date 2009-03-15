@@ -24,6 +24,7 @@ public class BarcodeTest extends TestCase {
     /**
      * Prepare for the test.
      */
+    @Override
     public void setUp() {
         barcode = new Barcode();
     }
@@ -31,6 +32,7 @@ public class BarcodeTest extends TestCase {
     /**
      * Clean up after the test.
      */
+    @Override
     public void tearDown() {
         barcode.clear();
         barcode = null;

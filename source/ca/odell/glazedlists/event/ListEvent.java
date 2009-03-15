@@ -7,7 +7,6 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.TransformedList;
 
 import java.util.EventObject;
-import java.util.List;
 
 /**
  * A ListEvent models a change to a list.
@@ -152,5 +151,6 @@ public abstract class ListEvent<E> extends EventObject {
      * Gets this event as a String. This simply iterates through all blocks
      * and concatenates them.
      */
+    @Override
     public abstract String toString();
 }

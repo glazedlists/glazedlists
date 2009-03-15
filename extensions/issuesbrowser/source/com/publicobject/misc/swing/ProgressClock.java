@@ -34,6 +34,7 @@ public class ProgressClock extends JComponent {
         foregroundPaint = new TexturePaint(afterBuffered, bounds);
     }
 
+    @Override
     protected void paintComponent(Graphics g) {
         // todo - center the clock in the center of the component, for larger
         // than preferred size components
@@ -56,14 +57,17 @@ public class ProgressClock extends JComponent {
         repaint();
     }
 
+    @Override
     public Dimension getPreferredSize() {
         return size;
     }
 
+    @Override
     public Dimension getMaximumSize() {
         return size;
     }
 
+    @Override
     public Dimension getMinimumSize() {
         return size;
     }

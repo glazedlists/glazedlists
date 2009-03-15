@@ -32,6 +32,7 @@ public final class BeanLabelProvider<E> extends LabelProvider {
     /**
      * Gets a label for the given Object from the JavaBean property.
      */
+    @Override
     public String getText(Object object) {
         if(beanProperty == null) loadPropertyDescriptors((E)object);
         Object property = beanProperty.get((E)object);

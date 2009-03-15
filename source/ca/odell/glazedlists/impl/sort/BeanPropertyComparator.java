@@ -49,6 +49,7 @@ public final class BeanPropertyComparator<T> implements Comparator<T> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean equals(Object o) {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
@@ -62,6 +63,7 @@ public final class BeanPropertyComparator<T> implements Comparator<T> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int hashCode() {
         int result;
         result = propertyComparator.hashCode();

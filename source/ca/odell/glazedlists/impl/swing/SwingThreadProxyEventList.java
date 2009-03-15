@@ -28,6 +28,7 @@ public class SwingThreadProxyEventList<E> extends ThreadProxyEventList<E> {
     /**
      * Schedule the specified runnable to be run on the proxied thread.
      */
+    @Override
     protected void schedule(Runnable runnable) {
         if(SwingUtilities.isEventDispatchThread()) {
             runnable.run();

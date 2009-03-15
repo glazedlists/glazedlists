@@ -25,6 +25,7 @@ import java.lang.reflect.InvocationTargetException;
  */
 public abstract class SwingTestCase extends GuiTestCase {
 
+    @Override
     protected final void executeOnGUIThread(Runnable runnable) {
         try {
             SwingUtilities.invokeAndWait(runnable);

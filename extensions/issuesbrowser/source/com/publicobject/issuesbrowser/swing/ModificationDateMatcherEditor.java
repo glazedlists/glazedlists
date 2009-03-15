@@ -23,6 +23,7 @@ public class ModificationDateMatcherEditor extends NachoDateRangeMatcherEditor<I
         super(ModificationDateMatcherEditor.ISSUE_DELTA_DATE_FILTERATOR);
     }
 
+    @Override
     public String toString() {
         return "Modification Date";
     }

@@ -67,6 +67,7 @@ public final class SparseList extends AbstractList {
     /**
      * Gets the size of this {@link List}.
      */
+    @Override
     public int size() {
         return size;
     }
@@ -74,6 +75,7 @@ public final class SparseList extends AbstractList {
     /**
      * Inserts a value into this tree at the given index
      */
+    @Override
     public void add(int index, Object value) {
         // Let nulls be inserted by the method created for that purpose
         if(value == null) {
@@ -121,6 +123,7 @@ public final class SparseList extends AbstractList {
     /**
      * Gets the value in this tree at the given index
      */
+    @Override
     public Object get(int index) {
         SparseListNode node = getNode(index);
         // The value at that index is a null
@@ -140,6 +143,7 @@ public final class SparseList extends AbstractList {
     /**
      * Sets the value of the node at the given index
      */
+    @Override
     public Object set(int index, Object value) {
         // The set occurs in the actual tree
         if(root != null && index < treeSize) {
@@ -168,6 +172,7 @@ public final class SparseList extends AbstractList {
     /**
      * Removes the nodex at the given index
      */
+    @Override
     public Object remove(int index) {
         // The remove occurs in the actual tree
         if(root != null && index < treeSize) {
@@ -185,6 +190,7 @@ public final class SparseList extends AbstractList {
     /**
      * Clears the tree
      */
+    @Override
     public void clear() {
         size = 0;
         root = null;
@@ -216,6 +222,7 @@ public final class SparseList extends AbstractList {
     /**
      * Obtains an {@link Iterator} for this {@link List}.
      */
+    @Override
     public Iterator iterator() {
         if(size == 0) return Collections.EMPTY_LIST.iterator();
         return new SparseListNode.SparseListIterator(this, root);

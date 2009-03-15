@@ -51,16 +51,19 @@ public class BciiTreeAsList/*[ TYPELIST_START ]*/ <T0,T1> /*[ TYPELIST_END ]*/ e
     }
 
     /** {@inheritDoc} */
+    @Override
     public T0 get(int index) {
         return tree.get(index /*[ COLORED_START ]*/, colors /*[ COLORED_END ]*/).get();
     }
 
     /** {@inheritDoc} */
+    @Override
     public void add(int index, T0 element) {
         tree.add(index, /*[ COLORED_START ]*/ colors, color, /*[ COLORED_END ]*/ element, 1);
     }
 
     /** {@inheritDoc} */
+    @Override
     public T0 set(int index, T0 element) {
         T0 replaced = get(index);
         tree.set(index, /*[ COLORED_START ]*/ colors, color, /*[ COLORED_END ]*/ element, 1);
@@ -68,6 +71,7 @@ public class BciiTreeAsList/*[ TYPELIST_START ]*/ <T0,T1> /*[ TYPELIST_END ]*/ e
     }
 
     /** {@inheritDoc} */
+    @Override
     public T0 remove(int index) {
         T0 removed = get(index);
         tree.remove(index, /*[ COLORED_START ]*/ colors, /*[ COLORED_END ]*/ 1);
@@ -75,6 +79,7 @@ public class BciiTreeAsList/*[ TYPELIST_START ]*/ <T0,T1> /*[ TYPELIST_END ]*/ e
     }
 
     /** {@inheritDoc} */
+    @Override
     public int size() {
         return tree.size(/*[ COLORED_START ]*/ colors /*[ COLORED_END ]*/);
     }

@@ -33,6 +33,7 @@ public class SearchEngineTextWidgetMatcherEditorTest extends SwtTestCase {
     private Text textField;
     private SearchEngineTextWidgetMatcherEditor<String> matcherEditor;
 
+    @Override
     public void guiSetUp() {
         filterList = new FilterList<String>(new BasicEventList<String>());
         filterList.addAll(GlazedListsTests.delimitedStringToList("James Jesse Jodie Jimney Jocelyn"));
@@ -42,6 +43,7 @@ public class SearchEngineTextWidgetMatcherEditorTest extends SwtTestCase {
         filterList.setMatcherEditor(matcherEditor);
     }
 
+    @Override
     public void guiTearDown() {
         matcherEditor.dispose();
     }

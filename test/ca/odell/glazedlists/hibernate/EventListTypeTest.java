@@ -138,6 +138,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
     /**
      * Gets mapping files for this test case. 
      */
+    @Override
     protected String[] getMappings() {
         return new String[] { "User.hbm.xml" };
     }

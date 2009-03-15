@@ -29,6 +29,7 @@ public class TextFilterComponent implements FilterComponent<Issue> {
         return textComponentMatcherEditor;
     }
 
+    @Override
     public String toString() {
         return "Text Filter";
     }

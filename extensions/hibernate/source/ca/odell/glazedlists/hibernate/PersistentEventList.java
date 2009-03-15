@@ -74,6 +74,7 @@ public final class PersistentEventList extends PersistentList implements EventLi
     }
 
     /** {@inheritDoc} */
+    @Override
     public void beforeInitialize(CollectionPersister persister, int anticipatedSize) {
         beforeInitialize();
     }

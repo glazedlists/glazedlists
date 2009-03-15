@@ -38,6 +38,7 @@ public class SortedListTest extends TestCase {
     /**
      * Prepare for the test.
      */
+    @Override
     public void setUp() {
         unsortedList = new BasicEventList<Comparable>();
         sortedList = SortedList.create(unsortedList);
@@ -46,6 +47,7 @@ public class SortedListTest extends TestCase {
     /**
      * Clean up after the test.
      */
+    @Override
     public void tearDown() {
         unsortedList = null;
         sortedList = null;
@@ -1349,6 +1351,7 @@ public class SortedListTest extends TestCase {
         }
         public int getPosition() { return position; }
         public void setPosition(int position) { this.position = position; }
+        @Override
         public String toString() {
             return "P:" + position;
         }
@@ -1397,6 +1400,7 @@ public class SortedListTest extends TestCase {
             return song;
         }
 
+        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
@@ -1409,6 +1413,7 @@ public class SortedListTest extends TestCase {
             return true;
         }
 
+        @Override
         public int hashCode() {
             int result;
             result = artist.hashCode();
@@ -1421,6 +1426,7 @@ public class SortedListTest extends TestCase {
             return this.getArtist().compareTo(song.getArtist());
         }
 
+        @Override
         public String toString() {
             return this.getArtist() + " - " + this.getSong();
         }

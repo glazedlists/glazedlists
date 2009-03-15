@@ -102,16 +102,19 @@ public final class SequenceList<E> extends TransformedList<E,E> implements Rando
     /**
      * @return <tt>false</tt>; SequenceList is readonly
      */
+    @Override
     protected boolean isWritable() {
         return false;
     }
 
     /** {@inheritDoc} */
+    @Override
     public int size() {
         return this.sequence.size();
     }
 
     /** {@inheritDoc} */
+    @Override
     public E get(int index) {
         return this.sequence.get(index);
     }
@@ -198,6 +201,7 @@ public final class SequenceList<E> extends TransformedList<E,E> implements Rando
     }
 
     /** {@inheritDoc} */
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
         this.updateSequence();
     }

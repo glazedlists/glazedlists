@@ -201,11 +201,13 @@ public class TransactionList<E> extends TransformedList<E, E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected boolean isWritable() {
         return true;
     }
 
     /** @inheritDoc */
+    @Override
     public void dispose() {
         if (rollbackSupport != null)
             rollbackSupport.uninstall();
@@ -219,6 +221,7 @@ public class TransactionList<E> extends TransformedList<E, E> {
      * Simply forwards all of the <code>listChanges</code> since TransactionList
      * doesn't transform the source data in any way.
      */
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
         updates.forwardEvent(listChanges);
     }

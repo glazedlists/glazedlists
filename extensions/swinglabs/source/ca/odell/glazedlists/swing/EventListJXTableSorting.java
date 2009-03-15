@@ -133,6 +133,7 @@ public class EventListJXTableSorting {
      * more elegant.
      */
     private class EventListFilterPipeline extends FilterPipeline {
+        @Override
         public SortController getSortController() {
             return sortController;
         }

@@ -280,6 +280,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      * <p>To do this, clicks are injected into each of the
      * corresponding <code>ColumnClickTracker</code>s.
      */
+    @Override
     protected void redetectComparator(Comparator<? super E> currentComparator) {
         super.redetectComparator(currentComparator);
 
@@ -291,6 +292,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
     /**
      * Updates the comparator in use and applies it to the table.
      */
+    @Override
     protected final void rebuildComparator() {
         super.rebuildComparator();
 
@@ -305,6 +307,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
     /**
      * Gets the sorting style currently applied to the specified column.
      */
+    @Override
     protected final int getSortingStyle(int column) {
         return super.getSortingStyle(table.convertColumnIndexToModel(column));
     }
@@ -360,6 +363,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
      * to call any method on a {@link TableComparatorChooser} after it has been disposed.
      */
+    @Override
     public void dispose() {
         super.dispose();
         headerClickHandler.dispose();
@@ -546,6 +550,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
             table.getTableHeader().addMouseListener(this);
         }
 
+        @Override
         public void mouseClicked(MouseEvent e) {
             // if the MouseEvent is popping up a context menu, do not sort
             if (mouseEventIsPerformingPopupTrigger) return;
@@ -574,6 +579,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
          * can avoid sorting the table when the poor user just wants to show
          * a context menu.
          */
+        @Override
         public void mousePressed(MouseEvent mouseEvent) {
             this.mouseEventIsPerformingPopupTrigger = mouseEvent.isPopupTrigger();
         }

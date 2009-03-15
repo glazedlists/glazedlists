@@ -18,8 +18,11 @@ final class Sum {
             super(new Float(0), source);
         }
 
+        @Override
         protected void inserted(Number element) { setValue(new Float(getValue().floatValue() + element.floatValue())); }
+        @Override
         protected void deleted(Number element) { setValue(new Float(getValue().floatValue() - element.floatValue())); }
+        @Override
         protected void updated(Number oldElement, Number newElement) { setValue(new Float(getValue().floatValue() - oldElement.floatValue() + newElement.floatValue())); }
     }
 
@@ -28,8 +31,11 @@ final class Sum {
             super(new Double(0), source);
         }
 
+        @Override
         protected void inserted(Number element) { setValue(new Double(getValue().doubleValue() + element.doubleValue())); }
+        @Override
         protected void deleted(Number element) { setValue(new Double(getValue().doubleValue() - element.doubleValue())); }
+        @Override
         protected void updated(Number oldElement, Number newElement) { setValue(new Double(getValue().doubleValue() - oldElement.doubleValue() + newElement.doubleValue())); }
     }
 
@@ -38,8 +44,11 @@ final class Sum {
             super(new Integer(0), source);
         }
 
+        @Override
         protected void inserted(Number element) { setValue(new Integer(getValue().intValue() + element.intValue())); }
+        @Override
         protected void deleted(Number element) { setValue(new Integer(getValue().intValue() - element.intValue())); }
+        @Override
         protected void updated(Number oldElement, Number newElement) { setValue(new Integer(getValue().intValue() - oldElement.intValue() + newElement.intValue())); }
     }
 
@@ -48,8 +57,11 @@ final class Sum {
             super(new Long(0), source);
         }
 
+        @Override
         protected void inserted(Number element) { setValue(new Long(getValue().longValue() + element.longValue())); }
+        @Override
         protected void deleted(Number element) { setValue(new Long(getValue().longValue() - element.longValue())); }
+        @Override
         protected void updated(Number oldElement, Number newElement) { setValue(new Long(getValue().longValue() - oldElement.longValue() + newElement.longValue())); }
     }
 }

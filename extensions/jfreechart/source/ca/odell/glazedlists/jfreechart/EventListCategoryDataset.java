@@ -331,6 +331,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
      * We override this method for speed reasons, since the super needlessly
      * constructs a new DatasetChangeEvent each time this method is called.
      */
+    @Override
     protected void fireDatasetChanged() {
         notifyListeners(immutableChangeEvent);
     }

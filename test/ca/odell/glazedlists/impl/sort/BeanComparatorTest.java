@@ -79,6 +79,7 @@ public class BeanComparatorTest extends TestCase {
         }
         public int getPosition() { return position; }
         public void setPosition(int position) { this.position = position; }
+        @Override
         public String toString() {
             return "P:" + position;
         }

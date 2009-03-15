@@ -1169,6 +1169,7 @@ final class BarcodeNode {
         replacement.height = 0;
     }
 
+    @Override
     public String toString() {
         return "[ " + left + " ("+ blackLeftSize +", " +treeLeftSize+")"
             +" <"+whiteSpace+"> " + rootSize +" <"+height+"> "

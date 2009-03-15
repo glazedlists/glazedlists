@@ -3,9 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.filter;
 
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-
 /**
  * This implementation of {@link TextSearchStrategy} matches a given text
  * against an exact subtext. If the subtext matches the given text character
@@ -18,11 +15,13 @@ public class ExactCaseInsensitiveTextSearchStrategy extends StartsWithCaseInsens
 
     private int subtextLength;
 
+    @Override
     public void setSubtext(String subtext) {
         super.setSubtext(subtext);
         this.subtextLength = subtext.length();
     }
 
+    @Override
     public int indexOf(String text) {
         if (text.length() != subtextLength)
             return -1;

@@ -80,6 +80,7 @@ public abstract class AbstractKeyedCollectionTest extends TestCase {
         public int compareTo(NamePosition other) {
             return name.compareTo(other.name);
         }
+        @Override
         public String toString() {
             return name;
         }

@@ -512,6 +512,7 @@ public final class CTPConnection implements NIOAttachment {
     /**
      * Gets this protocol as a String for debugging.
      */
+    @Override
     public String toString() {
         return localHost + ":" + getLocalPort() + "<->" + remoteHost + ":" + getRemotePort();
     }

@@ -28,6 +28,7 @@ public class CTPChunkTest extends TestCase {
     /**
      * Prepare for the test.
      */
+    @Override
     public void setUp() {
         try {
             // increment the server port as to not bind to a previously used one
@@ -44,6 +45,7 @@ public class CTPChunkTest extends TestCase {
     
      * Clean up after the test.
      */
+    @Override
     public void tearDown() {
         connectionManager.stop();
     }

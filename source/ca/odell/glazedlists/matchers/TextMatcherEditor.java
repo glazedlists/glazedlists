@@ -124,6 +124,7 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
     public static final Object NORMALIZED_STRATEGY = new NormalizedStrategyFactory();
     // this would be an inner class if declawer supported it
     private static class NormalizedStrategyFactory extends IdenticalStrategyFactory {
+        @Override
         public TextSearchStrategy create(int mode, String filter) {
             TextSearchStrategy result = super.create(mode, filter);
             // apply our simple character mapper

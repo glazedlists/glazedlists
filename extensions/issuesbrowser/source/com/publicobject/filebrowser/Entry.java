@@ -30,6 +30,7 @@ public class Entry implements Comparable<Entry> {
         this.size = file.length();
     }
 
+    @Override
     public String toString() {
         return file.getName();
     }

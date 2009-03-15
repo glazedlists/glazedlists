@@ -46,6 +46,7 @@ public class EventJXTableModel<E> extends EventTableModel<E> {
     /**
      * {@inheritDoc}
      */
+    @Override
     protected void handleListChange(ListEvent<E> listChanges) {
         if (listChanges.isReordering()) {
             super.handleListChange(listChanges);

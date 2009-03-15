@@ -30,7 +30,8 @@ public final class NotNullMatcher<E> implements Matcher<E> {
 	}
 
     /** {@inheritDoc} */
-	public String toString() {
+	@Override
+    public String toString() {
 		return "[NotNullMatcher]";
 	}
 }

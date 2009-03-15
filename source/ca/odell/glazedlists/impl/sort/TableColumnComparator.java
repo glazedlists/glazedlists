@@ -65,6 +65,7 @@ public class TableColumnComparator<E> implements Comparator<E> {
      * Test if this TableColumnComparator is equal to the other specified
      * TableColumnComparator.
      */
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -78,6 +79,7 @@ public class TableColumnComparator<E> implements Comparator<E> {
         return true;
     }
 
+    @Override
     public int hashCode() {
         int result;
         result = tableFormat.hashCode();

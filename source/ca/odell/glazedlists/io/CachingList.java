@@ -88,11 +88,13 @@ public class CachingList extends TransformedList {
     }
 
     /** {@inheritDoc} */
+    @Override
     public final int size() {
         return source.size();
     }
 
     /** {@inheritDoc} */
+    @Override
     public final Object get(int index) {
         if(index >= size()) throw new IndexOutOfBoundsException("cannot get from tree of size " + size() + " at " + index);
         preFetch(index);
@@ -173,6 +175,7 @@ public class CachingList extends TransformedList {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected boolean isWritable() {
         return true;
     }
@@ -209,6 +212,7 @@ public class CachingList extends TransformedList {
     }
 
     /** {@inheritDoc} */
+    @Override
     public final void listChanged(ListEvent listChanges) {
 
         updates.beginEvent();

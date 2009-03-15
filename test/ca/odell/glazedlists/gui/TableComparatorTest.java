@@ -15,7 +15,6 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.swing.DefaultEventTableModel;
-import ca.odell.glazedlists.swing.EventTableModel;
 import ca.odell.glazedlists.swing.TableComparatorChooser;
 
 /**
@@ -30,6 +29,7 @@ public class TableComparatorTest extends TestCase {
     private SortedList<String> sortedList;
     private AbstractTableComparatorChooser<String> tableComparatorChooser;
 
+    @Override
     protected void setUp() {
         sortedList = SortedList.create(new BasicEventList<String>());
         tableComparatorChooser = new TestTableComparatorChooser(sortedList, 10);
@@ -40,6 +40,7 @@ public class TableComparatorTest extends TestCase {
         tableComparatorChooser.getComparatorsForColumn(1).add(GlazedLists.reverseComparator());
     }
 
+    @Override
     protected void tearDown() {
         tableComparatorChooser.dispose();
         sortedList.dispose();

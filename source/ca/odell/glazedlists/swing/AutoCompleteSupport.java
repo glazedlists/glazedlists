@@ -1358,6 +1358,7 @@ public final class AutoCompleteSupport<E> {
          * Overridden because AutoCompleteSupport needs absolute control over
          * when a JComboBox's ActionListeners are notified.
          */
+        @Override
         public void setSelectedItem(Object selected) {
             doNotFilter = true;
             doNotAutoComplete = true;
@@ -1390,6 +1391,7 @@ public final class AutoCompleteSupport<E> {
          * attempts to change the ComboBoxEditor's Document are ignored and
          * our control is absolute.
          */
+        @Override
         public void listChanged(ListEvent<E> listChanges) {
             doNotChangeDocument = true;
             try {
@@ -1408,6 +1410,7 @@ public final class AutoCompleteSupport<E> {
      * filtering.
      */
     private class AutoCompleteFilter extends DocumentFilter {
+        @Override
         public void replace(FilterBypass filterBypass, int offset, int length, String string, AttributeSet attributeSet) throws BadLocationException {
             if (doNotChangeDocument) return;
 
@@ -1426,6 +1429,7 @@ public final class AutoCompleteSupport<E> {
             postProcessDocumentChange(filterBypass, attributeSet, valueBeforeEdit, selectionStart, selectionEnd, true);
         }
 
+        @Override
         public void insertString(FilterBypass filterBypass, int offset, String string, AttributeSet attributeSet) throws BadLocationException {
             if (doNotChangeDocument) return;
 
@@ -1438,6 +1442,7 @@ public final class AutoCompleteSupport<E> {
             postProcessDocumentChange(filterBypass, attributeSet, valueBeforeEdit, selectionStart, selectionEnd, true);
         }
 
+        @Override
         public void remove(FilterBypass filterBypass, int offset, int length) throws BadLocationException {
             if (doNotChangeDocument) return;
 
@@ -1860,10 +1865,12 @@ public final class AutoCompleteSupport<E> {
      * term.
      */
     private class PopupMouseHandler extends MouseAdapter {
+        @Override
         public void mousePressed(MouseEvent e) {
             doNotAutoComplete = true;
         }
 
+        @Override
         public void mouseReleased(MouseEvent e) {
             doNotAutoComplete = false;
         }
@@ -1916,6 +1923,7 @@ public final class AutoCompleteSupport<E> {
     private class AutoCompleteKeyHandler extends KeyAdapter {
         private ActionListener[] actionListeners;
 
+        @Override
         public void keyPressed(KeyEvent e) {
             if (!isTableCellEditor)
                 doNotTogglePopup = false;
@@ -1934,6 +1942,7 @@ public final class AutoCompleteSupport<E> {
                 doNotChangeDocument = true;
         }
 
+        @Override
         public void keyTyped(KeyEvent e) {
             if (isTrigger(e)) {
                 // if no content exists in the comboBoxEditorComponent, bail early
@@ -1959,6 +1968,7 @@ public final class AutoCompleteSupport<E> {
             }
         }
 
+        @Override
         public void keyReleased(KeyEvent e) {
             // resume the ability to modify our comboBoxEditorComponent's Document
             if (isTrigger(e))
@@ -2008,11 +2018,13 @@ public final class AutoCompleteSupport<E> {
      * behaviour.
      */
     private class ComboBoxEditorFocusHandler extends FocusAdapter {
+        @Override
         public void focusGained(FocusEvent e) {
             if (getSelectsTextOnFocusGain())
                 comboBoxEditorComponent.select(0, comboBoxEditorComponent.getText().length());
         }
 
+        @Override
         public void focusLost(FocusEvent e) {
             if (comboBox.isPopupVisible() && getHidesPopupOnFocusLost())
                 comboBox.setPopupVisible(false);
@@ -2067,6 +2079,7 @@ public final class AutoCompleteSupport<E> {
      * they invoked the install method.
      */
     private class StringFunctionRenderer extends DefaultListCellRenderer {
+        @Override
         public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
             String string = convertToString(value);
 
@@ -2403,6 +2416,7 @@ public final class AutoCompleteSupport<E> {
          * component of the JComboBox a chance to respond to the keystroke that
          * initiated the cell edit.
          */
+        @Override
         protected boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed) {
             // let the textfield have a crack at processing the KeyEvent
             final TableCellTextField tableCellTextField = (TableCellTextField) getEditor().getEditorComponent();
@@ -2427,6 +2441,7 @@ public final class AutoCompleteSupport<E> {
          * as the editor of the JComboBox has focus when the cell edit is
          * complete, focus is returned to the JTable in that case as well.
          */
+        @Override
         public void setNextFocusableComponent(Component aComponent) {
             super.setNextFocusableComponent(aComponent);
 
@@ -2462,6 +2477,7 @@ public final class AutoCompleteSupport<E> {
             /**
              * Implementation copied from BasicComboBoxEditor.BorderlessTextField.
              */
+            @Override
             public void setText(String s) {
                 if (!getText().equals(s))
                     super.setText(s);
@@ -2470,6 +2486,7 @@ public final class AutoCompleteSupport<E> {
             /**
              * Implementation copied from BasicComboBoxEditor.BorderlessTextField.
              */
+            @Override
             public void setBorder(Border b) {}
 
             /**
@@ -2480,6 +2497,7 @@ public final class AutoCompleteSupport<E> {
              * also contribute a character to this JTextField, thus mimicing
              * the behaviour of normal editable JTextField table cell editors.
              */
+            @Override
             public boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed) {
                 return super.processKeyBinding(ks, e, condition, pressed);
             }

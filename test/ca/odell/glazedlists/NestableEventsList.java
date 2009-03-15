@@ -31,10 +31,12 @@ public class NestableEventsList<E> extends TransformedList<E, E> {
         updates.commitEvent();
     }
 
+    @Override
     protected boolean isWritable() {
         return true;
     }
 
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
         if(forward) {
             updates.forwardEvent(listChanges);

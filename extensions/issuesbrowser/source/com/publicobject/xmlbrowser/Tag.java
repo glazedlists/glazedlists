@@ -46,6 +46,7 @@ public class Tag implements Comparable<Tag> {
         this.text += text;
     }
 
+    @Override
     public String toString() {
         return qName;
     }

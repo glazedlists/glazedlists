@@ -67,6 +67,7 @@ public final class AgedNode {
         return timestamp;
     }
 
+    @Override
     public String toString() {
         return "[AgedNode: " + value + "]";
     }

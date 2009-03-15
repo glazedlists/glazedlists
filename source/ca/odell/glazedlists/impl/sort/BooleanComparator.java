@@ -27,6 +27,7 @@ import java.util.Comparator;
     /**
      * This is equal to another comparator if it is a BooleanComparator.
      */
+    @Override
     public boolean equals(Object other) {
         return (other instanceof BooleanComparator);
     }

@@ -32,20 +32,24 @@ public class DelayList<S> extends TransformedList<S,S> {
         }
     }
 
+    @Override
     public void listChanged(ListEvent<S> listChanges) {
         this.delay();
         updates.forwardEvent(listChanges);
     }
 
+    @Override
     protected boolean isWritable() {
         return true;
     }
 
+    @Override
     public int size() {
         this.delay();
         return super.size();
     }
 
+    @Override
     public S get(int index) {
         this.delay();
         return super.get(index);
