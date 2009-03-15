@@ -4,15 +4,15 @@
 package ca.odell.glazedlists.impl.sort;
 
 // for being a JUnit test case
-import ca.odell.glazedlists.GlazedLists;
-
-import junit.framework.TestCase;
-
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import junit.framework.TestCase;
+
+import ca.odell.glazedlists.GlazedLists;
 
 /**
  * This test verifies that the BeanComparator works as expected.
@@ -26,7 +26,7 @@ public class BeanComparatorTest extends TestCase {
      * Tests that comparison by property works.
      */
     public void testCompare() {
-        Comparator comparator = GlazedLists.beanPropertyComparator(Position.class, "position", new String[0]);
+        Comparator<Position> comparator = GlazedLists.beanPropertyComparator(Position.class, "position");
 
         assertTrue(comparator.compare(new Position(4), new Position(1)) > 0);
         assertTrue(comparator.compare(new Position(1), new Position(4)) < 0);
@@ -37,11 +37,10 @@ public class BeanComparatorTest extends TestCase {
      * Tests that the equals() method of the comparator works.
      */
     public void testEquals() {
-        final String[] empty = {};
-        Comparator red = GlazedLists.beanPropertyComparator(Color.class, "red", empty);
-        Comparator blue = GlazedLists.beanPropertyComparator(Color.class, "blue", empty);
-        Comparator rouge = GlazedLists.beanPropertyComparator(Color.class, "red", empty);
-        Comparator blueBeer = GlazedLists.beanPropertyComparator(LabattBeer.class, "blue", empty);
+        Comparator red = GlazedLists.beanPropertyComparator(Color.class, "red");
+        Comparator blue = GlazedLists.beanPropertyComparator(Color.class, "blue");
+        Comparator rouge = GlazedLists.beanPropertyComparator(Color.class, "red");
+        Comparator blueBeer = GlazedLists.beanPropertyComparator(LabattBeer.class, "blue");
 
         assertTrue(red.equals(rouge));
         assertFalse(blue.equals(blueBeer));
@@ -53,18 +52,18 @@ public class BeanComparatorTest extends TestCase {
      */
     public void testSort() {
         // prepare the sample list
-        List unsorted = new ArrayList();
+        List<Position> unsorted = new ArrayList<Position>();
         unsorted.add(new Position(4));
         unsorted.add(new Position(1));
         unsorted.add(new Position(3));
 
-        List sorted1 = new ArrayList();
+        List<Position> sorted1 = new ArrayList<Position>();
         sorted1.addAll(unsorted);
         Collections.sort(sorted1);
 
-        List sorted2 = new ArrayList();
+        List<Position> sorted2 = new ArrayList<Position>();
         sorted2.addAll(unsorted);
-        Collections.sort(sorted2, GlazedLists.beanPropertyComparator(Position.class, "position", new String[0]));
+        Collections.sort(sorted2, GlazedLists.beanPropertyComparator(Position.class, "position"));
 
         assertEquals(sorted1, sorted2);
     }
@@ -72,7 +71,7 @@ public class BeanComparatorTest extends TestCase {
     /**
      * Simple class that sorts in the same order as its position value.
      */
-    public static class Position implements Comparable {
+    public static class Position implements Comparable<Position> {
         private int position;
         public Position(int position) {
             this.position = position;
@@ -83,8 +82,8 @@ public class BeanComparatorTest extends TestCase {
         public String toString() {
             return "P:" + position;
         }
-        public int compareTo(Object o) {
-            return position - ((Position)o).position;
+        public int compareTo(Position o) {
+            return position - o.position;
         }
     }
 

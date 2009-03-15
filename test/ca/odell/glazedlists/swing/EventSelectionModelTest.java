@@ -193,7 +193,7 @@ public class EventSelectionModelTest extends SwingTestCase {
      * This test was contributed by: Sergey Bogatyrjov
      */
     public void guiTestSelectionModel() {
-        EventList<Object> source = GlazedLists.eventListOf(new Object[] {"one", "two", "three"});
+        EventList<Object> source = GlazedLists.<Object>eventListOf("one", "two", "three");
         FilterList<Object> filtered = new FilterList<Object>(source, Matchers.trueMatcher());
 
         // create selection model
@@ -254,7 +254,7 @@ public class EventSelectionModelTest extends SwingTestCase {
      * inserting and removing at all locations relative to the range of list selections.
      */
     public void guiTestFireOnlyNecessaryEvents() {
-        EventList<String> source = GlazedLists.eventListOf(new String[] {"Albert", "Alex", "Aaron", "Brian", "Bruce"});
+        EventList<String> source = GlazedLists.eventListOf("Albert", "Alex", "Aaron", "Brian", "Bruce");
 
         // create selection model
         EventSelectionModel<String> model = new EventSelectionModel<String>(source);
@@ -329,7 +329,7 @@ public class EventSelectionModelTest extends SwingTestCase {
     }
 
     public void guiTestModelChangesProducingSelectionModelEvents() {
-        EventList<String> source = GlazedLists.eventListOf(new String[] {"Albert", "Alex", "Aaron", "Brian", "Bruce"});
+        EventList<String> source = GlazedLists.eventListOf("Albert", "Alex", "Aaron", "Brian", "Bruce");
 
         // create EventListModel (data model)
         EventListModel<String> model = new EventListModel<String>(source);
@@ -379,7 +379,7 @@ public class EventSelectionModelTest extends SwingTestCase {
     }
 
     public void guiTestDeleteSelectedRows_FixMe() {
-        EventList<String> source = GlazedLists.eventListOf(new String[] {"one", "two", "three"});
+        EventList<String> source = GlazedLists.eventListOf("one", "two", "three");
 
         // create selection model
         EventSelectionModel<String> model = new EventSelectionModel<String>(source);
@@ -404,7 +404,7 @@ public class EventSelectionModelTest extends SwingTestCase {
      * happens for the selected element.
      */
     public void guiTestSelectionOnTreeListUpdate_FixMe() {
-        final EventList<String> source = GlazedLists.eventListOf(new String[] {"zero", "one", "two", "three"});
+        final EventList<String> source = GlazedLists.eventListOf("zero", "one", "two", "three");
 
         final EventList<String> sourceProxy = GlazedListsSwing.swingThreadProxyList(source);
         final TreeList<String> treeList = new TreeList<String>(sourceProxy, new StringFormat(),

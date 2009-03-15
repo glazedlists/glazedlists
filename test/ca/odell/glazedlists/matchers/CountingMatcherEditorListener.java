@@ -9,7 +9,7 @@ import junit.framework.Assert;
  * Count matcher events, inserting a delay if requested to test multithreaded
  * matchers.
  */
-public class CountingMatcherEditorListener implements MatcherEditor.Listener {
+public class CountingMatcherEditorListener<E> implements MatcherEditor.Listener<E> {
 	private int matchAll = 0;
 	private int matchNone = 0;
 	private int changed = 0;
@@ -73,7 +73,7 @@ public class CountingMatcherEditorListener implements MatcherEditor.Listener {
 		Assert.assertEquals(relaxed, this.relaxed);
 	}
 
-	public void changedMatcher(MatcherEditor.Event matcherEvent) {
+	public void changedMatcher(MatcherEditor.Event<E> matcherEvent) {
 		switch (matcherEvent.getType()) {
 			case MatcherEditor.Event.CONSTRAINED: this.constrained++; break;
 			case MatcherEditor.Event.RELAXED: this.relaxed++; break;

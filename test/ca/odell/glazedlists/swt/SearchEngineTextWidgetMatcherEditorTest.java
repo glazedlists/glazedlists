@@ -106,10 +106,10 @@ public class SearchEngineTextWidgetMatcherEditorTest extends SwtTestCase {
         filteredCustomers.add(kevin);
 
         final JTextField customerFilterField = new JTextField();
-        final TextFilterator<Customer> customerFilterator = GlazedLists.textFilterator(Customer.class, new String[] {"firstName", "lastName"});
+        final TextFilterator<Customer> customerFilterator = GlazedLists.textFilterator(Customer.class, "firstName", "lastName");
         Set<SearchEngineTextMatcherEditor.Field<Customer>> fields = new HashSet<SearchEngineTextMatcherEditor.Field<Customer>>(2);
-        fields.add(new SearchEngineTextMatcherEditor.Field<Customer>("first", GlazedLists.textFilterator(Customer.class, new String[] {"firstName"})));
-        fields.add(new SearchEngineTextMatcherEditor.Field<Customer>("last", GlazedLists.textFilterator(Customer.class, new String[] {"lastName"})));
+        fields.add(new SearchEngineTextMatcherEditor.Field<Customer>("first", GlazedLists.textFilterator(Customer.class, "firstName")));
+        fields.add(new SearchEngineTextMatcherEditor.Field<Customer>("last", GlazedLists.textFilterator(Customer.class, "lastName")));
 
         SearchEngineTextFieldMatcherEditor<Customer> matcherEditor = new SearchEngineTextFieldMatcherEditor<Customer>(customerFilterField, customerFilterator);
         matcherEditor.setFields(fields);

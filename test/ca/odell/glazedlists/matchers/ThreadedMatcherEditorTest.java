@@ -29,21 +29,22 @@ public class ThreadedMatcherEditorTest extends TestCase {
     private MatcherEditor.Event matchChanged;
 
     /** combine multiple matcher editors */
-    private ThreadedMatcherEditor threadedMatcherEditor;
+    private ThreadedMatcherEditor<String> threadedMatcherEditor;
 
     /** a matcher editor to help test the threadedMatcherEditor */
-    private TextMatcherEditor textMatcherEditor;
+    private TextMatcherEditor<String> textMatcherEditor;
 
-    private FilterList filterList;
+    private FilterList<String> filterList;
 
     /**
      * Prepare for the test.
      */
     @Override
+    @SuppressWarnings("unchecked")
     public void setUp() {
-        textMatcherEditor = new TextMatcherEditor(GlazedLists.toStringTextFilterator());
-        threadedMatcherEditor = new ThreadedMatcherEditor(textMatcherEditor);
-        filterList = new FilterList(new BasicEventList(), threadedMatcherEditor);
+        textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
+        threadedMatcherEditor = new ThreadedMatcherEditor<String>(textMatcherEditor);
+        filterList = new FilterList<String>(new BasicEventList<String>(), threadedMatcherEditor);
 
         matchAll = new MatcherEditor.Event(threadedMatcherEditor, MatcherEditor.Event.MATCH_ALL, Matchers.trueMatcher());
         matchNone = new MatcherEditor.Event(threadedMatcherEditor, MatcherEditor.Event.MATCH_NONE, Matchers.falseMatcher());
@@ -115,6 +116,7 @@ public class ThreadedMatcherEditorTest extends TestCase {
         this.runCoalescingMatchChangedTest(events, MatcherEditor.Event.CHANGED);
     }
 
+    @SuppressWarnings("unchecked")
     private void runCoalescingMatchChangedTest(MatcherEditor.Event[] events, int expectedType) {
         final MatcherEditor.Event coalescedMatcherEvent = coalesceMatcherEvents(threadedMatcherEditor, events);
         // ensure the expectedType is received
@@ -148,8 +150,8 @@ public class ThreadedMatcherEditorTest extends TestCase {
     }
 
     public void testQueuingConstraints() throws InterruptedException {
-        final CountingMatcherEditorListener counter =
-            new CountingMatcherEditorListener(SIMULATED_PROCESSING_DELAY);
+        final CountingMatcherEditorListener<String> counter =
+            new CountingMatcherEditorListener<String>(SIMULATED_PROCESSING_DELAY);
         threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"J"});
@@ -168,8 +170,8 @@ public class ThreadedMatcherEditorTest extends TestCase {
     }
 
     public void testQueuingRelaxations() throws InterruptedException {
-        final CountingMatcherEditorListener counter =
-            new CountingMatcherEditorListener(SIMULATED_PROCESSING_DELAY);
+        final CountingMatcherEditorListener<String> counter =
+            new CountingMatcherEditorListener<String>(SIMULATED_PROCESSING_DELAY);
         threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"James"});
@@ -188,8 +190,8 @@ public class ThreadedMatcherEditorTest extends TestCase {
     }
 
     public void testQueuingMatchAll() throws InterruptedException {
-        final CountingMatcherEditorListener counter =
-            new CountingMatcherEditorListener(SIMULATED_PROCESSING_DELAY);
+        final CountingMatcherEditorListener<String> counter =
+            new CountingMatcherEditorListener<String>(SIMULATED_PROCESSING_DELAY);
         threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"James"});
@@ -206,8 +208,8 @@ public class ThreadedMatcherEditorTest extends TestCase {
     }
 
     public void testQueuingChanged() throws InterruptedException {
-        final CountingMatcherEditorListener counter =
-            new CountingMatcherEditorListener(SIMULATED_PROCESSING_DELAY);
+        final CountingMatcherEditorListener<String> counter =
+            new CountingMatcherEditorListener<String>(SIMULATED_PROCESSING_DELAY);
         threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"James"});
@@ -224,8 +226,8 @@ public class ThreadedMatcherEditorTest extends TestCase {
     }
 
     public void testQueuingAllSorts_WithPause() throws InterruptedException {
-        final CountingMatcherEditorListener counter =
-            new CountingMatcherEditorListener(SIMULATED_PROCESSING_DELAY);
+        final CountingMatcherEditorListener<String> counter =
+            new CountingMatcherEditorListener<String>(SIMULATED_PROCESSING_DELAY);
         threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"James"});
@@ -260,8 +262,8 @@ public class ThreadedMatcherEditorTest extends TestCase {
     }
 
     public void testQueuingAllSorts_WithoutPause() throws InterruptedException {
-        final CountingMatcherEditorListener counter =
-            new CountingMatcherEditorListener(SIMULATED_PROCESSING_DELAY);
+        final CountingMatcherEditorListener<String> counter =
+            new CountingMatcherEditorListener<String>(SIMULATED_PROCESSING_DELAY);
         threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"James"});

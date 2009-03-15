@@ -3,22 +3,22 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
+import java.beans.PropertyChangeEvent;
+import java.util.*;
+
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 import ca.odell.glazedlists.impl.*;
-import ca.odell.glazedlists.impl.functions.ConstantFunction;
 import ca.odell.glazedlists.impl.beans.*;
 import ca.odell.glazedlists.impl.filter.StringTextFilterator;
+import ca.odell.glazedlists.impl.functions.ConstantFunction;
 import ca.odell.glazedlists.impl.matchers.FixedMatcherEditor;
 import ca.odell.glazedlists.impl.sort.*;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.Matchers;
-
-import java.beans.PropertyChangeEvent;
-import java.util.*;
 
 /**
  * A factory for creating all sorts of objects to be used with Glazed Lists.
@@ -361,7 +361,7 @@ public final class GlazedLists {
      * Creates a new {@link EventList} which contains the given elements.
      */
     public static <E> EventList<E> eventListOf(E... contents) {
-        return eventList(contents == null ? Collections.EMPTY_LIST : Arrays.asList(contents));
+        return eventList(contents == null ? Collections.<E>emptyList() : Arrays.asList(contents));
     }
 
     /**
@@ -473,22 +473,22 @@ public final class GlazedLists {
     public static <E> ObservableElementList.Connector<E> beanConnector(Class<E> beanClass) {
         return new BeanConnector<E>(beanClass);
     }
-    
+
     /**
      * Create a new Connector for the {@link ObservableElementList} that works with JavaBeans'
      * {@link java.beans.PropertyChangeListener}. The methods to add and remove listeners are
      * detected automatically by examining the bean class and searching for a method prefixed with
      * "add" or "remove" taking a single {@link java.beans.PropertyChangeListener} argument.
      * <p>Use this variant, if you want to control which {@link java.beans.PropertyChangeEvent}s
-     * are delivered to the ObservableElementList. You can match or filter events by name. 
+     * are delivered to the ObservableElementList. You can match or filter events by name.
      * <p>If <code>matchPropertyNames</code> is <code>true</code>, the <code>propertyNames</code>
-     * parameter specifies the set of properties by name whose {@link java.beans.PropertyChangeEvent}s 
-     * should be delivered to the ObservableElementList, e.g. property change events for properties 
+     * parameter specifies the set of properties by name whose {@link java.beans.PropertyChangeEvent}s
+     * should be delivered to the ObservableElementList, e.g. property change events for properties
      * not contained in the specified <code>propertyNames</code> are ignored in this case.
-     * If <code>matchPropertyNames</code> is <code>false</code>, then the specified 
+     * If <code>matchPropertyNames</code> is <code>false</code>, then the specified
      * <code>propertyNames</code> are filtered, e.g. all but the specified property change events are
      * delivered to the ObservableElementList.
-     * 
+     *
      * @param beanClass a class with both
      *        <code>addPropertyChangeListener(PropertyChangeListener)</code> and
      *        <code>removePropertyChangeListener(PropertyChangeListener)</code>, or similar
@@ -503,18 +503,18 @@ public final class GlazedLists {
         final Matcher<PropertyChangeEvent> byNameMatcher = Matchers.propertyEventNameMatcher(matchPropertyNames, propertyNames);
         return beanConnector(beanClass, byNameMatcher);
     }
-    
+
     /**
      * Create a new Connector for the {@link ObservableElementList} that works with JavaBeans'
      * {@link java.beans.PropertyChangeListener}. The methods to add and remove listeners are
      * detected automatically by examining the bean class and searching for a method prefixed with
      * "add" or "remove" taking a single {@link java.beans.PropertyChangeListener} argument.
-     * 
-     * <p> The event matcher allows filtering of {@link java.beans.PropertyChangeEvent}s. 
-     * Only matching events are delivered to the ObservableElementList. 
+     *
+     * <p> The event matcher allows filtering of {@link java.beans.PropertyChangeEvent}s.
+     * Only matching events are delivered to the ObservableElementList.
      * To create a matcher that matches PropertyChangeEvents by property names, you can use
      * {@link Matchers#propertyEventNameMatcher(boolean, String[])}
-     * 
+     *
      * @param beanClass a class with both
      *        <code>addPropertyChangeListener(PropertyChangeListener)</code> and
      *        <code>removePropertyChangeListener(PropertyChangeListener)</code>, or similar
@@ -542,18 +542,18 @@ public final class GlazedLists {
     public static <E> ObservableElementList.Connector<E> beanConnector(Class<E> beanClass, String addListener, String removeListener) {
         return new BeanConnector<E>(beanClass, addListener, removeListener);
     }
-    
+
     /**
      * Create a new Connector for the {@link ObservableElementList} that works with
      * JavaBeans' {@link java.beans.PropertyChangeListener}. The methods to add
      * and remove listeners are specified by name. Such methods must take a single
      * {@link java.beans.PropertyChangeListener} argument.
      *
-     * <p> The event matcher allows filtering of {@link java.beans.PropertyChangeEvent}s. 
+     * <p> The event matcher allows filtering of {@link java.beans.PropertyChangeEvent}s.
      * Only matching events are delivered to the ObservableElementList.
      * To create a matcher that matches PropertyChangeEvents by property names, you can use
      * {@link Matchers#propertyEventNameMatcher(boolean, String[])}
-     * 
+     *
      * @param beanClass a class with both methods as specified.
      * @param addListener a method name such as "addPropertyChangeListener"
      * @param removeListener a method name such as "removePropertyChangeListener"

@@ -3,9 +3,17 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedLists;
+import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.EventObject;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
@@ -14,8 +22,10 @@ import javax.swing.event.TableColumnModelListener;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import java.beans.PropertyChangeListener;
-import java.util.*;
+
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
 
 /**
  * The general testing strategy in this class is to put a DefaultTableColumnModel
@@ -153,7 +163,7 @@ public class EventTableColumnModelTest extends SwingTestCase {
 
         watcher.assertFiredEventsAgreeAndClear();
     }
-    
+
     public void guiTestMoveSelectedColumn() {
         final TableColumn nameColumn = createColumn("name");
         EventList<TableColumn> columns = new BasicEventList<TableColumn>();
@@ -212,7 +222,7 @@ public class EventTableColumnModelTest extends SwingTestCase {
         final TableColumn nameColumn = createColumn("name");
         final TableColumn ageColumn = createColumn("age");
 
-        EventList<TableColumn> columns = GlazedLists.eventListOf(new TableColumn[] {nameColumn, ageColumn});
+        EventList<TableColumn> columns = GlazedLists.eventListOf(nameColumn, ageColumn);
         DefaultTableColumnModel defaultModel = watcher.createDefaultModel(columns);
         EventTableColumnModel eventModel = watcher.createEventModel(columns);
 
@@ -241,7 +251,7 @@ public class EventTableColumnModelTest extends SwingTestCase {
         final TableColumn nameColumn = createColumn("name");
         final TableColumn ageColumn = createColumn("age");
 
-        EventList<TableColumn> columns = GlazedLists.eventListOf(new TableColumn[] {nameColumn, ageColumn});
+        EventList<TableColumn> columns = GlazedLists.eventListOf(nameColumn, ageColumn);
         DefaultTableColumnModel defaultModel = watcher.createDefaultModel(columns);
         EventTableColumnModel eventModel = watcher.createEventModel(columns);
 
@@ -368,7 +378,7 @@ public class EventTableColumnModelTest extends SwingTestCase {
                     for (int j = 0, n = previousEventObjects.size(); j < n; j++) {
                         EventObject previousEvent = previousEventObjects.get(j);
                         EventObject currentEvent = currentEventObjects.get(j);
-                        
+
                         if (previousEvent instanceof TableColumnModelEvent) {
                             TableColumnModelEvent previous = (TableColumnModelEvent) previousEvent;
                             TableColumnModelEvent current = (TableColumnModelEvent) currentEvent;

@@ -3,17 +3,21 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser.swing;
 
-import ca.odell.glazedlists.Filterator;
+import java.awt.Color;
+import java.util.Hashtable;
+
+import javax.swing.DefaultBoundedRangeModel;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.RangeMatcherEditor;
-import com.publicobject.issuesbrowser.Issue;
 
-import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import java.awt.*;
-import java.util.Hashtable;
+import com.publicobject.issuesbrowser.Issue;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
@@ -30,7 +34,7 @@ public class PriorityMatcherEditor implements FilterComponent<Issue>, ChangeList
         slider = new JSlider(new DefaultBoundedRangeModel(0, 0, 0, 100));
         slider.addChangeListener(this);
 
-        rangeMatcherEditor = new RangeMatcherEditor<Integer,Issue>((Filterator)GlazedLists.filterator(new String[] { "priority.rating" }));
+        rangeMatcherEditor = new RangeMatcherEditor<Integer,Issue>(GlazedLists.<Integer,Issue>filterator("priority.rating"));
 
         // priority slider
         slider.setOpaque(false);
@@ -40,7 +44,7 @@ public class PriorityMatcherEditor implements FilterComponent<Issue>, ChangeList
         slider.setMajorTickSpacing(25);
         slider.setForeground(Color.BLACK);
         slider.setFocusable(false);
-        
+
         final Hashtable<Integer,JLabel> prioritySliderLabels = new Hashtable<Integer,JLabel>();
         prioritySliderLabels.put(MIN_PRIORITY, new JLabel("Low"));
         prioritySliderLabels.put(MAX_PRIORITY, new JLabel("High"));

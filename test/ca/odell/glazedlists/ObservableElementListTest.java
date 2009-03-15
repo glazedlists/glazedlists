@@ -3,18 +3,25 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
+import java.awt.Color;
+import java.awt.Component;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.EventListener;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import javax.swing.JLabel;
+
+import junit.framework.TestCase;
+
 import ca.odell.glazedlists.impl.beans.BeanConnector;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.Matchers;
-import junit.framework.TestCase;
-
-import javax.swing.*;
-import java.awt.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.*;
-import java.util.List;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
@@ -148,8 +155,8 @@ public class ObservableElementListTest extends TestCase {
     public void testEventMatcher() {
         // match no property change event
         final Matcher<PropertyChangeEvent> falseMatcher = Matchers.falseMatcher();
-        ObservableElementList<JLabel> labelList = 
-            new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), GlazedLists.beanConnector(JLabel.class, falseMatcher));        
+        ObservableElementList<JLabel> labelList =
+            new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), GlazedLists.beanConnector(JLabel.class, falseMatcher));
         final JLabel listElement1 = new JLabel();
         final JLabel listElement2 = new JLabel();
         labelList.add(listElement1);
@@ -161,11 +168,11 @@ public class ObservableElementListTest extends TestCase {
         listElement1.setEnabled(false);
         listElement2.setBackground(Color.RED);
         assertEquals(0, listener.getEventCount());
-        
+
         // match only property change events for properties 'text and 'enabled'
-        Matcher<PropertyChangeEvent> byNameMatcher = Matchers.propertyEventNameMatcher(true, new String[] {"text", "enabled"});
+        Matcher<PropertyChangeEvent> byNameMatcher = Matchers.propertyEventNameMatcher(true, "text", "enabled");
         labelList = new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), GlazedLists
-                .beanConnector(JLabel.class, byNameMatcher));        
+                .beanConnector(JLabel.class, byNameMatcher));
         labelList.add(listElement1);
         labelList.add(listElement2);
         listener = ListConsistencyListener.install(labelList);
@@ -173,17 +180,17 @@ public class ObservableElementListTest extends TestCase {
         listElement1.setText("Text 1");
         assertEquals(1, listener.getEventCount());
         listElement2.setText("Text 2");
-        assertEquals(2, listener.getEventCount());        
+        assertEquals(2, listener.getEventCount());
         listElement1.setBackground(Color.RED);
         assertEquals(2, listener.getEventCount());
         listElement2.setForeground(Color.GRAY);
-        assertEquals(2, listener.getEventCount());        
+        assertEquals(2, listener.getEventCount());
         listElement1.setEnabled(true);
         assertEquals(3, listener.getEventCount());
 
         // match only property change events for properties 'text and 'enabled'
         labelList = new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), GlazedLists
-                .beanConnector(JLabel.class, true, new String[] {"text", "enabled"}));        
+                .beanConnector(JLabel.class, true, "text", "enabled"));
         labelList.add(listElement1);
         labelList.add(listElement2);
         listener = ListConsistencyListener.install(labelList);
@@ -191,17 +198,17 @@ public class ObservableElementListTest extends TestCase {
         listElement1.setText("Item 1");
         assertEquals(1, listener.getEventCount());
         listElement2.setText("Item 2");
-        assertEquals(2, listener.getEventCount());        
+        assertEquals(2, listener.getEventCount());
         listElement1.setBackground(Color.GREEN);
         assertEquals(2, listener.getEventCount());
         listElement2.setForeground(Color.WHITE);
-        assertEquals(2, listener.getEventCount());        
+        assertEquals(2, listener.getEventCount());
         listElement1.setEnabled(false);
         assertEquals(3, listener.getEventCount());
-        
+
         // match all property change events excluding properties 'text' and 'enabled'
         labelList = new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), GlazedLists
-                .beanConnector(JLabel.class, false, new String[] {"text", "enabled"}));        
+                .beanConnector(JLabel.class, false, "text", "enabled"));
         labelList.add(listElement1);
         labelList.add(listElement2);
         listener = ListConsistencyListener.install(labelList);
@@ -209,15 +216,15 @@ public class ObservableElementListTest extends TestCase {
         listElement1.setText("Text 1");
         assertEquals(0, listener.getEventCount());
         listElement2.setText("Text 2");
-        assertEquals(0, listener.getEventCount());        
+        assertEquals(0, listener.getEventCount());
         listElement1.setBackground(Color.BLACK);
         assertEquals(1, listener.getEventCount());
         listElement2.setForeground(Color.YELLOW);
-        assertEquals(2, listener.getEventCount());        
+        assertEquals(2, listener.getEventCount());
         listElement1.setEnabled(true);
-        assertEquals(2, listener.getEventCount());        
+        assertEquals(2, listener.getEventCount());
     }
-    
+
     public void testPickyConnector() {
         this.runTestPickyConnector(new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), new PickyJLabelConnector()));
         this.runTestPickyConnector(new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), new MultiEventListJLabelConnector(true)));

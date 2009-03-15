@@ -10,6 +10,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 
 import junit.framework.TestCase;
+
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
@@ -122,7 +123,7 @@ public class TableComparatorTest extends TestCase {
      * EventTableModels behind the JTable.
      */
     public void guiTestTableModelStructureChanged() {
-        final EventList<String> source = GlazedLists.eventListOf(new String[] {"James", "Jodie", "Jesse"});
+        final EventList<String> source = GlazedLists.eventListOf("James", "Jodie", "Jesse");
         final SortedList<String> sorted = new SortedList<String>(source, null);
 
         final JTable table = new JTable();

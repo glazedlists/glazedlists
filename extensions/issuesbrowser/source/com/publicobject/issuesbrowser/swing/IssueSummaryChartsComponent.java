@@ -3,13 +3,15 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser.swing;
 
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FunctionList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.jfreechart.EventListPieDataset;
-import ca.odell.glazedlists.swing.GlazedListsSwing;
-import com.publicobject.issuesbrowser.Issue;
-import com.publicobject.issuesbrowser.OpenIssuesByMonthCategoryDataset;
+import java.awt.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.List;
+
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -25,12 +27,14 @@ import org.jfree.data.general.PieDataset;
 import org.jfree.text.TextBlock;
 import org.jfree.ui.RectangleEdge;
 
-import javax.swing.*;
-import java.awt.*;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.List;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FunctionList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.jfreechart.EventListPieDataset;
+import ca.odell.glazedlists.swing.GlazedListsSwing;
+
+import com.publicobject.issuesbrowser.Issue;
+import com.publicobject.issuesbrowser.OpenIssuesByMonthCategoryDataset;
 
 /**
  * This component is placed below the issues table and is shown when no issues
@@ -68,7 +72,7 @@ class IssueSummaryChartsComponent {
 
     public IssueSummaryChartsComponent(EventList<Issue> issuesList) {
         // build a PieDataset representing Issues by Status
-        final Comparator<Issue> issuesByStatusGrouper = GlazedLists.beanPropertyComparator(Issue.class, "status", new String[0]);
+        final Comparator<Issue> issuesByStatusGrouper = GlazedLists.beanPropertyComparator(Issue.class, "status");
         final FunctionList.Function<List<Issue>, Comparable<String>> keyFunction = new StatusFunction();
         final FunctionList.Function<List<Issue>, Number> valueFunction = new ListSizeFunction();
         final EventList<Issue> pieDataSource = GlazedListsSwing.swingThreadProxyList(issuesList);

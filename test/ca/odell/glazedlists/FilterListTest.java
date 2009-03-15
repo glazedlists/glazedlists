@@ -3,13 +3,18 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
-import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import ca.odell.glazedlists.impl.testing.AtLeastMatcherEditor;
-import ca.odell.glazedlists.matchers.*;
+import java.util.List;
+
 import junit.framework.TestCase;
 
-import java.util.List;
+import ca.odell.glazedlists.impl.testing.AtLeastMatcherEditor;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
+import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.matchers.MatcherEditor;
+import ca.odell.glazedlists.matchers.Matchers;
+import ca.odell.glazedlists.matchers.TextMatcherEditor;
 
 /**
  * Tests the generic FilterList class.
@@ -121,7 +126,7 @@ public class FilterListTest extends TestCase {
         EventList<Integer> original = new BasicEventList<Integer>();
         List<Integer> values = GlazedListsTests.intArrayToIntegerCollection(new int [] { 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 10, 11, 11, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 0, 10, 11, 11, 11, 11, 11, 11, 11, 10, 11, 11, 11, 11, 11, 10, 11, 11, 11, 11, 11, 11, 11, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 10, 1 });
         original.addAll(values);
-        
+
         // prepare a filter to filter our list
         AtLeastMatcherEditor editor = new AtLeastMatcherEditor();
         FilterList<Integer> myFilterList = new FilterList<Integer>(original, editor);
@@ -142,12 +147,12 @@ public class FilterListTest extends TestCase {
         assertEquals(myFilterList, Matchers.select(original, editor.getMatcher()));
         editor.setMinimum(0);
         assertEquals(myFilterList, Matchers.select(original, editor.getMatcher()));
-        
+
         // now try constrain
         values = GlazedListsTests.intArrayToIntegerCollection(new int[] { 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11 });
         original.clear();
         original.addAll(values);
-        
+
         // constrain the list
         editor.setMinimum(10);
         assertEquals(myFilterList, Matchers.select(original, editor.getMatcher()));
@@ -214,7 +219,7 @@ public class FilterListTest extends TestCase {
 	}
 
     public void testDispose() {
-        EventList<String> baseList = GlazedLists.eventListOf(new String[] {"A", "B", "C", "C", "B", "A"});
+        EventList<String> baseList = GlazedLists.eventListOf("A", "B", "C", "C", "B", "A");
         FilterList<String> filterList = new FilterList<String>(baseList);
 
         GlazedListsTests.ListEventCounter<String> counter = new GlazedListsTests.ListEventCounter<String>();

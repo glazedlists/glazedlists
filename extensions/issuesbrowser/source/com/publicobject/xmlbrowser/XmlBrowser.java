@@ -3,21 +3,24 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.xmlbrowser;
 
-import java.util.List;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.FlowLayout;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Comparator;
+import java.util.List;
+
+import javax.swing.*;
+import javax.swing.tree.DefaultTreeCellRenderer;
 
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.swing.*;
 
-import javax.swing.*;
-import javax.swing.tree.DefaultTreeCellRenderer;
-import java.awt.*;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-
-import com.publicobject.misc.swing.MacCornerScrollPaneLayoutManager;
 import com.publicobject.misc.swing.LookAndFeelTweaks;
+import com.publicobject.misc.swing.MacCornerScrollPaneLayoutManager;
 
 /**
  * Display an XML file in a table, to show off our tree code.
@@ -58,7 +61,7 @@ public class XmlBrowser {
 
             // prepare the table filters
             JTextField filterEdit = new JTextField(15);
-            TextFilterator<Tag> filterator = GlazedLists.textFilterator(new String[]{"qName", "text"});
+            TextFilterator<Tag> filterator = GlazedLists.textFilterator("qName", "text");
             TextComponentMatcherEditor<Tag> matcherEditor = new TextComponentMatcherEditor<Tag>(filterEdit, filterator);
             JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
             filterPanel.add(new JLabel("Filter:"));
@@ -99,7 +102,7 @@ public class XmlBrowser {
             MacCornerScrollPaneLayoutManager.install(tableScrollPane);
             JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScrollPane, tableScrollPane);
             splitPane.setBorder(BorderFactory.createEmptyBorder());
-            splitPane.setDividerLocation(200); 
+            splitPane.setDividerLocation(200);
             JPanel panel = new JPanel(new BorderLayout());
             panel.add(filterPanel, BorderLayout.NORTH);
             panel.add(splitPane, BorderLayout.CENTER);

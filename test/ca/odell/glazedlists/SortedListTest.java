@@ -1079,8 +1079,8 @@ public class SortedListTest extends TestCase {
      * order, then by the order in the source list.
      */
     public void testSortedListHandlesSortEvents() {
-        Comparator artistComparator = GlazedLists.beanPropertyComparator(Song.class, "artist", new String[0]);
-        Comparator songComparator = GlazedLists.beanPropertyComparator(Song.class, "song", new String[0]);
+        Comparator artistComparator = GlazedLists.beanPropertyComparator(Song.class, "artist");
+        Comparator songComparator = GlazedLists.beanPropertyComparator(Song.class, "song");
         List<Comparable> expectedOrder;
         sortedList.setComparator(null);
 
@@ -1301,7 +1301,7 @@ public class SortedListTest extends TestCase {
         assertSame(theUnquestionableTruth, sortedList.get(5));
         assertSame(welcomeToTheFold, sortedList.get(6));
 
-        Comparator songComparator = GlazedLists.beanPropertyComparator(Song.class, "artist", new String[] {"song"});
+        Comparator songComparator = GlazedLists.beanPropertyComparator(Song.class, "artist", "song");
         sortedList.setComparator(songComparator);
 
         assertSame(missBlue, sortedList.get(0));

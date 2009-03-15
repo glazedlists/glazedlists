@@ -35,7 +35,7 @@ public class TextMatcherTest extends TestCase {
         list.addAll(numbers);
         assertEquals(list, numbers);
 
-        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
+        final CountingMatcherEditorListener<String> counter = new CountingMatcherEditorListener<String>();
         textMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"0"});		// constrained
@@ -49,7 +49,7 @@ public class TextMatcherTest extends TestCase {
 
         list.addAll(numbers);
 
-        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
+        final CountingMatcherEditorListener<String> counter = new CountingMatcherEditorListener<String>();
         textMatcherEditor.addMatcherEditorListener(counter);
 
 		textMatcherEditor.setFilterText(new String[] {"0"});		// constrained
@@ -122,7 +122,7 @@ public class TextMatcherTest extends TestCase {
 
         list.addAll(numbers);
 
-        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
+        final CountingMatcherEditorListener<String> counter = new CountingMatcherEditorListener<String>();
         textMatcherEditor.addMatcherEditorListener(counter);
 
         assertEquals(list, numbers);
@@ -199,7 +199,7 @@ public class TextMatcherTest extends TestCase {
         FilterList<String> list = new FilterList<String>(new BasicEventList<String>(), textMatcherEditor);
         list.addAll(monotonicAlphabet);
 
-        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
+        final CountingMatcherEditorListener<String> counter = new CountingMatcherEditorListener<String>();
         textMatcherEditor.addMatcherEditorListener(counter);
 
         assertEquals(TextMatcherEditor.CONTAINS, textMatcherEditor.getMode());
@@ -233,7 +233,7 @@ public class TextMatcherTest extends TestCase {
         FilterList<String> list = new FilterList<String>(new BasicEventList<String>(), textMatcherEditor);
         list.addAll(monotonicAlphabet);
 
-        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
+        final CountingMatcherEditorListener<String> counter = new CountingMatcherEditorListener<String>();
         textMatcherEditor.addMatcherEditorListener(counter);
 
         assertEquals(TextMatcherEditor.IDENTICAL_STRATEGY, textMatcherEditor.getStrategy());

@@ -186,7 +186,7 @@ public class DefaultEventTableModelTest extends SwingTestCase {
 
         final ObservableElementList<JLabel> observedLabels = new ObservableElementList<JLabel>(labels, GlazedLists.beanConnector(JLabel.class));
 
-        final SortedList<JLabel> sortedLabels = new SortedList<JLabel>(observedLabels, GlazedLists.beanPropertyComparator(JLabel.class, "text", new String[0]));
+        final SortedList<JLabel> sortedLabels = new SortedList<JLabel>(observedLabels, GlazedLists.beanPropertyComparator(JLabel.class, "text"));
 
         final DefaultEventTableModel<JLabel> tableModel = new DefaultEventTableModel<JLabel>(sortedLabels, new LabelTableFormat());
 

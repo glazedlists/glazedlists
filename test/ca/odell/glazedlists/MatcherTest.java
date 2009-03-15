@@ -251,15 +251,15 @@ public class MatcherTest extends TestCase {
 
         Collection<? super Number> selected;
 
-        final Matcher<Number> intAndLongMatcher = Matchers.types(new Class[] {Long.class, Integer.class});
+        final Matcher<Number> intAndLongMatcher = Matchers.types(Long.class, Integer.class);
         selected = Matchers.select(numbers, intAndLongMatcher);
         assertEquals(Arrays.asList(new Integer(3), new Long(4)), selected);
 
-        final Matcher<Number> numberMatcher = Matchers.types(new Class[] {Number.class});
+        final Matcher<Number> numberMatcher = Matchers.types(Number.class);
         selected = Matchers.select(numbers, numberMatcher);
         assertEquals(Arrays.asList(new Float(0), new Double(1), new Short((short) 2), new Integer(3), new Long(4)), selected);
 
-        final Matcher<Number> stringMatcher = Matchers.types(new Class[] {String.class});
+        final Matcher<Number> stringMatcher = Matchers.types(String.class);
         selected = Matchers.select(numbers, stringMatcher);
         assertEquals(Collections.EMPTY_LIST, selected);
     }

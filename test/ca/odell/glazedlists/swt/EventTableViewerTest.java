@@ -47,9 +47,9 @@ public class EventTableViewerTest extends SwtTestCase {
         final TableComparatorChooser<Color> chooser = TableComparatorChooser.install(viewer, sorted, false);
         assertNull(table.getSortColumn());
         assertEquals(SWT.NONE, table.getSortDirection());
-        chooser.getComparatorsForColumn(0).add(GlazedLists.beanPropertyComparator(Color.class, "red", new String[]{}));
-        chooser.getComparatorsForColumn(1).add(GlazedLists.beanPropertyComparator(Color.class, "green", new String[]{}));
-        chooser.getComparatorsForColumn(2).add(GlazedLists.beanPropertyComparator(Color.class, "blue", new String[]{}));
+        chooser.getComparatorsForColumn(0).add(GlazedLists.beanPropertyComparator(Color.class, "red"));
+        chooser.getComparatorsForColumn(1).add(GlazedLists.beanPropertyComparator(Color.class, "green"));
+        chooser.getComparatorsForColumn(2).add(GlazedLists.beanPropertyComparator(Color.class, "blue"));
 
         chooser.appendComparator(0, 0, false);
         assertEquals(table.getColumn(0), table.getSortColumn());
@@ -86,9 +86,9 @@ public class EventTableViewerTest extends SwtTestCase {
         final TableComparatorChooser<Color> chooser = TableComparatorChooser.install(viewer, sorted, true);
         assertNull(table.getSortColumn());
         assertEquals(SWT.NONE, table.getSortDirection());
-        chooser.getComparatorsForColumn(0).add(GlazedLists.beanPropertyComparator(Color.class, "red", new String[]{}));
-        chooser.getComparatorsForColumn(1).add(GlazedLists.beanPropertyComparator(Color.class, "green", new String[]{}));
-        chooser.getComparatorsForColumn(2).add(GlazedLists.beanPropertyComparator(Color.class, "blue", new String[]{}));
+        chooser.getComparatorsForColumn(0).add(GlazedLists.beanPropertyComparator(Color.class, "red"));
+        chooser.getComparatorsForColumn(1).add(GlazedLists.beanPropertyComparator(Color.class, "green"));
+        chooser.getComparatorsForColumn(2).add(GlazedLists.beanPropertyComparator(Color.class, "blue"));
 
         chooser.appendComparator(0, 0, false);
         assertEquals(table.getColumn(0), table.getSortColumn());

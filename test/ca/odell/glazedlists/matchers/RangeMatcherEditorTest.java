@@ -1,9 +1,10 @@
 package ca.odell.glazedlists.matchers;
 
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import java.util.Date;
+
 import junit.framework.TestCase;
 
-import java.util.Date;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 
 public class RangeMatcherEditorTest extends TestCase {
 
@@ -16,7 +17,7 @@ public class RangeMatcherEditorTest extends TestCase {
 
     public void testSetRange() {
         final RangeMatcherEditor<Date,Date> matcherEditor = new RangeMatcherEditor<Date,Date>();
-        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
+        final CountingMatcherEditorListener<Date> counter = new CountingMatcherEditorListener<Date>();
         matcherEditor.addMatcherEditorListener(counter);
         counter.assertCounterState(0, 0, 0, 0, 0);
 
@@ -63,7 +64,7 @@ public class RangeMatcherEditorTest extends TestCase {
 
     public void testSetRangeWithNulls() {
         final RangeMatcherEditor<Date,Date> matcherEditor = new RangeMatcherEditor<Date,Date>();
-        final CountingMatcherEditorListener counter = new CountingMatcherEditorListener();
+        final CountingMatcherEditorListener<Date> counter = new CountingMatcherEditorListener<Date>();
         matcherEditor.addMatcherEditorListener(counter);
         counter.assertCounterState(0, 0, 0, 0, 0);
 
