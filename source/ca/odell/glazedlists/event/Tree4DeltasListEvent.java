@@ -120,7 +120,7 @@ class Tree4DeltasListEvent<E> extends ListEvent<E> {
     @Override
     public E getNewValue() {
         // TODO(jessewilson):
-        return (E)ListEvent.UNKNOWN_VALUE;
+        return ListEvent.<E>unknownValue();
     }
 
     @Override

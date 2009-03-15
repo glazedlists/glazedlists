@@ -3,11 +3,11 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.event;
 
-import ca.odell.glazedlists.impl.adt.gnutrove.TIntArrayList;
-import ca.odell.glazedlists.event.ListEvent;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.impl.adt.gnutrove.TIntArrayList;
 
 /**
  * Manage a very simple list of list event blocks that occur in
@@ -32,7 +32,7 @@ public class BlockSequence<E> {
      * @param endIndex the last index, exclusive
      */
     public boolean update(int startIndex, int endIndex) {
-        return addChange(ListEvent.UPDATE, startIndex, endIndex, (E)ListEvent.UNKNOWN_VALUE, (E)ListEvent.UNKNOWN_VALUE);
+        return addChange(ListEvent.UPDATE, startIndex, endIndex, ListEvent.<E>unknownValue(), ListEvent.<E>unknownValue());
     }
 
     /**
@@ -40,7 +40,7 @@ public class BlockSequence<E> {
      * @param endIndex the last index, exclusive
      */
     public boolean insert(int startIndex, int endIndex) {
-        return addChange(ListEvent.INSERT, startIndex, endIndex, (E)ListEvent.UNKNOWN_VALUE, (E)ListEvent.UNKNOWN_VALUE);
+        return addChange(ListEvent.INSERT, startIndex, endIndex, ListEvent.<E>unknownValue(), ListEvent.<E>unknownValue());
     }
 
     /**
@@ -48,7 +48,7 @@ public class BlockSequence<E> {
      * @param endIndex the last index, exclusive
      */
     public boolean delete(int startIndex, int endIndex) {
-        return addChange(ListEvent.DELETE, startIndex, endIndex, (E)ListEvent.UNKNOWN_VALUE, (E)ListEvent.UNKNOWN_VALUE);
+        return addChange(ListEvent.DELETE, startIndex, endIndex, ListEvent.<E>unknownValue(), ListEvent.<E>unknownValue());
     }
 
     /**
@@ -72,14 +72,14 @@ public class BlockSequence<E> {
             lastStartIndex = -1;
             lastEndIndex = 0;
             lastChangedIndex = 0;
-            lastOldValue = (E)ListEvent.UNKNOWN_VALUE;
-            lastNewValue = (E)ListEvent.UNKNOWN_VALUE;
+            lastOldValue = ListEvent.<E>unknownValue();
+            lastNewValue = ListEvent.<E>unknownValue();
         } else {
             lastType = types.get(size - 1);
             lastStartIndex = starts.get(size - 1);
             lastEndIndex = ends.get(size - 1);
             lastChangedIndex = (lastType == ListEvent.DELETE) ? lastStartIndex : lastEndIndex;
-            lastOldValue = (lastType == ListEvent.DELETE) ? oldValues.get(size - 1) : (E)ListEvent.UNKNOWN_VALUE;
+            lastOldValue = (lastType == ListEvent.DELETE) ? oldValues.get(size - 1) : ListEvent.<E>unknownValue();
             lastNewValue = newValues.get(size - 1);
         }
 

@@ -151,7 +151,7 @@ public class Tree4Deltas<E> {
     }
 
     public void sourceInsert(int sourceIndex) {
-        tree.add(sourceIndex, SOURCE_INDICES, NO_CHANGE, (E)ListEvent.UNKNOWN_VALUE, 1);
+        tree.add(sourceIndex, SOURCE_INDICES, NO_CHANGE, ListEvent.<E>unknownValue(), 1);
     }
 
     public void sourceDelete(int sourceIndex) {
@@ -159,7 +159,7 @@ public class Tree4Deltas<E> {
     }
 
     public void sourceRevert(int sourceIndex) {
-        tree.set(sourceIndex, SOURCE_INDICES, NO_CHANGE, (E)ListEvent.UNKNOWN_VALUE, 1);
+        tree.set(sourceIndex, SOURCE_INDICES, NO_CHANGE, ListEvent.<E>unknownValue(), 1);
     }
 
     public int targetSize() {
@@ -199,7 +199,7 @@ public class Tree4Deltas<E> {
         int delta = size - currentSize;
         if(delta > 0) {
             int endOfTree = tree.size(ALL_INDICES);
-            tree.add(endOfTree, ALL_INDICES, NO_CHANGE, (E)ListEvent.UNKNOWN_VALUE, delta);
+            tree.add(endOfTree, ALL_INDICES, NO_CHANGE, ListEvent.<E>unknownValue(), delta);
         }
     }
 

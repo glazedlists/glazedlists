@@ -3,13 +3,13 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.event;
 
+import java.util.ConcurrentModificationException;
+import java.util.List;
+
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.impl.WeakReferenceProxy;
 import ca.odell.glazedlists.impl.event.BlockSequence;
 import ca.odell.glazedlists.impl.event.Tree4Deltas;
-
-import java.util.ConcurrentModificationException;
-import java.util.List;
 
 /**
  * Models a continuous stream of changes on a list. Changes of the same type
@@ -118,7 +118,7 @@ public final class ListEventAssembler<E> {
      * the specified index, with the specified previous value.
      */
     public void elementInserted(int index, E newValue) {
-        addChange(ListEvent.INSERT, index, index, (E)ListEvent.UNKNOWN_VALUE, newValue);
+        addChange(ListEvent.INSERT, index, index, ListEvent.<E>unknownValue(), newValue);
     }
     /**
      * Add to the current ListEvent the update of the element at the specified
@@ -132,14 +132,14 @@ public final class ListEventAssembler<E> {
      * index, with the specified previous value.
      */
     public void elementDeleted(int index, E oldValue) {
-        addChange(ListEvent.DELETE, index, index, oldValue, (E)ListEvent.UNKNOWN_VALUE);
+        addChange(ListEvent.DELETE, index, index, oldValue, ListEvent.<E>unknownValue());
     }
 
     /**
      * @deprecated replaced with {@link #elementUpdated(int, Object, Object)}.
      */
     public void elementUpdated(int index, E oldValue) {
-        elementUpdated(index, oldValue, (E)ListEvent.UNKNOWN_VALUE);
+        elementUpdated(index, oldValue, ListEvent.<E>unknownValue());
     }
 
     /**
@@ -153,7 +153,7 @@ public final class ListEventAssembler<E> {
      *     and {@link #elementDeleted}.
      */
     public void addChange(int type, int startIndex, int endIndex) {
-        addChange(type, startIndex, endIndex, (E)ListEvent.UNKNOWN_VALUE, (E)ListEvent.UNKNOWN_VALUE);
+        addChange(type, startIndex, endIndex, ListEvent.<E>unknownValue(), ListEvent.<E>unknownValue());
     }
     /**
      * Convenience method for appending a single change of the specified type.
@@ -246,8 +246,8 @@ public final class ListEventAssembler<E> {
         if(!isEventEmpty()) throw new IllegalStateException("Cannot combine reorder with other change events");
         // can't reorder an empty list, see bug 91
         if(reorderMap.length == 0) return;
-        addChange(ListEvent.DELETE, 0, reorderMap.length - 1, (E)ListEvent.UNKNOWN_VALUE, (E)ListEvent.UNKNOWN_VALUE);
-        addChange(ListEvent.INSERT, 0, reorderMap.length - 1, (E)ListEvent.UNKNOWN_VALUE, (E)ListEvent.UNKNOWN_VALUE);
+        addChange(ListEvent.DELETE, 0, reorderMap.length - 1, ListEvent.<E>unknownValue(), ListEvent.<E>unknownValue());
+        addChange(ListEvent.INSERT, 0, reorderMap.length - 1, ListEvent.<E>unknownValue(), ListEvent.<E>unknownValue());
         this.reorderMap = reorderMap;
     }
     /**

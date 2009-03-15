@@ -4,6 +4,7 @@
 package ca.odell.glazedlists.event;
 
 import junit.framework.TestCase;
+
 import ca.odell.glazedlists.impl.event.Tree4Deltas;
 
 /**
@@ -15,7 +16,7 @@ public class Tree4DeltasTest extends TestCase {
      * Make sure the deltas iterator works as expected.
      */
     public void testIterateByBlocks() {
-        Tree4Deltas deltas = new Tree4Deltas();
+        Tree4Deltas<Object> deltas = new Tree4Deltas<Object>();
         deltas.reset(10);
         deltas.targetInsert(3, 6, null);
         deltas.targetDelete(8, 10, ListEvent.UNKNOWN_VALUE);
@@ -35,9 +36,9 @@ public class Tree4DeltasTest extends TestCase {
 
         assertEquals(false, iterator.hasNextNode());
     }
-    
+
     public void testTargetChanges() {
-        Tree4Deltas deltas = new Tree4Deltas();
+        Tree4Deltas<Object> deltas = new Tree4Deltas<Object>();
         deltas.reset(10);
         assertEquals("__________", deltas.toString());
 

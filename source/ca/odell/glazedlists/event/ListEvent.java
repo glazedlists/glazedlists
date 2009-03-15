@@ -3,10 +3,10 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.event;
 
+import java.util.EventObject;
+
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.TransformedList;
-
-import java.util.EventObject;
 
 /**
  * A ListEvent models a change to a list.
@@ -22,7 +22,7 @@ import java.util.EventObject;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public abstract class ListEvent<E> extends EventObject {
-    
+
     /** different types of changes */
     public static final int DELETE = 0;
     public static final int UPDATE = 1;
@@ -30,6 +30,12 @@ public abstract class ListEvent<E> extends EventObject {
 
     /** indicates a removed element whose value is unknown */
     public static final Object UNKNOWN_VALUE = new String("UNKNOWN VALUE");
+
+    /** Returns a value indicating a removed element whose value is unknown. */
+    @SuppressWarnings("unchecked")
+    public static final <E> E unknownValue() {
+        return (E) UNKNOWN_VALUE;
+    }
 
     /** the list that has changed */
     protected EventList<E> sourceList;
@@ -52,7 +58,7 @@ public abstract class ListEvent<E> extends EventObject {
 
     /**
      * Resets this event's position to the previously-marked position. This should
-     * be used for {@link TransformedList}s that require multiple-passes of the 
+     * be used for {@link TransformedList}s that require multiple-passes of the
      * {@link ListEvent} in order to process it.
      */
     public abstract void reset();
@@ -63,7 +69,7 @@ public abstract class ListEvent<E> extends EventObject {
      * change to view.
      */
     public abstract boolean next();
-    
+
     /**
      * Without incrementing the implicit iterator, this tests if there is another
      * change to view. The user will still need to call next() to view
@@ -75,7 +81,7 @@ public abstract class ListEvent<E> extends EventObject {
      * Increments the change sequence to view the next change block.
      */
     public abstract boolean nextBlock();
-    
+
     /**
      * Tests if this change is a complete reordering of the list.
      */
@@ -146,7 +152,7 @@ public abstract class ListEvent<E> extends EventObject {
     public EventList<E> getSourceList() {
         return sourceList;
     }
-    
+
     /**
      * Gets this event as a String. This simply iterates through all blocks
      * and concatenates them.

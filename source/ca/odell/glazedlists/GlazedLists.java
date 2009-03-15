@@ -218,6 +218,7 @@ public final class GlazedLists {
     /**
      * Creates a {@link Comparator} that compares {@link Comparable} objects.
      */
+    @SuppressWarnings("unchecked")
     public static <T extends Comparable> Comparator<T> comparableComparator() {
         if(comparableComparator == null) comparableComparator = new ComparableComparator();
         return (Comparator<T>)comparableComparator;
@@ -226,6 +227,7 @@ public final class GlazedLists {
     /**
      * Creates a reverse {@link Comparator} that works for {@link Comparable} objects.
      */
+    @SuppressWarnings("unchecked")
     public static <T extends Comparable> Comparator<T> reverseComparator() {
         if(reversedComparable == null) reversedComparable = reverseComparator(comparableComparator());
         return (Comparator<T>)reversedComparable;
@@ -327,8 +329,9 @@ public final class GlazedLists {
      * Creates a {@link TextFilterator} that searches against an Object's
      * {@link Object#toString() toString()} value.
      */
+    @SuppressWarnings("unchecked")
     public static <E> TextFilterator<E> toStringTextFilterator() {
-        if(stringTextFilterator == null) stringTextFilterator = new StringTextFilterator();
+        if(stringTextFilterator == null) stringTextFilterator = new StringTextFilterator<Object>();
         return (TextFilterator<E>) stringTextFilterator;
     }
 
