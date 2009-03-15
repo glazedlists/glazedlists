@@ -10,7 +10,7 @@ import java.util.Comparator;
  */
 public class KeyedCollectionForComparableValuesTest extends AbstractKeyedCollectionTest {
 
-    public static Comparator comparableComparator = (Comparator) GlazedLists.comparableComparator();
+    public static Comparator comparableComparator = GlazedLists.comparableComparator();
 
     public KeyedCollectionForComparableValuesTest() {
         super(GlazedListsImpl.keyedCollection(comparableComparator, comparableComparator));

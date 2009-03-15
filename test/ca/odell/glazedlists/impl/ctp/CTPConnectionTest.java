@@ -59,7 +59,7 @@ public class CTPConnectionTest extends TestCase {
         StaticCTPHandler refused = new StaticCTPHandler();
         connectionManager.connect(refused, "localhost", connectPort);
 
-        refused.assertClosed((long)1000);
+        refused.assertClosed(1000);
         
         connectionManager.stop();
     }

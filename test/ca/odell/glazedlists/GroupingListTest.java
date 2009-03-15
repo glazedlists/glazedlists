@@ -262,12 +262,12 @@ public class GroupingListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("BB"), groupList.get(1));
         assertEquals(GlazedListsTests.stringToList("CCC"), groupList.get(2));
 
-        ((List<String>)groupList.get(0)).add("A");
+        (groupList.get(0)).add("A");
         assertEquals(GlazedListsTests.stringToList("AA"), groupList.get(0));
         assertEquals(GlazedListsTests.stringToList("BB"), groupList.get(1));
         assertEquals(GlazedListsTests.stringToList("CCC"), groupList.get(2));
 
-        ((List<String>)groupList.get(0)).add("D");
+        (groupList.get(0)).add("D");
         assertEquals(GlazedListsTests.stringToList("AA"), groupList.get(0));
         assertEquals(GlazedListsTests.stringToList("BB"), groupList.get(1));
         assertEquals(GlazedListsTests.stringToList("CCC"), groupList.get(2));
@@ -310,16 +310,16 @@ public class GroupingListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("BB"), groupList.get(1));
         assertEquals(GlazedListsTests.stringToList("CCC"), groupList.get(2));
 
-        ((List<String>)groupList.get(1)).remove("B");
+        (groupList.get(1)).remove("B");
         assertEquals(GlazedListsTests.stringToList("A"), groupList.get(0));
         assertEquals(GlazedListsTests.stringToList("B"), groupList.get(1));
         assertEquals(GlazedListsTests.stringToList("CCC"), groupList.get(2));
 
-        ((List<String>)groupList.get(1)).remove("B");
+        (groupList.get(1)).remove("B");
         assertEquals(GlazedListsTests.stringToList("A"), groupList.get(0));
         assertEquals(GlazedListsTests.stringToList("CCC"), groupList.get(1));
 
-        ((List<String>)groupList.get(0)).remove("X");
+        (groupList.get(0)).remove("X");
         assertEquals(GlazedListsTests.stringToList("A"), groupList.get(0));
         assertEquals(GlazedListsTests.stringToList("CCC"), groupList.get(1));
     }
@@ -332,16 +332,16 @@ public class GroupingListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("BB"), groupList.get(1));
         assertEquals(GlazedListsTests.stringToList("CCC"), groupList.get(2));
 
-        ((List<String>)groupList.get(1)).set(0, "A");
+        (groupList.get(1)).set(0, "A");
         assertEquals(GlazedListsTests.stringToList("AA"), groupList.get(0));
         assertEquals(GlazedListsTests.stringToList("B"), groupList.get(1));
         assertEquals(GlazedListsTests.stringToList("CCC"), groupList.get(2));
 
-        ((List<String>)groupList.get(1)).set(0, "C");
+        (groupList.get(1)).set(0, "C");
         assertEquals(GlazedListsTests.stringToList("AA"), groupList.get(0));
         assertEquals(GlazedListsTests.stringToList("CCCC"), groupList.get(1));
 
-        ((List<String>)groupList.get(1)).set(2, "B");
+        (groupList.get(1)).set(2, "B");
         assertEquals(GlazedListsTests.stringToList("AA"), groupList.get(0));
         assertEquals(GlazedListsTests.stringToList("B"), groupList.get(1));
         assertEquals(GlazedListsTests.stringToList("CCC"), groupList.get(2));
@@ -376,14 +376,14 @@ public class GroupingListTest extends TestCase {
         assertEquals(((List)groupList.get(1)).size(), 2);
         assertEquals(((List)groupList.get(2)).size(), 3);
 
-        ((List<String>)groupList.get(2)).clear();
+        (groupList.get(2)).clear();
         assertEquals(((List)groupList.get(0)).size(), 1);
         assertEquals(((List)groupList.get(1)).size(), 2);
 
-        ((List<String>)groupList.get(0)).clear();
+        (groupList.get(0)).clear();
         assertEquals(((List)groupList.get(0)).size(), 2);
 
-        ((List<String>)groupList.get(0)).clear();
+        (groupList.get(0)).clear();
         assertEquals(groupList.size(), 0);
     }
 
@@ -409,9 +409,9 @@ public class GroupingListTest extends TestCase {
         final GroupingList<String> groupingList = GroupingList.create(source);
 
         source.addAll(GlazedListsTests.stringToList("AAABBBCCC"));
-        List<String> as = (List<String>) groupingList.get(0);
-        List<String> bs = (List<String>) groupingList.get(1);
-        List<String> cs = (List<String>) groupingList.get(2);
+        List<String> as = groupingList.get(0);
+        List<String> bs = groupingList.get(1);
+        List<String> cs = groupingList.get(2);
         assertEquals(3, as.size());
         assertEquals(3, bs.size());
         assertEquals(3, cs.size());
@@ -429,8 +429,8 @@ public class GroupingListTest extends TestCase {
 
         source.addAll(GlazedListsTests.delimitedStringToList("Jesse James Jodie Mark Mariusz"));
 
-        List<String> jNames = (List<String>) groupingList.get(0);
-        List<String> mNames = (List<String>) groupingList.get(1);
+        List<String> jNames = groupingList.get(0);
+        List<String> mNames = groupingList.get(1);
 
         assertEquals(GlazedListsTests.delimitedStringToList("Jesse James Jodie"), jNames);
         assertEquals(GlazedListsTests.delimitedStringToList("Mark Mariusz"), mNames);
@@ -452,7 +452,7 @@ public class GroupingListTest extends TestCase {
      */
     public void testSeparatorListBreaks() {
         TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
-        GroupingList<String> grouped = new GroupingList<String>(source, (Comparator)GlazedLists.comparableComparator());
+        GroupingList<String> grouped = new GroupingList<String>(source, GlazedLists.comparableComparator());
         ListConsistencyListener<List<String>> listConsistencyListener = ListConsistencyListener.install(grouped);
         listConsistencyListener.setPreviousElementTracked(false);
 

@@ -597,7 +597,7 @@ public class SeparatorListTest extends TestCase {
 
         // collapse all
         for(int i = 0; i < separatorList.size(); i++) {
-            SeparatorList.Separator separator = (SeparatorList.Separator)(Object)separatorList.get(i);
+            SeparatorList.Separator separator = (SeparatorList.Separator)separatorList.get(i);
             separator.setLimit(0);
         }
         // expand all
@@ -619,7 +619,7 @@ public class SeparatorListTest extends TestCase {
         EventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.stringToList("AAaaaBBBBbCCCddd"));
 
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, (Comparator)GlazedLists.caseInsensitiveComparator(), 0, Integer.MAX_VALUE);
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, GlazedLists.caseInsensitiveComparator(), 0, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
 

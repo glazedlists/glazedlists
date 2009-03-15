@@ -1397,7 +1397,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
         public Node<E> reevaluate(E sourceValue, Node<E> transformedValue) {
             assert(!transformedValue.virtual);
-            Node<E> result = (Node<E>) evaluate(sourceValue);
+            Node<E> result = evaluate(sourceValue);
             result.expanded = transformedValue.expanded;
             return result;
         }
@@ -1632,7 +1632,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     private class NodesList extends TransformedList<E,Node<E>> {
 
         public NodesList() {
-            super((EventList) TreeList.this);
+            super(TreeList.this);
             TreeList.this.addListEventListener(this);
         }
 

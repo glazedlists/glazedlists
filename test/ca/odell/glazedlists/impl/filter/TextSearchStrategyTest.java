@@ -113,7 +113,7 @@ public class TextSearchStrategyTest extends TestCase {
     public void testUnicodeCollision() {
         assertEquals(((int)'\u042F'), Character.toUpperCase('\u042F'));
         assertEquals(((int)'/'), Character.toUpperCase('/'));
-        assertEquals(((int)'\u042F') % 256, ((int)'/') % 256);
+        assertEquals(('\u042F') % 256, ('/') % 256);
 
         for(int s = 0; s < strategies.length; s++) {
             TextSearchStrategy strategy = strategies[s];

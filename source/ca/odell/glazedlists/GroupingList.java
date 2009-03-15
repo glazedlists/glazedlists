@@ -256,7 +256,7 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
     public List<E> remove(int index) {
         if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot remove at " + index + " on list of size " + size());
 
-        final List<E> removed = (List<E>) get(index);
+        final List<E> removed = get(index);
 
         // make a copy of the list to return
         final List<E> result = new ArrayList<E>(removed);
@@ -273,7 +273,7 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
 
         updates.beginEvent(true);
 
-        final List<E> result = (List<E>) remove(index);
+        final List<E> result = remove(index);
         add(index, value);
 
         updates.commitEvent();

@@ -241,8 +241,8 @@ public final class TextMatchers {
         final SearchTerm[] nullFieldSearchTerms = Matchers.select(filters, FIELD_MATCHER);
 
         // fetch all negated and non-negated SearchTerm object into two different Lists
-        final List<SearchTerm> negatedUnrequiredSearchTerms = Arrays.asList((SearchTerm[]) Matchers.select(nullFieldSearchTerms, NEGATED_MATCHER));
-        final List<SearchTerm> nonNegatedUnrequiredSearchTerms = Arrays.asList((SearchTerm[]) Matchers.select(nullFieldSearchTerms, NON_NEGATED_MATCHER));
+        final List<SearchTerm> negatedUnrequiredSearchTerms = Arrays.asList(Matchers.select(nullFieldSearchTerms, NEGATED_MATCHER));
+        final List<SearchTerm> nonNegatedUnrequiredSearchTerms = Arrays.asList(Matchers.select(nullFieldSearchTerms, NON_NEGATED_MATCHER));
 
         // reassemble a super List of all normalized (necessary) SearchTerms
         final Collection<SearchTerm> allSearchTerms = new ArrayList<SearchTerm>(filters.length);

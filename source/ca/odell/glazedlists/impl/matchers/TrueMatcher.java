@@ -23,7 +23,7 @@ public final class TrueMatcher<E> implements Matcher<E> {
 	 * Return a singleton instance.
 	 */
 	public static <E> Matcher<E> getInstance() {
-		return (Matcher<E>) INSTANCE;
+		return INSTANCE;
 	}
 
     /** {@inheritDoc} */

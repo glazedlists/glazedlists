@@ -65,9 +65,9 @@ public class CTPChunkTest extends TestCase {
             handlerFactory.addHandler(server);
             connectionManager.connect(client, "localhost", serverPort);
             
-            client.assertComplete((long)1000);
+            client.assertComplete(1000);
             client.close();
-            server.assertComplete((long)1000);
+            server.assertComplete(1000);
             server.close();
         } catch(Exception e) {
             fail(e.getMessage());
@@ -90,8 +90,8 @@ public class CTPChunkTest extends TestCase {
             handlerFactory.addHandler(server);
             connectionManager.connect(client, "localhost", serverPort);
             
-            client.assertComplete((long)1000);
-            server.assertComplete((long)1000);
+            client.assertComplete(1000);
+            server.assertComplete(1000);
             client.close();
             server.close();
         } catch(Exception e) {
@@ -119,9 +119,9 @@ public class CTPChunkTest extends TestCase {
             handlerFactory.addHandler(server);
             connectionManager.connect(client, "localhost", serverPort);
             
-            client.assertComplete((long)1000);
+            client.assertComplete(1000);
             client.close();
-            server.assertComplete((long)1000);
+            server.assertComplete(1000);
             server.close();
         } catch(Exception e) {
             fail(e.getMessage());
@@ -150,9 +150,9 @@ public class CTPChunkTest extends TestCase {
             handlerFactory.addHandler(server);
             connectionManager.connect(client, "localhost", serverPort);
             
-            client.assertComplete((long)1000);
+            client.assertComplete(1000);
             client.close();
-            server.assertComplete((long)1000);
+            server.assertComplete(1000);
             server.close();
         } catch(Exception e) {
             fail(e.getMessage());

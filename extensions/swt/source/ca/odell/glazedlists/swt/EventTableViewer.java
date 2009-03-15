@@ -81,7 +81,7 @@ public class EventTableViewer<E> implements ListEventListener<E> {
      *             instead
      */
     public EventTableViewer(EventList<E> source, Table table, String[] propertyNames, String[] columnLabels) {
-        this(source, table, (TableFormat<E>)GlazedLists.tableFormat(propertyNames, columnLabels));
+        this(source, table, GlazedLists.tableFormat(propertyNames, columnLabels));
     }
 
     /**

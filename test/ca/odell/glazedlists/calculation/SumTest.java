@@ -108,7 +108,7 @@ public final class SumTest extends TestCase {
 
         // test remove
         source.remove(1);
-        assertEquals(1, (int) sum.getValue().intValue());
+        assertEquals(1, sum.getValue().intValue());
         assertEquals(1, counter.getCountAndReset());
     }
 

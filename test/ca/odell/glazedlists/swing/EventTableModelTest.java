@@ -40,6 +40,7 @@ import ca.odell.glazedlists.matchers.Matcher;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
+@SuppressWarnings("deprecation")
 public class EventTableModelTest extends SwingTestCase {
 
     /**

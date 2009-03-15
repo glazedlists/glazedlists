@@ -54,7 +54,7 @@ public class CachingListTest extends TestCase {
         // Lookup each value in the source
         for(int i = 0;i < 25;i++) {
             Object result = cache.get(i);
-            assertEquals(new Integer(i), (Integer)result);
+            assertEquals(new Integer(i), result);
         }
 
         // Verify that there have been no cache hits
@@ -78,7 +78,7 @@ public class CachingListTest extends TestCase {
         Integer ONE = new Integer(1);
         for(int i = 0;i < 25;i++) {
             Object result = cache.get(1);
-            assertEquals(ONE, (Integer)result);
+            assertEquals(ONE, result);
         }
 
         // Verify that there have been 24 cache hits
@@ -103,7 +103,7 @@ public class CachingListTest extends TestCase {
         // Lookup enough values to fill the cache
         for(int i = 0;i < 15;i++) {
             Object result = cache.get(i);
-            assertEquals(new Integer(i), (Integer)result);
+            assertEquals(new Integer(i), result);
         }
 
         int cacheHitBaseline = cache.getCacheHits();
@@ -111,14 +111,14 @@ public class CachingListTest extends TestCase {
 
         // Lookup one uncached object
         Object result = cache.get(20);
-        assertEquals(new Integer(20), (Integer)result);
+        assertEquals(new Integer(20), result);
 
         assertEquals(cacheHitBaseline, cache.getCacheHits());
         assertEquals(cacheMissBaseline + 1, cache.getCacheMisses());
 
         // Look for the first request value which should not be in the cache
         result = cache.get(0);
-        assertEquals(new Integer(0), (Integer)result);
+        assertEquals(new Integer(0), result);
 
         assertEquals(cacheHitBaseline, cache.getCacheHits());
         assertEquals(cacheMissBaseline + 2, cache.getCacheMisses());
@@ -139,7 +139,7 @@ public class CachingListTest extends TestCase {
         // Lookup enough values to fill the cache
         for(int i = 0;i < 15;i++) {
             Object result = cache.get(i);
-            assertEquals(new Integer(i), (Integer)result);
+            assertEquals(new Integer(i), result);
         }
 
         // Randomly lookup cached data to randomize cache entry ordering
@@ -155,7 +155,7 @@ public class CachingListTest extends TestCase {
         // Lookup the cached values in reverse order to re-order entries in reverse
         for(int i = 14;i >= 0;i--) {
             Object result = cache.get(i);
-            assertEquals(new Integer(i), (Integer)result);
+            assertEquals(new Integer(i), result);
         }
 
         assertEquals(cacheHitBaseline += 15, cache.getCacheHits());
@@ -163,7 +163,7 @@ public class CachingListTest extends TestCase {
 
         // Lookup one uncached object
         Object result = cache.get(20);
-        assertEquals(new Integer(20), (Integer)result);
+        assertEquals(new Integer(20), result);
 
         assertEquals(cacheHitBaseline, cache.getCacheHits());
         assertEquals(cacheMissBaseline + 1, cache.getCacheMisses());
@@ -171,7 +171,7 @@ public class CachingListTest extends TestCase {
         // Look for the previously cached values in reverse order
         for(int i = 14;i >= 0;i--) {
             result = cache.get(i);
-            assertEquals(new Integer(i), (Integer)result);
+            assertEquals(new Integer(i), result);
             assertEquals(cacheHitBaseline, cache.getCacheHits());
             assertEquals(cacheMissBaseline + 1 + (15 - i), cache.getCacheMisses());
         }
@@ -250,7 +250,7 @@ public class CachingListTest extends TestCase {
         // Lookup enough values to fill the cache
         for(int i = 0;i < 15;i++) {
             Object result = cache.get(i);
-            assertEquals(new Integer(i), (Integer)result);
+            assertEquals(new Integer(i), result);
         }
 
         // Remove 10 values leaving the first value
@@ -312,7 +312,7 @@ public class CachingListTest extends TestCase {
         // Lookup some values to paritally fill the cache
         for(int i = 9;i < 15;i++) {
              Object result = cache.get(i);
-             assertEquals(new Integer(i), (Integer)result);
+             assertEquals(new Integer(i), result);
         }
 
         // request beyond bounds with non-empty source and a partially filled cache
@@ -330,7 +330,7 @@ public class CachingListTest extends TestCase {
         // Lookup enough values to fill the cache
         for(int i = 9;i < 15;i++) {
             Object result = cache.get(i);
-            assertEquals(new Integer(i), (Integer)result);
+            assertEquals(new Integer(i), result);
         }
 
         // request beyond bounds with non-empty source and a full cache

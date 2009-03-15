@@ -137,7 +137,7 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
     public List<V> put(K key, List<V> value) {
         checkKeyValueAgreement(key, value);
 
-        final List<V> removed = (List<V>) remove(key);
+        final List<V> removed = remove(key);
         groupingList.add(value);
 
         return removed;
@@ -256,7 +256,7 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
             final int changeType = listChanges.getType();
 
             if (changeType == ListEvent.INSERT) {
-                final List<V> inserted = (List<V>) listChanges.getSourceList().get(changeIndex);
+                final List<V> inserted = listChanges.getSourceList().get(changeIndex);
                 final K key = key(inserted);
                 keyList.add(changeIndex, key);
                 delegate.put(key, inserted);
@@ -318,7 +318,7 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
             final K key = e.getKey();
             final List<V> value = e.getValue();
 
-            final List<V> mapValue = (List<V>) GroupingListMultiMap.this.get(key);
+            final List<V> mapValue = GroupingListMultiMap.this.get(key);
 
             return GlazedListsImpl.equal(value, mapValue);
         }
@@ -374,7 +374,7 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
          */
         public Entry<K, List<V>> next() {
             final K key = keyIter.next();
-            return new MultiMapEntry(key, (List<V>) get(key));
+            return new MultiMapEntry(key, get(key));
         }
 
         /** {@inheritDoc} */
