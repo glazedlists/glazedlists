@@ -3,31 +3,34 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.gui.TableFormat;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 import java.awt.event.MouseListener;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.swing.DefaultCellEditor;
+import javax.swing.JComboBox;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+
+import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.gui.TableFormat;
 
 public class TreeTableSupportTest extends SwingTestCase {
 
     public void guiTestUninstall() {
         // build a TreeList
         final EventList<String> source = new BasicEventList<String>();
-        final TreeList<String> treeList = new TreeList<String>(source, TreeListTest.COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
-
+        final TreeList<String> treeList = new TreeList<String>(source, TreeListTest.COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
+        final EventList<String> proxyList = GlazedListsSwing.swingThreadProxyList(treeList);
         // build a regular JTable around the TreeList
         final String[] propertyNames = {""};
         final String[] columnLabels = {"Column 1"};
         final TableFormat<String> itemTableFormat = GlazedLists.tableFormat(propertyNames, columnLabels);
-        final EventTableModel<String> model = new EventTableModel<String>(treeList, itemTableFormat);
+        final DefaultEventTableModel<String> model = new DefaultEventTableModel<String>(proxyList, itemTableFormat);
         final JTable table = new JTable(model);
         final TableColumn hierarchyColumn = table.getColumnModel().getColumn(0);
         final TableCellRenderer originalRenderer = new DefaultTableCellRenderer();
@@ -67,13 +70,14 @@ public class TreeTableSupportTest extends SwingTestCase {
     public void guiTestSetDelegateRendererAndEditor() {
         // build a TreeList
         final EventList<String> source = new BasicEventList<String>();
-        final TreeList<String> treeList = new TreeList<String>(source, TreeListTest.COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
+        final TreeList<String> treeList = new TreeList<String>(source, TreeListTest.COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
+        final EventList<String> proxyList = GlazedListsSwing.swingThreadProxyList(treeList);
 
         // build a regular JTable around the TreeList
         final String[] propertyNames = {""};
         final String[] columnLabels = {"Column 1"};
         final TableFormat<String> itemTableFormat = GlazedLists.tableFormat(propertyNames, columnLabels);
-        final EventTableModel<String> model = new EventTableModel<String>(treeList, itemTableFormat);
+        final DefaultEventTableModel<String> model = new DefaultEventTableModel<String>(proxyList, itemTableFormat);
         final JTable table = new JTable(model);
 
         // install TreeTableSupport
@@ -104,13 +108,14 @@ public class TreeTableSupportTest extends SwingTestCase {
     public void guiTestSetRendererAndEditor() {
         // build a TreeList
         final EventList<String> source = new BasicEventList<String>();
-        final TreeList<String> treeList = new TreeList<String>(source, TreeListTest.COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
+        final TreeList<String> treeList = new TreeList<String>(source, TreeListTest.COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
+        final EventList<String> proxyList = GlazedListsSwing.swingThreadProxyList(treeList);
 
         // build a regular JTable around the TreeList
         final String[] propertyNames = {""};
         final String[] columnLabels = {"Column 1"};
         final TableFormat<String> itemTableFormat = GlazedLists.tableFormat(propertyNames, columnLabels);
-        final EventTableModel<String> model = new EventTableModel<String>(treeList, itemTableFormat);
+        final DefaultEventTableModel<String> model = new DefaultEventTableModel<String>(proxyList, itemTableFormat);
         final JTable table = new JTable(model);
 
         // install TreeTableSupport
@@ -150,11 +155,12 @@ public class TreeTableSupportTest extends SwingTestCase {
     public void guiTestListEventsArriveOnEDT() throws InterruptedException {
         // build a TreeList
         final EventList<String> source = new BasicEventList<String>();
-        final TreeList<String> treeList = new TreeList<String>(source, TreeListTest.COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
+        final TreeList<String> treeList = new TreeList<String>(source, TreeListTest.COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
+        final EventList<String> proxyList = GlazedListsSwing.swingThreadProxyList(treeList);
 
         // build a regular JTable around the TreeList
         final TableFormat<String> itemTableFormat = GlazedLists.tableFormat(new String[] {""}, new String[] {"Column 1"});
-        final EventTableModel<String> model = new EventTableModel<String>(treeList, itemTableFormat);
+        final DefaultEventTableModel<String> model = new DefaultEventTableModel<String>(proxyList, itemTableFormat);
         final JTable table = new JTable(model);
 
         // install TreeTableSupport

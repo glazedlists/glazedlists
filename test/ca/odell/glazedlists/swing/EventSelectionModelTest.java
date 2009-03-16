@@ -14,14 +14,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.DelayList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.ThreadRecorderEventList;
-import ca.odell.glazedlists.TreeList;
+import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.matchers.Matchers;
 
@@ -408,7 +401,7 @@ public class EventSelectionModelTest extends SwingTestCase {
 
         final EventList<String> sourceProxy = GlazedListsSwing.swingThreadProxyList(source);
         final TreeList<String> treeList = new TreeList<String>(sourceProxy, new StringFormat(),
-                TreeList.NODES_START_EXPANDED);
+                TreeList.<String>nodesStartExpanded());
         final EventSelectionModel<String> selModel = new EventSelectionModel<String>(treeList);
         selModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         selModel.setSelectionInterval(2, 2);

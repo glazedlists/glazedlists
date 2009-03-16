@@ -3,13 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import java.util.AbstractList;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
@@ -35,8 +29,25 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
     /** An {@link ExpansionModel} with a simple policy: all nodes start expanded. */
     public static final ExpansionModel NODES_START_EXPANDED = new DefaultExpansionModel(true);
+
     /** An {@link ExpansionModel} with a simple policy: all nodes start collapsed. */
     public static final ExpansionModel NODES_START_COLLAPSED = new DefaultExpansionModel(false);
+
+    /**
+     * @return an {@link ExpansionModel} with a simple policy: all nodes start expanded.
+     */
+    @SuppressWarnings("unchecked")
+    public static final <E> ExpansionModel<E> nodesStartExpanded() {
+        return NODES_START_EXPANDED;
+    }
+
+    /**
+     * @return an {@link ExpansionModel} with a simple policy: all nodes start collapsed.
+     */
+    @SuppressWarnings("unchecked")
+    public static final <E> ExpansionModel<E> nodesStartCollapsed() {
+        return NODES_START_COLLAPSED;
+    }
 
     /** marker values for comparing elements */
     private static final Element MINIMUM_ELEMENT = new FakeElement();
@@ -48,7 +59,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     private ExpansionModel<E> expansionModel;
 
     /** node colors define where it is in the source and where it is here */
-    private static final ListToByteCoder BYTE_CODER = new ListToByteCoder(Arrays.asList("R", "V", "r", "v"));
+    private static final ListToByteCoder<String> BYTE_CODER = new ListToByteCoder<String>(Arrays.asList("R", "V", "r", "v"));
     private static final byte VISIBLE_REAL = BYTE_CODER.colorToByte("R");
     private static final byte VISIBLE_VIRTUAL = BYTE_CODER.colorToByte("V");
     private static final byte HIDDEN_REAL = BYTE_CODER.colorToByte("r");
@@ -119,7 +130,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
     /** @deprecated use the constructor that takes an {@link ExpansionModel} */
     public TreeList(EventList<E> source, Format<E> format) {
-        this(new InitializationData<E>(source, format, NODES_START_EXPANDED));
+        this(new InitializationData<E>(source, format, TreeList.<E>nodesStartExpanded()));
     }
 
     /**
@@ -919,14 +930,14 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         private void populateIndicesByValue(int firstNeeded, int lastNeeded) {
 
             // fill in everything between firstNeeded and firstAvailable
-            Element firstAvailableElement = indicesByValue.first();
+            Element<Node<E>> firstAvailableElement = indicesByValue.first();
             int firstAvailable = firstAvailableElement != null
                     ? data.indexOfNode(firstAvailableElement, ALL_NODES)
                     : lastNeeded;
             populate(firstNeeded, firstAvailable);
 
             // fill in everything between lastAvailable and lastNeeded
-            Element lastAvailableElement = indicesByValue.last();
+            Element<Node<E>> lastAvailableElement = indicesByValue.last();
             int lastAvailable = lastAvailableElement != null
                     ? data.indexOfNode(lastAvailableElement, ALL_NODES)
                     : firstAvailable;

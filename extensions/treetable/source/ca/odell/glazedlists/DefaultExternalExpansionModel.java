@@ -3,9 +3,9 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import java.util.Map;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * An {@link TreeList.ExpansionModel} that uses a {@link Map} to remember
@@ -28,7 +28,7 @@ public class DefaultExternalExpansionModel<E> implements TreeList.ExpansionModel
     }
 
     public DefaultExternalExpansionModel() {
-        this(TreeList.NODES_START_EXPANDED);
+        this(TreeList.<E>nodesStartExpanded());
     }
 
     public boolean isExpanded(E element, List<E> path) {

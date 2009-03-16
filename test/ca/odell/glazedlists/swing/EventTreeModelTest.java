@@ -10,7 +10,7 @@ public class EventTreeModelTest extends SwingTestCase {
     public void guiTestDispose() {
         EventList<String> treeNodeList = new BasicEventList<String>();
 
-        TreeList<String> glazedTreeList = new TreeList<String>(treeNodeList, TreeListTest.COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_COLLAPSED);
+        TreeList<String> glazedTreeList = new TreeList<String>(treeNodeList, TreeListTest.COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartCollapsed());
         EventTreeModel<String> eventTreeModel = new EventTreeModel<String>(glazedTreeList);
         eventTreeModel.dispose();
         glazedTreeList.dispose();

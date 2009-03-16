@@ -3,20 +3,24 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.filebrowser;
 
-import ca.odell.glazedlists.gui.TableFormat;
-import ca.odell.glazedlists.TreeList;
+import java.util.Comparator;
+import java.util.List;
+
+import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.SwingUtilities;
+import javax.swing.table.TableModel;
+
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.TreeList;
+import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.swing.EventTableModel;
-import ca.odell.glazedlists.swing.TreeTableSupport;
 import ca.odell.glazedlists.swing.GlazedListsSwing;
 import ca.odell.glazedlists.swing.TableComparatorChooser;
-
-import javax.swing.table.TableModel;
-import javax.swing.*;
-import java.util.Comparator;
-import java.util.List;
+import ca.odell.glazedlists.swing.TreeTableSupport;
 
 /**
  * A simplistic file system browser for exploring the TreeList API.
@@ -48,7 +52,7 @@ public class FileBrowser implements Runnable {
 
             SortedList<Entry> sortedEntries = new SortedList<Entry>(entries, null);
 
-            TreeList<Entry> treeList = new TreeList<Entry>(sortedEntries, treeFormat, TreeList.NODES_START_EXPANDED);
+            TreeList<Entry> treeList = new TreeList<Entry>(sortedEntries, treeFormat, TreeList.<Entry>nodesStartExpanded());
             TableModel model = new EventTableModel<Entry>(treeList, tableFormat);
             JTable table = new JTable(model);
             TreeTableSupport.install(table, treeList, 0);
