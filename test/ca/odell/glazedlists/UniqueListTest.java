@@ -3,12 +3,13 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
+import java.util.*;
+
+import junit.framework.TestCase;
+
 import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import junit.framework.TestCase;
-
-import java.util.*;
 
 /**
  * A UniqueListTest tests the functionality of the UniqueList
@@ -498,15 +499,15 @@ public class UniqueListTest extends TestCase {
     }
 
     public void testUpdateDeleteCollide() {
-        source = new BasicEventList<Object>();
-        source.add(new int[] { 2, 0, 1 });
-        source.add(new int[] { 2, 0, 1 });
-        source.add(new int[] { 3, 0, 1 });
-        source.add(new int[] { 4, 1, 0 });
+        BasicEventList<int[]> sourceList = new BasicEventList<int[]>();
+        sourceList.add(new int[] { 2, 0, 1 });
+        sourceList.add(new int[] { 2, 0, 1 });
+        sourceList.add(new int[] { 3, 0, 1 });
+        sourceList.add(new int[] { 4, 1, 0 });
 
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
-        FilterList filterList = new FilterList(source, matcherEditor);
-        unique = new UniqueList(filterList, GlazedListsTests.intArrayComparator(0));
+        FilterList<int[]> filterList = new FilterList<int[]>(sourceList, matcherEditor);
+        UniqueList<int[]> uniqueList = new UniqueList<int[]>(filterList, GlazedListsTests.intArrayComparator(0));
 
         matcherEditor.setFilter(2, 1);
         matcherEditor.setFilter(1, 1);
@@ -516,72 +517,72 @@ public class UniqueListTest extends TestCase {
      * Tests the change from A, B, B, D to A, C, C, D
      */
     public void testMultipleDeleteWithMultipleInsert() {
-        source = new BasicEventList<Object>();
-        source.add(new int[] { 1, 1, 1 });
-        source.add(new int[] { 2, 1, 0 });
-        source.add(new int[] { 2, 1, 0 });
-        source.add(new int[] { 3, 0, 1 });
-        source.add(new int[] { 3, 0, 1 });
-        source.add(new int[] { 4, 1, 1 });
+        BasicEventList<int[]> sourceList = new BasicEventList<int[]>();
+        sourceList.add(new int[] { 1, 1, 1 });
+        sourceList.add(new int[] { 2, 1, 0 });
+        sourceList.add(new int[] { 2, 1, 0 });
+        sourceList.add(new int[] { 3, 0, 1 });
+        sourceList.add(new int[] { 3, 0, 1 });
+        sourceList.add(new int[] { 4, 1, 1 });
 
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
-        FilterList filterList = new FilterList(source, matcherEditor);
-        unique = new UniqueList(filterList, GlazedListsTests.intArrayComparator(0));
+        FilterList<int[]> filterList = new FilterList<int[]>(sourceList, matcherEditor);
+        UniqueList<int[]> uniqueList = new UniqueList<int[]>(filterList, GlazedListsTests.intArrayComparator(0));
 
         matcherEditor.setFilter(1, 1);
         matcherEditor.setFilter(2, 1);
 
-        assertEquals(3, unique.size());
-        assertEquals(1, ((int[])unique.get(0))[0]);
-        assertEquals(3, ((int[])unique.get(1))[0]);
-        assertEquals(4, ((int[])unique.get(2))[0]);
+        assertEquals(3, uniqueList.size());
+        assertEquals(1, uniqueList.get(0)[0]);
+        assertEquals(3, uniqueList.get(1)[0]);
+        assertEquals(4, uniqueList.get(2)[0]);
     }
 
     /**
      * Tests the change from A, B, D to A, C, D
      */
     public void testDeleteWithInsert() {
-        source = new BasicEventList<Object>();
-        source.add(new int[] { 1, 1, 1 });
-        source.add(new int[] { 2, 1, 0 });
-        source.add(new int[] { 3, 0, 1 });
-        source.add(new int[] { 4, 1, 1 });
+        BasicEventList<int[]> sourceList = new BasicEventList<int[]>();
+        sourceList.add(new int[] { 1, 1, 1 });
+        sourceList.add(new int[] { 2, 1, 0 });
+        sourceList.add(new int[] { 3, 0, 1 });
+        sourceList.add(new int[] { 4, 1, 1 });
 
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
-        FilterList filterList = new FilterList(source, matcherEditor);
-        unique = new UniqueList(filterList, GlazedListsTests.intArrayComparator(0));
+        FilterList<int[]> filterList = new FilterList<int[]>(sourceList, matcherEditor);
+        UniqueList<int[]> uniqueList = new UniqueList<int[]>(filterList, GlazedListsTests.intArrayComparator(0));
 
         matcherEditor.setFilter(1, 1);
         matcherEditor.setFilter(2, 1);
 
-        assertEquals(3, unique.size());
-        assertEquals(1, ((int[])unique.get(0))[0]);
-        assertEquals(3, ((int[])unique.get(1))[0]);
-        assertEquals(4, ((int[])unique.get(2))[0]);
+        assertEquals(3, uniqueList.size());
+        assertEquals(1, uniqueList.get(0)[0]);
+        assertEquals(3, uniqueList.get(1)[0]);
+        assertEquals(4, uniqueList.get(2)[0]);
     }
 
     /**
      * Tests the change from A, B, C to C, D, E
      */
     public void testSingleValueKept() {
-        source = new BasicEventList<Object>();
-        source.add(new int[] { 1, 1, 0 });
-        source.add(new int[] { 2, 1, 0 });
-        source.add(new int[] { 3, 1, 1 });
-        source.add(new int[] { 4, 0, 1 });
-        source.add(new int[] { 5, 0, 1 });
+        BasicEventList<int[]> sourceList = new BasicEventList<int[]>();
+        sourceList.add(new int[] { 1, 1, 0 });
+        sourceList.add(new int[] { 2, 1, 0 });
+        sourceList.add(new int[] { 3, 1, 1 });
+        sourceList.add(new int[] { 4, 0, 1 });
+        sourceList.add(new int[] { 5, 0, 1 });
 
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
-        FilterList filterList = new FilterList(source, matcherEditor);
-        unique = new UniqueList(filterList, GlazedListsTests.intArrayComparator(0));
+        FilterList<int[]> filterList = new FilterList<int[]>(sourceList, matcherEditor);
+        UniqueList<int[]> uniqueList = new UniqueList<int[]>(filterList, GlazedListsTests.intArrayComparator(0));
 
         matcherEditor.setFilter(1, 1);
         matcherEditor.setFilter(2, 1);
 
-        assertEquals(3, unique.size());
-        assertEquals(3, ((int[])unique.get(0))[0]);
-        assertEquals(4, ((int[])unique.get(1))[0]);
-        assertEquals(5, ((int[])unique.get(2))[0]);
+        assertEquals(3, uniqueList.size());
+        assertEquals(3, uniqueList.get(0)[0]);
+        assertEquals(4, uniqueList.get(1)[0]);
+        assertEquals(5, uniqueList.get(2)[0]);
     }
 
 
@@ -589,29 +590,29 @@ public class UniqueListTest extends TestCase {
      * Tests the change from A, A, B, B, C, C to C, C, D, D, E, E
      */
     public void testMultipleValuesKept() {
-        source = new BasicEventList<Object>();
-        source.add(new int[] { 1, 1, 0 });
-        source.add(new int[] { 1, 1, 0 });
-        source.add(new int[] { 2, 1, 0 });
-        source.add(new int[] { 2, 1, 0 });
-        source.add(new int[] { 3, 1, 1 });
-        source.add(new int[] { 3, 1, 1 });
-        source.add(new int[] { 4, 0, 1 });
-        source.add(new int[] { 4, 0, 1 });
-        source.add(new int[] { 5, 0, 1 });
-        source.add(new int[] { 5, 0, 1 });
+        BasicEventList<int[]> sourceList = new BasicEventList<int[]>();
+        sourceList.add(new int[] { 1, 1, 0 });
+        sourceList.add(new int[] { 1, 1, 0 });
+        sourceList.add(new int[] { 2, 1, 0 });
+        sourceList.add(new int[] { 2, 1, 0 });
+        sourceList.add(new int[] { 3, 1, 1 });
+        sourceList.add(new int[] { 3, 1, 1 });
+        sourceList.add(new int[] { 4, 0, 1 });
+        sourceList.add(new int[] { 4, 0, 1 });
+        sourceList.add(new int[] { 5, 0, 1 });
+        sourceList.add(new int[] { 5, 0, 1 });
 
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
-        FilterList filterList = new FilterList(source, matcherEditor);
-        unique = new UniqueList(filterList, GlazedListsTests.intArrayComparator(0));
+        FilterList<int[]> filterList = new FilterList<int[]>(sourceList, matcherEditor);
+        UniqueList<int[]> uniqueList = new UniqueList<int[]>(filterList, GlazedListsTests.intArrayComparator(0));
 
         matcherEditor.setFilter(1, 1);
         matcherEditor.setFilter(2, 1);
 
-        assertEquals(3, unique.size());
-        assertEquals(3, ((int[])unique.get(0))[0]);
-        assertEquals(4, ((int[])unique.get(1))[0]);
-        assertEquals(5, ((int[])unique.get(2))[0]);
+        assertEquals(3, uniqueList.size());
+        assertEquals(3, uniqueList.get(0)[0]);
+        assertEquals(4, uniqueList.get(1)[0]);
+        assertEquals(5, uniqueList.get(2)[0]);
     }
 
 
@@ -619,54 +620,54 @@ public class UniqueListTest extends TestCase {
      * Tests the change from A, A, B, B, C, C, D, D, E, E to B, B, E, E
      */
     public void testSubset() {
-        source = new BasicEventList<Object>();
-        source.add(new int[] { 1, 1, 0 });
-        source.add(new int[] { 1, 1, 0 });
-        source.add(new int[] { 2, 1, 1 });
-        source.add(new int[] { 2, 1, 1 });
-        source.add(new int[] { 3, 1, 0 });
-        source.add(new int[] { 3, 1, 0 });
-        source.add(new int[] { 4, 1, 1 });
-        source.add(new int[] { 4, 1, 1 });
-        source.add(new int[] { 5, 1, 0 });
-        source.add(new int[] { 5, 1, 0 });
+        BasicEventList<int[]> sourceList = new BasicEventList<int[]>();
+        sourceList.add(new int[] { 1, 1, 0 });
+        sourceList.add(new int[] { 1, 1, 0 });
+        sourceList.add(new int[] { 2, 1, 1 });
+        sourceList.add(new int[] { 2, 1, 1 });
+        sourceList.add(new int[] { 3, 1, 0 });
+        sourceList.add(new int[] { 3, 1, 0 });
+        sourceList.add(new int[] { 4, 1, 1 });
+        sourceList.add(new int[] { 4, 1, 1 });
+        sourceList.add(new int[] { 5, 1, 0 });
+        sourceList.add(new int[] { 5, 1, 0 });
 
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
-        FilterList filterList = new FilterList(source, matcherEditor);
-        unique = new UniqueList(filterList, GlazedListsTests.intArrayComparator(0));
+        FilterList<int[]> filterList = new FilterList<int[]>(sourceList, matcherEditor);
+        UniqueList<int[]> uniqueList = new UniqueList<int[]>(filterList, GlazedListsTests.intArrayComparator(0));
 
         matcherEditor.setFilter(1, 1);
         matcherEditor.setFilter(2, 1);
 
-        assertEquals(2, unique.size());
-        assertEquals(2, ((int[])unique.get(0))[0]);
-        assertEquals(4, ((int[])unique.get(1))[0]);
+        assertEquals(2, uniqueList.size());
+        assertEquals(2, uniqueList.get(0)[0]);
+        assertEquals(4, uniqueList.get(1)[0]);
     }
 
     /**
      * Tests the change from A, A, B, B, C to empty to A, B, B, C, C
      */
     public void testMultipleChanges() {
-        source = new BasicEventList<Object>();
-        source.add(new int[] { 1, 1, 0, 0 });
-        source.add(new int[] { 1, 1, 0, 1 });
-        source.add(new int[] { 2, 1, 0, 1 });
-        source.add(new int[] { 2, 1, 0, 1 });
-        source.add(new int[] { 3, 1, 0, 1 });
-        source.add(new int[] { 3, 0, 0, 1 });
+        BasicEventList<int[]> sourceList = new BasicEventList<int[]>();
+        sourceList.add(new int[] { 1, 1, 0, 0 });
+        sourceList.add(new int[] { 1, 1, 0, 1 });
+        sourceList.add(new int[] { 2, 1, 0, 1 });
+        sourceList.add(new int[] { 2, 1, 0, 1 });
+        sourceList.add(new int[] { 3, 1, 0, 1 });
+        sourceList.add(new int[] { 3, 0, 0, 1 });
 
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
-        FilterList filterList = new FilterList(source, matcherEditor);
-        unique = new UniqueList(filterList, GlazedListsTests.intArrayComparator(0));
+        FilterList<int[]> filterList = new FilterList<int[]>(sourceList, matcherEditor);
+        UniqueList<int[]> uniqueList = new UniqueList<int[]>(filterList, GlazedListsTests.intArrayComparator(0));
 
         matcherEditor.setFilter(1, 1);
         matcherEditor.setFilter(2, 1);
         matcherEditor.setFilter(3, 1);
 
-        assertEquals(3, unique.size());
-        assertEquals(1, ((int[])unique.get(0))[0]);
-        assertEquals(2, ((int[])unique.get(1))[0]);
-        assertEquals(3, ((int[])unique.get(2))[0]);
+        assertEquals(3, uniqueList.size());
+        assertEquals(1, uniqueList.get(0)[0]);
+        assertEquals(2, uniqueList.get(1)[0]);
+        assertEquals(3, uniqueList.get(2)[0]);
     }
 
     /** the dice for the random tests */
@@ -676,16 +677,16 @@ public class UniqueListTest extends TestCase {
      * Tests a large set of random events.
      */
     public void testLargeRandomSet() {
-        source = new BasicEventList<Object>();
+        BasicEventList<int[]> sourceList = new BasicEventList<int[]>();
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
-        FilterList filterList = new FilterList(source, matcherEditor);
-        unique = new UniqueList(filterList, GlazedListsTests.intArrayComparator(0));
+        FilterList<int[]> filterList = new FilterList<int[]>(sourceList, matcherEditor);
+        UniqueList<int[]> uniqueList = new UniqueList<int[]>(filterList, GlazedListsTests.intArrayComparator(0));
 
         // populate a list with 1000 random arrays between 0 and 1000
         for(int i = 0; i < 1000; i++) {
             int value = random.nextInt(1000);
             int[] array = new int[] { value, random.nextInt(2), random.nextInt(2), random.nextInt(2) };
-            source.add(array);
+            sourceList.add(array);
         }
 
         // try ten different filters
@@ -695,16 +696,16 @@ public class UniqueListTest extends TestCase {
             matcherEditor.setFilter(filterColumn + 1, 1);
 
             // construct the control list
-            SortedSet<Object> controlSet = new TreeSet<Object>(GlazedListsTests.intArrayComparator(0));
+            SortedSet<int[]> controlSet = new TreeSet<int[]>(GlazedListsTests.intArrayComparator(0));
             controlSet.addAll(filterList);
-            List<Object> controlList = new ArrayList<Object>();
+            List<int[]> controlList = new ArrayList<int[]>();
             controlList.addAll(controlSet);
             Collections.sort(controlList, GlazedListsTests.intArrayComparator(0));
 
             // verify that the control and unique list are the same
-            assertEquals(unique.size(), controlList.size());
-            for(int j = 0; j < unique.size(); j++) {
-                assertEquals(((int[])unique.get(j))[0], ((int[])controlList.get(j))[0]);
+            assertEquals(uniqueList.size(), controlList.size());
+            for(int j = 0; j < uniqueList.size(); j++) {
+                assertEquals(uniqueList.get(j)[0], controlList.get(j)[0]);
             }
         }
     }
@@ -715,31 +716,31 @@ public class UniqueListTest extends TestCase {
      */
     public void testReSortSource() {
         // create a unique list with a sorted source
-        source = new BasicEventList<Object>();
-        SortedList sortedList = new SortedList(source);
-        unique = new UniqueList<Object>(sortedList);
+        BasicEventList<Integer> sourceList = new BasicEventList<Integer>();
+        SortedList<Integer> sortedList = new SortedList<Integer>(sourceList);
+        UniqueList<Integer> uniqueList = new UniqueList<Integer>(sortedList);
 
         // populate the source
         for(int i = 0; i < 1000; i++) {
-            source.add(new Integer(random.nextInt(100)));
+            sourceList.add(new Integer(random.nextInt(100)));
         }
 
         // build a control list
-        SortedSet<Object> uniqueSource = new TreeSet<Object>();
-        uniqueSource.addAll(source);
-        List controlList = new ArrayList();
+        SortedSet<Integer> uniqueSource = new TreeSet<Integer>();
+        uniqueSource.addAll(sourceList);
+        List<Integer> controlList = new ArrayList<Integer>();
         controlList.addAll(uniqueSource);
 
         // verify the unique list is correct initially
-        assertEquals(unique, controlList);
+        assertEquals(uniqueList, controlList);
 
         // verify the unique list is correct when the sorted list is unsorted
         sortedList.setComparator(null);
-        assertEquals(unique, controlList);
+        assertEquals(uniqueList, controlList);
 
         // verify the unique list is correct when the sorted list is sorted
         sortedList.setComparator(GlazedLists.reverseComparator());
-        assertEquals(unique, controlList);
+        assertEquals(uniqueList, controlList);
     }
 
 
@@ -977,24 +978,24 @@ public class UniqueListTest extends TestCase {
 
 
     public void testNewReplaceAll() {
-        EventList target = new BasicEventList();
-        EventList source = SortedList.create(new BasicEventList());
+        EventList<String> target = new BasicEventList<String>();
+        EventList<String> source = SortedList.create(new BasicEventList<String>());
 
         source.addAll(GlazedListsTests.stringToList("ACDF"));
 
-        GlazedListsImpl.replaceAll(target, source, true, GlazedLists.comparableComparator());
+        GlazedListsImpl.replaceAll(target, source, true, GlazedLists.<String>comparableComparator());
         assertEquals(GlazedListsTests.stringToList("ACDF"), target);
 
         source.add(1, "B");
         source.add(4, "E");
-        GlazedListsImpl.replaceAll(target, source, true, GlazedLists.comparableComparator());
+        GlazedListsImpl.replaceAll(target, source, true, GlazedLists.<String>comparableComparator());
         assertEquals(GlazedListsTests.stringToList("ABCDEF"), source);
         assertEquals(GlazedListsTests.stringToList("ABCDEF"), target);
 
         source.remove(5);
         source.remove(4);
         source.remove(0);
-        GlazedListsImpl.replaceAll(target, source, true, GlazedLists.comparableComparator());
+        GlazedListsImpl.replaceAll(target, source, true, GlazedLists.<String>comparableComparator());
         assertEquals(GlazedListsTests.stringToList("BCD"), source);
         assertEquals(GlazedListsTests.stringToList("BCD"), target);
 
@@ -1002,7 +1003,7 @@ public class UniqueListTest extends TestCase {
         source.add(2, "F");
         source.add(3, "G");
         source.add(4, "H");
-        GlazedListsImpl.replaceAll(target, source, true, GlazedLists.comparableComparator());
+        GlazedListsImpl.replaceAll(target, source, true, GlazedLists.<String>comparableComparator());
         assertEquals(GlazedListsTests.stringToList("BDFGH"), source);
         assertEquals(GlazedListsTests.stringToList("BDFGH"), target);
 
@@ -1010,19 +1011,19 @@ public class UniqueListTest extends TestCase {
         source.add(2, "F");
         source.add(4, "F");
         source.add(4, "F");
-        GlazedListsImpl.replaceAll(target, source, true, GlazedLists.comparableComparator());
+        GlazedListsImpl.replaceAll(target, source, true, GlazedLists.<String>comparableComparator());
         assertEquals(GlazedListsTests.stringToList("BFFFFGH"), source);
         assertEquals(GlazedListsTests.stringToList("BFFFFGH"), target);
 
         source.add(0, "A");
         source.add(0, "A");
         source.add(0, "A");
-        GlazedListsImpl.replaceAll(target, source, true, GlazedLists.comparableComparator());
+        GlazedListsImpl.replaceAll(target, source, true, GlazedLists.<String>comparableComparator());
         assertEquals(GlazedListsTests.stringToList("AAABFFFFGH"), source);
         assertEquals(GlazedListsTests.stringToList("AAABFFFFGH"), target);
 
         source.clear();
-        GlazedListsImpl.replaceAll(target, source, true, GlazedLists.comparableComparator());
+        GlazedListsImpl.replaceAll(target, source, true, GlazedLists.<String>comparableComparator());
         assertEquals(GlazedListsTests.stringToList(""), source);
         assertEquals(GlazedListsTests.stringToList(""), target);
     }

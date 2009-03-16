@@ -3,13 +3,13 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.testing;
 
+import java.io.*;
+import java.util.*;
+
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.Matcher;
-
-import java.io.*;
-import java.util.*;
 
 /**
  * A factory class useful for testing!
@@ -170,7 +170,7 @@ public class GlazedListsTests {
      * A comparator for comparing integer arrays, which are particularly well
      * suited to sorting and filtering tests.
      */
-    public static Comparator intArrayComparator(int index) {
+    public static Comparator<int[]> intArrayComparator(int index) {
         return new IntArrayComparator(index);
     }
     private static class IntArrayComparator implements Comparator<int[]> {
@@ -261,8 +261,8 @@ public class GlazedListsTests {
             count = 0;
             return result;
         }
-    }    
-    
+    }
+
     /**
      * This listener records the source of the last ListEvent received. This is
      * useful for testing ListEventListener serialization.
@@ -291,5 +291,5 @@ public class GlazedListsTests {
         public static EventList getLastSource() {
             return lastSource;
         }
-    }    
+    }
 }

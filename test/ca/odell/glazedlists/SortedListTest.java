@@ -4,14 +4,7 @@
 package ca.odell.glazedlists;
 
 // for being a JUnit test case
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Random;
+import java.util.*;
 
 import junit.framework.TestCase;
 
@@ -288,10 +281,10 @@ public class SortedListTest extends TestCase {
      * Tests that sorting works on a large set of filter changes.
      */
     public void testAgressiveFiltering() {
-        BasicEventList<Object> source = new BasicEventList<Object>();
+        BasicEventList<int[]> source = new BasicEventList<int[]>();
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
-        FilterList<Object> filterList = new FilterList<Object>(source);
-        SortedList<Object> sorted = new SortedList<Object>(filterList, GlazedListsTests.intArrayComparator(0));
+        FilterList<int[]> filterList = new FilterList<int[]>(source);
+        SortedList<int[]> sorted = new SortedList<int[]>(filterList, GlazedListsTests.intArrayComparator(0));
 
         // populate a list with 1000 random arrays between 0 and 1000
         for(int i = 0; i < 1000; i++) {
@@ -307,14 +300,14 @@ public class SortedListTest extends TestCase {
             matcherEditor.setFilter(filterColumn + 1, 1);
 
             // construct the control list
-            List<Object> controlList = new ArrayList<Object>();
+            List<int[]> controlList = new ArrayList<int[]>();
             controlList.addAll(filterList);
             Collections.sort(controlList, GlazedListsTests.intArrayComparator(0));
 
             // verify that the control and sorted list are the same
             assertEquals(sorted.size(), controlList.size());
             for(int j = 0; j < sorted.size(); j++) {
-                assertEquals(((int[])sorted.get(j))[0], ((int[])controlList.get(j))[0]);
+                assertEquals(sorted.get(j)[0], controlList.get(j)[0]);
             }
         }
     }
