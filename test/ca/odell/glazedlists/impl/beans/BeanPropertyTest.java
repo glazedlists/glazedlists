@@ -3,11 +3,9 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.beans;
 
+import java.awt.Color;
+
 import junit.framework.TestCase;
-
-import java.awt.*;
-
-import ca.odell.glazedlists.impl.reflect.ReturnTypeResolverFactory;
 
 /**
  * This test verifies that the BeanProperty works as expected.
@@ -129,19 +127,11 @@ public class BeanPropertyTest extends TestCase {
     }
 
     public void testResolveGenericReturnType() {
-        // this testcase is only meant for JDK 1.5, so turn it into a no-op otherwise
-        if (!ReturnTypeResolverFactory.DEFAULT.createReturnTypeResolver().getClass().getName().contains("java15"))
-            return;
-        
         final BeanProperty<Bus> busPassengers = new BeanProperty<Bus>(Bus.class, "passenger", true, true);
         assertSame(People.class, busPassengers.getValueClass());
     }
 
     public void testResolveGenericParameterType() {
-        // this testcase is only meant for JDK 1.5, so turn it into a no-op otherwise
-        if (!ReturnTypeResolverFactory.DEFAULT.createReturnTypeResolver().getClass().getName().contains("java15"))
-            return;
-
         final BeanProperty<Bus> busDriver = new BeanProperty<Bus>(Bus.class, "driver", false, true);
         assertSame(People.class, busDriver.getValueClass());
     }

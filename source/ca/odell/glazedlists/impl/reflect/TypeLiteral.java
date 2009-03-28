@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ca.odell.glazedlists.impl.java15;
+package ca.odell.glazedlists.impl.reflect;
 
 import static ca.odell.glazedlists.impl.Preconditions.checkArgument;
 import static ca.odell.glazedlists.impl.Preconditions.checkNotNull;

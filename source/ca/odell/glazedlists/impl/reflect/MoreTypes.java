@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ca.odell.glazedlists.impl.java15;
+package ca.odell.glazedlists.impl.reflect;
 
 import java.io.Serializable;
 import java.lang.reflect.*;
