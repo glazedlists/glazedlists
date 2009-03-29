@@ -8,11 +8,14 @@ import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
-import javax.swing.*;
-import javax.swing.event.ListDataEvent;
-import javax.swing.event.ListDataListener;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.swing.JList;
+import javax.swing.ListModel;
+import javax.swing.SwingUtilities;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 
 /**
  * An EventListModel adapts an EventList to the ListModel interface making it
@@ -95,18 +98,10 @@ public class EventListModel<E> implements ListEventListener<E>, ListModel {
     }
 
     /**
-     * Retrieves the value at the specified location from the table.
+     * Returns the value at the specified index.
      *
-     * Before every get, we need to validate the row because there may be an
-     * update waiting in the event queue. For example, it is possible that
-     * the source list has been updated by a database thread. Such a change
-     * may have been sent as notification, but after this request in the
-     * event queue. In the case where a row is no longer available, null is
-     * returned. The value returned is insignificant in this case because the
-     * Event queue will very shortly be repainting (or removing) the row
-     * anyway.
-     *
-     * @see ca.odell.glazedlists.swing.EventTableModel#getValueAt(int,int) ListTable
+     * @param index the requested index
+     * @return the value at <code>index</code>
      */
     public Object getElementAt(int index) {
         swingSource.getReadWriteLock().readLock().lock();

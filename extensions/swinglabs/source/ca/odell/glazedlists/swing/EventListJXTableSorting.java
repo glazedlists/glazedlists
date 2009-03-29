@@ -3,20 +3,21 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
+import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.sort.TableColumnComparator;
+
+import java.util.*;
+
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.FilterPipeline;
 import org.jdesktop.swingx.decorator.SortController;
 import org.jdesktop.swingx.decorator.SortKey;
 import org.jdesktop.swingx.decorator.SortOrder;
 import org.jdesktop.swingx.table.TableColumnExt;
-
-import java.util.*;
 
 /**
  * Sort a {@link JXTable} using {@link ca.odell.glazedlists.SortedList}.
@@ -31,9 +32,9 @@ import java.util.*;
  * </table>
  *
  * <p>To prepare a {@link JXTable} to be sorted using a {@link SortedList}:
- * <li>Create a {@link SortedList} and {@link EventTableModel} that depends
+ * <li>Create a {@link SortedList} and {@link DefaultEventTableModel} that depends
  * on that {@link SortedList}.
- * <li>Create a {@link JXTable} using the {@link EventTableModel} as its model.
+ * <li>Create a {@link JXTable} using the {@link DefaultEventTableModel} as its model.
  * <li>Run the {@link EventListJXTableSorting#install} method to bind the
  * {@link JXTable}'s headers to the {@link SortedList}'s {@link Comparator}.
  *
@@ -223,7 +224,7 @@ public class EventListJXTableSorting {
          * Comparator.
          */
         private Comparator getComparator(int modelIndex) {
-            EventTableModel tableModel = (EventTableModel)table.getModel();
+            DefaultEventTableModel tableModel = (DefaultEventTableModel) table.getModel();
             TableFormat tableFormat = tableModel.getTableFormat();
             return new TableColumnComparator(tableFormat, modelIndex);
         }

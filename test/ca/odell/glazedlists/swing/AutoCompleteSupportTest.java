@@ -6,9 +6,13 @@ package ca.odell.glazedlists.swing;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.io.IntegerTableFormat;
+import ca.odell.glazedlists.IntegerTableFormat;
 import ca.odell.glazedlists.matchers.GlazedListsICU4J;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
+
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.*;
 import javax.swing.event.DocumentListener;
@@ -16,9 +20,6 @@ import javax.swing.event.UndoableEditListener;
 import javax.swing.plaf.ComboBoxUI;
 import javax.swing.plaf.basic.ComboPopup;
 import javax.swing.text.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class AutoCompleteSupportTest extends SwingTestCase {
 
@@ -484,7 +485,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals("Nova Scotia", model.getElementAt(1));
         assertEquals("Newfoundland", model.getElementAt(2));
     }
-    
+
     public void guiTestTextMatchingStrategy() throws BadLocationException {
         final JComboBox combo = new JComboBox();
 
@@ -534,7 +535,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals(0, combo.getItemCount());
         doc.replace(0, doc.getLength(), "wei\u00dfe Wasser", null);
         assertEquals(0, combo.getItemCount());
-        
+
         support.setTextMatchingStrategy(TextMatcherEditor.NORMALIZED_STRATEGY);
         doc.replace(0, doc.getLength(), "New", null);
         assertEquals(2, combo.getItemCount());
@@ -545,20 +546,20 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals("Muller", model.getElementAt(0));
         assertEquals("M\u00fcller", model.getElementAt(1));
         doc.replace(0, doc.getLength(), "M\u00fcll", null);
-        assertEquals(2, combo.getItemCount());        
+        assertEquals(2, combo.getItemCount());
         assertEquals("Muller", model.getElementAt(0));
         assertEquals("M\u00fcller", model.getElementAt(1));
         doc.replace(0, doc.getLength(), "Aenima", null);
         assertEquals(1, combo.getItemCount());
         assertEquals("Aenima", model.getElementAt(0));
         doc.replace(0, doc.getLength(), "\u00c6nima", null);
-        assertEquals(1, combo.getItemCount());                
+        assertEquals(1, combo.getItemCount());
         assertEquals("\u00c6nima", model.getElementAt(0));
         doc.replace(0, doc.getLength(), "ecole", null);
         assertEquals(1, combo.getItemCount());
         assertEquals("école", model.getElementAt(0));
         doc.replace(0, doc.getLength(), "école", null);
-        assertEquals(1, combo.getItemCount());        
+        assertEquals(1, combo.getItemCount());
         assertEquals("école", model.getElementAt(0));
         doc.replace(0, doc.getLength(), "Ru\u00df", null);
         assertEquals(1, combo.getItemCount());
@@ -567,7 +568,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals(0, combo.getItemCount());
         doc.replace(0, doc.getLength(), "wei\u00dfe Wasser", null);
         assertEquals(0, combo.getItemCount());
-        
+
         support.setTextMatchingStrategy(GlazedListsICU4J.UNICODE_TEXT_SEARCH_STRATEGY);
         doc.replace(0, doc.getLength(), "New", null);
         assertEquals(2, combo.getItemCount());
@@ -578,22 +579,22 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals("Muller", model.getElementAt(0));
         assertEquals("M\u00fcller", model.getElementAt(1));
         doc.replace(0, doc.getLength(), "M\u00fcll", null);
-        assertEquals(2, combo.getItemCount());        
+        assertEquals(2, combo.getItemCount());
         assertEquals("Muller", model.getElementAt(0));
         assertEquals("M\u00fcller", model.getElementAt(1));
         doc.replace(0, doc.getLength(), "Aenima", null);
-        assertEquals(2, combo.getItemCount());        
+        assertEquals(2, combo.getItemCount());
         assertEquals("Aenima", model.getElementAt(0));
         assertEquals("\u00c6nima", model.getElementAt(1));
         doc.replace(0, doc.getLength(), "\u00c6nima", null);
-        assertEquals(2, combo.getItemCount());                
+        assertEquals(2, combo.getItemCount());
         assertEquals("Aenima", model.getElementAt(0));
         assertEquals("\u00c6nima", model.getElementAt(1));
         doc.replace(0, doc.getLength(), "ecole", null);
         assertEquals(1, combo.getItemCount());
         assertEquals("école", model.getElementAt(0));
         doc.replace(0, doc.getLength(), "école", null);
-        assertEquals(1, combo.getItemCount());        
+        assertEquals(1, combo.getItemCount());
         assertEquals("école", model.getElementAt(0));
         doc.replace(0, doc.getLength(), "Ru\u00df", null);
         assertEquals(1, combo.getItemCount());
@@ -601,11 +602,11 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         doc.replace(0, doc.getLength(), "wei\u00dfe Wasser", null);
         assertEquals(1, combo.getItemCount());
         assertEquals("wei\u00dfe Wasserwelle", model.getElementAt(0));
-        
+
         // @todo activate when ICU4J bug 5420 is fixed!
 //        doc.replace(0, doc.getLength(), "Russland", null);
 //        assertEquals(1, combo.getItemCount());
-//        assertEquals("Ru\u00dfland", model.getElementAt(0));        
+//        assertEquals("Ru\u00dfland", model.getElementAt(0));
     }
 
     public void guiTestFilterator() {

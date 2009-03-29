@@ -758,7 +758,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
             }
             /** {@inheritDoc} */
             public List<E> getGroup() {
-                if(node == null) return Collections.EMPTY_LIST;
+                if(node == null) return Collections.emptyList();
                 return source.subList(start(), end());
             }
             /** {@inheritDoc} */

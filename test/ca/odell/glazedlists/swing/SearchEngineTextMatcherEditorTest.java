@@ -3,6 +3,14 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.matchers.SearchEngineTextMatcherEditor;
+import ca.odell.glazedlists.matchers.SearchEngineTextMatcherEditor.Field;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -11,13 +19,6 @@ import java.util.Set;
 import javax.swing.JTextField;
 
 import junit.framework.TestCase;
-
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.TextFilterator;
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
-import ca.odell.glazedlists.matchers.SearchEngineTextMatcherEditor;
 
 public class SearchEngineTextMatcherEditorTest extends TestCase {
 
@@ -162,7 +163,7 @@ public class SearchEngineTextMatcherEditorTest extends TestCase {
         customerFilterField.postActionEvent();
         assertEquals(Arrays.asList(jesse), filteredCustomers);
 
-        matcherEditor.setFields(Collections.EMPTY_SET);
+        matcherEditor.setFields(Collections.<Field<Customer>>emptySet());
         customerFilterField.setText("first:e");
         customerFilterField.postActionEvent();
         assertTrue(filteredCustomers.isEmpty());

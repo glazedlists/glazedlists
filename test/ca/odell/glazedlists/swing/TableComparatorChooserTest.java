@@ -1,13 +1,16 @@
 package ca.odell.glazedlists.swing;
 
-import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.gui.AbstractTableComparatorChooser;
+import ca.odell.glazedlists.gui.TableFormat;
 
-import javax.swing.*;
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.table.TableCellRenderer;
 
 public class TableComparatorChooserTest extends SwingTestCase {
@@ -18,7 +21,7 @@ public class TableComparatorChooserTest extends SwingTestCase {
         TableFormat<JLabel> tableFormat = GlazedLists.tableFormat(properties, labels);
         EventList<JLabel> source = new BasicEventList<JLabel>();
 
-        JTable table = new JTable(new EventTableModel<JLabel>(source, tableFormat));
+        JTable table = new JTable(new DefaultEventTableModel<JLabel>(source, tableFormat));
 
         SortedList<JLabel> sorted = new SortedList<JLabel>(source);
         TableComparatorChooser.install(table, sorted, AbstractTableComparatorChooser.SINGLE_COLUMN);

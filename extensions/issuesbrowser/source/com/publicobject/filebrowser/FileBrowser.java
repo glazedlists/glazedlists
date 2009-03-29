@@ -3,6 +3,16 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.filebrowser;
 
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.TreeList;
+import ca.odell.glazedlists.gui.TableFormat;
+import ca.odell.glazedlists.swing.DefaultEventTableModel;
+import ca.odell.glazedlists.swing.GlazedListsSwing;
+import ca.odell.glazedlists.swing.TableComparatorChooser;
+import ca.odell.glazedlists.swing.TreeTableSupport;
+
 import java.util.Comparator;
 import java.util.List;
 
@@ -11,16 +21,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
-
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.TreeList;
-import ca.odell.glazedlists.gui.TableFormat;
-import ca.odell.glazedlists.swing.EventTableModel;
-import ca.odell.glazedlists.swing.GlazedListsSwing;
-import ca.odell.glazedlists.swing.TableComparatorChooser;
-import ca.odell.glazedlists.swing.TreeTableSupport;
 
 /**
  * A simplistic file system browser for exploring the TreeList API.
@@ -42,7 +42,7 @@ public class FileBrowser implements Runnable {
     }
 
     public void run() {
-        TableFormat tableFormat = new EntryTableFormat();
+        TableFormat<Entry> tableFormat = new EntryTableFormat();
         TreeList.Format<Entry> treeFormat = new EntryTreeFormat();
 
         EventList<Entry> sourceEntries = fileBrowserModel.getEntries();
@@ -53,7 +53,7 @@ public class FileBrowser implements Runnable {
             SortedList<Entry> sortedEntries = new SortedList<Entry>(entries, null);
 
             TreeList<Entry> treeList = new TreeList<Entry>(sortedEntries, treeFormat, TreeList.<Entry>nodesStartExpanded());
-            TableModel model = new EventTableModel<Entry>(treeList, tableFormat);
+            TableModel model = new DefaultEventTableModel<Entry>(treeList, tableFormat);
             JTable table = new JTable(model);
             TreeTableSupport.install(table, treeList, 0);
             TableComparatorChooser.install(table, sortedEntries, TableComparatorChooser.SINGLE_COLUMN);

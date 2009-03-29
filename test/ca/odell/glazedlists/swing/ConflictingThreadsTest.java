@@ -9,7 +9,7 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.gui.TableFormat;
 
-import javax.swing.*;
+import javax.swing.JLabel;
 
 
 /**
@@ -24,17 +24,18 @@ public class ConflictingThreadsTest extends SwingTestCase {
      * Verifies that conflicting threads are resolved intelligently.
      */
     public void guiTestConflictingThreads_FixMe() {
-        EventList labelsList = new BasicEventList();
+        EventList<JLabel> labelsList = new BasicEventList<JLabel>();
         labelsList.add(new JLabel("7-up"));
         labelsList.add(new JLabel("Pepsi"));
         labelsList.add(new JLabel("Dr. Pepper"));
+        EventList<JLabel> labelsProxyList = GlazedListsSwing.swingThreadProxyList(labelsList);
 
         String[] properties = new String[] { "text", "toolTipText" };
         String[] headers = new String[] { "Text", "Tool Tip" };
         boolean[] editable = new boolean[] { true, true };
-        TableFormat labelsTableFormat = GlazedLists.tableFormat(JLabel.class, properties, headers, editable);
+        TableFormat<JLabel> labelsTableFormat = GlazedLists.tableFormat(JLabel.class, properties, headers, editable);
 
-        EventTableModel labelsTable = new EventTableModel(labelsList, labelsTableFormat);
+        DefaultEventTableModel<JLabel> labelsTable = new DefaultEventTableModel<JLabel>(labelsProxyList, labelsTableFormat);
 
         doBackgroundTask(new ClearListRunnable(labelsList), true);
 

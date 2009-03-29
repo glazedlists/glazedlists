@@ -18,7 +18,7 @@ import java.util.List;
  * contained in another list. An example usage would be to wrap a parent list
  * containing albums and use the CollectionList to display the songs on the
  * album.
- * 
+ *
  * <p>The actual mapping from the parent list to the child list (album to
  * songs in the above example) is done by a {@link CollectionList.Model} that
  * is provided to the constructor.
@@ -57,7 +57,7 @@ import java.util.List;
 public class CollectionList<S, E> extends TransformedList<S, E> implements ListEventListener<S> {
 
     /** This is a hack - we need a temporary value when inserting into IndexedTrees, and this is the one we use. */
-    private final ChildElement<E> EMPTY_CHILD_ELEMENT = new SimpleChildElement(Collections.EMPTY_LIST, null);
+    private final ChildElement<E> EMPTY_CHILD_ELEMENT = new SimpleChildElement(Collections.<E>emptyList(), null);
 
     /** used to extract children */
     private final Model<S, E> model;
@@ -224,15 +224,15 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
         }
         updates.commitEvent();
     }
-    
+
     /** @inheritDoc */
     @Override
     public void dispose() {
         super.dispose();
-        
+
         // iterate over all child elements and dispose them
         final SimpleTreeIterator<ChildElement<E>> treeIterator = new SimpleTreeIterator<ChildElement<E>>(childElements);
-        
+
         while(treeIterator.hasNext()) {
             treeIterator.next();
             treeIterator.value().dispose();

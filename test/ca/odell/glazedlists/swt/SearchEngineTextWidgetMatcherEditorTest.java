@@ -4,6 +4,15 @@
 
 package ca.odell.glazedlists.swt;
 
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.matchers.SearchEngineTextMatcherEditor;
+import ca.odell.glazedlists.matchers.SearchEngineTextMatcherEditor.Field;
+import ca.odell.glazedlists.swing.SearchEngineTextFieldMatcherEditor;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -13,14 +22,6 @@ import javax.swing.JTextField;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Text;
-
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.TextFilterator;
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
-import ca.odell.glazedlists.matchers.SearchEngineTextMatcherEditor;
-import ca.odell.glazedlists.swing.SearchEngineTextFieldMatcherEditor;
 
 /**
  * Tests the class {@link SearchEngineTextWidgetMatcherEditor}.
@@ -177,7 +178,7 @@ public class SearchEngineTextWidgetMatcherEditorTest extends SwtTestCase {
         customerFilterField.postActionEvent();
         assertEquals(Arrays.asList(jesse), filteredCustomers);
 
-        matcherEditor.setFields(Collections.EMPTY_SET);
+        matcherEditor.setFields(Collections.<Field<Customer>>emptySet());
         customerFilterField.setText("first:e");
         customerFilterField.postActionEvent();
         assertTrue(filteredCustomers.isEmpty());

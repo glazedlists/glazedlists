@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class ListCollectionListModel<E> implements CollectionList.Model<List<E>,E> {
     public List<E> getChildren(List<E> parent) {
-        if(parent == null) return Collections.EMPTY_LIST;
+        if(parent == null) return Collections.emptyList();
         return parent;
     }
 }

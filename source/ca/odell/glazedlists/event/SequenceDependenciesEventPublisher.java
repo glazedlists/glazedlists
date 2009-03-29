@@ -31,10 +31,10 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher, Se
 
     /** For versioning as a {@link Serializable} */
     private static final long serialVersionUID = -8228256898169043019L;
-    
+
     /** keep track of how many times the fireEvent() method is on the stack */
     private transient int reentrantFireEventCount;
-    
+
     /** subject to cleanup when this event is completely distributed */
     private transient final Map<Object,EventFormat> subjectsToCleanUp = new IdentityHashMap<Object,EventFormat>();
 
@@ -49,7 +49,7 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher, Se
      * We should be careful not to make changes to this list directly and instead
      * create a copy as necessary
      */
-    private transient List<SubjectAndListener> subjectAndListeners = Collections.EMPTY_LIST;
+    private transient List<SubjectAndListener> subjectAndListeners = Collections.emptyList();
 
     /**
      * We use copy-on-write on the listeners list. This is a copy of the

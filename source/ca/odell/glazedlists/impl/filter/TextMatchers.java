@@ -12,16 +12,7 @@ import ca.odell.glazedlists.matchers.Matchers;
 import ca.odell.glazedlists.matchers.SearchEngineTextMatcherEditor;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Common services required when implementing a Matcher that performs text
@@ -263,8 +254,8 @@ public final class TextMatchers {
      * @return SearchTerm an object encapsulating a single raw search term as
      *      well as metadata related to the use of the SearchTerm
      */
-    public static SearchTerm[] parse(String text) {
-        return parse(text, Collections.EMPTY_SET);
+    public static <E> SearchTerm<E>[] parse(String text) {
+        return parse(text, Collections.<SearchEngineTextMatcherEditor.Field<E>>emptySet());
     }
 
     /**

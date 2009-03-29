@@ -11,26 +11,32 @@ import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.SortIconFactory;
 import ca.odell.glazedlists.impl.gui.SortingStrategy;
 
-import javax.swing.*;
-import javax.swing.plaf.UIResource;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumnModel;
-import javax.swing.table.DefaultTableCellRenderer;
-import java.awt.*;
+import java.awt.AWTEventMulticaster;
+import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Comparator;
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.Comparator;
+
+import javax.swing.Icon;
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.plaf.UIResource;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumnModel;
 
 /**
- * A TableComparatorChooser is a tool that allows the user to sort a ListTable by clicking
+ * A TableComparatorChooser is a tool that allows the user to sort a table by clicking
  * on the table's headers. It requires that the {@link JTable}s model is an
- * {@link EventTableModel} with a {@link SortedList} as a source.
+ * {@link DefaultEventTableModel} with a {@link SortedList} as a source.
  *
  * <p>This class includes custom arrow icons that indicate the sort
  * order. The icons used are chosen based on the current Swing look and feel.
@@ -47,7 +53,7 @@ import java.beans.PropertyChangeEvent;
  * clicks subsequent columns. The list is sorted by the first column and ties
  * are broken by the second column.
  *
- * <p>If the {@link EventTableModel} uses an {@link AdvancedTableFormat}, its
+ * <p>If the {@link DefaultEventTableModel} uses an {@link AdvancedTableFormat}, its
  * {@link AdvancedTableFormat#getColumnComparator} method will be used to
  * populate the initial column {@link Comparator}s.
  *
@@ -359,7 +365,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      * to be garbage collected before its source {@link EventList}. This is
      * necessary for situations where an {@link TableComparatorChooser} is short-lived but
      * its source {@link EventList} is long-lived.
-     * 
+     *
      * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
      * to call any method on a {@link TableComparatorChooser} after it has been disposed.
      */

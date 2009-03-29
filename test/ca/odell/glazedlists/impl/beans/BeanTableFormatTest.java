@@ -7,9 +7,10 @@ import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
-import junit.framework.TestCase;
 
-import java.awt.*;
+import java.awt.Color;
+
+import junit.framework.TestCase;
 
 /**
  * This test verifies that the BeanTableFormat works as expected.
@@ -19,13 +20,13 @@ import java.awt.*;
 public class BeanTableFormatTest extends TestCase {
 
     /** the formats to test */
-    private TableFormat footballFormat;
-    private TableFormat classedFootballFormat;
+    private TableFormat<FootballTeam> footballFormat;
+    private TableFormat<FootballTeam> classedFootballFormat;
 
     /** the objects to test */
     private FootballTeam riders = new FootballTeam("Roughriders", "Saskatchewan", Color.green, Color.white);
     private FootballTeam ticats = new FootballTeam("Tiger-Cats", "Hamilton", Color.yellow, Color.black);
-    
+
     /**
      * Prepare for the test.
      */
@@ -46,7 +47,7 @@ public class BeanTableFormatTest extends TestCase {
         footballFormat = null;
         classedFootballFormat = null;
     }
-    
+
     /**
      * Tests that BeanTableFormat works as a TableFormat.
      */
@@ -56,12 +57,12 @@ public class BeanTableFormatTest extends TestCase {
         assertEquals("Home",             footballFormat.getColumnName(1));
         assertEquals("Primary Color",    footballFormat.getColumnName(2));
         assertEquals("Secondary Color",  footballFormat.getColumnName(3));
-        
+
         assertEquals("Roughriders",      footballFormat.getColumnValue(riders, 0));
         assertEquals("Saskatchewan",     footballFormat.getColumnValue(riders, 1));
         assertEquals(Color.green,        footballFormat.getColumnValue(riders, 2));
         assertEquals(Color.white,        footballFormat.getColumnValue(riders, 3));
-        
+
         assertEquals("Tiger-Cats",       footballFormat.getColumnValue(ticats, 0));
         assertEquals("Hamilton",         footballFormat.getColumnValue(ticats, 1));
         assertEquals(Color.yellow,       footballFormat.getColumnValue(ticats, 2));
@@ -72,16 +73,16 @@ public class BeanTableFormatTest extends TestCase {
      * Tests that BeanTableFormat works as a WritableTableFormat.
      */
     public void testWritableTableFormat() {
-        WritableTableFormat writableFootballFormat = (WritableTableFormat)footballFormat;
+        WritableTableFormat<FootballTeam> writableFootballFormat = (WritableTableFormat<FootballTeam>) footballFormat;
         assertEquals(false,              writableFootballFormat.isEditable(riders, 0));
         assertEquals(true,               writableFootballFormat.isEditable(riders, 1));
         assertEquals(false,              writableFootballFormat.isEditable(riders, 2));
         assertEquals(false,              writableFootballFormat.isEditable(riders, 3));
-        
+
         writableFootballFormat.setColumnValue(riders, "Regina", 1);
         assertEquals("Regina",           riders.getHome());
         assertEquals("Regina",           footballFormat.getColumnValue(riders, 1));
-        
+
         writableFootballFormat.setColumnValue(ticats, "Lancaster", 1);
         assertEquals("Lancaster",        ticats.getHome());
         assertEquals("Lancaster",        footballFormat.getColumnValue(ticats, 1));
@@ -116,10 +117,7 @@ public class BeanTableFormatTest extends TestCase {
         assertEquals(GlazedLists.comparableComparator(), fullAdvancedFootballFormat.getColumnComparator(1));
         assertEquals(null,                               fullAdvancedFootballFormat.getColumnComparator(2));
         assertEquals(null,                               fullAdvancedFootballFormat.getColumnComparator(3));
-        // this returns GlazedLists.comparableComparator() on Java 5, where Boolean implements Comparable,
-        // but it returns null on prior versions where Boolean does not implement Comparable
-        boolean booleanIsComparable = Boolean.TRUE instanceof Comparable;
-        assertEquals(booleanIsComparable, GlazedLists.comparableComparator() == fullAdvancedFootballFormat.getColumnComparator(4));
+        assertEquals(GlazedLists.comparableComparator(), fullAdvancedFootballFormat.getColumnComparator(4));
         assertEquals(GlazedLists.comparableComparator(), fullAdvancedFootballFormat.getColumnComparator(5));
     }
 

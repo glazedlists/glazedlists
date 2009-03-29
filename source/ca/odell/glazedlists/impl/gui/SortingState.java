@@ -124,7 +124,7 @@ public class SortingState {
         // Populate a list of Comparators
         final List<Comparator> comparatorsList;
         if(foreignComparator == null) {
-            comparatorsList = Collections.EMPTY_LIST;
+            comparatorsList = Collections.emptyList();
         } else if(foreignComparator instanceof ComparatorChain) {
             ComparatorChain chain = (ComparatorChain)foreignComparator;
             comparatorsList = Arrays.asList(chain.getComparators());

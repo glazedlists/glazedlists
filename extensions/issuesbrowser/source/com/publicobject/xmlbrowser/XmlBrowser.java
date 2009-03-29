@@ -3,10 +3,16 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.xmlbrowser;
 
+import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.gui.TableFormat;
+import ca.odell.glazedlists.swing.*;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Comparator;
@@ -14,10 +20,6 @@ import java.util.List;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultTreeCellRenderer;
-
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.gui.TableFormat;
-import ca.odell.glazedlists.swing.*;
 
 import com.publicobject.misc.swing.LookAndFeelTweaks;
 import com.publicobject.misc.swing.MacCornerScrollPaneLayoutManager;
@@ -33,7 +35,6 @@ public class XmlBrowser {
         if(args.length != 1) {
             args = new String[] { "pom.xml" };
         }
-
         // create an EventList to share data between main and the Swing EDT
         EventList<Tag> eventList = new BasicEventList<Tag>();
 
@@ -42,6 +43,14 @@ public class XmlBrowser {
 
         // parse the XML file on the main thread
         InputStream xmlIn = XmlBrowser.class.getClassLoader().getResourceAsStream(args[0]);
+        if (xmlIn == null) {
+            // try file input
+            try {
+                xmlIn = new FileInputStream(args[0]);
+            } catch (FileNotFoundException ex) {
+                throw new IllegalArgumentException(args[0] + " not found!");
+            }
+        }
         new EventListXmlContentHandler(eventList).parse(xmlIn);
     }
 
@@ -78,7 +87,7 @@ public class XmlBrowser {
             String[] columnFields = new String[] { "qName", "text" };
             String[] columnNames = new String[] { "Element", "Content" };
             TableFormat<Tag> tableFormat = GlazedLists.tableFormat(Tag.class, columnFields, columnNames);
-            EventTableModel<Tag> tableModel = new EventTableModel<Tag>(treeList, tableFormat);
+            DefaultEventTableModel<Tag> tableModel = new DefaultEventTableModel<Tag>(treeList, tableFormat);
             JTable table = new JTable(tableModel);
             TreeTableSupport treeSupport = TreeTableSupport.install(table, treeList, 0);
             treeSupport.setArrowKeyExpansionEnabled(true);

@@ -3,49 +3,55 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.io;
 
-import ca.odell.glazedlists.swing.EventTableModel;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.StringTableFormat;
+import ca.odell.glazedlists.swing.DefaultEventTableModel;
+import ca.odell.glazedlists.swing.GlazedListsSwing;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 
+import javax.swing.*;
+
 /**
  * A frame that shows a subscribed list.
- * 
+ *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class SubscribeFrame implements ActionListener, NetworkListStatusListener {
-    
+
     /** the subscribed data */
     private NetworkList data = null;
-    
+
     /** the network connection */
     private ListPeer peer = null;
-    
+
     /** the resource name of the subscribed data */
     private String resourceName = null;
-    
+
     /** the button to toggle connect */
     private JButton connectButton;
-    
+
     /**
      * Creates a new SubscribeFrame client.
      */
     public SubscribeFrame(ListPeer peer, String host, int port, String path) throws IOException {
         this.peer = peer;
-        
+
         // subscribe
         data = peer.subscribe(host, port, path, GlazedListsIO.serializableByteCoder());
-        
+
         // build user interface
         constructStandalone();
 
         // listen for status changes
         data.addStatusListener(this);
     }
-    
+
     /**
      * Constructs the browser as a standalone frame.
      */
@@ -57,16 +63,17 @@ public class SubscribeFrame implements ActionListener, NetworkListStatusListener
         frame.getContentPane().add(constructView(), new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
         frame.setVisible(true);
     }
-    
+
     /**
      * Display a frame for browsing issues.
      */
     private JPanel constructView() {
         // build the table
-        EventTableModel tableModel = new EventTableModel(data, new IntegerTableFormat());
+        final EventList dataProxyList = GlazedListsSwing.swingThreadProxyList(data);
+        DefaultEventTableModel tableModel = new DefaultEventTableModel(dataProxyList, new StringTableFormat());
         JTable table = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        
+
         // build the buttons
         connectButton = new JButton(data.isConnected() ? "Disconnect" : "Connect");
         connectButton.addActionListener(this);
@@ -86,7 +93,7 @@ public class SubscribeFrame implements ActionListener, NetworkListStatusListener
     public void connected(NetworkList list) {
         connectButton.setText("Disconnect");
     }
-    
+
     /**
      * Called each time a resource's disconnected status changes. This method may
      * be called for each attempt it makes to reconnect to the network.
@@ -94,13 +101,13 @@ public class SubscribeFrame implements ActionListener, NetworkListStatusListener
     public void disconnected(NetworkList list, Exception reason) {
         connectButton.setText("Connect");
     }
-    
+
     /**
-     * When a button is pressed. 
+     * When a button is pressed.
      */
     public void actionPerformed(ActionEvent e) {
         peer.print();
-        
+
         if(e.getSource() == connectButton) {
             if(data.isConnected()) {
                 data.disconnect();

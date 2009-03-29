@@ -3,11 +3,14 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.TextFilterator;
+import ca.odell.glazedlists.gui.TableFormat;
+import ca.odell.glazedlists.matchers.TextMatcherEditor;
+
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -15,37 +18,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.swing.AbstractAction;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.ButtonGroup;
-import javax.swing.ComboBoxModel;
-import javax.swing.DefaultCellEditor;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JRadioButtonMenuItem;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.LookAndFeel;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.TextFilterator;
-import ca.odell.glazedlists.gui.TableFormat;
-import ca.odell.glazedlists.matchers.TextMatcherEditor;
+import javax.swing.*;
 
 public class AutoCompleteSupportTestApp {
 
@@ -193,11 +166,12 @@ public class AutoCompleteSupportTestApp {
     public AutoCompleteSupportTestApp() {
         final EventList<Location> locations = new BasicEventList<Location>();
         locations.addAll(Arrays.asList(STATE_CAPITALS_DATA));
+        final EventList<Location> locationsProxylist = GlazedListsSwing.swingThreadProxyList(locations);
         final String[] propertyNames = {"country", "state", "city"};
         final String[] columnLabels = {"Country", "State", "City"};
         final boolean[] writable = {true, true, true};
         final TableFormat<Location> tableFormat = GlazedLists.tableFormat(propertyNames, columnLabels, writable);
-        table.setModel(new EventTableModel<Location>(locations, tableFormat));
+        table.setModel(new DefaultEventTableModel<Location>(locationsProxylist, tableFormat));
 
         // install a DefaultCellEditor with autocompleting support in each column
         final DefaultCellEditor cellEditor = AutoCompleteSupport.createTableCellEditor(tableFormat, locations, 2);

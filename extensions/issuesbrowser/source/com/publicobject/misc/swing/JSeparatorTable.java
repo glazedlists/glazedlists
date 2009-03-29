@@ -4,13 +4,18 @@
 package com.publicobject.misc.swing;
 
 import ca.odell.glazedlists.SeparatorList;
-import ca.odell.glazedlists.swing.EventTableModel;
+import ca.odell.glazedlists.swing.DefaultEventTableModel;
 
-import javax.swing.*;
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Point;
+import java.awt.Rectangle;
+
+import javax.swing.JComponent;
+import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
 import javax.swing.plaf.basic.BasicTableUI;
 import javax.swing.table.*;
-import java.awt.*;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
@@ -21,11 +26,11 @@ public class JSeparatorTable extends JTable {
     private TableCellRenderer separatorRenderer;
     private TableCellEditor separatorEditor;
 
-    public JSeparatorTable(EventTableModel tableModel) {
+    public JSeparatorTable(DefaultEventTableModel tableModel) {
         this(tableModel, null);
     }
 
-    public JSeparatorTable(EventTableModel tableModel, TableColumnModel tableColumnModel) {
+    public JSeparatorTable(DefaultEventTableModel tableModel, TableColumnModel tableColumnModel) {
         super(tableModel, tableColumnModel);
         setUI(new SpanTableUI());
 
@@ -36,25 +41,25 @@ public class JSeparatorTable extends JTable {
     /** {@inheritDoc} */
     @Override
     public void setModel(TableModel tableModel) {
-        if(!(tableModel instanceof EventTableModel))
-            throw new IllegalArgumentException("tableModel is expected to be an EventTableModel");
+        if(!(tableModel instanceof DefaultEventTableModel))
+            throw new IllegalArgumentException("tableModel is expected to be an DefaultEventTableModel");
         super.setModel(tableModel);
     }
 
     /**
      * A convenience method to cast the TableModel to the expected
-     * EventTableModel implementation.
+     * DefaultEventTableModel implementation.
      *
-     * @return the EventTableModel that backs this table
+     * @return the DefaultEventTableModel that backs this table
      */
-    private EventTableModel getEventTableModel() {
-        return (EventTableModel) getModel();
+    private DefaultEventTableModel getEventTableModel() {
+        return (DefaultEventTableModel) getModel();
     }
 
     /** {@inheritDoc} */
     @Override
     public Rectangle getCellRect(int row, int column, boolean includeSpacing) {
-        final EventTableModel eventTableModel = getEventTableModel();
+        final DefaultEventTableModel eventTableModel = getEventTableModel();
 
         // sometimes JTable asks for a cellrect that doesn't exist anymore, due
         // to an editor being installed before a bunch of rows were removed.
@@ -345,7 +350,7 @@ class SpanTableUI extends BasicTableUI {
 
         for(int row = rMin; row <= rMax; row++) {
             // skip separator rows
-            Object rowValue = ((EventTableModel)separatorTable.getModel()).getElementAt(row);
+            Object rowValue = ((DefaultEventTableModel)separatorTable.getModel()).getElementAt(row);
 
             // only paint the cell on non-separator rows
             if(!(rowValue instanceof SeparatorList.Separator)) {

@@ -3,6 +3,11 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.amazonbrowser.swing;
 
+import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import ca.odell.glazedlists.matchers.SearchEngineTextMatcherEditor;
+import ca.odell.glazedlists.swing.*;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,11 +20,6 @@ import java.util.Set;
 
 import javax.swing.*;
 import javax.swing.table.*;
-
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import ca.odell.glazedlists.matchers.SearchEngineTextMatcherEditor;
-import ca.odell.glazedlists.swing.*;
 
 import com.publicobject.amazonbrowser.*;
 import com.publicobject.misc.Exceptions;
@@ -49,7 +49,7 @@ public class AmazonBrowser implements Runnable {
     private TreeList<Item> treeList;
 
     /** the TableModel backing the treetable of items */
-    private EventTableModel<Item> itemTableModel;
+    private DefaultEventTableModel<Item> itemTableModel;
 
     /** the ListSelectionModel backing the treetable of items */
     private EventSelectionModel<Item> itemTableSelectionModel;
@@ -173,7 +173,7 @@ public class AmazonBrowser implements Runnable {
         treeList = new TreeList<Item>(swingFilteredItemsList, new ItemTreeFormat(treeCriteriaEditor.getActiveCriteria()), TreeList.<Item>nodesStartExpanded());
 
         // create a JTable to display the items
-        itemTableModel = new EventTableModel<Item>(treeList, new ItemTableFormat());
+        itemTableModel = new DefaultEventTableModel<Item>(treeList, new ItemTableFormat());
         itemTableSelectionModel = new EventSelectionModel<Item>(treeList);
         final JTable itemTable = new StripedTable(itemTableModel, null, itemTableSelectionModel);
         JScrollPane itemScrollPane = new JScrollPane(itemTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);

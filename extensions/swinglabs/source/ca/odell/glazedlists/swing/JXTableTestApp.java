@@ -3,6 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
+import ca.odell.glazedlists.*;
+
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.io.FileInputStream;
@@ -11,26 +13,11 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 import org.jdesktop.swingx.JXTable;
 
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.SortedList;
-
-import com.publicobject.issuesbrowser.Issue;
-import com.publicobject.issuesbrowser.IssueTableFormat;
-import com.publicobject.issuesbrowser.IssueTextFilterator;
-import com.publicobject.issuesbrowser.IssuezillaXMLParser;
-import com.publicobject.issuesbrowser.Project;
+import com.publicobject.issuesbrowser.*;
 
 /**
  * Demonstrate sorting using JXTable's header indicator icons and Glazed Lists'
@@ -53,8 +40,8 @@ class JXTableTestApp implements Runnable {
             TextComponentMatcherEditor<Issue> textMatcherEditor = new TextComponentMatcherEditor<Issue>(filterEdit, new IssueTextFilterator());
             FilterList<Issue> textFilteredIssues = new FilterList<Issue>(issues, textMatcherEditor);
             SortedList<Issue> sortedIssues = new SortedList<Issue>(textFilteredIssues, null);
-
-            EventTableModel<Issue> tableModel = new EventTableModel<Issue>(sortedIssues, new IssueTableFormat());
+            EventList<Issue> issueProxyList = GlazedListsSwing.swingThreadProxyList(sortedIssues);
+            DefaultEventTableModel<Issue> tableModel = new DefaultEventTableModel<Issue>(issueProxyList, new IssueTableFormat());
             EventSelectionModel<Issue> selectionModel = new EventSelectionModel<Issue>(sortedIssues);
 
             JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -85,9 +72,9 @@ class JXTableTestApp implements Runnable {
      * Load issues asynchronously.
      */
     private static class IssueLoader implements Runnable {
-        private EventList issues;
+        private EventList<Issue> issues;
         private Project project;
-        public IssueLoader(EventList issues, String filename) {
+        public IssueLoader(EventList<Issue> issues, String filename) {
             this.issues = issues;
 
             this.project = new Project("Glazed Lists", "Glazed Lists");

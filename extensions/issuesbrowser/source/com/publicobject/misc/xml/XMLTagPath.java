@@ -3,7 +3,10 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.misc.xml;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * An XMLTagPath simply represents a position within an XML Document. Much like
@@ -96,7 +99,7 @@ public final class XMLTagPath {
      * thought of as representing the entire Document.
      */
     static XMLTagPath emptyPath() {
-        return new XMLTagPath(Collections.EMPTY_LIST, BODY);
+        return new XMLTagPath(Collections.<String>emptyList(), BODY);
     }
 
     /**
@@ -118,7 +121,7 @@ public final class XMLTagPath {
         if(this.attribute == attribute) return this;
         return new XMLTagPath(path, attribute);
     }
-    
+
     /**
      * Produces a new XMLTagPath by changing the location field of this
      * XMLTagPath to be {@link #START}.
