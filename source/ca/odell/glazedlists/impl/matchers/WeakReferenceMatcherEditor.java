@@ -120,7 +120,7 @@ public final class WeakReferenceMatcherEditor<E> implements MatcherEditor<E>, Ma
      * of the underlying listener. If it is available, it is notified. If it is
      * unavailable, it removes itself from listening.
      */
-    private static class WeakMatcherEditorListener<E> implements Listener<E> {
+    private class WeakMatcherEditorListener<E> implements Listener<E> {
 
         /** The WeakReference housing the true MatcherEditor.Listener. */
         private final WeakReference<Listener<E>> weakListener;
@@ -164,10 +164,11 @@ public final class WeakReferenceMatcherEditor<E> implements MatcherEditor<E>, Ma
             final Listener<E> matcherEditorListener = this.weakListener.get();
 
             // if it has been garbage collected, stop listening to the MatcherEditor
-            // otherwise, fire the event as normal
             if (matcherEditorListener == null) {
                 this.editor.removeMatcherEditorListener(this);
             } else {
+                // otherwise fire the event as though it originated from this WeakReferenceMatcherEditor
+                matcherEvent = new MatcherEditor.Event(WeakReferenceMatcherEditor.this, matcherEvent.getType(), matcherEvent.getMatcher());
                 matcherEditorListener.changedMatcher(matcherEvent);
             }
         }
