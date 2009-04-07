@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.reflect;
 
-
 import java.lang.reflect.Method;
 
 /**
