@@ -5,17 +5,10 @@ package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.TransformedList;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.JList;
 import javax.swing.ListModel;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ListDataEvent;
-import javax.swing.event.ListDataListener;
 
 /**
  * An EventListModel adapts an EventList to the ListModel interface making it
@@ -33,18 +26,17 @@ import javax.swing.event.ListDataListener;
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=228">Bug 228</a>
  * @see SwingUtilities#invokeAndWait(Runnable)
  *
+ * @deprecated Use {@link DefaultEventListModel} instead. This class will be removed in the GL
+ *             2.0 release. The wrapping of the source list with an EDT safe list has been
+ *             determined to be undesirable (it is better for the user to provide their own EDT
+ *             safe list).
+ *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ * @author Holger Brands
  */
-public class EventListModel<E> implements ListEventListener<E>, ListModel {
-
-    /** the proxy moves events to the Swing Event Dispatch thread */
-    private TransformedList<E, E> swingSource;
-
-    /** whom to notify of data changes */
-    private final List<ListDataListener> listeners = new ArrayList<ListDataListener>();
-
-    /** recycle the list data event to prevent unnecessary object creation */
-    protected final MutableListDataEvent listDataEvent = new MutableListDataEvent(this);
+public class EventListModel<E> extends DefaultEventListModel<E> {
+    /** indicates, if source list has to be disposed */
+    private boolean disposeSource;
 
     /**
      * Creates a new model that contains all objects located in the given
@@ -52,111 +44,8 @@ public class EventListModel<E> implements ListEventListener<E>, ListModel {
      * <code>source</code>.
      */
     public EventListModel(EventList<E> source) {
-        // lock the source list for reading since we want to prevent writes
-        // from occurring until we fully initialize this EventListModel
-        source.getReadWriteLock().readLock().lock();
-        try {
-            swingSource = GlazedListsSwing.swingThreadProxyList(source);
-            swingSource.addListEventListener(this);
-        } finally {
-            source.getReadWriteLock().readLock().unlock();
-        }
-    }
-
-    /**
-     * For implementing the ListEventListener interface. This sends changes
-     * to the table which can repaint the table cells. Because this class uses
-     * a EventThreadProxy, it is guaranteed that all natural
-     * calls to this method use the Swing thread.
-     *
-     * <p>This always sends discrete changes for the complete size of the list.
-     * It may be more efficient to implement a threshhold where a large list
-     * of changes are grouped together as a single change. This is how the
-     * ListTable accepts large change events.
-     */
-    public void listChanged(ListEvent<E> listChanges) {
-        // build an "optimized" ListDataEvent describing the precise range of rows in the first block
-        listChanges.nextBlock();
-        final int startIndex = listChanges.getBlockStartIndex();
-        final int endIndex = listChanges.getBlockEndIndex();
-        listDataEvent.setRange(startIndex, endIndex);
-
-        final int changeType = listChanges.getType();
-        switch (changeType) {
-            case ListEvent.INSERT: listDataEvent.setType(ListDataEvent.INTERVAL_ADDED); break;
-            case ListEvent.DELETE: listDataEvent.setType(ListDataEvent.INTERVAL_REMOVED); break;
-            case ListEvent.UPDATE: listDataEvent.setType(ListDataEvent.CONTENTS_CHANGED); break;
-        }
-
-        // if another block exists, fallback to using a generic "data changed" ListDataEvent
-        if (listChanges.nextBlock()) {
-            listDataEvent.setRange(0, Integer.MAX_VALUE);
-            listDataEvent.setType(ListDataEvent.CONTENTS_CHANGED);
-        }
-
-        fireListDataEvent(listDataEvent);
-    }
-
-    /**
-     * Returns the value at the specified index.
-     *
-     * @param index the requested index
-     * @return the value at <code>index</code>
-     */
-    public Object getElementAt(int index) {
-        swingSource.getReadWriteLock().readLock().lock();
-        try {
-            return swingSource.get(index);
-        } finally {
-            swingSource.getReadWriteLock().readLock().unlock();
-        }
-    }
-
-    /**
-     * Gets the size of the list.
-     */
-    public int getSize() {
-        swingSource.getReadWriteLock().readLock().lock();
-        try {
-            return swingSource.size();
-        } finally {
-            swingSource.getReadWriteLock().readLock().unlock();
-        }
-    }
-
-    /**
-     * Registers the specified ListDataListener to receive updates whenever
-     * this list changes.
-     *
-     * <p>The specified ListDataListener must <strong>not</strong> save a
-     * reference to the ListDataEvent beyond the end of the notification
-     * method. This is because the ListDataEvent is re-used to increase
-     * the performance of this implementation.
-     */
-    public void addListDataListener(ListDataListener listDataListener) {
-        listeners.add(listDataListener);
-    }
-    /**
-     * Deregisters the specified ListDataListener from receiving updates
-     * whenever this list changes.
-     */
-    public void removeListDataListener(ListDataListener listDataListener) {
-        listeners.remove(listDataListener);
-    }
-
-    /**
-     * Notifies all ListDataListeners about one block of changes in the list.
-     */
-    protected void fireListDataEvent(ListDataEvent listDataEvent) {
-        // notify all listeners about the event
-        for(int i = 0, n = listeners.size(); i < n; i++) {
-            ListDataListener listDataListener = listeners.get(i);
-            switch (listDataEvent.getType()) {
-                case ListDataEvent.CONTENTS_CHANGED: listDataListener.contentsChanged(listDataEvent); break;
-                case ListDataEvent.INTERVAL_ADDED: listDataListener.intervalAdded(listDataEvent); break;
-                case ListDataEvent.INTERVAL_REMOVED: listDataListener.intervalRemoved(listDataEvent); break;
-            }
-        }
+        super(createProxyList(source));
+        disposeSource = (this.source != source);
     }
 
     /**
@@ -175,8 +64,38 @@ public class EventListModel<E> implements ListEventListener<E>, ListModel {
      * As such, this {@link EventListModel} should be detached from its
      * corresponding Component <strong>before</strong> it is disposed.
      */
+    @Override
     public void dispose() {
-        swingSource.removeListEventListener(this);
-        swingSource.dispose();
+        if (disposeSource) source.dispose();
+        super.dispose();
     }
+
+    /**
+     * while holding a read lock, this method wraps the given source list with a swing thread
+     * proxy list.
+     */
+    private static <E> EventList<E> createProxyList(EventList<E> source) {
+        // lock the source list for reading since we want to prevent writes
+        // from occurring until we fully initialize this EventTableModel
+        EventList<E> result = source;
+        source.getReadWriteLock().readLock().lock();
+        try {
+            final TransformedList<E,E> decorated = createSwingThreadProxyList(source);
+
+            // if the create method actually returned a decorated form of the source,
+            // record it so it may later be disposed
+            if (decorated != null && decorated != source) {
+                result = decorated;
+            }
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
+        }
+        return result;
+    }
+
+    /** wraps the given source list with a swing thread proxy list, if necessary */
+    private static <E> TransformedList<E,E> createSwingThreadProxyList(EventList<E> source) {
+        return GlazedListsSwing.isSwingThreadProxyList(source) ? null : GlazedListsSwing.swingThreadProxyList(source);
+    }
+
 }

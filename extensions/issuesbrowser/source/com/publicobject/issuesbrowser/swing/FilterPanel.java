@@ -10,18 +10,21 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.CompositeMatcherEditor;
 import ca.odell.glazedlists.matchers.MatcherEditor;
-import ca.odell.glazedlists.swing.EventComboBoxModel;
+import ca.odell.glazedlists.swing.DefaultEventComboBoxModel;
+import ca.odell.glazedlists.swing.GlazedListsSwing;
 import ca.odell.glazedlists.swing.JEventListPanel;
-import com.publicobject.issuesbrowser.Issue;
-import com.publicobject.misc.swing.RoundedBorder;
 
-import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+
+import javax.swing.*;
+import javax.swing.border.Border;
+
+import com.publicobject.issuesbrowser.Issue;
+import com.publicobject.misc.swing.RoundedBorder;
 
 /**
  * Manage a bunch of issue filters in a panel.
@@ -152,13 +155,15 @@ class FilterPanel {
     /**
      * A combobox to add a new filter.
      */
-    private class AddFilterControl implements ItemListener, ListEventListener {
+    private class AddFilterControl implements ItemListener, ListEventListener<CloseableFilterComponent> {
         private JComboBox filterSelect;
         private JLabel selectLabel;
         private JComponent panel;
 
         public AddFilterControl() {
-            filterSelect = new JComboBox(new EventComboBoxModel<CloseableFilterComponent>(remainingFilterComponents));
+            final EventList<CloseableFilterComponent> remainingFilterComponentsProxyList =
+                GlazedListsSwing.swingThreadProxyList(remainingFilterComponents);
+            filterSelect = new JComboBox(new DefaultEventComboBoxModel<CloseableFilterComponent>(remainingFilterComponentsProxyList));
             filterSelect.setFont(filterSelect.getFont().deriveFont(10.0f));
             filterSelect.setOpaque(false);
 
@@ -189,7 +194,7 @@ class FilterPanel {
         }
 
         /** {@inheritDoc} */
-        public void listChanged(ListEvent listChanges) {
+        public void listChanged(ListEvent<CloseableFilterComponent> listChanges) {
             boolean enabled = !remainingFilterComponents.isEmpty();
             filterSelect.setEnabled(enabled);
             selectLabel.setForeground(enabled ? Color.BLACK : IssuesBrowser.GLAZED_LISTS_MEDIUM_BROWN);
@@ -208,7 +213,7 @@ class FilterPanel {
     }
 
     /**
-     * Provide layout for {@link CloseableFilterComponent}s. 
+     * Provide layout for {@link CloseableFilterComponent}s.
      */
     private class CloseableFilterComponentPanelFormat<E> extends JEventListPanel.AbstractFormat<CloseableFilterComponent> {
         protected CloseableFilterComponentPanelFormat() {

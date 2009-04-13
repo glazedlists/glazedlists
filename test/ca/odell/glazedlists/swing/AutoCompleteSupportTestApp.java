@@ -403,7 +403,7 @@ public class AutoCompleteSupportTestApp {
         final TextFilterator<String> filterator = new URLTextFilterator();
         final EventList<String> items = new BasicEventList<String>();
         items.addAll(Arrays.asList(URL_SAMPLE_DATA));
-
+        final EventList<String> itemProxyList = GlazedListsSwing.swingThreadProxyList(items);
         final JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
@@ -416,7 +416,7 @@ public class AutoCompleteSupportTestApp {
 
         final JComboBox plainComboBox = regularComboBox;
         plainComboBox.setEditable(true);
-        plainComboBox.setModel(new EventComboBoxModel<String>(items));
+        plainComboBox.setModel(new DefaultEventComboBoxModel<String>(itemProxyList));
 
         final JScrollPane tableScroller = new JScrollPane(table);
         tableScroller.setPreferredSize(new Dimension(1, 200));

@@ -7,23 +7,26 @@ import ca.odell.glazedlists.EventList;
 
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListDataEvent;
 
 /**
  * A combo box model for displaying Glazed Lists in a combo box.
+ *
+ * <p>The DefaultEventComboBoxModel class is <strong>not thread-safe</strong>. Unless
+ * otherwise noted, all methods are only safe to be called from the event
+ * dispatch thread. To do this programmatically, use {@link SwingUtilities#invokeAndWait(Runnable)}
+ * and wrap the source list (or some part of the source list's pipeline) using
+ * {@link GlazedListsSwing#swingThreadProxyList(EventList)}.
  *
  * <p>The implementation of {@link #setSelectedItem} and {@link #getSelectedItem}
  * is not in any way tied to the contents of the list.
  *
  * @see <a href="http://publicobject.com/glazedlists/tutorial/">Glazed Lists Tutorial</a>
  *
- * @deprecated Use {@link DefaultEventComboBoxModel} instead. This class will be removed in the GL
- *             2.0 release. The wrapping of the source list with an EDT safe list has been
- *             determined to be undesirable (it is better for the user to provide their own EDT
- *             safe list).
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class EventComboBoxModel<E> extends EventListModel<E> implements ComboBoxModel {
+public class DefaultEventComboBoxModel<E> extends DefaultEventListModel<E> implements ComboBoxModel {
 
     /** the currently selected item which typically belong to the source list */
     private Object selected;
@@ -32,7 +35,7 @@ public class EventComboBoxModel<E> extends EventListModel<E> implements ComboBox
      * Creates a new combo box model that contains the elements of the given
      * <code>source</code> and tracks further changes made to it.
      */
-    public EventComboBoxModel(EventList<E> source) {
+    public DefaultEventComboBoxModel(EventList<E> source) {
         super(source);
     }
 

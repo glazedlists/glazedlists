@@ -3,6 +3,10 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
+import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.matchers.Matchers;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -13,10 +17,6 @@ import javax.swing.JList;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
-import ca.odell.glazedlists.matchers.Matchers;
 
 /**
  * This test verifies that the EventSelectionModel works.
@@ -325,7 +325,7 @@ public class EventSelectionModelTest extends SwingTestCase {
         EventList<String> source = GlazedLists.eventListOf("Albert", "Alex", "Aaron", "Brian", "Bruce");
 
         // create EventListModel (data model)
-        EventListModel<String> model = new EventListModel<String>(source);
+        DefaultEventListModel<String> model = new DefaultEventListModel<String>(source);
 
         // create EventSelectionModel (our selection model)
         EventSelectionModel<String> eventSelectionModel = new EventSelectionModel<String>(source);

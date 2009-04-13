@@ -4,9 +4,7 @@
 package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.DelayList;
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.ThreadRecorderEventList;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 
 import java.awt.Color;
@@ -14,12 +12,29 @@ import java.awt.Color;
 import javax.swing.JList;
 
 /**
- * Test EventListModel from the Swing thread.
+ * Test <code>DefaultEventListModelTest</code> from the Swing thread.
  *
- * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ * @author Holger Brands
  */
-@SuppressWarnings("deprecation")
-public class EventListModelTest extends SwingTestCase {
+public class DefaultEventListModelTest extends SwingTestCase {
+    /**
+     * Verifies that the EDT check works, e.g. an IllegalStateException is thrown when a ListEvent
+     * arrives on a non-EDT thread
+     */
+    public void testOnMainThreadEDTViolation() {
+        EventList<Color> colors = new BasicEventList<Color>();
+        colors.add(Color.RED);
+        colors.add(Color.GREEN);
+
+        final DefaultEventListModel<Color> listModel = new DefaultEventListModel<Color>(colors);
+        assertEquals(2, listModel.getSize());
+        try {
+            colors.add(Color.BLUE);
+            fail("failed to receive IllegalStateException because of missing ThreadProxyList");
+        } catch (IllegalStateException ex) {
+            // expected
+        }
+    }
 
     /**
      * Verifies that the new getElementAt() method of EventListModel works.
@@ -30,7 +45,7 @@ public class EventListModelTest extends SwingTestCase {
         colors.add(Color.GREEN);
         colors.add(Color.BLUE);
 
-        EventListModel<Color> listModel = new EventListModel<Color>(colors);
+        DefaultEventListModel<Color> listModel = new DefaultEventListModel<Color>(colors);
 
         assertEquals(Color.RED, listModel.getElementAt(0));
         assertEquals(Color.GREEN, listModel.getElementAt(1));
@@ -47,30 +62,9 @@ public class EventListModelTest extends SwingTestCase {
         } catch (IndexOutOfBoundsException e) { }
     }
 
-    public void guiTestConstructorLocking() throws InterruptedException {
-        // create a list which will record our multithreaded interactions with a list
-        final ThreadRecorderEventList<Integer> atomicList = new ThreadRecorderEventList<Integer>(new BasicEventList<Integer>());
-
-        // start a thread which adds new Integers every 50 ms
-        final Thread writerThread = new Thread(GlazedListsTests.createJerkyAddRunnable(atomicList, null, 2000, 50), "WriterThread");
-        writerThread.start();
-
-        // make sure the writerThread has started writing
-        Thread.sleep(200);
-
-        // create a list whose get() method pauses for 50 ms before returning the value
-        final EventList<Integer> delayList = new DelayList<Integer>(atomicList, 50);
-
-        // the test: creating the EventListModel should be atomic and pause the writerThread while it initializes its internal state
-        new EventListModel<Integer>(delayList);
-
-        // wait until the writerThread finishes before asserting the recorded state
-        writerThread.join();
-
-        // correct locking should have produced a thread log like: WriterThread* AWT-EventQueue-0* WriterThread*
-        // correct locking should have produced a read/write pattern like: W...W R...R W...W
-        assertEquals(3, atomicList.getReadWriteBlockCount());
-    }
+    //  public void guiTestConstructorLocking() throws InterruptedException {
+    //  fail("I don't think this is appropriate for testing DefaultEventTableModel, or do we still want to deal with locking during construction of DefaultEventTableModel??");
+    //}
 
     /**
      * Verifies that list selection is preserved, when handling a complex ListEvent with blocks,
@@ -80,7 +74,7 @@ public class EventListModelTest extends SwingTestCase {
         // setup JList with EventListModel and EventSelectionModel
         final EventList<String> list = new BasicEventList<String>();
         list.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
-        final EventListModel<String> model = new EventListModel<String>(list);
+        final DefaultEventListModel<String> model = new DefaultEventListModel<String>(list);
         final JList jList = new JList(model);
         final EventSelectionModel selModel = new EventSelectionModel<String>(list);
         jList.setSelectionModel(selModel);
@@ -94,4 +88,5 @@ public class EventListModelTest extends SwingTestCase {
         assertEquals(GlazedListsTests.stringToList("B"), selModel.getSelected());
         assertEquals(GlazedListsTests.delimitedStringToList("A C D"), selModel.getDeselected());
     }
+
 }

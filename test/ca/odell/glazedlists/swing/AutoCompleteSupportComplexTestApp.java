@@ -426,6 +426,7 @@ public class AutoCompleteSupportComplexTestApp {
         final UrlFormat format = new UrlFormat();
         final EventList<AutoCompleteSupportComplexTestApp.Url> items = new BasicEventList<AutoCompleteSupportComplexTestApp.Url>();
         items.addAll(Arrays.asList(AutoCompleteSupportComplexTestApp.URL_SAMPLE_DATA));
+        final EventList<AutoCompleteSupportComplexTestApp.Url> itemProxyList = GlazedListsSwing.swingThreadProxyList(items);
 
         final JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -439,7 +440,7 @@ public class AutoCompleteSupportComplexTestApp {
 
         final JComboBox plainComboBox = regularComboBox;
         plainComboBox.setEditable(true);
-        plainComboBox.setModel(new EventComboBoxModel<AutoCompleteSupportComplexTestApp.Url>(items));
+        plainComboBox.setModel(new DefaultEventComboBoxModel<AutoCompleteSupportComplexTestApp.Url>(itemProxyList));
 
         final JScrollPane tableScroller = new JScrollPane(table);
         tableScroller.setPreferredSize(new Dimension(1, 200));

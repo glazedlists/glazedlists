@@ -4,14 +4,19 @@
 package com.publicobject.issuesbrowser.swing;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.matchers.MatcherEditor;
-import ca.odell.glazedlists.swing.EventListModel;
+import ca.odell.glazedlists.swing.DefaultEventListModel;
 import ca.odell.glazedlists.swing.EventSelectionModel;
+import ca.odell.glazedlists.swing.GlazedListsSwing;
+
+import javax.swing.JComponent;
+import javax.swing.JList;
+import javax.swing.JScrollPane;
+
 import com.publicobject.issuesbrowser.Issue;
 import com.publicobject.issuesbrowser.UsersMatcherEditor;
 import com.publicobject.misc.swing.NoFocusRenderer;
-
-import javax.swing.*;
 
 /**
  * A UsersMatcherEditor with Swing support.
@@ -24,6 +29,9 @@ class SwingUsersMatcherEditor extends UsersMatcherEditor implements FilterCompon
     /** scroll through users */
     private JScrollPane scrollPane;
 
+    /** ThreadProxyList for user list */
+    private TransformedList<String, String> allUserProxyList;
+
     /**
      * Create a filter list that filters the specified source list, which
      * must contain only Issue objects.
@@ -33,7 +41,8 @@ class SwingUsersMatcherEditor extends UsersMatcherEditor implements FilterCompon
 
         // create a JList that contains users
         final EventList<String> allUsers = getUsersList();
-        final EventListModel<String> usersListModel = new EventListModel<String>(allUsers);
+        allUserProxyList = GlazedListsSwing.swingThreadProxyList(allUsers);
+        final DefaultEventListModel<String> usersListModel = new DefaultEventListModel<String>(allUserProxyList);
         userSelect = new JList(usersListModel);
         userSelect.setPrototypeCellValue("jessewilson");
         userSelect.setVisibleRowCount(10);
@@ -67,5 +76,11 @@ class SwingUsersMatcherEditor extends UsersMatcherEditor implements FilterCompon
 
     public MatcherEditor<Issue> getMatcherEditor() {
         return this;
+    }
+
+    @Override
+    public void dispose() {
+        allUserProxyList.dispose();
+        super.dispose();
     }
 }

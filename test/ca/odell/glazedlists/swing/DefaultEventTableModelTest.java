@@ -3,6 +3,12 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
+import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.gui.TableFormat;
+import ca.odell.glazedlists.gui.WritableTableFormat;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.matchers.Matcher;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Rectangle;
@@ -12,25 +18,10 @@ import java.awt.event.MouseListener;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.swing.Action;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.JLabel;
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableCellRenderer;
-
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.ObservableElementList;
-import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.gui.TableFormat;
-import ca.odell.glazedlists.gui.WritableTableFormat;
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
-import ca.odell.glazedlists.matchers.Matcher;
 
 /**
  * Test DefaultEventTableModel
@@ -50,6 +41,7 @@ public class DefaultEventTableModelTest extends SwingTestCase {
 
         final TableFormat<Color> colorTableFormat = GlazedLists.tableFormat(new String[] { "red", "green", "blue" }, new String[] { "Red", "Green", "Blue" });
         final DefaultEventTableModel<Color> tableModel = new DefaultEventTableModel<Color>(colors, colorTableFormat);
+        assertEquals(2, tableModel.getRowCount());
         try {
             colors.add(Color.BLUE);
             fail("failed to receive IllegalStateException because of missing ThreadProxyList");

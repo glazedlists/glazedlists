@@ -3,6 +3,11 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.ListSelection;
+import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.matchers.Matcher;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,11 +15,6 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.ListSelection;
-import ca.odell.glazedlists.TransformedList;
-import ca.odell.glazedlists.matchers.Matcher;
 
 /**
  * An {@link EventSelectionModel} is a class that performs two simulaneous
@@ -75,7 +75,7 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
      *
      * @param source the {@link EventList} whose selection will be managed. This should
      *      be the same {@link EventList} passed to the constructor of your
-     *      {@link DefaultEventTableModel} or {@link EventListModel}.
+     *      {@link DefaultEventTableModel} or {@link DefaultEventListModel}.
      */
     public EventSelectionModel(EventList<E> source) {
         // lock the source list for reading since we want to prevent writes

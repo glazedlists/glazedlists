@@ -3,6 +3,11 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser.swing;
 
+import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.swing.*;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.net.URL;
@@ -16,11 +21,6 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
-import ca.odell.glazedlists.swing.*;
 
 import com.publicobject.issuesbrowser.*;
 import com.publicobject.misc.Exceptions;
@@ -179,9 +179,9 @@ public class IssuesBrowser implements Runnable {
 
         // projects
         EventList<Project> projects = Project.getProjects();
-
+        TransformedList<Project, Project> projectsProxyList = GlazedListsSwing.swingThreadProxyList(projects);
         // project select combobox
-        EventComboBoxModel projectsComboModel = new EventComboBoxModel<Project>(projects);
+        DefaultEventComboBoxModel projectsComboModel = new DefaultEventComboBoxModel<Project>(projectsProxyList);
         JComboBox projectsCombo = new JComboBox(projectsComboModel);
         projectsCombo.setEditable(false);
         projectsCombo.setOpaque(false);
