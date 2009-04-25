@@ -87,7 +87,7 @@ public class XmlBrowser {
             String[] columnFields = new String[] { "qName", "text" };
             String[] columnNames = new String[] { "Element", "Content" };
             TableFormat<Tag> tableFormat = GlazedLists.tableFormat(Tag.class, columnFields, columnNames);
-            DefaultEventTableModel<Tag> tableModel = new DefaultEventTableModel<Tag>(treeList, tableFormat);
+            AdvancedTableModel<Tag> tableModel = GlazedListsSwing.eventTableModel(treeList, tableFormat);
             JTable table = new JTable(tableModel);
             TreeTableSupport treeSupport = TreeTableSupport.install(table, treeList, 0);
             treeSupport.setArrowKeyExpansionEnabled(true);

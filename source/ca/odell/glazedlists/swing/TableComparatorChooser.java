@@ -36,7 +36,7 @@ import javax.swing.table.TableColumnModel;
 /**
  * A TableComparatorChooser is a tool that allows the user to sort a table by clicking
  * on the table's headers. It requires that the {@link JTable}s model is an
- * {@link DefaultEventTableModel} with a {@link SortedList} as a source.
+ * {@link AdvancedTableModel} with a {@link SortedList} as a source.
  *
  * <p>This class includes custom arrow icons that indicate the sort
  * order. The icons used are chosen based on the current Swing look and feel.
@@ -53,7 +53,7 @@ import javax.swing.table.TableColumnModel;
  * clicks subsequent columns. The list is sorted by the first column and ties
  * are broken by the second column.
  *
- * <p>If the {@link DefaultEventTableModel} uses an {@link AdvancedTableFormat}, its
+ * <p>If the {@link AdvancedTableModel} uses an {@link AdvancedTableFormat}, its
  * {@link AdvancedTableFormat#getColumnComparator} method will be used to
  * populate the initial column {@link Comparator}s.
  *
@@ -108,7 +108,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      * performed and fixes an API flaw by explicitly requiring the TableFormat.
      */
     public TableComparatorChooser(JTable table, SortedList<E> sortedList, Object strategy) {
-        this(table, sortedList,strategy,((DefaultEventTableModel<E>)table.getModel()).getTableFormat());
+        this(table, sortedList,strategy,((AdvancedTableModel<E>)table.getModel()).getTableFormat());
     }
 
     /**
@@ -167,8 +167,8 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      * If at any time the table should no longer sort, the behaviour can be
      * removed calling {@link #dispose()} on the object returned by this method.
      *
-     * <p>This method assumes that the JTable is backed by an EventTableModel
-     * and it is from that EventTableModel that the TableFormat should be
+     * <p>This method assumes that the JTable is backed by an AdvancedTableModel
+     * and it is from that AdvancedTableModel that the TableFormat should be
      * extracted. This is, by far, the typical case and so we provide this
      * simpler install method for convenience.
      *
@@ -185,7 +185,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      *      mouse clicks on the table header into sorting actions on the sortedList.
      */
     public static <E> TableComparatorChooser<E> install(JTable table, SortedList<E> sortedList, Object strategy) {
-        return install(table, sortedList, strategy, ((DefaultEventTableModel<E>)table.getModel()).getTableFormat());
+        return install(table, sortedList, strategy, ((AdvancedTableModel<E>)table.getModel()).getTableFormat());
     }
 
     /**
@@ -415,8 +415,8 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
          */
         public void propertyChange(PropertyChangeEvent evt) {
             // get the two EventTableModels
-            final DefaultEventTableModel<E> oldModel = evt.getOldValue() instanceof DefaultEventTableModel ? (DefaultEventTableModel<E>) evt.getOldValue() : null;
-            final DefaultEventTableModel<E> newModel = evt.getNewValue() instanceof DefaultEventTableModel ? (DefaultEventTableModel<E>) evt.getNewValue() : null;
+            final AdvancedTableModel<E> oldModel = evt.getOldValue() instanceof AdvancedTableModel ? (AdvancedTableModel<E>) evt.getOldValue() : null;
+            final AdvancedTableModel<E> newModel = evt.getNewValue() instanceof AdvancedTableModel ? (AdvancedTableModel<E>) evt.getNewValue() : null;
 
             // stop listening for TableModelEvents in the oldModel and start for the newModel, if possible
             if (oldModel != null) oldModel.removeTableModelListener(this);
@@ -435,10 +435,10 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
          */
         public void tableChanged(TableModelEvent event) {
             if(event.getFirstRow() == TableModelEvent.HEADER_ROW && event.getColumn() == TableModelEvent.ALL_COLUMNS) {
-                if (table.getModel() instanceof DefaultEventTableModel) {
+                if (table.getModel() instanceof AdvancedTableModel) {
                     // the table structure may have changed due to a change in the table format
                     // so we conservatively reset the TableFormat on this TableComparatorChooser
-                    setTableFormat(((DefaultEventTableModel<E>) table.getModel()).getTableFormat());
+                    setTableFormat(((AdvancedTableModel<E>) table.getModel()).getTableFormat());
                 }
             }
 

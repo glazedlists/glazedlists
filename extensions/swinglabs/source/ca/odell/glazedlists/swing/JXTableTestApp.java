@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.*;
+import javax.swing.table.TableModel;
 
 import org.jdesktop.swingx.JXTable;
 
@@ -41,8 +42,8 @@ class JXTableTestApp implements Runnable {
             FilterList<Issue> textFilteredIssues = new FilterList<Issue>(issues, textMatcherEditor);
             SortedList<Issue> sortedIssues = new SortedList<Issue>(textFilteredIssues, null);
             EventList<Issue> issueProxyList = GlazedListsSwing.swingThreadProxyList(sortedIssues);
-            DefaultEventTableModel<Issue> tableModel = new DefaultEventTableModel<Issue>(issueProxyList, new IssueTableFormat());
-            EventSelectionModel<Issue> selectionModel = new EventSelectionModel<Issue>(sortedIssues);
+            TableModel tableModel = GlazedListsSwing.eventTableModel(issueProxyList, new IssueTableFormat());
+            ListSelectionModel selectionModel = GlazedListsSwing.eventSelectionModel(issueProxyList);
 
             JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
             filterPanel.add(new JLabel("Filter:"));

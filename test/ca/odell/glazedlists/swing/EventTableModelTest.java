@@ -3,6 +3,12 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
+import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.gui.TableFormat;
+import ca.odell.glazedlists.gui.WritableTableFormat;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.matchers.Matcher;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Rectangle;
@@ -12,28 +18,10 @@ import java.awt.event.MouseListener;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.swing.Action;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.JLabel;
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableCellRenderer;
-
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.DelayList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.ObservableElementList;
-import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.ThreadRecorderEventList;
-import ca.odell.glazedlists.TransformedList;
-import ca.odell.glazedlists.gui.TableFormat;
-import ca.odell.glazedlists.gui.WritableTableFormat;
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
-import ca.odell.glazedlists.matchers.Matcher;
 
 /**
  * Test EventTableModel from the Swing thread.
@@ -448,7 +436,7 @@ public class EventTableModelTest extends SwingTestCase {
         selectionModel.setSelectionInterval(1, 1);
         assertEquals(Arrays.asList(labels.get(1)), selectionModel.getSelected());
         assertEquals(labels, sortedLabels);
-        final TableComparatorChooser<JLabel> tableComparatorChooser = TableComparatorChooser.install(table, sortedLabels, TableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD);
+        TableComparatorChooser.install(table, sortedLabels, TableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD);
         // sort the table by the first column
         clickColumnHeader(table, 0);
         // check that selected element is preserved

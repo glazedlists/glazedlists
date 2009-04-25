@@ -322,7 +322,7 @@ public class DefaultEventTableModelTest extends SwingTestCase {
         final TableFormat<String> tableFormat = GlazedLists.tableFormat(new String[] {"bytes"}, new String[] {"Test"});
         final DefaultEventTableModel<String> model = new DefaultEventTableModel<String>(list, tableFormat);
         final JTable table = new JTable(model);
-        final EventSelectionModel selectionModel = new EventSelectionModel<String>(list);
+        final DefaultEventSelectionModel selectionModel = new DefaultEventSelectionModel<String>(list);
         selectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.setSelectionModel(selectionModel);
         list.add("Member_two");
@@ -338,7 +338,7 @@ public class DefaultEventTableModelTest extends SwingTestCase {
         final TableFormat<String> tableFormat = GlazedLists.tableFormat(new String[] {"bytes"}, new String[] {"Test"});
         final DefaultEventTableModel<String> model = new DefaultEventTableModel<String>(list, tableFormat);
         final JTable table = new JTable(model);
-        final EventSelectionModel<String> selectionModel = new EventSelectionModel<String>(list);
+        final DefaultEventSelectionModel<String> selectionModel = new DefaultEventSelectionModel<String>(list);
         selectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.setSelectionModel(selectionModel);
         selectionModel.setSelectionInterval(0, 0);
@@ -357,7 +357,7 @@ public class DefaultEventTableModelTest extends SwingTestCase {
         final TableModelChangeCounter counter = new TableModelChangeCounter();
         model.addTableModelListener(counter);
         final JTable table = new JTable(model);
-        final EventSelectionModel<String> selModel = new EventSelectionModel<String>(list);
+        final DefaultEventSelectionModel<String> selModel = new DefaultEventSelectionModel<String>(list);
         table.setSelectionModel(selModel);
         // establish a selection
         selModel.setSelectionInterval(1, 1);
@@ -383,14 +383,14 @@ public class DefaultEventTableModelTest extends SwingTestCase {
         final SortedList<JLabel> sortedLabels = new SortedList<JLabel>(labels, null);
         // build a sorted table and model
         final DefaultEventTableModel<JLabel> tableModel = new DefaultEventTableModel<JLabel>(sortedLabels, new LabelTableFormat());
-        final EventSelectionModel<JLabel> selectionModel = new EventSelectionModel<JLabel>(sortedLabels);
+        final DefaultEventSelectionModel<JLabel> selectionModel = new DefaultEventSelectionModel<JLabel>(sortedLabels);
         final JTable table = new JTable(tableModel);
         table.setSelectionModel(selectionModel);
         // set an initial selection
         selectionModel.setSelectionInterval(1, 1);
         assertEquals(Arrays.asList(labels.get(1)), selectionModel.getSelected());
         assertEquals(labels, sortedLabels);
-        final TableComparatorChooser<JLabel> tableComparatorChooser = TableComparatorChooser.install(table, sortedLabels, TableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD);
+        TableComparatorChooser.install(table, sortedLabels, TableComparatorChooser.MULTIPLE_COLUMN_KEYBOARD);
         // sort the table by the first column
         clickColumnHeader(table, 0);
         // check that selected element is preserved

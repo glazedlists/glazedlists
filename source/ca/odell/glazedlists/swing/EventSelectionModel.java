@@ -4,16 +4,13 @@
 package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.ListSelection;
 import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.matchers.Matcher;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 /**
@@ -44,26 +41,21 @@ import javax.swing.event.ListSelectionListener;
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=112">Bug 112</a>
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=222">Bug 222</a>
  *
+ * @deprecated Use {@link DefaultEventSelectionModel} instead. This class will be removed in the GL
+ *             2.0 release. The wrapping of the source list with an EDT safe list has been
+ *             determined to be undesirable (it is better for the user to provide their own EDT
+ *             safe list).
+ *
+ *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public final class EventSelectionModel<E> implements ListSelectionModel {
+public final class EventSelectionModel<E> implements AdvancedListSelectionModel<E> {
 
-    /** the event lists that provide an event list view of the selection */
-    private ListSelection<E> listSelection;
+	/** The DefaultEventSelectionModel this delegates to. */
+	private DefaultEventSelectionModel<E> delegateSelectionModel;
 
     /** the proxy moves events to the Swing Event Dispatch thread */
-    private TransformedList<E, E> swingThreadSource;
-
-    /** whether the user can modify the selection */
-    private boolean enabled = true;
-
-    /** listeners to notify when the selection changes */
-    private final List<ListSelectionListener> listeners = new ArrayList<ListSelectionListener>();
-
-    /** whether there are a series of changes on the way */
-    private boolean valueIsAdjusting = false;
-    private int fullChangeStart = -1;
-    private int fullChangeFinish = -1;
+    protected TransformedList<E,E> swingThreadSource;
 
     /**
      * Creates a new selection model that also presents a list of the selection.
@@ -75,7 +67,7 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
      *
      * @param source the {@link EventList} whose selection will be managed. This should
      *      be the same {@link EventList} passed to the constructor of your
-     *      {@link DefaultEventTableModel} or {@link DefaultEventListModel}.
+     *      {@link EventTableModel} or {@link EventListModel}.
      */
     public EventSelectionModel(EventList<E> source) {
         // lock the source list for reading since we want to prevent writes
@@ -83,376 +75,10 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
         source.getReadWriteLock().readLock().lock();
         try {
             swingThreadSource = GlazedListsSwing.swingThreadProxyList(source);
-
-            // build a list for reading the selection
-            this.listSelection = new ListSelection<E>(swingThreadSource);
-            this.listSelection.addSelectionListener(new SwingSelectionListener());
+            delegateSelectionModel = new DefaultEventSelectionModel<E>(swingThreadSource);
         } finally {
             source.getReadWriteLock().readLock().unlock();
         }
-    }
-
-    /**
-     * Gets the event list that always contains the current selection.
-     *
-     * @deprecated As of 2005/02/18, the naming of this method became
-     *             ambiguous.  Please use {@link #getSelected()}.
-     */
-    public EventList<E> getEventList() {
-        return getSelected();
-    }
-
-    /**
-     * Gets an {@link EventList} that contains only selected
-     * values and modifies the source list on mutation.
-     *
-     * Adding and removing items from this list performs the same operation on
-     * the source list.
-     */
-    public EventList<E> getSelected() {
-        swingThreadSource.getReadWriteLock().readLock().lock();
-        try {
-            return listSelection.getSelected();
-        } finally {
-            swingThreadSource.getReadWriteLock().readLock().unlock();
-        }
-    }
-
-    /**
-     * Gets an {@link EventList} that contains only selected
-     * values and modifies the selection state on mutation.
-     *
-     * Adding an item to this list selects it and removing an item deselects it.
-     * If an item not in the source list is added an
-     * {@link IllegalArgumentException} is thrown.
-     */
-    public EventList<E> getTogglingSelected() {
-        swingThreadSource.getReadWriteLock().readLock().lock();
-        try {
-            return listSelection.getTogglingSelected();
-        } finally {
-            swingThreadSource.getReadWriteLock().readLock().unlock();
-        }
-    }
-
-    /**
-     * Gets an {@link EventList} that contains only deselected values and
-     * modifies the source list on mutation.
-     *
-     * Adding and removing items from this list performs the same operation on
-     * the source list.
-     */
-    public EventList<E> getDeselected() {
-        swingThreadSource.getReadWriteLock().readLock().lock();
-        try {
-            return listSelection.getDeselected();
-        } finally {
-            swingThreadSource.getReadWriteLock().readLock().unlock();
-        }
-    }
-
-    /**
-     * Gets an {@link EventList} that contains only deselected values and
-     * modifies the selection state on mutation.
-     *
-     * Adding an item to this list deselects it and removing an item selects it.
-     * If an item not in the source list is added an
-     * {@link IllegalArgumentException} is thrown
-     */
-    public EventList<E> getTogglingDeselected() {
-        swingThreadSource.getReadWriteLock().readLock().lock();
-        try {
-            return listSelection.getTogglingDeselected();
-        } finally {
-            swingThreadSource.getReadWriteLock().readLock().unlock();
-        }
-    }
-
-    /**
-     * Gets the selection model that provides selection management for a table.
-     *
-     * @deprecated As of 2004/11/26, the {@link EventSelectionModel} implements
-     *      {@link ListSelectionModel} directly.
-     */
-    public ListSelectionModel getListSelectionModel() {
-        return this;
-    }
-
-    /**
-     * Set the EventSelectionModel as editable or not. This means that the user cannot
-     * manipulate the selection by clicking. The selection can still be changed as
-     * the source list changes.
-     *
-     * <p>Note that this will also disable the selection from being modified
-     * <strong>programatically</strong>. Therefore you must use setEnabled(true) to
-     * modify the selection in code.
-     */
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    /**
-     * Returns whether the EventSelectionModel is editable or not.
-     */
-    public boolean getEnabled() {
-        return enabled;
-    }
-
-    /**
-     * Listens to selection changes on the {@link ListSelection} and fires
-     * {@link ListSelectionEvent}s to registered listeners.
-     */
-    private class SwingSelectionListener implements ListSelection.Listener {
-        /** {@inheritDoc} */
-        public void selectionChanged(int changeStart, int changeEnd) {
-            fireSelectionChanged(changeStart, changeEnd);
-        }
-    }
-
-    /**
-     * Notify listeners that the selection has changed.
-     *
-     * <p>This notifies all listeners with the same immutable
-     * ListSelectionEvent.
-     */
-    private void fireSelectionChanged(int changeStart, int changeFinish) {
-        // if this is a change in a series, save the bounds of this change
-        if(valueIsAdjusting) {
-            if(fullChangeStart == -1 || changeStart < fullChangeStart) fullChangeStart = changeStart;
-            if(fullChangeFinish == -1 || changeFinish > fullChangeFinish) fullChangeFinish = changeFinish;
-        }
-
-        // fire the change
-        final ListSelectionEvent event = new ListSelectionEvent(this, changeStart, changeFinish, valueIsAdjusting);
-        for (int i = 0, n = listeners.size(); i < n; i++)
-            listeners.get(i).valueChanged(event);
-    }
-
-    /**
-     * Inverts the current selection.
-     */
-    public void invertSelection() {
-        swingThreadSource.getReadWriteLock().writeLock().lock();
-        try {
-            listSelection.invertSelection();
-        } finally {
-            swingThreadSource.getReadWriteLock().writeLock().unlock();
-        }
-    }
-
-    /**
-     * Change the selection to be between index0 and index1 inclusive.
-     *
-     * <p>First this calculates the smallest range where changes occur. This
-     * includes the union of the selection range before and the selection
-     * range specified. It then walks through the change and sets each
-     * index as selected or not based on whether the index is in the
-     * new range. Finally it fires events to both the listening lists and
-     * selection listeners about what changes happened.
-     *
-     * <p>If the selection does not change, this will not fire any events.
-     */
-    public void setSelectionInterval(int index0, int index1) {
-        if(!enabled) return;
-        swingThreadSource.getReadWriteLock().writeLock().lock();
-        try {
-            listSelection.setSelection(index0, index1);
-        } finally {
-            swingThreadSource.getReadWriteLock().writeLock().unlock();
-        }
-    }
-
-    /**
-     * Change the selection to be the set union of the current selection  and the indices between index0 and index1 inclusive
-     */
-    public void addSelectionInterval(int index0, int index1) {
-        if(!enabled) return;
-        swingThreadSource.getReadWriteLock().writeLock().lock();
-        try {
-            listSelection.select(index0, index1);
-        } finally {
-            swingThreadSource.getReadWriteLock().writeLock().unlock();
-        }
-    }
-    /**
-     * Change the selection to be the set difference of the current selection  and the indices between index0 and index1 inclusive.
-     */
-    public void removeSelectionInterval(int index0, int index1) {
-        if(!enabled) return;
-        if(index0 == 0 && index1 == 0 && swingThreadSource.isEmpty()) return; // hack for Java 5 compatibility
-        swingThreadSource.getReadWriteLock().writeLock().lock();
-        try {
-            listSelection.deselect(index0, index1);
-        } finally {
-            swingThreadSource.getReadWriteLock().writeLock().unlock();
-        }
-    }
-
-    /**
-     * Returns true if the specified index is selected. If the specified
-     * index has not been seen before, this will return false. This is
-     * in the case where the table painting and selection have fallen
-     * out of sync. Usually in this case there is an update event waiting
-     * in the event queue that notifies this model of the change
-     * in table size.
-     */
-    public boolean isSelectedIndex(int index) {
-        return (listSelection.isSelected(index));
-    }
-
-    /**
-     * Return the first index argument from the most recent call to setSelectionInterval(), addSelectionInterval() or removeSelectionInterval().
-     */
-    public int getAnchorSelectionIndex() {
-        return listSelection.getAnchorSelectionIndex();
-    }
-    /**
-     * Set the anchor selection index.
-     */
-    public void setAnchorSelectionIndex(int anchorSelectionIndex) {
-        if(!enabled) return;
-        swingThreadSource.getReadWriteLock().writeLock().lock();
-        try {
-            listSelection.setAnchorSelectionIndex(anchorSelectionIndex);
-        } finally {
-            swingThreadSource.getReadWriteLock().writeLock().unlock();
-        }
-    }
-    /**
-     * Return the second index argument from the most recent call to setSelectionInterval(), addSelectionInterval() or removeSelectionInterval().
-     */
-    public int getLeadSelectionIndex() {
-        return listSelection.getLeadSelectionIndex();
-    }
-    /**
-     * Set the lead selection index.
-     */
-    public void setLeadSelectionIndex(int leadSelectionIndex) {
-        if(!enabled) return;
-        swingThreadSource.getReadWriteLock().writeLock().lock();
-        try {
-            listSelection.setLeadSelectionIndex(leadSelectionIndex);
-        } finally {
-            swingThreadSource.getReadWriteLock().writeLock().unlock();
-        }
-    }
-
-    /**
-     * Gets the index of the first selected element.
-     */
-    public int getMinSelectionIndex() {
-        return listSelection.getMinSelectionIndex();
-    }
-
-    /**
-     * Gets the index of the last selected element.
-     */
-    public int getMaxSelectionIndex() {
-        return listSelection.getMaxSelectionIndex();
-    }
-
-    /**
-     * Change the selection to the empty set.
-     */
-    public void clearSelection() {
-        if(!enabled) return;
-        swingThreadSource.getReadWriteLock().writeLock().lock();
-        try {
-            listSelection.deselectAll();
-        } finally {
-            swingThreadSource.getReadWriteLock().writeLock().unlock();
-        }
-    }
-    /**
-     * Returns true if no indices are selected.
-     */
-    public boolean isSelectionEmpty() {
-        swingThreadSource.getReadWriteLock().readLock().lock();
-        try {
-            return listSelection.getSelected().isEmpty();
-        } finally {
-            swingThreadSource.getReadWriteLock().readLock().unlock();
-        }
-    }
-
-    /**
-     * Insert length indices beginning before/after index.
-     */
-    public void insertIndexInterval(int index, int length, boolean before) {
-        // these changes are handled by the ListSelection
-    }
-    /**
-     * Remove the indices in the interval index0,index1 (inclusive) from  the selection model.
-     */
-    public void removeIndexInterval(int index0, int index1) {
-        // these changes are handled by the ListSelection
-    }
-
-    /**
-     * This property is true if upcoming changes to the value  of the model should be considered a single event.
-     */
-    public void setValueIsAdjusting(boolean valueIsAdjusting) {
-        this.valueIsAdjusting = valueIsAdjusting;
-
-        // fire one extra change containing all changes in this set
-        if(!valueIsAdjusting) {
-            if(fullChangeStart != -1 && fullChangeFinish != -1) {
-                swingThreadSource.getReadWriteLock().writeLock().lock();
-                try {
-                    fireSelectionChanged(fullChangeStart, fullChangeFinish);
-                    fullChangeStart = -1;
-                    fullChangeFinish = -1;
-                } finally {
-                    swingThreadSource.getReadWriteLock().writeLock().unlock();
-                }
-            }
-        }
-    }
-
-    /**
-     * Returns true if the value is undergoing a series of changes.
-     */
-    public boolean getValueIsAdjusting() {
-        return valueIsAdjusting;
-    }
-
-    /**
-     * Set the selection mode.
-     */
-    public void setSelectionMode(int selectionMode) {
-        swingThreadSource.getReadWriteLock().writeLock().lock();
-        try {
-            listSelection.setSelectionMode(selectionMode);
-        } finally {
-            swingThreadSource.getReadWriteLock().writeLock().unlock();
-        }
-    }
-
-    /**
-     * Returns the current selection mode.
-     */
-    public int getSelectionMode() {
-        return listSelection.getSelectionMode();
-    }
-
-    /**
-     * Add a matcher which decides when source elements are valid for selection.
-     *
-     * @param validSelectionMatcher returns <tt>true</tt> if a source element
-     *      can be selected; <tt>false</tt> otherwise
-     */
-    public void addValidSelectionMatcher(Matcher<E> validSelectionMatcher) {
-        listSelection.addValidSelectionMatcher(validSelectionMatcher);
-    }
-
-    /**
-     * Remove a matcher which decides when source elements are valid for selection.
-     *
-     * @param validSelectionMatcher returns <tt>true</tt> if a source element
-     *      can be selected; <tt>false</tt> otherwise
-     */
-    public void removeValidSelectionMatcher(Matcher<E> validSelectionMatcher) {
-        listSelection.removeValidSelectionMatcher(validSelectionMatcher);
     }
 
     /**
@@ -464,15 +90,33 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
      * advised not to <code>for()</code> through the changed range without
      * also verifying that each row is still in the table.
      */
-    public void addListSelectionListener(ListSelectionListener listener) {
-        listeners.add(listener);
-    }
+	public void addListSelectionListener(ListSelectionListener listener) {
+		delegateSelectionModel.addListSelectionListener(listener);
+	}
+
     /**
-     * Remove a listener from the list that's notified each time a change to the selection occurs.
+     * Change the selection to be the set union of the current selection  and the indices between index0 and index1 inclusive
      */
-    public void removeListSelectionListener(ListSelectionListener listener) {
-        listeners.remove(listener);
-    }
+	public void addSelectionInterval(int index0, int index1) {
+		delegateSelectionModel.addSelectionInterval(index0, index1);
+	}
+
+    /**
+     * Add a matcher which decides when source elements are valid for selection.
+     *
+     * @param validSelectionMatcher returns <tt>true</tt> if a source element
+     *      can be selected; <tt>false</tt> otherwise
+     */
+	public void addValidSelectionMatcher(Matcher<E> validSelectionMatcher) {
+		delegateSelectionModel.addValidSelectionMatcher(validSelectionMatcher);
+	}
+
+    /**
+     * Change the selection to the empty set.
+     */
+	public void clearSelection() {
+		delegateSelectionModel.clearSelection();
+	}
 
     /**
      * Releases the resources consumed by this {@link EventSelectionModel} so that it
@@ -488,8 +132,251 @@ public final class EventSelectionModel<E> implements ListSelectionModel {
      * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
      * to call any method on a {@link EventSelectionModel} after it has been disposed.
      */
-    public void dispose() {
-        listSelection.dispose();
-        swingThreadSource.dispose();
-    }
+	public void dispose() {
+		delegateSelectionModel.dispose();
+		swingThreadSource.dispose();
+	}
+
+    /**
+     * Return the first index argument from the most recent call to setSelectionInterval(), addSelectionInterval() or removeSelectionInterval().
+     */
+	public int getAnchorSelectionIndex() {
+		return delegateSelectionModel.getAnchorSelectionIndex();
+	}
+
+    /**
+     * Gets an {@link EventList} that contains only deselected values and
+     * modifies the source list on mutation.
+     *
+     * Adding and removing items from this list performs the same operation on
+     * the source list.
+     */
+	public EventList<E> getDeselected() {
+		return delegateSelectionModel.getDeselected();
+	}
+
+    /**
+     * Returns whether the EventSelectionModel is editable or not.
+     */
+	public boolean getEnabled() {
+		return delegateSelectionModel.getEnabled();
+	}
+
+    /**
+     * Gets the event list that always contains the current selection.
+     *
+     * @deprecated As of 2005/02/18, the naming of this method became
+     *             ambiguous.  Please use {@link #getSelected()}.
+     */
+	public EventList<E> getEventList() {
+		return delegateSelectionModel.getSelected();
+	}
+
+    /**
+     * Return the second index argument from the most recent call to setSelectionInterval(), addSelectionInterval() or removeSelectionInterval().
+     */
+	public int getLeadSelectionIndex() {
+		return delegateSelectionModel.getLeadSelectionIndex();
+	}
+
+    /**
+     * Gets the selection model that provides selection management for a table.
+     *
+     * @deprecated As of 2004/11/26, the {@link EventSelectionModel} implements
+     *      {@link ListSelectionModel} directly.
+     */
+	public ListSelectionModel getListSelectionModel() {
+		return delegateSelectionModel;
+	}
+
+    /**
+     * Gets the index of the last selected element.
+     */
+	public int getMaxSelectionIndex() {
+		return delegateSelectionModel.getMaxSelectionIndex();
+	}
+
+    /**
+     * Gets the index of the first selected element.
+     */
+	public int getMinSelectionIndex() {
+		return delegateSelectionModel.getMinSelectionIndex();
+	}
+
+    /**
+     * Gets an {@link EventList} that contains only selected
+     * values and modifies the source list on mutation.
+     *
+     * Adding and removing items from this list performs the same operation on
+     * the source list.
+     */
+	public EventList<E> getSelected() {
+		return delegateSelectionModel.getSelected();
+	}
+
+    /**
+     * Returns the current selection mode.
+     */
+	public int getSelectionMode() {
+		return delegateSelectionModel.getSelectionMode();
+	}
+
+    /**
+     * Gets an {@link EventList} that contains only deselected values and
+     * modifies the selection state on mutation.
+     *
+     * Adding an item to this list deselects it and removing an item selects it.
+     * If an item not in the source list is added an
+     * {@link IllegalArgumentException} is thrown
+     */
+	public EventList<E> getTogglingDeselected() {
+		return delegateSelectionModel.getTogglingDeselected();
+	}
+
+    /**
+     * Gets an {@link EventList} that contains only selected
+     * values and modifies the selection state on mutation.
+     *
+     * Adding an item to this list selects it and removing an item deselects it.
+     * If an item not in the source list is added an
+     * {@link IllegalArgumentException} is thrown.
+     */
+	public EventList<E> getTogglingSelected() {
+		return delegateSelectionModel.getTogglingSelected();
+	}
+
+    /**
+     * Returns true if the value is undergoing a series of changes.
+     */
+	public boolean getValueIsAdjusting() {
+		return delegateSelectionModel.getValueIsAdjusting();
+	}
+
+    /**
+     * Insert length indices beginning before/after index.
+     */
+	public void insertIndexInterval(int index, int length, boolean before) {
+		delegateSelectionModel.insertIndexInterval(index, length, before);
+	}
+
+    /**
+     * Inverts the current selection.
+     */
+	public void invertSelection() {
+		delegateSelectionModel.invertSelection();
+	}
+
+    /**
+     * Returns true if the specified index is selected. If the specified
+     * index has not been seen before, this will return false. This is
+     * in the case where the table painting and selection have fallen
+     * out of sync. Usually in this case there is an update event waiting
+     * in the event queue that notifies this model of the change
+     * in table size.
+     */
+	public boolean isSelectedIndex(int index) {
+		return delegateSelectionModel.isSelectedIndex(index);
+	}
+
+    /**
+     * Returns true if no indices are selected.
+     */
+	public boolean isSelectionEmpty() {
+		return delegateSelectionModel.isSelectionEmpty();
+	}
+
+    /**
+     * Remove the indices in the interval index0,index1 (inclusive) from  the selection model.
+     */
+	public void removeIndexInterval(int index0, int index1) {
+		delegateSelectionModel.removeIndexInterval(index0, index1);
+	}
+
+    /**
+     * Remove a listener from the list that's notified each time a change to the selection occurs.
+     */
+	public void removeListSelectionListener(ListSelectionListener listener) {
+		delegateSelectionModel.removeListSelectionListener(listener);
+	}
+
+    /**
+     * Change the selection to be the set difference of the current selection  and the indices between index0 and index1 inclusive.
+     */
+	public void removeSelectionInterval(int index0, int index1) {
+		delegateSelectionModel.removeSelectionInterval(index0, index1);
+	}
+
+    /**
+     * Remove a matcher which decides when source elements are valid for selection.
+     *
+     * @param validSelectionMatcher returns <tt>true</tt> if a source element
+     *      can be selected; <tt>false</tt> otherwise
+     */
+	public void removeValidSelectionMatcher(Matcher<E> validSelectionMatcher) {
+		delegateSelectionModel
+				.removeValidSelectionMatcher(validSelectionMatcher);
+	}
+
+    /**
+     * Set the anchor selection index.
+     */
+	public void setAnchorSelectionIndex(int anchorSelectionIndex) {
+		delegateSelectionModel.setAnchorSelectionIndex(anchorSelectionIndex);
+	}
+
+    /**
+     * Set the EventSelectionModel as editable or not. This means that the user cannot
+     * manipulate the selection by clicking. The selection can still be changed as
+     * the source list changes.
+     *
+     * <p>Note that this will also disable the selection from being modified
+     * <strong>programatically</strong>. Therefore you must use setEnabled(true) to
+     * modify the selection in code.
+     */
+	public void setEnabled(boolean enabled) {
+		delegateSelectionModel.setEnabled(enabled);
+	}
+
+    /**
+     * Set the lead selection index.
+     */
+	public void setLeadSelectionIndex(int leadSelectionIndex) {
+		delegateSelectionModel.setLeadSelectionIndex(leadSelectionIndex);
+	}
+
+    /**
+     * Change the selection to be between index0 and index1 inclusive.
+     *
+     * <p>First this calculates the smallest range where changes occur. This
+     * includes the union of the selection range before and the selection
+     * range specified. It then walks through the change and sets each
+     * index as selected or not based on whether the index is in the
+     * new range. Finally it fires events to both the listening lists and
+     * selection listeners about what changes happened.
+     *
+     * <p>If the selection does not change, this will not fire any events.
+     */
+	public void setSelectionInterval(int index0, int index1) {
+		delegateSelectionModel.setSelectionInterval(index0, index1);
+	}
+
+    /**
+     * Set the selection mode.
+     */
+	public void setSelectionMode(int selectionMode) {
+		delegateSelectionModel.setSelectionMode(selectionMode);
+	}
+
+    /**
+     * This property is true if upcoming changes to the value  of the model should be considered a single event.
+     */
+	public void setValueIsAdjusting(boolean valueIsAdjusting) {
+		delegateSelectionModel.setValueIsAdjusting(valueIsAdjusting);
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public String toString() {
+		return delegateSelectionModel.toString();
+	}
 }

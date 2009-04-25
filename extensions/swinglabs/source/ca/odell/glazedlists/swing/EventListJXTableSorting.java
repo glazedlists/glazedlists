@@ -32,9 +32,9 @@ import org.jdesktop.swingx.table.TableColumnExt;
  * </table>
  *
  * <p>To prepare a {@link JXTable} to be sorted using a {@link SortedList}:
- * <li>Create a {@link SortedList} and {@link DefaultEventTableModel} that depends
+ * <li>Create a {@link SortedList} and {@link AdvancedTableModel} that depends
  * on that {@link SortedList}.
- * <li>Create a {@link JXTable} using the {@link DefaultEventTableModel} as its model.
+ * <li>Create a {@link JXTable} using the {@link AdvancedTableModel} as its model.
  * <li>Run the {@link EventListJXTableSorting#install} method to bind the
  * {@link JXTable}'s headers to the {@link SortedList}'s {@link Comparator}.
  *
@@ -224,7 +224,7 @@ public class EventListJXTableSorting {
          * Comparator.
          */
         private Comparator getComparator(int modelIndex) {
-            DefaultEventTableModel tableModel = (DefaultEventTableModel) table.getModel();
+            AdvancedTableModel tableModel = (AdvancedTableModel) table.getModel();
             TableFormat tableFormat = tableModel.getTableFormat();
             return new TableColumnComparator(tableFormat, modelIndex);
         }

@@ -3,9 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import javax.swing.BoundedRangeModel;
-import javax.swing.table.TableModel;
-
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ThresholdList;
@@ -14,6 +11,9 @@ import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.swing.LowerThresholdRangeModel;
 import ca.odell.glazedlists.impl.swing.SwingThreadProxyEventList;
 import ca.odell.glazedlists.impl.swing.UpperThresholdRangeModel;
+
+import javax.swing.BoundedRangeModel;
+import javax.swing.SwingUtilities;
 
 /**
  * A factory for creating all sorts of objects to be used with Glazed Lists.
@@ -68,16 +68,40 @@ public final class GlazedListsSwing {
     public static BoundedRangeModel upperRangeModel(ThresholdList target) {
         return new UpperThresholdRangeModel(target);
     }
-    
+
     // TableModel convenience creators
-    
+
+    /**
+     * Creates a new table model that extracts column data from the given
+     * <code>source</code> using the the given <code>tableFormat</code>.
+     *
+     * <p>The returned table model is <strong>not thread-safe</strong>. Unless otherwise
+     * noted, all methods are only safe to be called from the event dispatch thread.
+     * To do this programmatically, use {@link SwingUtilities#invokeAndWait(Runnable)} and
+     * wrap the source list (or some part of the source list's pipeline) using
+     * GlazedListsSwing#swingThreadProxyList(EventList).</p>
+     *
+     * @param source the EventList that provides the row objects
+     * @param tableFormat the object responsible for extracting column data
+     *      from the row objects
+     */
+    public static <E> AdvancedTableModel<E> eventTableModel(EventList<E> source, TableFormat<? super E> tableFormat) {
+        return new DefaultEventTableModel<E>(source, tableFormat);
+    }
+
     /**
      * Creates a new table model that renders the specified list with an automatically
      * generated {@link TableFormat}. It uses JavaBeans and reflection to create
      * a {@link TableFormat} as specified.
      *
      * <p>Note that classes that will be obfuscated may not work with
-     * reflection. In this case, implement a {@link TableFormat} manually.
+     * reflection. In this case, implement a {@link TableFormat} manually.</p>
+     *
+     * <p>The returned table model is <strong>not thread-safe</strong>. Unless otherwise
+     * noted, all methods are only safe to be called from the event dispatch thread.
+     * To do this programmatically, use {@link SwingUtilities#invokeAndWait(Runnable)} and
+     * wrap the source list (or some part of the source list's pipeline) using
+     * GlazedListsSwing#swingThreadProxyList(EventList).</p>
      *
      * @param source the EventList that provides the row objects
      * @param propertyNames an array of property names in the JavaBeans format.
@@ -90,10 +114,33 @@ public final class GlazedListsSwing {
      *      your labels might be "First Name" and "Age".
      * @param writable an array of booleans specifying which of the columns in
      *      your table are writable.
-     *      
+     *
      */
-    public static <E> TableModel createEventTableModel(EventList<E> source, String[] propertyNames, String[] columnLabels, boolean[] writable) {
-        return new DefaultEventTableModel<E>(source, GlazedLists.tableFormat(propertyNames, columnLabels, writable));
+    public static <E> AdvancedTableModel<E> eventTableModel(EventList<E> source, String[] propertyNames, String[] columnLabels, boolean[] writable) {
+        return eventTableModel(source, GlazedLists.tableFormat(propertyNames, columnLabels, writable));
     }
 
+    // ListSelectionModel convenience creators
+
+    /**
+     * Creates a new selection model that also presents a list of the selection.
+     *
+     * The {@link AdvancedListSelectionModel} listens to this {@link EventList} in order
+     * to adjust selection when the {@link EventList} is modified. For example,
+     * when an element is added to the {@link EventList}, this may offset the
+     * selection of the following elements.
+     *
+     * <p>The returned selection model is <strong>not thread-safe</strong>. Unless otherwise
+     * noted, all methods are only safe to be called from the event dispatch thread.
+     * To do this programmatically, use {@link SwingUtilities#invokeAndWait(Runnable)} and
+     * wrap the source list (or some part of the source list's pipeline) using
+     * GlazedListsSwing#swingThreadProxyList(EventList).</p>
+     *
+     * @param source the {@link EventList} whose selection will be managed. This should
+     *      be the same {@link EventList} passed to the constructor of your
+     *      {@link AdvancedTableModel} or {@link EventListModel}.
+     */
+    public static <E> AdvancedListSelectionModel<E> eventSelectionModel(EventList<E> source) {
+        return new DefaultEventSelectionModel<E>(source);
+    }
 }

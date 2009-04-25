@@ -4,22 +4,27 @@
 package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.TreeList;
-import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 
-import javax.swing.*;
+import java.awt.Component;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.event.*;
+
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import java.awt.event.*;
-import java.awt.*;
 
 /**
  * This class {@link #install}s support for a single hierarchical column within
- * a standard {@link JTable} that is backed by an {@link EventTableModel}. The
- * {@link EventTableModel}, in turn <strong>must</strong> be backed by the same
+ * a standard {@link JTable} that is backed by an {@link AdvancedTableModel}. The
+ * {@link AdvancedTableModel}, in turn <strong>must</strong> be backed by the same
  * {@link TreeList} which is given as a parameter to {@link #install}.
  *
  * <p>Typical usage of {@link TreeTableSupport} resembles this:
@@ -32,7 +37,7 @@ import java.awt.*;
  * TreeList treeList = new TreeList(myEventList, new MyTreeFormat());
  *
  * // create a JTable that displays the contents of treeList in a tabular format
- * EventTableModel myTableModel = new EventTableModel(treeList, new MyTableFormat());
+ * AdvancedTableModel myTableModel = GlazedListsSwing.eventTableModel(treeList, new MyTableFormat());
  * JTable myTable = new JTable(myTableModel);
  *
  * // make the 3rd table column a hierarchical column to create a TreeTable
@@ -372,7 +377,7 @@ public final class TreeTableSupport {
      *   <li> The left and right arrow keys will toggle the expansion state of
      *        hierarchy nodes in the tree rather than adjust cell focus in the
      *        table.</li>
-     * 
+     *
      *   <li> The table column model's selection model is replaced with a no-op
      *        implementation so that column selection and column lead/anchor
      *        indexes are NOT tracked. Thus, column selection is disabled and

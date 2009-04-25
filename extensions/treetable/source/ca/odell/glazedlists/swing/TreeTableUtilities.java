@@ -5,9 +5,13 @@ package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.TreeList;
 
-import javax.swing.*;
+import java.awt.Component;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
-import java.awt.*;
+
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 
 /**
  * A collection of static utility methods to ease the burdens of implementing
@@ -73,7 +77,7 @@ public class TreeTableUtilities {
      * <code>row</code> in the given <code>treeList</code> without altering the
      * row selections within the given <code>table</code>, if possible. In
      * practice, this can only be achieved if the <code>table</code> uses an
-     * {@link EventSelectionModel} as its selection model.
+     * {@link AdvancedListSelectionModel} as its selection model.
      *
      * <p>This method also turns off JTable's <code>JTable.autoStartsEdit</code>
      * client property during the toggling to stop any attempts at beginning a
@@ -89,7 +93,7 @@ public class TreeTableUtilities {
      */
     static Runnable toggleExpansion(JTable table, TreeList treeList, int row) {
         final RestoreStateRunnable restoreStateRunnable = new RestoreStateRunnable(table);
-        final EventSelectionModel selectionModel = restoreStateRunnable.getEventSelectionModel();
+        final AdvancedListSelectionModel selectionModel = restoreStateRunnable.getEventSelectionModel();
 
         // disable the EventSelectionModel so it does not respect our attempted change to row selection (due to treeList.toggleExpanded(row);)
         if (selectionModel != null)
@@ -112,19 +116,19 @@ public class TreeTableUtilities {
 
         private final JTable table;
         private final Boolean autoStartsEdit;
-        private final EventSelectionModel eventSelectionModel;
+        private final AdvancedListSelectionModel eventSelectionModel;
         private final boolean eventSelectionModelEnabled;
 
         public RestoreStateRunnable(JTable table) {
             this.table = table;
 
             final ListSelectionModel selectionModel = table.getSelectionModel();
-            eventSelectionModel = selectionModel instanceof EventSelectionModel ? (EventSelectionModel) selectionModel : null;
+            eventSelectionModel = selectionModel instanceof AdvancedListSelectionModel ? (AdvancedListSelectionModel) selectionModel : null;
             eventSelectionModelEnabled = eventSelectionModel != null && eventSelectionModel.getEnabled();
             autoStartsEdit = (Boolean) table.getClientProperty("JTable.autoStartsEdit");
         }
 
-        public EventSelectionModel getEventSelectionModel() {
+        public AdvancedListSelectionModel getEventSelectionModel() {
             return eventSelectionModel;
         }
 

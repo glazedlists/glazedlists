@@ -4,7 +4,7 @@
 package com.publicobject.misc.swing;
 
 import ca.odell.glazedlists.SeparatorList;
-import ca.odell.glazedlists.swing.DefaultEventTableModel;
+import ca.odell.glazedlists.swing.AdvancedTableModel;
 
 import java.awt.Component;
 import java.awt.Graphics;
@@ -26,11 +26,11 @@ public class JSeparatorTable extends JTable {
     private TableCellRenderer separatorRenderer;
     private TableCellEditor separatorEditor;
 
-    public JSeparatorTable(DefaultEventTableModel tableModel) {
+    public JSeparatorTable(AdvancedTableModel tableModel) {
         this(tableModel, null);
     }
 
-    public JSeparatorTable(DefaultEventTableModel tableModel, TableColumnModel tableColumnModel) {
+    public JSeparatorTable(AdvancedTableModel tableModel, TableColumnModel tableColumnModel) {
         super(tableModel, tableColumnModel);
         setUI(new SpanTableUI());
 
@@ -41,25 +41,25 @@ public class JSeparatorTable extends JTable {
     /** {@inheritDoc} */
     @Override
     public void setModel(TableModel tableModel) {
-        if(!(tableModel instanceof DefaultEventTableModel))
-            throw new IllegalArgumentException("tableModel is expected to be an DefaultEventTableModel");
+        if(!(tableModel instanceof AdvancedTableModel))
+            throw new IllegalArgumentException("tableModel is expected to be an AdvancedTableModel");
         super.setModel(tableModel);
     }
 
     /**
      * A convenience method to cast the TableModel to the expected
-     * DefaultEventTableModel implementation.
+     * AdvancedTableModel implementation.
      *
-     * @return the DefaultEventTableModel that backs this table
+     * @return the AdvancedTableModel that backs this table
      */
-    private DefaultEventTableModel getEventTableModel() {
-        return (DefaultEventTableModel) getModel();
+    private AdvancedTableModel getEventTableModel() {
+        return (AdvancedTableModel) getModel();
     }
 
     /** {@inheritDoc} */
     @Override
     public Rectangle getCellRect(int row, int column, boolean includeSpacing) {
-        final DefaultEventTableModel eventTableModel = getEventTableModel();
+        final AdvancedTableModel eventTableModel = getEventTableModel();
 
         // sometimes JTable asks for a cellrect that doesn't exist anymore, due
         // to an editor being installed before a bunch of rows were removed.
@@ -350,7 +350,7 @@ class SpanTableUI extends BasicTableUI {
 
         for(int row = rMin; row <= rMax; row++) {
             // skip separator rows
-            Object rowValue = ((DefaultEventTableModel)separatorTable.getModel()).getElementAt(row);
+            Object rowValue = ((AdvancedTableModel)separatorTable.getModel()).getElementAt(row);
 
             // only paint the cell on non-separator rows
             if(!(rowValue instanceof SeparatorList.Separator)) {

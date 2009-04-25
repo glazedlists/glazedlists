@@ -6,8 +6,8 @@ package com.publicobject.issuesbrowser.swing;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.matchers.MatcherEditor;
+import ca.odell.glazedlists.swing.AdvancedListSelectionModel;
 import ca.odell.glazedlists.swing.DefaultEventListModel;
-import ca.odell.glazedlists.swing.EventSelectionModel;
 import ca.odell.glazedlists.swing.GlazedListsSwing;
 
 import javax.swing.JComponent;
@@ -50,7 +50,7 @@ class SwingUsersMatcherEditor extends UsersMatcherEditor implements FilterCompon
         userSelect.setCellRenderer(new NoFocusRenderer(userSelect.getCellRenderer()));
 
         // create an EventList containing the JList's selection
-        final EventSelectionModel<String> userSelectionModel = new EventSelectionModel<String>(allUsers);
+        final AdvancedListSelectionModel<String> userSelectionModel = GlazedListsSwing.eventSelectionModel(allUserProxyList);
         userSelect.setSelectionModel(userSelectionModel);
         setSelectionList(userSelectionModel.getSelected());
 

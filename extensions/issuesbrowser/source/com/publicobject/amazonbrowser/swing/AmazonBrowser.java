@@ -49,10 +49,10 @@ public class AmazonBrowser implements Runnable {
     private TreeList<Item> treeList;
 
     /** the TableModel backing the treetable of items */
-    private DefaultEventTableModel<Item> itemTableModel;
+    private AdvancedTableModel<Item> itemTableModel;
 
     /** the ListSelectionModel backing the treetable of items */
-    private EventSelectionModel<Item> itemTableSelectionModel;
+    private AdvancedListSelectionModel<Item> itemTableSelectionModel;
 
     /** loads items as requested */
     private ItemLoader itemLoader;
@@ -173,8 +173,8 @@ public class AmazonBrowser implements Runnable {
         treeList = new TreeList<Item>(swingFilteredItemsList, new ItemTreeFormat(treeCriteriaEditor.getActiveCriteria()), TreeList.<Item>nodesStartExpanded());
 
         // create a JTable to display the items
-        itemTableModel = new DefaultEventTableModel<Item>(treeList, new ItemTableFormat());
-        itemTableSelectionModel = new EventSelectionModel<Item>(treeList);
+        itemTableModel = GlazedListsSwing.eventTableModel(treeList, new ItemTableFormat());
+        itemTableSelectionModel = GlazedListsSwing.eventSelectionModel(treeList);
         final JTable itemTable = new StripedTable(itemTableModel, null, itemTableSelectionModel);
         JScrollPane itemScrollPane = new JScrollPane(itemTable, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         itemScrollPane.setBorder(BorderFactory.createEmptyBorder());

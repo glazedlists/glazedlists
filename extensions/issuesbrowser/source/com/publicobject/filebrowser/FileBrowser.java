@@ -8,7 +8,6 @@ import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.TreeList;
 import ca.odell.glazedlists.gui.TableFormat;
-import ca.odell.glazedlists.swing.DefaultEventTableModel;
 import ca.odell.glazedlists.swing.GlazedListsSwing;
 import ca.odell.glazedlists.swing.TableComparatorChooser;
 import ca.odell.glazedlists.swing.TreeTableSupport;
@@ -53,7 +52,7 @@ public class FileBrowser implements Runnable {
             SortedList<Entry> sortedEntries = new SortedList<Entry>(entries, null);
 
             TreeList<Entry> treeList = new TreeList<Entry>(sortedEntries, treeFormat, TreeList.<Entry>nodesStartExpanded());
-            TableModel model = new DefaultEventTableModel<Entry>(treeList, tableFormat);
+            TableModel model = GlazedListsSwing.eventTableModel(treeList, tableFormat);
             JTable table = new JTable(model);
             TreeTableSupport.install(table, treeList, 0);
             TableComparatorChooser.install(table, sortedEntries, TableComparatorChooser.SINGLE_COLUMN);

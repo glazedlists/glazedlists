@@ -3,18 +3,18 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import java.awt.EventQueue;
-
-import javax.swing.SwingUtilities;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableModel;
-
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
+
+import java.awt.EventQueue;
+
+import javax.swing.SwingUtilities;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
 
 /**
  * A {@link TableModel} that holds an {@link EventList}. Each element of the list
@@ -25,7 +25,7 @@ import ca.odell.glazedlists.gui.WritableTableFormat;
  * noted, all methods are only safe to be called from the event dispatch thread.
  * To do this programmatically, use {@link SwingUtilities#invokeAndWait(Runnable)} and
  * wrap the source list (or some part of the source list's pipeline) using
- * GlazedListsSwing#swingThreadProxyList(EventList).
+ * GlazedListsSwing#swingThreadProxyList(EventList).</p>
  *
  * @see <a href="http://publicobject.com/glazedlists/tutorial/">Glazed Lists Tutorial</a>
  *
@@ -37,7 +37,7 @@ import ca.odell.glazedlists.gui.WritableTableFormat;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class DefaultEventTableModel<E> extends AbstractTableModel implements ListEventListener<E> {
+public class DefaultEventTableModel<E> extends AbstractTableModel implements AdvancedTableModel<E>, ListEventListener<E> {
 
     /** the source of data for this TableModel, which may or may not be {@link #swingThreadSource} */
     protected EventList<E> source;
@@ -63,17 +63,14 @@ public class DefaultEventTableModel<E> extends AbstractTableModel implements Lis
     }
 
     /**
-     * Gets the Table Format.
+     * {@inheritDoc}
      */
     public TableFormat<? super E> getTableFormat() {
         return tableFormat;
     }
+
     /**
-     * Sets the {@link TableFormat} that will extract column data from each
-     * element. This has some very important consequences. Any cell selections
-     * will be lost - this is due to the fact that the TableFormats may have
-     * different numbers of columns, and JTable has no event to specify columns
-     * changing without rows.
+     * {@inheritDoc}
      */
     public void setTableFormat(TableFormat<? super E> tableFormat) {
         this.tableFormat = tableFormat;
@@ -82,12 +79,7 @@ public class DefaultEventTableModel<E> extends AbstractTableModel implements Lis
     }
 
     /**
-     * Retrieves the value at the specified location from the table.
-     *
-     * <p>This may be used by renderers to paint the cells of a row differently
-     * based on the entire value for that row.
-     *
-     * @see #getValueAt(int,int)
+     * {@inheritDoc}
      */
     public E getElementAt(int index) {
         source.getReadWriteLock().readLock().lock();
@@ -251,20 +243,7 @@ public class DefaultEventTableModel<E> extends AbstractTableModel implements Lis
     }
 
     /**
-     * Releases the resources consumed by this {@link DefaultEventTableModel} so that it
-     * may eventually be garbage collected.
-     *
-     * <p>An {@link DefaultEventTableModel} will be garbage collected without a call to
-     * {@link #dispose()}, but not before its source {@link EventList} is garbage
-     * collected. By calling {@link #dispose()}, you allow the {@link DefaultEventTableModel}
-     * to be garbage collected before its source {@link EventList}. This is
-     * necessary for situations where an {@link DefaultEventTableModel} is short-lived but
-     * its source {@link EventList} is long-lived.
-     *
-     * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
-     * to call any method on an {@link DefaultEventTableModel} after it has been disposed.
-     * As such, this {@link DefaultEventTableModel} should be detached from its
-     * corresponding Component <strong>before</strong> it is disposed.
+     * {@inheritDoc}
      */
     public void dispose() {
         source.removeListEventListener(this);

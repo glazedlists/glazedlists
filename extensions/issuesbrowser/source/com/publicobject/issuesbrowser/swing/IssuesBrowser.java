@@ -54,10 +54,10 @@ public class IssuesBrowser implements Runnable {
     private FilterPanel filterPanel = new FilterPanel(issuesEventList);
 
     /** the currently selected issues */
-    private EventSelectionModel<Issue> issuesSelectionModel;
+    private AdvancedListSelectionModel<Issue> issuesSelectionModel;
 
     /** the TableModel containing the filtered and sorted issues */
-    private EventTableModel<Issue> issuesTableModel;
+    private AdvancedTableModel<Issue> issuesTableModel;
 
     /** the currently selected issue for which the details are displayed */
     private Issue descriptionIssue;
@@ -144,16 +144,16 @@ public class IssuesBrowser implements Runnable {
         FilterList<Issue> filteredIssues = new FilterList<Issue>(issuesSortedList, filterPanel.getMatcherEditor());
 
         SeparatorList<Issue> separatedIssues = new SeparatorList<Issue>(filteredIssues, GlazedLists.beanPropertyComparator(Issue.class, "subcomponent"), 0, Integer.MAX_VALUE);
-
+        EventList<Issue> separatedIssuesProxyList = GlazedListsSwing.swingThreadProxyList(separatedIssues);
         // build the issues table
-        issuesTableModel = new EventTableModel<Issue>(separatedIssues, new IssueTableFormat());
-        final TableColumnModel issuesTableColumnModel = new EventTableColumnModel(new BasicEventList<TableColumn>());
+        issuesTableModel = GlazedListsSwing.eventTableModel(separatedIssuesProxyList, new IssueTableFormat());
+        final TableColumnModel issuesTableColumnModel = new EventTableColumnModel<TableColumn>(new BasicEventList<TableColumn>());
         JSeparatorTable issuesJTable = new JSeparatorTable(issuesTableModel, issuesTableColumnModel);
         issuesJTable.setAutoCreateColumnsFromModel(true);
 
         issuesJTable.setSeparatorRenderer(new IssueSeparatorTableCell(separatedIssues));
         issuesJTable.setSeparatorEditor(new IssueSeparatorTableCell(separatedIssues));
-        issuesSelectionModel = new EventSelectionModel<Issue>(separatedIssues);
+        issuesSelectionModel = GlazedListsSwing.eventSelectionModel(separatedIssuesProxyList);
         issuesSelectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE); // multi-selection best demos our awesome selection management
         issuesSelectionModel.addListSelectionListener(new IssuesSelectionListener());
         issuesJTable.setSelectionModel(issuesSelectionModel);
