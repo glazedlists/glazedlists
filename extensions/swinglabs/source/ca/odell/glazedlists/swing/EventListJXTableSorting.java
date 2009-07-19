@@ -77,14 +77,18 @@ public class EventListJXTableSorting {
     /** whether to sort multiple columns at a time */
     private boolean multipleColumnSort = false;
 
+    /** comparator to use, if there are no sort keys.*/
+    private final Comparator defaultComparator;
+
     /**
      * Usually, constructors shouldn't supposed to have side-effects, but this one
      * changes the table's filter pipeline. Therefore we use this private
      * constructor and call through it from the {@link #install} method.
      */
-    private EventListJXTableSorting(JXTable table, SortedList sortedList) {
+    private EventListJXTableSorting(JXTable table, SortedList sortedList, Comparator defaultComparator) {
         this.table = table;
         this.sortedList = sortedList;
+        this.defaultComparator = defaultComparator;
         this.originalFilterPipeline = table.getFilters();
 
         this.sortController = new EventListSortController();
@@ -93,11 +97,20 @@ public class EventListJXTableSorting {
     }
 
     /**
-     * Install this {@link EventListJXTableSorting} to provide the sorting
-     * behaviour for the specified {@link JXTable}.
+     * Install this {@link EventListJXTableSorting} to provide the sorting behaviour for the
+     * specified {@link JXTable}. No comparator is used, when there are no sort keys.
      */
     public static EventListJXTableSorting install(JXTable table, SortedList sortedList) {
-        return new EventListJXTableSorting(table, sortedList);
+        return install(table, sortedList, null);
+    }
+
+    /**
+     * Install this {@link EventListJXTableSorting} to provide the sorting behaviour for the
+     * specified {@link JXTable}. Optionally, a default comparator can be specified, which is
+     * used, when there are no sort keys.
+     */
+    public static EventListJXTableSorting install(JXTable table, SortedList sortedList, Comparator defaultComparator) {
+        return new EventListJXTableSorting(table, sortedList, defaultComparator);
     }
 
     /**
@@ -119,7 +132,8 @@ public class EventListJXTableSorting {
     }
 
     /**
-     * Remove this {@link EventListJXTableSorting} from the {@link JXTable}.
+     * Remove this {@link EventListJXTableSorting} from the {@link JXTable} and restores the
+     * original filter pipeline.
      */
     public void uninstall() {
         table.setFilters(originalFilterPipeline);
@@ -201,7 +215,7 @@ public class EventListJXTableSorting {
             // figure out the final comparator
             final Comparator comparator;
             if(comparators.isEmpty()) {
-                comparator = null;
+                comparator = defaultComparator;
             } else if(comparators.size() == 1) {
                 comparator = comparators.get(0);
             } else {
