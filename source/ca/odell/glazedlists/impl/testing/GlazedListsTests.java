@@ -3,13 +3,14 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.testing;
 
-import java.io.*;
-import java.util.*;
-
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FunctionList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.Matcher;
+
+import java.io.*;
+import java.util.*;
 
 /**
  * A factory class useful for testing!
@@ -20,7 +21,7 @@ public class GlazedListsTests {
 
     private static final Comparator<String> FIRST_LETTER_COMPARATOR = new FirstLetterComparator();
     private static final Comparator<String> LAST_LETTER_COMPARATOR = new LastLetterComparator();
-
+    private static final FunctionList.Function<String, String> FIRST_LETTER_FUNCTION = new FirstLetterFunction();
     /**
      * A dummy constructor to prevent instantiation of this class
      */
@@ -182,6 +183,17 @@ public class GlazedListsTests {
             return a[index] - b[index];
         }
     }
+
+    public static FunctionList.Function<String, String> getFirstLetterFunction() {
+        return FIRST_LETTER_FUNCTION;
+    }
+
+    private static final class FirstLetterFunction implements FunctionList.Function<String, String> {
+        public String evaluate(String sourceValue) {
+            return String.valueOf(sourceValue.charAt(0));
+        }
+    }
+
 
     public static Date createDate(int year, int month, int date) {
         Calendar cal = Calendar.getInstance();

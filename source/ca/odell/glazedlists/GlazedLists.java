@@ -3,9 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import java.beans.PropertyChangeEvent;
-import java.util.*;
-
+import ca.odell.glazedlists.FunctionList.Function;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.TableFormat;
@@ -19,6 +17,9 @@ import ca.odell.glazedlists.impl.sort.*;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.Matchers;
+
+import java.beans.PropertyChangeEvent;
+import java.util.*;
 
 /**
  * A factory for creating all sorts of objects to be used with Glazed Lists.
@@ -429,6 +430,26 @@ public final class GlazedLists {
      */
     public static <E> TransformedList<E, E> threadSafeList(EventList<E> source) {
         return new ThreadSafeList<E>(source);
+    }
+
+    /**
+     * Returns a {@link TransformedList} that maps each element of the source list to a target
+     * element by use of a specified {@link Function}.
+     * <p>
+     * <strong><font color="#FF0000">Warning:</font></strong> The returned {@link EventList} is
+     * thread ready but not thread safe. See {@link EventList} for an example of thread safe
+     * code.
+     * <p>
+     * <strong><font color="#FF0000">Warning:</font></strong>This method will
+     * <strong>not</strong> return a full-featured {@link FunctionList}, but a much simpler
+     * list implementation, that is not writable.
+     *
+     * @param source the source list to transform
+     * @param function the function to tranform each list element
+     * @return a {@link TransformedList} that needs to be disposed after use
+     */
+    public static <S, E> TransformedList<S, E> transformByFunction(EventList<S> source, Function<S, E> function) {
+        return new SimpleFunctionList<S, E>(source, function);
     }
 
     /**
