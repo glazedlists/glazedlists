@@ -327,8 +327,8 @@
              this code through our Java 1.5 to Java 1.4 source code translator -->
         <mkdir dir="extensions/swinglabs/lib"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
-            <classpath path="${classes.dir}"/>
-            <arg value="https://glazedlists.dev.java.net/files/documents/1073/92328/swingx.jar"/>
+            <classpath path="${classes.dir}"/>        	
+            <arg value="https://glazedlists.dev.java.net/files/documents/1073/139214/swingx.jar"/>
             <arg value="extensions/swinglabs/lib/swingx.jar"/>
         </java>
         <javac destdir="${classes.dir}" srcdir="extensions/swinglabs/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
