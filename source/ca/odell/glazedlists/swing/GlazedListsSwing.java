@@ -90,6 +90,23 @@ public final class GlazedListsSwing {
     }
 
     /**
+     * Creates a new table model that extracts column data from the given <code>source</code>
+     * using the the given <code>tableFormat</code>. This method wraps the source list using
+     * GlazedListsSwing#swingThreadProxyList(EventList).
+     * <p>
+     * The returned table model is <strong>not thread-safe</strong>. Unless otherwise noted, all
+     * methods are only safe to be called from the event dispatch thread.
+     * </p>
+     *
+     * @param source the EventList that provides the row objects
+     * @param tableFormat the object responsible for extracting column data from the row objects
+     */
+    public static <E> AdvancedTableModel<E> eventTableModelWithThreadProxyList(EventList<E> source, TableFormat<? super E> tableFormat) {
+        final EventList<E> proxySource = createSwingThreadProxyList(source);
+        return new DefaultEventTableModel<E>(proxySource, true, tableFormat);
+    }
+
+    /**
      * Creates a new table model that renders the specified list with an automatically
      * generated {@link TableFormat}. It uses JavaBeans and reflection to create
      * a {@link TableFormat} as specified.
@@ -120,6 +137,35 @@ public final class GlazedListsSwing {
         return eventTableModel(source, GlazedLists.tableFormat(propertyNames, columnLabels, writable));
     }
 
+    /**
+     * Creates a new table model that renders the specified list with an automatically
+     * generated {@link TableFormat}. It uses JavaBeans and reflection to create
+     * a {@link TableFormat} as specified. This method wraps the source list using
+     * GlazedListsSwing#swingThreadProxyList(EventList).
+     *
+     * <p>Note that classes that will be obfuscated may not work with
+     * reflection. In this case, implement a {@link TableFormat} manually.</p>
+     *
+     * <p>The returned table model is <strong>not thread-safe</strong>. Unless otherwise
+     * noted, all methods are only safe to be called from the event dispatch thread.<p>
+     *
+     * @param source the EventList that provides the row objects
+     * @param propertyNames an array of property names in the JavaBeans format.
+     *      For example, if your list contains Objects with the methods getFirstName(),
+     *      setFirstName(String), getAge(), setAge(Integer), then this array should
+     *      contain the two strings "firstName" and "age". This format is specified
+     *      by the JavaBeans {@link java.beans.PropertyDescriptor}.
+     * @param columnLabels the corresponding column names for the listed property
+     *      names. For example, if your columns are "firstName" and "age", then
+     *      your labels might be "First Name" and "Age".
+     * @param writable an array of booleans specifying which of the columns in
+     *      your table are writable.
+     *
+     */
+    public static <E> AdvancedTableModel<E> eventTableModelWithThreadProxyList(EventList<E> source, String[] propertyNames, String[] columnLabels, boolean[] writable) {
+        return eventTableModelWithThreadProxyList(source, GlazedLists.tableFormat(propertyNames, columnLabels, writable));
+    }
+
     // ListSelectionModel convenience creators
 
     /**
@@ -143,4 +189,106 @@ public final class GlazedListsSwing {
     public static <E> AdvancedListSelectionModel<E> eventSelectionModel(EventList<E> source) {
         return new DefaultEventSelectionModel<E>(source);
     }
+
+    /**
+     * Creates a new selection model that also presents a list of the selection. It wraps the
+     * source list using GlazedListsSwing#swingThreadProxyList(EventList). The
+     * {@link AdvancedListSelectionModel} listens to this {@link EventList} in order to adjust
+     * selection when the {@link EventList} is modified. For example, when an element is added to
+     * the {@link EventList}, this may offset the selection of the following elements.
+     * <p>
+     * The returned selection model is <strong>not thread-safe</strong>. Unless otherwise noted,
+     * all methods are only safe to be called from the event dispatch thread.
+     * </p>
+     *
+     * @param source the {@link EventList} whose selection will be managed. This should be the
+     *            same {@link EventList} passed to the constructor of your
+     *            {@link AdvancedTableModel} or {@link EventListModel}.
+     */
+    public static <E> AdvancedListSelectionModel<E> eventSelectionModelWithThreadProxyList(EventList<E> source) {
+        final EventList<E> proxySource = createSwingThreadProxyList(source);
+        return new DefaultEventSelectionModel<E>(proxySource, true);
+    }
+
+    // EventListModel convenience creators
+
+    /**
+     * Creates a new list model that contains all objects located in the given
+     * <code>source</code> and reacts to any changes in the given <code>source</code>.
+     *
+     * <p>The returned selection model is <strong>not thread-safe</strong>. Unless otherwise
+     * noted, all methods are only safe to be called from the event dispatch thread.
+     * To do this programmatically, use {@link SwingUtilities#invokeAndWait(Runnable)} and
+     * wrap the source list (or some part of the source list's pipeline) using
+     * GlazedListsSwing#swingThreadProxyList(EventList).
+     * </p>
+     *
+     * @param source the EventList that provides the elements
+     */
+    public static <E> DefaultEventListModel<E> eventListModel(EventList<E> source) {
+        return new DefaultEventListModel<E>(source);
+    }
+
+    /**
+     * Creates a new list model that contains all objects located in the given
+     * <code>source</code> and reacts to any changes in the given <code>source</code>.
+     *
+     * <p>The returned selection model is <strong>not thread-safe</strong>. Unless otherwise
+     * noted, all methods are only safe to be called from the event dispatch thread.
+     * </p>
+     *
+     * @param source the EventList that provides the elements
+     */
+    public static <E> DefaultEventListModel<E> eventListModelWithThreadProxyList(EventList<E> source) {
+        final EventList<E> proxySource = createSwingThreadProxyList(source);
+        return new DefaultEventListModel<E>(proxySource, true);
+    }
+
+    // EventComboBoxModel convenience creators
+
+    /**
+     * Creates a new combobox model that contains all objects located in the given
+     * <code>source</code> and reacts to any changes in the given <code>source</code>.
+     *
+     * <p>The returned combobox model is <strong>not thread-safe</strong>. Unless otherwise
+     * noted, all methods are only safe to be called from the event dispatch thread.
+     * To do this programmatically, use {@link SwingUtilities#invokeAndWait(Runnable)} and
+     * wrap the source list (or some part of the source list's pipeline) using
+     * GlazedListsSwing#swingThreadProxyList(EventList).
+     * </p>
+     *
+     * @param source the EventList that provides the elements
+     */
+    public static <E> DefaultEventComboBoxModel<E> eventComboBoxModel(EventList<E> source) {
+        return new DefaultEventComboBoxModel<E>(source);
+    }
+
+    /**
+     * Creates a new combobox model that contains all objects located in the given
+     * <code>source</code> and reacts to any changes in the given <code>source</code>.
+     *
+     * <p>The returned combobox model is <strong>not thread-safe</strong>. Unless otherwise
+     * noted, all methods are only safe to be called from the event dispatch thread.
+     * </p>
+     *
+     * @param source the EventList that provides the elements
+     */
+    public static <E> DefaultEventComboBoxModel<E> eventComboBoxModelWithThreadProxyList(EventList<E> source) {
+        final EventList<E> proxySource = createSwingThreadProxyList(source);
+        return new DefaultEventComboBoxModel<E>(proxySource, true);
+    }
+
+    /** Helper method to create a SwingThreadProxyList with read locks. */
+    private static <E> EventList<E> createSwingThreadProxyList(EventList<E> source) {
+        final EventList<E> result;
+        source.getReadWriteLock().readLock().lock();
+        try {
+            result = GlazedListsSwing.swingThreadProxyList(source);
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
+        }
+        return result;
+    }
+
+
 }

@@ -36,6 +36,24 @@ public class DefaultEventComboBoxModelTest extends SwingTestCase {
     }
 
     /**
+     * Verifies that factory method for creating model with thread proxy list works.
+     */
+    public void testOnMainThreadNoEDTViolation() {
+        EventList<Color> colors = new BasicEventList<Color>();
+        colors.add(Color.RED);
+        colors.add(Color.GREEN);
+
+        final DefaultEventComboBoxModel<Color> comboModel = GlazedListsSwing.eventComboBoxModelWithThreadProxyList(colors);
+        assertEquals(2, comboModel.getSize());
+        try {
+            colors.add(Color.BLUE);
+        } catch (IllegalStateException ex) {
+            fail("failed to proxy source list with ThreadProxyList");
+        }
+        comboModel.dispose();
+    }
+
+    /**
      * Verifies the selected item.
      */
     public void guiTestSelectedItem() {

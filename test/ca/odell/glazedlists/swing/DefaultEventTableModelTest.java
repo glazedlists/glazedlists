@@ -51,6 +51,25 @@ public class DefaultEventTableModelTest extends SwingTestCase {
     }
 
     /**
+     * Verifies that factory method for creating table with thread proxy list works.
+     */
+    public void testOnMainThreadNoEDTViolation() {
+        EventList<Color> colors = new BasicEventList<Color>();
+        colors.add(Color.RED);
+        colors.add(Color.GREEN);
+
+        final TableFormat<Color> colorTableFormat = GlazedLists.tableFormat(new String[] { "red", "green", "blue" }, new String[] { "Red", "Green", "Blue" });
+        final AdvancedTableModel<Color> tableModel = GlazedListsSwing.eventTableModelWithThreadProxyList(colors, colorTableFormat);
+        assertEquals(2, tableModel.getRowCount());
+        try {
+            colors.add(Color.BLUE);
+        } catch (IllegalStateException ex) {
+            fail("failed to proxy source list with ThreadProxyList");
+        }
+        tableModel.dispose();
+    }
+
+    /**
      * Verifies that the new getElementAt() method of EventTableModel works.
      */
     public void guiTestGetElementAt() {

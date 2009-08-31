@@ -42,6 +42,9 @@ public class DefaultEventListModel<E> implements ListEventListener<E>, ListModel
     /** the source EventList */
     protected EventList<E> source;
 
+    /** indicator to dispose source list */
+    private boolean disposeSource;
+
     /** whom to notify of data changes */
     private final List<ListDataListener> listeners = new ArrayList<ListDataListener>();
 
@@ -52,9 +55,25 @@ public class DefaultEventListModel<E> implements ListEventListener<E>, ListModel
      * Creates a new model that contains all objects located in the given
      * <code>source</code> and reacts to any changes in the given
      * <code>source</code>.
+     *
+     * @param source the EventList that provides the elements
      */
     public DefaultEventListModel(EventList<E> source) {
+        this(source, false);
+    }
+
+    /**
+     * Creates a new model that contains all objects located in the given
+     * <code>source</code> and reacts to any changes in the given
+     * <code>source</code>.
+     *
+     * @param source the EventList that provides the elements
+     * @param diposeSource <code>true</code> if the source list should be disposed when disposing
+     *            this model, <code>false</code> otherwise
+     */
+    DefaultEventListModel(EventList<E> source, boolean disposeSource) {
         this.source = source;
+        this.disposeSource = disposeSource;
         this.source.addListEventListener(this);
     }
 
@@ -174,6 +193,7 @@ public class DefaultEventListModel<E> implements ListEventListener<E>, ListModel
      */
     public void dispose() {
         source.removeListEventListener(this);
+        if (disposeSource) source.dispose();
         // this encourages exceptions to be thrown if this model is incorrectly accessed again
         source = null;
     }

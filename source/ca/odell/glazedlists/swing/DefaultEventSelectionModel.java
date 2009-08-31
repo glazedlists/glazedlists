@@ -60,6 +60,9 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
     /** the source event list. */
     private EventList<E> source;
 
+    /** indicator to dispose source list */
+    private boolean disposeSource;
+
     /** whether the user can modify the selection */
     private boolean enabled = true;
 
@@ -84,11 +87,27 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
      *      {@link DefaultEventTableModel} or {@link DefaultEventListModel}.
      */
     public DefaultEventSelectionModel(EventList<E> source) {
+        this(source, false);
+    }
+
+    /**
+     * Creates a new selection model that also presents a list of the selection. The
+     * {@link DefaultEventSelectionModel} listens to this {@link EventList} in order to adjust
+     * selection when the {@link EventList} is modified. For example, when an element is added to
+     * the {@link EventList}, this may offset the selection of the following elements.
+     *
+     * @param source the {@link EventList} whose selection will be managed. This should be the
+     *            same {@link EventList} passed to the constructor of your
+     *            {@link DefaultEventTableModel} or {@link DefaultEventListModel}.
+     * @param diposeSource <code>true</code> if the source list should be disposed when disposing
+     *            this model, <code>false</code> otherwise
+     */
+    DefaultEventSelectionModel(EventList<E> source, boolean disposeSource) {
         // lock the source list for reading since we want to prevent writes
         // from occurring until we fully initialize this EventSelectionModel
         source.getReadWriteLock().readLock().lock();
         try {
-        	this.source = source;
+            this.source = source;
 
             // build a list for reading the selection
             this.listSelection = new ListSelection<E>(source);
@@ -96,7 +115,9 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
         } finally {
             source.getReadWriteLock().readLock().unlock();
         }
+        this.disposeSource = disposeSource;
     }
+
 
     /**
      * {@inheritDoc}
@@ -435,5 +456,6 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
      */
     public void dispose() {
         listSelection.dispose();
+        if (disposeSource) source.dispose();
     }
 }

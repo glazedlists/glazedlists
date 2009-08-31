@@ -37,6 +37,24 @@ public class DefaultEventListModelTest extends SwingTestCase {
     }
 
     /**
+     * Verifies that the factory method for model creation with thread proxy list works.
+     */
+    public void testOnMainThreadNoEDTViolation() {
+        EventList<Color> colors = new BasicEventList<Color>();
+        colors.add(Color.RED);
+        colors.add(Color.GREEN);
+
+        final DefaultEventListModel<Color> listModel = GlazedListsSwing.eventListModelWithThreadProxyList(colors);
+        assertEquals(2, listModel.getSize());
+        try {
+            colors.add(Color.BLUE);
+        } catch (IllegalStateException ex) {
+            fail("failed to proxy source list with ThreadProxyList");
+        }
+        listModel.dispose();
+    }
+
+    /**
      * Verifies that the new getElementAt() method of EventListModel works.
      */
     public void guiTestGetElementAt() {

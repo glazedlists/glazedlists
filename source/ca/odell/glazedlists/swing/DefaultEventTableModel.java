@@ -42,6 +42,9 @@ public class DefaultEventTableModel<E> extends AbstractTableModel implements Adv
     /** the source of data for this TableModel, which may or may not be {@link #swingThreadSource} */
     protected EventList<E> source;
 
+    /** indicator to dispose source list */
+    private boolean disposeSource;
+
     /** specifies how column data is extracted from each row object */
     private TableFormat<? super E> tableFormat;
 
@@ -57,7 +60,22 @@ public class DefaultEventTableModel<E> extends AbstractTableModel implements Adv
      *      from the row objects
      */
     public DefaultEventTableModel(EventList<E> source, TableFormat<? super E> tableFormat) {
+        this(source, false, tableFormat);
+    }
+
+    /**
+     * Creates a new table model that extracts column data from the given
+     * <code>source</code> using the the given <code>tableFormat</code>.
+     *
+     * @param source the EventList that provides the row objects
+     * @param diposeSource <code>true</code> if the source list should be disposed when disposing
+     *            this model, <code>false</code> otherwise
+     * @param tableFormat the object responsible for extracting column data
+     *      from the row objects
+     */
+    DefaultEventTableModel(EventList<E> source, boolean disposeSource, TableFormat<? super E> tableFormat) {
         this.source = source;
+        this.disposeSource = disposeSource;
         this.tableFormat = tableFormat;
         source.addListEventListener(this);
     }
@@ -247,7 +265,7 @@ public class DefaultEventTableModel<E> extends AbstractTableModel implements Adv
      */
     public void dispose() {
         source.removeListEventListener(this);
-
+        if (disposeSource) source.dispose();
         // this encourages exceptions to be thrown if this model is incorrectly accessed again
         source = null;
     }

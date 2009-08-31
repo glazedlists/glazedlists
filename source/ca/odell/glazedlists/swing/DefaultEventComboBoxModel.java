@@ -34,9 +34,23 @@ public class DefaultEventComboBoxModel<E> extends DefaultEventListModel<E> imple
     /**
      * Creates a new combo box model that contains the elements of the given
      * <code>source</code> and tracks further changes made to it.
+     *
+     * @param source the EventList that provides the elements
      */
     public DefaultEventComboBoxModel(EventList<E> source) {
-        super(source);
+        this(source, false);
+    }
+
+    /**
+     * Creates a new combo box model that contains the elements of the given
+     * <code>source</code> and tracks further changes made to it.
+     *
+     * @param source the EventList that provides the elements
+     * @param diposeSource <code>true</code> if the source list should be disposed when disposing
+     *            this model, <code>false</code> otherwise
+     */
+    DefaultEventComboBoxModel(EventList<E> source, boolean disposeSource) {
+        super(source, disposeSource);
     }
 
     /**
