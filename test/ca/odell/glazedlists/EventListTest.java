@@ -3,22 +3,19 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
-import junit.framework.TestCase;
-
 import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import ca.odell.glazedlists.matchers.Matchers;
+import ca.odell.glazedlists.util.concurrent.LockFactory;
+import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
+
+import java.util.*;
+
+import junit.framework.TestCase;
 
 /**
  * Verifies that EventList matches the List API.
@@ -328,16 +325,16 @@ public class EventListTest extends TestCase {
     }
 
     /**
-     * Test that the {@link GlazedLists#eventListOf(Object[])} factory
+     * Test that the {@link GlazedLists#eventListOf(Object...)} factory
      * method works.
      */
     public void testGlazedListsEventListUsingVarArgs() {
         // make sure they have different backing stores
-        EventList<String> eventList = GlazedLists.eventListOf("A", "B");
+        final EventList<String> eventList = GlazedLists.eventListOf("A", "B");
         assertEquals(Arrays.asList("A", "B"), eventList);
 
         // make sure null is supported
-        EventList<String> empty = GlazedLists.eventListOf((String[]) null);
+        final EventList<String> empty = GlazedLists.eventListOf((String[]) null);
         assertEquals(Collections.EMPTY_LIST, empty);
     }
 
@@ -349,7 +346,7 @@ public class EventListTest extends TestCase {
      */
     public void testGlazedListsEventList() {
         // make sure they have different backing stores
-        List<String> list = new ArrayList<String>();
+        final List<String> list = new ArrayList<String>();
         EventList<String> eventList = GlazedLists.eventList(list);
         assertEquals(list, eventList);
 
@@ -360,8 +357,56 @@ public class EventListTest extends TestCase {
         assertTrue(!list.equals(eventList));
 
         // make sure null is supported
-        EventList<String> empty = GlazedLists.eventList((Collection) null);
+        final EventList<String> empty = GlazedLists.eventList((Collection<String>) null);
         assertEquals(Collections.EMPTY_LIST, empty);
+    }
+
+    /**
+     * Test that the
+     * {@link GlazedLists#eventListOf(ListEventPublisher, ReadWriteLock, Object...)} factory
+     * method works.
+     */
+    public void testGlazedListsEventListUsingVarArgsAndPublisherLock() {
+        // make sure they have different backing stores
+        final ListEventPublisher publisher = ListEventAssembler.createListEventPublisher();
+        final ReadWriteLock lock = LockFactory.DEFAULT.createReadWriteLock();
+        final EventList<String> eventList = GlazedLists.eventListOf(publisher, lock, "A", "B");
+        assertEquals(Arrays.asList("A", "B"), eventList);
+        assertEquals(publisher, eventList.getPublisher());
+        assertEquals(lock, eventList.getReadWriteLock());
+
+        // make sure null is supported
+        final EventList<String> empty = GlazedLists.eventListOf(publisher, lock, (String[]) null);
+        assertEquals(Collections.EMPTY_LIST, empty);
+        assertEquals(publisher, empty.getPublisher());
+        assertEquals(lock, empty.getReadWriteLock());
+    }
+
+    /**
+     * Test that the {@link GlazedLists#eventList(ListEventPublisher, ReadWriteLock, Collection)}
+     * factory method works.
+     */
+    public void testGlazedListsEventListUsingPublisherLock() {
+        // make sure they have different backing stores
+        final List<String> list = new ArrayList<String>();
+        final ListEventPublisher publisher = ListEventAssembler.createListEventPublisher();
+        final ReadWriteLock lock = LockFactory.DEFAULT.createReadWriteLock();
+        final EventList<String> eventList = GlazedLists.eventList(publisher, lock, list);
+        assertEquals(list, eventList);
+        assertEquals(publisher, eventList.getPublisher());
+        assertEquals(lock, eventList.getReadWriteLock());
+
+        list.add("A");
+        assertTrue(!list.equals(eventList));
+
+        eventList.add("B");
+        assertTrue(!list.equals(eventList));
+
+        // make sure null is supported
+        final EventList<String> empty = GlazedLists.eventList(publisher, lock, (Collection<String>) null);
+        assertEquals(Collections.EMPTY_LIST, empty);
+        assertEquals(publisher, empty.getPublisher());
+        assertEquals(lock, empty.getReadWriteLock());
     }
 
     /**

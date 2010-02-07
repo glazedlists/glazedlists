@@ -5,6 +5,7 @@ package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.FunctionList.Function;
 import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
@@ -17,6 +18,7 @@ import ca.odell.glazedlists.impl.sort.*;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.Matchers;
+import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 import java.beans.PropertyChangeEvent;
 import java.util.*;
@@ -363,6 +365,9 @@ public final class GlazedLists {
 
     /**
      * Creates a new {@link EventList} which contains the given elements.
+     *
+     * @param contents the list elements, if <code>null</code> the result will be an empty list
+     * @return the new {@link EventList}
      */
     public static <E> EventList<E> eventListOf(E... contents) {
         return eventList(contents == null ? Collections.<E>emptyList() : Arrays.asList(contents));
@@ -372,10 +377,47 @@ public final class GlazedLists {
      * Creates a new {@link EventList} which contains the contents of the specified
      * {@link Collection}. The {@link EventList}'s order will be determined by
      * {@link Collection#iterator() contents.iterator()}.
+     *
+     * @param contents the collection with list elements, if <code>null</code> the result will be
+     *            an empty list
      */
     public static <E> EventList<E> eventList(Collection<? extends E> contents) {
         final EventList<E> result = new BasicEventList<E>(contents == null ? 0 : contents.size());
         if(contents != null) result.addAll(contents);
+        return result;
+    }
+
+    /**
+     * Creates a new {@link EventList} with the given {@link ListEventPublisher} and
+     * {@link ReadWriteLock} which contains the given elements.
+     *
+     * @param publisher the {@link ListEventPublisher} for the new list, may be <code>null</code>
+     * @param lock the {@link ReadWriteLock} for the new list, may be <code>null</code>
+     * @param contents the list elements, if <code>null</code> the result will be an empty list
+     * @return the new {@link EventList}
+     */
+    public static <E> EventList<E> eventListOf(ListEventPublisher publisher, ReadWriteLock lock,
+            E... contents) {
+        return eventList(publisher, lock, contents == null ? Collections.<E>emptyList() : Arrays
+                .asList(contents));
+    }
+
+    /**
+     * Creates a new {@link EventList} with the given {@link ListEventPublisher} and
+     * {@link ReadWriteLock} which contains the contents of the specified
+     * {@link Collection}. The {@link EventList}'s order will be determined by
+     * {@link Collection#iterator() contents.iterator()}.
+     *
+     * @param publisher the {@link ListEventPublisher} for the new list, may be <code>null</code>
+     * @param lock the {@link ReadWriteLock} for the new list, may be <code>null</code>
+     * @param contents the collection with list elements, if <code>null</code> the result will be
+     *            an empty list
+     */
+    public static <E> EventList<E> eventList(ListEventPublisher publisher, ReadWriteLock lock,
+            Collection<? extends E> contents) {
+        final EventList<E> result = new BasicEventList<E>(
+                contents == null ? 0 : contents.size(), publisher, lock);
+        if (contents != null) result.addAll(contents);
         return result;
     }
 
