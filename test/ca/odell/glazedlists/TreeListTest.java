@@ -1,12 +1,12 @@
 package ca.odell.glazedlists;
 
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+
 import java.lang.reflect.Method;
 import java.util.*;
 
 import junit.framework.TestCase;
-
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
-import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 
 /**
  * Verifies that TreeList behaves as expected.
@@ -121,6 +121,29 @@ public class TreeListTest extends TestCase {
         assertEquals(13, treeList.size());
         source.remove("ABEFH");
         assertEquals(12, treeList.size());
+    }
+
+    /** Test for <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=489">bug 489</a> */
+    public void testDeletionIssues_FixMe() {
+        EventList<String> source = new BasicEventList<String>();
+        TreeList<String> treeList = new TreeList<String>(source,
+                COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.NODES_START_EXPANDED);
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener
+                .install(treeList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        source.add("A");
+        source.add("AB");
+        assertTreeStructure(treeList, new String[] {"A", "AB",});
+
+        source.add(0, "A");
+        assertTreeStructure(treeList, new String[] {"A", "A", "AB",});
+        source.remove(0);
+        assertTreeStructure(treeList, new String[] {"A", "AB",});
+        source.set(1, "AB");
+
+        assertTreeStructure(treeList, new String[] {"A", "AB",});
+
     }
 
     public void testSubtreeSize() {

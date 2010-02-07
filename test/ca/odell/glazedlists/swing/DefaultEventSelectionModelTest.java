@@ -441,7 +441,7 @@ public class DefaultEventSelectionModelTest extends SwingTestCase {
             return element.equals("zero");
         }
 
-        public Comparator<? extends String> getComparator(int depth) {
+        public Comparator<? super String> getComparator(int depth) {
             return null;
         }
 
