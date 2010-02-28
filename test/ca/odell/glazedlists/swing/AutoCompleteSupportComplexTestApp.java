@@ -53,6 +53,17 @@ public class AutoCompleteSupportComplexTestApp {
         }
     }
 
+    private static final class UrlListCellRenderer extends JLabel implements ListCellRenderer {
+        public Component getListCellRendererComponent(JList list, Object value, int index,
+                boolean isSelected, boolean cellHasFocus) {
+            if (value instanceof Url) {
+                setText("URL:" + ((Url) value).getLocation());
+            }
+            System.out.println("renderer called for " + index);
+            return this;
+        }
+    }
+
     private static final AutoCompleteSupportComplexTestApp.Url[] URL_SAMPLE_DATA = {
         new AutoCompleteSupportComplexTestApp.Url("http://mail.google.com/mail/"),
         new AutoCompleteSupportComplexTestApp.Url("http://slashdot.org/"),
@@ -201,11 +212,13 @@ public class AutoCompleteSupportComplexTestApp {
 
         autocompleteActionList.setPrototypeCellValue("100: http://java.sun.com/j2se/1.5.0/download.jsp");
         autocompleteActionList.setPreferredSize(new Dimension(autocompleteActionList.getPreferredSize().width, 600));
+        autoCompleteComboBox.setRenderer(new UrlListCellRenderer());
         autoCompleteComboBox.addActionListener(new AutoCompleteSupportComplexTestApp.RecordActionHandler(autocompleteActionListModel));
         autocompleteActionPanel = createActionPanel("AutoComplete ActionEvent Log", autocompleteActionList);
 
         regularActionList.setPrototypeCellValue("100: http://java.sun.com/j2se/1.5.0/download.jsp");
         regularActionList.setPreferredSize(new Dimension(regularActionList.getPreferredSize().width, 600));
+        regularComboBox.setRenderer(new UrlListCellRenderer());
         regularComboBox.addActionListener(new AutoCompleteSupportComplexTestApp.RecordActionHandler(regularActionListModel));
         regularActionPanel = createActionPanel("Normal ActionEvent Log", regularActionList);
 

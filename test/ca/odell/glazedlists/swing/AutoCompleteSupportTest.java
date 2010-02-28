@@ -13,6 +13,9 @@ import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.FieldPosition;
+import java.text.Format;
+import java.text.ParsePosition;
 
 import javax.swing.*;
 import javax.swing.event.DocumentListener;
@@ -32,6 +35,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         final ComboBoxUI originalUI = combo.getUI();
         final ComboBoxModel originalModel = combo.getModel();
         final boolean originalEditable = combo.isEditable();
+        final ListCellRenderer originalRenderer = combo.getRenderer();
         final ComboBoxEditor originalEditor = combo.getEditor();
         final int originalEditorKeyListenerCount = originalEditor.getEditorComponent().getKeyListeners().length;
         final AbstractDocument originalEditorDocument = (AbstractDocument) ((JTextField) combo.getEditor().getEditorComponent()).getDocument();
@@ -50,9 +54,10 @@ public class AutoCompleteSupportTest extends SwingTestCase {
 
         JTextField currentEditor = ((JTextField) combo.getEditor().getEditorComponent());
         AbstractDocument currentEditorDocument = (AbstractDocument) currentEditor.getDocument();
-
+        ListCellRenderer currentRenderer = combo.getRenderer();
         assertSame(originalUI, combo.getUI());
         assertSame(currentEditorDocument, originalEditorDocument);
+        assertSame(originalRenderer, currentRenderer);
         assertNotSame(originalEditor, combo.getEditor());
         assertNotSame(originalModel, combo.getModel());
         assertEquals(!originalEditable, combo.isEditable());
@@ -86,11 +91,12 @@ public class AutoCompleteSupportTest extends SwingTestCase {
 
         currentEditor = ((JTextField) combo.getEditor().getEditorComponent());
         currentEditorDocument = (AbstractDocument) currentEditor.getDocument();
-
+        currentRenderer = combo.getRenderer();
         assertSame(originalUI, combo.getUI());
         assertSame(originalModel, combo.getModel());
         assertEquals(originalEditable, combo.isEditable());
         assertSame(originalEditor, combo.getEditor());
+        assertSame(originalRenderer, currentRenderer);
         assertSame(originalEditorDocument, currentEditorDocument);
         assertSame(currentEditorDocument.getDocumentFilter(), null);
         assertEquals(originalComboBoxPropertyChangeListenerCount, combo.getPropertyChangeListeners().length);
@@ -139,6 +145,34 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         } catch (IllegalArgumentException e) {
             // expected
         }
+    }
+
+    /**
+     * Tests that a custom renderer gets not overwritten, when a format is specified.
+     */
+    public void guiTestRenderer() {
+        final JComboBox combo = new JComboBox();
+        final ListCellRenderer renderer = new NoopListCellRenderer();
+        combo.setRenderer(renderer);
+        final EventList<Object> items = new BasicEventList<Object>();
+        items.add("First");
+        items.add("Second");
+        final AutoCompleteSupport support = AutoCompleteSupport.install(combo, items, null, new Format() {
+            @Override
+            public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
+                toAppendTo.append("item");
+                toAppendTo.append(obj);
+                return toAppendTo;
+            }
+
+            @Override
+            public Object parseObject(String source, ParsePosition pos) {
+                return source.substring(4);
+            }
+        });
+        assertSame(renderer, combo.getRenderer());
+        support.uninstall();
+        assertSame(renderer, combo.getRenderer());
     }
 
     public void guiTestChangeModel() {
@@ -948,6 +982,14 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         public void selectAll() { }
         public void addActionListener(ActionListener l) { }
         public void removeActionListener(ActionListener l) { }
+    }
+
+    private static class NoopListCellRenderer extends DefaultListCellRenderer {
+        @Override
+        public Component getListCellRendererComponent(JList list, Object value, int index,
+                boolean isSelected, boolean cellHasFocus) {
+            return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+        }
     }
 
     private static class CountingActionListener implements ActionListener {
