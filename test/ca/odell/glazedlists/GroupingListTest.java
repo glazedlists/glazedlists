@@ -1,12 +1,13 @@
 package ca.odell.glazedlists;
 
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import ca.odell.glazedlists.matchers.Matcher;
+
 import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.TestCase;
-
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
-import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 
 public class GroupingListTest extends TestCase {
 
@@ -284,7 +285,7 @@ public class GroupingListTest extends TestCase {
      * The problem we were seeing is that the GroupingList fires a ListEvent
      * that includes an update to a group at an index that NEVER EXISTED.
      */
-    public void testGroupListMassUpdate_FixMe() {
+    public void testGroupListMassUpdate() {
         BasicEventList<String> sourceList = new BasicEventList<String>();
         sourceList.addAll(GlazedListsTests.delimitedStringToList("A A A A"));
         GroupingList<String> groupList = new GroupingList<String>(sourceList, GlazedListsTests.getFirstLetterComparator());
@@ -534,4 +535,107 @@ public class GroupingListTest extends TestCase {
         assertEquals(2, groupingList.indexOfGroup("Rusty"));
         assertEquals(-1, groupingList.indexOfGroup("Steve"));
     }
+
+    public void testWithFilters() {
+        EventList<String> source = new BasicEventList<String>();
+        FilterList<String> filtered = new FilterList<String>(source);
+        GroupingList<String> grouped = new GroupingList<String>(filtered, GlazedListsTests
+                .getFirstLetterComparator());
+
+        source.addAll(Arrays.asList("CGG"));
+        assertEquals(1, grouped.size());
+
+        filtered.setMatcher(new Matcher<String>() {
+            public boolean matches(String item) {
+                return !item.equals("CGG");
+            }
+        });
+
+        assertEquals(0, grouped.size());
+    }
+
+    /**
+     * This tests a corner case where updates to the first element in a group caused the next
+     * element to be marked as a potential start of a group. This worked fine until we had an
+     * event that actually had an update on that next element - this caused things to go wrong in
+     * the Grouper implementation.
+     * <p>
+     * See issue <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=491">491</a>
+     * </p>
+     */
+    public void testChangeOnFirstAndSecondElement() {
+        TransactionList<String> source = new TransactionList<String>(
+                new BasicEventList<String>());
+
+        GroupingList<String> grouped = new GroupingList<String>(source, GlazedListsTests
+                .getFirstLetterComparator());
+
+        source.add("A1");
+        source.add("A2");
+        source.add("A4");
+
+        assertEquals("[[A1, A2, A4]]", grouped.toString());
+
+        source.beginEvent();
+        source.set(0, "A1");
+        source.set(1, source.get(1));
+        source.add("A5");
+        source.commitEvent();
+
+        assertEquals("[[A1, A2, A4, A5]]", grouped.toString());
+    }
+
+    /**
+     * This tests a corner case that arose from the first attempt at fixing issue <a
+     * href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=491">491</a>
+     */
+    public void testAddOnFirstAndUpdateOnSecondElement() {
+        TransactionList<String> source = new TransactionList<String>(
+                new BasicEventList<String>());
+
+        GroupingList<String> grouped = new GroupingList<String>(source, GlazedListsTests
+                .getFirstLetterComparator());
+
+        source.add("A1");
+        source.add("B1");
+        source.add("B2");
+
+        assertEquals("[[A1], [B1, B2]]", grouped.toString());
+
+        System.out.println("Ready for test");
+
+        source.beginEvent();
+        source.add(1, "A2");
+        source.set(2, source.get(2));
+        source.commitEvent();
+
+        assertEquals("[[A1, A2], [B1, B2]]", grouped.toString());
+
+    }
+
+    /**
+     * Testcase from issue <a
+     * href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=486">486</a>
+     */
+    public void testIssue486() {
+        TransactionList<String> txList = new TransactionList<String>(
+                new BasicEventList<String>());
+
+        new GroupingList<String>(txList);
+
+        txList.beginEvent();
+        txList.add("basket");
+        txList.add("basket");
+        txList.add("basket");
+        txList.add("basket");
+        txList.commitEvent();
+
+        txList.beginEvent();
+        txList.set(0, txList.get(0));
+        txList.set(1, txList.get(1));
+        txList.set(2, txList.get(2));
+        txList.set(3, txList.get(3));
+        txList.commitEvent();
+    }
+
 }

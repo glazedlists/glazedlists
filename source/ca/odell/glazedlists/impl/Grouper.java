@@ -3,12 +3,12 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl;
 
-import java.util.Comparator;
-import java.util.LinkedList;
-
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.impl.adt.Barcode;
+
+import java.util.Comparator;
+import java.util.LinkedList;
 
 /**
  * This helper class manages the groups created by dividing up a
@@ -139,6 +139,7 @@ public class Grouper<E> {
 
         // first pass -> update the barcode and accumulate the type of values removed (UNIQUE or DUPLICATE or UNIQUE_WITH_DUPLICATE)
         final LinkedList removedValues = new LinkedList();
+        int lastFakedUniqueChangeIndex = -1;
         while (listChanges.next()) {
             final int changeIndex = listChanges.getIndex();
             final int changeType = listChanges.getType();
@@ -157,8 +158,21 @@ public class Grouper<E> {
                 // if it really is
                 if (barcode.get(changeIndex) == UNIQUE) {
                     if (changeIndex+1 < barcode.size() && barcode.get(changeIndex+1) == DUPLICATE) {
-                        barcode.set(changeIndex, UNIQUE, 2);
-                        toDoList.set(changeIndex, TODO, 1);
+                        // however, we need to make sure that the barcode UNIQUE entry we are looking at
+                        // was part of the barcode state before we started this iteration of listChanges.
+                        // Specifically, we are concerned about the case where an update on the first element
+                        // causes the barcode goes from:
+                        //   X__ to XX_
+                        // In this case, when looking at element 1, we should not treat it as if it were
+                        // a UNIQUE node that is getting updated.  Instead, it should be treated as the
+                        // DUPLICATE node that it really is.
+                        // We track the index of the last element that we set to UNIQUE in this way using
+                        // lastFakedUniqueChangeIndex
+                        if (changeIndex != lastFakedUniqueChangeIndex){
+                            barcode.set(changeIndex, UNIQUE, 2);
+                            toDoList.set(changeIndex, TODO, 1);
+                            lastFakedUniqueChangeIndex = changeIndex+1;
+                        }
                     }
                 }
 

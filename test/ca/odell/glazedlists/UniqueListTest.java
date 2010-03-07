@@ -3,13 +3,13 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import java.util.*;
-
-import junit.framework.TestCase;
-
 import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+
+import java.util.*;
+
+import junit.framework.TestCase;
 
 /**
  * A UniqueListTest tests the functionality of the UniqueList
@@ -1610,7 +1610,7 @@ public class UniqueListTest extends TestCase {
         assertEquals(source, GlazedListsTests.stringToList("AaAeeE"));
     }
 
-    public void testMassUpdates_FixMe() {
+    public void testMassUpdates() {
         final TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>(), true);
         final UniqueList<String> uniqueList = new UniqueList<String>(source, String.CASE_INSENSITIVE_ORDER);
 
