@@ -4,30 +4,13 @@
 package com.publicobject.issuesbrowser.swt;
 
 // swt
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.SortedList;
-import ca.odell.glazedlists.ThresholdList;
-import ca.odell.glazedlists.UniqueList;
+import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.Matchers;
 import ca.odell.glazedlists.matchers.ThreadedMatcherEditor;
-import ca.odell.glazedlists.swt.EventListViewer;
-import ca.odell.glazedlists.swt.EventTableViewer;
-import ca.odell.glazedlists.swt.GlazedListsSWT;
-import ca.odell.glazedlists.swt.TableComparatorChooser;
-import ca.odell.glazedlists.swt.TextWidgetMatcherEditor;
-
-import com.publicobject.issuesbrowser.Description;
-import com.publicobject.issuesbrowser.Issue;
-import com.publicobject.issuesbrowser.IssueLoader;
-import com.publicobject.issuesbrowser.IssueTextFilterator;
-import com.publicobject.issuesbrowser.Project;
-import com.publicobject.issuesbrowser.UsersMatcherEditor;
-import com.publicobject.misc.Throbber;
+import ca.odell.glazedlists.swt.*;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -35,17 +18,10 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Canvas;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.List;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Slider;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.*;
+
+import com.publicobject.issuesbrowser.*;
+import com.publicobject.misc.Throbber;
 
 
 /**
@@ -69,7 +45,7 @@ public class IssuesBrowser {
     /**
      * Constructs a new IssuesBrowser in the given window
      */
-    private IssuesBrowser(Shell shell) {
+    private IssuesBrowser(Shell shell, String[] args) {
         // Various Layered List Transformations
         usersMatcherEditor = new UsersMatcherEditor(issuesEventList);
         FilterList<Issue> issuesUserFiltered = new FilterList<Issue>(issuesEventList, usersMatcherEditor);
@@ -156,7 +132,11 @@ public class IssuesBrowser {
 
         // Start the demo
         issueLoader.start();
-        issueLoader.setProject(Project.getProjects().get(0));
+        if ((args != null) && (args.length == 1)) {
+            issueLoader.setFileName(args[0]);
+        } else {
+            issueLoader.setProject(Project.getProjects().get(0));
+        }
     }
 
     private Text createFilterText(Composite parent) {
@@ -447,7 +427,7 @@ public class IssuesBrowser {
         gridLayout.marginWidth = 0;
         parent.setLayout(gridLayout);
 
-        new IssuesBrowser(parent);
+        new IssuesBrowser(parent, args);
         parent.setSize(640, 480);
         parent.open();
 

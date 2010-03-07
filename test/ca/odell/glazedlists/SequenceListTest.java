@@ -3,12 +3,15 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
+import ca.odell.glazedlists.SequenceList.Sequencer;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import junit.framework.TestCase;
 
+import java.util.Arrays;
 import java.util.Date;
+
+import junit.framework.TestCase;
 
 public class SequenceListTest extends TestCase {
 
@@ -208,4 +211,24 @@ public class SequenceListTest extends TestCase {
         assertEquals(GlazedListsImpl.getMonthBegin(aug), sequence.get(4));
         assertEquals(GlazedListsImpl.getMonthBegin(sep), sequence.get(5));
     }
+
+    public void testIssue482_FixMe() {
+        EventList<Integer> src = new BasicEventList<Integer>();
+        src.add(1);
+        src.add(3);
+
+        SequenceList<Integer> integers = new SequenceList<Integer>(src,
+                new Sequencer<Integer>() {
+                    public Integer next(Integer value) {
+                        return value + 1;
+                    }
+
+                    public Integer previous(Integer value) {
+                        return value - 1;
+                    }
+                });
+
+        assertEquals(Arrays.asList(1, 2, 3), integers);
+    }
+
 }

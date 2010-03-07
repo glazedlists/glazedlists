@@ -38,6 +38,7 @@ import java.util.List;
  * <tr><td class="TableSubHeadingColor"><b>Unit Tests:</b></td><td>GroupingListTest</td></tr>
  * <tr><td class="TableSubHeadingColor"><b>Issues:</b></td><td>
  *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=281">281</a>
+ *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=491">491</a>
  * </td></tr>
  * </table>
  *
@@ -238,7 +239,7 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
 
             // insert all new groups (represented by the newly formed barcode)
             updates.addInsert(0, size() - 1);
-            
+
         } else {
             grouper.listChanged(listChanges);
         }
