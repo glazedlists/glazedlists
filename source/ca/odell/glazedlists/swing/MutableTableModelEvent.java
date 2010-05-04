@@ -17,15 +17,15 @@ import javax.swing.table.TableModel;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-final class MutableTableModelEvent extends TableModelEvent {
-    
+public final class MutableTableModelEvent extends TableModelEvent {
+
     /**
      * Constructors simply call the same on the superclass.
      */
     public MutableTableModelEvent(TableModel source) {
         super(source);
     }
-    
+
     /**
      * Changes this table model event. The event <strong>must not</strong>
      * be changed while it is being viewed by a listener.
@@ -34,11 +34,11 @@ final class MutableTableModelEvent extends TableModelEvent {
         this.firstRow = firstRow;
         this.lastRow = lastRow;
     }
-    
+
     public void setType(int type) {
         this.type = type;
     }
-    
+
     /**
      * Sets the table model event to notify that the table structure
      * has changed.
