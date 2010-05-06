@@ -73,7 +73,7 @@ public class DefaultEventTableModel<E> extends AbstractTableModel implements Adv
      * @param tableFormat the object responsible for extracting column data
      *      from the row objects
      */
-    DefaultEventTableModel(EventList<E> source, boolean disposeSource, TableFormat<? super E> tableFormat) {
+    protected DefaultEventTableModel(EventList<E> source, boolean disposeSource, TableFormat<? super E> tableFormat) {
         this.source = source;
         this.disposeSource = disposeSource;
         this.tableFormat = tableFormat;
