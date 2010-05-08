@@ -43,6 +43,9 @@
 	<!-- Default name for jar file, overridden by release target -->
 	<property name="jar.file" value="glazedlists_${java.target.version.fileFriendlyName}.jar"/>
 
+	<!-- Default name for jar file, overridden by release target -->
+    <property name="source.jar.file" value="glazedlists_${java.target.version.fileFriendlyName}-sources.jar"/>
+
 	<!-- Release name for jar file -->
 	<property name="release.jar.file" value="glazedlists-${version}_${java.target.version.fileFriendlyName}.jar"/>
 
@@ -189,6 +192,31 @@
 
         <!-- rename the OSGi Bundle to the orignal jar file's name -->
         <move file="${target.dir}/${jar.file}.osgi" toFile="${target.dir}/${jar.file}"/>
+    </target>
+
+	<target name="sourcejar"
+        description="Creates glazedlists source jar file containing all sources.">
+		
+        <mkdir dir="${target.dir}/sources"/>
+	    <!--copy source files to temp directory -->
+		<copy todir="${target.dir}/sources">
+		    <fileset dir="${basedir}">
+		        <include name="source/**"/>
+		        <include name="extensions/**/source/**"/>
+		    </fileset>
+		    <regexpmapper from=".*source/(.*)" to="\1" handledirsep="true"/>
+		</copy>
+
+        <!-- create a jar file with the resources and copied sources -->
+        <jar destfile="${target.dir}/${source.jar.file}">
+            <fileset dir="${target.dir}/sources">
+            	<include name="**/*.java" />
+            </fileset>
+            <fileset dir="${basedir}">
+                <include name="resources/**"/>
+            </fileset>
+        </jar>
+		<delete dir="${target.dir}/sources"/>
     </target>
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -594,7 +622,7 @@
 		</zip>
 	</target>
 
-    <target name="upload" depends="dist,jar,compiletests"
+    <target name="upload" depends="dist,jar,sourcejar,compiletests"
         description="Upload binaries to java.net, see http://javanettasks.dev.java.net/">
 
         <!-- download the javanettasks library for uploading jars to the java.net webserver -->
@@ -608,11 +636,11 @@
         <!-- prepare the javaNetUpload task -->
         <taskdef resource="org/kohsuke/javanettasks.properties" classpath="tools/javanettasks.jar"/>
 
-        <!-- upload source -->
+        <!-- upload source distribution -->
         <javaNetUpload projectName="glazedlists"
             toFile="/latest_build/${dist.file}"
             fromFile="${target.dir}/${dist.file}"
-            fileDescription="Source build by ${user.name} at ${datestamp.dateAndTime}"
+            fileDescription="Source distribution by ${user.name} at ${datestamp.dateAndTime}"
             overwrite="yes"
             fileStatus="Draft"/>
 
@@ -623,8 +651,15 @@
             fileDescription="Binary build by ${user.name} at ${datestamp.dateAndTime}"
             overwrite="yes"
             fileStatus="Draft"/>
+    	
+        <!-- upload source jar -->
+    	<javaNetUpload projectName="glazedlists"
+            toFile="/latest_build/${source.jar.file}"
+            fromFile="${target.dir}/${source.jar.file}"
+            fileDescription="Source jar by ${user.name} at ${datestamp.dateAndTime}"
+            overwrite="yes"
+            fileStatus="Draft"/>
 	</target>
-
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
        TEST
