@@ -3,13 +3,13 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.event;
 
-import java.util.ConcurrentModificationException;
-import java.util.List;
-
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.impl.WeakReferenceProxy;
 import ca.odell.glazedlists.impl.event.BlockSequence;
 import ca.odell.glazedlists.impl.event.Tree4Deltas;
+
+import java.util.ConcurrentModificationException;
+import java.util.List;
 
 /**
  * Models a continuous stream of changes on a list. Changes of the same type
@@ -401,6 +401,8 @@ public final class ListEventAssembler<E> {
         listDeltas.reset(sourceList.size());
         reorderMap = null;
         listDeltas.setAllowContradictingEvents(false);
+        // force cleanup of iterator which still could reference old data
+        listEvent.reset();
     }
 
     /**
