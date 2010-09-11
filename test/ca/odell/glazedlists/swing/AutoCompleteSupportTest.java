@@ -22,7 +22,13 @@ import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.plaf.ComboBoxUI;
 import javax.swing.plaf.basic.ComboPopup;
-import javax.swing.text.*;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.Element;
+import javax.swing.text.Position;
+import javax.swing.text.Segment;
 
 public class AutoCompleteSupportTest extends SwingTestCase {
 
@@ -399,6 +405,41 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals(3, listener.getCount());
     }
 
+    public void guiTestStrictModeWithNull() throws BadLocationException {
+        final JComboBox combo = new JComboBox();
+        final EventList<String> items = new BasicEventList<String>();
+        items.add("New Brunswick");
+        items.add(null);
+        items.add("Nova Scotia");
+        items.add("Newfoundland");
+        items.add("Prince Edward Island");
+
+        AutoCompleteSupport support = AutoCompleteSupport.install(combo, items);
+        final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
+        final AbstractDocument doc = (AbstractDocument) textField.getDocument();
+        support.setStrict(true);
+
+        assertEquals("", textField.getText());
+        assertEquals(-1, combo.getSelectedIndex()); // should be 1, but JComboBox.getSelecteditem() always returns -1 for null element
+        assertNull(combo.getSelectedItem());
+
+        combo.setSelectedItem("New Brunswick");
+        assertEquals("New Brunswick", textField.getText());
+        assertEquals(0, combo.getSelectedIndex());
+
+        // typing garbage in strict mode should be ignored
+        doc.replace(0, doc.getLength(), "garbage", null);
+        assertEquals(5, combo.getItemCount());
+        assertEquals("New Brunswick", textField.getText());
+        assertEquals(0, combo.getSelectedIndex());
+
+        // select second item (=null)
+        combo.setSelectedItem(null);
+        assertNull(combo.getSelectedItem());
+        assertEquals("", textField.getText());
+        assertEquals(-1, combo.getSelectedIndex()); // should be 1, but JComboBox.getSelecteditem() always returns -1 for null element
+    }
+
     public void guiTestStrictModeAndFirstItem() throws BadLocationException {
         final JComboBox combo = new JComboBox();
 
@@ -419,10 +460,12 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         support.setFirstItem("Saskatchewan");
         combo.setSelectedItem(null);
         assertNull(combo.getSelectedItem());
+        assertEquals("", textField.getText());
 
         support.setStrict(true);
         assertEquals("Saskatchewan", combo.getSelectedItem());
         assertEquals(0, combo.getSelectedIndex());
+        assertEquals("Saskatchewan", textField.getText());
 
         support.setStrict(false);
         support.setFirstItem(null);
@@ -435,6 +478,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         support.setStrict(true);
         assertNull(combo.getSelectedItem());
         assertEquals(-1, combo.getSelectedIndex());
+        assertEquals("", textField.getText());
     }
 
     public void guiTestDeleteKey() throws BadLocationException {
@@ -902,7 +946,8 @@ public class AutoCompleteSupportTest extends SwingTestCase {
 
         final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
 
-        final EventList<String> items = new BasicEventList<String>();
+        final EventList<String> basicItems = new BasicEventList<String>();
+        final EventList<String> items = GlazedLists.threadSafeList(basicItems);
         items.add("foobar");
 
         SwingUtilities.invokeAndWait(new Runnable() {
