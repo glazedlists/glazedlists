@@ -3,6 +3,12 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
+import ca.odell.glazedlists.impl.filter.StringLengthComparator;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.matchers.Matchers;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,12 +17,6 @@ import java.util.List;
 import java.util.Random;
 
 import junit.framework.TestCase;
-
-import ca.odell.glazedlists.impl.filter.StringLengthComparator;
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
-import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import ca.odell.glazedlists.matchers.Matcher;
-import ca.odell.glazedlists.matchers.Matchers;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
@@ -69,6 +69,34 @@ public class SeparatorListTest extends TestCase {
         assertSeparatorEquals(separatorList.get(5), 2, "C");
     }
 
+    /** Change from AACCC -> AAACC. */
+    public void testUpdateBug500() {
+        EventList<String> source = new BasicEventList<String>();
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList, "SeparatorList", true);
+        listConsistencyListener.setPreviousElementTracked(false);
+        source.addAll(0, GlazedListsTests.stringToList("AACCC"));
+        assertSeparatorEquals(separatorList.get(0), 2, "A");
+        assertSeparatorEquals(separatorList.get(3), 3, "C");
+        source.set(2, "A");
+        assertSeparatorEquals(separatorList.get(0), 3, "A");
+        assertSeparatorEquals(separatorList.get(4), 2, "C");
+    }
+
+    /** Change from AAACC -> AACCC. */
+    public void testUpdate2Bug500() {
+        EventList<String> source = new BasicEventList<String>();
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList, "SeparatorList", true);
+        listConsistencyListener.setPreviousElementTracked(false);
+        source.addAll(0, GlazedListsTests.stringToList("AAACC"));
+        assertSeparatorEquals(separatorList.get(0), 3, "A");
+        assertSeparatorEquals(separatorList.get(4), 2, "C");
+        source.set(2, "C");
+        assertSeparatorEquals(separatorList.get(0), 2, "A");
+        assertSeparatorEquals(separatorList.get(3), 3, "C");
+    }
+
     public void testUpdate3() {
         EventList<String> source = new BasicEventList<String>();
         SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
@@ -93,6 +121,33 @@ public class SeparatorListTest extends TestCase {
         source.set(0, "C");
         assertSeparatorEquals(separatorList.get(0), 2, "B");
         assertSeparatorEquals(separatorList.get(3), 1, "C");
+    }
+    public void testUpdate5() {
+        EventList<String> source = new BasicEventList<String>();
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
+        listConsistencyListener.setPreviousElementTracked(false);
+        source.addAll(0, GlazedListsTests.stringToList("AABCC"));
+        assertSeparatorEquals(separatorList.get(0), 2, "A");
+        assertSeparatorEquals(separatorList.get(3), 1, "B");
+        assertSeparatorEquals(separatorList.get(5), 2, "C");
+        source.set(2, "A");
+        assertSeparatorEquals(separatorList.get(0), 3, "A");
+        assertSeparatorEquals(separatorList.get(4), 2, "C");
+    }
+
+    public void testUpdate6() {
+        EventList<String> source = new BasicEventList<String>();
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
+        listConsistencyListener.setPreviousElementTracked(false);
+        source.addAll(0, GlazedListsTests.stringToList("AABCC"));
+        assertSeparatorEquals(separatorList.get(0), 2, "A");
+        assertSeparatorEquals(separatorList.get(3), 1, "B");
+        assertSeparatorEquals(separatorList.get(5), 2, "C");
+        source.set(2, "C");
+        assertSeparatorEquals(separatorList.get(0), 2, "A");
+        assertSeparatorEquals(separatorList.get(3), 3, "C");
     }
 
     /**

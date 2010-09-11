@@ -18,7 +18,7 @@ import java.util.List;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class ListConsistencyListener<E> {
-    
+
     /** a second copy of the list data */
     private List<E> expected;
 
@@ -48,7 +48,7 @@ public class ListConsistencyListener<E> {
         this.source = source;
         this.name = name != null ? name : source.getClass().getName();
         this.verbose = verbose;
-        
+
         // populate the list of expected values
         expected = new ArrayList<E>(source);
 
@@ -95,7 +95,7 @@ public class ListConsistencyListener<E> {
     public void assertConsistent() {
         assertTrue(expected.size() == source.size());
         for(int i = 0; i < expected.size(); i++) {
-            assertTrue("Different elements at " + i, expected.get(i) == source.get(i));
+            assertTrue("Different elements at " + i + " (expected=" + expected.get(i) + ", is=" + source.get(i), expected.get(i) == source.get(i));
         }
     }
 
