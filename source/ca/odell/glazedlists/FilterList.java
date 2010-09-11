@@ -62,6 +62,9 @@ public final class FilterList<E> extends TransformedList<E,E> {
     /** listener handles changes to the matcher */
     private final MatcherEditor.Listener listener = new PrivateMatcherEditorListener();
 
+    /** is this list already disposed? */
+    private volatile boolean disposed;
+
     /**
      * Creates a {@link FilterList} that includes a subset of the specified
      * source {@link EventList}.
@@ -156,9 +159,11 @@ public final class FilterList<E> extends TransformedList<E,E> {
         // stop listening to the MatcherEditor if one exists
         if (currentEditor != null) {
             currentEditor.removeMatcherEditorListener(listener);
-            currentEditor = null;
         }
-
+        // mark this list as disposed before clearing fields
+        // this flag is checked in #changeMatcher
+        disposed = true;
+        currentEditor = null;
         currentMatcher = null;
     }
 
@@ -281,15 +286,18 @@ public final class FilterList<E> extends TransformedList<E,E> {
      * during initialization of FilterList.
      */
     private void changeMatcher(MatcherEditor<? super E> matcherEditor, Matcher<? super E> matcher, int changeType) {
-        // ensure the MatcherEvent is from OUR MatcherEditor
-        if (currentEditor != matcherEditor) throw new IllegalStateException();
+        // first check if this list is already disposed
+        if (!disposed) {
+            // ensure the MatcherEvent is from OUR MatcherEditor
+            if (currentEditor != matcherEditor) throw new IllegalStateException();
 
-        switch (changeType) {
-            case MatcherEditor.Event.CONSTRAINED: currentMatcher = matcher; this.constrained(); break;
-            case MatcherEditor.Event.RELAXED: currentMatcher = matcher; this.relaxed(); break;
-            case MatcherEditor.Event.CHANGED: currentMatcher = matcher; this.changed(); break;
-            case MatcherEditor.Event.MATCH_ALL: currentMatcher = Matchers.trueMatcher(); this.matchAll(); break;
-            case MatcherEditor.Event.MATCH_NONE: currentMatcher = Matchers.falseMatcher(); this.matchNone(); break;
+            switch (changeType) {
+                case MatcherEditor.Event.CONSTRAINED: currentMatcher = matcher; this.constrained(); break;
+                case MatcherEditor.Event.RELAXED: currentMatcher = matcher; this.relaxed(); break;
+                case MatcherEditor.Event.CHANGED: currentMatcher = matcher; this.changed(); break;
+                case MatcherEditor.Event.MATCH_ALL: currentMatcher = Matchers.trueMatcher(); this.matchAll(); break;
+                case MatcherEditor.Event.MATCH_NONE: currentMatcher = Matchers.falseMatcher(); this.matchNone(); break;
+            }
         }
     }
 
