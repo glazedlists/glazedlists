@@ -10,7 +10,11 @@ import ca.odell.glazedlists.event.ListEventListener;
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.event.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -87,6 +91,14 @@ import javax.swing.table.TableColumnModel;
  * Generally speaking, tree-style behaviour is preferrable when the treetable
  * is readonly.
  *
+ * <p><i><u>Space Key</u></i>
+ *
+ * <p>As a default, TreeTableSupport enables the space key to toggle expand/collapse
+ * of the table hierachy of the currently selected node. This behaviour can be adjusted
+ * by calling {@link #setSpaceKeyExpansionEnabled(boolean)} with an argument of <code>false</code>.
+ * In this case, the space key will not be used to control expand and collapse
+ * of the table hierachy.
+ *
  * <p><i><u>Displaying Expander Buttons</u></i>
  *
  * <p>{@link TreeList} draws a distinction between three unique situations
@@ -147,6 +159,9 @@ public final class TreeTableSupport {
 
     /** Controls whether the left and right arrow keys perform simple table navigations or expand/collapse the table hierarchy. */
     private boolean arrowKeyExpansionEnabled;
+
+    /** Controls whether the space key performs expand/collapse the table hierarchy when performed on a cell in the hierachical column. */
+    private boolean spaceKeyExpansionEnabled = true;
 
     /**
      * When {@link #arrowKeyExpansionEnabled} is enabled, we must replace the
@@ -422,6 +437,24 @@ public final class TreeTableSupport {
     }
 
     /**
+     * Returns <code>true</code> if the space key is currently used to control the table hierachy
+     * expansion, <code>false</code> otherwise
+     */
+    public boolean getSpaceKeyExpansionEnabled() {
+        return spaceKeyExpansionEnabled;
+    }
+
+    /**
+     * If <code>spaceKeyExpansionEnabled</code> is <code>true</code>, then control of the
+     * table hierachy expansion via the space key is enabled. If <code>false</code>, the space
+     * key will not control the table hierachie expansion.
+     */
+    public void setSpaceKeyExpansionEnabled(boolean spaceKeyExpansionEnabled) {
+        checkAccessThread();
+        this.spaceKeyExpansionEnabled = spaceKeyExpansionEnabled;
+    }
+
+    /**
      * Use the given <code>treeTableCellRenderer</code> when rendering the
      * hierarchy column of the tree table.
      */
@@ -625,6 +658,8 @@ public final class TreeTableSupport {
 
         @Override
         public void keyPressed(KeyEvent e) {
+            if (!getSpaceKeyExpansionEnabled())
+                return;
             // if the table isn't enabled, break early
             if (!table.isEnabled())
                 return;
