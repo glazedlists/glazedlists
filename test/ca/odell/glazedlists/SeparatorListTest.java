@@ -712,6 +712,71 @@ public class SeparatorListTest extends TestCase {
         assertEquals(24, separatorList.size());
     }
 
+    /**
+     * Make sure that the {@link SeparatorList#setComparator} works with limits set.
+     *
+     * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=453">Issue 453</a>
+     */
+    public void testSetComparatorWithLimit() {
+        EventList<String> source = new BasicEventList<String>();
+        source.addAll(GlazedListsTests.stringToList("AAaaaBBBBbCCCddd"));
+
+        SeparatorList<String> separatorList = new SeparatorList<String>(source,
+                (Comparator) GlazedLists.caseInsensitiveComparator(), 0, 2);
+        ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener
+                .install(separatorList);
+        listConsistencyListener.setPreviousElementTracked(false);
+
+        // try with the first comparator
+        assertSeparatorEquals(separatorList.get(0), 5, "A");
+        assertEquals("A", separatorList.get(1));
+        assertEquals("A", separatorList.get(2));
+        assertSeparatorEquals(separatorList.get(3), 5, "B");
+        assertEquals("B", separatorList.get(4));
+        assertEquals("B", separatorList.get(5));
+        assertSeparatorEquals(separatorList.get(6), 3, "C");
+        assertEquals("C", separatorList.get(7));
+        assertEquals("C", separatorList.get(8));
+        assertSeparatorEquals(separatorList.get(9), 3, "d");
+        assertEquals("d", separatorList.get(10));
+        assertEquals("d", separatorList.get(11));
+        assertEquals(12, separatorList.size());
+
+        separatorList.setComparator(new CaseComparator());
+        assertSeparatorEquals(separatorList.get(0), 7, "a");
+        assertEquals("a", separatorList.get(1));
+        assertEquals("a", separatorList.get(2));
+        assertSeparatorEquals(separatorList.get(3), 9, "A");
+        assertEquals("A", separatorList.get(4));
+        assertEquals("A", separatorList.get(5));
+        assertEquals(6, separatorList.size());
+
+        // make list changes
+        source.addAll(5, GlazedListsTests.stringToList("aaaA"));
+        assertSeparatorEquals(separatorList.get(0), 10, "a");
+        assertEquals("a", separatorList.get(1));
+        assertEquals("a", separatorList.get(2));
+        assertSeparatorEquals(separatorList.get(3), 10, "A");
+        assertEquals("A", separatorList.get(4));
+        assertEquals("A", separatorList.get(5));
+        assertEquals(6, separatorList.size());
+        // change the comparator again
+        separatorList.setComparator(GlazedLists.caseInsensitiveComparator());
+        assertSeparatorEquals(separatorList.get(0), 9, "A");
+        assertEquals("A", separatorList.get(1));
+        assertEquals("A", separatorList.get(2));
+        assertSeparatorEquals(separatorList.get(3), 5, "B");
+        assertEquals("B", separatorList.get(4));
+        assertEquals("B", separatorList.get(5));
+        assertSeparatorEquals(separatorList.get(6), 3, "C");
+        assertEquals("C", separatorList.get(7));
+        assertEquals("C", separatorList.get(8));
+        assertSeparatorEquals(separatorList.get(9), 3, "d");
+        assertEquals("d", separatorList.get(10));
+        assertEquals("d", separatorList.get(11));
+        assertEquals(12, separatorList.size());
+    }
+
     private void assertEqualsIgnoreSeparators(List source, SeparatorList separatorList, Comparator separatorComparator) {
         // create a protective copy that we can surely modify
         source = new ArrayList(source);

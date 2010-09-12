@@ -514,7 +514,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
                 insertedSeparators.add(groupIndex + sourceIndex, SEPARATOR, 1);
                 Element<GroupSeparator> node = separators.add(groupIndex, new GroupSeparator(), 1);
                 node.get().setNode(node);
-                node.get().setLimit(defaultLimit);
+                node.get().applyLimit(defaultLimit, false);
             }
             // update the cached values in all separators
             for(int i = 0; i < separators.size(); i++) {
@@ -767,24 +767,36 @@ public class SeparatorList<E> extends TransformedList<E, E> {
             public int getLimit() {
                 return limit;
             }
+
             /** {@inheritDoc} */
             public void setLimit(int limit) {
+                applyLimit(limit, true);
+            }
+
+            /**
+             * Applies the maximum number of elements in this group to show.
+             *
+             * @param limit the limit
+             * @param fireEvents flag to indicate if ListEvents should be fired or not
+             */
+            protected void applyLimit(int limit, boolean fireEvents) {
                 if(this.limit == limit) return;
                 // fail gracefully if the node is null, that means this separator
                 // has been removed from the list but its still visible to an editor
                 if(node == null) {
                     return;
                 }
-
                 this.limit = limit;
-
-                // notify the world of this separator change
-                updates.beginEvent();
-                int groupIndex = separators.indexOfNode(node, (byte)1);
-                int separatorIndex = insertedSeparators.getIndex(groupIndex, SEPARATOR);
-                updates.addUpdate(separatorIndex);
-                updates.commitEvent();
+                if (fireEvents) {
+                    // notify the world of this separator change
+                    updates.beginEvent();
+                    int groupIndex = separators.indexOfNode(node, (byte)1);
+                    int separatorIndex = insertedSeparators.getIndex(groupIndex, SEPARATOR);
+                    updates.addUpdate(separatorIndex);
+                    updates.commitEvent();
+                }
             }
+
             /** {@inheritDoc} */
             public List<E> getGroup() {
                 if(node == null) return Collections.emptyList();
