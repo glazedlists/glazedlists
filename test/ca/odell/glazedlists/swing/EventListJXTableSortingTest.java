@@ -37,9 +37,6 @@ public class EventListJXTableSortingTest extends SwingTestCase {
         colors.add(Color.GRAY);
         colors.add(Color.WHITE);
         colors.add(Color.BLACK);
-        System.out.println(Color.GRAY.getAlpha());
-        System.out.println(Color.WHITE.getAlpha());
-        System.out.println(Color.BLACK.getAlpha());
         sortedColors = new SortedList<Color>(colors, redComparator);
         tableModel = GlazedListsSwing.eventTableModel(GlazedListsSwing.swingThreadProxyList(sortedColors), colorTableFormat);
         table = new JXTable(tableModel);
