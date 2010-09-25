@@ -4,17 +4,35 @@
 package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.calculation.Calculation;
+import ca.odell.glazedlists.impl.swing.SwingThreadProxyCalculation;
 
-import javax.swing.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.Format;
 
-public final class SwingCalculations {
+import javax.swing.JLabel;
+
+public final class CalculationsSwing {
     private static final Float FLOAT_NAN = new Float(Float.NaN);
     private static final Double DOUBLE_NAN = new Double(Double.NaN);
 
-    private SwingCalculations() {}
+    private CalculationsSwing() {}
+
+    /**
+     * Wraps the source in a {@link Calculation} that fires all of its update
+     * events from the Swing event dispatch thread.
+     */
+    public static <E> Calculation<E> swingThreadProxyCalculation(Calculation<? extends E> source) {
+        return new SwingThreadProxyCalculation<E>(source);
+    }
+
+    /**
+     * Returns <code>true</code> if <code>calc</code> is a {@link Calculation} that fires
+     * all of its update events from the Swing event dispatch thread.
+     */
+    public static boolean isSwingThreadProxyCalculation(Calculation calc) {
+        return calc instanceof SwingThreadProxyCalculation;
+    }
 
     /**
      * Updates the given label with the latest value of a Calculation each time

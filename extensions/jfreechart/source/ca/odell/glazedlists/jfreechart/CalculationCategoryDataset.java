@@ -10,12 +10,14 @@ import ca.odell.glazedlists.ObservableElementList;
 import ca.odell.glazedlists.calculation.Calculation;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.general.AbstractDataset;
 import org.jfree.data.general.DatasetChangeEvent;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * An implementation of a CategoryDataset that is backed by a List&lt;Calculation&gt;
@@ -72,6 +74,17 @@ public class CalculationCategoryDataset extends AbstractDataset implements Categ
 
     public CalculationCategoryDataset() {
         calculations.addListEventListener(this);
+    }
+
+    /**
+     * Constructs a CategoryDataset backed by the given <code>calculations</code>.
+     * Each {@link Calculation} is a single-valued series in the CategoryDataset.
+     *
+     * @param calculations the calculations of the dataset
+     */
+    public CalculationCategoryDataset(Calculation<? extends Number>... calculations) {
+        this();
+        getCalculations().addAll(Arrays.asList(calculations));
     }
 
     /**

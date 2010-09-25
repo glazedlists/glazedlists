@@ -3,11 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.calculation;
 
-import java.util.Arrays;
-
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.matchers.Matcher;
-import ca.odell.glazedlists.jfreechart.CalculationCategoryDataset;
 
 public final class Calculations {
 
@@ -93,15 +90,4 @@ public final class Calculations {
 
     /** A Calculation that value at the given <code>index</code> in the given <code>elements</code>. If <code>elements</code> does not contain enough items, the given <code>defaultValue</code> is returned. */
     public static <E> Calculation<E> elementAt(EventList<E> elements, int index, E defaultValue) { return new ElementAt(elements, index, defaultValue); }
-
-    //
-    // Datasets
-    //
-
-    /** A CategoryDataset backed by the given <code>calculations</code>; each Calculation is a single-valued series in the CategoryDataset */
-    public static CalculationCategoryDataset calculationCategoryDataset(Calculation<? extends Number>... calculations) {
-        final CalculationCategoryDataset ccd = new CalculationCategoryDataset();
-        ccd.getCalculations().addAll(Arrays.asList(calculations));
-        return ccd;
-    }
 }

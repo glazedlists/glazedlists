@@ -6,7 +6,7 @@ package ca.odell.glazedlists.impl.swing;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.impl.gui.ThreadProxyEventList;
 
-import javax.swing.*;
+import java.awt.EventQueue;
 
 /**
  * Proxies events from all threads to the Swing event dispatch thread. This allows
@@ -30,10 +30,10 @@ public class SwingThreadProxyEventList<E> extends ThreadProxyEventList<E> {
      */
     @Override
     protected void schedule(Runnable runnable) {
-        if(SwingUtilities.isEventDispatchThread()) {
+        if (EventQueue.isDispatchThread()) {
             runnable.run();
         } else {
-            SwingUtilities.invokeLater(runnable);
+            EventQueue.invokeLater(runnable);
         }
     }
 }

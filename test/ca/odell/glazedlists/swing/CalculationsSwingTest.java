@@ -1,3 +1,6 @@
+/* Glazed Lists                                                 (c) 2003-2010 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -5,15 +8,15 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.calculation.Calculation;
 import ca.odell.glazedlists.calculation.Calculations;
 
-import junit.framework.TestCase;
-
-import javax.swing.JLabel;
-
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-public class SwingCalculationsTest extends TestCase {
+import javax.swing.JLabel;
+
+import junit.framework.TestCase;
+
+public class CalculationsSwingTest extends TestCase {
 
     public void testCalculationLabel() {
         final EventList<Float> source = new BasicEventList<Float>();
@@ -27,8 +30,8 @@ public class SwingCalculationsTest extends TestCase {
         formatter.setMinimumFractionDigits(2);
         formatter.setMaximumFractionDigits(2);
 
-        SwingCalculations.bind(label, mean);
-        SwingCalculations.bind(formattedLabel, mean, formatter);
+        CalculationsSwing.bind(label, mean);
+        CalculationsSwing.bind(formattedLabel, mean, formatter);
 
         assertEquals("1.0", label.getText());
         assertEquals("1.00", formattedLabel.getText());
