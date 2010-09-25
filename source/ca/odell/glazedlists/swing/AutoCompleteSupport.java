@@ -3,14 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.CompositeList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.FunctionList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.TextFilterator;
-import ca.odell.glazedlists.UniqueList;
+import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
@@ -42,11 +35,7 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.plaf.UIResource;
 import javax.swing.plaf.basic.BasicComboBoxEditor;
 import javax.swing.plaf.basic.ComboPopup;
-import javax.swing.text.AbstractDocument;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import javax.swing.text.DocumentFilter;
+import javax.swing.text.*;
 
 /**
  * This class {@link #install}s support for filtering and autocompletion into
@@ -1755,18 +1744,21 @@ public final class AutoCompleteSupport<E> {
 
         private class CheckStrictModeInvariantRunnable implements Runnable {
             public void run() {
-                final String currentText = comboBoxEditorComponent.getText();
-                final Object item = findAutoCompleteTerm(currentText);
-                String itemText = convertToString(item);
+                final JTextField editor = comboBoxEditorComponent;
+                if (editor != null) {
+                    final String currentText = editor.getText();
+                    final Object item = findAutoCompleteTerm(currentText);
+                    String itemText = convertToString(item);
 
-                // if we did not find the same autocomplete term
-                if (!currentText.equals(itemText)) {
-                    // select the first item if we could not find an autocomplete term with the currentText
-                    if (item == NOT_FOUND && !allItemsUnfiltered.isEmpty())
-                        itemText = convertToString(allItemsUnfiltered.get(0));
+                    // if we did not find the same autocomplete term
+                    if (!currentText.equals(itemText)) {
+                        // select the first item if we could not find an autocomplete term with the currentText
+                        if (item == NOT_FOUND && !allItemsUnfiltered.isEmpty())
+                            itemText = convertToString(allItemsUnfiltered.get(0));
 
-                    // set the new strict value text into the editor component
-                    comboBoxEditorComponent.setText(itemText);
+                        // set the new strict value text into the editor component
+                        editor.setText(itemText);
+                    }
                 }
             }
         }
