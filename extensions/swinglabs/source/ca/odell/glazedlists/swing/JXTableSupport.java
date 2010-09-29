@@ -7,6 +7,7 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.Preconditions;
+import ca.odell.glazedlists.impl.beans.BeanProperty;
 import ca.odell.glazedlists.impl.gui.SortingStrategy;
 
 import javax.swing.ListSelectionModel;
@@ -19,7 +20,7 @@ import org.jdesktop.swingx.JXTable;
 
 /**
  * <b>Developer Preview:</b>
- * <code>JXTableSupport</code> prototype, currently supporting SwingX 1.0.x
+ * <code>JXTableSupport</code> prototype
  * <p>
  * Integrates a {@link JXTable} with Glazed Lists by
  * <ul>
@@ -45,11 +46,7 @@ public class JXTableSupport<E> {
     private JXTable table;
 
     /** The state of JXTable before install; needed for uninstall to restore state. */
-    private TableModel oldTableModel;
-    private ListSelectionModel oldSelectionModel;
-    private boolean oldSortable;
-    private TableCellRenderer oldDefaultRenderer;
-    private boolean oldSelectionMapperEnabled;
+    private JXTableMemento tableMemento;
 
     /** the installed event table model. */
     private AdvancedTableModel<E> tableModel;
@@ -143,18 +140,15 @@ public class JXTableSupport<E> {
     public void uninstall() {
         checkAccessThread();
         tableComparatorChooser.dispose();
-        // restore table state before install
-        table.setModel(oldTableModel);
-        table.setSelectionModel(oldSelectionModel);
-        table.getSelectionMapper().setEnabled(oldSelectionMapperEnabled);
-        table.setSortable(oldSortable);
-        table.getTableHeader().setDefaultRenderer(oldDefaultRenderer);
+        tableMemento.restoreStateTo(table);
         tableModel.dispose();
         selectionModel.dispose();
         tableComparatorChooser = null;
         tableModel = null;
         selectionModel = null;
+        tableFormat = null;
         table = null;
+        tableMemento = null;
     }
 
     /**
@@ -172,20 +166,16 @@ public class JXTableSupport<E> {
         this.table = table;
         this.tableFormat = tableFormat;
         // remember table state for restore on uninstall
-        this.oldTableModel = table.getModel();
-        this.oldSelectionModel = table.getSelectionModel();
-        oldSortable = table.isSortable();
-        oldDefaultRenderer = table.getTableHeader().getDefaultRenderer();
-        oldSelectionMapperEnabled = table.getSelectionMapper().isEnabled();
-
-        table.getSelectionMapper().setEnabled(false);
-        table.setSortable(false);
-        table.getTableHeader().setDefaultRenderer(new JTableHeader().getDefaultRenderer());
-
+        tableMemento = JXTableMemento.create(table);
+        tableMemento.storeStateFrom(table);
+        // set state needed to integrate with Glazed Lists
+        tableMemento.configureStateForGlazedLists(table);
+        // prepare and set TableModel und SelectionModel
         tableModel = GlazedListsSwing.eventTableModelWithThreadProxyList(eventList, tableFormat);
         table.setModel(tableModel);
         selectionModel = GlazedListsSwing.eventSelectionModelWithThreadProxyList(eventList);
         table.setSelectionModel(selectionModel);
+        // finally install TableComparatorChooser
         tableComparatorChooser = TableComparatorChooser.<E>install(table, sortedList,
                 sortingStrategy, tableFormat);
     }
@@ -199,5 +189,132 @@ public class JXTableSupport<E> {
             throw new IllegalStateException(
                     "JXTableSupport must be accessed from the Swing Event Dispatch Thread, but was called on Thread \""
                             + Thread.currentThread().getName() + "\"");
+    }
+
+    /**
+     * <code>JXTableMemento</code> holds common state for {@link JXTable}.
+     * Version specific state for SwingX 1.0 or SwingX 1.6 is managed by subclasses.
+     *
+     * @author Holger Brands
+     */
+    private static abstract class JXTableMemento {
+        private TableModel oldTableModel;
+        private ListSelectionModel oldSelectionModel;
+        private boolean oldSortable;
+        private TableCellRenderer oldDefaultRenderer;
+
+        /**
+         * Gets the current state from the given JXTable and stores it for later restore.
+         */
+        public void storeStateFrom(JXTable table) {
+            oldTableModel = table.getModel();
+            oldSelectionModel = table.getSelectionModel();
+            oldSortable = table.isSortable();
+            oldDefaultRenderer = table.getTableHeader().getDefaultRenderer();
+        }
+
+        /**
+         * Restores the previously stored state to the given JXTable.
+         */
+        public void restoreStateTo(JXTable table) {
+            table.setModel(oldTableModel);
+            table.setSelectionModel(oldSelectionModel);
+            table.setSortable(oldSortable);
+            table.getTableHeader().setDefaultRenderer(oldDefaultRenderer);
+        }
+
+        /**
+         * Configures the given JXTable for use with GlazedLists
+         */
+        public void configureStateForGlazedLists(JXTable table) {
+            table.setSortable(false);
+            table.getTableHeader().setDefaultRenderer(new JTableHeader().getDefaultRenderer());
+        }
+
+        /**
+         * Creates a memento instance suitable for the given JXTable.
+         */
+        public static JXTableMemento create(JXTable table) {
+            if (isSwingX16(table)) {
+                return new JXTable16Memento();
+            } else {
+                return new JXTable10Memento();
+            }
+        }
+
+        /**
+         * Determines if the table is from SwingX 1.0.x or SwingX 1.6.x.
+         * The former has a public method <code>getSelectionMapper</code>, the latter not.
+         *
+         * @param table the JXTable to check
+         * @return <code>true</code>, is it's SwingX 1.6.x
+         */
+        private static boolean isSwingX16(JXTable table) {
+            boolean result = false;
+            try {
+                table.getClass().getMethod("getSelectionMapper", new Class[0]);
+            } catch (NoSuchMethodException e) {
+                result = true;
+            }
+            return result;
+        }
+    }
+
+    /**
+     * <code>JXTable10Memento</code> for SwingX 1.0-specific state like the selection mapper.
+     *
+     * @author Holger Brands
+     */
+    private static class JXTable10Memento extends JXTableMemento {
+        private Boolean oldSelectionMapperEnabled;
+        private final BeanProperty<JXTable> selectionMapperEnabledProperty = new BeanProperty<JXTable>(JXTable.class, "selectionMapper.enabled", true, true);
+        @Override
+        public void storeStateFrom(JXTable table) {
+            super.storeStateFrom(table);
+            oldSelectionMapperEnabled = (Boolean) selectionMapperEnabledProperty.get(table);
+        }
+
+        @Override
+        public void restoreStateTo(JXTable table) {
+            super.restoreStateTo(table);
+            selectionMapperEnabledProperty.set(table, oldSelectionMapperEnabled);
+        }
+        @Override
+        public void configureStateForGlazedLists(JXTable table) {
+            super.configureStateForGlazedLists(table);
+            selectionMapperEnabledProperty.set(table, Boolean.FALSE);
+        }
+    }
+
+    /**
+     * <code>JXTable16Memento</code> for SwingX 1.6-specific state like the row sorter.
+     *
+     * @author Holger Brands
+     */
+    private static class JXTable16Memento extends JXTableMemento {
+        private Boolean oldAutoCreateRowSorter;
+        private final BeanProperty<JXTable> autoCreateRowSorterProperty = new BeanProperty<JXTable>(JXTable.class, "autoCreateRowSorter", true, true);
+        private Object oldRowSorter;
+        private final BeanProperty<JXTable> rowSorterProperty = new BeanProperty<JXTable>(JXTable.class, "rowSorter", true, true);
+        @Override
+        public void storeStateFrom(JXTable table) {
+            super.storeStateFrom(table);
+            oldAutoCreateRowSorter = (Boolean) autoCreateRowSorterProperty.get(table);
+            oldRowSorter = rowSorterProperty.get(table);
+        }
+
+        @Override
+        public void restoreStateTo(JXTable table) {
+            super.restoreStateTo(table);
+            autoCreateRowSorterProperty.set(table, oldAutoCreateRowSorter);
+            rowSorterProperty.set(table, oldRowSorter);
+        }
+
+        @Override
+        public void configureStateForGlazedLists(JXTable table) {
+            super.configureStateForGlazedLists(table);
+            autoCreateRowSorterProperty.set(table, Boolean.FALSE);
+            rowSorterProperty.set(table, null);
+        }
     }
 }

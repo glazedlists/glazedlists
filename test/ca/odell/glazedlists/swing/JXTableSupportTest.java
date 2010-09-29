@@ -5,11 +5,14 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.gui.TableFormat;
+import ca.odell.glazedlists.swing.TableComparatorChooser.SortArrowHeaderRenderer;
 
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.util.Comparator;
 
+import javax.swing.ListSelectionModel;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
 import org.jdesktop.swingx.JXTable;
@@ -23,10 +26,8 @@ public class JXTableSupportTest extends SwingTestCase {
     private SortedList<Color> sortedColors;
     private TableFormat<Color> colorTableFormat = GlazedLists.tableFormat(
             new String[] { "red", "green", "blue" }, new String[] { "Red", "Green", "Blue" });
-    private TableModel tableModel;
     private JXTable table;
     private Comparator<Color> redComparator = GlazedLists.beanPropertyComparator(Color.class, "red");
-    private Comparator<Color> alphaComparator = GlazedLists.beanPropertyComparator(Color.class, "alpha");
 
     @Override
     protected void setUp() {
@@ -36,6 +37,43 @@ public class JXTableSupportTest extends SwingTestCase {
         colors.add(Color.BLACK);
         sortedColors = new SortedList<Color>(colors, redComparator);
         table = new JXTable();
+    }
+
+    public void guiTestInstall() {
+        final JXTableSupport support = JXTableSupport.install(table, colors, colorTableFormat, sortedColors, TableComparatorChooser.SINGLE_COLUMN);
+        assertTrue(support.isInstalled());
+        assertNotNull(support.getTableModel());
+        assertEquals(support.getTableModel(), table.getModel());
+        assertTrue(table.getModel() instanceof AdvancedTableModel);
+        assertNotNull(support.getTableSelectionModel());
+        assertEquals(support.getTableSelectionModel(), table.getSelectionModel());
+        assertTrue(table.getSelectionModel() instanceof AdvancedListSelectionModel);
+        assertNotNull(support.getTableComparatorChooser());
+        assertEquals(table, support.getTable());
+        assertEquals(colorTableFormat, support.getTableFormat());
+        assertFalse(table.isSortable());
+        assertTrue(table.getTableHeader().getDefaultRenderer() instanceof SortArrowHeaderRenderer);
+    }
+
+    public void guiTestUninstall() {
+        final TableModel oldTableModel = table.getModel();
+        final ListSelectionModel oldSelectionModel = table.getSelectionModel();
+        final boolean isSortable = table.isSortable();
+        final TableCellRenderer oldDefaultRenderer = table.getTableHeader().getDefaultRenderer();
+
+        final JXTableSupport support = JXTableSupport.install(table, colors, colorTableFormat, sortedColors, TableComparatorChooser.SINGLE_COLUMN);
+        assertTrue(support.isInstalled());
+        support.uninstall();
+        assertFalse(support.isInstalled());
+        assertNull(support.getTableModel());
+        assertNull(support.getTableSelectionModel());
+        assertNull(support.getTableComparatorChooser());
+        assertNull(support.getTable());
+        assertNull(support.getTableFormat());
+        assertEquals(oldTableModel, table.getModel());
+        assertEquals(oldSelectionModel, table.getSelectionModel());
+        assertEquals(isSortable, table.isSortable());
+        assertEquals(oldDefaultRenderer, table.getTableHeader().getDefaultRenderer());
     }
 
     public void testOnMainThreadInstallEDTViolation() {
@@ -63,8 +101,6 @@ public class JXTableSupportTest extends SwingTestCase {
         });
     }
 
-    public void guiTestInstall() {
-    }
 
     private class InstallRunnable implements Runnable {
         private JXTableSupport support;
