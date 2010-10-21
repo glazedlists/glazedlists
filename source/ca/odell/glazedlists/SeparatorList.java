@@ -384,6 +384,15 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         }
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public void dispose() {
+        // dispose internal SeparatorInjectorList and SortedList
+        separatorSource.dispose();
+        separatorSource.source.dispose();
+        super.dispose();
+    }
+
     /**
      * A separator heading the elements of a group.
      */
