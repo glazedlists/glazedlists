@@ -12,8 +12,8 @@
     <description>Event-driven lists for dynamically filtered and sorted tables</description>
     <url>http://publicobject.com/glazedlists/</url>
     <issueManagement>
-        <system>java.net</system>
-        <url>https://glazedlists.dev.java.net/issues</url>
+        <system>Jira</system>
+        <url>http://java.net/jira/browse/GLAZEDLISTS</url>
     </issueManagement>
     <inceptionYear>2003</inceptionYear>
     <mailingLists>
