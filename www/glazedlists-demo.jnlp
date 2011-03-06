@@ -2,7 +2,7 @@
 <!-- JNLP File for Glazed Lists demo -->
 <jnlp
 	spec="1.0+"
-	codebase="https://glazedlists.dev.java.net/"
+	codebase="http://java.net/projects/glazedlists/sources/svn/content/trunk/www/"
 	href="glazedlists-demo.jnlp">
 	<information>
 		<title>Glazed Lists Demo</title>
@@ -16,7 +16,7 @@
 	<security>
 	</security>
 	<resources>
-		<j2se version="1.4+"/>
+		<j2se version="1.5+"/>
 		<jar href="/glazedlists-demo.jar"/>
 	</resources>
 	<application-desc main-class="com.publicobject.issuesbrowser.swing.IssuesBrowser"/>

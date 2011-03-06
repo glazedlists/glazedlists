@@ -24,7 +24,7 @@ import com.publicobject.misc.xml.*;
  */
 public class JiraXMLParser {
 
-    private static final int maxIssueCount = 30;
+    private static final int maxIssueCount = 100;
 
     private static final String JAVA_NET_JIRA_QUERY = "http://java.net/jira/sr/jira.issueviews:searchrequest-xml/temp/SearchRequest.xml?jqlQuery=project+%3D+@PROJECT@+ORDER+BY+key+DESC&tempMax=" + maxIssueCount;
 
