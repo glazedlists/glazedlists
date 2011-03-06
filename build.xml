@@ -78,30 +78,25 @@
 		<include name="**/*.xml"/>
 	</patternset>
 
+	<!-- base url for downloads --> 
+	<property name="download.base.url" value="http://java.net/downloads/glazedlists"/>
+	
 	<!-- determine the platform swt jar file name and download path from java.net -->
-	<condition property="swt.jar.path" value="https://glazedlists.dev.java.net/files/documents/1073/64389/">
-		<os family="windows"/>
-	</condition>
+    <property name="swt.jar.path" value="${download.base.url}/lib/swt/3.3"/>
+
 	<condition property="swt.jar.file" value="org.eclipse.swt.win32.win32.x86.jar">
 		<os family="windows"/>
 	</condition>
 
-	<condition property="swt.jar.path" value="https://glazedlists.dev.java.net/files/documents/1073/64390/">
-		<os family="mac"/>
-	</condition>
 	<condition property="swt.jar.file" value="org.eclipse.swt.carbon.macosx.jar">
 		<os family="mac"/>
 	</condition>
 
-	<condition property="swt.jar.path" value="https://glazedlists.dev.java.net/files/documents/1073/64627/">
-		<os name="Linux"/>
-	</condition>
 	<condition property="swt.jar.file" value="org.eclipse.swt.gtk.linux.x86.jar">
 		<os name="Linux"/>
 	</condition>
 	
 	<!-- use windows files as default if nothing matches -->
-	<property name="swt.jar.path" value="https://glazedlists.dev.java.net/files/documents/1073/64389/"/>
 	<property name="swt.jar.file" value="org.eclipse.swt.win32.win32.x86.jar"/>
 	
 	<target name="clean"
@@ -141,15 +136,15 @@
 			<packageset dir="extensions/hibernate/source"><exclude name="**/impl/**"/></packageset>			
 			<packageset dir="extensions/treetable/source"><exclude name="**/impl/**"/></packageset>			
             <classpath><fileset dir="extensions/" includes="**/lib/*.jar"/></classpath>
-            <link href="http://java.sun.com/j2se/${java.target.version}/docs/api/"/>
-            <link href="http://help.eclipse.org/help33/nftopic/org.eclipse.platform.doc.isv/reference/api/"/>
+            <link href="http://download.oracle.com/javase/1.5.0/docs/api/"/>
+            <link href="http://help.eclipse.org/help33/index.jsp?topic=/org.eclipse.platform.doc.isv/reference/api/overview-summary.html"/>
             <link href="http://www.jdocs.com/formlayout/1.0.4/api/" packagelistloc="extensions/jgoodiesforms/lib"/>
             <link href="http://nachocalendar.sourceforge.net/doc/"/>
             <link href="http://www.jfree.org/jfreechart/api/javadoc/"/>
             <link href="http://download.java.net/javadesktop/swinglabs/releases/0.8/docs/api/"/>
-			<link href="http://www.hibernate.org/hib_docs/v3/api/"/>
+			<link href="http://docs.jboss.org/hibernate/core/3.5/javadocs/"/>
             <doctitle><![CDATA[<h1>${doctitle}</h1>]]></doctitle>
-			<bottom><![CDATA[<a href="http://publicobject.com/glazedlists/" target="_top">Glazed Lists</a>, Copyright &#169; 2003 publicobject.com, O'Dell Engineering.<br>Documentation build by ${user.name} at ${datestamp.dateAndTime}]]></bottom>
+			<bottom><![CDATA[<a href="http://www.glazedlists.com" target="_top">Glazed Lists</a>, Copyright &#169; 2003 publicobject.com, O'Dell Engineering.<br>Documentation build by ${user.name} at ${datestamp.dateAndTime}]]></bottom>
 		</javadoc>
 	</target>
 
@@ -166,7 +161,7 @@
         <!--download the BND library for creating entries in the manifest.mf file which make it a compliant OSGi bundle. See http://www.osgi.org/ -->
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="https://glazedlists.dev.java.net/files/documents/1073/110958/bnd.jar"/>
+            <arg value="${download.base.url}/tools/bnd/bnd.jar"/>
             <arg value="tools/bnd.jar"/>
         </java>
 
@@ -286,22 +281,22 @@
         <mkdir dir="extensions/swt/lib"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="https://glazedlists.dev.java.net/files/documents/1073/64386/org.eclipse.core.commands.jar"/>
+            <arg value="${swt.jar.path}/org.eclipse.core.commands.jar"/>
             <arg value="extensions/swt/lib/org.eclipse.core.commands.jar"/>
         </java>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="https://glazedlists.dev.java.net/files/documents/1073/64387/org.eclipse.equinox.common.jar"/>
+            <arg value="${swt.jar.path}/org.eclipse.equinox.common.jar"/>
             <arg value="extensions/swt/lib/org.eclipse.equinox.common.jar"/>
         </java>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="https://glazedlists.dev.java.net/files/documents/1073/64388/org.eclipse.jface.jar"/>
+            <arg value="${swt.jar.path}/org.eclipse.jface.jar"/>
             <arg value="extensions/swt/lib/org.eclipse.jface.jar"/>
         </java>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="${swt.jar.path}${swt.jar.file}"/>
+            <arg value="${swt.jar.path}/${swt.jar.file}"/>
             <arg value="extensions/swt/lib/${swt.jar.file}"/>
         </java>
         <javac destdir="${classes.dir}" srcdir="extensions/swt/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
@@ -315,7 +310,7 @@
         <mkdir dir="extensions/ktable/lib"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="https://glazedlists.dev.java.net/files/documents/1073/24419/ktable.jar"/>
+            <arg value="${download.base.url}/lib/ktable/2.1.2/ktable.jar"/>
             <arg value="extensions/ktable/lib/ktable.jar"/>
         </java>
         <javac destdir="${classes.dir}" srcdir="extensions/ktable/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
@@ -330,7 +325,7 @@
         <mkdir dir="extensions/jgoodiesforms/lib"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="https://glazedlists.dev.java.net/files/documents/1073/27334/forms.jar"/>
+            <arg value="${download.base.url}/lib/forms/1.0.5/forms.jar"/>
             <arg value="extensions/jgoodiesforms/lib/forms.jar"/>
         </java>
         <javac destdir="${classes.dir}" srcdir="extensions/jgoodiesforms/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
@@ -346,7 +341,7 @@
         <mkdir dir="extensions/swinglabs/lib"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>        	
-            <arg value="https://glazedlists.dev.java.net/files/documents/1073/139214/swingx.jar"/>
+            <arg value="${download.base.url}/lib/swinglabs/1.0.0/swingx.jar"/>
             <arg value="extensions/swinglabs/lib/swingx.jar"/>
         </java>
         <javac destdir="${classes.dir}" srcdir="extensions/swinglabs/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
@@ -360,7 +355,7 @@
         <mkdir dir="extensions/icu4j/lib"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="https://glazedlists.dev.java.net/files/documents/1073/41904/icu4j.jar"/>
+            <arg value="${download.base.url}/lib/icu4j/3.6/icu4j.jar"/>
             <arg value="extensions/icu4j/lib/icu4j.jar"/>
         </java>
         <javac destdir="${classes.dir}" srcdir="extensions/icu4j/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
@@ -374,7 +369,7 @@
         <mkdir dir="extensions/nachocalendar/lib"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="https://glazedlists.dev.java.net/files/documents/1073/29958/nachocalendar.jar"/>
+            <arg value="${download.base.url}/lib/nachocalendar/0.23/nachocalendar.jar"/>
             <arg value="extensions/nachocalendar/lib/nachocalendar.jar"/>
         </java>
         <javac destdir="${classes.dir}" srcdir="extensions/nachocalendar/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
@@ -392,12 +387,12 @@
         <mkdir dir="extensions/jfreechart/lib"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="https://glazedlists.dev.java.net/files/documents/1073/26197/jcommon.jar"/>
+            <arg value="${download.base.url}/lib/jfreechart/1.0.0/jcommon.jar"/>
             <arg value="extensions/jfreechart/lib/jcommon.jar"/>
         </java>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="https://glazedlists.dev.java.net/files/documents/1073/26198/jfreechart.jar"/>
+            <arg value="${download.base.url}/lib/jfreechart/1.0.0/jfreechart.jar"/>
             <arg value="extensions/jfreechart/lib/jfreechart.jar"/>
         </java>
         <javac destdir="${classes.dir}" srcdir="extensions/jfreechart/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
@@ -411,17 +406,17 @@
         <mkdir dir="extensions/hibernate/lib"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="https://glazedlists.dev.java.net/files/documents/1073/58581/hibernate.jar"/>
+            <arg value="${download.base.url}/lib/hibernate/3.2.4.sp1/hibernate.jar"/>
             <arg value="extensions/hibernate/lib/hibernate.jar"/>
         </java>		
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="https://glazedlists.dev.java.net/files/documents/1073/58582/hibernate-libs.jar"/>
+            <arg value="${download.base.url}/lib/hibernate/3.2.4.sp1/hibernate-libs.jar"/>
             <arg value="extensions/hibernate/lib/hibernate-libs.jar"/>
         </java>				
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="https://glazedlists.dev.java.net/files/documents/1073/39276/hsqldb.jar"/>
+            <arg value="${download.base.url}/lib/hsqldb/1.8.0.4/hsqldb.jar"/>
             <arg value="extensions/hibernate/lib/hsqldb.jar"/>
         </java>				
         <javac destdir="${classes.dir}" srcdir="extensions/hibernate/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
@@ -436,17 +431,17 @@
         <mkdir dir="extensions/japex/lib"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="https://glazedlists.dev.java.net/files/documents/1073/37606/activation.jar"/>
+            <arg value="${download.base.url}/lib/japex/1.0.18/activation.jar"/>
             <arg value="extensions/japex/lib/activation.jar"/>
         </java>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="https://glazedlists.dev.java.net/files/documents/1073/37605/japex-all.jar"/>
+            <arg value="${download.base.url}/lib/japex/1.0.18/japex-all.jar"/>
             <arg value="extensions/japex/lib/japex-all.jar"/>
         </java>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="https://glazedlists.dev.java.net/files/documents/1073/37607/mail.jar"/>
+            <arg value="${download.base.url}/lib/japex/1.0.18/mail.jar"/>
             <arg value="extensions/japex/lib/mail.jar"/>
         </java>
         <!-- compile the Japex performance tests -->
@@ -475,7 +470,7 @@
         <mkdir dir="extensions/issuesbrowser/lib"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="https://glazedlists.dev.java.net/files/documents/1073/37509/http.jar"/>
+            <arg value="${download.base.url}/lib/httpclient/0.3.3/http.jar"/>
             <arg value="extensions/issuesbrowser/lib/http.jar"/>
         </java>
         <javac destdir="${classes.dir}" srcdir="extensions/issuesbrowser/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
@@ -502,7 +497,7 @@
         <!-- download bcel.jar to the ant \lib directory -->
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="https://glazedlists.dev.java.net/files/documents/1073/42723/bcel.jar"/>
+            <arg value="${download.base.url}/lib/bcel/5.2/bcel.jar"/>
             <arg value="${ant.home}/lib/bcel.jar"/>
         </java>
 
@@ -619,7 +614,7 @@
         <mkdir dir="tools"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="https://glazedlists.dev.java.net/files/documents/1073/25945/javanettasks.jar"/>
+            <arg value="${download.base.url}/tools/javanettasks/javanettasks.jar"/>
             <arg value="tools/javanettasks.jar"/>
         </java>
 
@@ -785,7 +780,7 @@
         <mkdir dir="tools"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="https://glazedlists.dev.java.net/files/documents/1073/25945/javanettasks.jar"/>
+            <arg value="${download.base.url}/tools/javanettasks/javanettasks.jar"/>
             <arg value="tools/javanettasks.jar"/>
         </java>
 
