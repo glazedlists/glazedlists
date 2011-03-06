@@ -17,7 +17,7 @@
 	</security>
 	<resources>
 		<j2se version="1.5+"/>
-		<jar href="/glazedlists-demo.jar"/>
+		<jar href="glazedlists-demo.jar"/>
 	</resources>
 	<application-desc main-class="com.publicobject.issuesbrowser.swing.IssuesBrowser"/>
 </jnlp>
