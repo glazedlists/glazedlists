@@ -3,10 +3,10 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser;
 
-import ca.odell.glazedlists.TextFilterator;
-
 import java.util.Iterator;
 import java.util.List;
+
+import ca.odell.glazedlists.TextFilterator;
 
 /**
  * Provide text filter strings for {@link Issue} objects.
@@ -17,7 +17,7 @@ public class IssueTextFilterator implements TextFilterator<Issue> {
     /** {@inheritDoc} */
     public void getFilterStrings(List<String> baseList, Issue i) {
         // the displayed strings
-        baseList.add(i.getId().toString());
+        baseList.add(i.getId());
         baseList.add(i.getIssueType());
         baseList.add(Issue.TABLE_DATE_FORMAT.format(i.getCreationTimestamp()));
         baseList.add(i.getPriority().toString());

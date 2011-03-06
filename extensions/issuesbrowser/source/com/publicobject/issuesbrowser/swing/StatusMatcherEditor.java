@@ -3,6 +3,17 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser.swing;
 
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.text.MessageFormat;
+import java.util.*;
+
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GroupingList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -11,16 +22,10 @@ import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.swing.GlazedListsSwing;
+
 import com.publicobject.issuesbrowser.Issue;
 import com.publicobject.issuesbrowser.IssueStatusComparator;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.text.MessageFormat;
-import java.util.*;
-import java.util.List;
+import com.publicobject.issuesbrowser.Status;
 
 /**
  * A MatcherEditor that produces Matchers that filter the issues based on the
@@ -46,19 +51,14 @@ class StatusMatcherEditor extends AbstractMatcherEditor<Issue> implements ListEv
      */
     private List<String> statuses = new ArrayList<String>();
 
-    public StatusMatcherEditor(EventList<Issue> issues) {
+    public StatusMatcherEditor(EventList<Issue> issues, Status[] stati) {
         // group the issues according to their status
         issuesByStatus = new GroupingList<Issue>(issues, new IssueStatusComparator());
         this.issuesByStatusSwingThread = GlazedListsSwing.swingThreadProxyList(issuesByStatus);
         this.issuesByStatusSwingThread.addListEventListener(this);
-
-        this.statusCheckBoxes.put("NEW", buildCheckBox("New"));
-        this.statusCheckBoxes.put("UNCONFIRMED", buildCheckBox("Unconfirmed"));
-        this.statusCheckBoxes.put("STARTED", buildCheckBox("Started"));
-        this.statusCheckBoxes.put("REOPENED", buildCheckBox("Reopened"));
-        this.statusCheckBoxes.put("CLOSED", buildCheckBox("Closed"));
-        this.statusCheckBoxes.put("VERIFIED", buildCheckBox("Verified"));
-        this.statusCheckBoxes.put("RESOLVED", buildCheckBox("Resolved"));
+        for (Status status : stati) {
+            this.statusCheckBoxes.put(status.getId(), buildCheckBox(status.getName()));
+        }
 
         this.checkBoxPanel.setOpaque(false);
 
@@ -140,7 +140,6 @@ class StatusMatcherEditor extends AbstractMatcherEditor<Issue> implements ListEv
             }
 
             final JCheckBox checkBox = statusCheckBoxes.get(status);
-
             // update the text of the checkbox to reflect the new bug count for that status
             checkBox.setText(checkboxFormat.format(new Object[] { checkBox.getName(), new Integer(count)}));
         }

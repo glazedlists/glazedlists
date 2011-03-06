@@ -3,18 +3,19 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser.swing;
 
-import com.publicobject.issuesbrowser.Description;
-import com.publicobject.issuesbrowser.Issue;
-import com.publicobject.misc.swing.WebStart;
-import com.publicobject.misc.swing.MacCornerScrollPaneLayoutManager;
+import java.awt.event.ActionEvent;
+import java.util.Iterator;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
-import java.awt.event.ActionEvent;
-import java.util.Iterator;
+
+import com.publicobject.issuesbrowser.Description;
+import com.publicobject.issuesbrowser.Issue;
+import com.publicobject.misc.swing.MacCornerScrollPaneLayoutManager;
+import com.publicobject.misc.swing.WebStart;
 
 /**
  * The details for a particular issue listed out. This also includes a link
@@ -27,6 +28,7 @@ class IssueDescriptionsPanel {
 
     private JScrollPane scrollPane;
     private JTextPane descriptionsTextPane = new JTextPane();
+
     private Style plainStyle;
     private Style whoStyle;
     private Style buttonStyle;
@@ -114,7 +116,19 @@ class IssueDescriptionsPanel {
         append(doc, "\n", whoStyle);
 
         // write the body
-        append(doc, description.getText(), plainStyle);
+        final String text = escapeText(description.getText());
+        append(doc, text, plainStyle);
+    }
+
+    /** helper method to fix messed up description text from Jira. */
+    private static String escapeText(String source) {
+        String result = source.replace("<br/>", "");
+        result = result.replace("&nbsp;", " ");
+        result = result.replace("&quot;", "\"");
+        result = result.replace("&amp;", "&");
+        result = result.replace("&lt;", "<");
+        result = result.replace("&gt;", ">");
+        return result;
     }
 
     /**

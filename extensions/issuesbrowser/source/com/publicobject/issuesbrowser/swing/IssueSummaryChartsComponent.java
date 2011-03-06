@@ -34,7 +34,9 @@ import ca.odell.glazedlists.jfreechart.EventListPieDataset;
 import ca.odell.glazedlists.swing.GlazedListsSwing;
 
 import com.publicobject.issuesbrowser.Issue;
+import com.publicobject.issuesbrowser.IssueTrackingSystem;
 import com.publicobject.issuesbrowser.OpenIssuesByMonthCategoryDataset;
+import com.publicobject.issuesbrowser.Status;
 
 /**
  * This component is placed below the issues table and is shown when no issues
@@ -57,18 +59,6 @@ class IssueSummaryChartsComponent {
 
     // the panel containing all ChartPanels
     private final JPanel allChartsPanel = new JPanel(new GridBagLayout());
-
-    // map each unique Issue status to a representative color
-    private static final Map<String,Paint> issuesStatusToPaintMap = new HashMap<String,Paint>();
-    static {
-        issuesStatusToPaintMap.put("NEW", Color.RED);
-        issuesStatusToPaintMap.put("STARTED", Color.ORANGE);
-        issuesStatusToPaintMap.put("CLOSED", Color.YELLOW);
-        issuesStatusToPaintMap.put("RESOLVED", Color.GREEN);
-        issuesStatusToPaintMap.put("UNCONFIRMED", Color.BLUE);
-        issuesStatusToPaintMap.put("VERIFIED", Color.PINK);
-        issuesStatusToPaintMap.put("REOPENED", Color.MAGENTA);
-    }
 
     public IssueSummaryChartsComponent(EventList<Issue> issuesList) {
         // build a PieDataset representing Issues by Status
@@ -107,6 +97,16 @@ class IssueSummaryChartsComponent {
     }
 
     /**
+     * Finds a status by name
+     *
+     * @param name the status name
+     * @return the status
+     */
+    private static final Status statusFor(String name) {
+        return IssueTrackingSystem.getInstance().statusFor(name);
+    }
+
+    /**
      * A function to extract the status from the first element in a list of
      * {@link Issue} objects that share the same status.
      */
@@ -139,7 +139,7 @@ class IssueSummaryChartsComponent {
         @Override
         public Paint getSectionPaint(int section) {
             final String rowKeyForSeries = (String) this.getDataset().getKey(section);
-            return issuesStatusToPaintMap.get(rowKeyForSeries);
+            return statusFor(rowKeyForSeries).getColor();
         }
     }
 
@@ -157,7 +157,7 @@ class IssueSummaryChartsComponent {
         @Override
         public Paint getSeriesPaint(int series) {
             final String rowKeyForSeries = (String) this.dataset.getRowKey(series);
-            return issuesStatusToPaintMap.get(rowKeyForSeries);
+            return statusFor(rowKeyForSeries).getColor();
         }
     }
 

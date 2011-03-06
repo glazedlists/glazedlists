@@ -3,6 +3,15 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser.swing;
 
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+
+import javax.swing.*;
+import javax.swing.border.Border;
+
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FunctionList;
@@ -14,16 +23,9 @@ import ca.odell.glazedlists.swing.DefaultEventComboBoxModel;
 import ca.odell.glazedlists.swing.GlazedListsSwing;
 import ca.odell.glazedlists.swing.JEventListPanel;
 
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-
-import javax.swing.*;
-import javax.swing.border.Border;
-
 import com.publicobject.issuesbrowser.Issue;
+import com.publicobject.issuesbrowser.IssueTrackingSystem;
+import com.publicobject.issuesbrowser.Status;
 import com.publicobject.misc.swing.RoundedBorder;
 
 /**
@@ -48,7 +50,8 @@ class FilterPanel {
         this.selectedFilterComponents.add(new CloseableFilterComponent(new TextFilterComponent()));
         this.selectedFilterComponents.add(new CloseableFilterComponent(new SwingUsersMatcherEditor(issues)));
         // and then have the rest
-        this.remainingFilterComponents.add(new CloseableFilterComponent(new StatusMatcherEditor(issues)));
+        final Status[] stati = IssueTrackingSystem.getInstance().getSupportedStati();
+        this.remainingFilterComponents.add(new CloseableFilterComponent(new StatusMatcherEditor(issues, stati)));
         this.remainingFilterComponents.add(new CloseableFilterComponent(new PriorityMatcherEditor()));
         this.remainingFilterComponents.add(new CloseableFilterComponent(new CreationDateMatcherEditor()));
         this.remainingFilterComponents.add(new CloseableFilterComponent(new ModificationDateMatcherEditor()));

@@ -16,19 +16,20 @@ public class Project {
 
     /** the sample projects */
     private static EventList<Project> projects;
+
     static {
 		projects = new BasicEventList<Project>();
 		projects.add(new Project("glazedlists", "Glazed Lists"));
-		projects.add(new Project("lg3d-core", "Project Looking Glass Core"));
+		projects.add(new Project("glassfish", "Open Source Application Server for Java EE 6"));
 		projects.add(new Project("javacc", "Java Compiler Compiler"));
-		projects.add(new Project("sqlexplorer", "SQLExplorer Eclipse Database Plugin"));
-		projects.add(new Project("ofbiz", "Open For Business"));
+		projects.add(new Project("eventbus", "Pub-sub Event broadcasting mechanism"));
+		projects.add(new Project("jaxb", "The Standard Implementation for JAXB"));
 		projects.add(new Project("jogl", "JOGL Java OpenGL Bindings"));
-		projects.add(new Project("sip-communicator", "SIP Communicator"));
+		projects.add(new Project("appframework", "Swing Application Framework"));
 		projects.add(new Project("jdic", "JavaDesktop Integration Components"));
 		projects.add(new Project("jdnc", "JavaDesktop Network Components"));
-		projects.add(new Project("javanettasks", "Java.Net Tasks"));
 		projects.add(new Project("swingx", "SwingX"));
+		projects.add(new Project("binding", "JGoodies Binding"));
     }
 
     private String projectName;

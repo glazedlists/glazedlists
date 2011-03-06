@@ -3,11 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser;
 
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.matchers.Matchers;
-import com.publicobject.misc.xml.*;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -15,6 +10,12 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.matchers.Matchers;
+
+import com.publicobject.misc.xml.*;
 
 /**
  * Parses IssueZilla issues as described by their XML.
@@ -47,7 +48,7 @@ public class IssuezillaXMLParser {
         final XMLTagPath issueTag = new XMLTagPath("issuezilla").child("issue");
         issueParser.addProcessor(issueTag.start(),                           Processors.createNewObject(Issue.class, new Class[] {Project.class}, new Object[] {project}));
         issueParser.addProcessor(issueTag.attribute("status_code"),          Processors.setterMethod(Issue.class, "statusCode", Converters.trimAndIntern()));
-        issueParser.addProcessor(issueTag.child("issue_id"),                 Processors.setterMethod(Issue.class, "id", Converters.integer()));
+        issueParser.addProcessor(issueTag.child("issue_id"),                 Processors.setterMethod(Issue.class, "id", Converters.trimAndIntern()));
         issueParser.addProcessor(issueTag.child("issue_status"),             Processors.setterMethod(Issue.class, "status", Converters.trimAndIntern()));
         issueParser.addProcessor(issueTag.child("priority"),                 Processors.setterMethod(Issue.class, "priority", new PriorityConverter()));
         issueParser.addProcessor(issueTag.child("resolution"),               Processors.setterMethod(Issue.class, "resolution", Converters.trimAndIntern()));
@@ -196,7 +197,7 @@ public class IssuezillaXMLParser {
      */
     private static class PriorityConverter implements Converter<String,Priority> {
         public Priority convert(String value) {
-            return Priority.lookup(value.trim());
+            return Priority.lookupIssuzilla(value.trim());
         }
     }
 

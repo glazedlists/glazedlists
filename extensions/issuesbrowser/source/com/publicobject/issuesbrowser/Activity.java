@@ -16,6 +16,22 @@ public class Activity {
     private String oldValue;
     private String newValue;
 
+    /** default constructor. */
+    public Activity() {
+        // NOP
+    }
+
+    /**
+     * constructor for state change.
+     *
+     * @param field field name
+     * @param newValue new value for field
+     */
+    public Activity(String field, String newValue) {
+        this.field = field;
+        this.newValue = newValue;
+    }
+
     /**
      * user who performed the change action
      */

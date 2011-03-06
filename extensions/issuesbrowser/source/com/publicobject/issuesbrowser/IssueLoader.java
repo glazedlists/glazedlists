@@ -3,16 +3,17 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser;
 
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedLists;
-import com.publicobject.misc.Exceptions;
-import com.publicobject.misc.Throbber;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.NoRouteToHostException;
 import java.net.UnknownHostException;
 import java.security.AccessControlException;
+
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+
+import com.publicobject.misc.Exceptions;
+import com.publicobject.misc.Throbber;
 
 /**
  * This loads issues by project as they are requested. When a new project is
@@ -84,9 +85,10 @@ public class IssueLoader implements Runnable {
                 // load the issues
                 issuesList.clear();
                 if(currentProject.getFileName() != null) {
-                    IssuezillaXMLParser.loadIssues(issuesList, new FileInputStream(currentProject.getFileName()), currentProject);
+                    IssueTrackingSystem.getInstance().loadIssues(issuesList,
+                            new FileInputStream(currentProject.getFileName()), currentProject);
                 } else {
-                    IssuezillaXMLParser.loadIssues(issuesList, currentProject.getXMLUri(), currentProject);
+                    IssueTrackingSystem.getInstance().loadIssues(issuesList, currentProject);
                 }
 
             // handling interruptions is really gross

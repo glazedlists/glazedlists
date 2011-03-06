@@ -25,7 +25,7 @@ public final class Priority implements Comparable<Priority> {
 	/**
 	 * Lookup the correct static instance based on the given input string.
 	 */
-	public static Priority lookup(String priority_name) {
+	public static Priority lookupIssuzilla(String priority_name) {
 		if (priority_name == null) return null;
 
 		if (priority_name.equals("P1")) return P1;
@@ -36,6 +36,21 @@ public final class Priority implements Comparable<Priority> {
 
 		throw new IllegalArgumentException("Priority \"" + priority_name + "\" not found.");
 	}
+
+	/**
+     * Lookup the correct static instance based on the given input string.
+     */
+    public static Priority lookupJira(String priority_name) {
+        if (priority_name == null) return null;
+
+        if (priority_name.equals("Blocker")) return P1;
+        if (priority_name.equals("Critical")) return P2;
+        if (priority_name.equals("Major")) return P3;
+        if (priority_name.equals("Minor")) return P4;
+        if (priority_name.equals("Trivial")) return P5;
+
+        throw new IllegalArgumentException("Priority \"" + priority_name + "\" not found.");
+    }
 
     private Priority(int value) {
         this.value = value;
