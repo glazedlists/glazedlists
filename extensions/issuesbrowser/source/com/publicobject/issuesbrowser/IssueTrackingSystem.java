@@ -227,7 +227,8 @@ public abstract class IssueTrackingSystem {
         }
 
         private String baseUrlFor(Project project) {
-            return getBaseUrlTemplate().replace(PROJECT_PLACEHOLDER, project.getName());
+            return getBaseUrlTemplate().replace(PROJECT_PLACEHOLDER,
+                    (project.getName() == null) ? "" : project.getName());
         }
 
         private String getBaseUrlTemplate() {

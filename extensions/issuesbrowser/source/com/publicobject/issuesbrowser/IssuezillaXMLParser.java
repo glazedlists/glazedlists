@@ -160,7 +160,8 @@ public class IssuezillaXMLParser {
             }
 
             // prepare a stream
-            URL issuesUrl = new URL(baseQueryUrl + "?include_attachments=false&id=" + idArg);
+            final String urlAsString = baseQueryUrl + "?include_attachments=false&id=" + idArg;
+            URL issuesUrl = new URL(urlAsString);
             InputStream issuesInStream = issuesUrl.openStream();
 
             // parse
