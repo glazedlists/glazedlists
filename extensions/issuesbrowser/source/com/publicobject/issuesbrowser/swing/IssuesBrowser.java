@@ -3,6 +3,15 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser.swing;
 
+import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.swing.*;
+
+import com.publicobject.issuesbrowser.*;
+import com.publicobject.misc.Exceptions;
+import com.publicobject.misc.swing.*;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.net.URL;
@@ -16,15 +25,6 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
-import ca.odell.glazedlists.swing.*;
-
-import com.publicobject.issuesbrowser.*;
-import com.publicobject.misc.Exceptions;
-import com.publicobject.misc.swing.*;
 
 /**
  * An IssueBrowser is a program for finding and viewing issues.
@@ -105,8 +105,8 @@ public class IssuesBrowser implements Runnable {
         issueLoader.start();
 
         // load issues from a file if requested
-        if(startupArgs.length == 1) {
-            issueLoader.setFileName(startupArgs[0]);
+        if(startupArgs.length == 2) {
+            issueLoader.fileBasedProject(startupArgs[0], startupArgs[1]);
         }
     }
 
@@ -186,7 +186,7 @@ public class IssuesBrowser implements Runnable {
         projectsCombo.setEditable(false);
         projectsCombo.setOpaque(false);
         projectsCombo.addItemListener(new ProjectChangeListener());
-        projectsComboModel.setSelectedItem(new Project(null, "Select a Java.net project..."));
+        projectsComboModel.setSelectedItem(new Project(null, "Select a Java.net project...", null));
 
         // build a label to display the number of issues in the issue table
         issueCounter = new IssueCounterLabel(filteredIssues);

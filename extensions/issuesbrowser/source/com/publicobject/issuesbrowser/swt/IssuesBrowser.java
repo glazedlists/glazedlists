@@ -12,6 +12,9 @@ import ca.odell.glazedlists.matchers.Matchers;
 import ca.odell.glazedlists.matchers.ThreadedMatcherEditor;
 import ca.odell.glazedlists.swt.*;
 
+import com.publicobject.issuesbrowser.*;
+import com.publicobject.misc.Throbber;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.graphics.Font;
@@ -19,9 +22,6 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
-
-import com.publicobject.issuesbrowser.*;
-import com.publicobject.misc.Throbber;
 
 
 /**
@@ -132,8 +132,8 @@ public class IssuesBrowser {
 
         // Start the demo
         issueLoader.start();
-        if ((args != null) && (args.length == 1)) {
-            issueLoader.setFileName(args[0]);
+        if ((args != null) && (args.length == 2)) {
+            issueLoader.fileBasedProject(args[0], args[1]);
         } else {
             issueLoader.setProject(Project.getProjects().get(0));
         }

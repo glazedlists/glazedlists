@@ -3,6 +3,11 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser;
 
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.matchers.Matchers;
+
+import com.publicobject.misc.xml.*;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -10,12 +15,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
-
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.matchers.Matchers;
-
-import com.publicobject.misc.xml.*;
 
 /**
  * Parses IssueZilla issues as described by their XML.
@@ -142,21 +141,11 @@ public class IssuezillaXMLParser {
     }
 
     /**
-     * When executed, this opens a file specified on the command line, parses
-     * it for Issuezilla XML and writes the issues to the command line.
-     */
-    public static void main(String[] args) throws IOException {
-        final EventList<Issue> issuesList = new BasicEventList<Issue>();
-
-        loadIssues(issuesList, "https://glazedlists.dev.java.net/issues/xml.cgi", Project.getProjects().get(0));
-    }
-
-    /**
      * Loads issues from the specified URL.
      */
-    public static void loadIssues(EventList<Issue> target, String baseUrl, Project owner) throws IOException {
+    public static void loadIssues(EventList<Issue> target, Project owner) throws IOException {
         int issuesPerRequest = 100;
-
+        String baseQueryUrl = owner.getIssueQueryUri();
         // continuously load issues until there's no more
         while (true) {
             // figure out how many to load
@@ -171,7 +160,7 @@ public class IssuezillaXMLParser {
             }
 
             // prepare a stream
-            URL issuesUrl = new URL(baseUrl + "?include_attachments=false&id=" + idArg);
+            URL issuesUrl = new URL(baseQueryUrl + "?include_attachments=false&id=" + idArg);
             InputStream issuesInStream = issuesUrl.openStream();
 
             // parse

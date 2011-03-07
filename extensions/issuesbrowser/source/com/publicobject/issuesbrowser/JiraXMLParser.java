@@ -1,7 +1,11 @@
-/* Glazed Lists                                                 (c) 2003-2006 */
+/* Glazed Lists                                                 (c) 2003-2011 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser;
+
+import ca.odell.glazedlists.EventList;
+
+import com.publicobject.misc.xml.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,11 +15,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-
-import com.publicobject.misc.xml.*;
-
 /**
  * <code>JiraXMLParser</code> adapted from {@link IssuezillaXMLParser} to support JIRA issue
  * parsing from its XML view.
@@ -23,10 +22,6 @@ import com.publicobject.misc.xml.*;
  * @author Holger Brands
  */
 public class JiraXMLParser {
-
-    private static final int maxIssueCount = 100;
-
-    private static final String JAVA_NET_JIRA_QUERY = "http://java.net/jira/sr/jira.issueviews:searchrequest-xml/temp/SearchRequest.xml?jqlQuery=project+%3D+@PROJECT@+ORDER+BY+key+DESC&tempMax=" + maxIssueCount;
 
     /** the date format for "issue_when" is documented in the DTD to be 'yyyy-MM-dd HH:mm' but is actually 'yyyy-MM-dd HH:mm:ss' */
     /** the date format for "delta_ts" is documented in the DTD to be 'yyyy-MM-dd HH:mm' but is actually 'yyyyMMddHHmmss' */
@@ -158,29 +153,27 @@ public class JiraXMLParser {
     }
 
     /**
-     * When executed, this opens a file specified on the command line, parses
-     * it for Issuezilla XML and writes the issues to the command line.
+     * Parses the Jira XML document returned from the query URL of the given project into a List of
+     * issues.
+     *
+     * @param target the target {@link EventList}
+     * @param owner the owning project
+     * @throws IOException if a parsing error occurs
      */
-    public static void main(String[] args) throws IOException {
-        final EventList<Issue> issuesList = new BasicEventList<Issue>();
-
-        loadIssues(issuesList, Project.getProjects().get(1));
-    }
-
     public static void loadIssues(EventList<Issue> target, Project owner) throws IOException {
-        final String queryURLTemplate = JAVA_NET_JIRA_QUERY;
-        final String queryURL = queryURLTemplate.replace("@PROJECT@", owner.getName());
-        final URL issuesUrl = new URL(queryURL);
+        final URL issuesUrl = new URL(owner.getIssueQueryUri());
         final InputStream issuesInStream = issuesUrl.openStream();
         // parse
         loadIssues(target, issuesInStream, owner);
     }
 
     /**
-     * Parses the Issuezilla XML document on the specified input stream into a List
-     * of issues. While the parsing is taking place this writes some simple Java
-     * commands to reproduce a lightweight version of this list. This is useful
-     * to load the issues as code rather than XML.
+     * Parses the Jira XML document on the specified input stream into a List
+     * of issues.
+     * @param target the target {@link EventList}
+     * @param source the inout stream
+     * @param owner the owning project
+     * @throws IOException if a parsing error occurs
      */
     public static void loadIssues(EventList<Issue> target, InputStream source, Project owner) throws IOException {
         createParser(owner).parse(source, target);

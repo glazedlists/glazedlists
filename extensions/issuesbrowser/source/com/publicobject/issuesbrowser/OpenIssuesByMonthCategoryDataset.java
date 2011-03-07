@@ -3,14 +3,14 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser;
 
-import java.util.Date;
-import java.util.List;
-
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.jfreechart.EventListCategoryDataset;
 import ca.odell.glazedlists.jfreechart.ValueSegment;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.swing.GlazedListsSwing;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * This CategoryDataset explodes each {@link Issue} object into a List of
@@ -27,6 +27,8 @@ import ca.odell.glazedlists.swing.GlazedListsSwing;
  * @author James Lemieux
  */
 public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<String, Date> {
+    /** serialVersionUID. */
+    private static final long serialVersionUID = 0L;
 
     /** The sequencer which produces the uniform column keys. */
     private final SequenceList.Sequencer<Date> monthSequencer = Sequencers.monthSequencer();
@@ -42,12 +44,12 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
      * @param issues the source list of {@link Issue} objects
      */
     public OpenIssuesByMonthCategoryDataset(EventList<Issue> issues) {
-        this(new CollectionList<Issue,ValueSegment<Date,String>>(issues, new StateChangesCollectionModel()));
+        this(issues, new CollectionList<Issue,ValueSegment<Date,String>>(issues, new StateChangesCollectionModel()));
     }
 
-    private OpenIssuesByMonthCategoryDataset(CollectionList<Issue,ValueSegment<Date,String>> valueSegments) {
+    private OpenIssuesByMonthCategoryDataset(EventList<Issue> issues, CollectionList<Issue,ValueSegment<Date,String>> valueSegments) {
         // filter away ValueSegments whose value represents a retired issue (RESOLVED or CLOSED)
-        this(new FilterList<ValueSegment<Date,String>>(valueSegments, new OpenIssuesMatcher()));
+        this(new FilterList<ValueSegment<Date,String>>(valueSegments, new OpenIssuesMatcher(new StatusProvider(issues))));
     }
 
     private OpenIssuesByMonthCategoryDataset(FilterList<ValueSegment<Date,String>> filteredValueSegments) {
@@ -158,16 +160,6 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
     }
 
     /**
-     * Finds a status by name
-     *
-     * @param name the status name
-     * @return the status
-     */
-    private static final Status statusFor(String name) {
-        return IssueTrackingSystem.getInstance().statusFor(name);
-    }
-
-    /**
      * This Model decomposes Issues into a List of ValueSegment objects
      * describing the state changes and when they occurred during the
      * "lifetime" of the Issue.
@@ -183,9 +175,14 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
      * since they do not represent an Issue in an open state.
      */
     private static class OpenIssuesMatcher implements Matcher<ValueSegment<Date,String>> {
+        private StatusProvider statusProvider;
+
+        public OpenIssuesMatcher(StatusProvider statusProvider) {
+            this.statusProvider = statusProvider;
+        }
         public boolean matches(ValueSegment<Date, String> item) {
             final String value = item.getValue();
-            return statusFor(value).isActive();
+            return statusProvider.statusFor(value).isActive();
         }
     }
 }

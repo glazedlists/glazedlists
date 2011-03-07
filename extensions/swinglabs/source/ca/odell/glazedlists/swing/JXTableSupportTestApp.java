@@ -5,6 +5,8 @@ package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.*;
 
+import com.publicobject.issuesbrowser.*;
+
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -19,8 +21,6 @@ import java.util.List;
 import javax.swing.*;
 
 import org.jdesktop.swingx.JXTable;
-
-import com.publicobject.issuesbrowser.*;
 
 /**
  * Demonstrate sorting using JXTable with Glazed Lists' {@link ca.odell.glazedlists.SortedList}
@@ -94,13 +94,13 @@ class JXTableSupportTestApp implements Runnable {
         public IssueLoader(EventList<Issue> issues, String filename) {
             this.issues = issues;
 
-            this.project = new Project("Glazed Lists", "Glazed Lists");
+            this.project = new Project("Glazed Lists", "Glazed Lists", IssueTrackingSystem.getJavaNetJira());
             project.setFileName(filename);
         }
         public void run() {
             try {
 
-                IssuezillaXMLParser.loadIssues(GlazedLists.threadSafeList(issues), new FileInputStream(project.getFileName()), project);
+                project.getOwner().loadIssues(GlazedLists.threadSafeList(issues), new FileInputStream(project.getFileName()), project);
             } catch (IOException e) {
                 e.printStackTrace();
                 return;

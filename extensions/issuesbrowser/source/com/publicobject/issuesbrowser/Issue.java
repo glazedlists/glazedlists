@@ -3,6 +3,9 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser;
 
+import ca.odell.glazedlists.jfreechart.DefaultValueSegment;
+import ca.odell.glazedlists.jfreechart.ValueSegment;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
@@ -11,9 +14,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-
-import ca.odell.glazedlists.jfreechart.DefaultValueSegment;
-import ca.odell.glazedlists.jfreechart.ValueSegment;
 
 /**
  * An issue models a work effort either due to an existing problem or a desired
@@ -126,7 +126,8 @@ public class Issue implements Comparable {
         // this stores the sequence of state changes in chronological order, like a timeline
         final List<ValueSegment<Date,String>> timeline = new ArrayList<ValueSegment<Date,String>>();
 
-        String state = IssueTrackingSystem.getInstance().getSupportedStati()[0].getName();
+        final IssueTrackingSystem issueTracker = issue.getProject().getOwner();
+        String state = issueTracker.getSupportedStati()[0].getName();
 
         // the end Date of the previous ValueSegment
         Date last = issue.getCreationTimestamp();
@@ -181,7 +182,7 @@ public class Issue implements Comparable {
      */
     public URL getURL() {
         try {
-            return new URL(owner.getBaseUri() + "/issues/show_bug.cgi?id=" + getId());
+            return new URL(getProject().getIssueDetailUri(this));
         } catch(MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -360,6 +361,13 @@ public class Issue implements Comparable {
      */
     public PeerIssue getDuplicate() { return isDuplicate; }
     public void setDuplicate(PeerIssue isDuplicate) { this.isDuplicate = isDuplicate; }
+
+    /**
+     * @return the owning project
+     */
+    public Project getProject() {
+        return owner;
+    }
 
     /**
      * Write this issue for debugging.

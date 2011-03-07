@@ -3,6 +3,16 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser.swing;
 
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FunctionList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.jfreechart.EventListPieDataset;
+import ca.odell.glazedlists.swing.GlazedListsSwing;
+
+import com.publicobject.issuesbrowser.Issue;
+import com.publicobject.issuesbrowser.OpenIssuesByMonthCategoryDataset;
+import com.publicobject.issuesbrowser.StatusProvider;
+
 import java.awt.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -26,17 +36,6 @@ import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.general.PieDataset;
 import org.jfree.text.TextBlock;
 import org.jfree.ui.RectangleEdge;
-
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FunctionList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.jfreechart.EventListPieDataset;
-import ca.odell.glazedlists.swing.GlazedListsSwing;
-
-import com.publicobject.issuesbrowser.Issue;
-import com.publicobject.issuesbrowser.IssueTrackingSystem;
-import com.publicobject.issuesbrowser.OpenIssuesByMonthCategoryDataset;
-import com.publicobject.issuesbrowser.Status;
 
 /**
  * This component is placed below the issues table and is shown when no issues
@@ -69,7 +68,8 @@ class IssueSummaryChartsComponent {
         final PieDataset issuesByStatusDataset = new EventListPieDataset<Issue, String>(pieDataSource, issuesByStatusGrouper, keyFunction, valueFunction);
 
         // build a Pie Chart and a panel to display it
-        final JFreeChart pieChart_IssuesByStatus = new JFreeChart("Issues By Status", new CustomPiePlot(issuesByStatusDataset));
+        final StatusProvider statusProvider = new StatusProvider(issuesList);
+        final JFreeChart pieChart_IssuesByStatus = new JFreeChart("Issues By Status", new CustomPiePlot(issuesByStatusDataset, statusProvider));
         pieChart_IssuesByStatus.setBackgroundPaint(CHART_PANEL_BACKGROUND_PAINT);
         pieChart_IssuesByStatus.getLegend().setBorder(CHART_LEGEND_BORDER);
         this.pieChartPanel_IssuesByStatus = new ChartPanel(pieChart_IssuesByStatus, true);
@@ -81,7 +81,7 @@ class IssueSummaryChartsComponent {
         final CategoryPlot categoryPlot = lineChart_OpenIssuesOverTime.getCategoryPlot();
         categoryPlot.setBackgroundPaint(CHART_PLOT_BACKGROUND_PAINT);
         categoryPlot.setDomainAxis(new CustomCategoryAxis());
-        categoryPlot.setRenderer(new CustomCategoryItemRenderer(categoryPlot.getDataset()));
+        categoryPlot.setRenderer(new CustomCategoryItemRenderer(categoryPlot.getDataset(), statusProvider));
         this.lineChartPanel_OpenIssuesOverTime = new ChartPanel(lineChart_OpenIssuesOverTime, true);
 
         // add all ChartPanels to a master panel
@@ -94,16 +94,6 @@ class IssueSummaryChartsComponent {
      */
     public JComponent getComponent() {
         return this.allChartsPanel;
-    }
-
-    /**
-     * Finds a status by name
-     *
-     * @param name the status name
-     * @return the status
-     */
-    private static final Status statusFor(String name) {
-        return IssueTrackingSystem.getInstance().statusFor(name);
     }
 
     /**
@@ -130,8 +120,14 @@ class IssueSummaryChartsComponent {
      * This custom PiePlot selects Paint values based on section data.
      */
     private static class CustomPiePlot extends PiePlot {
-        public CustomPiePlot(PieDataset dataset) {
+        /** serialVersionUID. */
+        private static final long serialVersionUID = 0L;
+
+        private final StatusProvider statusProvider;
+
+        public CustomPiePlot(PieDataset dataset, StatusProvider statusProvider) {
             super(dataset);
+            this.statusProvider = statusProvider;
             this.setBackgroundPaint(CHART_PLOT_BACKGROUND_PAINT);
             this.setOutlinePaint(PIE_CHART_PLOT_PAINT);
         }
@@ -139,7 +135,7 @@ class IssueSummaryChartsComponent {
         @Override
         public Paint getSectionPaint(int section) {
             final String rowKeyForSeries = (String) this.getDataset().getKey(section);
-            return statusFor(rowKeyForSeries).getColor();
+            return statusProvider.statusFor(rowKeyForSeries).getColor();
         }
     }
 
@@ -147,17 +143,22 @@ class IssueSummaryChartsComponent {
      * This custom renderer selects Paint values based on series data.
      */
     private static class CustomCategoryItemRenderer extends DefaultCategoryItemRenderer {
-        private final CategoryDataset dataset;
+        /** serialVersionUID. */
+        private static final long serialVersionUID = 0L;
 
-        public CustomCategoryItemRenderer(CategoryDataset dataset) {
+        private final CategoryDataset dataset;
+        private final StatusProvider statusProvider;
+
+        public CustomCategoryItemRenderer(CategoryDataset dataset, StatusProvider statusProvider) {
             this.dataset = dataset;
+            this.statusProvider = statusProvider;
             this.setShapesVisible(false);
         }
 
         @Override
         public Paint getSeriesPaint(int series) {
             final String rowKeyForSeries = (String) this.dataset.getRowKey(series);
-            return statusFor(rowKeyForSeries).getColor();
+            return statusProvider.statusFor(rowKeyForSeries).getColor();
         }
     }
 
@@ -165,6 +166,9 @@ class IssueSummaryChartsComponent {
      * This custom CategoryAxis formats the labels of the Date axis as desired.
      */
     private static class CustomCategoryAxis extends CategoryAxis {
+        /** serialVersionUID. */
+        private static final long serialVersionUID = 0L;
+
         private static final DateFormat DATE_FORMAT = new SimpleDateFormat("MMM yyyy");
 
         // map each Date to a pretty formatted display value
