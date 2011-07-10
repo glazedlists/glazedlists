@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
     <name>Glazed Lists</name>
     <description>Event-driven lists for dynamically filtered and sorted tables</description>
-    <url>http://publicobject.com/glazedlists/</url>
+    <url>http://www.glazedlists.com/</url>
     <issueManagement>
         <system>Jira</system>
         <url>http://java.net/jira/browse/GLAZEDLISTS</url>
@@ -18,36 +18,19 @@
     <inceptionYear>2003</inceptionYear>
     <mailingLists>
         <mailingList>
-            <name>users@glazedlists.dev.java.net</name>
-            <post>users@glazedlists.dev.java.net</post>
-            <subscribe>https://glazedlists.dev.java.net/servlets/ProjectMailingListList</subscribe>
-            <unsubscribe>
-                https://glazedlists.dev.java.net/servlets/ProjectMailingListList</unsubscribe>
-            <archive>https://glazedlists.dev.java.net/servlets/ProjectMailingListList</archive>
+            <name>users@glazedlists.java.net</name>
+            <post>users@glazedlists.java.net</post>
+            <archive>http://java.net/projects/glazedlists/lists/users/archive</archive>
         </mailingList>
         <mailingList>
-            <name>dev@glazedlists.dev.java.net</name>
-            <post>dev@glazedlists.dev.java.net</post>
-            <subscribe>https://glazedlists.dev.java.net/servlets/ProjectMailingListList</subscribe>
-            <unsubscribe>
-                https://glazedlists.dev.java.net/servlets/ProjectMailingListList</unsubscribe>
-            <archive>https://glazedlists.dev.java.net/servlets/ProjectMailingListList</archive>
+            <name>dev@glazedlists.java.net</name>
+            <post>dev@glazedlists.java.net</post>
+            <archive>http://java.net/projects/glazedlists/lists/dev/archive</archive>
         </mailingList>
         <mailingList>
-            <name>cvs@glazedlists.dev.java.net</name>
-            <post>cvs@glazedlists.dev.java.net</post>
-            <subscribe>https://glazedlists.dev.java.net/servlets/ProjectMailingListList</subscribe>
-            <unsubscribe>
-                https://glazedlists.dev.java.net/servlets/ProjectMailingListList</unsubscribe>
-            <archive>https://glazedlists.dev.java.net/servlets/ProjectMailingListList</archive>
-        </mailingList>
-        <mailingList>
-            <name>issues@glazedlists.dev.java.net</name>
-            <post>issues@glazedlists.dev.java.net</post>
-            <subscribe>https://glazedlists.dev.java.net/servlets/ProjectMailingListList</subscribe>
-            <unsubscribe>
-                https://glazedlists.dev.java.net/servlets/ProjectMailingListList</unsubscribe>
-            <archive>https://glazedlists.dev.java.net/servlets/ProjectMailingListList</archive>
+            <name>issues@glazedlists.java.net</name>
+            <post>issues@glazedlists.java.net</post>
+            <archive>http://java.net/projects/glazedlists/lists/issues/archive</archive>
         </mailingList>
     </mailingLists>
     <developers>
@@ -121,7 +104,9 @@
         </license>
     </licenses>
     <scm>
-        <url>https://glazedlists.dev.java.net/source/browse/glazedlists/</url>
+        <connection>scm:svn:http://svn.java.net/svn/glazedlists~svn/trunk</connection>
+        <developerConnection>scm:svn:https://svn.java.net/svn/glazedlists~svn/trunk</developerConnection>
+        <url>http://java.net/projects/glazedlists/sources/svn/show/trunk</url>
     </scm>
     <dependencies>
         <dependency>
