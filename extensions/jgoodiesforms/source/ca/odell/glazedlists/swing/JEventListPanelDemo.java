@@ -6,11 +6,13 @@ package ca.odell.glazedlists.swing;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Random;
+
+import javax.swing.*;
 
 /**
  * A panel that shows the contents of an EventList containing JComponents.
@@ -19,9 +21,9 @@ import java.util.Random;
  */
 class JEventListPanelDemo {
 
-    private final EventList sillyObjects = new BasicEventList();
+    private final EventList<String> sillyObjects = new BasicEventList<String>();
 
-    public class SillyObjectFormat extends JEventListPanel.AbstractFormat {
+    public class SillyObjectFormat extends JEventListPanel.AbstractFormat<String> {
 
         public SillyObjectFormat() {
             super("0dlu, pref, 0dlu, pref, 0dlu", "0dlu, pref, 0dlu, fill:pref:grow, 0dlu", "45dlu", "45dlu", new String[] { "2, 2, 1, 3", "4, 2", "4, 4" });
@@ -33,8 +35,8 @@ class JEventListPanelDemo {
             return 3;
         }
 
-        public JComponent getComponent(Object element, int component) {
-            final String sillyObject = (String)element;
+        public JComponent getComponent(String element, int component) {
+            final String sillyObject = element;
             if(component == 0) {
                 JButton button = new JButton(sillyObject);
                 button.addActionListener(new ButtonActionListener(sillyObject));
@@ -66,7 +68,7 @@ class JEventListPanelDemo {
         sillyObjects.add("X 3");
         sillyObjects.add("X 9");
 
-        JEventListPanel panel = new JEventListPanel(sillyObjects, new SillyObjectFormat());
+        JEventListPanel<String> panel = new JEventListPanel<String>(sillyObjects, new SillyObjectFormat());
         panel.setBorder(BorderFactory.createMatteBorder(5, 5, 5, 5, Color.RED));
         panel.setElementColumns(1);
 
@@ -88,8 +90,8 @@ class JEventListPanelDemo {
 
     static class AddAction implements ActionListener {
         private Random dice = new Random();
-        private EventList target;
-        public AddAction(EventList target) {
+        private EventList<String> target;
+        public AddAction(EventList<String> target) {
             this.target = target;
         }
         public void actionPerformed(ActionEvent e) {

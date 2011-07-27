@@ -7,13 +7,17 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.RowSpec;
-
-import javax.swing.*;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A panel that shows the contents of an EventList containing JComponents.
@@ -111,7 +115,7 @@ public final class JEventListPanel<E> extends JPanel {
     /**
      * Provide the binding between this panel and the source {@link EventList}.
      */
-    private class SourceChangeHandler implements ListEventListener {
+    private class SourceChangeHandler implements ListEventListener<E> {
         /**
          * Handle an inserted element.
          */
@@ -189,7 +193,7 @@ public final class JEventListPanel<E> extends JPanel {
         /**
          * When the components list changes, this updates the panel.
          */
-        public void listChanged(ListEvent listChanges) {
+        public void listChanged(ListEvent<E> listChanges) {
             while(listChanges.next()) {
                 int type = listChanges.getType();
                 int index = listChanges.getIndex();
@@ -211,11 +215,12 @@ public final class JEventListPanel<E> extends JPanel {
     /**
      * Releases the resources consumed by this {@link JEventListPanel} so that it
      * may eventually be garbage collected.
-     * 
+     *
      * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
      * to call any method on a {@link JEventListPanel} after it has been disposed.
      */
     public void dispose() {
+        swingSource.removeListEventListener(sourceChangeHandler);
         swingSource.dispose();
     }
 
