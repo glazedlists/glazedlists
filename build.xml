@@ -3,7 +3,7 @@
    Copyright 2003 publicobject.com, O'Dell Engineering Ltd.
 -->
 
-<project name="glazedlists" default="jar" basedir=".">
+<project name="glazedlists" default="jar" basedir="." xmlns:artifact="antlib:org.apache.maven.artifact.ant">
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
        BUILD ADMINISTRATION
@@ -13,41 +13,41 @@
     <property name="java.target.version" value="1.5"/>
     <property name="java.target.version.fileFriendlyName" value="java15"/>
 
+	<!-- Version number for the next planned release -->
+    <property name="next.release.version" value="1.9"/>
+    
+	<!-- Maven coordinates -->
+	<!-- version number, use suffix '-SNAPSHOT' for development build -->
+    <property name="version" value="${next.release.version}-SNAPSHOT"/>	
+    <property name="artifactId" value="glazedlists_${java.target.version.fileFriendlyName}" />
+	<property name="groupId" value="net.java.dev.glazedlists" />
+
 	<!-- filter for maven pom.xml -->
 	<filter token="glazedlists.version" value="${version}"/>
-	<filter token="glazedlists.artifactId" value="glazedlists_${java.target.version.fileFriendlyName}"/>
+	<filter token="glazedlists.artifactId" value="${artifactId}"/>
 	
+    <!-- defined maven snapshots and staging repository id and url -->
+    <property name="maven-snapshots-repository-id" value="jvnet-nexus-snapshots" />
+    <property name="maven-snapshots-repository-url" value="https://maven.java.net/content/repositories/snapshots/" />
+    <property name="maven-staging-repository-id" value="jvnet-nexus-staging" />
+    <property name="maven-staging-repository-url" value="https://maven.java.net/service/local/staging/deploy/maven2/" />
+
     <property environment="env"/>
     <tstamp prefix="datestamp">
         <format property="dateAndTime" pattern="yyyy-MM-dd H:mm"/>
     </tstamp>
 
-	<!-- Version number for the next planned release -->
-	<property name="next.release.version" value="1.9"/>
-	
-	<!-- Default implementation version for jar file, overridden by release target -->
-	<property name="implementation.version" value="${next.release.version}.alpha${datestamp.DSTAMP}"/>
-	
-	<!-- Default OSGI Bundle version for jar file, overridden by release target -->	
-	<property name="bundle.version" value="${implementation.version}"/>
-	
-	<!-- Default title for javadocs, overridden by release target -->
-	<property name="doctitle" value="Glazed Lists"/>
+	<!-- Default name for distribution zip file -->
+	<property name="dist.file" value="${artifactId}-${version}-dist.zip"/>
 
-	<!-- Default name for distribution zip file, overridden by release target -->
-	<property name="dist.file" value="glazedlists-source_${java.target.version.fileFriendlyName}.zip"/>
+	<!-- name for jar file -->
+	<property name="jar.file" value="${artifactId}-${version}.jar"/>
 
-	<!-- Release name for distribution zip file -->
-	<property name="release.dist.file" value="glazedlists-${version}-source_${java.target.version.fileFriendlyName}.zip"/>
+	<!-- name for source jar file -->
+    <property name="source.jar.file" value="${artifactId}-${version}-sources.jar"/>
 
-	<!-- Default name for jar file, overridden by release target -->
-	<property name="jar.file" value="glazedlists_${java.target.version.fileFriendlyName}.jar"/>
-
-	<!-- Default name for jar file, overridden by release target -->
-    <property name="source.jar.file" value="glazedlists_${java.target.version.fileFriendlyName}-sources.jar"/>
-
-	<!-- Release name for jar file -->
-	<property name="release.jar.file" value="glazedlists-${version}_${java.target.version.fileFriendlyName}.jar"/>
+	<!-- name for javadoc jar file -->
+    <property name="javadoc.jar.file" value="${artifactId}-${version}-javadoc.jar"/>
 
 	<!-- base output directory for build artefacts -->
 	<property name="target.dir" value="target"/>
@@ -64,16 +64,16 @@
 	<!-- output directory for javadocs -->
 	<property name="docs.dir" value="${target.dir}/docs"/>
 
+	<!-- title for javadocs -->
+    <property name="doctitle" value="Glazed Lists ${version}"/>
+
 	<!-- output directory for demo jar contents -->
 	<property name="issuesbrowserjar.dir" value="${target.dir}/issuesbrowserjar"/>
 	<property name="xmlbrowser.dir" value="${target.dir}/xmlbrowserjar"/>
-
-	<!-- output directory for maven upload bundle -->
-	<property name="maven_bundle.dir" value="${target.dir}/maven_bundle"/>
-
-	<!-- name of maven upload bundle -->
-	<property name="maven_bundle.file" value="glazedlists_${java.target.version.fileFriendlyName}-${version}-bundle.jar"/>	
-
+	
+	<!-- deploy directory -->
+	<property name="deploy.dir" value="${target.dir}/deploy"/>
+	
 	<patternset id="test.files">
 		<include name="**/*.xml"/>
 	</patternset>
@@ -153,8 +153,41 @@
 	   JAR
 	   Construct the .jar file for use in a library.
 	 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	<!-- update property values depending on version (snapshot or release)-->
+	<target name="update-version-properties" depends="check-snapshot-version, update-snapshot-properties, update-release-properties">
+		<echo message="implementation.version=${implementation.version}"/>
+		<echo message="bundle.version=${bundle.version}"/>
+	</target>
 
-    <target name="jar" depends="compileall"
+	<!-- checks if current version is SNAPSHOT -->
+	<target name="check-snapshot-version" depends="check-version">
+        <condition property="isSnapshot">
+            <matches string="${version}" pattern="-SNAPSHOT$"/>
+        </condition>
+    </target>
+
+	<!-- ensures that version property is set -->
+	<target name="check-version" description="Checks version property">
+        <fail unless="version" message="To build or deploy a release the property 'version' must be defined."/>
+    </target>
+
+	<!-- update property values depending on snapshot version -->
+	<target name="update-snapshot-properties" if="isSnapshot">
+	    <!-- implementation version for jar file -->
+	    <property name="implementation.version" value="${next.release.version}.alpha${datestamp.DSTAMP}"/>	    
+	    <!-- OSGI Bundle version for jar file --> 
+	    <property name="bundle.version" value="${implementation.version}"/>
+	</target>
+	
+	<!-- update property values depending on release version -->
+    <target name="update-release-properties" unless="isSnapshot">
+        <!-- implementation version for jar file -->
+        <property name="implementation.version" value="${version}"/>        
+        <!-- OSGI Bundle version for jar file --> 
+        <property name="bundle.version" value="${implementation.version}"/>
+    </target>
+	
+    <target name="jar" depends="compileall,update-version-properties"
         description="Creates glazedlists jar file (which is also a valid OSGi bundle) containing all UI libraries.">
 
         <mkdir dir="tools"/>
@@ -189,6 +222,10 @@
         <move file="${target.dir}/${jar.file}.osgi" toFile="${target.dir}/${jar.file}"/>
     </target>
 
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+       SOURCEJAR
+       Construct the .jar file with all sources of the library.
+     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 	<target name="sourcejar"
         description="Creates glazedlists source jar file containing all sources.">
 		
@@ -214,6 +251,15 @@
 		<delete dir="${target.dir}/sources"/>
     </target>
 
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+       JAVADOCJAR
+       Construct the .jar file with all javadoc for the library.
+     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <target name="javadocjar" depends="docs"
+        description="Create a .jar file containing the javadoc.">
+        <jar destfile="${target.dir}/${javadoc.jar.file}" basedir="${docs.dir}/api"/>
+    </target>
+	
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 	   COMPILE
 	 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -607,45 +653,6 @@
 		</zip>
 	</target>
 
-    <target name="upload" depends="dist,jar,sourcejar,compiletests"
-        description="Upload binaries to java.net, see http://javanettasks.dev.java.net/">
-
-        <!-- download the javanettasks library for uploading jars to the java.net webserver -->
-        <mkdir dir="tools"/>
-        <java classname="ca.odell.glazedlists.impl.HttpClient">
-            <classpath path="${classes.dir}"/>
-            <arg value="${download.base.url}/tools/javanettasks/javanettasks.jar"/>
-            <arg value="tools/javanettasks.jar"/>
-        </java>
-
-        <!-- prepare the javaNetUpload task -->
-        <taskdef resource="org/kohsuke/javanettasks.properties" classpath="tools/javanettasks.jar"/>
-
-        <!-- upload source distribution -->
-        <javaNetUpload projectName="glazedlists"
-            toFile="/latest_build/${dist.file}"
-            fromFile="${target.dir}/${dist.file}"
-            fileDescription="Source distribution by ${user.name} at ${datestamp.dateAndTime}"
-            overwrite="yes"
-            fileStatus="Draft"/>
-
-        <!-- upload binary -->
-        <javaNetUpload projectName="glazedlists"
-            toFile="/latest_build/${jar.file}"
-            fromFile="${target.dir}/${jar.file}"
-            fileDescription="Binary build by ${user.name} at ${datestamp.dateAndTime}"
-            overwrite="yes"
-            fileStatus="Draft"/>
-    	
-        <!-- upload source jar -->
-    	<javaNetUpload projectName="glazedlists"
-            toFile="/latest_build/${source.jar.file}"
-            fromFile="${target.dir}/${source.jar.file}"
-            fileDescription="Source jar by ${user.name} at ${datestamp.dateAndTime}"
-            overwrite="yes"
-            fileStatus="Draft"/>
-	</target>
-
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
        TEST
        Compile unit tests and run them using JUnit.
@@ -695,122 +702,151 @@
 			</fileset>
 		</copy>
     </target>
-
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	   MAVEN-BUNDLE
-	   Construct the maven upload bundle.
-	   It contains the POM, the main artifact, source and javadoc jar
-	 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-	<target name="maven-bundle" depends="jar-sources,jar-javadoc,jar"
-		description="Creates glazedlists upload bundle for maven repository.">
-		<copy file="pom.xml" todir="${maven_bundle.dir}" filtering="true"/>
-		<copy file="${target.dir}/${jar.file}" tofile="${maven_bundle.dir}/glazedlists_${java.target.version.fileFriendlyName}-${version}.jar"/>
-		<jar destfile="${target.dir}/${maven_bundle.file}">
-            <fileset dir="${maven_bundle.dir}">
-				<include name="pom.xml"/>
-				<include name="glazedlists_${java.target.version.fileFriendlyName}-${version}.jar"/>
-				<include name="glazedlists_${java.target.version.fileFriendlyName}-${version}-sources.jar"/>
-				<include name="glazedlists_${java.target.version.fileFriendlyName}-${version}-javadoc.jar"/>
-            </fileset>
-		</jar>
-		<delete dir="${maven_bundle.dir}"/>
-	</target>
-
-	<target name="check-version" description="Checks version property">
-		<fail unless="version" message="To build a maven upload bundle the property 'version' must be defined."/>
-	</target>
-
-	<target name="jar-sources" depends="check-version,dist"
-		description="Create a .jar file containing the source files.">
-		<mkdir dir="${maven_bundle.dir}"/>
-		<copy file="${target.dir}/${dist.file}" tofile="${maven_bundle.dir}/glazedlists_${java.target.version.fileFriendlyName}-${version}-sources.jar"/>
-		<jar destfile="${maven_bundle.dir}/glazedlists_${java.target.version.fileFriendlyName}-${version}-sources.jar" update="true"/>
-	</target>
-
-	<target name="jar-javadoc" depends="check-version,docs"
-		description="Create a .jar file containing the javadoc.">
-		<mkdir dir="${maven_bundle.dir}"/>
-		<jar destfile="${maven_bundle.dir}/glazedlists_${java.target.version.fileFriendlyName}-${version}-javadoc.jar" basedir="${docs.dir}/api"/>
+	
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+       BUILD
+       Build a source distribution, binary jar, source jar and javadoc jar ready for deployment 
+     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	<target name="build" depends="dist,jar,sourcejar,javadocjar,compiletests"
+		  description="builds a source distribution, binary jar, source jar and javadoc jar ready for deployment">
+		   <echo message="${line.separator}Release build completed. Please upload with: 'ant deploy'"/>
 	</target>
 	
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-	   RELEASE
-	   Build a Glazed Lists release with version number.
-	   It builds source distribution, binary jar and maven upload bundle with correct file names.
-	 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+       DEPLOY
+       Deploy an already built snapshot or release to the corresponding java.net maven repository
+       if the version property ends with '-SNAPSHOT' a snapshot is published, otherwise a release is staged 
+     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <target name="deploy" depends="deploy-snapshot, stage-release" 
+    	description="deploys an already built snapshot or release to the corresponding java.net maven repository"/>
+    	
+	<!-- deploy a snapshot/latest build with binary, source and javadoc jar to the corresponding java.net snapshot maven repository -->
+	<!-- project version should have a proper value (ending with '-SNAPSHOT') -->
+    <target name="deploy-snapshot" depends="deploy-init, check-deploy-artifacts" if="isSnapshot">
+        <echo message="deploying latest build ${version} to Maven SNAPSHOT repository ${maven-snapshots-repository-url}"/>
+        <artifact:mvn pom="${deploy.dir}/pom.xml">
+            <arg value="org.apache.maven.plugins:maven-deploy-plugin:2.6:deploy-file" />
+            <arg value="-Durl=${maven-snapshots-repository-url}" />
+            <arg value="-DrepositoryId=${maven-snapshots-repository-id}" />
+            <arg value="-DpomFile=pom.xml" />
+            <arg value="-Dfile=${jar.file}" />
+            <arg value="-Dsources=${source.jar.file}" />
+            <arg value="-Djavadoc=${javadoc.jar.file}" />
+        </artifact:mvn>
+        <echo message="${line.separator}Snapshot deployment completed."/>    	
+    </target>
 
-	<target name="check-release-version" description="Checks version property">
-		<fail unless="version" message="To build or upload a release the property 'version' must be defined."/>
-	</target>
-	
-	<target name="release" depends="check-release-version"
-		description="Builds a release with binary jar, source distribution and maven upload bundle">
-		<antcall target="maven-bundle">
-			<param name="doctitle" value="Glazed Lists ${version}"/>
-			<param name="implementation.version" value="${version}"/>
-			<param name="bundle.version" value="${version}"/>
-			<param name="jar.file" value="${release.jar.file}"/>
-			<param name="dist.file" value="${release.dist.file}"/>
-		</antcall>
-		<echo message="${line.separator}Release build completed. Please upload with: 'ant -Dversion=${version} upload-release'"/>
-		<echo message="Remember to increase the value for build property 'next.release.version'"/>
-	</target>
+	<!-- deploy a release with a source distribution, binary, source and javadoc jar to the corresponding java.net staging maven repository -->
+    <!-- project version should have a proper value (no SNAPSHOT) -->
+    <target name="stage-release" depends="deploy-init, check-deploy-artifacts" unless="isSnapshot">
+        <echo message="deploying release version to Maven STAGING repository ${maven-staging-repository-url}"/>     
+        <!-- sign and deploy the main artifact -->
+        <artifact:mvn pom="${deploy.dir}/pom.xml">
+            <arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
+            <arg value="-Durl=${maven-staging-repository-url}" />
+            <arg value="-DrepositoryId=${maven-staging-repository-id}" />
+            <arg value="-DpomFile=pom.xml" />
+            <arg value="-Dfile=${jar.file}" />
+            <arg value="-Pgpg" />
+        </artifact:mvn>
 
-	<target name="check-release-artifacts">
-		<fail message="Files for release upload are missing, build a release first.">
-	    	<condition>
-	    		<or>
-	       			<not>
-			       		<available file="${target.dir}/${release.jar.file}" property="jar.file.present"/>
-	    	   		</not>
-	       			<not>
-			       		<available file="${target.dir}/${release.dist.file}" property="dist.file.present"/>
-	    	   		</not>
-	       			<not>
-			       		<available file="${target.dir}/${maven_bundle.file}" property="maven_bundle.file.present"/>
-	    	   		</not>
-	    		</or>
-	     	</condition>
-		</fail>
-	</target>
+        <!-- sign and deploy the sources artifact -->
+        <artifact:mvn pom="${deploy.dir}/pom.xml">
+            <arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
+            <arg value="-Durl=${maven-staging-repository-url}" />
+            <arg value="-DrepositoryId=${maven-staging-repository-id}" />
+            <arg value="-DpomFile=pom.xml" />
+            <arg value="-Dfile=${source.jar.file}" />
+            <arg value="-Dclassifier=sources" />
+            <arg value="-Pgpg" />
+        </artifact:mvn>
+        <!-- sign and deploy the javadoc artifact -->
+        <artifact:mvn pom="${deploy.dir}/pom.xml">
+            <arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
+            <arg value="-Durl=${maven-staging-repository-url}" />
+            <arg value="-DrepositoryId=${maven-staging-repository-id}" />
+            <arg value="-DpomFile=pom.xml" />
+            <arg value="-Dfile=${javadoc.jar.file}" />
+            <arg value="-Dclassifier=javadoc" />
+            <arg value="-Pgpg" />
+        </artifact:mvn>
+        <!-- sign and deploy the dist artifact -->
+        <artifact:mvn pom="${deploy.dir}/pom.xml">
+            <arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
+            <arg value="-Durl=${maven-staging-repository-url}" />
+            <arg value="-DrepositoryId=${maven-staging-repository-id}" />
+            <arg value="-DpomFile=pom.xml" />
+            <arg value="-Dfile=${dist.file}" />
+            <arg value="-Dclassifier=dist" />
+        	<arg value="-Dpackaging=zip" />
+            <arg value="-Pgpg" />
+        </artifact:mvn>
+        <echo message="${line.separator}Release staging completed. Please test, close and release the staging repo at 'maven.java.net'"/>
+        <echo message="Remember to increase the value for build properties 'next.release.version' and 'version'"/>
+    </target>
 	
-	<target name="upload-release" depends="check-release-version, check-release-artifacts"
-		description="Uploads a release to glazedlists.dev.java.net">
-        <!-- download the javanettasks library for uploading jars to the java.net webserver -->
+	<!-- initializes deploy directory with the needed artifacts -->
+    <target name="deploy-init" depends="download-mavenanttasks, check-snapshot-version">
+    	<echo message="Preparing artifacts for deployment..."/>
+        <mkdir dir="${deploy.dir}" />
+        <copy file="pom.xml" todir="${deploy.dir}" filtering="true" failonerror="true"/>
+        <copy file="${target.dir}/${jar.file}" tofile="${deploy.dir}/${jar.file}" failonerror="true"/>
+        <copy file="${target.dir}/${source.jar.file}" tofile="${deploy.dir}/${source.jar.file}" failonerror="true"/>
+        <copy file="${target.dir}/${javadoc.jar.file}" tofile="${deploy.dir}/${javadoc.jar.file}" failonerror="true"/>
+    	<copy file="${target.dir}/${dist.file}" tofile="${deploy.dir}/${dist.file}" failonerror="true"/>
+    </target>
+
+	<!-- download Maven ANT tasks for deployment -->
+    <target name="download-mavenanttasks">
         <mkdir dir="tools"/>
+        <!--download the Maven ANT tasks needed for deploying to maven repositories -->
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="${download.base.url}/tools/javanettasks/javanettasks.jar"/>
-            <arg value="tools/javanettasks.jar"/>
+            <arg value="http://java.net/projects/glazedlists/downloads/download/tools/mavenanttasks/maven-ant-tasks.jar"/>
+            <arg value="tools/maven-ant-tasks.jar"/>
         </java>
+        <!-- check if download was successfull -->
+        <fail message="Maven ANT tasks could not be downloaded. Please check your settings to ensure internet access.">
+            <condition>
+                <not>
+                    <available file="tools/maven-ant-tasks.jar"/>
+                </not>
+            </condition>
+        </fail>
+        <path id="maven-ant-tasks.classpath" path="tools/maven-ant-tasks.jar" />
+        <typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="antlib:org.apache.maven.artifact.ant"
+                   classpathref="maven-ant-tasks.classpath" />
+    </target>
 
-        <!-- prepare the javaNetUpload task -->
-        <taskdef resource="org/kohsuke/javanettasks.properties" classpath="tools/javanettasks.jar"/>
-		
-        <!-- upload source distribution -->
-		<echo message="Uploading to /glazedlists-${version}/${release.dist.file}"/>
-        <javaNetUpload projectName="glazedlists"
-            toFile="/glazedlists-${version}/${release.dist.file}"
-            fromFile="${target.dir}/${release.dist.file}"
-            fileDescription="Source release by ${user.name} at ${datestamp.dateAndTime}"
-            fileStatus="Archival"/>
+    <!-- checks if all needed artifacts are available -->
+    <target name="check-deploy-artifacts">
+        <fail message="Files for deployment are missing, build a release first with 'ant build'.">
+            <condition>
+                <or>
+                    <not>
+                        <available file="${deploy.dir}/${jar.file}" property="jar.file.present"/>
+                    </not>
+                    <not>
+                        <available file="${deploy.dir}/${source.jar.file}" property="sources.jar.file.present"/>
+                    </not>
+                    <not>
+                        <available file="${deploy.dir}/${javadoc.jar.file}" property="javadoc.jar.file.present"/>
+                    </not>
+                    <not>
+                        <available file="${deploy.dir}/${dist.file}" property="dist.jar.file.present"/>
+                    </not>
+                    <not>
+                        <available file="${deploy.dir}/pom.xml" property="pom.file.present"/>
+                    </not>
+                </or>
+            </condition>
+        </fail>
+    </target>
 
-        <!-- upload binary jar -->
-		<echo message="Uploading to /glazedlists-${version}/${release.jar.file}"/>		
-        <javaNetUpload projectName="glazedlists"
-            toFile="/glazedlists-${version}/${release.jar.file}"
-            fromFile="${target.dir}/${release.jar.file}"
-            fileDescription="Binary release by ${user.name} at ${datestamp.dateAndTime}"
-            fileStatus="Archival"/>
-
-		<!-- upload maven bundle -->
-		<echo message="Uploading to /maven_upload/${maven_bundle.file}"/>
-        <javaNetUpload projectName="glazedlists"
-            toFile="/maven_upload/${maven_bundle.file}"
-            fromFile="${target.dir}/${maven_bundle.file}"
-            fileDescription="Maven upload bundle by ${user.name} at ${datestamp.dateAndTime}"
-            fileStatus="Archival"/>		
-	</target>
+	<!-- deletes the deploy dir with all contents -->
+    <target name="deploy-clean" description="clean up deploy directory">
+        <delete dir="${deploy.dir}" />
+    </target>
 	
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
        M4
