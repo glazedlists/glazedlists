@@ -94,7 +94,7 @@ public class BeanConnectorTest extends TestCase {
         }
 
         @Override
-        public void elementChanged(E element) {
+        public void elementChanged(Object element) {
             this.elementChangeCount++;
             super.elementChanged(element);
         }

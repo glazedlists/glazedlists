@@ -31,7 +31,7 @@ public class ObservableConnector<E extends Observable> implements ObservableElem
      * @param arg an argument passed to observers which is ignored here
      */
     public void update(Observable o, Object arg) {
-        ((ObservableElementList) list).elementChanged(o);
+        list.elementChanged(o);
     }
 
     /**

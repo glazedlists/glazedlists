@@ -410,7 +410,7 @@ public class ObservableElementList<E> extends TransformedList<E, E> {
      *
      * @param listElement the list element which has been modified
      */
-    public void elementChanged(E listElement) {
+    public void elementChanged(Object listElement) {
         if (this.observedElements == null)
             throw new IllegalStateException("This list has been disposed and can no longer be used.");
 
@@ -420,8 +420,10 @@ public class ObservableElementList<E> extends TransformedList<E, E> {
 
             // locate all indexes containing the given listElement
             for (int i = 0, n = size(); i < n; i++) {
-                if (listElement == get(i))
-                    this.updates.elementUpdated(i, listElement);
+            	final E currentElement = get(i);
+                if (listElement == currentElement) {
+                    this.updates.elementUpdated(i, currentElement);
+                }
             }
 
             this.updates.commitEvent();
