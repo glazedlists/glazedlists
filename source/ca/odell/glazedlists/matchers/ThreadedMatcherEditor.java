@@ -93,7 +93,6 @@ public class ThreadedMatcherEditor<E> extends AbstractMatcherEditorListenerSuppo
      *
      * @return the current Matcher specified by the source {@link MatcherEditor}
      */
-    @Override
     public Matcher<E> getMatcher() {
         return this.source.getMatcher();
     }
