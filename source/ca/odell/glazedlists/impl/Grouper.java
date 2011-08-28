@@ -220,7 +220,18 @@ public class Grouper<E> {
 
                 // get the location of the group before the update occurred
                 int oldGroup = 0;
-                if(toDoList.get(changeIndex) == TODO) oldGroup = RIGHT_GROUP;
+                if(toDoList.get(changeIndex) == TODO) {
+                	if (changeIndex + 1 < barcode.size()) {
+                		oldGroup = RIGHT_GROUP;
+                	} else {
+                		// case: AACC -> AAC (list change __UX)
+                		// an update occured on the UNIQUE element of the last group,
+                		// but the following duplicates of this group were deleted.
+                		// as it's the last element remaining, treat it as UNIQUE.
+                		// in the second iteration this will lead to a group update event
+                		oldGroup = NO_GROUP;
+                	}
+                }
                 else if(barcode.get(changeIndex) == DUPLICATE) oldGroup = LEFT_GROUP;
                 else if(barcode.get(changeIndex) == UNIQUE) oldGroup = NO_GROUP;
 
@@ -288,8 +299,16 @@ public class Grouper<E> {
 
                 // fire the change event
                 if(deleted == UNIQUE) {
-                    // if we removed a UNIQUE element then it was the last one and we must remove the group
-                    client.groupChanged(changeIndex, groupDeletedIndex, ListEvent.DELETE, true, changeType, oldValue, ListEvent.<E>unknownValue());
+                	if (changeIndex == lastFakedUniqueChangeIndex) {
+                		// case: AACC -> AAC (list change __UX)
+                		// in the last group we have deleted a duplicate element that was marked as UNIQUE 
+                		// because of an update event of the preceding UNIQUE element in the first iteration.
+                		// Duplicate deletion is a group update, but it was already triggered by the UNIQUE element update,
+                		// so nothing to do here
+                	} else {
+                		// if we removed a UNIQUE element then it was the last one and we must remove the group
+                		client.groupChanged(changeIndex, groupDeletedIndex, ListEvent.DELETE, true, changeType, oldValue, ListEvent.<E>unknownValue());
+                	}
                 } else {
                     E oldValueInGroup;
                     E newValueInGroup;

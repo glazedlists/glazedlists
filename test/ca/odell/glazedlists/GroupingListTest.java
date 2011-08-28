@@ -1,3 +1,6 @@
+/* Glazed Lists                                                 (c) 2003-2006 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
@@ -5,6 +8,7 @@ import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import ca.odell.glazedlists.matchers.Matcher;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -602,8 +606,6 @@ public class GroupingListTest extends TestCase {
 
         assertEquals("[[A1], [B1, B2]]", grouped.toString());
 
-        System.out.println("Ready for test");
-
         source.beginEvent();
         source.add(1, "A2");
         source.set(2, source.get(2));
@@ -621,14 +623,14 @@ public class GroupingListTest extends TestCase {
         TransactionList<String> txList = new TransactionList<String>(
                 new BasicEventList<String>());
 
-        new GroupingList<String>(txList);
-
+        GroupingList<String> grouped = new GroupingList<String>(txList);
         txList.beginEvent();
         txList.add("basket");
         txList.add("basket");
         txList.add("basket");
         txList.add("basket");
         txList.commitEvent();
+        assertEquals("[[basket, basket, basket, basket]]", grouped.toString());
 
         txList.beginEvent();
         txList.set(0, txList.get(0));
@@ -636,6 +638,150 @@ public class GroupingListTest extends TestCase {
         txList.set(2, txList.get(2));
         txList.set(3, txList.get(3));
         txList.commitEvent();
+        assertEquals("[[basket, basket, basket, basket]]", grouped.toString());
+    }
+    
+    public void testIssue522() {
+        TransactionList<String> source = new TransactionList<String>(
+                new BasicEventList<String>());
+
+        Comparator<String> comparator = GlazedListsTests.getFirstLetterComparator();
+        GroupingList<String> grouped = new GroupingList<String>(source, comparator);
+        ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped);
+        listener.setPreviousElementTracked(false);
+        String[] s = new String[] {"A", "B", "C", "D", "DD", "DDD", "E", "F", "FF"};
+
+        for (int i = 0; i < s.length; i++)
+            source.add(s[i]);
+        assertEquals("[[A], [B], [C], [D, DD, DDD], [E], [F, FF]]", grouped.toString());
+
+        source.beginEvent();
+        source.set(7, "F");
+        source.remove(8);
+        source.commitEvent();
+        assertEquals("[[A], [B], [C], [D, DD, DDD], [E], [F]]", grouped.toString());
+    }
+    
+    public void testMultipleUpdateDelete() {
+        TransactionList<String> source = new TransactionList<String>(
+                new BasicEventList<String>());
+
+        Comparator<String> comparator = GlazedListsTests.getFirstLetterComparator();
+        GroupingList<String> grouped = new GroupingList<String>(source, comparator);
+        ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped);
+        listener.setPreviousElementTracked(false);
+        String[] s = new String[] {"C", "CC", "D", "DD", "E", "EE"};
+
+        for (int i = 0; i < s.length; i++)
+            source.add(s[i]);
+
+        assertEquals("[[C, CC], [D, DD], [E, EE]]", grouped.toString());
+
+        source.beginEvent();
+        source.set(0, "C");
+        source.remove(1);
+        source.set(1, "D");
+        source.remove(2);
+        source.set(2, "E");
+        source.remove(3);
+        source.commitEvent();
+
+        assertEquals("[[C], [D], [E]]", grouped.toString());
+    }
+    
+    public void testLastGroup() {
+        TransactionList<String> source = new TransactionList<String>(
+                new BasicEventList<String>());
+
+        Comparator<String> comparator = GlazedListsTests.getFirstLetterComparator();
+        GroupingList<String> grouped = new GroupingList<String>(source, comparator);
+        ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped);
+        listener.setPreviousElementTracked(false);
+        String[] s = new String[] {"A", "B", "C", "D", "DD", "DDD", "E", "F", "FF"};
+
+        for (int i = 0; i < s.length; i++)
+            source.add(s[i]);
+        assertEquals("[[A], [B], [C], [D, DD, DDD], [E], [F, FF]]", grouped.toString());
+
+        source.beginEvent();
+        source.remove(6);
+        source.set(6, "DDDD");
+        source.remove(7);
+        source.add("E");
+        source.commitEvent();
+        assertEquals("[[A], [B], [C], [D, DD, DDD, DDDD], [E]]", grouped.toString());
+    }
+    
+	public void testIssue499_FixMe() {
+		TransactionList<String> source = new TransactionList<String>(
+				new BasicEventList<String>());
+
+		Comparator<String> comparator = GlazedListsTests.getFirstLetterComparator();
+		GroupingList<String> grouped = new GroupingList<String>(source,
+				comparator);
+        ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
+        listener.setPreviousElementTracked(false);
+
+		String[] s = new String[] { "MSFT", "MSFT", "IBM", "C", "IBM", "C",
+				"C", "IBM", "IBM", "C" };
+		String[] upd = new String[] { "MSFT", "MSFT", "MSFT", "C", "C", "IBM",
+				"IBM", "IBM", "C", "MSFT" };
+
+		for (int i = 0; i < s.length; i++)
+			source.add(s[i]);
+		
+		assertEquals("[[C, C, C, C], [IBM, IBM, IBM, IBM], [MSFT, MSFT]]", grouped.toString());
+
+		source.beginEvent();
+		for (int i = 0; i < upd.length; i++)
+			source.set(i, upd[i]);
+		source.commitEvent();
+		assertEquals("[[C, C, C], [IBM, IBM, IBM], [MSFT, MSFT, MSFT, MSFT]]", grouped.toString());
+	}    
+   
+    public void testSplitFirstGroup_FixMe() {
+        TransactionList<String> source = new TransactionList<String>(
+                new BasicEventList<String>());
+
+        Comparator<String> comparator = GlazedListsTests.getFirstLetterComparator();
+        GroupingList<String> grouped = new GroupingList<String>(source, comparator);
+        ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
+        listener.setPreviousElementTracked(false);
+
+        source.add("C");
+        source.add("CC");
+        source.add("CCC");
+
+        assertEquals("[[C, CC, CCC]]", grouped.toString());
+
+        source.beginEvent();
+        source.set(0, "A");
+        source.set(1, "B");
+        source.commitEvent();
+
+        assertEquals("[[A], [B], [CCC]]", grouped.toString());
+    }
+    
+    public void testJoinToFirstGroup_FixMe() {
+        TransactionList<String> source = new TransactionList<String>(
+                new BasicEventList<String>());
+
+        Comparator<String> comparator = GlazedListsTests.getFirstLetterComparator();
+        GroupingList<String> grouped = new GroupingList<String>(source, comparator);
+        ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
+        listener.setPreviousElementTracked(false);
+
+        source.add("A");
+        source.add("B");
+        source.add("CCC");
+
+        assertEquals("[[A], [B], [CCC]]", grouped.toString());
+
+        source.beginEvent();
+        source.set(0, "C");
+        source.set(1, "CC");
+        source.commitEvent();        
+        assertEquals("[[C, CC, CCC]]", grouped.toString());
     }
 
 }
