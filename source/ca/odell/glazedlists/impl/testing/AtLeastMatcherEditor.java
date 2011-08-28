@@ -17,7 +17,7 @@ public class AtLeastMatcherEditor extends AbstractMatcherEditor<Number> {
     }
     public AtLeastMatcherEditor(int minimum) {
         this.minimum = minimum;
-        currentMatcher = GlazedListsTests.matchAtLeast(minimum);
+        fireChanged(GlazedListsTests.matchAtLeast(minimum));
     }
     public void setMinimum(int value) {
         if(value < minimum) {

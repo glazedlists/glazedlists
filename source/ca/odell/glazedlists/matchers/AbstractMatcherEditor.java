@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.matchers;
 
-import javax.swing.event.EventListenerList;
 
 /**
  * Basic building block for {@link MatcherEditor} implementations that
@@ -23,44 +22,31 @@ import javax.swing.event.EventListenerList;
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
-public abstract class AbstractMatcherEditor<E> implements MatcherEditor<E> {
+public abstract class AbstractMatcherEditor<E> extends AbstractMatcherEditorListenerSupport<E> {
 
-    /** listeners for this Editor */
-    private EventListenerList listenerList = new EventListenerList();
-
-	/** the current Matcher in effect */
-	protected Matcher<E> currentMatcher = Matchers.trueMatcher();
+    /** the current Matcher in effect */
+	private Matcher<E> currentMatcher = Matchers.trueMatcher();
 
 	/** {@inheritDoc} */
-	public Matcher<E> getMatcher() {
+	public final Matcher<E> getMatcher() {
 		return currentMatcher;
 	}
 
-	/** {@inheritDoc} */
-    public final void addMatcherEditorListener(MatcherEditor.Listener<E> listener) {
-        listenerList.add(MatcherEditor.Listener.class, listener);
-    }
-
-    /** {@inheritDoc} */
-    public final void removeMatcherEditorListener(MatcherEditor.Listener<E> listener) {
-        listenerList.remove(Listener.class, listener);
-    }
-
-    /**
+	/**
      * Indicates that the filter matches all.
      */
     protected final void fireMatchAll() {
-		this.currentMatcher = Matchers.trueMatcher();
-        this.fireChangedMatcher(new MatcherEditor.Event<E>(this, Event.MATCH_ALL, this.currentMatcher));
+		currentMatcher = Matchers.trueMatcher();
+        fireChangedMatcher(createMatchAllEvent(currentMatcher));
     }
 
     /**
      * Indicates that the filter has changed in an indeterminate way.
      */
     protected final void fireChanged(Matcher<E> matcher) {
-		if(matcher == null) throw new NullPointerException();
-		this.currentMatcher = matcher;
-        this.fireChangedMatcher(new MatcherEditor.Event<E>(this, Event.CHANGED, this.currentMatcher));
+		if (matcher == null) throw new NullPointerException();
+		currentMatcher = matcher;
+		fireChangedMatcher(createChangedEvent(currentMatcher));
     }
 
     /**
@@ -68,9 +54,9 @@ public abstract class AbstractMatcherEditor<E> implements MatcherEditor<E> {
      * called if all currently filtered items will remain filtered.
      */
     protected final void fireConstrained(Matcher<E> matcher) {
-		if(matcher == null) throw new NullPointerException();
-		this.currentMatcher = matcher;
-        this.fireChangedMatcher(new MatcherEditor.Event<E>(this, Event.CONSTRAINED, this.currentMatcher));
+		if (matcher == null) throw new NullPointerException();
+		currentMatcher = matcher;
+        fireChangedMatcher(createConstrainedEvent(currentMatcher));
     }
 
     /**
@@ -78,40 +64,30 @@ public abstract class AbstractMatcherEditor<E> implements MatcherEditor<E> {
      * called if all currently unfiltered items will remain unfiltered.
      */
     protected final void fireRelaxed(Matcher<E> matcher) {
-		if(matcher == null) throw new NullPointerException();
-		this.currentMatcher = matcher;
-        this.fireChangedMatcher(new MatcherEditor.Event<E>(this, Event.RELAXED, this.currentMatcher));
+		if (matcher == null) throw new NullPointerException();
+		currentMatcher = matcher;
+        fireChangedMatcher(createRelaxedEvent(currentMatcher));
     }
 
     /**
      * Indicates that the filter matches none.
      */
     protected final void fireMatchNone() {
-		this.currentMatcher = Matchers.falseMatcher();
-        this.fireChangedMatcher(new MatcherEditor.Event<E>(this, Event.MATCH_NONE, this.currentMatcher));
+		currentMatcher = Matchers.falseMatcher();
+        fireChangedMatcher(createMatchNoneEvent(currentMatcher));
     }
 
     /**
      * Returns <tt>true</tt> if the current matcher will match everything.
      */
     protected final boolean isCurrentlyMatchingAll() {
-        return this.currentMatcher == Matchers.trueMatcher();
+        return currentMatcher == Matchers.trueMatcher();
     }
 
     /**
      * Returns <tt>true</tt> if the current matcher will match nothing.
      */
     protected final boolean isCurrentlyMatchingNone() {
-        return this.currentMatcher == Matchers.falseMatcher();
-    }
-
-    protected final void fireChangedMatcher(MatcherEditor.Event<E> event) {
-        // Guaranteed to return a non-null array
-        final Object[] listeners = this.listenerList.getListenerList();
-
-        // Process the listenerList last to first, notifying
-        // those that are interested in this event
-        for (int i = listeners.length-2; i>=0; i-=2)
-            ((Listener<E>) listeners[i+1]).changedMatcher(event);
+        return currentMatcher == Matchers.falseMatcher();
     }
 }

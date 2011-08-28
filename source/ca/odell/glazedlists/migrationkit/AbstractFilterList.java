@@ -162,17 +162,17 @@ public abstract class AbstractFilterList extends TransformedList {
          * This MatcherEditor's Matcher is itself.
          */
         public PrivateMatcherEditor() {
-            this.currentMatcher = this;
+            fireChanged();
         }
     
         /** {@inheritDoc} */
         public boolean matches(Object item) {
             return filterMatches(item);
         }
-        public void fireCleared() { super.fireMatchAll(); }
-        public void fireRelaxed() { super.fireRelaxed(this); }
-        public void fireConstrained() { super.fireConstrained(this); }
-        public void fireChanged() { super.fireChanged(this); }
+        public void fireCleared() { fireMatchAll(); }
+        public void fireRelaxed() { fireRelaxed(this); }
+        public void fireConstrained() { fireConstrained(this); }
+        public void fireChanged() { fireChanged(this); }
     }
 
 

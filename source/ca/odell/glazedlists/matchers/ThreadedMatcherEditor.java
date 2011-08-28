@@ -43,7 +43,7 @@ import java.util.List;
  *
  * @author James Lemieux
  */
-public class ThreadedMatcherEditor<E> extends AbstractMatcherEditor<E> {
+public class ThreadedMatcherEditor<E> extends AbstractMatcherEditorListenerSupport<E> {
 
     /** The underlying MatcherEditor whose MatcherEvents are being queued and fired on an alternate Thread. */
     private final MatcherEditor<E> source;
