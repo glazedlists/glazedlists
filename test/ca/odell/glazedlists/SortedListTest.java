@@ -72,12 +72,16 @@ public class SortedListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("ABCHEFGIJKLMNO"), sortedList);
         assertEquals(10, unsortedList.indexOf("H"));
         assertEquals(3, sortedList.indexOf("H"));
+        assertEquals(12, unsortedList.lastIndexOf("F"));
+        assertEquals(5, sortedList.lastIndexOf("F"));
 
         unsortedList.removeAll(GlazedListsTests.stringToList("AEIO"));
         assertEquals(GlazedListsTests.stringToList("BCJKLMNHFG"), unsortedList);
         assertEquals(GlazedListsTests.stringToList("BCHFGJKLMN"), sortedList);
         assertEquals(7, unsortedList.indexOf("H"));
         assertEquals(2, sortedList.indexOf("H"));
+        assertEquals(8, unsortedList.lastIndexOf("F"));
+        assertEquals(3, sortedList.lastIndexOf("F"));
 
         unsortedList.addAll(8, GlazedListsTests.stringToList("AEIO"));
         assertEquals(GlazedListsTests.stringToList("BCJKLMNHAEIOFG"), unsortedList);
@@ -100,10 +104,16 @@ public class SortedListTest extends TestCase {
         assertEquals(-1, sortedList.indexOf("H"));
         assertEquals(7, unsortedList.indexOf("F"));
         assertEquals(4, sortedList.indexOf("F"));
+        assertEquals(12, unsortedList.lastIndexOf("F"));
+        assertEquals(5, sortedList.lastIndexOf("F"));
 
         unsortedList.addAll(0, GlazedListsTests.stringToList("EEFF"));
         assertEquals(GlazedListsTests.stringToList("EEFFZCJKLMNFAEIOFG"), unsortedList);
         assertEquals(GlazedListsTests.stringToList("AZCEEEFFFFGIJKLMNO"), sortedList);
+        assertEquals(2, unsortedList.indexOf("F"));
+        assertEquals(6, sortedList.indexOf("F"));
+        assertEquals(16, unsortedList.lastIndexOf("F"));
+        assertEquals(9, sortedList.lastIndexOf("F"));
 
         unsortedList.addAll(5, GlazedListsTests.stringToList("WXYZ"));
         assertEquals(GlazedListsTests.stringToList("EEFFZWXYZCJKLMNFAEIOFG"), unsortedList);
@@ -1238,6 +1248,10 @@ public class SortedListTest extends TestCase {
         assertEquals(1, names.indexOf("foo fighters"));
         assertEquals(2, names.indexOf("nirvana"));
         assertEquals(3, names.indexOf("cardigans"));
+        assertEquals(0, names.lastIndexOf("abba"));
+        assertEquals(1, names.lastIndexOf("foo fighters"));
+        assertEquals(2, names.lastIndexOf("nirvana"));
+        assertEquals(3, names.lastIndexOf("cardigans"));
 
         names.setMode(SortedList.STRICT_SORT_ORDER);
 
@@ -1249,6 +1263,10 @@ public class SortedListTest extends TestCase {
         assertEquals(1, names.indexOf("cardigans"));
         assertEquals(2, names.indexOf("foo fighters"));
         assertEquals(3, names.indexOf("nirvana"));
+        assertEquals(0, names.lastIndexOf("abba"));
+        assertEquals(1, names.lastIndexOf("cardigans"));
+        assertEquals(2, names.lastIndexOf("foo fighters"));
+        assertEquals(3, names.lastIndexOf("nirvana"));
 
         names.setMode(SortedList.AVOID_MOVING_ELEMENTS);
         names.add("bob marley");
@@ -1263,6 +1281,11 @@ public class SortedListTest extends TestCase {
         assertEquals(2, names.indexOf("cardigans"));
         assertEquals(3, names.indexOf("foo fighters"));
         assertEquals(4, names.indexOf("nirvana"));
+        assertEquals(0, names.lastIndexOf("abba"));
+        assertEquals(1, names.lastIndexOf("bob marley"));
+        assertEquals(2, names.lastIndexOf("cardigans"));
+        assertEquals(3, names.lastIndexOf("foo fighters"));
+        assertEquals(4, names.lastIndexOf("nirvana"));
 
         names.set(1, "zamfir");
         assertEquals("abba", names.get(0));
@@ -1275,6 +1298,11 @@ public class SortedListTest extends TestCase {
         assertEquals(2, names.indexOf("cardigans"));
         assertEquals(3, names.indexOf("foo fighters"));
         assertEquals(4, names.indexOf("nirvana"));
+        assertEquals(0, names.lastIndexOf("abba"));
+        assertEquals(1, names.lastIndexOf("zamfir"));
+        assertEquals(2, names.lastIndexOf("cardigans"));
+        assertEquals(3, names.lastIndexOf("foo fighters"));
+        assertEquals(4, names.lastIndexOf("nirvana"));
     }
 
 
