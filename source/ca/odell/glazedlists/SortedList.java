@@ -484,7 +484,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
     /** {@inheritDoc} */
     @Override
     public int indexOf(Object object) {
-        if(mode != STRICT_SORT_ORDER || comparator == null) return source.indexOf(object);
+        if(mode != STRICT_SORT_ORDER || comparator == null) return super.indexOf(object);
 
         // use the fact that we have sorted data to quickly locate a position
         // at which we can begin a linear search for an object that .equals(object)

@@ -64,26 +64,42 @@ public class SortedListTest extends TestCase {
         unsortedList.set(3, "H");
         assertEquals(GlazedListsTests.stringToList("ABCHEFG"), unsortedList);
         assertEquals(GlazedListsTests.stringToList("ABCHEFG"), sortedList);
-
+        assertEquals(3, unsortedList.indexOf("H"));
+        assertEquals(3, sortedList.indexOf("H"));
+        
         unsortedList.addAll(3, GlazedListsTests.stringToList("IJKLMNO"));
         assertEquals(GlazedListsTests.stringToList("ABCIJKLMNOHEFG"), unsortedList);
         assertEquals(GlazedListsTests.stringToList("ABCHEFGIJKLMNO"), sortedList);
+        assertEquals(10, unsortedList.indexOf("H"));
+        assertEquals(3, sortedList.indexOf("H"));
 
         unsortedList.removeAll(GlazedListsTests.stringToList("AEIO"));
         assertEquals(GlazedListsTests.stringToList("BCJKLMNHFG"), unsortedList);
         assertEquals(GlazedListsTests.stringToList("BCHFGJKLMN"), sortedList);
+        assertEquals(7, unsortedList.indexOf("H"));
+        assertEquals(2, sortedList.indexOf("H"));
 
         unsortedList.addAll(8, GlazedListsTests.stringToList("AEIO"));
         assertEquals(GlazedListsTests.stringToList("BCJKLMNHAEIOFG"), unsortedList);
         assertEquals(GlazedListsTests.stringToList("ABCEHFGIJKLMNO"), sortedList);
+        assertEquals(7, unsortedList.indexOf("H"));
+        assertEquals(4, sortedList.indexOf("H"));
 
         unsortedList.set(0, "Z");
         assertEquals(GlazedListsTests.stringToList("ZCJKLMNHAEIOFG"), unsortedList);
         assertEquals(GlazedListsTests.stringToList("AZCEHFGIJKLMNO"), sortedList);
+        assertEquals(7, unsortedList.indexOf("H"));
+        assertEquals(4, sortedList.indexOf("H"));
+        assertEquals(0, unsortedList.indexOf("Z"));
+        assertEquals(1, sortedList.indexOf("Z"));
 
         unsortedList.set(7, "F");
         assertEquals(GlazedListsTests.stringToList("ZCJKLMNFAEIOFG"), unsortedList);
         assertEquals(GlazedListsTests.stringToList("AZCEFFGIJKLMNO"), sortedList);
+        assertEquals(-1, unsortedList.indexOf("H"));
+        assertEquals(-1, sortedList.indexOf("H"));
+        assertEquals(7, unsortedList.indexOf("F"));
+        assertEquals(4, sortedList.indexOf("F"));
 
         unsortedList.addAll(0, GlazedListsTests.stringToList("EEFF"));
         assertEquals(GlazedListsTests.stringToList("EEFFZCJKLMNFAEIOFG"), unsortedList);
@@ -96,6 +112,8 @@ public class SortedListTest extends TestCase {
         sortedList.set(1, "B");
         assertEquals(GlazedListsTests.stringToList("EEFFBWXYZCJKLMNFAEIOFG"), unsortedList);
         assertEquals(GlazedListsTests.stringToList("ABCEEEFFFFGIJKLMNOWXYZ"), sortedList);
+        assertEquals(4, unsortedList.indexOf("B"));
+        assertEquals(1, sortedList.indexOf("B"));
 
         sortedList.clear();
         assertEquals(Collections.EMPTY_LIST, unsortedList);
@@ -103,14 +121,22 @@ public class SortedListTest extends TestCase {
 
         sortedList.addAll(GlazedListsTests.stringToList("ABC"));
         assertEquals(GlazedListsTests.stringToList("ABC"), unsortedList);
+        assertEquals(GlazedListsTests.stringToList("ABC"), sortedList);
 
         sortedList.set(0, "C");
         sortedList.set(2, "A");
+        assertEquals(GlazedListsTests.stringToList("CBA"), unsortedList);
         assertEquals(GlazedListsTests.stringToList("CBA"), sortedList);
 
         sortedList.add("A");
+        assertEquals(GlazedListsTests.stringToList("CBAA"), unsortedList);
         assertEquals(GlazedListsTests.stringToList("ACBA"), sortedList);
+        assertEquals(2, unsortedList.indexOf("A"));
+        assertEquals(0, unsortedList.indexOf("C"));
+        assertEquals(0, sortedList.indexOf("A"));
+        assertEquals(1, sortedList.indexOf("C"));
         sortedList.add("C");
+        assertEquals(GlazedListsTests.stringToList("CBAAC"), unsortedList);
         assertEquals(GlazedListsTests.stringToList("ACBCA"), sortedList);
     }
 
@@ -1208,6 +1234,10 @@ public class SortedListTest extends TestCase {
         assertEquals("foo fighters", names.get(1));
         assertEquals("nirvana", names.get(2));
         assertEquals("cardigans", names.get(3));
+        assertEquals(0, names.indexOf("abba"));
+        assertEquals(1, names.indexOf("foo fighters"));
+        assertEquals(2, names.indexOf("nirvana"));
+        assertEquals(3, names.indexOf("cardigans"));
 
         names.setMode(SortedList.STRICT_SORT_ORDER);
 
@@ -1215,6 +1245,10 @@ public class SortedListTest extends TestCase {
         assertEquals("cardigans", names.get(1));
         assertEquals("foo fighters", names.get(2));
         assertEquals("nirvana", names.get(3));
+        assertEquals(0, names.indexOf("abba"));
+        assertEquals(1, names.indexOf("cardigans"));
+        assertEquals(2, names.indexOf("foo fighters"));
+        assertEquals(3, names.indexOf("nirvana"));
 
         names.setMode(SortedList.AVOID_MOVING_ELEMENTS);
         names.add("bob marley");
@@ -1224,6 +1258,11 @@ public class SortedListTest extends TestCase {
         assertEquals("cardigans", names.get(2));
         assertEquals("foo fighters", names.get(3));
         assertEquals("nirvana", names.get(4));
+        assertEquals(0, names.indexOf("abba"));
+        assertEquals(1, names.indexOf("bob marley"));
+        assertEquals(2, names.indexOf("cardigans"));
+        assertEquals(3, names.indexOf("foo fighters"));
+        assertEquals(4, names.indexOf("nirvana"));
 
         names.set(1, "zamfir");
         assertEquals("abba", names.get(0));
@@ -1231,6 +1270,11 @@ public class SortedListTest extends TestCase {
         assertEquals("cardigans", names.get(2));
         assertEquals("foo fighters", names.get(3));
         assertEquals("nirvana", names.get(4));
+        assertEquals(0, names.indexOf("abba"));
+        assertEquals(1, names.indexOf("zamfir"));
+        assertEquals(2, names.indexOf("cardigans"));
+        assertEquals(3, names.indexOf("foo fighters"));
+        assertEquals(4, names.indexOf("nirvana"));
     }
 
 
@@ -1244,23 +1288,36 @@ public class SortedListTest extends TestCase {
         listConsistencyListener.setPreviousElementTracked(true);
 
         original.removeAll(GlazedListsTests.stringToList("MI"));
+        assertEquals(GlazedListsTests.stringToList("LPBZKT"), original);
         assertEquals(GlazedListsTests.stringToList("BKLPTZ"), sorted);
+        assertEquals(1, original.indexOf("P"));
+        assertEquals(3, sorted.indexOf("P"));
 
         // update in-place
         original.set(1, "Q");
         assertEquals(GlazedListsTests.stringToList("LQBZKT"), original);
         assertEquals(GlazedListsTests.stringToList("BKLQTZ"), sorted);
+        assertEquals(1, original.indexOf("Q"));
+        assertEquals(3, sorted.indexOf("Q"));
+        assertEquals(-1, original.indexOf("P"));
+        assertEquals(-1, sorted.indexOf("P"));
 
         // update-causing-move
         original.set(2, "R");
         assertEquals(GlazedListsTests.stringToList("LQRZKT"), original);
         assertEquals(GlazedListsTests.stringToList("KLQRTZ"), sorted);
+        assertEquals(2, original.indexOf("R"));
+        assertEquals(3, sorted.indexOf("R"));
 
         // update-without-move
         sorted.setMode(SortedList.AVOID_MOVING_ELEMENTS);
         original.set(1, "A");
         assertEquals(GlazedListsTests.stringToList("LARZKT"), original);
         assertEquals(GlazedListsTests.stringToList("KLARTZ"), sorted);
+        assertEquals(1, original.indexOf("A"));
+        assertEquals(0, sorted.indexOf("K"));
+        assertEquals(1, sorted.indexOf("L"));
+        assertEquals(2, sorted.indexOf("A"));
     }
 
     /**
