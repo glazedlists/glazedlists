@@ -703,6 +703,52 @@ public class EventListTest extends TestCase {
         ((EventList)source).add("Test");
     }
 
+    public void testAddNullListener() {
+    	final EventList<String> source = GlazedLists.eventListOf("TEST");
+    	try {
+    		source.addListEventListener(null);
+    		fail("expected NullPointerException");
+    	} catch (NullPointerException ex) {
+    		// expected
+    	}
+    }
+
+    public void testRemoveNullListener() {
+    	final EventList<String> source = GlazedLists.eventListOf("TEST");
+    	try {
+    		source.removeListEventListener(null);
+    		fail("expected NullPointerException");
+    	} catch (NullPointerException ex) {
+    		// expected
+    	}
+    }
+
+    public void testRemoveInvalidListener() {
+    	final EventList<String> source = GlazedLists.eventListOf("TEST");
+    	final GlazedListsTests.ListEventCounter<String> eventCounter =
+            new GlazedListsTests.ListEventCounter<String>();
+    	try {
+      		source.removeListEventListener(eventCounter);
+    		fail("expected IllegalArgumentException");
+    	} catch (IllegalArgumentException ex) {
+    		// expected
+    	}
+    }
+    
+    public void testAddRemoveListener() {
+    	final BasicEventList<String> source = new BasicEventList<String>();
+    	final GlazedListsTests.ListEventCounter<String> eventCounter =
+            new GlazedListsTests.ListEventCounter<String>();
+  		source.addListEventListener(eventCounter);
+  		assertTrue(source.updates.getListEventListeners().contains(eventCounter));
+  		source.add("Test");
+  		source.removeListEventListener(eventCounter);
+  		assertFalse(source.updates.getListEventListeners().contains(eventCounter));
+  		assertEquals(1, eventCounter.getCountAndReset());
+    }
+
+    
+    
     /**
      * Install a consistency listener to the specified list.
      */

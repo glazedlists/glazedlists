@@ -27,6 +27,42 @@ import java.util.List;
  */
 public class BasicEventListTest extends TestCase {
 
+	public void testConstructors() {
+		BasicEventList<String> list = new BasicEventList<String>();
+		assertNotNull(list.getPublisher());
+		assertNotNull(list.getReadWriteLock());
+		
+		list = new BasicEventList<String>(15);
+		assertNotNull(list.getPublisher());
+		assertNotNull(list.getReadWriteLock());
+		
+		list = new BasicEventList<String>((ReadWriteLock) null);
+		assertNotNull(list.getPublisher());
+		assertNotNull(list.getReadWriteLock());
+		
+		final ReadWriteLock lock = LockFactory.DEFAULT.createReadWriteLock();
+		list = new BasicEventList<String>(lock);
+		assertNotNull(list.getPublisher());
+		assertEquals(lock, list.getReadWriteLock());
+		
+		list = new BasicEventList<String>(null, null);
+		assertNotNull(list.getPublisher());
+		assertNotNull(list.getReadWriteLock());
+		final ListEventPublisher publisher = ListEventAssembler.createListEventPublisher();
+		list = new BasicEventList<String>(publisher, lock);
+		assertEquals(lock, list.getReadWriteLock());
+		assertEquals(publisher, list.getPublisher());
+		
+		list = new BasicEventList<String>(15, null, null);
+		assertNotNull(list.getPublisher());
+		assertNotNull(list.getReadWriteLock());
+
+		list = new BasicEventList<String>(15, publisher, lock);
+		assertEquals(lock, list.getReadWriteLock());
+		assertEquals(publisher, list.getPublisher());		
+	}
+	
+	
     public void testSimpleSerialization() throws IOException, ClassNotFoundException {
         EventList<String> serializableList = new BasicEventList<String>();
         serializableList.addAll(GlazedListsTests.stringToList("Saskatchewan Roughriders"));

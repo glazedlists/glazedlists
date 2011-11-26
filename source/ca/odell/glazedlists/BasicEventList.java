@@ -95,7 +95,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
     public BasicEventList(int initialCapacity, ListEventPublisher publisher, ReadWriteLock readWriteLock) {
         super(publisher);
         this.data = new ArrayList<E>(initialCapacity);
-        this.readWriteLock = readWriteLock;
+        this.readWriteLock = (readWriteLock == null) ? LockFactory.DEFAULT.createReadWriteLock() : readWriteLock;
     }
 
     /**

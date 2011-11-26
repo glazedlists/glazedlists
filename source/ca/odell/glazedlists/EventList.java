@@ -68,16 +68,23 @@ public interface EventList<E> extends List<E> {
 
     /**
      * Registers the specified listener to receive change updates for this list.
+     * 
+     * @param listChangeListener event listener != null
+     * @throws NullPointerException if the specified listener is null
      */
     public void addListEventListener(ListEventListener<? super E> listChangeListener);
 
     /**
      * Removes the specified listener from receiving change updates for this list.
+     * 
+     * @param listChangeListener event listener != null
+     * @throws NullPointerException if the specified listener is null
+     * @throws IllegalArgumentException if the specified listener wasn't added before
      */
     public void removeListEventListener(ListEventListener<? super E> listChangeListener);
 
     /**
-     * Gets the lock required to share this list between multiple threads.
+     * Gets the lock required to share this list between multiple threads. It's always defined.
      *
      * @return a re-entrant {@link ReadWriteLock} that guarantees thread safe
      *      access to this list.
@@ -85,7 +92,7 @@ public interface EventList<E> extends List<E> {
     public ReadWriteLock getReadWriteLock();
 
     /**
-     * Get the publisher used to distribute {@link ListEvent}s.
+     * Get the publisher used to distribute {@link ListEvent}s. It's always defined.
      */
     public ListEventPublisher getPublisher();
 
