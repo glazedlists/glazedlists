@@ -77,7 +77,7 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> impl
     private final ListEventAssembler<E> cacheUpdates = new ListEventAssembler<E>(this, ListEventAssembler.createListEventPublisher());
 
     /** whether the proxy thread has been scheduled */
-    private boolean scheduled = false;
+    private volatile boolean scheduled = false;
 
     /**
      * Create a {@link ThreadProxyEventList} which delivers changes to the
