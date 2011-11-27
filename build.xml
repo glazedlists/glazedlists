@@ -143,7 +143,7 @@
             <link href="http://nachocalendar.sourceforge.net/doc/"/>
             <link href="http://www.jfree.org/jfreechart/api/javadoc/"/>
             <link href="http://download.java.net/javadesktop/swinglabs/releases/0.8/docs/api/"/>
-			<link href="http://docs.jboss.org/hibernate/core/3.5/javadocs/"/>
+			<link href="http://docs.jboss.org/hibernate/core/3.6/javadocs/"/>
             <doctitle><![CDATA[<h1>${doctitle}</h1>]]></doctitle>
 			<bottom><![CDATA[<a href="http://www.glazedlists.com" target="_top">Glazed Lists</a>, Copyright &#169; 2003 publicobject.com, O'Dell Engineering.<br>Documentation build by ${user.name} at ${datestamp.dateAndTime}]]></bottom>
 		</javadoc>
@@ -453,18 +453,18 @@
         <mkdir dir="extensions/hibernate/lib"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="${download.lib.url}/hibernate/3.2.4.sp1/hibernate.jar"/>
+            <arg value="${download.lib.url}/hibernate/3.6.8.Final/hibernate.jar"/>
             <arg value="extensions/hibernate/lib/hibernate.jar"/>
         </java>		
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="${download.lib.url}/hibernate/3.2.4.sp1/hibernate-libs.jar"/>
+            <arg value="${download.lib.url}/hibernate/3.6.8.Final/hibernate-libs.jar"/>
             <arg value="extensions/hibernate/lib/hibernate-libs.jar"/>
         </java>				
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
-            <arg value="${download.lib.url}/hsqldb/1.8.0.4/hsqldb.jar"/>
-            <arg value="extensions/hibernate/lib/hsqldb.jar"/>
+            <arg value="${download.lib.url}/hsqldb/2.2.6/hsqldb-jdk5.jar"/>
+            <arg value="extensions/hibernate/lib/hsqldb-jdk5.jar"/>
         </java>				
         <javac destdir="${classes.dir}" srcdir="extensions/hibernate/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
             <classpath>
