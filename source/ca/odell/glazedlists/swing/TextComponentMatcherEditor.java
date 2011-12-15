@@ -67,7 +67,7 @@ public class TextComponentMatcherEditor<E> extends TextMatcherEditor<E> {
      *      <code>null</code> then all filtered objects are expected to
      *      implement {@link ca.odell.glazedlists.TextFilterable}.
      */
-    public TextComponentMatcherEditor(JTextComponent textComponent, TextFilterator<E> textFilterator) {
+    public TextComponentMatcherEditor(JTextComponent textComponent, TextFilterator<? super E> textFilterator) {
         this(textComponent, textFilterator, true);
     }
 
