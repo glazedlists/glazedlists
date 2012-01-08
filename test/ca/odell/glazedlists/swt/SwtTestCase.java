@@ -3,10 +3,10 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swt;
 
+import ca.odell.glazedlists.GuiTestCase;
+
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-
-import ca.odell.glazedlists.GuiTestCase;
 
 /**
  * Utility class for running JUnit tests with SWT code.

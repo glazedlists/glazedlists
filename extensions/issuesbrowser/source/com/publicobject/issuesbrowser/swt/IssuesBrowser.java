@@ -313,7 +313,7 @@ public class IssuesBrowser {
         usersList.setLayoutData(usersListLayout);
 
         // Add filtering based on selection of issue owners
-        EventListViewer<String> listViewer = new EventListViewer<String>(usersMatcherEditor.getUsersList(), usersList);
+        DefaultEventListViewer<String> listViewer = GlazedListsSWT.eventListViewerWithThreadProxyList(usersMatcherEditor.getUsersList(), usersList);
         usersMatcherEditor.setSelectionList(listViewer.getSelected());
     }
 

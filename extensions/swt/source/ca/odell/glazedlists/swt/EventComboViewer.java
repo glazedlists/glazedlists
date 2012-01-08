@@ -4,12 +4,11 @@
 package ca.odell.glazedlists.swt;
 
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.TransformedList;
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.event.ListEventListener;
+
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Display;
 
 /**
  * A view helper that displays an {@link EventList} in a {@link Combo} component.
@@ -17,18 +16,18 @@ import org.eclipse.swt.widgets.Combo;
  * <p>This class is not thread safe. It must be used exclusively with the SWT
  * event handler thread.
  *
+ * @deprecated Use {@link DefaultEventComboViewer} instead. This class will be removed in the GL
+ *             2.0 release. The wrapping of the source list with an SWT-EDT safe list has been
+ *             determined to be undesirable (it is better for the user to provide their own SWT-EDT
+ *             safe list).
+ *             
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
+ * @author Holger Brands
  */
-public class EventComboViewer<E> implements ListEventListener<E> {
-
-    /** the SWT Combo component */
-    private Combo combo = null;
-
-    /** the EventList to respond to */
-    private TransformedList<E, E> swtSource = null;
-
-    /** the label provider to pretty print a String representation of each Object */
-    private ILabelProvider labelProvider = null;
+public class EventComboViewer<E> extends DefaultEventComboViewer<E> {
+	
+    /** indicates, if source list has to be disposed */
+    private boolean disposeSource;
 
     /**
      * Binds the contents of a {@link Combo} component to an {@link EventList}
@@ -52,71 +51,8 @@ public class EventComboViewer<E> implements ListEventListener<E> {
      * @see GlazedListsSWT#beanLabelProvider(String)
      */
     public EventComboViewer(EventList<E> source, Combo combo, ILabelProvider labelProvider) {
-        // lock the source list for reading since we want to prevent writes
-        // from occurring until we fully initialize this EventComboViewer
-        source.getReadWriteLock().readLock().lock();
-        try {
-            this.swtSource = GlazedListsSWT.swtThreadProxyList(source, combo.getDisplay());
-            this.combo = combo;
-            this.labelProvider = labelProvider;
-
-            // set the initial data
-            for(int i = 0, n = source.size(); i < n; i++) {
-                addRow(i, source.get(i));
-            }
-
-            // listen for changes
-            swtSource.addListEventListener(this);
-        } finally {
-            source.getReadWriteLock().readLock().unlock();
-        }
-    }
-
-    /**
-     * Gets the Combo being managed by this {@link EventComboViewer}.
-     */
-    public Combo getCombo() {
-        return combo;
-    }
-
-    /**
-     * Adds the value at the specified row.
-     */
-    private void addRow(int row, Object value) {
-        combo.add(labelProvider.getText(value), row);
-    }
-
-    /**
-     * Updates the value at the specified row.
-     */
-    private void updateRow(int row, Object value) {
-        combo.setItem(row, labelProvider.getText(value));
-    }
-
-    /**
-     * Removes the value at the specified row.
-     */
-    private void deleteRow(int row) {
-        combo.remove(row);
-    }
-
-    /**
-     * When the source combo is changed, this forwards the change to the
-     * displayed combo.
-     */
-    public void listChanged(ListEvent listChanges) {
-        // apply the combo changes
-        while (listChanges.next()) {
-            int changeIndex = listChanges.getIndex();
-            int changeType = listChanges.getType();
-
-            if (changeType == ListEvent.INSERT)
-                addRow(changeIndex, swtSource.get(changeIndex));
-            else if (changeType == ListEvent.UPDATE)
-                updateRow(changeIndex, swtSource.get(changeIndex));
-            else if (changeType == ListEvent.DELETE)
-                deleteRow(changeIndex);
-        }
+    	super(createProxyList(source, combo.getDisplay()), combo, labelProvider);
+    	disposeSource = (this.source != source);
     }
 
     /**
@@ -134,7 +70,15 @@ public class EventComboViewer<E> implements ListEventListener<E> {
      * to call any method on a {@link EventComboViewer} after it has been disposed.
      */
     public void dispose() {
-        swtSource.removeListEventListener(this);
-        swtSource.dispose();
+        if (disposeSource) source.dispose();
+        super.dispose();
+    }
+    
+    /**
+     * while holding a read lock, this method wraps the given source list with a SWT thread
+     * proxy list.
+     */
+    private static <E> EventList<E> createProxyList(EventList<E> source, Display display) {
+    	return GlazedListsSWT.createProxyListIfNecessary(source, display);
     }
 }
