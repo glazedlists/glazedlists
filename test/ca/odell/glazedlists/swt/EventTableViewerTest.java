@@ -1,3 +1,6 @@
+/* Glazed Lists                                                 (c) 2003-2012 */
+/* http://publicobject.com/glazedlists/                      publicobject.com,*/
+/*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swt;
 
 import ca.odell.glazedlists.*;
@@ -10,7 +13,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
@@ -18,7 +20,7 @@ import org.eclipse.swt.widgets.TableItem;
 /**
  * Tests for the {@link EventTableViewer}.
  *
- * @author hbrands
+ * @author Holger Brands
  */
 public class EventTableViewerTest extends SwtTestCase {
 
@@ -331,39 +333,6 @@ public class EventTableViewerTest extends SwtTestCase {
     }
 
     /**
-     * This test ensures subclasses can prevent the building of a
-     * SWTThreadProxyEventList by overriding
-     * {@link EventTableViewer#createSwtThreadProxyList}.
-     */
-    public void guiTestNoThreadProxyingDesired() {
-        final EventList<Color> source = new BasicEventList<Color>();
-        source.add(Color.RED);
-        final TableFormat<Color> tableFormat = new ColorTableFormat();
-        final Table table = new Table(getShell(), SWT.VIRTUAL);
-        // 1. test with a thread proxy
-        final EventTableViewer<Color> colorViewerWithProxy = new EventTableViewer<Color>(source, table, tableFormat);
-        assertNotNull(colorViewerWithProxy.swtThreadSource);
-        assertSame(colorViewerWithProxy.source, colorViewerWithProxy.swtThreadSource);
-        assertEquals(0, colorViewerWithProxy.getSelected().size());
-        assertEquals(1, colorViewerWithProxy.getDeselected().size());
-        assertSame(Color.RED, colorViewerWithProxy.getSourceList().get(0));
-        colorViewerWithProxy.dispose();
-        assertNull(colorViewerWithProxy.swtThreadSource);
-        assertNull(colorViewerWithProxy.source);
-
-        // 2. test without a thread proxy
-        final NoProxyingEventTableViewer<Color> colorViewerNoProxy = new NoProxyingEventTableViewer<Color>(source, table, tableFormat);
-        assertNull(colorViewerNoProxy.swtThreadSource);
-        assertSame(colorViewerNoProxy.source, source);
-        assertEquals(0, colorViewerNoProxy.getSelected().size());
-        assertEquals(1, colorViewerNoProxy.getDeselected().size());
-        assertSame(Color.RED, colorViewerNoProxy.getSourceList().get(0));
-        colorViewerNoProxy.dispose();
-        assertNull(colorViewerNoProxy.swtThreadSource);
-        assertNull(colorViewerNoProxy.source);
-    }
-
-    /**
      * Tests clearing the source list of {@link EventTableViewer}.
      */
     public void guiTestClearOnThreadProxy_FixMe() {
@@ -390,21 +359,6 @@ public class EventTableViewerTest extends SwtTestCase {
         assertEquals(0, table.getItemCount());
         assertEquals(Collections.EMPTY_LIST, viewer.getSelected());
         assertEquals(0, table.getSelectionCount());
-    }
-
-    private static class NoProxyingEventTableViewer<E> extends EventTableViewer<E> {
-
-        public NoProxyingEventTableViewer(EventList<E> source, Table table, TableFormat<? super E> tableFormat) {
-            super(source, table, tableFormat);
-        }
-
-        /**
-         * Returning null implies no ThreadProxyEventList is necessary.
-         */
-        @Override
-        protected TransformedList<E, E> createSwtThreadProxyList(EventList<E> source, Display display) {
-            return null;
-        }
     }
 
     private static class ColorTableFormat implements TableFormat<Color>, TableColumnConfigurer {

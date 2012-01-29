@@ -13,14 +13,15 @@ import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.Matchers;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A FilterList for elements that are checked in the EventTableViewer.
@@ -273,7 +274,7 @@ final class TableCheckFilterList<S, E> extends TransformedList<S, E> implements 
         super.addListEventListener(listChangeListener);
 
         // also adjust the table's checked rows
-        if(listChangeListener instanceof EventTableViewer) {
+        if(listChangeListener instanceof DefaultEventTableViewer) {
             tableChecker = new TableChecker();
             super.addListEventListener(tableChecker);
         }

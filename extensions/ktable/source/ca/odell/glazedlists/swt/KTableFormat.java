@@ -4,6 +4,7 @@
 package ca.odell.glazedlists.swt;
 
 import ca.odell.glazedlists.gui.TableFormat;
+
 import de.kupzog.ktable.KTable;
 import de.kupzog.ktable.KTableCellEditor;
 import de.kupzog.ktable.KTableCellRenderer;
@@ -26,7 +27,7 @@ public interface KTableFormat extends TableFormat {
      * Provide a value for the specified header row and column. Unlike
      * simple {@link TableFormat}, the {@link KTableFormat} supports
      * multiple header rows per table. Therefore this method is the
-     * preferred way to define the header values for {@link EventKTableModel}.
+     * preferred way to define the header values for {@link DefaultEventKTableModel}.
      *
      * @see TableFormat#getColumnName(int)
      * @see de.kupzog.ktable.KTableModel#getContentAt

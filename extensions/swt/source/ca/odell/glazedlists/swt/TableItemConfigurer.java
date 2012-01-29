@@ -11,10 +11,10 @@ import org.eclipse.swt.widgets.TableItem;
 
 /**
  * A <code>TableItemConfigurer</code> can be provided to an
- * {@link EventTableViewer} to customize the initial format and appearance of
+ * {@link DefaultEventTableViewer} to customize the initial format and appearance of
  * column values, each represented by a {@link TableItem}.
  *
- * @see EventTableViewer#setTableItemConfigurer(TableItemConfigurer)
+ * @see DefaultEventTableViewer#setTableItemConfigurer(TableItemConfigurer)
  *
  * @author hbrands
  */

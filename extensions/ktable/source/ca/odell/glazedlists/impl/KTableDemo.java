@@ -1,17 +1,21 @@
-/* Glazed Lists                                                 (c) 2003-2006 */
+/* Glazed Lists                                                 (c) 2003-2012 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.gui.TableFormat;
-import ca.odell.glazedlists.swt.EventKTableModel;
+import ca.odell.glazedlists.swt.DefaultEventKTableModel;
+import ca.odell.glazedlists.swt.GlazedListsKTable;
+
 import com.publicobject.issuesbrowser.Issue;
 import com.publicobject.issuesbrowser.IssueLoader;
 import com.publicobject.issuesbrowser.Project;
 import com.publicobject.misc.Throbber;
+
 import de.kupzog.ktable.KTable;
 import de.kupzog.ktable.SWTX;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -52,7 +56,7 @@ public class KTableDemo {
         final KTable table = new KTable(comp1, SWT.FULL_SELECTION | SWT.MULTI | SWT.V_SCROLL
                 | SWT.H_SCROLL | SWTX.FILL_WITH_LASTCOL | SWTX.EDIT_ON_KEY);
 
-        EventKTableModel tableModel = new EventKTableModel(table, issuesEventList, new IssuesTableFormat());
+        DefaultEventKTableModel tableModel = GlazedListsKTable.eventKTableModelWithThreadProxyList(table, issuesEventList, new IssuesTableFormat());
         table.setModel(tableModel);
 
         // loads issues

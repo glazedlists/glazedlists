@@ -114,8 +114,8 @@ public class IssuesBrowser {
 
         // Create the Issues Table
         Table issuesTable = createIssuesTable(issuePanel);
-        EventTableViewer<Issue> issuesTableViewer = new EventTableViewer<Issue>(issuesSortedList,
-                issuesTable, new SwtIssueTableFormat());
+		DefaultEventTableViewer<Issue> issuesTableViewer = GlazedListsSWT.eventTableViewerWithThreadProxyList(
+				issuesSortedList, issuesTable, new SwtIssueTableFormat());
         issuesTableViewer.setTableItemConfigurer(new IssueTableItemConfigurer());
 
         issuesTable = formatIssuesTable(issuesTable);
@@ -335,7 +335,7 @@ public class IssuesBrowser {
         return issuesTable;
     }
 
-    private void createDescriptionsTable(Composite parent, EventTableViewer<Issue> issuesTableViewer) {
+    private void createDescriptionsTable(Composite parent, DefaultEventTableViewer<Issue> issuesTableViewer) {
         Table descriptionsTable = new Table(parent, SWT.MULTI | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.BORDER);
         GridData descriptionsTableLayout = new GridData();
         descriptionsTableLayout.horizontalAlignment = GridData.FILL;

@@ -54,7 +54,7 @@ public class EventListViewer<E> extends DefaultEventListViewer<E> {
      */
     public EventListViewer(EventList<E> source, List list, ILabelProvider labelProvider) {
     	super(createProxyList(source, list.getDisplay()), list, labelProvider);
-    	disposeSource = (this.source != source);    	
+    	disposeSource = (this.source != source);
     }
 
     /**

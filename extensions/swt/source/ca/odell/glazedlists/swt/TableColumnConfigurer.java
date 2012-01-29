@@ -10,9 +10,9 @@ import org.eclipse.swt.widgets.TableColumn;
 
 /**
  * Optional interface to be implemented by a {@link TableFormat} implementation usable by an
- * {@link EventTableViewer}. For each table column the viewer creates it calls the
+ * {@link DefaultEventTableViewer}. For each table column the viewer creates it calls the
  * {@link #configure(TableColumn, int)} method to allow customization of the table column.
- * 
+ *
  * @author hbrands
  */
 public interface TableColumnConfigurer {

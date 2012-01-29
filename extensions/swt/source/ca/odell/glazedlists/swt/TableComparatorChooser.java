@@ -10,16 +10,16 @@ import ca.odell.glazedlists.gui.AbstractTableComparatorChooser;
 import ca.odell.glazedlists.impl.gui.MouseOnlySortingStrategy;
 import ca.odell.glazedlists.impl.gui.SortingStrategy;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * A TableComparatorChooser is a tool that allows the user to sort a ListTable by clicking
@@ -50,7 +50,7 @@ public final class TableComparatorChooser<E> extends AbstractTableComparatorChoo
      * identical but uses a more fitting name to convey the action that is
      * performed.
      */
-    public TableComparatorChooser(EventTableViewer<E> eventTableViewer, SortedList<E> sortedList, boolean multipleColumnSort) {
+    public TableComparatorChooser(DefaultEventTableViewer<E> eventTableViewer, SortedList<E> sortedList, boolean multipleColumnSort) {
         super(sortedList, eventTableViewer.getTableFormat());
 
         // save the SWT-specific state
@@ -76,7 +76,7 @@ public final class TableComparatorChooser<E> extends AbstractTableComparatorChoo
      *      sorting by multiple columns is more powerful, the user interface is
      *      not as simple and this strategy should only be used where necessary.
      */
-    public static <E> TableComparatorChooser<E> install(EventTableViewer<E> eventTableViewer, SortedList<E> sortedList, boolean multipleColumnSort) {
+    public static <E> TableComparatorChooser<E> install(DefaultEventTableViewer<E> eventTableViewer, SortedList<E> sortedList, boolean multipleColumnSort) {
         return new TableComparatorChooser<E>(eventTableViewer, sortedList,  multipleColumnSort);
     }
 
