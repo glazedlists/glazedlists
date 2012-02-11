@@ -69,17 +69,17 @@ public class JSeparatorTable extends JTable {
             return new Rectangle();
         }
 
-        // if it's the separator row, return the entire row as one big rectangle
-        Object rowValue = eventTableModel.getElementAt(row);
-        if(rowValue instanceof SeparatorList.Separator) {
-            Rectangle firstColumn = super.getCellRect(row, 0, includeSpacing);
-            Rectangle lastColumn = super.getCellRect(row, getColumnCount() - 1, includeSpacing);
-            return firstColumn.union(lastColumn);
-
-        // otherwise it's business as usual
-        } else {
-            return super.getCellRect(row, column, includeSpacing);
+        if (row >= 0) {
+	        // if it's the separator row, return the entire row as one big rectangle
+	        final Object rowValue = eventTableModel.getElementAt(row);
+	        if (rowValue instanceof SeparatorList.Separator) {
+	            final Rectangle firstColumn = super.getCellRect(row, 0, includeSpacing);
+	            final Rectangle lastColumn = super.getCellRect(row, getColumnCount() - 1, includeSpacing);
+	            return firstColumn.union(lastColumn);
+	        }
         }
+	    // otherwise it's business as usual
+        return super.getCellRect(row, column, includeSpacing);
     }
 
     public Rectangle getCellRectWithoutSpanning(int row, int column, boolean includeSpacing) {
