@@ -7,8 +7,6 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.List;
 
@@ -33,7 +31,7 @@ public class DefaultEventListViewer<E> implements ListEventListener<E> {
     protected EventList<E> source;
 
     /** the formatter for list elements */
-    private ILabelProvider labelProvider;
+    private ItemFormat<? super E> itemFormat;
 
     /** For selection management */
     private SelectionManager<E> selection;
@@ -42,43 +40,43 @@ public class DefaultEventListViewer<E> implements ListEventListener<E> {
      * Creates a new List that displays and responds to changes in the source list.
      * List elements will simply be displayed as the result of calling
      * toString() on the contents of the source list.
-     * 
+     *
      * @param source the EventList that provides the elements
      * @param list the list
      */
     public DefaultEventListViewer(EventList<E> source, List list) {
-        this(source, list, new LabelProvider());
+        this(source, list, new DefaultItemFormat<E>());
     }
 
     /**
      * Creates a new List that displays and responds to changes in the source list.
-     * List elements are formatted using the provided {@link ILabelProvider}.
-     * 
+     * List elements are formatted using the provided {@link ItemFormat}.
+     *
      * @param source the EventList that provides the elements
      * @param list the list
-     * @param labelProvider a LabelProvider for formatting the displayed values
-     * 
-     * @see ILabelProvider
-     * @see GlazedListsSWT#beanLabelProvider(String)
+     * @param itemFormat an {@link ItemFormat} for formatting the displayed values
+     *
+     * @see ItemFormat
+     * @see GlazedListsSWT#beanItemFormat(String)
      */
-    public DefaultEventListViewer(EventList<E> source, List list, ILabelProvider labelProvider) {
-    	this(source, list, labelProvider, false);
+    public DefaultEventListViewer(EventList<E> source, List list, ItemFormat<? super E> itemFormat) {
+    	this(source, list, itemFormat, false);
     }
 
     /**
      * Creates a new List that displays and responds to changes in the source list.
-     * List elements are formatted using the provided {@link ILabelProvider}.
-     * 
+     * List elements are formatted using the provided {@link ItemFormat}.
+     *
      * @param source the EventList that provides the elements
      * @param list the list
-     * @param labelProvider an optional LabelProvider for formatting the displayed values
+     * @param itemFormat an optional {@link ItemFormat} for formatting the displayed values
      * @param diposeSource <code>true</code> if the source list should be disposed when disposing
      *            this model, <code>false</code> otherwise
-     *            
-     * @see ILabelProvider
-     * @see GlazedListsSWT#beanLabelProvider(String)
+     *
+     * @see ItemFormat
+     * @see GlazedListsSWT#beanItemFormat(String)
      */
-    protected DefaultEventListViewer(EventList<E> source, List list, ILabelProvider labelProvider, boolean disposeSource) {
+    protected DefaultEventListViewer(EventList<E> source, List list, ItemFormat<? super E> itemFormat, boolean disposeSource) {
     	this.disposeSource = disposeSource;
         // lock the source list for reading since we want to prevent writes
         // from occurring until we fully initialize this EventListViewer
@@ -86,7 +84,7 @@ public class DefaultEventListViewer<E> implements ListEventListener<E> {
         try {
             this.source = source;
             this.list = list;
-            this.labelProvider = labelProvider;
+            this.itemFormat = itemFormat;
 
             // Enable the selection lists
             selection = new SelectionManager<E>(this.source, new SelectableList());
@@ -102,12 +100,12 @@ public class DefaultEventListViewer<E> implements ListEventListener<E> {
             source.getReadWriteLock().readLock().unlock();
         }
     }
-    
+
     /**
-     * Gets the List's {@link ILabelProvider}.
+     * Gets the List's {@link ItemFormat}.
      */
-    public ILabelProvider getLabelProvider() {
-        return labelProvider;
+    public ItemFormat<? super E> getItemFormat() {
+        return itemFormat;
     }
 
     /**
@@ -180,15 +178,15 @@ public class DefaultEventListViewer<E> implements ListEventListener<E> {
     /**
      * Adds the value at the specified row.
      */
-    private void addRow(int row, Object value) {
-        list.add(labelProvider.getText(value), row);
+    private void addRow(int row, E value) {
+        list.add(itemFormat.format(value), row);
     }
 
     /**
      * Updates the value at the specified row.
      */
-    private void updateRow(int row, Object value) {
-        list.setItem(row, labelProvider.getText(value));
+    private void updateRow(int row, E value) {
+        list.setItem(row, itemFormat.format(value));
     }
 
     /**

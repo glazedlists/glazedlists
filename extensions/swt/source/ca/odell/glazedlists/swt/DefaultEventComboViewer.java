@@ -7,8 +7,6 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.widgets.Combo;
 
 /**
@@ -31,8 +29,8 @@ public class DefaultEventComboViewer<E> implements ListEventListener<E> {
     /** the EventList to respond to */
     protected EventList<E> source;
 
-    /** the label provider to pretty print a String representation of each Object */
-    private ILabelProvider labelProvider;
+    /** the {@link ItemFormat} to pretty print a String representation of each Object */
+    private ItemFormat<? super E> itemFormat;
 
     /**
      * Binds the contents of a {@link Combo} component to an {@link EventList}
@@ -40,12 +38,12 @@ public class DefaultEventComboViewer<E> implements ListEventListener<E> {
      * dynamically to reflect chances to the source {@link EventList}.  The
      * {@link String} values displayed in the {@link Combo} compoment will be
      * the result of calling toString() on the Objects found in source.
-     * 
+     *
      * @param source the EventList that provides the elements
      * @param combo the combo box
      */
     public DefaultEventComboViewer(EventList<E> source, Combo combo) {
-        this(source, combo, new LabelProvider());
+        this(source, combo, new DefaultItemFormat<E>());
     }
 
     /**
@@ -53,17 +51,17 @@ public class DefaultEventComboViewer<E> implements ListEventListener<E> {
      * source.  This allows the selection choices in a {@link Combo} to change
      * dynamically to reflect chances to the source {@link EventList}.  The
      * {@link String} values displayed in the {@link Combo} compoment will be
-     * formatted using the provided {@link ILabelProvider}.
-     * 
+     * formatted using the provided {@link ItemFormat}.
+     *
      * @param source the EventList that provides the elements
      * @param combo the combo box
-     * @param labelProvider a LabelProvider for formatting the displayed values
-     *            
-     * @see ILabelProvider
-     * @see GlazedListsSWT#beanLabelProvider(String)
+     * @param itemFormat a {@link ItemFormat} for formatting the displayed values
+     *
+     * @see ItemFormat
+     * @see GlazedListsSWT#beanItemFormat(String)
      */
-    public DefaultEventComboViewer(EventList<E> source, Combo combo, ILabelProvider labelProvider) {
-    	this(source, combo, labelProvider, false);
+    public DefaultEventComboViewer(EventList<E> source, Combo combo, ItemFormat<? super E> itemFormat) {
+    	this(source, combo, itemFormat, false);
     }
 
     /**
@@ -71,19 +69,19 @@ public class DefaultEventComboViewer<E> implements ListEventListener<E> {
      * source.  This allows the selection choices in a {@link Combo} to change
      * dynamically to reflect chances to the source {@link EventList}.  The
      * {@link String} values displayed in the {@link Combo} compoment will be
-     * formatted using the provided {@link ILabelProvider}.
-     * 
+     * formatted using the provided {@link ItemFormat}.
+     *
      * @param source the EventList that provides the elements
      * @param combo the combo box
-     * @param labelProvider an optional LabelProvider for formatting the displayed values
+     * @param itemFormat an optional {@link ItemFormat} for formatting the displayed values
      * @param diposeSource <code>true</code> if the source list should be disposed when disposing
      *            this model, <code>false</code> otherwise
      *
-     * @see ILabelProvider
-     * @see GlazedListsSWT#beanLabelProvider(String)
+     * @see ItemFormat
+     * @see GlazedListsSWT#beanItemFormat(String)
      */
 	protected DefaultEventComboViewer(EventList<E> source, Combo combo,
-			ILabelProvider labelProvider, boolean disposeSource) {
+			ItemFormat<? super E> itemFormat, boolean disposeSource) {
 		this.disposeSource = disposeSource;
         // lock the source list for reading since we want to prevent writes
         // from occurring until we fully initialize this EventComboViewer
@@ -91,7 +89,7 @@ public class DefaultEventComboViewer<E> implements ListEventListener<E> {
         try {
             this.source = source;
             this.combo = combo;
-            this.labelProvider = labelProvider;
+            this.itemFormat = itemFormat;
 
             // set the initial data
             for(int i = 0, n = source.size(); i < n; i++) {
@@ -113,17 +111,24 @@ public class DefaultEventComboViewer<E> implements ListEventListener<E> {
     }
 
     /**
+     * Gets the Combo's {@link ItemFormat}.
+     */
+    public ItemFormat<? super E> getItemFormat() {
+        return itemFormat;
+    }
+
+    /**
      * Adds the value at the specified row.
      */
-    private void addRow(int row, Object value) {
-        combo.add(labelProvider.getText(value), row);
+    private void addRow(int row, E value) {
+        combo.add(itemFormat.format(value), row);
     }
 
     /**
      * Updates the value at the specified row.
      */
-    private void updateRow(int row, Object value) {
-        combo.setItem(row, labelProvider.getText(value));
+    private void updateRow(int row, E value) {
+        combo.setItem(row, itemFormat.format(value));
     }
 
     /**

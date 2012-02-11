@@ -5,8 +5,6 @@ package ca.odell.glazedlists.swt;
 
 import ca.odell.glazedlists.EventList;
 
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Display;
 
@@ -20,12 +18,12 @@ import org.eclipse.swt.widgets.Display;
  *             2.0 release. The wrapping of the source list with an SWT-EDT safe list has been
  *             determined to be undesirable (it is better for the user to provide their own SWT-EDT
  *             safe list).
- *             
+ *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  * @author Holger Brands
  */
 public class EventComboViewer<E> extends DefaultEventComboViewer<E> {
-	
+
     /** indicates, if source list has to be disposed */
     private boolean disposeSource;
 
@@ -37,7 +35,7 @@ public class EventComboViewer<E> extends DefaultEventComboViewer<E> {
      * the result of calling toString() on the Objects found in source.
      */
     public EventComboViewer(EventList<E> source, Combo combo) {
-        this(source, combo, new LabelProvider());
+        this(source, combo, new DefaultItemFormat<E>());
     }
 
     /**
@@ -45,13 +43,13 @@ public class EventComboViewer<E> extends DefaultEventComboViewer<E> {
      * source.  This allows the selection choices in a {@link Combo} to change
      * dynamically to reflect chances to the source {@link EventList}.  The
      * {@link String} values displayed in the {@link Combo} compoment will be
-     * formatted using the provided {@link ILabelProvider}.
+     * formatted using the provided {@link ItemFormat}.
      *
-     * @see ILabelProvider
-     * @see GlazedListsSWT#beanLabelProvider(String)
+     * @see ItemFormat
+     * @see GlazedListsSWT#beanItemFormat(String)
      */
-    public EventComboViewer(EventList<E> source, Combo combo, ILabelProvider labelProvider) {
-    	super(createProxyList(source, combo.getDisplay()), combo, labelProvider);
+    public EventComboViewer(EventList<E> source, Combo combo, ItemFormat<? super E> itemFormat) {
+    	super(createProxyList(source, combo.getDisplay()), combo, itemFormat);
     	disposeSource = (this.source != source);
     }
 
@@ -73,7 +71,7 @@ public class EventComboViewer<E> extends DefaultEventComboViewer<E> {
         if (disposeSource) source.dispose();
         super.dispose();
     }
-    
+
     /**
      * while holding a read lock, this method wraps the given source list with a SWT thread
      * proxy list.

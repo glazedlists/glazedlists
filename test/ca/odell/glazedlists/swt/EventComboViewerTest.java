@@ -8,14 +8,12 @@ import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 
 import java.util.Arrays;
 
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Combo;
 
 /**
  * Tests for the {@link EventComboViewer}.
- * 
+ *
  * @author hbrands
  */
 public class EventComboViewerTest extends SwtTestCase {
@@ -23,15 +21,15 @@ public class EventComboViewerTest extends SwtTestCase {
 	/**
 	 * Tests constructor with empty source list.
 	 */
-	public void guiTestEmptyConstruction() {		
+	public void guiTestEmptyConstruction() {
         final BasicEventList<String> source = new BasicEventList<String>();
         final Combo combo = new Combo(getShell(), SWT.DROP_DOWN);
         final EventComboViewer<String> viewer = new EventComboViewer<String>(source, combo);
         assertSame(combo, viewer.getCombo());
         assertEquals(0, combo.getItemCount());
-        assertTrue(Arrays.equals(new String[0], combo.getItems()));        
+        assertTrue(Arrays.equals(new String[0], combo.getItems()));
 	}
-	
+
 	/**
 	 * Tests constructor with non-empty source list.
 	 */
@@ -50,11 +48,11 @@ public class EventComboViewerTest extends SwtTestCase {
         assertEquals("E", combo.getItem(4));
         assertEquals("F", combo.getItem(5));
 	}
-	
+
 	/**
-	 * Tests, that list chnages are reflected in the combo box.	
+	 * Tests, that list chnages are reflected in the combo box.
 	 */
-	public void guiTestChangeList() {		
+	public void guiTestChangeList() {
         final BasicEventList<String> source = new BasicEventList<String>();
         final Combo combo = new Combo(getShell(), SWT.DROP_DOWN);
         final EventComboViewer<String> viewer = new EventComboViewer<String>(source, combo);
@@ -64,7 +62,7 @@ public class EventComboViewerTest extends SwtTestCase {
         assertTrue(Arrays.equals(source.toArray(new String[source.size()]), combo.getItems()));
         source.clear();
         assertEquals(0, combo.getItemCount());
-        assertTrue(Arrays.equals(new String[0], combo.getItems()));        
+        assertTrue(Arrays.equals(new String[0], combo.getItems()));
         source.add("B");
         source.add("D");
         source.add(0, "A");
@@ -81,7 +79,7 @@ public class EventComboViewerTest extends SwtTestCase {
         source.remove("E");
         assertEquals(GlazedListsTests.delimitedStringToList("D F"), source);
         assertEquals(source.size(), combo.getItemCount());
-        assertTrue(Arrays.equals(source.toArray(new String[source.size()]), combo.getItems()));        
+        assertTrue(Arrays.equals(source.toArray(new String[source.size()]), combo.getItems()));
 	}
 
 	/**
@@ -91,7 +89,7 @@ public class EventComboViewerTest extends SwtTestCase {
 		final BasicEventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
         final Combo combo = new Combo(getShell(), SWT.DROP_DOWN);
-        final EventComboViewer<String> viewer = new EventComboViewer<String>(source, combo, new TestLabelProvider());
+        final EventComboViewer<String> viewer = new EventComboViewer<String>(source, combo, new TestItemFormat());
         assertSame(combo, viewer.getCombo());
         assertEquals(source.size(), combo.getItemCount());
         assertEquals("AA", combo.getItem(0));
@@ -102,14 +100,11 @@ public class EventComboViewerTest extends SwtTestCase {
         assertEquals("FF", combo.getItem(5));
 	}
 
-	
-    /** TestLabelProvider. */
-    private static class TestLabelProvider extends LabelProvider {
-    	public Image getImage(Object element) {
-    		return null;
-    	}
-    	
-    	public String getText(Object element) {
+
+    /** TestItemFormat. */
+    private static class TestItemFormat implements ItemFormat<String> {
+
+    	public String format(String element) {
     		final String result = ((element == null) ? "" : element.toString());
     		return result + result;
     	}

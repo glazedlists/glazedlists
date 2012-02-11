@@ -11,8 +11,6 @@ import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.swt.*;
 
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.*;
 
@@ -78,17 +76,32 @@ public final class GlazedListsSWT {
     }
 
 
-    // LabelProviders // // // // // // // // // // // // // // // // // // //
+    // ItemFormats // // // // // // // // // // // // // // // // // // //
 
     /**
-     * Creates an {@link ILabelProvider} that returns labels for Objects via
-     * Relection. The label returned will be the String value of specified
-     * JavaBean property.
+	 * Creates a new {@link ItemFormat} that uses the string value of a JavaBean
+	 * property as the formatted value of a list element. If the list element or
+	 * the propery value is <code>null</code>, the emtpy string is returned.
+	 *
+	 * @param propertyName the JavaBean property name
      */
-    public static ILabelProvider beanLabelProvider(String property) {
-        return new BeanLabelProvider(property);
+    public static <E> ItemFormat<E> beanItemFormat(String property) {
+        return new BeanItemFormat<E>(property);
     }
 
+    /**
+	 * Creates a new {@link ItemFormat} that uses the string value of a JavaBean
+	 * property as the formatted value of a list element. If the list element or
+	 * the propery value is <code>null</code>, the given value is returned.
+	 *
+	 * @param propertyName the JavaBean property name
+	 * @param valueForNullElement
+	 *            string value to be used for a <code>null</code> element or
+	 *            property value
+     */
+    public static <E> ItemFormat<E> beanItemFormat(String property, String valueForNullElement) {
+        return new BeanItemFormat<E>(property, valueForNullElement);
+    }
 
     // ThresholdViewers // // // // // // // // // // // // // // // // // // //
 
@@ -251,7 +264,7 @@ public final class GlazedListsSWT {
      */
     public static <E> DefaultEventListViewer<E> eventListViewerWithThreadProxyList(EventList<E> source, List list) {
     	final EventList<E> proxySource = createSwtThreadProxyListWithLock(source, list.getDisplay());
-    	return new DefaultEventListViewer<E>(proxySource, list, new LabelProvider(), true);
+    	return new DefaultEventListViewer<E>(proxySource, list, new DefaultItemFormat<E>(), true);
     }
 
     /**
@@ -291,7 +304,7 @@ public final class GlazedListsSWT {
      */
     public static <E> DefaultEventComboViewer<E> eventComboViewerWithThreadProxyList(EventList<E> source, Combo combo) {
     	final EventList<E> proxySource = createSwtThreadProxyListWithLock(source, combo.getDisplay());
-    	return new DefaultEventComboViewer<E>(proxySource, combo, new LabelProvider(), true);
+    	return new DefaultEventComboViewer<E>(proxySource, combo, new DefaultItemFormat<E>(), true);
     }
 
     /** Helper method to create a SwtThreadProxyList with read locks. */

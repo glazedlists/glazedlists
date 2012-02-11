@@ -83,18 +83,54 @@
 	<property name="download.lib.url" value="http://java.net/projects/glazedlists/downloads/download/lib"/>
 	
 	<!-- determine the platform swt jar file name and download path from java.net -->
-    <property name="swt.jar.path" value="${download.lib.url}/swt/3.3"/>
+    <property name="swt.jar.path" value="${download.lib.url}/swt/3.7.1"/>
 
 	<condition property="swt.jar.file" value="org.eclipse.swt.win32.win32.x86.jar">
-		<os family="windows"/>
+		<and>
+			<os family="windows"/>
+			<not>
+				<contains string="${os.arch}" substring="64"/>
+			</not>
+		</and>
 	</condition>
 
-	<condition property="swt.jar.file" value="org.eclipse.swt.carbon.macosx.jar">
-		<os family="mac"/>
+	<condition property="swt.jar.file" value="org.eclipse.swt.win32.win32.x86_64.jar">
+		<and>
+			<os family="windows"/>
+			<contains string="${os.arch}" substring="64"/>
+		</and>
+	</condition>
+
+	<condition property="swt.jar.file" value="org.eclipse.swt.cocoa.macosx.jar">
+		<and>
+			<os family="mac"/>
+			<not>
+				<contains string="${os.arch}" substring="64"/>
+			</not>
+		</and>
+	</condition>
+
+	<condition property="swt.jar.file" value="org.eclipse.swt.cocoa.macosx.x86_64.jar">
+		<and>
+			<os family="mac"/>
+			<contains string="${os.arch}" substring="64"/>
+		</and>
 	</condition>
 
 	<condition property="swt.jar.file" value="org.eclipse.swt.gtk.linux.x86.jar">
-		<os name="Linux"/>
+		<and>
+			<os name="Linux"/>
+			<not>
+				<contains string="${os.arch}" substring="64"/>
+			</not>
+		</and>
+	</condition>
+
+	<condition property="swt.jar.file" value="org.eclipse.swt.gtk.linux.x86_64.jar">
+		<and>
+			<os name="Linux"/>
+			<contains string="${os.arch}" substring="64"/>
+		</and>
 	</condition>
 	
 	<!-- use windows files as default if nothing matches -->
@@ -102,7 +138,6 @@
 	
 	<target name="clean"
 		description="Clean up generated files, forcing them to be rebuilt.">
-
 		<!-- Delete target directory with all generated build artifacts -->
 		<delete dir="${target.dir}"/>
 
@@ -326,21 +361,6 @@
 
     <target name="swt" depends="core,calculation">
         <mkdir dir="extensions/swt/lib"/>
-        <java classname="ca.odell.glazedlists.impl.HttpClient">
-            <classpath path="${classes.dir}"/>
-            <arg value="${swt.jar.path}/org.eclipse.core.commands.jar"/>
-            <arg value="extensions/swt/lib/org.eclipse.core.commands.jar"/>
-        </java>
-        <java classname="ca.odell.glazedlists.impl.HttpClient">
-            <classpath path="${classes.dir}"/>
-            <arg value="${swt.jar.path}/org.eclipse.equinox.common.jar"/>
-            <arg value="extensions/swt/lib/org.eclipse.equinox.common.jar"/>
-        </java>
-        <java classname="ca.odell.glazedlists.impl.HttpClient">
-            <classpath path="${classes.dir}"/>
-            <arg value="${swt.jar.path}/org.eclipse.jface.jar"/>
-            <arg value="extensions/swt/lib/org.eclipse.jface.jar"/>
-        </java>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
             <arg value="${swt.jar.path}/${swt.jar.file}"/>

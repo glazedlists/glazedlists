@@ -5,8 +5,6 @@ package ca.odell.glazedlists.swt;
 
 import ca.odell.glazedlists.EventList;
 
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.List;
 
@@ -33,27 +31,27 @@ public class EventListViewer<E> extends DefaultEventListViewer<E> {
      * Creates a new List that displays and responds to changes in the source list.
      * List elements will simply be displayed as the result of calling
      * toString() on the contents of the source list.
-     * 
+     *
      * @param source the EventList that provides the elements
      * @param list the list
      */
     public EventListViewer(EventList<E> source, List list) {
-        this(source, list, new LabelProvider());
+        this(source, list, new DefaultItemFormat<E>());
     }
 
     /**
      * Creates a new List that displays and responds to changes in the source list.
-     * List elements are formatted using the provided {@link ILabelProvider}.
-     * 
+     * List elements are formatted using the provided {@link ItemFormat}.
+     *
      * @param source the EventList that provides the elements
      * @param list the list
-     * @param labelProvider a LabelProvider for formatting the displayed values
-     * 
-     * @see ILabelProvider
-     * @see GlazedListsSWT#beanLabelProvider(String)
+     * @param itemFormat an {@link ItemFormat} for formatting the displayed values
+     *
+     * @see ItemFormat
+     * @see GlazedListsSWT#beanItemFormat(String)
      */
-    public EventListViewer(EventList<E> source, List list, ILabelProvider labelProvider) {
-    	super(createProxyList(source, list.getDisplay()), list, labelProvider);
+    public EventListViewer(EventList<E> source, List list, ItemFormat<? super E> itemFormat) {
+    	super(createProxyList(source, list.getDisplay()), list, itemFormat);
     	disposeSource = (this.source != source);
     }
 
@@ -75,7 +73,7 @@ public class EventListViewer<E> extends DefaultEventListViewer<E> {
         if (disposeSource) source.dispose();
         super.dispose();
     }
-    
+
     /**
      * while holding a read lock, this method wraps the given source list with a SWT thread
      * proxy list.

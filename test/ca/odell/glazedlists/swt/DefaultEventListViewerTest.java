@@ -10,9 +10,7 @@ import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.List;
 
 /**
@@ -21,19 +19,19 @@ import org.eclipse.swt.widgets.List;
  * @author Holger Brands
  */
 public class DefaultEventListViewerTest extends SwtTestCase {
-	
+
 	/**
 	 * Tests constructor with empty source list.
 	 */
-	public void guiTestEmptyConstruction() {		
+	public void guiTestEmptyConstruction() {
         final BasicEventList<String> source = new BasicEventList<String>();
         final List list = new List(getShell(), SWT.MULTI);
         final DefaultEventListViewer<String> viewer = new DefaultEventListViewer<String>(source, list);
         assertSame(list, viewer.getList());
         assertEquals(0, list.getItemCount());
-        assertTrue(Arrays.equals(new String[0], list.getItems()));        
+        assertTrue(Arrays.equals(new String[0], list.getItems()));
 	}
-	
+
 	/**
 	 * Tests constructor with non-empty source list.
 	 */
@@ -52,11 +50,11 @@ public class DefaultEventListViewerTest extends SwtTestCase {
         assertEquals("E", list.getItem(4));
         assertEquals("F", list.getItem(5));
 	}
-	
+
 	/**
-	 * Tests, that list changes are reflected in the list.	
+	 * Tests, that list changes are reflected in the list.
 	 */
-	public void guiTestChangeList() {		
+	public void guiTestChangeList() {
         final BasicEventList<String> source = new BasicEventList<String>();
         final List list = new List(getShell(), SWT.MULTI);
         final DefaultEventListViewer<String> viewer = new DefaultEventListViewer<String>(source, list);
@@ -66,7 +64,7 @@ public class DefaultEventListViewerTest extends SwtTestCase {
         assertTrue(Arrays.equals(source.toArray(new String[source.size()]), list.getItems()));
         source.clear();
         assertEquals(0, list.getItemCount());
-        assertTrue(Arrays.equals(new String[0], list.getItems()));        
+        assertTrue(Arrays.equals(new String[0], list.getItems()));
         source.add("B");
         source.add("D");
         source.add(0, "A");
@@ -83,7 +81,7 @@ public class DefaultEventListViewerTest extends SwtTestCase {
         source.remove("E");
         assertEquals(GlazedListsTests.delimitedStringToList("D F"), source);
         assertEquals(source.size(), list.getItemCount());
-        assertTrue(Arrays.equals(source.toArray(new String[source.size()]), list.getItems()));        
+        assertTrue(Arrays.equals(source.toArray(new String[source.size()]), list.getItems()));
 	}
 
 	/**
@@ -93,7 +91,7 @@ public class DefaultEventListViewerTest extends SwtTestCase {
 		final BasicEventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
         final List list = new List(getShell(), SWT.MULTI);
-        final DefaultEventListViewer<String> viewer = new DefaultEventListViewer<String>(source, list, new TestLabelProvider());
+        final DefaultEventListViewer<String> viewer = new DefaultEventListViewer<String>(source, list, new TestItemFormat());
         assertSame(list, viewer.getList());
         assertEquals(source.size(), list.getItemCount());
         assertEquals("AA", list.getItem(0));
@@ -199,13 +197,10 @@ public class DefaultEventListViewerTest extends SwtTestCase {
         viewer.dispose();
     }
 
-    /** TestLabelProvider. */
-    private static class TestLabelProvider extends LabelProvider {
-    	public Image getImage(Object element) {
-    		return null;
-    	}
-    	
-    	public String getText(Object element) {
+    /** TestItemFormat. */
+    private static class TestItemFormat implements ItemFormat<String> {
+
+    	public String format(String element) {
     		final String result = ((element == null) ? "" : element.toString());
     		return result + result;
     	}
