@@ -4,8 +4,8 @@
 /*                                                          StarLight Systems */
 package ca.odell.glazedlists.matchers;
 
-import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.FunctionList;
+import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
 
 import java.util.Comparator;
@@ -115,6 +115,7 @@ public class ThresholdMatcherEditor<E, T> extends AbstractMatcherEditor<E> {
 
         // if this is our first matcher, it's automatically a constrain
         currentMatcher = operation.instance(comparator, threshold, function);
+        fireChanged(currentMatcher);
 	}
 
     /**
