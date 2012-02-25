@@ -192,24 +192,7 @@ public class DefaultEventTableViewerTest extends SwtTestCase {
         final TableFormat<Color> tableFormat = new ColorTableFormat();
         final Table table = new Table(getShell(), SWT.CHECK);
         DefaultEventTableViewer<Color> viewer = new DefaultEventTableViewer<Color>(source, table, tableFormat);
-        assertEquals(3, table.getColumnCount());
-        assertEquals("Red", table.getColumn(0).getText());
-        assertEquals(SWT.LEFT, table.getColumn(0).getAlignment());
-        assertEquals(80, table.getColumn(0).getWidth());
-        assertEquals(true, table.getColumn(0).getResizable());
-        assertEquals(null, table.getColumn(0).getToolTipText());
-
-        assertEquals("Green", table.getColumn(1).getText());
-        assertEquals(SWT.LEFT, table.getColumn(1).getAlignment());
-        assertEquals(100, table.getColumn(1).getWidth());
-        assertEquals(false, table.getColumn(1).getResizable());
-        assertEquals(null, table.getColumn(1).getToolTipText());
-
-        assertEquals("Blue", table.getColumn(2).getText());
-        assertEquals(SWT.CENTER, table.getColumn(2).getAlignment());
-        assertEquals(80, table.getColumn(2).getWidth());
-        assertEquals(true, table.getColumn(2).getResizable());
-        assertEquals("Blue Column", table.getColumn(2).getToolTipText());
+        checkColorTableFormatColumns(table);
         viewer.dispose();
     }
 
@@ -328,18 +311,6 @@ public class DefaultEventTableViewerTest extends SwtTestCase {
         viewer.dispose();
     }
 
-    private static class SimpleTableFormat implements TableFormat<String> {
-        public int getColumnCount() {
-            return 1;
-        }
-        public String getColumnName(int column) {
-            return "Hello";
-        }
-        public Object getColumnValue(String baseObject, int column) {
-            return baseObject;
-        }
-    }
-
     /**
      * Tests clearing the source list of {@link DefaultEventTableViewer}.
      */
@@ -367,6 +338,124 @@ public class DefaultEventTableViewerTest extends SwtTestCase {
         assertEquals(0, table.getItemCount());
         assertEquals(Collections.EMPTY_LIST, viewer.getSelected());
         assertEquals(0, table.getSelectionCount());
+    }
+
+    /**
+     * Tests {@link DefaultEventTableViewer#setTableFormat(TableFormat)} with <code>null</code> value.
+     */
+    public void guiTestSetTableFormatNull() {
+        final EventList<Color> source = GlazedLists.eventList(RGBNull);
+        final TableFormat<Color> tableFormat = new ColorTableFormat();
+        final Table table = new Table(getShell(), SWT.CHECK);
+        DefaultEventTableViewer<Color> viewer = new DefaultEventTableViewer<Color>(source, table, tableFormat);
+        try {
+        	viewer.setTableFormat(null);
+        	fail("expected IllegalArgumentException for null TableFormat");
+        } catch (IllegalArgumentException ex) {
+        	// expected
+        }
+    }
+
+    /**
+     * Tests {@link DefaultEventTableViewer#setTableFormat(TableFormat)}.
+     */
+    public void guiTestSetTableFormat() {
+        final EventList<Color> source = GlazedLists.eventList(RGB);
+        final TableFormat<Color> tableFormat = new ColorTableFormat();
+        final Table table = new Table(getShell(), SWT.CHECK);
+        DefaultEventTableViewer<Color> viewer = new DefaultEventTableViewer<Color>(source, table, tableFormat);
+        checkColorTableFormatColumns(table);
+        checkColorTableFormatItems(viewer);
+        // change TableFormat
+        final TableFormat<Color> newTableFormat = GlazedLists.tableFormat(new String[] { "green",
+                "red"}, new String[] { "GREEN", "RED", });
+        viewer.setTableFormat(newTableFormat);
+        // check TableColumns
+        assertEquals(2, table.getColumnCount());
+        assertEquals("GREEN", table.getColumn(0).getText());
+        assertEquals(SWT.LEFT, table.getColumn(0).getAlignment());
+        assertEquals(80, table.getColumn(0).getWidth());
+        assertEquals(true, table.getColumn(0).getResizable());
+        assertEquals(null, table.getColumn(0).getToolTipText());
+        assertEquals("RED", table.getColumn(1).getText());
+        assertEquals(SWT.LEFT, table.getColumn(1).getAlignment());
+        assertEquals(80, table.getColumn(1).getWidth());
+        assertEquals(true, table.getColumn(1).getResizable());
+        assertEquals(null, table.getColumn(1).getToolTipText());
+        // check TableItems
+    	assertEquals(3, viewer.getTable().getItemCount());
+    	assertEquals(3, viewer.getSourceList().size());
+    	Color elem = viewer.getSourceList().get(0);
+    	TableItem item = viewer.getTable().getItem(0);
+    	assertEquals(String.valueOf(elem.getGreen()), item.getText(0));
+    	assertEquals(String.valueOf(elem.getRed()), item.getText(1));
+    	elem = viewer.getSourceList().get(1);
+    	item = viewer.getTable().getItem(1);
+    	assertEquals(String.valueOf(elem.getGreen()), item.getText(0));
+    	assertEquals(String.valueOf(elem.getRed()), item.getText(1));
+    	elem = viewer.getSourceList().get(2);
+    	item = viewer.getTable().getItem(2);
+    	assertEquals(String.valueOf(elem.getGreen()), item.getText(0));
+    	assertEquals(String.valueOf(elem.getRed()), item.getText(1));
+    	// set back original TableFormat and assert again
+        viewer.setTableFormat(tableFormat);
+        checkColorTableFormatColumns(table);
+        checkColorTableFormatItems(viewer);
+
+        viewer.dispose();
+    }
+
+    private void checkColorTableFormatColumns(Table table) {
+        assertEquals(3, table.getColumnCount());
+        assertEquals("Red", table.getColumn(0).getText());
+        assertEquals(SWT.LEFT, table.getColumn(0).getAlignment());
+        assertEquals(80, table.getColumn(0).getWidth());
+        assertEquals(true, table.getColumn(0).getResizable());
+        assertEquals(null, table.getColumn(0).getToolTipText());
+
+        assertEquals("Green", table.getColumn(1).getText());
+        assertEquals(SWT.LEFT, table.getColumn(1).getAlignment());
+        assertEquals(100, table.getColumn(1).getWidth());
+        assertEquals(false, table.getColumn(1).getResizable());
+        assertEquals(null, table.getColumn(1).getToolTipText());
+
+        assertEquals("Blue", table.getColumn(2).getText());
+        assertEquals(SWT.CENTER, table.getColumn(2).getAlignment());
+        assertEquals(80, table.getColumn(2).getWidth());
+        assertEquals(true, table.getColumn(2).getResizable());
+        assertEquals("Blue Column", table.getColumn(2).getToolTipText());
+    }
+
+    private void checkColorTableFormatItems(DefaultEventTableViewer<Color> viewer) {
+    	assertEquals(3, viewer.getTable().getItemCount());
+    	assertEquals(3, viewer.getSourceList().size());
+    	Color elem = viewer.getSourceList().get(0);
+    	TableItem item = viewer.getTable().getItem(0);
+    	assertEquals(String.valueOf(elem.getRed()), item.getText(0));
+    	assertEquals(String.valueOf(elem.getGreen()), item.getText(1));
+    	assertEquals(String.valueOf(elem.getBlue()), item.getText(2));
+    	elem = viewer.getSourceList().get(1);
+    	item = viewer.getTable().getItem(1);
+    	assertEquals(String.valueOf(elem.getRed()), item.getText(0));
+    	assertEquals(String.valueOf(elem.getGreen()), item.getText(1));
+    	assertEquals(String.valueOf(elem.getBlue()), item.getText(2));
+    	elem = viewer.getSourceList().get(2);
+    	item = viewer.getTable().getItem(2);
+    	assertEquals(String.valueOf(elem.getRed()), item.getText(0));
+    	assertEquals(String.valueOf(elem.getGreen()), item.getText(1));
+    	assertEquals(String.valueOf(elem.getBlue()), item.getText(2));
+    }
+
+    private static class SimpleTableFormat implements TableFormat<String> {
+        public int getColumnCount() {
+            return 1;
+        }
+        public String getColumnName(int column) {
+            return "Hello";
+        }
+        public Object getColumnValue(String baseObject, int column) {
+            return baseObject;
+        }
     }
 
     private static class ColorTableFormat implements TableFormat<Color>, TableColumnConfigurer {

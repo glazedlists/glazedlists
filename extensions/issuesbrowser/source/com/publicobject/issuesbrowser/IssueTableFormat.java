@@ -39,7 +39,7 @@ public class IssueTableFormat implements WritableTableFormat<Object>, AdvancedTa
 
     public Class getColumnClass(int column) {
         switch (column) {
-            case 0: return Integer.class;
+            case 0: return String.class;
             case 2: return Date.class;
             case 3: return Date.class;
             case 4: return Priority.class;
@@ -70,7 +70,7 @@ public class IssueTableFormat implements WritableTableFormat<Object>, AdvancedTa
             if(column == 5) return separator.first().getSubcomponent();
             else return "------";
         }
-        
+
         final Issue issue = (Issue) baseObject;
         switch (column) {
             case 0: return issue.getId();

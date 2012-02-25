@@ -171,6 +171,13 @@ public class DefaultEventTableViewer<E> implements ListEventListener<E> {
         }
     }
 
+    /** Removes existing columns from the table. */
+    private void removeTableColumns() {
+    	while (table.getColumnCount() > 0) {
+    	    table.getColumns()[0].dispose();
+    	}
+    }
+
     /**
      * Sets all of the column values on a {@link TableItem}.
      */
@@ -189,11 +196,20 @@ public class DefaultEventTableViewer<E> implements ListEventListener<E> {
     }
 
     /**
-     * Sets this {@link Table} to be formatted by a different
-     * {@link TableFormat}.  This method is not yet implemented for SWT.
+     * Sets this {@link Table} to be formatted by a different {@link TableFormat}.
+     * @param tableFormat the new TableFormat
+     * @throws IllegalArgumentException if tableFormat is <code>null</code>
      */
-    public void setTableFormat(TableFormat<E> tableFormat) {
-        throw new UnsupportedOperationException();
+    public void setTableFormat(TableFormat<? super E> tableFormat) {
+    	if (tableFormat == null)
+    		throw new IllegalArgumentException("TableFormat may not be null");
+        this.tableFormat = tableFormat;
+
+        table.setRedraw(false);
+        removeTableColumns();
+        initTable();
+		this.tableHandler.redraw();
+		table.setRedraw(true);
     }
 
     /**
@@ -515,6 +531,11 @@ public class DefaultEventTableViewer<E> implements ListEventListener<E> {
          * completely virtual table
          */
         public int getLastIndex();
+
+        /**
+         * redraws the table
+         */
+        public void redraw();
     }
 
     /**
@@ -564,6 +585,13 @@ public class DefaultEventTableViewer<E> implements ListEventListener<E> {
         public int getLastIndex() {
             return table.getItemCount() - 1;
         }
+
+        /** {@inheritedDoc} */
+        public void redraw() {
+			for (int i=0; i<source.size(); i++) {
+				renderTableItem(table.getItem(i), source.get(i), i);
+			}
+		}
     }
 
     /**
@@ -674,5 +702,14 @@ public class DefaultEventTableViewer<E> implements ListEventListener<E> {
         public void dispose() {
             table.removeListener(SWT.SetData, this);
         }
+
+        /** {@inheritedDoc} */
+        public void redraw() {
+			this.requested.clear();
+			table.setItemCount(0);
+
+			requested.addWhite(0, source.size());
+			table.setItemCount(source.size());
+		}
     }
 }

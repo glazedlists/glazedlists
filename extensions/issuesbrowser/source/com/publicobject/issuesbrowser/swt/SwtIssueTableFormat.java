@@ -7,14 +7,14 @@ package com.publicobject.issuesbrowser.swt;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.swt.TableColumnConfigurer;
 
+import com.publicobject.issuesbrowser.IssueTableFormat;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.TableColumn;
 
-import com.publicobject.issuesbrowser.IssueTableFormat;
-
 /**
  * Extended {@link TableFormat} for configuring the SWT issue table columns.
- * 
+ *
  * @author hbrands
  */
 public class SwtIssueTableFormat extends IssueTableFormat implements TableColumnConfigurer {
@@ -22,8 +22,8 @@ public class SwtIssueTableFormat extends IssueTableFormat implements TableColumn
     /** {@inheritedDoc} */
     public void configure(TableColumn tableColumn, int column) {
         switch (column) {
-            case 0: 
-                tableColumn.setWidth(30);
+            case 0:
+                tableColumn.setWidth(110);
                 tableColumn.setResizable(false);
                 tableColumn.setAlignment(SWT.RIGHT);
                 break;
