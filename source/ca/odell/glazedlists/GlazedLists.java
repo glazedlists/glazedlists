@@ -437,8 +437,8 @@ public final class GlazedLists {
      * is thread ready but not thread safe. See {@link EventList} for an example
      * of thread safe code.
      */
-    public static <E> TransformedList<E, E> readOnlyList(EventList<E> source) {
-        return new ReadOnlyList<E>(source);
+    public static <E> TransformedList<E, E> readOnlyList(EventList<? extends E> source) {
+        return new ReadOnlyList<E>((EventList<E>) source);
     }
 
     /**
@@ -470,8 +470,8 @@ public final class GlazedLists {
      *
      * @see ca.odell.glazedlists.util.concurrent
      */
-    public static <E> TransformedList<E, E> threadSafeList(EventList<E> source) {
-        return new ThreadSafeList<E>(source);
+    public static <E> TransformedList<E, E> threadSafeList(EventList<? extends E> source) {
+        return new ThreadSafeList<E>((EventList<E>) source);
     }
 
     /**
@@ -751,12 +751,12 @@ public final class GlazedLists {
 	 * installed and returned to the caller (which they may uninstall at their
 	 * leisure) will throw an {@link IllegalArgumentException} if it detects the
 	 * addition of an element with an unsupported type.
-	 * 
+	 *
 	 * <p>
 	 * This {@link ListEventListener} is typically used as a tool to check
 	 * invariants of the elements of {@link EventList}s during software
 	 * development and testing phases.
-	 * 
+	 *
 	 * @param source
 	 *            the {@link EventList} on which to provide type safety
 	 * @param types

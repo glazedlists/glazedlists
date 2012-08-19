@@ -5,12 +5,13 @@ package ca.odell.glazedlists;
 
 // for being a JUnit test case
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
-import junit.framework.TestCase;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
+import junit.framework.TestCase;
 
 /**
  * A ReadOnlyListTest tests the functionality of the ReadOnlyList
@@ -166,4 +167,39 @@ public class ReadOnlyListTest extends TestCase {
             // expected
         }
     }
+
+    /**
+     * Tests {@link GlazedLists#readOnlyList(EventList)}
+     */
+    @SuppressWarnings("unused")
+    public void testGenericsFactoryMethod() {
+    	final EventList<AbstractBase> baseList = new BasicEventList<AbstractBase>();
+    	final EventList<Derived> derivedList = new BasicEventList<Derived>();
+    	final EventList<Concrete> concreteList = new BasicEventList<Concrete>();
+
+    	final EventList<AbstractBase> readOnlyBaseList = GlazedLists.readOnlyList(baseList);
+    	final TransformedList<AbstractBase, AbstractBase> treadOnlyBaseList = GlazedLists.readOnlyList(baseList);
+    	final EventList<Derived> readOnlyDerivedList = GlazedLists.readOnlyList(derivedList);
+    	final TransformedList<Derived, Derived> treadOnlyDerivedList = GlazedLists.readOnlyList(derivedList);
+		final EventList<Concrete> readOnlyConcreteList = GlazedLists.readOnlyList(concreteList);
+    	final TransformedList<Concrete, Concrete> treadOnlyConcreteList = GlazedLists.readOnlyList(concreteList);
+
+    	// wasn't possible before Bugfix GLAZEDLISTS-510:
+    	final EventList<AbstractBase> readOnlyBaseDerivedList = GlazedLists.<AbstractBase>readOnlyList(derivedList);
+    	final TransformedList<AbstractBase, AbstractBase> treadOnlyBaseDerivedList = GlazedLists.<AbstractBase>readOnlyList(derivedList);
+    	final EventList<AbstractBase> readOnlyBaseConcreteList = GlazedLists.<AbstractBase>readOnlyList(concreteList);
+    	final TransformedList<AbstractBase, AbstractBase> treadOnlyBaseConcreteList = GlazedLists.<AbstractBase>readOnlyList(concreteList);
+    	final EventList<Derived> readOnlyDerivedConcreteList = GlazedLists.<Derived>readOnlyList(concreteList);
+    	final TransformedList<Derived, Derived> treadOnlyDerivedConcreteList = GlazedLists.<Derived>readOnlyList(concreteList);
+    }
+
+    private static abstract class AbstractBase {
+    }
+
+    private static class Derived extends AbstractBase {
+    }
+
+    private static class Concrete extends Derived {
+    }
+
 }
