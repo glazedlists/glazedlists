@@ -3,11 +3,11 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.event;
 
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.impl.adt.IntArrayList;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.impl.adt.gnutrove.TIntArrayList;
 
 /**
  * Manage a very simple list of list event blocks that occur in
@@ -18,11 +18,11 @@ import ca.odell.glazedlists.impl.adt.gnutrove.TIntArrayList;
 public class BlockSequence<E> {
 
     /** the start indices of the change blocks, inclusive */
-    private TIntArrayList starts = new TIntArrayList();
+    private IntArrayList starts = new IntArrayList();
     /** the end indices of the change blocks, exclusive */
-    private TIntArrayList ends = new TIntArrayList();
+    private IntArrayList ends = new IntArrayList();
     /** the change types */
-    private TIntArrayList types = new TIntArrayList();
+    private IntArrayList types = new IntArrayList();
     /** the impacted values */
     private List<E> oldValues = new ArrayList<E>();
     private List<E> newValues = new ArrayList<E>();
