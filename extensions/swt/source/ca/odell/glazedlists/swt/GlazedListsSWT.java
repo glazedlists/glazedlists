@@ -195,6 +195,8 @@ public final class GlazedListsSWT {
      * Creates a new viewer for the given {@link Table} that updates the table
      * contents in response to changes on the specified {@link EventList}. The
      * {@link Table} is formatted with the specified {@link TableFormat}.
+     * While holding a read lock, this method wraps the source list using
+     * {@link GlazedListsSWT#swtThreadProxyList(EventList, Display)}.
      *
      * <p>The returned viewer is <strong>not thread-safe</strong>. Unless otherwise
      * noted, all methods are only safe to be called from the SWT event handler thread.
@@ -214,6 +216,8 @@ public final class GlazedListsSWT {
      * Creates a new viewer for the given {@link Table} that updates the table
      * contents in response to changes on the specified {@link EventList}. The
      * {@link Table} is formatted with the specified {@link TableFormat}.
+     * While holding a read lock, this method wraps the source list using
+     * {@link GlazedListsSWT#swtThreadProxyList(EventList, Display)}.
      *
      * <p>The returned viewer is <strong>not thread-safe</strong>. Unless otherwise
      * noted, all methods are only safe to be called from the SWT event handler thread.
@@ -252,8 +256,29 @@ public final class GlazedListsSWT {
 
     /**
      * Creates a new List that displays and responds to changes in the source list.
+     * List elements are formatted using the provided {@link ItemFormat}.
+     *
+     * <p>The returned viewer is <strong>not thread-safe</strong>. Unless otherwise
+     * noted, all methods are only safe to be called from the SWT event handler thread.
+     * To do this programmatically, use {@link Display#syncExec(Runnable)} and
+     * wrap the source list (or some part of the source list's pipeline) using
+     * {@link GlazedListsSWT#swtThreadProxyList(EventList, Display)}.
+     * </p>
+     *
+     * @param source the EventList that provides the elements
+     * @param list the list
+     * @param itemFormat an {@link ItemFormat} for formatting the displayed values
+     */
+    public static <E> DefaultEventListViewer<E> eventListViewer(EventList<E> source, List list, ItemFormat<? super E> itemFormat) {
+    	return new DefaultEventListViewer<E>(source, list, itemFormat);
+    }
+
+    /**
+     * Creates a new List that displays and responds to changes in the source list.
      * List elements will simply be displayed as the result of calling
      * toString() on the contents of the source list.
+     * While holding a read lock, this method wraps the source list using
+     * {@link GlazedListsSWT#swtThreadProxyList(EventList, Display)}.
      *
      * <p>The returned viewer is <strong>not thread-safe</strong>. Unless otherwise
      * noted, all methods are only safe to be called from the SWT event handler thread.
@@ -265,6 +290,25 @@ public final class GlazedListsSWT {
     public static <E> DefaultEventListViewer<E> eventListViewerWithThreadProxyList(EventList<E> source, List list) {
     	final EventList<E> proxySource = createSwtThreadProxyListWithLock(source, list.getDisplay());
     	return new DefaultEventListViewer<E>(proxySource, list, new DefaultItemFormat<E>(), true);
+    }
+
+    /**
+     * Creates a new List that displays and responds to changes in the source list.
+     * List elements are formatted using the provided {@link ItemFormat}.
+     * While holding a read lock, this method wraps the source list using
+     * {@link GlazedListsSWT#swtThreadProxyList(EventList, Display)}.
+     *
+     * <p>The returned viewer is <strong>not thread-safe</strong>. Unless otherwise
+     * noted, all methods are only safe to be called from the SWT event handler thread.
+     * </p>
+     *
+     * @param source the EventList that provides the elements
+     * @param list the list
+     * @param itemFormat an {@link ItemFormat} for formatting the displayed values
+     */
+    public static <E> DefaultEventListViewer<E> eventListViewerWithThreadProxyList(EventList<E> source, List list, ItemFormat<? super E> itemFormat) {
+    	final EventList<E> proxySource = createSwtThreadProxyListWithLock(source, list.getDisplay());
+    	return new DefaultEventListViewer<E>(proxySource, list, itemFormat, true);
     }
 
     /**
@@ -292,8 +336,32 @@ public final class GlazedListsSWT {
      * Binds the contents of a {@link Combo} component to an {@link EventList}
      * source.  This allows the selection choices in a {@link Combo} to change
      * dynamically to reflect chances to the source {@link EventList}.  The
+     * {@link String} values displayed in the {@link Combo} component will be
+     * formatted using the provided {@link ItemFormat}.
+     *
+     * <p>The returned viewer is <strong>not thread-safe</strong>. Unless otherwise
+     * noted, all methods are only safe to be called from the SWT event handler thread.
+     * To do this programmatically, use {@link Display#syncExec(Runnable)} and
+     * wrap the source list (or some part of the source list's pipeline) using
+     * {@link GlazedListsSWT#swtThreadProxyList(EventList, Display)}.
+     * </p>
+     *
+     * @param source the EventList that provides the elements
+     * @param combo the combo box
+     * @param itemFormat an {@link ItemFormat} for formatting the displayed values
+     */
+    public static <E> DefaultEventComboViewer<E> eventComboViewer(EventList<E> source, Combo combo, ItemFormat<? super E> itemFormat) {
+    	return new DefaultEventComboViewer<E>(source, combo, itemFormat);
+    }
+
+    /**
+     * Binds the contents of a {@link Combo} component to an {@link EventList}
+     * source.  This allows the selection choices in a {@link Combo} to change
+     * dynamically to reflect chances to the source {@link EventList}.  The
      * {@link String} values displayed in the {@link Combo} compoment will be
      * the result of calling toString() on the Objects found in source.
+     * While holding a read lock, this method wraps the source list using
+     * {@link GlazedListsSWT#swtThreadProxyList(EventList, Display)}.
      *
      * <p>The returned viewer is <strong>not thread-safe</strong>. Unless otherwise
      * noted, all methods are only safe to be called from the SWT event handler thread.
@@ -305,6 +373,28 @@ public final class GlazedListsSWT {
     public static <E> DefaultEventComboViewer<E> eventComboViewerWithThreadProxyList(EventList<E> source, Combo combo) {
     	final EventList<E> proxySource = createSwtThreadProxyListWithLock(source, combo.getDisplay());
     	return new DefaultEventComboViewer<E>(proxySource, combo, new DefaultItemFormat<E>(), true);
+    }
+
+    /**
+     * Binds the contents of a {@link Combo} component to an {@link EventList}
+     * source.  This allows the selection choices in a {@link Combo} to change
+     * dynamically to reflect chances to the source {@link EventList}. The
+     * {@link String} values displayed in the {@link Combo} component will be
+     * formatted using the provided {@link ItemFormat}.
+     * While holding a read lock, this method wraps the source list using
+     * {@link GlazedListsSWT#swtThreadProxyList(EventList, Display)}.
+     *
+     * <p>The returned viewer is <strong>not thread-safe</strong>. Unless otherwise
+     * noted, all methods are only safe to be called from the SWT event handler thread.
+     * </p>
+     *
+     * @param source the EventList that provides the elements
+     * @param combo the combo box
+     * @param itemFormat an {@link ItemFormat} for formatting the displayed values
+     */
+    public static <E> DefaultEventComboViewer<E> eventComboViewerWithThreadProxyList(EventList<E> source, Combo combo, ItemFormat<? super E> itemFormat) {
+    	final EventList<E> proxySource = createSwtThreadProxyListWithLock(source, combo.getDisplay());
+    	return new DefaultEventComboViewer<E>(proxySource, combo, itemFormat, true);
     }
 
     /** Helper method to create a SwtThreadProxyList with read locks. */

@@ -36,7 +36,7 @@ public class DefaultEventComboViewer<E> implements ListEventListener<E> {
      * Binds the contents of a {@link Combo} component to an {@link EventList}
      * source.  This allows the selection choices in a {@link Combo} to change
      * dynamically to reflect chances to the source {@link EventList}.  The
-     * {@link String} values displayed in the {@link Combo} compoment will be
+     * {@link String} values displayed in the {@link Combo} component will be
      * the result of calling toString() on the Objects found in source.
      *
      * @param source the EventList that provides the elements
@@ -50,12 +50,12 @@ public class DefaultEventComboViewer<E> implements ListEventListener<E> {
      * Binds the contents of a {@link Combo} component to an {@link EventList}
      * source.  This allows the selection choices in a {@link Combo} to change
      * dynamically to reflect chances to the source {@link EventList}.  The
-     * {@link String} values displayed in the {@link Combo} compoment will be
+     * {@link String} values displayed in the {@link Combo} component will be
      * formatted using the provided {@link ItemFormat}.
      *
      * @param source the EventList that provides the elements
      * @param combo the combo box
-     * @param itemFormat a {@link ItemFormat} for formatting the displayed values
+     * @param itemFormat an {@link ItemFormat} for formatting the displayed values
      *
      * @see ItemFormat
      * @see GlazedListsSWT#beanItemFormat(String)
@@ -68,7 +68,7 @@ public class DefaultEventComboViewer<E> implements ListEventListener<E> {
      * Binds the contents of a {@link Combo} component to an {@link EventList}
      * source.  This allows the selection choices in a {@link Combo} to change
      * dynamically to reflect chances to the source {@link EventList}.  The
-     * {@link String} values displayed in the {@link Combo} compoment will be
+     * {@link String} values displayed in the {@link Combo} component will be
      * formatted using the provided {@link ItemFormat}.
      *
      * @param source the EventList that provides the elements

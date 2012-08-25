@@ -79,7 +79,7 @@ public final class GlazedListsSwing {
      * noted, all methods are only safe to be called from the event dispatch thread.
      * To do this programmatically, use {@link SwingUtilities#invokeAndWait(Runnable)} and
      * wrap the source list (or some part of the source list's pipeline) using
-     * GlazedListsSwing#swingThreadProxyList(EventList).</p>
+     * {@link GlazedListsSwing#swingThreadProxyList(EventList)}.</p>
      *
      * @param source the EventList that provides the row objects
      * @param tableFormat the object responsible for extracting column data
@@ -91,8 +91,9 @@ public final class GlazedListsSwing {
 
     /**
      * Creates a new table model that extracts column data from the given <code>source</code>
-     * using the the given <code>tableFormat</code>. This method wraps the source list using
-     * GlazedListsSwing#swingThreadProxyList(EventList).
+     * using the the given <code>tableFormat</code>. While holding a read lock,
+     * this method wraps the source list using
+     * {@link GlazedListsSwing#swingThreadProxyList(EventList)}.
      * <p>
      * The returned table model is <strong>not thread-safe</strong>. Unless otherwise noted, all
      * methods are only safe to be called from the event dispatch thread.
@@ -118,7 +119,7 @@ public final class GlazedListsSwing {
      * noted, all methods are only safe to be called from the event dispatch thread.
      * To do this programmatically, use {@link SwingUtilities#invokeAndWait(Runnable)} and
      * wrap the source list (or some part of the source list's pipeline) using
-     * GlazedListsSwing#swingThreadProxyList(EventList).</p>
+     * {@link GlazedListsSwing#swingThreadProxyList(EventList)}.</p>
      *
      * @param source the EventList that provides the row objects
      * @param propertyNames an array of property names in the JavaBeans format.
@@ -140,8 +141,9 @@ public final class GlazedListsSwing {
     /**
      * Creates a new table model that renders the specified list with an automatically
      * generated {@link TableFormat}. It uses JavaBeans and reflection to create
-     * a {@link TableFormat} as specified. This method wraps the source list using
-     * GlazedListsSwing#swingThreadProxyList(EventList).
+     * a {@link TableFormat} as specified.  While holding a read lock,
+     * this method wraps the source list using
+     * {@link GlazedListsSwing#swingThreadProxyList(EventList)}.
      *
      * <p>Note that classes that will be obfuscated may not work with
      * reflection. In this case, implement a {@link TableFormat} manually.</p>
@@ -180,7 +182,7 @@ public final class GlazedListsSwing {
      * noted, all methods are only safe to be called from the event dispatch thread.
      * To do this programmatically, use {@link SwingUtilities#invokeAndWait(Runnable)} and
      * wrap the source list (or some part of the source list's pipeline) using
-     * GlazedListsSwing#swingThreadProxyList(EventList).</p>
+     * {@link GlazedListsSwing#swingThreadProxyList(EventList)}.</p>
      *
      * @param source the {@link EventList} whose selection will be managed. This should
      *      be the same {@link EventList} passed to the constructor of your
@@ -191,8 +193,9 @@ public final class GlazedListsSwing {
     }
 
     /**
-     * Creates a new selection model that also presents a list of the selection. It wraps the
-     * source list using GlazedListsSwing#swingThreadProxyList(EventList). The
+     * Creates a new selection model that also presents a list of the selection.
+     * While holding a read lock, it wraps the source list using
+     * {@link GlazedListsSwing#swingThreadProxyList(EventList)}. The
      * {@link AdvancedListSelectionModel} listens to this {@link EventList} in order to adjust
      * selection when the {@link EventList} is modified. For example, when an element is added to
      * the {@link EventList}, this may offset the selection of the following elements.
@@ -220,7 +223,7 @@ public final class GlazedListsSwing {
      * noted, all methods are only safe to be called from the event dispatch thread.
      * To do this programmatically, use {@link SwingUtilities#invokeAndWait(Runnable)} and
      * wrap the source list (or some part of the source list's pipeline) using
-     * GlazedListsSwing#swingThreadProxyList(EventList).
+     * {@link GlazedListsSwing#swingThreadProxyList(EventList)}.
      * </p>
      *
      * @param source the EventList that provides the elements
@@ -232,6 +235,8 @@ public final class GlazedListsSwing {
     /**
      * Creates a new list model that contains all objects located in the given
      * <code>source</code> and reacts to any changes in the given <code>source</code>.
+     * While holding a read lock, it wraps the source list using
+     * {@link GlazedListsSwing#swingThreadProxyList(EventList)}.
      *
      * <p>The returned selection model is <strong>not thread-safe</strong>. Unless otherwise
      * noted, all methods are only safe to be called from the event dispatch thread.
@@ -254,7 +259,7 @@ public final class GlazedListsSwing {
      * noted, all methods are only safe to be called from the event dispatch thread.
      * To do this programmatically, use {@link SwingUtilities#invokeAndWait(Runnable)} and
      * wrap the source list (or some part of the source list's pipeline) using
-     * GlazedListsSwing#swingThreadProxyList(EventList).
+     * {@link GlazedListsSwing#swingThreadProxyList(EventList)}.
      * </p>
      *
      * @param source the EventList that provides the elements
@@ -266,6 +271,8 @@ public final class GlazedListsSwing {
     /**
      * Creates a new combobox model that contains all objects located in the given
      * <code>source</code> and reacts to any changes in the given <code>source</code>.
+     * While holding a read lock, it wraps the source list using
+     * {@link GlazedListsSwing#swingThreadProxyList(EventList)}.
      *
      * <p>The returned combobox model is <strong>not thread-safe</strong>. Unless otherwise
      * noted, all methods are only safe to be called from the event dispatch thread.
