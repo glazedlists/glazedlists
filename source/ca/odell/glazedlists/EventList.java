@@ -13,7 +13,8 @@ import java.util.List;
 
 /**
  * An observable {@link List}. {@link ListEventListener}s can register to be
- * notified when this list changes.
+ * notified when this list changes. A {@link ListEvent} represents these changes
+ * to an {@link EventList}.
  *
  * <p>{@link EventList}s may be writable or read-only. Consult the Javadoc for
  * your {@link EventList} if you are unsure.
@@ -68,7 +69,7 @@ public interface EventList<E> extends List<E> {
 
     /**
      * Registers the specified listener to receive change updates for this list.
-     * 
+     *
      * @param listChangeListener event listener != null
      * @throws NullPointerException if the specified listener is null
      */
@@ -76,7 +77,7 @@ public interface EventList<E> extends List<E> {
 
     /**
      * Removes the specified listener from receiving change updates for this list.
-     * 
+     *
      * @param listChangeListener event listener != null
      * @throws NullPointerException if the specified listener is null
      * @throws IllegalArgumentException if the specified listener wasn't added before

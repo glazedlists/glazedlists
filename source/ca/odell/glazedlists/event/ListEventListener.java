@@ -11,12 +11,15 @@ import java.util.EventListener;
  * implemented by a GUI widget such as a table or combo box to repaint, add, or
  * remove elements when the underlying data changes.
  *
+ * <p>List changes are represented by a {@link ListEvent}.
+ *
  * <p>When a thread requires notification on the Swing thread for GUI display, the
  * user should not add the implementation of this interface as a listener
  * directly. Instead use a EventThreadProxy, which receives
  * events on the list thread and then fires them on the Swing thread.
  *
  * @see <a href="http://publicobject.com/glazedlists/tutorial/">Glazed Lists Tutorial</a>
+ * @see ListEvent
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
@@ -31,6 +34,8 @@ public interface ListEventListener<E> extends EventListener {
      * to the source list to cause this event. This condition guarantees that
      * no writes can occur while the listener is handling this event.
      * It is an error to write to the source list while processing an event.
+     *
+     * @param listChanges a {@link ListEvent} describing the changes to the list
      */
     public void listChanged(ListEvent<E> listChanges);
 }
