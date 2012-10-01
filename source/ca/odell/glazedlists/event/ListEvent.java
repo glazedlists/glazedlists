@@ -90,10 +90,10 @@ import java.util.EventObject;
  *
  * <pre>
  * EventList&lt;String&gt; list = GlazedLists.eventListOf(&quot;A&quot;, &quot;A&quot;, &quot;B&quot;, &quot;B&quot;, &quot;C&quot;, &quot;C&quot;);
- * list.removeAll(GlazedLists.eventListOf(&quot;A&quot;, &quot;B&quot;));
+ * list.removeAll(GlazedLists.eventListOf(&quot;A&quot;, &quot;C&quot;));
  * </pre>
  *
- * This deletes all occurences of elements "A" and "B" from the list. So there
+ * This deletes all occurences of elements "A" and "C" from the list. So there
  * is a deletion from index 0 to index 1 (inclusive) and another deletion from
  * index 2 to 3. So, instead of modeling each change one by one like ("D0",
  * "D0", "D2", "D2"), you can view the changes in blocks "D0-1" and "D2-3". This
