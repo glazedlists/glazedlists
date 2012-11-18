@@ -287,6 +287,14 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         return getTreeNode(visibleIndex).getElement();
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public E remove(int visibleIndex) {
+    	final E result = get(visibleIndex);
+    	super.remove(visibleIndex);
+    	return result;
+    }
+
     /**
      * @return the tree node at the specified index
      */
@@ -1526,6 +1534,13 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
          */
         public boolean isVisible() {
             return (element.getColor() & VISIBLE_NODES) > 0;
+        }
+
+        /**
+         * @return <code>true</code> if this node is virtual and not real.
+         */
+        boolean isVirtual() {
+        	return virtual;
         }
 
         /**

@@ -123,6 +123,101 @@ public class TreeListTest extends TestCase {
         assertEquals(12, treeList.size());
     }
 
+    public void testRemoveByIndexRealNodeWithVirtualParents() {
+        BasicEventList<String> source = new BasicEventList<String>();
+        source.add("ABC");
+        TreeList<String> treeList = new TreeList<String>(source, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC"
+        });
+        assertEquals(3, treeList.size());
+        assertTrue(treeList.getTreeNode(0).isVirtual());
+        assertTrue(treeList.getTreeNode(1).isVirtual());
+        assertFalse(treeList.getTreeNode(2).isVirtual());
+        assertEquals("C", treeList.remove(2));
+        assertEquals(0, treeList.size());
+        assertTreeStructure(treeList, new String[] { });
+    }
+
+    public void testRemoveByIndexRealNodeWithRealParents() {
+        BasicEventList<String> source = new BasicEventList<String>();
+        source.add("A");
+        source.add("AB");
+        source.add("ABC");
+        TreeList<String> treeList = new TreeList<String>(source, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC"
+        });
+        assertEquals(3, treeList.size());
+        assertFalse(treeList.getTreeNode(0).isVirtual());
+        assertFalse(treeList.getTreeNode(1).isVirtual());
+        assertFalse(treeList.getTreeNode(2).isVirtual());
+        assertEquals("C", treeList.remove(2));
+        assertEquals(2, treeList.size());
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB"
+        });
+    }
+
+    public void testRemoveByIndexRealNodeWithMixedParents() {
+        BasicEventList<String> source = new BasicEventList<String>();
+        source.add("A");
+        source.add("AB");
+        source.add("ABC");
+        TreeList<String> treeList = new TreeList<String>(source, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC"
+        });
+        assertEquals(3, treeList.size());
+        assertFalse(treeList.getTreeNode(0).isVirtual());
+        assertFalse(treeList.getTreeNode(1).isVirtual());
+        assertFalse(treeList.getTreeNode(2).isVirtual());
+        // removing real parent with real child causes creation of virtual parent
+        assertEquals("B", treeList.remove(1));
+        assertEquals(3, treeList.size());
+        assertFalse(treeList.getTreeNode(0).isVirtual());
+        assertTrue(treeList.getTreeNode(1).isVirtual());
+        assertFalse(treeList.getTreeNode(2).isVirtual());
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC"
+        });
+        assertEquals("C", treeList.remove(2));
+        assertEquals(1, treeList.size());
+        assertTreeStructure(treeList, new String[] {
+                "A"
+        });
+    }
+
+    public void testRemoveByIndexVirtualNodeNotSupported() {
+        BasicEventList<String> source = new BasicEventList<String>();
+        source.add("ABC");
+        TreeList<String> treeList = new TreeList<String>(source, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
+        assertTreeStructure(treeList, new String[] {
+                "A",
+                "AB",
+                "ABC"
+        });
+        assertEquals(3, treeList.size());
+        assertTrue(treeList.getTreeNode(0).isVirtual());
+        assertTrue(treeList.getTreeNode(1).isVirtual());
+        assertFalse(treeList.getTreeNode(2).isVirtual());
+        try {
+        	treeList.remove(1);
+        	fail("removing virtual node should not succeed, because it's not supported (yet)");
+        } catch (IndexOutOfBoundsException ex) {
+        	// expected, only real nodes can be removed like that currently
+        }
+    }
+
     /** Test for <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=489">bug 489</a> */
     public void testDeletionIssues_FixMe() {
         EventList<String> source = new BasicEventList<String>();
@@ -138,7 +233,7 @@ public class TreeListTest extends TestCase {
 
         source.add(0, "A");
         assertTreeStructure(treeList, new String[] {"A", "A", "AB",});
-        source.remove(0);
+        source.remove(1);
         assertTreeStructure(treeList, new String[] {"A", "AB",});
         source.set(1, "AB");
 
