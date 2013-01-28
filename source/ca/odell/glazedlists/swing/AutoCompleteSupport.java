@@ -2309,7 +2309,7 @@ public final class AutoCompleteSupport<E> {
 
             // replace the UI Delegate's FocusListener with our own in both
             // the JComboBox and its ComboBoxEditor
-            replaceUIDelegateFocusListener(editor.getEditorComponent(), this);
+            replaceUIDelegateFocusListener(getEditor().getEditorComponent(), this);
             replaceUIDelegateFocusListener(this, this);
         }
 
@@ -2340,40 +2340,37 @@ public final class AutoCompleteSupport<E> {
         }
 
         /**
-         * Implementation copied from BasicComboBoxUI.Handler.focusGained.
+         * Repaint and request focus if editable.
          */
         public void focusGained(FocusEvent e) {
-            if (e.getSource() == getEditor().getEditorComponent())
-                return;
-
-            repaint();
-
-            if (isEditable() && editor != null)
-                getEditor().getEditorComponent().requestFocus();
+        	final ComboBoxEditor currentEditor = getEditor();
+            if (currentEditor != null && currentEditor.getEditorComponent() != e.getSource()) {
+            	repaint();
+	            if (isEditable()) {
+	            	currentEditor.getEditorComponent().requestFocus();
+	            }
+            }
         }
 
-        /**
-         * Implementation copied from BasicComboBoxUI.Handler.focusLost and
-         * changed slightly as seen in the comments below.
-         */
+		/**
+		 * BasicComboBoxUI.Handler.focusLost screws up the installation of this
+		 * JComboBox as a TableCellEditor by hiding the ComboBoxPopup on the
+		 * first keystroke and represent the reason why we must tear out the
+		 * FocusListener and replace it with one of our own.
+		 */
         public void focusLost(FocusEvent e) {
-            if (e.getSource() == getEditor().getEditorComponent()) {
-                final ComboBoxEditor editor = getEditor();
-                final Object item = editor.getItem();
-
-                if (!e.isTemporary() && item != null && !item.equals(getSelectedItem()))
-                    actionPerformed(new ActionEvent(editor, 0, "", EventQueue.getMostRecentEventTime(), 0));
+        	final ComboBoxEditor currentEditor = getEditor();
+            if (!e.isTemporary() && currentEditor != null && currentEditor.getEditorComponent() == e.getSource()) {
+                final Object currentItem = currentEditor.getItem();
+                if (currentItem != null && !currentItem.equals(getSelectedItem())) {
+                	fireActionPerformed(currentEditor);
+                }
             }
-
-            // the 2 lines of code below are copied from BasicComboBoxUI.Handler.focusLost
-            // and represent the reason why we must tear out the FocusListener and replace
-            // it with one of our own - it screws up the installation of this JComboBox as
-            // a TableCellEditor by hiding the ComboBoxPopup on the first keystroke.
-            //
-            // if (!e.isTemporary())
-            //    setPopupVisible(false);
-
             repaint();
+        }
+
+        private void fireActionPerformed(ComboBoxEditor source) {
+        	actionPerformed(new ActionEvent(source, 0, "", EventQueue.getMostRecentEventTime(), 0));
         }
 
         /**
@@ -2446,19 +2443,28 @@ public final class AutoCompleteSupport<E> {
             }
 
             /**
-             * Implementation copied from BasicComboBoxEditor.BorderlessTextField.
+             * {@inheritDoc}
              */
             @Override
-            public void setText(String s) {
-                if (!getText().equals(s))
-                    super.setText(s);
+            public void setText(String newText) {
+            	// workaround for bug 4530952
+                if (!equalsText(newText)) {
+                    super.setText(newText);
+                }
+            }
+
+            private boolean equalsText(String newText) {
+            	final String currentText = getText();
+            	return (currentText == null) ? newText == null : currentText.equals(newText);
             }
 
             /**
-             * Implementation copied from BasicComboBoxEditor.BorderlessTextField.
+             * {@inheritDoc}
              */
             @Override
-            public void setBorder(Border b) {}
+            public void setBorder(Border b) {
+            	// NOP, we want no border
+            }
 
             /**
              * We override this method to make it public so that it can be
