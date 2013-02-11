@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Glazed Lists 1.9.0 Release Notes</title>
+
+  
+  <style type="text/css">
+    body { 
+      background-color: rgb(255, 255, 255);
+      font-family: sans-serif;
+    }
+    h1, h2, h3, h4, h5, h6, td, form {
+      padding: 0px;
+      margin: 0px;
+    }
+    td, th {
+      padding: 4px;
+    }
+
+    a {
+      color: rgb(102, 51, 0);
+    }
+    .section {
+      border-top: solid 2px rgb(255, 204, 0);
+      width: 100%;
+      padding: 2px;
+      margin: 20px 0px 0px 0px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Glazed Lists 1.9.0 Release Notes</h1>
+
+<p>
+Glazed Lists 1.9.0 is a stable maintenance release suitable for production use.
+</p>
+<p>It contains some changes that are not backwards compatible:</p>
+<ul>
+  <li>we dropped Java 1.4 support, Glazed Lists 1.9 is built against Java 1.5.</li>
+  <li>we deprecated the existing Swing and SWT model adapters and introduced new ones which do not wrap the source list in a thread proxy list anymore.</li>
+  <li>the SWT extension is now independent of JFace.</li>
+</ul>
+<p>Please see the <a href="http://www.glazedlists.com/documentation/upgrade-from-18-to-19">Upgade Notes</a> for details.</p>
+<div class="section">
+<h3><a href="http://www.glazedlists.com/propaganda/features">Glazed Lists Features</a></h3>
+<ul>
+  <li>API Compatibility with ArrayList</li>
+  <li>Generic TableModels</li>
+  <li>Easy dynamic filtering &amp; sorting</li>
+
+  <li>High performance</li>
+  <li>Designed for concurrency</li>
+  <li>Swing or SWT</li>
+  <li>Free and open</li>
+</ul>
+</div>
+
+<div class="section">
+<h3>Download</h3>
+
+<p>Glazed Lists is distributed with support for Java 1.5
+or higher. Download is available <a href="http://java.net/projects/glazedlists/downloads/directory/glazedlists-1.9.0">here</a>.
+</p>
+<p>Glazed Lists is also deployed to the <a href="http://repo1.maven.org/maven2/net/java/dev/glazedlists/glazedlists_java15/1.9.0/">central Maven repository</a>.
+</p>
+<table border="1" cellpadding="4" cellspacing="0">
+<tbody>
+  <tr><td>groupId</td><td>net.java.dev.glazedlists</td></tr>
+  <tr><td>artifactId</td><td>glazedlists_java15</td></tr>
+  <tr><td>version</td><td>1.9.0</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="section">
+<h3><a href="http://www.glazedlists.com/documentation">Documentation</a></h3>
+<ul>
+  <li><a href="http://publicobject.com/glazedlistsdeveloper/">Screencasts</a></li>
+  <li><a href="http://www.glazedlists.com/documentation/tutorial">Tutorial</a></li>
+  <li><a href="http://www.glazedlists.com/documentation/faq">FAQ</a></li>
+  <li><a href="http://glazedlists.1045722.n5.nabble.com/GlazedLists-User-f3416378.html">Mailing List</a></li>
+</ul>
+</div>
+
+<div class="section">
+<h3><a href="http://java.net/jira/secure/ReleaseNote.jspa?projectId=11694&version=14295">Changelog</a></h3>
+<h4>        Bug
+</h4>
+<ul>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-412'>GLAZEDLISTS-412</a>] -         GroupingList doesn't handle mass update ListEvents
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-453'>GLAZEDLISTS-453</a>] -         SeparatorList incorrectly throws ConcurrentModificationException when setting comparator
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-463'>GLAZEDLISTS-463</a>] -         incorrect jar index contains 'com' directory
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-471'>GLAZEDLISTS-471</a>] -         RFE: SwingProxyCalculation
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-476'>GLAZEDLISTS-476</a>] -         Glazed Lists 1.8.0 breaks classloader (ECJ)
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-479'>GLAZEDLISTS-479</a>] -         EventListJXTableSorting.install sets the comparator to null
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-486'>GLAZEDLISTS-486</a>] -         GroupingList breaks (NPE/assertion failure) on transaction of updates
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-491'>GLAZEDLISTS-491</a>] -         GroupingList fails with NPE under certain update scenarios
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-493'>GLAZEDLISTS-493</a>] -         AutoCompleteSupport: custom renderer gets overwritten when installing with format
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-498'>GLAZEDLISTS-498</a>] -         Memory leak in ListEventAssembler
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-500'>GLAZEDLISTS-500</a>] -         SeparatorList: some element updates are not handled correctly
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-501'>GLAZEDLISTS-501</a>] -         Regression: null-handling in AutoCompleteSupport with strict mode
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-502'>GLAZEDLISTS-502</a>] -         FilterList: concurrency problem involving ThreadedMatcherEditor
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-504'>GLAZEDLISTS-504</a>] -         NullPointerException in AutoCompleteSupport.CheckStrictModeInvariantRunnable
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-505'>GLAZEDLISTS-505</a>] -         MemoryLeak in SeparatorList
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-513'>GLAZEDLISTS-513</a>] -         NullPointerException in BarcodeNode
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-515'>GLAZEDLISTS-515</a>] -         AbstractMatchEditor is not inheritable
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-516'>GLAZEDLISTS-516</a>] -         missing remove of registered ListEventHandler in dispose method of JEventListPanel causes memory leak
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-517'>GLAZEDLISTS-517</a>] -         Elements are inserted at wrong index
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-520'>GLAZEDLISTS-520</a>] -         TreeList.Format comparator signature incorrect
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-522'>GLAZEDLISTS-522</a>] -         Another NullpointerException in GroupingList
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-524'>GLAZEDLISTS-524</a>] -         List selection changes after filtering when first in list selected
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-528'>GLAZEDLISTS-528</a>] -         SortedList returns wrong &quot;indexOf&quot; when using  SortedList .AVOID_MOVING_ELEMENTS
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-530'>GLAZEDLISTS-530</a>] -         Confusing Javadoc comment in typeSafetyListener(EventList&lt;E&gt; source, Set&lt;Class&gt; types) in ca.odell.glazedlists.GlazedLists
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-533'>GLAZEDLISTS-533</a>] -         Getting writelock after obtaining a readlock causes deadlock
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-534'>GLAZEDLISTS-534</a>] -         Ensure ReadWriteLock is defined for BasicEventList
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-535'>GLAZEDLISTS-535</a>] -         Fail fast if a null event listener is added to or removed from an EventList
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-540'>GLAZEDLISTS-540</a>] -         TextComponentMatcherEditor Constructor uses wrong generic type
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-546'>GLAZEDLISTS-546</a>] -         Exception in JSeparatorTable
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-550'>GLAZEDLISTS-550</a>] -         signature of GlazedLists.readOnlyList does not take generics bounds into consideration
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-557'>GLAZEDLISTS-557</a>] -         TreeList.remove(int) returns wrong type
+</li>
+</ul>
+        
+<h4>        Improvement
+</h4>
+<ul>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-465'>GLAZEDLISTS-465</a>] -         provide Swing adapters without implicit thread proxying
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-466'>GLAZEDLISTS-466</a>] -         provide SWT adapters without implicit thread proxying
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-468'>GLAZEDLISTS-468</a>] -         drop JDK 1.4 support
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-478'>GLAZEDLISTS-478</a>] -         Upgrade to SwingX 1.0
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-480'>GLAZEDLISTS-480</a>] -         Add high performance version of FunctionList
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-483'>GLAZEDLISTS-483</a>] -         Add publisher and lock to eventList and eventListOf
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-494'>GLAZEDLISTS-494</a>] -         Make ExpandAndCollapseKeyListener on TreeTable configurable
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-496'>GLAZEDLISTS-496</a>] -         provide source jar for latest build
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-497'>GLAZEDLISTS-497</a>] -         include source jar in maven upload bundle
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-503'>GLAZEDLISTS-503</a>] -         provide SWTThreadProxyCalculation
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-508'>GLAZEDLISTS-508</a>] -         [solved] Could 'rebuildMatcher' in 'CompositeMatcherEditor' become 'protected'?
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-510'>GLAZEDLISTS-510</a>] -         Add ability to handle covariant element types in GlazedLists.readOnlyList a'la Collections.unmodifiableXXXX
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-514'>GLAZEDLISTS-514</a>] -         Change ca.odell.glazedlists.ObservableElementList.elementChanged(E) signature to accept Object
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-543'>GLAZEDLISTS-543</a>] -         make SWT extension independent of JFace
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-547'>GLAZEDLISTS-547</a>] -         Implement DefaultEventTableViewer#setTableFormat(TableFormat)
+</li>
+</ul>
+            
+<h4>        Task
+</h4>
+<ul>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-511'>GLAZEDLISTS-511</a>] -         Adapt ANT build file to new download location at java.net site
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-512'>GLAZEDLISTS-512</a>] -         Adapt the issue browser demo application to use JIRA at the new java.net site
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-518'>GLAZEDLISTS-518</a>] -         adapt ANT build to support java.net maven repository manager
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-532'>GLAZEDLISTS-532</a>] -         update build to use new download location
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-536'>GLAZEDLISTS-536</a>] -         Upgrade to latest Hibernate 3.x version
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-544'>GLAZEDLISTS-544</a>] -         update SWT dependency to 3.7.1
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-545'>GLAZEDLISTS-545</a>] -         update tutorial for 1.9
+</li>
+<li>[<a href='http://java.net/jira/browse/GLAZEDLISTS-554'>GLAZEDLISTS-554</a>] -         Replace TIntArrayList implementation because of  incompatible licence
+</li>
+</ul>
+</div>
+
+<div class="section">
+<h3>License</h3>
+<p>Glazed Lists is distributed under your choice of two popular open source
+licenses, the <a href="http://www.gnu.org/copyleft/lesser.html">LGPL</a> and
+the <a href="http://www.mozilla.org/MPL/MPL-1.1.html">MPL</a>.
+</p>
+<ul>
+<li>You may distribute Glazed Lists free of charge</li>
+<li>You may use Glazed Lists in a commercial or closed source application</li>
+<li>You may not create a closed-source fork of Glazed Lists</li>
+</ul>
+</div>
+
+<div class="section">
+<h3>Developers</h3>
+<ul>
+  <li>Holger Brands</li>
+  <li>James Lemieux</li>
+  <li><a href="mailto:jesse@swank.ca">Jesse Wilson</a></li>
+  <li><a href="mailto:kevin@swank.ca">Kevin Maltby</a></li>
+  <li>Rob Eden</li>
+</ul>
+</div>
+
+<div class="section" style="text-align:right;">
+<p><a href="http://www.glazedlists.com">Glazed Lists</a>, Copyright &copy; 2003-2013 publicobject.com, O'Dell Engineering Ltd.
+</p>
+</div>
+</body>
+</html>
