@@ -10,18 +10,15 @@
        Create build directories and set up necessary paths.
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-    <property name="java.target.version" value="1.5"/>
-    <property name="java.target.version.fileFriendlyName" value="java15"/>
+    <property name="java.target.version" value="1.6"/>
+    <property name="java.target.version.fileFriendlyName" value="java16"/>
 
 	<!-- Version number for the next planned release -->
     <property name="next.release.version" value="1.10"/>
     
 	<!-- Maven coordinates -->
 	<!-- version number, use suffix '-SNAPSHOT' for development build -->
-	<!--
     <property name="version" value="${next.release.version}-SNAPSHOT"/>
-    -->
-	<property name="version" value="1.9.0"/>
     <property name="artifactId" value="glazedlists_${java.target.version.fileFriendlyName}" />
 	<property name="groupId" value="net.java.dev.glazedlists" />
 
@@ -175,7 +172,7 @@
 			<packageset dir="extensions/hibernate/source"><exclude name="**/impl/**"/></packageset>			
 			<packageset dir="extensions/treetable/source"><exclude name="**/impl/**"/></packageset>			
             <classpath><fileset dir="extensions/" includes="**/lib/*.jar"/></classpath>
-            <link href="http://download.oracle.com/javase/1.5.0/docs/api/"/>
+            <link href="http://docs.oracle.com/javase/6/docs/api/"/>
             <link href="http://help.eclipse.org/help33/index.jsp?topic=/org.eclipse.platform.doc.isv/reference/api/overview-summary.html"/>
             <link href="http://www.jdocs.com/formlayout/1.0.4/api/" packagelistloc="extensions/jgoodiesforms/lib"/>
             <link href="http://nachocalendar.sourceforge.net/doc/"/>
