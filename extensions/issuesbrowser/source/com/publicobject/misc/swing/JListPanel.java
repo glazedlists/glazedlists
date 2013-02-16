@@ -196,6 +196,7 @@ public class JListPanel<C extends Component> extends JPanel implements ListEvent
             repaint();
         }
 
+        @Override
         public void mouseDragged(MouseEvent e) {
             // reposition the DND component relative to the mouse cursor
             dndCurrent = SwingUtilities.convertPoint(e.getComponent(), e.getPoint(), JListPanel.this);
@@ -203,7 +204,8 @@ public class JListPanel<C extends Component> extends JPanel implements ListEvent
             revalidate();
             repaint();
         }
-
+        
+        @Override
         public void mouseMoved(MouseEvent e) { }
     }
 

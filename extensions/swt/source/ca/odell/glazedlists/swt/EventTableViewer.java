@@ -118,6 +118,7 @@ public class EventTableViewer<E> extends DefaultEventTableViewer<E> {
      * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
      * to call any method on a {@link EventTableViewer} after it has been disposed.
      */
+    @Override
     public void dispose() {
         if (swtThreadSource != null) swtThreadSource.dispose();
         super.dispose();

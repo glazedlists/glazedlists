@@ -74,6 +74,7 @@ public class EventKTableModel extends DefaultEventKTableModel {
      * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
      * to call any method on a {@link EventKTableModel} after it has been disposed.
      */
+    @Override
     public void dispose() {
         if (disposeSource) source.dispose();
         super.dispose();

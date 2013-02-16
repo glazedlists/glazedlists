@@ -67,6 +67,7 @@ public class EventComboViewer<E> extends DefaultEventComboViewer<E> {
      * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
      * to call any method on a {@link EventComboViewer} after it has been disposed.
      */
+    @Override
     public void dispose() {
         if (disposeSource) source.dispose();
         super.dispose();
