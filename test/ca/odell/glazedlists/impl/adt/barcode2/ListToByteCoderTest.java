@@ -4,19 +4,23 @@
 package ca.odell.glazedlists.impl.adt.barcode2;
 
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
-import junit.framework.TestCase;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Make sure we can encode to bytes and back consistently.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class ListToByteCoderTest extends TestCase {
+public class ListToByteCoderTest {
 
+    @Test
     public void testSymmetry() {
         List<String> values = GlazedListsTests.stringToList("ABCDEFG");
         ListToByteCoder<String> coder = new ListToByteCoder<String>(values);

@@ -3,7 +3,11 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swt;
 
-import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.IntegerTableFormat;
+import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 
@@ -16,6 +20,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests for the {@link DefaultEventTableViewer}.
@@ -28,21 +35,24 @@ public class DefaultEventTableViewerTest extends SwtTestCase {
     private static final List<Color> RGBNull = Arrays.asList(Color.RED, Color.GREEN, Color.BLUE, null);
 
     /** Tests creation of EventTableViewer with checkable table. */
-    public void guiTestConstructorWithCheckableTable() {
+    @Test
+    public void testConstructorWithCheckableTable() {
     	DefaultEventTableViewer<Integer> viewer = new DefaultEventTableViewer<Integer>(
     			new BasicEventList<Integer>(), new Table(getShell(), SWT.CHECK), new IntegerTableFormat());
         viewer.dispose();
     }
 
     /** Tests creation of EventTableViewer with checkable table. */
-    public void guiTestConstructorWithProxyListAndCheckableTable() {
+    @Test
+    public void testConstructorWithProxyListAndCheckableTable() {
     	DefaultEventTableViewer<Integer> viewer = GlazedListsSWT.eventTableViewerWithThreadProxyList(
     			new BasicEventList<Integer>(), new Table(getShell(), SWT.CHECK), new IntegerTableFormat());
         viewer.dispose();
     }
 
     /** Tests SWT table sort column and sort direction with GL single column sort. */
-    public void guiTestSingleColumnSort() {
+    @Test
+    public void testSingleColumnSort() {
         final EventList<Color> source = GlazedLists.eventList(RGB);
         final SortedList<Color> sorted = new SortedList<Color>(source, null);
         final TableFormat<Color> tableFormat = GlazedLists.tableFormat(new String[] { "red",
@@ -81,7 +91,8 @@ public class DefaultEventTableViewerTest extends SwtTestCase {
      * Tests SWT table sort column and sort direction with GL multiple column sort.
      * <p>As SWT table only supports one sort column, it'll always be the GL primary sort column.</p>
      */
-    public void guiTestMultiColumnSort() {
+    @Test
+    public void testMultiColumnSort() {
         final EventList<Color> source = GlazedLists.eventList(RGB);
         final SortedList<Color> sorted = new SortedList<Color>(source, null);
         final TableFormat<Color> tableFormat = GlazedLists.tableFormat(new String[] { "red",
@@ -122,7 +133,8 @@ public class DefaultEventTableViewerTest extends SwtTestCase {
     }
 
     /** Tests the default TableItemConfigurer. */
-    public void guiTestTableItemConfigurer() {
+    @Test
+    public void testTableItemConfigurer() {
         final EventList<Color> source = GlazedLists.eventList(RGBNull);
         final TableFormat<Color> tableFormat = GlazedLists.tableFormat(new String[] { "red",
                 "green", "blue" }, new String[] { "Red", "Green", "Blue" });
@@ -187,7 +199,8 @@ public class DefaultEventTableViewerTest extends SwtTestCase {
     }
 
     /** Tests a TableFormat that is a TableColumnConfigurer. */
-    public void guiTestTableColumnConfigurer() {
+    @Test
+    public void testTableColumnConfigurer() {
         final EventList<Color> source = GlazedLists.eventList(RGBNull);
         final TableFormat<Color> tableFormat = new ColorTableFormat();
         final Table table = new Table(getShell(), SWT.CHECK);
@@ -200,7 +213,8 @@ public class DefaultEventTableViewerTest extends SwtTestCase {
      * Tests the lists {@link DefaultEventTableViewer#getTogglingSelected()} and
      * {@link DefaultEventTableViewer#getTogglingDeselected()} for programmatic selection control.
      */
-    public void guiTestToggleSelection() {
+    @Test
+    public void testToggleSelection() {
         final BasicEventList<String> list = new BasicEventList<String>();
         final Table table = new Table(getShell(), SWT.VIRTUAL | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
         final DefaultEventTableViewer<String> viewer = new DefaultEventTableViewer<String>(list, table, new SimpleTableFormat());
@@ -292,7 +306,8 @@ public class DefaultEventTableViewerTest extends SwtTestCase {
         viewer.dispose();
     }
 
-    public void guiTestBug413() {
+    @Test
+    public void testBug413() {
         final BasicEventList<String> source = new BasicEventList<String>();
         for (int i = 0; i < 3; i++) {
             source.add("Str" + i);
@@ -314,7 +329,8 @@ public class DefaultEventTableViewerTest extends SwtTestCase {
     /**
      * Tests clearing the source list of {@link DefaultEventTableViewer}.
      */
-    public void guiTestClearOnThreadProxy_FixMe() {
+    @Test
+    public void testClearOnThreadProxy() {
         final BasicEventList<String> list = new BasicEventList<String>();
         final Table table = new Table(getShell(), SWT.VIRTUAL | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
         final DefaultEventTableViewer<String> viewer = new DefaultEventTableViewer<String>(list, table, new SimpleTableFormat());
@@ -343,7 +359,8 @@ public class DefaultEventTableViewerTest extends SwtTestCase {
     /**
      * Tests {@link DefaultEventTableViewer#setTableFormat(TableFormat)} with <code>null</code> value.
      */
-    public void guiTestSetTableFormatNull() {
+    @Test
+    public void testSetTableFormatNull() {
         final EventList<Color> source = GlazedLists.eventList(RGBNull);
         final TableFormat<Color> tableFormat = new ColorTableFormat();
         final Table table = new Table(getShell(), SWT.CHECK);
@@ -359,7 +376,8 @@ public class DefaultEventTableViewerTest extends SwtTestCase {
     /**
      * Tests {@link DefaultEventTableViewer#setTableFormat(TableFormat)}.
      */
-    public void guiTestSetTableFormat() {
+    @Test
+    public void testSetTableFormat() {
         final EventList<Color> source = GlazedLists.eventList(RGB);
         final TableFormat<Color> tableFormat = new ColorTableFormat();
         final Table table = new Table(getShell(), SWT.CHECK);
@@ -447,12 +465,15 @@ public class DefaultEventTableViewerTest extends SwtTestCase {
     }
 
     private static class SimpleTableFormat implements TableFormat<String> {
+        @Override
         public int getColumnCount() {
             return 1;
         }
+        @Override
         public String getColumnName(int column) {
             return "Hello";
         }
+        @Override
         public Object getColumnValue(String baseObject, int column) {
             return baseObject;
         }
@@ -461,28 +482,46 @@ public class DefaultEventTableViewerTest extends SwtTestCase {
     private static class ColorTableFormat implements TableFormat<Color>, TableColumnConfigurer {
 
         /** {@inheritedDoc} */
+        @Override
         public int getColumnCount() {
             return 3;
         }
 
         /** {@inheritedDoc} */
+        @Override
         public String getColumnName(int column) {
-            if (column == 0) return "Red";
-            if (column == 1) return "Green";
-            if (column == 2) return "Blue";
+            if (column == 0) {
+                return "Red";
+            }
+            if (column == 1) {
+                return "Green";
+            }
+            if (column == 2) {
+                return "Blue";
+            }
             return "???";
         }
 
         /** {@inheritedDoc} */
+        @Override
         public Object getColumnValue(Color baseObject, int column) {
-            if (baseObject == null) return null;
-            if (column == 0) return new Integer(baseObject.getRed());
-            if (column == 1) return new Integer(baseObject.getGreen());
-            if (column == 2) return new Integer(baseObject.getBlue());
+            if (baseObject == null) {
+                return null;
+            }
+            if (column == 0) {
+                return new Integer(baseObject.getRed());
+            }
+            if (column == 1) {
+                return new Integer(baseObject.getGreen());
+            }
+            if (column == 2) {
+                return new Integer(baseObject.getBlue());
+            }
             return null;
         }
 
         /** {@inheritedDoc} */
+        @Override
         public void configure(TableColumn tableColumn, int column) {
             switch(column) {
                 case 1:
@@ -501,6 +540,7 @@ public class DefaultEventTableViewerTest extends SwtTestCase {
     private static class ColorTableItemConfigurer implements TableItemConfigurer<Color> {
 
         /** {@inheritedDoc} */
+        @Override
         public void configure(TableItem item, Color rowValue, Object columnValue, int row, int column) {
             switch(column) {
                 case 0: item.setText(column, "Red=" + columnValue); break;

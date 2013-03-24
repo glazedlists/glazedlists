@@ -1,11 +1,13 @@
 package ca.odell.glazedlists.impl.adt;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author jessewilson
  */
-public abstract class AbstractKeyedCollectionTest extends TestCase {
+public abstract class AbstractKeyedCollectionTest {
 
     private NamePosition a = new NamePosition("A");
     private NamePosition b = new NamePosition("B");
@@ -20,6 +22,7 @@ public abstract class AbstractKeyedCollectionTest extends TestCase {
         this.collection = collection;
     }
 
+    @Test
     public void testSimpleQueries() {
         collection.insert(a, "alpha");
 
@@ -34,6 +37,7 @@ public abstract class AbstractKeyedCollectionTest extends TestCase {
         assertEquals(c, collection.find(c, d, "beta"));
     }
 
+    @Test
     public void testHeavilyPopulatedCollection() {
         collection.insert(a, "alpha");
         collection.insert(b, "beta");
@@ -50,6 +54,7 @@ public abstract class AbstractKeyedCollectionTest extends TestCase {
         assertNull(collection.find(a, f, "firehouse"));
     }
 
+    @Test
     public void testTheSameValueManyTimes() {
         collection.insert(a, "alpha");
         collection.insert(b, "alpha");
@@ -63,6 +68,7 @@ public abstract class AbstractKeyedCollectionTest extends TestCase {
         assertNull(collection.find(d, d, "alpha"));
     }
 
+    @Test
     public void testInconsistentMinMax() {
         try {
             collection.find(b, a, "alpha");

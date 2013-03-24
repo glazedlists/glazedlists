@@ -14,10 +14,13 @@ import java.util.Locale;
 
 import javax.swing.JLabel;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class CalculationsSwingTest extends TestCase {
+import static org.junit.Assert.*;
 
+public class CalculationsSwingTest {
+
+    @Test
     public void testCalculationLabel() {
         final EventList<Float> source = new BasicEventList<Float>();
         source.add(new Float(1));

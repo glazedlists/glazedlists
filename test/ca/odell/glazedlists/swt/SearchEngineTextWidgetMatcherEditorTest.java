@@ -22,6 +22,11 @@ import javax.swing.JTextField;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Text;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests the class {@link SearchEngineTextWidgetMatcherEditor}.
@@ -34,8 +39,8 @@ public class SearchEngineTextWidgetMatcherEditorTest extends SwtTestCase {
     private Text textField;
     private SearchEngineTextWidgetMatcherEditor<String> matcherEditor;
 
-    @Override
-    public void guiSetUp() {
+    @Before
+    public void setUp() {
         filterList = new FilterList<String>(new BasicEventList<String>());
         filterList.addAll(GlazedListsTests.delimitedStringToList("James Jesse Jodie Jimney Jocelyn"));
 
@@ -44,12 +49,13 @@ public class SearchEngineTextWidgetMatcherEditorTest extends SwtTestCase {
         filterList.setMatcherEditor(matcherEditor);
     }
 
-    @Override
-    public void guiTearDown() {
+    @After
+    public void tearDown() {
         matcherEditor.dispose();
     }
 
-    public void guiTestBasicFilter() {
+    @Test
+    public void testBasicFilter() {
         setNewFilter("Jo");
         assertEquals(GlazedListsTests.delimitedStringToList("Jodie Jocelyn"), filterList);
 
@@ -63,7 +69,8 @@ public class SearchEngineTextWidgetMatcherEditorTest extends SwtTestCase {
         assertEquals(GlazedListsTests.delimitedStringToList("James Jesse Jodie Jimney Jocelyn"), filterList);
     }
 
-    public void guiTestNegationFilter() {
+    @Test
+    public void testNegationFilter() {
         setNewFilter("Jo");
         assertEquals(GlazedListsTests.delimitedStringToList("Jodie Jocelyn"), filterList);
 
@@ -80,7 +87,8 @@ public class SearchEngineTextWidgetMatcherEditorTest extends SwtTestCase {
         assertEquals(GlazedListsTests.delimitedStringToList("James Jesse Jodie Jimney Jocelyn"), filterList);
     }
 
-    public void guiTestQuotedFilter() {
+    @Test
+    public void testQuotedFilter() {
         setNewFilter("Jo die");
         assertEquals(GlazedListsTests.delimitedStringToList("Jodie"), filterList);
 
@@ -94,7 +102,8 @@ public class SearchEngineTextWidgetMatcherEditorTest extends SwtTestCase {
         assertEquals(GlazedListsTests.delimitedStringToList("Jodie"), filterList);
     }
 
-    public void guiTestFields() {
+    @Test
+    public void testFields() {
         final Customer jesse = new Customer("Jesse", "Wilson");
         final Customer james = new Customer("James", "Lemieux");
         final Customer holger = new Customer("Holger", "Brands");

@@ -1,20 +1,24 @@
 package ca.odell.glazedlists.impl.adt;
 
-import junit.framework.TestCase;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.ArrayList;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author jessewilson
  */
-public class CircularArrayListTest extends TestCase {
+public class CircularArrayListTest {
 
   private final CircularArrayList<Object> list = new CircularArrayList<Object>();
   
+  @Test
   public void testRightShifts() {
     Object[] innerArray = new Object[] { "A", "B", "C", "D", "E", "a", "b", "c" };
     list.values = innerArray;
@@ -59,6 +63,7 @@ public class CircularArrayListTest extends TestCase {
 
   }
 
+  @Test
   public void testLeftShifts() {
     Object[] innerArray = new Object[] { "A", "B", "C", "D", "E", "a", "b", "c" };
     list.values = innerArray;
@@ -110,6 +115,7 @@ public class CircularArrayListTest extends TestCase {
     assertEquals(GlazedListsTests.stringToList(expected), innerArrayAsList);
   }
 
+  @Test
   public void testAdd() {
     list.add("c");
     list.add("d");
@@ -120,6 +126,7 @@ public class CircularArrayListTest extends TestCase {
     assertEquals(list, GlazedListsTests.stringToList("abcdef"));
   }
 
+  @Test
   public void testRemove() {
     list.addAll(GlazedListsTests.stringToList("abcdef"));
 
@@ -136,6 +143,7 @@ public class CircularArrayListTest extends TestCase {
     assertEquals(list, GlazedListsTests.stringToList(""));
   }
 
+  @Test
   public void testLargeCircularArray() {
     for(int i = 0; i < 1000; i++) {
       list.add(0, new Integer(i));
@@ -158,6 +166,7 @@ public class CircularArrayListTest extends TestCase {
     }
   }
 
+  @Test
   public void testListMethods() {
     list.addAll(GlazedListsTests.stringToList("helloworld"));
 

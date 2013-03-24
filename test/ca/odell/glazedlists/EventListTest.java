@@ -13,22 +13,32 @@ import ca.odell.glazedlists.matchers.Matchers;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Verifies that EventList matches the List API.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class EventListTest extends TestCase {
+public class EventListTest {
 
     /**
      * Validates that removeAll() works.
      *
      * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=169">Bug 169</a>
      */
+    @Test
     public void testRemoveAll() {
         List<String> jesse = GlazedListsTests.stringToList("JESSE");
         List<String> wilson = GlazedListsTests.stringToList("WILSON");
@@ -59,6 +69,7 @@ public class EventListTest extends TestCase {
     /**
      * Validates that retainAll() works.
      */
+    @Test
     public void testRetainAll() {
         List<String> jesse = GlazedListsTests.stringToList("JESSE");
         List<String> wilson = GlazedListsTests.stringToList("WILSON");
@@ -85,6 +96,7 @@ public class EventListTest extends TestCase {
     /**
      * Validates that contains() works with null.
      */
+    @Test
     public void testContainsNull() {
         // get all different list types
         List<List<String>> listTypes = new ArrayList<List<String>>();
@@ -114,6 +126,7 @@ public class EventListTest extends TestCase {
     /**
      * Validates that containsAll() works with null.
      */
+    @Test
     public void testContainsAllNull() {
         // get all different list types
         List<List<String>> listTypes = new ArrayList<List<String>>();
@@ -145,6 +158,7 @@ public class EventListTest extends TestCase {
     /**
      * Validates that indexOf() works with null.
      */
+    @Test
     public void testIndexOfNull() {
         // get all different list types
         List<List<String>> listTypes = new ArrayList<List<String>>();
@@ -174,6 +188,7 @@ public class EventListTest extends TestCase {
     /**
      * Validates that lastIndexOf() works with null.
      */
+    @Test
     public void testLastIndexOfNull() {
         // get all different list types
         List<List<String>> listTypes = new ArrayList<List<String>>();
@@ -203,6 +218,7 @@ public class EventListTest extends TestCase {
     /**
      * Validates that remove() works with null.
      */
+    @Test
     public void testRemoveNull() {
         // get all different list types
         List<List<String>> listTypes = new ArrayList<List<String>>();
@@ -233,6 +249,7 @@ public class EventListTest extends TestCase {
     /**
      * Validates that removeAll() works with null.
      */
+    @Test
     public void testRemoveAllNull() {
         // get all different list types
         List<List<String>> listTypes = new ArrayList<List<String>>();
@@ -262,6 +279,7 @@ public class EventListTest extends TestCase {
     /**
      * Validates that retainAll() works with null.
      */
+    @Test
     public void testRetainAllNull() {
         // get all different list types
         List<List<String>> listTypes = new ArrayList<List<String>>();
@@ -290,6 +308,7 @@ public class EventListTest extends TestCase {
     /**
      * Validates that hashCode() works with null.
      */
+    @Test
     public void testHashCodeNull() {
         // get all different list types
         List<List<String>> listTypes = new ArrayList<List<String>>();
@@ -328,6 +347,7 @@ public class EventListTest extends TestCase {
      * Test that the {@link GlazedLists#eventListOf(Object...)} factory
      * method works.
      */
+    @Test
     public void testGlazedListsEventListUsingVarArgs() {
         // make sure they have different backing stores
         final EventList<String> eventList = GlazedLists.eventListOf("A", "B");
@@ -344,6 +364,7 @@ public class EventListTest extends TestCase {
      *
      * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=234">Bug 234</a>
      */
+    @Test
     public void testGlazedListsEventList() {
         // make sure they have different backing stores
         final List<String> list = new ArrayList<String>();
@@ -366,6 +387,7 @@ public class EventListTest extends TestCase {
      * {@link GlazedLists#eventListOf(ListEventPublisher, ReadWriteLock, Object...)} factory
      * method works.
      */
+    @Test
     public void testGlazedListsEventListUsingVarArgsAndPublisherLock() {
         // make sure they have different backing stores
         final ListEventPublisher publisher = ListEventAssembler.createListEventPublisher();
@@ -386,6 +408,7 @@ public class EventListTest extends TestCase {
      * Test that the {@link GlazedLists#eventList(ListEventPublisher, ReadWriteLock, Collection)}
      * factory method works.
      */
+    @Test
     public void testGlazedListsEventListUsingPublisherLock() {
         // make sure they have different backing stores
         final List<String> list = new ArrayList<String>();
@@ -413,6 +436,7 @@ public class EventListTest extends TestCase {
      * Tests the {@link GlazedLists#syncEventListToList(EventList, List)}
      * factory method.
      */
+    @Test
     public void testGlazedListsSync() {
         EventList<String> source = new BasicEventList<String>();
         source.add("McCallum");
@@ -446,13 +470,14 @@ public class EventListTest extends TestCase {
         assertFalse(source.equals(target));
     }
 
+    @Test
     public void testEventListTypeSafety() {
         EventList<Object> source = new BasicEventList<Object>();
         final Set<Class> acceptedTypes = new HashSet<Class>();
         acceptedTypes.add(null);
         acceptedTypes.add(Integer.class);
         acceptedTypes.add(String.class);
-        ListEventListener typeSafetyListener = GlazedLists.typeSafetyListener(source, acceptedTypes);
+        ListEventListener<Object> typeSafetyListener = GlazedLists.typeSafetyListener(source, acceptedTypes);
 
         source.add(null);
         source.add(new Integer(0));
@@ -487,6 +512,7 @@ public class EventListTest extends TestCase {
         source.set(0, new Long(23));
     }
 
+    @Test
     public void testEventListLock() {
         final EventList<String> source = new BasicEventList<String>();
 
@@ -511,6 +537,7 @@ public class EventListTest extends TestCase {
         source.getReadWriteLock().writeLock().unlock();
     }
 
+    @Test
     public void testRemoveAllOnView() {
         EventList<String> original = new BasicEventList<String>();
         original.addAll(GlazedListsTests.stringToList("ABCDE"));
@@ -519,6 +546,7 @@ public class EventListTest extends TestCase {
         assertEquals(Collections.EMPTY_LIST, original);
     }
 
+    @Test
     public void testRetainAllOnSelf() {
         EventList<String> original = new BasicEventList<String>();
         original.addAll(GlazedListsTests.stringToList("ABCDE"));
@@ -526,6 +554,7 @@ public class EventListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("ABCDE"), original);
     }
 
+    @Test
     public void testSublistClear() {
         EventList<String> original = new BasicEventList<String>();
         original.addAll(GlazedListsTests.stringToList("ABCDE"));
@@ -539,6 +568,7 @@ public class EventListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("ABE"), original);
     }
 
+    @Test
     public void testAddAllFromView() {
         EventList<Integer> original = new BasicEventList<Integer>();
         original.addAll(Arrays.asList(0, 10, 20, 30, 40));
@@ -547,6 +577,7 @@ public class EventListTest extends TestCase {
         assertEquals(Arrays.asList(0, 10, 20, 30, 40, 20, 30, 40), original);
     }
 
+    @Test
     public void testSimpleAddAll() {
         EventList<String> source = new BasicEventList<String>();
         installConsistencyListener(source);
@@ -557,6 +588,7 @@ public class EventListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("JESSE"), filterList);
     }
 
+    @Test
     public void testReplace() {
         EventList<String> source = new BasicEventList<String>();
         installConsistencyListener(source);
@@ -576,18 +608,24 @@ public class EventListTest extends TestCase {
      * problematic behaviour. This is probably due to the way that we sort list
      * events while processing them.
      */
+    @Test
     public void testCombineEvents() {
         TransactionList<Object> list = new TransactionList<Object>(new BasicEventList<Object>(), true);
-        for (int i = 0; i < 16; i++)
-             list.add(new Integer(0));
+        for (int i = 0; i < 16; i++) {
+            list.add(new Integer(0));
+        }
 
         ListConsistencyListener.install(list);
 
         list.beginEvent();
 
-        for(int i = 0; i < 4; i++) list.add(8, new Object());
+        for(int i = 0; i < 4; i++) {
+            list.add(8, new Object());
+        }
         for(int j = 7; j >= 0; j--) {
-            for(int i = 0; i < 10; i++) list.add(j, new Object());
+            for(int i = 0; i < 10; i++) {
+                list.add(j, new Object());
+            }
         }
         list.remove(55);
         list.remove(95);
@@ -672,19 +710,27 @@ public class EventListTest extends TestCase {
         }
         list.set(25, new Integer(101)); // critical
         for(int j = 0; j < 4; j++) {
-            for(int i = 0; i < 5; i++) list.remove(0);
+            for(int i = 0; i < 5; i++) {
+                list.remove(0);
+            }
             list.add(0, new Integer(102));
         }
-        for(int i = 0; i < 10; i++) list.remove(0);
+        for(int i = 0; i < 10; i++) {
+            list.remove(0);
+        }
         list.add(0, new Integer(107));
-        for(int i = 0; i < 2; i++) list.remove(0);
+        for(int i = 0; i < 2; i++) {
+            list.remove(0);
+        }
 
         list.commitEvent();
     }
 
+    @Test
     public void testGenericsOfListEvent() {
         final EventList<? extends String> source = GlazedLists.eventListOf((String[]) null);
         source.addListEventListener(new ListEventListener<Object>() {
+            @Override
             public void listChanged(ListEvent<Object> listChanges) {
                 listChanges.next();
                 Object o = listChanges.getSourceList().get(listChanges.getIndex());
@@ -693,6 +739,7 @@ public class EventListTest extends TestCase {
         });
 
         source.addListEventListener(new ListEventListener<String>() {
+            @Override
             public void listChanged(ListEvent<String> listChanges) {
                 listChanges.next();
                 String s = listChanges.getSourceList().get(listChanges.getIndex());
@@ -703,6 +750,7 @@ public class EventListTest extends TestCase {
         ((EventList)source).add("Test");
     }
 
+    @Test
     public void testAddNullListener() {
     	final EventList<String> source = GlazedLists.eventListOf("TEST");
     	try {
@@ -713,6 +761,7 @@ public class EventListTest extends TestCase {
     	}
     }
 
+    @Test
     public void testRemoveNullListener() {
     	final EventList<String> source = GlazedLists.eventListOf("TEST");
     	try {
@@ -723,6 +772,7 @@ public class EventListTest extends TestCase {
     	}
     }
 
+    @Test
     public void testRemoveInvalidListener() {
     	final EventList<String> source = GlazedLists.eventListOf("TEST");
     	final GlazedListsTests.ListEventCounter<String> eventCounter =
@@ -734,7 +784,8 @@ public class EventListTest extends TestCase {
     		// expected
     	}
     }
-    
+
+    @Test
     public void testAddRemoveListener() {
     	final BasicEventList<String> source = new BasicEventList<String>();
     	final GlazedListsTests.ListEventCounter<String> eventCounter =
@@ -747,14 +798,14 @@ public class EventListTest extends TestCase {
   		assertEquals(1, eventCounter.getCountAndReset());
     }
 
-    
-    
+
+
     /**
      * Install a consistency listener to the specified list.
      */
-    private static void installConsistencyListener(List list) {
-        if(list instanceof BasicEventList) {
-            ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install((BasicEventList)list);
+    private static void installConsistencyListener(List<String> list) {
+        if (list instanceof BasicEventList) {
+            ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install((EventList<String>) list);
             listConsistencyListener.setPreviousElementTracked(true);
         }
     }

@@ -4,26 +4,31 @@
 package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
-import junit.framework.TestCase;
 
 import java.util.List;
 
-public class TransactionListTest extends TestCase {
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+public class TransactionListTest {
 
     private EventList<String> source;
     private TransactionList<String> txList;
     private GlazedListsTests.ListEventCounter<String> counter;
 
-    @Override
-    protected void setUp() {
+    @Before
+    public void setUp() {
         source = new BasicEventList<String>();
         txList = new TransactionList<String>(source);
         counter = new GlazedListsTests.ListEventCounter<String>();
         txList.addListEventListener(counter);
     }
 
-    @Override
-    protected void tearDown() {
+    @After
+    public void tearDown() {
         txList.removeListEventListener(counter);
         txList.dispose();
 
@@ -32,6 +37,7 @@ public class TransactionListTest extends TestCase {
         source = null;
     }
 
+    @Test
     public void testRollbackSimpleListEvent() {
         assertState(GlazedListsTests.stringToList(""), 0);
 
@@ -62,6 +68,7 @@ public class TransactionListTest extends TestCase {
         assertState(GlazedListsTests.stringToList("0"), 0);
     }
 
+    @Test
     public void testRollbackComplexListEvent() {
         source.addAll(GlazedListsTests.stringToList("ABC"));
         assertState(GlazedListsTests.stringToList("ABC"), 1);
@@ -76,6 +83,7 @@ public class TransactionListTest extends TestCase {
         assertState(GlazedListsTests.stringToList("ABC"), 0);
     }
 
+    @Test
     public void testCommitComplex() {
         source.addAll(GlazedListsTests.stringToList("ABC"));
         assertState(GlazedListsTests.stringToList("ABC"), 1);
@@ -94,6 +102,7 @@ public class TransactionListTest extends TestCase {
      * If a transaction is "buffered" it accumulates all ListEvents during the
      * transaction into a single uber-ListEvent and fires it on commit.
      */
+    @Test
     public void testCommitOnBufferedTransactionFiresEvent() {
         assertState(GlazedListsTests.stringToList(""), 0);
 
@@ -118,6 +127,7 @@ public class TransactionListTest extends TestCase {
      * If a transaction is "buffered" it accumulates all ListEvents during the
      * transaction into a single uber-ListEvent and thus fires no event on rollback.
      */
+    @Test
     public void testRollbackOnBufferedTransactionFiresNoEvent() {
         assertState(GlazedListsTests.stringToList(""), 0);
 
@@ -142,6 +152,7 @@ public class TransactionListTest extends TestCase {
      * If a transaction is "live" it forwards all ListEvents as they are
      * received and thus no ListEvent is fired on commit.
      */
+    @Test
     public void testCommitOnLiveTransactionFiresNoEvent() {
         assertState(GlazedListsTests.stringToList(""), 0);
 
@@ -166,6 +177,7 @@ public class TransactionListTest extends TestCase {
      * If a transaction is "live" it forwards all ListEvents as they are
      * received and thus a ListEvent must be fired on rollback.
      */
+    @Test
     public void testRollbackOnLiveTransactionFiresEvent() {
         assertState(GlazedListsTests.stringToList(""), 0);
 
@@ -186,6 +198,7 @@ public class TransactionListTest extends TestCase {
         assertState(GlazedListsTests.stringToList(""), 1);
     }
 
+    @Test
     public void testDoubleBegin() {
         txList.beginEvent();
 
@@ -196,6 +209,7 @@ public class TransactionListTest extends TestCase {
         }
     }
 
+    @Test
     public void testCommitNothing() {
         try {
             txList.commitEvent();
@@ -204,6 +218,7 @@ public class TransactionListTest extends TestCase {
         }
     }
 
+    @Test
     public void testRollbackNothing() {
         try {
             txList.rollbackEvent();
@@ -211,7 +226,8 @@ public class TransactionListTest extends TestCase {
             assertEquals("No ListEvent exists to roll back", e.getMessage());
         }
     }
-    
+
+    @Test
     public void testNoRollbackSupport() {
         source = new BasicEventList<String>();
         txList = new TransactionList<String>(source, false);
@@ -227,6 +243,7 @@ public class TransactionListTest extends TestCase {
         }
     }
 
+    @Test
     public void testRollbackNestedTransactions() {
         txList.beginEvent(false);
             txList.add("A");
@@ -256,6 +273,7 @@ public class TransactionListTest extends TestCase {
         assertState(GlazedListsTests.stringToList("ABGH"), 0);
     }
 
+    @Test
     public void testCommitNestedTransactions() {
         txList.beginEvent(true);
             txList.add("A");
@@ -284,7 +302,8 @@ public class TransactionListTest extends TestCase {
         txList.commitEvent();
         assertState(GlazedListsTests.stringToList("ABCDEFGH"), 1);
     }
-    
+
+    @Test
     public void testIgnoreChangesOutsideOfTransaction() {
         txList.add("A");
         assertState(GlazedListsTests.stringToList("A"), 1);

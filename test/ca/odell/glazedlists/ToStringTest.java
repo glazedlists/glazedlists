@@ -5,9 +5,12 @@ package ca.odell.glazedlists;
 
 // for being a JUnit test case
 import ca.odell.glazedlists.matchers.Matchers;
-import junit.framework.TestCase;
 
 import java.util.ArrayList;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * This test verifies that the toString() method on all lists is consistent
@@ -15,11 +18,12 @@ import java.util.ArrayList;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class ToStringTest extends TestCase {
+public class ToStringTest {
 
     /**
      * Validate that toString() is consistent with ArrayList on all lists.
      */
+    @Test
     public void testToStringConsistency() {
         ArrayList<String> controlList = new ArrayList<String>();
         BasicEventList<String> basicEventList = new BasicEventList<String>();

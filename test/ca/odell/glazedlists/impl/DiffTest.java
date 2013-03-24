@@ -9,20 +9,30 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
-import junit.framework.TestCase;
 
-import java.util.*;
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * This test verifies that Diff works.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class DiffTest extends TestCase {
+public class DiffTest {
 
     /**
      * Tests to verify that Diff performs the correct number of changes.
      */
+    @Test
     public void testDiff() {
         assertEquals(4, getChangeCount("algorithm", "logarithm", false));
         assertEquals(5, getChangeCount("abcabba", "cbabac", false));
@@ -33,6 +43,7 @@ public class DiffTest extends TestCase {
     /**
      * Tests that diff works for a large number of elements.
      */
+    @Test
     public void testMemory() {
         EventList sequence = new BasicEventList(new SparseDifferencesList(new ReallyBigList(1000 * 1000)));
         List modifiedSequence = new SparseDifferencesList(new ReallyBigList(1000 * 1000));

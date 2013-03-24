@@ -6,16 +6,23 @@ package ca.odell.glazedlists;
 // for being a JUnit test case
 import ca.odell.glazedlists.impl.sort.ReverseComparator;
 import ca.odell.glazedlists.impl.testing.AtLeastMatcherEditor;
-import junit.framework.TestCase;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Random;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * This test verifies that event lists can have multiple listeners.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class MultipleListenersTest extends TestCase {
+public class MultipleListenersTest {
 
     /** for randomly choosing list indices */
     private Random random = new Random();
@@ -26,6 +33,7 @@ public class MultipleListenersTest extends TestCase {
      * listener is changed in sequence to verify that the listeners all
      * receive notification.
      */
+    @Test
     public void testMultipleListeners() {
         BasicEventList<Number> root = new BasicEventList<Number>();
         List<Number> control = new ArrayList<Number>();

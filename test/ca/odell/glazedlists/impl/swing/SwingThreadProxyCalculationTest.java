@@ -12,7 +12,10 @@ import java.util.Arrays;
 
 import javax.swing.SwingUtilities;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * <code>SwingThreadProxyCalculationTest</code> tests the bahaviour of
@@ -20,24 +23,26 @@ import junit.framework.TestCase;
  *
  * @author Holger Brands
  */
-public class SwingThreadProxyCalculationTest extends TestCase {
+public class SwingThreadProxyCalculationTest {
 
     private EventList<String> source;
     private Calculation<Integer> countCalc;
     private Calculation<Integer> countProxyCalc;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         source = new BasicEventList<String>();
         countCalc = Calculations.count(source);
         countProxyCalc = CalculationsSwing.swingThreadProxyCalculation(countCalc);
     }
 
+    @Test
     public void testIsProxy() {
         assertTrue(CalculationsSwing.isSwingThreadProxyCalculation(countProxyCalc));
         assertFalse(CalculationsSwing.isSwingThreadProxyCalculation(countCalc));
     }
 
+    @Test
     public void testValue() {
         assertEquals(Integer.valueOf(0), countCalc.getValue());
         assertEquals(Integer.valueOf(0), countProxyCalc.getValue());
@@ -55,6 +60,7 @@ public class SwingThreadProxyCalculationTest extends TestCase {
         assertEquals(Integer.valueOf(0), countProxyCalc.getValue());
     }
 
+    @Test
     public void testPropertyChangeListener() throws Exception {
         final PropertyChangeEventRecorder recorder = new PropertyChangeEventRecorder();
         countProxyCalc.addPropertyChangeListener(recorder);
@@ -97,6 +103,7 @@ public class SwingThreadProxyCalculationTest extends TestCase {
         private Object lastCallbackOldValue;
         private Object lastCallbackNewValue;
 
+        @Override
         public void propertyChange(PropertyChangeEvent evt) {
             callbackCount++;
             lastCallbackThreadWasEDT = SwingUtilities.isEventDispatchThread();

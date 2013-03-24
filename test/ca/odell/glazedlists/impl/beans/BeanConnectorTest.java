@@ -1,17 +1,20 @@
 package ca.odell.glazedlists.impl.beans;
 
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-
-import junit.framework.TestCase;
-
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList;
 
-public class BeanConnectorTest extends TestCase {
+import javax.swing.JComponent;
+import javax.swing.JLabel;
 
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+public class BeanConnectorTest {
+
+    @Test
     public void testBeanClassConstructor() {
         try {
             new BeanConnector<Object>(null);
@@ -30,6 +33,7 @@ public class BeanConnectorTest extends TestCase {
         new BeanConnector<JComponent>(JComponent.class);
     }
 
+    @Test
     public void testBeanClassAndMethodNamesConstructor() {
         try {
             new BeanConnector<JComponent>(null, "addPropertyChangeListener", "removePropertyChangeListener");
@@ -69,6 +73,7 @@ public class BeanConnectorTest extends TestCase {
         new BeanConnector<JComponent>(JComponent.class, "addPropertyChangeListener", "removePropertyChangeListener");
     }
 
+    @Test
     public void testListenerCascade() {
         final CountingObservableElementList<JComponent> list = new CountingObservableElementList<JComponent>(new BasicEventList<JComponent>(), GlazedLists.beanConnector(JComponent.class));
         final JLabel listElement = new JLabel();

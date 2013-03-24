@@ -3,15 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.matchers;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
-
-import junit.framework.TestCase;
-
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
@@ -20,7 +11,18 @@ import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.impl.filter.TextMatcher;
 import ca.odell.glazedlists.impl.filter.TextMatchers;
 
-public class TextMatcherTest extends TestCase {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+public class TextMatcherTest {
 
     private List<String> numbers = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
 
@@ -28,6 +30,7 @@ public class TextMatcherTest extends TestCase {
 
     private List<String> dictionary = Arrays.asList("act", "actor", "enact", "reactor");
 
+    @Test
     public void testConstrainingFilter() {
         TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
         FilterList<String> list = new FilterList<String>(new BasicEventList<String>(), textMatcherEditor);
@@ -43,6 +46,7 @@ public class TextMatcherTest extends TestCase {
 		counter.assertCounterState(0, 0, 0, 1, 0);
     }
 
+	@Test
 	public void testRelaxingFilter() {
         TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
         FilterList<String> list = new FilterList<String>(new BasicEventList<String>(), textMatcherEditor);
@@ -73,6 +77,7 @@ public class TextMatcherTest extends TestCase {
 		counter.assertCounterState(0, 0, 0, 1, 1);
     }
 
+    @Test
     public void testRelaxAndConstrainFilter() {
         TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
         FilterList<String> list = new FilterList<String>(new BasicEventList<String>(), textMatcherEditor);
@@ -116,6 +121,7 @@ public class TextMatcherTest extends TestCase {
         }
     }
 
+    @Test
     public void testClearFilter() {
         TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
         FilterList<String> list = new FilterList<String>(new BasicEventList<String>(), textMatcherEditor);
@@ -136,6 +142,7 @@ public class TextMatcherTest extends TestCase {
 		assertEquals(list, numbers);
     }
 
+    @Test
     public void testMatchNonStrings() {
         final TextMatcherEditor<Integer> textMatcherEditor = new TextMatcherEditor<Integer>(new IntegerTextFilterator());
         FilterList<Integer> list = new FilterList<Integer>(new BasicEventList<Integer>(), textMatcherEditor);
@@ -157,6 +164,7 @@ public class TextMatcherTest extends TestCase {
         assertEquals(list.get(3), new Integer(103));
     }
 
+    @Test
     public void testChangeMode() {
         TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
         FilterList<String> list = new FilterList<String>(new BasicEventList<String>(), textMatcherEditor);
@@ -194,6 +202,7 @@ public class TextMatcherTest extends TestCase {
         assertEquals(Arrays.asList(new String[0]), list);
     }
 
+    @Test
     public void testChangeModeNotifications() {
         TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
         FilterList<String> list = new FilterList<String>(new BasicEventList<String>(), textMatcherEditor);
@@ -228,6 +237,7 @@ public class TextMatcherTest extends TestCase {
 		counter.assertCounterState(0, 0, 0, 1, 1);
     }
 
+    @Test
     public void testChangeStrategyNotifications() {
         TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
         FilterList<String> list = new FilterList<String>(new BasicEventList<String>(), textMatcherEditor);
@@ -266,6 +276,7 @@ public class TextMatcherTest extends TestCase {
      * Test to verify that the filter is working correctly when values
      * are being added to a list.
      */
+    @Test
     public void testFilterBeforeAndAfter() {
         // set up
         EventList<String> unfilteredList = new BasicEventList<String>();
@@ -304,6 +315,7 @@ public class TextMatcherTest extends TestCase {
      * Test to verify that the filter is working correctly when the list
      * is changing by adds, removes and deletes.
      */
+    @Test
     public void testFilterDynamic() {
         // set up
         Random random = new Random();
@@ -348,6 +360,7 @@ public class TextMatcherTest extends TestCase {
      * either the filtered list or the unfiltered list. The list where the
      * operation is performed is selected at random.
      */
+    @Test
     public void testFilterWritable() {
         // set up
         Random random = new Random();
@@ -388,6 +401,7 @@ public class TextMatcherTest extends TestCase {
         assertEquals(controlList, filteredList);
     }
 
+    @Test
     public void testNormalizedLatinStrategy() {
         TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
         FilterList<String> list = new FilterList<String>(new BasicEventList<String>(), textMatcherEditor);
@@ -445,6 +459,7 @@ public class TextMatcherTest extends TestCase {
         assertEquals(uberString, list.get(0));
     }
 
+    @Test
     public void testTextMatcherEquals() {
         TextMatcher<String> matcherA = new TextMatcher<String>(TextMatchers.parse("a b c"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.CONTAINS, TextMatcherEditor.IDENTICAL_STRATEGY);
 

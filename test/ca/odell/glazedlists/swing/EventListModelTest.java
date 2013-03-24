@@ -13,6 +13,10 @@ import java.awt.Color;
 
 import javax.swing.JList;
 
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
 /**
  * Test EventListModel from the Swing thread.
  *
@@ -24,7 +28,8 @@ public class EventListModelTest extends SwingTestCase {
     /**
      * Verifies that the new getElementAt() method of EventListModel works.
      */
-    public void guiTestGetElementAt() {
+    @Test
+    public void testGetElementAt() {
         EventList<Color> colors = new BasicEventList<Color>();
         colors.add(Color.RED);
         colors.add(Color.GREEN);
@@ -47,7 +52,8 @@ public class EventListModelTest extends SwingTestCase {
         } catch (IndexOutOfBoundsException e) { }
     }
 
-    public void guiTestConstructorLocking() throws InterruptedException {
+    @Test
+    public void testConstructorLocking() throws InterruptedException {
         // create a list which will record our multithreaded interactions with a list
         final ThreadRecorderEventList<Integer> atomicList = new ThreadRecorderEventList<Integer>(new BasicEventList<Integer>());
 
@@ -76,7 +82,8 @@ public class EventListModelTest extends SwingTestCase {
      * Verifies that list selection is preserved, when handling a complex ListEvent with blocks,
      * which triggers a "data changed" ListDateEvent.
      */
-    public void guiTestRemoveWithBlocksInListEvent() {
+    @Test
+    public void testRemoveWithBlocksInListEvent() {
         // setup JList with EventListModel and EventSelectionModel
         final EventList<String> list = new BasicEventList<String>();
         list.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));

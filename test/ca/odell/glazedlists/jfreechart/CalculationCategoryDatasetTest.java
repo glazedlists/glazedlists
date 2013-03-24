@@ -3,16 +3,20 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.jfreechart;
 
-import junit.framework.TestCase;
-import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.calculation.Calculation;
 import ca.odell.glazedlists.calculation.Calculations;
+
 import org.jfree.data.general.DatasetChangeEvent;
 import org.jfree.data.general.DatasetChangeListener;
+import org.junit.Test;
 
-public class CalculationCategoryDatasetTest extends TestCase {
+import static org.junit.Assert.*;
 
+public class CalculationCategoryDatasetTest {
+
+    @Test
     public void testFireChangesAppropriately() {
         final EventList<Number> numbers = new BasicEventList<Number>();
 

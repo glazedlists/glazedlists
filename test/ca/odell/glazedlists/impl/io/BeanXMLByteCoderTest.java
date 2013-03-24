@@ -4,21 +4,26 @@
 package ca.odell.glazedlists.impl.io;
 
 import ca.odell.glazedlists.io.ByteCoder;
-import junit.framework.TestCase;
 
-import javax.swing.*;
 import java.io.IOException;
+
+import javax.swing.JLabel;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests the BeanXMLByteCoder..
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class BeanXMLByteCoderTest extends TestCase {
+public class BeanXMLByteCoderTest {
 
     /**
      * Tests that the XML encoding works.
      */
+    @Test
     public void testCoding() throws IOException {
         Bufferlo data = new Bufferlo();
         

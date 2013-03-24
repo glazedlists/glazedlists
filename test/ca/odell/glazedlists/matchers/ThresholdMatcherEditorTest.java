@@ -6,20 +6,25 @@ package ca.odell.glazedlists.matchers;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.FunctionList;
-import junit.framework.TestCase;
+import ca.odell.glazedlists.GlazedLists;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.ArrayList;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests {@link ThresholdMatcherEditor}.
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
-public class ThresholdMatcherEditorTest extends TestCase {
+public class ThresholdMatcherEditorTest {
 
     private static final Integer MINUS_ONE = new Integer(-1);
     private static final Integer ZERO = new Integer(0);
@@ -38,29 +43,31 @@ public class ThresholdMatcherEditorTest extends TestCase {
 
     private static final List<Integer> INITIAL_LIST = new ArrayList<Integer>(10);
     static {
-        for (int i = 0; i < 11; i++)
+        for (int i = 0; i < 11; i++) {
             INITIAL_LIST.add(new Integer(i));
+        }
     }
 
 	EventList<Integer> sourceList;
 	FilterList<Integer> filterList;
 	ThresholdMatcherEditor<Integer,Integer> thresholdMatcherEditor;
 
-	@Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
 		sourceList = GlazedLists.eventList(INITIAL_LIST);
 		thresholdMatcherEditor = new ThresholdMatcherEditor<Integer,Integer>();
 		filterList = new FilterList<Integer>(sourceList, thresholdMatcherEditor);
 	}
 
-	@Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
 		filterList.dispose();
 		filterList = null;
 		sourceList = null;
         thresholdMatcherEditor = null;
     }
 
+	@Test
 	public void testNoThreshold() {
 		thresholdMatcherEditor.setThreshold(null);
 
@@ -73,6 +80,7 @@ public class ThresholdMatcherEditorTest extends TestCase {
     /**
      * Test that toggling between equal and not equal works as expected.
      */
+    @Test
     public void testToggleEqual() {
 		thresholdMatcherEditor.setThreshold(FIVE);
 
@@ -89,6 +97,7 @@ public class ThresholdMatcherEditorTest extends TestCase {
     /**
      * Test that toggling between operations works as expected.
      */
+    @Test
     public void testToggleOperations() {
 		thresholdMatcherEditor.setThreshold(SIX);
 
@@ -156,6 +165,7 @@ public class ThresholdMatcherEditorTest extends TestCase {
         assertEquals(6, filterList.size());
 	}
 
+	@Test
 	public void testLogic() {
 		thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN);
 		thresholdMatcherEditor.setThreshold(FIVE);
@@ -173,6 +183,7 @@ public class ThresholdMatcherEditorTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testGreaterThan() {
 		thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN);
 
@@ -206,6 +217,7 @@ public class ThresholdMatcherEditorTest extends TestCase {
 		assertTrue(filterList.isEmpty());
 	}
 
+	@Test
 	public void testGreaterThanOrEqual() {
 		thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.GREATER_THAN_OR_EQUAL);
 
@@ -240,6 +252,7 @@ public class ThresholdMatcherEditorTest extends TestCase {
 		assertTrue(filterList.isEmpty());
 	}
 
+	@Test
 	public void testLessThan() {
 		thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN);
 
@@ -273,6 +286,7 @@ public class ThresholdMatcherEditorTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testLessThanOrEqual() {
 		thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN_OR_EQUAL);
 
@@ -307,6 +321,7 @@ public class ThresholdMatcherEditorTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testEqual() {
 		thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
 
@@ -334,6 +349,7 @@ public class ThresholdMatcherEditorTest extends TestCase {
 		assertTrue(filterList.isEmpty());
 	}
 
+	@Test
 	public void testNotEqual() {
 		thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.NOT_EQUAL);
 
@@ -367,6 +383,7 @@ public class ThresholdMatcherEditorTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testComparator() {
 		// set to a comparator that uses absolute values. If not used, nothing will match.
 		thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
@@ -376,6 +393,7 @@ public class ThresholdMatcherEditorTest extends TestCase {
 		assertEquals(1, filterList.size());
 	}
 
+    @Test
     public void testWrites() {
 		// Add when not initially shown via filter
 		thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.LESS_THAN_OR_EQUAL);
@@ -402,6 +420,7 @@ public class ThresholdMatcherEditorTest extends TestCase {
 		assertEquals(TWELVE, filterList.get(1));
 	}
 
+    @Test
     public void testFunction() {
         sourceList = GlazedLists.eventList(INITIAL_LIST);
         thresholdMatcherEditor = new ThresholdMatcherEditor<Integer,Integer>(null, null, null, new FirstNumberFunction());
@@ -430,8 +449,11 @@ public class ThresholdMatcherEditorTest extends TestCase {
     }
 
     private static class FirstNumberFunction implements FunctionList.Function<Integer, Integer> {
+        @Override
         public Integer evaluate(Integer sourceValue) {
-            if (sourceValue == null) return null;
+            if (sourceValue == null) {
+                return null;
+            }
 
             return new Integer(String.valueOf(sourceValue.intValue()).substring(0, 1));
         }
@@ -441,6 +463,7 @@ public class ThresholdMatcherEditorTest extends TestCase {
      * Compare two Integers by their absolute value.
      */
     private static class AbsComparator implements Comparator<Integer> {
+        @Override
         public int compare(Integer o1, Integer o2) {
             return Math.abs(o1.intValue()) - Math.abs(o2.intValue());
         }

@@ -9,7 +9,10 @@ import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.matchers.Matcher;
-import junit.framework.TestCase;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Make sure that the {@link SequenceDependenciesEventPublisher} class fires
@@ -17,11 +20,12 @@ import junit.framework.TestCase;
  *
  * @author jessewilson
  */
-public class ListEventPublisher2Test extends TestCase {
+public class ListEventPublisher2Test {
 
     /**
      * Make sure that all events get fired to all listeners.
      */
+    @Test
     public void testVeryBasicChain() {
         SequenceDependenciesEventPublisher publisher = new SequenceDependenciesEventPublisher();
         SimpleSubjectListener a = new SimpleSubjectListener("A", publisher);
@@ -138,6 +142,7 @@ public class ListEventPublisher2Test extends TestCase {
      * both directly and through a MatcherEditor. That MatcherEditor undoes
      * an inserted element.
      */
+    @Test
     public void testAppendContradictingEvents() {
         EventList<String> source = new BasicEventList<String>();
         NotFirstMatcherEditor<String> matcherEditor = new NotFirstMatcherEditor<String>();

@@ -1,15 +1,5 @@
 package ca.odell.glazedlists;
 
-import java.beans.PropertyChangeEvent;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-
-import junit.framework.TestCase;
-
 import ca.odell.glazedlists.impl.matchers.NotMatcher;
 import ca.odell.glazedlists.impl.matchers.PropertyEventNameMatcher;
 import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
@@ -18,20 +8,35 @@ import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.Matchers;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
 
-public class MatcherTest extends TestCase {
+import java.beans.PropertyChangeEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+public class MatcherTest {
+
+    @Test
     public void testTrueMatcher() {
         Matcher<String> s = Matchers.trueMatcher();
         Matcher<Boolean> b = Matchers.trueMatcher();
         assertSame(s, b);
     }
 
+    @Test
     public void testFalseMatcher() {
         Matcher<String> s = Matchers.falseMatcher();
         Matcher<Boolean> b = Matchers.falseMatcher();
         assertSame(s, b);
     }
 
+    @Test
     public void testNotMatcher() {
         Matcher<String> s = new NotMatcher<String>(new CapitalizedStringMatcher());
         assertFalse(s.matches("James"));
@@ -42,6 +47,7 @@ public class MatcherTest extends TestCase {
         assertTrue(b.matches(Boolean.FALSE));
     }
 
+    @Test
     public void testGenerics() {
         NumberMatcherEditor numMatcherEditor = new NumberMatcherEditor();
         assertTrue(numMatcherEditor.getMatcher().matches(new Integer(5)));
@@ -66,6 +72,7 @@ public class MatcherTest extends TestCase {
         assertTrue(typedMatcherEditor.getMatcher().matches(new Float(3.14f)));
     }
 
+    @Test
     public void testFilter() {
         List<Integer> elements = new ArrayList<Integer>();
         elements.add(new Integer(45));
@@ -97,6 +104,7 @@ public class MatcherTest extends TestCase {
         assertEquals(0, elements.size());
     }
 
+    @Test
     public void testSelect() {
         List<Integer> elements = new ArrayList<Integer>();
         elements.add(new Integer(45));
@@ -122,6 +130,7 @@ public class MatcherTest extends TestCase {
         assertEquals(9, results.size());
     }
 
+    @Test
     public void testIndexOf() {
         List<Integer> elements = new ArrayList<Integer>();
         elements.add(new Integer(45));
@@ -141,6 +150,7 @@ public class MatcherTest extends TestCase {
         assertEquals(-1, Matchers.indexOf(elements, new NumberMatcher(new Integer(99))));
     }
 
+    @Test
     public void testPropertyMatcher() {
         Matcher<Collection> matcher = Matchers.beanPropertyMatcher(Collection.class, "empty", Boolean.TRUE);
         assertEquals(true, matcher.matches(Collections.EMPTY_LIST));
@@ -151,6 +161,7 @@ public class MatcherTest extends TestCase {
         assertEquals(false, matcher.matches(null));
     }
 
+    @Test
     public void testDateRangeMatcher() {
         Matcher<Date> matcher = Matchers.rangeMatcher(new Date(10000), new Date(20000));
         assertEquals(false, matcher.matches(new Date(9999)));
@@ -186,6 +197,7 @@ public class MatcherTest extends TestCase {
         assertEquals(true, matcher.matches(null));
     }
 
+    @Test
     public void testPropertyEventNameMatcher() {
         try {
             new PropertyEventNameMatcher(true, (Collection) null);
@@ -241,6 +253,7 @@ public class MatcherTest extends TestCase {
         assertEquals(true, matcher.matches(event5));
     }
 
+    @Test
     public void testTypeMatcher() {
         final List<Number> numbers = new ArrayList<Number>();
         numbers.add(new Float(0));

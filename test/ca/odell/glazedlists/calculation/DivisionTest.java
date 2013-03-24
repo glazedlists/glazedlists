@@ -3,12 +3,16 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.calculation;
 
-import junit.framework.TestCase;
-import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
 
-public class DivisionTest extends TestCase {
+import org.junit.Test;
 
+import static org.junit.Assert.*;
+
+public class DivisionTest {
+
+    @Test
     public void testMeanFloat() {
         final EventList<Float> source = new BasicEventList<Float>();
         source.add(new Float(1));
@@ -49,6 +53,7 @@ public class DivisionTest extends TestCase {
         assertEquals(2, counter.getCountAndReset());
     }
 
+    @Test
     public void testMeanDouble() {
         final EventList<Double> source = new BasicEventList<Double>();
         source.add(new Double(1));

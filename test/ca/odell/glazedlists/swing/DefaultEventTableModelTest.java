@@ -3,7 +3,13 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.ExecuteOnMainThread;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.ObservableElementList;
+import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
@@ -18,10 +24,18 @@ import java.awt.event.MouseListener;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.swing.*;
+import javax.swing.Action;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableCellRenderer;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Test DefaultEventTableModel
@@ -34,6 +48,8 @@ public class DefaultEventTableModelTest extends SwingTestCase {
      * Verifies that the EDT check works, e.g. an IllegalStateException is thrown when a ListEvent
      * arrives on a non-EDT thread
      */
+    @Test
+    @ExecuteOnMainThread
     public void testOnMainThreadEDTViolation() {
         EventList<Color> colors = new BasicEventList<Color>();
         colors.add(Color.RED);
@@ -53,6 +69,8 @@ public class DefaultEventTableModelTest extends SwingTestCase {
     /**
      * Verifies that factory method for creating table with thread proxy list works.
      */
+    @Test
+    @ExecuteOnMainThread
     public void testOnMainThreadNoEDTViolation() {
         EventList<Color> colors = new BasicEventList<Color>();
         colors.add(Color.RED);
@@ -72,7 +90,8 @@ public class DefaultEventTableModelTest extends SwingTestCase {
     /**
      * Verifies that the new getElementAt() method of EventTableModel works.
      */
-    public void guiTestGetElementAt() {
+    @Test
+    public void testGetElementAt() {
         EventList<Color> colors = new BasicEventList<Color>();
         colors.add(Color.RED);
         colors.add(Color.GREEN);
@@ -103,7 +122,8 @@ public class DefaultEventTableModelTest extends SwingTestCase {
     /**
      * Verifies that the getValueAt() method of EventTableModel works.
      */
-    public void guiTestGetValueAt() {
+    @Test
+    public void testGetValueAt() {
         EventList<Color> colors = new BasicEventList<Color>();
         colors.add(Color.RED);
         colors.add(Color.GREEN);
@@ -135,7 +155,8 @@ public class DefaultEventTableModelTest extends SwingTestCase {
 //        fail("I don't think this is appropriate for testing DefaultEventTableModel, or do we still want to deal with locking during construction of DefaultEventTableModel??");
 //    }
 
-    public void guiTestSetValueAt_FilterList() {
+    @Test
+    public void testSetValueAt_FilterList() {
         final EventList<JLabel> labels = new BasicEventList<JLabel>();
         labels.add(new JLabel("saskatchewan"));
         labels.add(new JLabel("saskwatch"));
@@ -162,7 +183,8 @@ public class DefaultEventTableModelTest extends SwingTestCase {
         assertEquals("saskatchewan", tableModel.getValueAt(0, 0));
     }
 
-    public void guiTestSetValueAtWithCopyingTableFormat_FilterList() {
+    @Test
+    public void testSetValueAtWithCopyingTableFormat_FilterList() {
         final EventList<JLabel> labels = new BasicEventList<JLabel>();
         labels.add(new JLabel("saskatchewan"));
         labels.add(new JLabel("saskwatch"));
@@ -189,7 +211,8 @@ public class DefaultEventTableModelTest extends SwingTestCase {
         assertEquals("saskatchewan", tableModel.getValueAt(0, 0));
     }
 
-    public void guiTestSetValueAt_SortedList() {
+    @Test
+    public void testSetValueAt_SortedList() {
         final EventList<JLabel> labels = new BasicEventList<JLabel>();
         labels.add(new JLabel("banana"));
         labels.add(new JLabel("cherry"));
@@ -217,27 +240,31 @@ public class DefaultEventTableModelTest extends SwingTestCase {
      * This test ensures the compiler allows us to use a TableFormat of a more
      * generic type than the actual EventTableModel.
      */
-    public void guiTestGenericTypeRelationships() {
+    @Test
+    public void testGenericTypeRelationships() {
         final EventList<DefaultListCellRenderer> source = new BasicEventList<DefaultListCellRenderer>();
         final TableFormat<JLabel> tableFormat = new LabelTableFormat();
         new DefaultEventTableModel<DefaultListCellRenderer>(source, tableFormat);
     }
-
-
 
     /**
      * This TableFormat returns new JLabels from its setValueAt()
      * method rather than modifying the existing one in place.
      */
     private static final class CopyingLabelTableFormat implements WritableTableFormat<JLabel> {
+        @Override
         public boolean isEditable(JLabel baseObject, int column) { return true; }
 
+        @Override
         public JLabel setColumnValue(JLabel baseObject, Object editedValue, int column) {
             return new JLabel(editedValue == null ? null : editedValue.toString());
         }
 
+        @Override
         public int getColumnCount() { return 1; }
+        @Override
         public String getColumnName(int column) { return "Label Text"; }
+        @Override
         public Object getColumnValue(JLabel baseObject, int column) { return baseObject.getText(); }
     }
 
@@ -245,19 +272,25 @@ public class DefaultEventTableModelTest extends SwingTestCase {
      * This TableFormat modifyies existing JLabels in place.
      */
     private static final class LabelTableFormat implements WritableTableFormat<JLabel> {
+        @Override
         public boolean isEditable(JLabel baseObject, int column) { return true; }
 
+        @Override
         public JLabel setColumnValue(JLabel baseObject, Object editedValue, int column) {
             baseObject.setText(editedValue == null ? null : editedValue.toString());
             return baseObject;
         }
 
+        @Override
         public int getColumnCount() { return 1; }
+        @Override
         public String getColumnName(int column) { return "Label Text"; }
+        @Override
         public Object getColumnValue(JLabel baseObject, int column) { return baseObject.getText(); }
     }
 
     private static final class SaskLabelMatcher implements Matcher<JLabel> {
+        @Override
         public boolean matches(JLabel item) {
             return item.getText().startsWith("sask");
         }
@@ -270,7 +303,8 @@ public class DefaultEventTableModelTest extends SwingTestCase {
     /**
      * Perform a quick run through the basics of TableComparatorChooser.
      */
-    public void guiTestTableComparatorChooser() {
+    @Test
+    public void testTableComparatorChooser() {
         // build the data
         EventList<Color> colors = GlazedLists.eventList(rgb);
         SortedList<Color> sortedColors = new SortedList<Color>(colors, null);
@@ -335,7 +369,8 @@ public class DefaultEventTableModelTest extends SwingTestCase {
      * Ensure correct locking of EventTableModel such that it does not block calls to
      * ListSelectionModel.
      */
-    public void guiTestLocking1() {
+    @Test
+    public void testLocking1() {
         final BasicEventList<String> list = new BasicEventList<String>();
         list.add("Member_one");
         final TableFormat<String> tableFormat = GlazedLists.tableFormat(new String[] {"bytes"}, new String[] {"Test"});
@@ -351,7 +386,8 @@ public class DefaultEventTableModelTest extends SwingTestCase {
      * Ensure correct locking of EventTableModel such that it does not block calls to
      * ListSelectionModel.
      */
-    public void guiTestLocking2() {
+    @Test
+    public void testLocking2() {
         final BasicEventList<String> list = new BasicEventList<String>();
         list.add("Member_one");
         final TableFormat<String> tableFormat = GlazedLists.tableFormat(new String[] {"bytes"}, new String[] {"Test"});
@@ -367,7 +403,8 @@ public class DefaultEventTableModelTest extends SwingTestCase {
     /**
      * Verifies that table selection is preserved, when handling a complex ListEvent with blocks.
      */
-    public void guiTestRemoveWithBlocksInListEvent() {
+    @Test
+    public void testRemoveWithBlocksInListEvent() {
         // setup JTable with EventTableModel and EventSelectionModel
         final EventList<String> list = new BasicEventList<String>();
         list.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
@@ -393,7 +430,8 @@ public class DefaultEventTableModelTest extends SwingTestCase {
      * Tests that a table selection is correctly reflected when the user presses UP- and DOWN-arrow
      * keys while the table is in sorted state.
      */
-    public void guiTestChangeSelectionByKeysInSortedState_FixMe() {
+    @Test
+    public void testChangeSelectionByKeysInSortedState_FixMe() {
         // build the data
         final EventList<JLabel> labels = new BasicEventList<JLabel>();
         labels.add(new JLabel("def"));
@@ -448,6 +486,7 @@ public class DefaultEventTableModelTest extends SwingTestCase {
      */
     private static class TableModelChangeCounter implements TableModelListener {
         private int count = 0;
+        @Override
         public void tableChanged(TableModelEvent e) {
             count++;
         }

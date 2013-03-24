@@ -8,10 +8,17 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.TransactionList;
 import ca.odell.glazedlists.event.ListEvent;
 
-import javax.swing.undo.UndoManager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import javax.swing.undo.UndoManager;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class UndoSupportTest extends SwingTestCase {
 
@@ -22,18 +29,19 @@ public class UndoSupportTest extends SwingTestCase {
     private UndoManager undoManager;
     private UndoSupport undoSupport;
 
-    @Override
-    public void guiSetUp() {
+    @Before
+    public void setUp() {
+        System.out.println(Thread.currentThread() + ": UndoSupportTest.guiSetUp");
         source = new BasicEventList<String>();
         txSource = new TransactionList<String>(source);
         undoManager = new UndoManager();
         undoManager.setLimit(NUMBER_OF_UNDOS);
         undoSupport = UndoSupport.install(undoManager, txSource);
-        System.out.println("UndoSupportTest.guiSetUp");
     }
 
-    @Override
-    public void guiTearDown() {
+    @After
+    public void tearDown() {
+        System.out.println(Thread.currentThread() + ": UndoSupportTest.guiTearDown");
         undoSupport.uninstall();
         txSource.dispose();
         source = null;
@@ -41,7 +49,8 @@ public class UndoSupportTest extends SwingTestCase {
         undoManager = null;
     }
 
-    public void guiTestAdd() {
+    @Test
+    public void testAdd() {
         source.add("First");
 
         assertTrue(undoManager.canUndo());
@@ -60,7 +69,8 @@ public class UndoSupportTest extends SwingTestCase {
         assertSame("First", source.get(0));
     }
 
-    public void guiTestRemove() {
+    @Test
+    public void testRemove() {
         source.add("First");
         undoManager.discardAllEdits();
         source.remove(0);
@@ -81,7 +91,8 @@ public class UndoSupportTest extends SwingTestCase {
         assertEquals(0, source.size());
     }
 
-    public void guiTestUpdate() {
+    @Test
+    public void testUpdate() {
         source.add("First");
         undoManager.discardAllEdits();
         source.set(0, "Second");
@@ -103,14 +114,16 @@ public class UndoSupportTest extends SwingTestCase {
         assertSame("Second", source.get(0));
     }
 
-    public void guiTestMutate() {
+    @Test
+    public void testMutate() {
         source.add("First");
         undoManager.discardAllEdits();
         source.set(0, "First");
         assertFalse(undoManager.canUndoOrRedo());
     }
 
-    public void guiTestComplexEdit() {
+    @Test
+    public void testComplexEdit() {
         source.add("First");
         source.add("Second");
         source.add("Third");
@@ -152,7 +165,8 @@ public class UndoSupportTest extends SwingTestCase {
         assertEquals(afterSnapshot, source);
     }
 
-    public void guiTestLongChainOfRandomEdits() {
+    @Test
+    public void testLongChainOfRandomEdits() {
         int value = 0;
         Random random = new Random();
 
@@ -161,26 +175,29 @@ public class UndoSupportTest extends SwingTestCase {
             int changeType = txSource.isEmpty() ? ListEvent.INSERT : random.nextInt(3);
             int index = txSource.isEmpty() ? 0 : random.nextInt(txSource.size());
 
-            if (changeType == ListEvent.INSERT)
+            if (changeType == ListEvent.INSERT) {
                 txSource.add(index, String.valueOf(++value));
-            else if (changeType == ListEvent.DELETE)
+            } else if (changeType == ListEvent.DELETE) {
                 txSource.remove(index);
-            else if (changeType == ListEvent.UPDATE)
+            } else if (changeType == ListEvent.UPDATE) {
                 txSource.set(index, String.valueOf(++value));
+            }
         }
 
         // take a snapshot of the List after 500 random edits
         final List<String> snapshot = new ArrayList<String>(txSource);
 
         // undo all edits (should result in an empty list)
-        for (int i = 0; i < NUMBER_OF_UNDOS; i++)
+        for (int i = 0; i < NUMBER_OF_UNDOS; i++) {
             undoManager.undo();
+        }
 
         assertTrue(txSource.isEmpty());
 
         // redo all edits (should result in snapshot)
-        for (int i = 0; i < NUMBER_OF_UNDOS; i++)
+        for (int i = 0; i < NUMBER_OF_UNDOS; i++) {
             undoManager.redo();
+        }
 
         assertEquals(snapshot, txSource);
     }

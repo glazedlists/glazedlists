@@ -5,7 +5,10 @@ package ca.odell.glazedlists;
 
 // for being a JUnit test case
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import junit.framework.TestCase;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests to verify that for each list change, only one event is fired.
@@ -14,12 +17,13 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class MultipleEventsTest extends TestCase {
+public class MultipleEventsTest {
 
     /**
      * Tests that clearing the filter list does not fire multiple
      * events on the original list.
      */
+    @Test
     public void testFilterList() {
         // create a list
         EventList<int[]> source = new BasicEventList<int[]>();
@@ -47,6 +51,7 @@ public class MultipleEventsTest extends TestCase {
      * Tests that clearing a sub list does not fire multiple
      * events on the original list.
      */
+    @Test
     public void testSubList() {
         // create a list
         EventList<String> source = new BasicEventList<String>();
@@ -73,6 +78,7 @@ public class MultipleEventsTest extends TestCase {
      * Tests that clearing a unique list does not fire multiple
      * events on the original list.
      */
+    @Test
     public void testUniqueList() {
         // create a list
         EventList<String> source = new BasicEventList<String>();

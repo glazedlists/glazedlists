@@ -3,17 +3,21 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.event;
 
-import junit.framework.TestCase;
 import ca.odell.glazedlists.impl.event.BlockSequence;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class ListBlocksLinearTest extends TestCase {
+public class ListBlocksLinearTest {
 
     /**
      * Test if simple changes to the linear blocks work as expected.
      */
+    @Test
     public void testSimpleChanges() {
         BlockSequence listBlocks = new BlockSequence();
         listBlocks.insert(0, 2);
@@ -42,6 +46,7 @@ public class ListBlocksLinearTest extends TestCase {
     /**
      * Test if combining changes to the linear blocks work as expected.
      */
+    @Test
     public void testCombiningChanges() {
         BlockSequence listBlocks = new BlockSequence();
         listBlocks.insert(0, 2);
@@ -83,6 +88,7 @@ public class ListBlocksLinearTest extends TestCase {
      * Test if linear blocks returns false appropriately when changes are
      * out of order.
      */
+    @Test
     public void testOutOfOrder() {
         BlockSequence listBlocks;
 
@@ -135,6 +141,7 @@ public class ListBlocksLinearTest extends TestCase {
     /**
      * Test we can iterate the BlockSequence one block at a time.
      */
+    @Test
     public void testIterateByBlocks() {
         BlockSequence listBlocks = new BlockSequence();
         listBlocks.insert(0, 2);

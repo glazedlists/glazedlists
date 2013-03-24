@@ -8,12 +8,16 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.swing.GlazedListsSwing;
-import junit.framework.TestCase;
 
-import javax.swing.*;
+import javax.swing.SwingUtilities;
 
-public class SwingThreadProxyEventListTest extends TestCase {
+import org.junit.Test;
 
+import static org.junit.Assert.*;
+
+public class SwingThreadProxyEventListTest {
+
+    @Test
     public void testExceptionInListenerCausesNextListEventToBeDeliveredOnWrongThread() throws Exception {
         final EventList<String> source = new BasicEventList<String>();
         final EventList<String> threadProxy = GlazedListsSwing.swingThreadProxyList(source);

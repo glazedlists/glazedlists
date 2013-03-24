@@ -5,10 +5,14 @@ package ca.odell.glazedlists.calculation;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
-import junit.framework.TestCase;
 
-public class ZeroElementsTest extends TestCase {
+import org.junit.Test;
 
+import static org.junit.Assert.*;
+
+public class ZeroElementsTest {
+
+    @Test
     public void testPropertyChanges() {
         final EventList<String> source = new BasicEventList<String>();
 

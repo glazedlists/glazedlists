@@ -3,6 +3,11 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
+import ca.odell.glazedlists.impl.beans.BeanConnector;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.matchers.Matchers;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.beans.PropertyChangeEvent;
@@ -16,33 +21,28 @@ import java.util.Set;
 
 import javax.swing.JLabel;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
-import ca.odell.glazedlists.impl.beans.BeanConnector;
-import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import ca.odell.glazedlists.matchers.Matcher;
-import ca.odell.glazedlists.matchers.Matchers;
+import static org.junit.Assert.*;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class ObservableElementListTest extends TestCase {
+public class ObservableElementListTest {
 
     private ObservableElementList<JLabel> labels;
     private ListConsistencyListener<JLabel> counter;
 
-    public ObservableElementListTest() {
-        super("Observable Elements - RFE 157");
-    }
-
-    @Override
+    @Before
     public void setUp() {
         labels = new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), GlazedLists.beanConnector(JLabel.class));
         counter = ListConsistencyListener.install(labels);
         assertEquals(0, counter.getEventCount());
     }
 
-    @Override
+    @After
     public void tearDown() {
         labels = null;
         counter = null;
@@ -51,6 +51,7 @@ public class ObservableElementListTest extends TestCase {
     /**
      * Tests ObservableEleemntLists' handling of JavaBean PropertyChangeEvents
      */
+    @Test
     public void testJavabeans() {
         JLabel ottawa = new JLabel("Rough Riders");
         JLabel wrestling = new JLabel("WWF");
@@ -68,6 +69,7 @@ public class ObservableElementListTest extends TestCase {
         assertEquals(1, counter.getChangeCount(3));
     }
 
+    @Test
     public void testAddRemoveListeners() {
         final JLabel listElement1 = new JLabel();
         final JLabel listElement2 = new JLabel();
@@ -103,6 +105,7 @@ public class ObservableElementListTest extends TestCase {
         assertEquals(initialListenerCount, listElement2.getPropertyChangeListeners().length);
     }
 
+    @Test
     public void testConstructor() {
         try {
             new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), null);
@@ -132,6 +135,7 @@ public class ObservableElementListTest extends TestCase {
         assertEquals(initialListenerCount, listElement1.getPropertyChangeListeners().length);
     }
 
+    @Test
     public void testDisposeSingleEventList() {
         this.runTestDispose(this.labels);
         this.runTestDispose(new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), new MultiEventListJLabelConnector(false)));
@@ -152,6 +156,7 @@ public class ObservableElementListTest extends TestCase {
         assertTrue(labels.isEmpty());
     }
 
+    @Test
     public void testEventMatcher() {
         // match no property change event
         final Matcher<PropertyChangeEvent> falseMatcher = Matchers.falseMatcher();
@@ -225,6 +230,7 @@ public class ObservableElementListTest extends TestCase {
         assertEquals(2, listener.getEventCount());
     }
 
+    @Test
     public void testPickyConnector() {
         this.runTestPickyConnector(new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), new PickyJLabelConnector()));
         this.runTestPickyConnector(new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), new MultiEventListJLabelConnector(true)));
@@ -248,6 +254,7 @@ public class ObservableElementListTest extends TestCase {
         assertEquals(initialListenerCount, listElement1.getPropertyChangeListeners().length);
     }
 
+    @Test
     public void testLateBloomingMultiEventListConnector() {
         final int bloomCount = 5;
         final ObservableElementList<JLabel> list = new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), new LateBloomingMultiEventListJLabelConnector(bloomCount));
@@ -256,13 +263,15 @@ public class ObservableElementListTest extends TestCase {
         final int initialListenerCount1 = listElement1.getPropertyChangeListeners().length;
 
         // install a common listener for the first bloomCount insertions
-        for (int i = 0; i < bloomCount; i++)
+        for (int i = 0; i < bloomCount; i++) {
             list.add(listElement1);
+        }
         assertEquals(initialListenerCount1 + bloomCount, listElement1.getPropertyChangeListeners().length);
 
         // install new listeners for the next bloomCount
-        for (int i = 0; i < bloomCount; i++)
+        for (int i = 0; i < bloomCount; i++) {
             list.add(listElement1);
+        }
         assertEquals(initialListenerCount1 + 2 * bloomCount, listElement1.getPropertyChangeListeners().length);
 
         final PropertyChangeListener[] propertyChangeListeners = listElement1.getPropertyChangeListeners();
@@ -271,7 +280,9 @@ public class ObservableElementListTest extends TestCase {
         List<EventListener> listeners = new ArrayList<EventListener>();
         Set<EventListener> uniqueListeners = new HashSet<EventListener>();
         for (int i = 0; i < propertyChangeListeners.length; i++) {
-            if(!(propertyChangeListeners[i] instanceof BeanConnector.PropertyChangeHandler)) continue;
+            if(!(propertyChangeListeners[i] instanceof BeanConnector.PropertyChangeHandler)) {
+                continue;
+            }
             listeners.add(propertyChangeListeners[i]);
             uniqueListeners.add(propertyChangeListeners[i]);
         }
@@ -293,6 +304,7 @@ public class ObservableElementListTest extends TestCase {
         }
     }
 
+    @Test
     public void testMultithreadedUpdate() throws InterruptedException {
         final LazyThreadedConnector connector = new LazyThreadedConnector();
         final ObservableElementList<JLabel> list = new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), connector);
@@ -319,17 +331,20 @@ public class ObservableElementListTest extends TestCase {
         assertEquals(false, connector.isExitDueToException());
     }
 
+    @Test
     public void testGenerics() {
         // should be able to use an EventList<JLabel> and a Connector<Component>, for example
         new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), new ComponentConnector());
     }
 
+	@Test
 	public void testSwitchToMultiListenerMode() {
         final ObservableElementList<JLabel> list = new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), new BurstOfThreeJLabelConnector());
 
         // pattern of installed PropertyChangeListeners: _ _ _ A A A _ _ _ B B B
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < 12; i++) {
             list.add(new JLabel());
+        }
 
         assertEquals(list.get(0).getPropertyChangeListeners().length, list.get(1).getPropertyChangeListeners().length);
         assertEquals(list.get(1).getPropertyChangeListeners().length, list.get(2).getPropertyChangeListeners().length);
@@ -349,8 +364,9 @@ public class ObservableElementListTest extends TestCase {
         list.dispose();
 
         // all Labels should now have the same number of listeners
-        for (Iterator<JLabel> i = list.iterator(); i.hasNext();)
+        for (Iterator<JLabel> i = list.iterator(); i.hasNext();) {
             assertEquals(list.get(0).getPropertyChangeListeners().length, i.next().getPropertyChangeListeners().length);
+        }
     }
 
     /**
@@ -396,8 +412,9 @@ public class ObservableElementListTest extends TestCase {
 
         @Override
         public EventListener installListener(JLabel element) {
-            if (this.picky && this.elementCount++ % 2 == 0)
+            if (this.picky && this.elementCount++ % 2 == 0) {
                 return null;
+            }
 
             final PropertyChangeListener propertyChangeHandler = new PropertyChangeHandler();
             element.addPropertyChangeListener(propertyChangeHandler);
@@ -472,8 +489,9 @@ public class ObservableElementListTest extends TestCase {
 
         @Override
         public EventListener installListener(JLabel element) {
-            if (this.elementCount++ % 2 == 0)
+            if (this.elementCount++ % 2 == 0) {
                 return null;
+            }
 
             return super.installListener(element);
         }
@@ -527,6 +545,7 @@ public class ObservableElementListTest extends TestCase {
                 this.handler = handler;
             }
 
+            @Override
             public void run() {
                 try {
                     // 1. delay

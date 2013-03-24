@@ -3,17 +3,20 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.calculation;
 
-import java.util.Arrays;
-
-import junit.framework.TestCase;
-
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.SortedList;
 
-public final class SumTest extends TestCase {
+import java.util.Arrays;
 
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+public final class SumTest {
+
+    @Test
     public void testSumFloat() {
         final EventList<Float> source = new BasicEventList<Float>();
         source.add(new Float(1));
@@ -47,6 +50,7 @@ public final class SumTest extends TestCase {
         assertEquals(1, counter.getCountAndReset());
     }
 
+    @Test
     public void testSumDouble() {
         final EventList<Double> source = new BasicEventList<Double>();
         source.add(new Double(1));
@@ -80,6 +84,7 @@ public final class SumTest extends TestCase {
         assertEquals(1, counter.getCountAndReset());
     }
 
+    @Test
     public void testSumInteger() {
         final EventList<Integer> source = new BasicEventList<Integer>();
         source.add(new Integer(1));
@@ -113,6 +118,7 @@ public final class SumTest extends TestCase {
         assertEquals(1, counter.getCountAndReset());
     }
 
+    @Test
     public void testSumLong() {
         final EventList<Long> source = new BasicEventList<Long>();
         source.add(new Long(1));
@@ -146,6 +152,7 @@ public final class SumTest extends TestCase {
         assertEquals(1, counter.getCountAndReset());
     }
 
+    @Test
     public void testReorderEvents() {
         final EventList<Long> source = new BasicEventList<Long>();
         final SortedList<Long> sortedSource = new SortedList<Long>(source);

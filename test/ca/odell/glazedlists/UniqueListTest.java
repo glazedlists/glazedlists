@@ -7,9 +7,20 @@ import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * A UniqueListTest tests the functionality of the UniqueList
@@ -17,7 +28,7 @@ import junit.framework.TestCase;
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class UniqueListTest extends TestCase {
+public class UniqueListTest {
 
     private UniqueList<Object> unique;
     private BasicEventList<Object> source;
@@ -25,7 +36,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Prepare for the test.
      */
-    @Override
+    @Before
     public void setUp() {
         source = new BasicEventList<Object>();
         unique = new UniqueList<Object>(source);
@@ -34,7 +45,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Clean up after the test.
      */
-    @Override
+    @After
     public void tearDown() {
         unique = null;
         source = null;
@@ -44,12 +55,14 @@ public class UniqueListTest extends TestCase {
 
     /** Testing add() with an empty source list */
 
+    @Test
     public void testSimpleInsert() {
         source.add("A");
         assertEquals(1, unique.size());
         assertEquals("A", unique.get(0));
     }
 
+    @Test
     public void testSortedNonDuplicateInsert() {
         source.add("A");
         source.add("B");
@@ -60,6 +73,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("C", unique.get(2));
     }
 
+    @Test
     public void testUnsortedNonDuplicateInsert() {
         source.add("C");
         source.add("A");
@@ -70,6 +84,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("C", unique.get(2));
     }
 
+    @Test
     public void testSimpleDuplicateInsert() {
         source.add("A");
         source.add("A");
@@ -79,6 +94,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("A", unique.get(0));
     }
 
+    @Test
     public void testMultipleDuplicateInserts() {
         source.add("A");
         source.add("A");
@@ -93,6 +109,7 @@ public class UniqueListTest extends TestCase {
 
     /** Testing add() with a non-empty source list */
 
+    @Test
     public void testSimpleNonEmptySource() {
         unique = null;
         source.add("A");
@@ -101,6 +118,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("A", unique.get(0));
     }
 
+    @Test
     public void testSortedNonDuplicateNonEmptySource() {
         unique = null;
         source.add("A");
@@ -113,6 +131,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("C", unique.get(2));
     }
 
+    @Test
     public void testUnsortedNonDuplicateNonEmptySource() {
         unique = null;
         source.add("C");
@@ -125,6 +144,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("C", unique.get(2));
     }
 
+    @Test
     public void testSimpleDuplicateInNonEmptySource() {
         unique = null;
         source.add("A");
@@ -135,6 +155,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("A", unique.get(0));
     }
 
+    @Test
     public void testMultipleDuplicatesInNonEmptySource() {
         unique = null;
         source.add("A");
@@ -149,6 +170,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("C", unique.get(1));
     }
 
+    @Test
     public void testSimpleAddToEndOfSortedNonDuplicateNonEmptySource() {
         unique = null;
         source.add("A");
@@ -163,6 +185,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("D", unique.get(3));
     }
 
+    @Test
     public void testSimpleAddToFrontOfSortedNonDuplicateNonEmptySource() {
         unique = null;
         source.add("B");
@@ -177,6 +200,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("D", unique.get(3));
     }
 
+    @Test
     public void testSimpleAddToUnsortedNonDuplicateNonEmptySource() {
         unique = null;
         source.add("D");
@@ -191,6 +215,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("D", unique.get(3));
     }
 
+    @Test
     public void testAddingSimpleDuplicateToNonEmptySource() {
         unique = null;
         source.add("A");
@@ -205,6 +230,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("C", unique.get(1));
     }
 
+    @Test
     public void testAddingMultipleDuplicatesToNonEmptySource() {
         unique = null;
         source.add("C");
@@ -229,6 +255,7 @@ public class UniqueListTest extends TestCase {
 
     /** Testing response to addAll() */
 
+    @Test
     public void testSimpleAddOfSortedCollection() {
         List<Object> duplicates = new LinkedList<Object>();
         duplicates.add("A");
@@ -241,6 +268,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("C", unique.get(2));
     }
 
+    @Test
     public void testSimpleAddOfUnsortedCollection() {
         List<Object> duplicates = new LinkedList<Object>();
         duplicates.add("B");
@@ -253,6 +281,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("C", unique.get(2));
     }
 
+    @Test
     public void testAddOfCollectionContainingDuplicates() {
         List<Object> duplicates = new LinkedList<Object>();
         duplicates.add("A");
@@ -267,6 +296,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("C", unique.get(1));
     }
 
+    @Test
     public void testAddingCollectionDuplicatingContentsOfNonEmptySource() {
         unique = null;
         source.add("A");
@@ -284,6 +314,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("C", unique.get(2));
     }
 
+    @Test
     public void testAddingCollectionOfSingleUniqueToNonEmptySource() {
         unique = null;
         source.add("A");
@@ -303,6 +334,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("C", unique.get(2));
     }
 
+    @Test
     public void testAddingCollectionWithNewDuplicatesToNonEmptySource() {
         unique = null;
         source.add("A");
@@ -325,6 +357,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("C", unique.get(2));
     }
 
+    @Test
     public void testAddingCollectionOfDuplicatesToNonEmptySource() {
         unique = null;
         source.add("A");
@@ -350,21 +383,24 @@ public class UniqueListTest extends TestCase {
 
     /** Testing response to REMOVE event */
 
+    @Test
     public void testSimpleRemoveByIndex() {
         source.add("A");
         source.remove(0);
         assertEquals(0, unique.size());
     }
 
+    @Test
     public void testRemoveOfSingleDuplicateByIndex() {
         source.add("A");
         source.add("A");
         source.add("A");
         source.remove(2);
         assertEquals(1, unique.size());
-        assertEquals("A", (String)unique.get(0));
+        assertEquals("A", unique.get(0));
     }
 
+    @Test
     public void testRemoveOfDuplicatesByIndex() {
         source.add("A");
         source.add("A");
@@ -375,6 +411,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("A", unique.get(0));
     }
 
+    @Test
     public void testRemoveWithMultipleDuplicatesByIndex() {
         source.add("A");
         source.add("A");
@@ -393,6 +430,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("C", unique.get(2));
     }
 
+    @Test
     public void testSimpleRemoveOfOriginalByIndex() {
         source.add("A");
         source.add("A");
@@ -402,6 +440,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("A", unique.get(0));
     }
 
+    @Test
     public void testRemoveOfMultipleOriginalsByIndex() {
         source.add("A");
         source.add("A");
@@ -421,12 +460,14 @@ public class UniqueListTest extends TestCase {
         assertEquals("E", unique.get(2));
     }
 
+    @Test
     public void testSimpleRemoveByObject() {
         source.add("A");
         source.remove("A");
         assertEquals(0, unique.size());
     }
 
+    @Test
     public void testSimpleRemoveWithMultipleUniqueValuesByObject() {
         source.add("A");
         source.add("B");
@@ -437,6 +478,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("C", unique.get(1));
     }
 
+    @Test
     public void testRemoveOfASingleDuplicateByObject() {
         source.add("A");
         source.add("A");
@@ -447,6 +489,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("A", unique.get(0));
     }
 
+    @Test
     public void testRemoveOfAllDuplicatesByObject() {
         source.add("A");
         source.add("A");
@@ -459,6 +502,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("A", unique.get(0));
     }
 
+    @Test
     public void testRemoveOfAllValuesByObject() {
         source.add("A");
         source.add("A");
@@ -471,6 +515,7 @@ public class UniqueListTest extends TestCase {
         assertEquals(0, unique.size());
     }
 
+    @Test
     public void testRemoveOfMultipleDuplicatesByObject() {
         source.add("A");
         source.add("A");
@@ -485,6 +530,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("C", unique.get(1));
     }
 
+    @Test
     public void testClear() {
         source.add("A");
         source.add("A");
@@ -498,6 +544,7 @@ public class UniqueListTest extends TestCase {
         assertEquals(0, unique.size());
     }
 
+    @Test
     public void testUpdateDeleteCollide() {
         BasicEventList<int[]> sourceList = new BasicEventList<int[]>();
         sourceList.add(new int[] { 2, 0, 1 });
@@ -516,6 +563,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Tests the change from A, B, B, D to A, C, C, D
      */
+    @Test
     public void testMultipleDeleteWithMultipleInsert() {
         BasicEventList<int[]> sourceList = new BasicEventList<int[]>();
         sourceList.add(new int[] { 1, 1, 1 });
@@ -541,6 +589,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Tests the change from A, B, D to A, C, D
      */
+    @Test
     public void testDeleteWithInsert() {
         BasicEventList<int[]> sourceList = new BasicEventList<int[]>();
         sourceList.add(new int[] { 1, 1, 1 });
@@ -564,6 +613,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Tests the change from A, B, C to C, D, E
      */
+    @Test
     public void testSingleValueKept() {
         BasicEventList<int[]> sourceList = new BasicEventList<int[]>();
         sourceList.add(new int[] { 1, 1, 0 });
@@ -589,6 +639,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Tests the change from A, A, B, B, C, C to C, C, D, D, E, E
      */
+    @Test
     public void testMultipleValuesKept() {
         BasicEventList<int[]> sourceList = new BasicEventList<int[]>();
         sourceList.add(new int[] { 1, 1, 0 });
@@ -619,6 +670,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Tests the change from A, A, B, B, C, C, D, D, E, E to B, B, E, E
      */
+    @Test
     public void testSubset() {
         BasicEventList<int[]> sourceList = new BasicEventList<int[]>();
         sourceList.add(new int[] { 1, 1, 0 });
@@ -647,6 +699,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Tests the change from A, A, B, B, C to empty to A, B, B, C, C
      */
+    @Test
     public void testMultipleChanges() {
         BasicEventList<int[]> sourceList = new BasicEventList<int[]>();
         sourceList.add(new int[] { 1, 1, 0, 0 });
@@ -676,6 +729,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Tests a large set of random events.
      */
+    @Test
     public void testLargeRandomSet() {
         BasicEventList<int[]> sourceList = new BasicEventList<int[]>();
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
@@ -714,6 +768,7 @@ public class UniqueListTest extends TestCase {
      * Tests a UniqueList version of a SortedList is safe when that SortedList
      * is re-sorted.
      */
+    @Test
     public void testReSortSource() {
         // create a unique list with a sorted source
         BasicEventList<Integer> sourceList = new BasicEventList<Integer>();
@@ -746,6 +801,7 @@ public class UniqueListTest extends TestCase {
 
     /** Test response to an UPDATE event  */
 
+    @Test
     public void testLeftEdgeUpdateToNewObject() {
         source.add("A");
         source.add("A");
@@ -761,6 +817,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("C", unique.get(2));
     }
 
+    @Test
     public void testLeftEdgeUpdateToLeftDuplicateObject() {
         source.add("A");
         source.add("A");
@@ -775,6 +832,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("C", unique.get(1));
     }
 
+    @Test
     public void testLeftEdgeUpdateToRightDuplicateObject() {
         source.add("A");
         source.add("A");
@@ -789,6 +847,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("C", unique.get(1));
     }
 
+    @Test
     public void testRightEdgeUpdateToNewObject() {
         source.add("A");
         source.add("A");
@@ -804,6 +863,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("C", unique.get(2));
     }
 
+    @Test
     public void testRightEdgeUpdateToRightDuplicateObject() {
         source.add("A");
         source.add("A");
@@ -818,6 +878,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("C", unique.get(1));
     }
 
+    @Test
     public void testUniqueEndUpdateToNewObject() {
         source.add("A");
         source.add("A");
@@ -830,6 +891,7 @@ public class UniqueListTest extends TestCase {
         assertEquals("B", unique.get(1));
     }
 
+    @Test
     public void testDuplicateEndUpdateToNewObject() {
         source.add("A");
         source.add("A");
@@ -846,6 +908,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Verify that a unique list can be cleared.
      */
+    @Test
     public void testUniqueListClear() {
         unique.add("A");
         unique.add("A");
@@ -861,6 +924,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Verify that a unique list can have elements removed.
      */
+    @Test
     public void testUniqueListRemoveByValue() {
         unique.add("A");
         unique.add("A");
@@ -876,6 +940,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Verify that a unique list can have elements removed.
      */
+    @Test
     public void testUniqueListRemoveByIndex() {
         unique.add("A");
         unique.add("A");
@@ -891,6 +956,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Verify that a unique list can have elements removed.
      */
+    @Test
     public void testUniqueSet() {
         unique.add("A");
         unique.add("A");
@@ -907,6 +973,7 @@ public class UniqueListTest extends TestCase {
      * Verifies that the UniqueList sends update events and
      * not insert/delete event combinations.
      */
+    @Test
     public void testUpdateCount() {
         unique.add("A");
         unique.add("A");
@@ -931,6 +998,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Verify that replaceAll() works in the simplest of cases.
      */
+    @Test
     public void testReplaceAll() {
         unique.add("B");
         unique.add("D");
@@ -954,6 +1022,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Verify that replaceAll() works in a more sophisticated case.
      */
+    @Test
     public void testReplaceAllRigorous() {
         for(int i = 0; i < 100; i++) {
             unique.add(new Integer(random.nextInt(100)));
@@ -977,6 +1046,7 @@ public class UniqueListTest extends TestCase {
     }
 
 
+    @Test
     public void testNewReplaceAll() {
         EventList<String> target = new BasicEventList<String>();
         EventList<String> source = SortedList.create(new BasicEventList<String>());
@@ -1032,6 +1102,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Test indexOf() consistency
      */
+    @Test
     public void testIndexOf() {
         BasicEventList<Object> source = new BasicEventList<Object>();
         UniqueList<Object> unique = new UniqueList<Object>(source);
@@ -1075,6 +1146,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Test lastIndexOf() consistency
      */
+    @Test
     public void testLastIndexOf() {
         BasicEventList<Object> source = new BasicEventList<Object>();
         UniqueList<Object> unique = new UniqueList<Object>(source);
@@ -1118,6 +1190,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Test containment accuracy
      */
+    @Test
     public void testContains() {
         BasicEventList<Object> source = new BasicEventList<Object>();
         UniqueList<Object> unique = new UniqueList<Object>(source);
@@ -1219,6 +1292,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Tests that getCount() works.
      */
+    @Test
     public void testGetCount() {
         source.add("A");
         source.add("A");
@@ -1238,6 +1312,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Tests that getAll() works.
      */
+    @Test
     public void testGetAll() {
         source.add("A");
         source.add("A");
@@ -1258,6 +1333,7 @@ public class UniqueListTest extends TestCase {
      * Tests that the UniqueList can handle sets on the edge of two pairs of duplicates.
      * This was inspired by a similar test case in PopularityListTest.
      */
+    @Test
     public void testRightEdgeSet() {
         EventList<Object> source = new BasicEventList<Object>();
         source.add("Chevy");       // C
@@ -1273,6 +1349,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Tests that the UniqueList can handle sets on the edge.
      */
+    @Test
     public void testLeftEdgeSet() {
         EventList<Object> source = new BasicEventList<Object>();
         source.add("Chevy");       // C
@@ -1288,6 +1365,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Tests that the UniqueList can handle sets on the edge.
      */
+    @Test
     public void testUpdateSet() {
         EventList<Object> source = new BasicEventList<Object>();
         source.add("Chevy");       // C
@@ -1304,6 +1382,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Tests that the UniqueList can handle sets on the edge.
      */
+    @Test
     public void testUpdateLeftSet() {
         EventList<Object> source = new BasicEventList<Object>();
         source.add("Chevy");       // C
@@ -1320,6 +1399,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Tests that the UniqueList can handle sets on the edge.
      */
+    @Test
     public void testUpdateRightSet() {
         EventList<Object> source = new BasicEventList<Object>();
         source.add("Chevy");       // C
@@ -1336,6 +1416,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Tests that the UniqueList can handle sets on the edge.
      */
+    @Test
     public void testLeftUpdateSet() {
         EventList<Object> source = new BasicEventList<Object>();
         source.add("Chevy");       // C
@@ -1352,6 +1433,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Tests that the UniqueList can handle sets on the edge.
      */
+    @Test
     public void testLeftInsertSet() {
         EventList<Object> source = new BasicEventList<Object>();
         source.add("Chevy");       // C
@@ -1368,6 +1450,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Tests that the UniqueList can handle sets on the edge.
      */
+    @Test
     public void testLeftMoveSet() {
         EventList<Object> source = new BasicEventList<Object>();
         source.add("Chevy");       // C
@@ -1384,6 +1467,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Tests that the UniqueList can handle sets on the edge.
      */
+    @Test
     public void testRightUpdateSet() {
         EventList<Object> source = new BasicEventList<Object>();
         source.add("Chevy");       // C
@@ -1400,6 +1484,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Tests that the UniqueList can handle sets on the edge.
      */
+    @Test
     public void testRightInsertSet() {
         EventList<Object> source = new BasicEventList<Object>();
         source.add("Chevy");       // C
@@ -1416,6 +1501,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Tests that the UniqueList can handle sets on the edge.
      */
+    @Test
     public void testRightMoveSet() {
         EventList<Object> source = new BasicEventList<Object>();
         source.add("Chevy");       // C
@@ -1429,6 +1515,7 @@ public class UniqueListTest extends TestCase {
         source.set(1, "Chevy");    // C C F
     }
 
+    @Test
     public void testRemoveAPair() {
         EventList<String> source = new BasicEventList<String>();
         UniqueList<String> uniqueList = UniqueList.create(source);
@@ -1442,6 +1529,7 @@ public class UniqueListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("BD"), uniqueList);
     }
 
+    @Test
     public void testDispose() {
         assertEquals(1, source.updates.getListEventListeners().size());
 
@@ -1453,6 +1541,7 @@ public class UniqueListTest extends TestCase {
     /**
      * When {@link UniqueList#set} is called, this should fire an updated event.
      */
+    @Test
     public void testEventsFiredBySet() {
         source.addAll(GlazedListsTests.stringToList("AAABBBDDD"));
         ListConsistencyListener consistencyListener = ListConsistencyListener.install(unique);
@@ -1469,6 +1558,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Test the replacement of the grouping Comparator.
      */
+    @Test
     public void testSetComparator() {
         final BasicEventList<String> source = new BasicEventList<String>();
         final UniqueList<String> uniqueList = new UniqueList<String>(source, GlazedListsTests.getFirstLetterComparator());
@@ -1501,6 +1591,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Test the replacement of the grouping Comparator when there's multiple elements.
      */
+    @Test
     public void testSetComparatorWithDuplicates() {
         final BasicEventList<String> source = new BasicEventList<String>();
         final UniqueList<String> uniqueList = new UniqueList<String>(source, GlazedListsTests.getFirstLetterComparator());
@@ -1541,6 +1632,7 @@ public class UniqueListTest extends TestCase {
     /**
      * Tests that previous and new values are populaetd properly.
      */
+    @Test
     public void testPreviousAndNewValues() {
         final BasicEventList<String> source = new BasicEventList<String>();
         final UniqueList<String> uniqueList = new UniqueList<String>(source, String.CASE_INSENSITIVE_ORDER);
@@ -1560,9 +1652,11 @@ public class UniqueListTest extends TestCase {
         assertEquals(4, uniqueList.size());
     }
 
+    @Test
     public void testGenerics() {
         final EventList<Integer> source = new BasicEventList<Integer>();
         final Comparator<Number> comparator = new Comparator<Number>() {
+            @Override
             public int compare(Number o1, Number o2) {
                 return o1.intValue() - o2.intValue();
             }
@@ -1570,6 +1664,7 @@ public class UniqueListTest extends TestCase {
         final UniqueList<Integer> unique = new UniqueList<Integer>(source, comparator);
     }
 
+    @Test
     public void testAllPossibleGrouperStateChanges_FixMe() {
         final TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>(), true);
         final UniqueList<String> uniqueList = new UniqueList<String>(source, String.CASE_INSENSITIVE_ORDER);
@@ -1610,6 +1705,7 @@ public class UniqueListTest extends TestCase {
         assertEquals(source, GlazedListsTests.stringToList("AaAeeE"));
     }
 
+    @Test
     public void testMassUpdates() {
         final TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>(), true);
         final UniqueList<String> uniqueList = new UniqueList<String>(source, String.CASE_INSENSITIVE_ORDER);

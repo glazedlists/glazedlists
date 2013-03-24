@@ -2,12 +2,17 @@ package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.GlazedLists;
-import junit.framework.TestCase;
 
-import javax.swing.*;
+import javax.swing.JComboBox;
+import javax.swing.SwingUtilities;
 
-public class AutoCompleteSupportThreadingTest extends TestCase {
+import org.junit.Test;
 
+import static org.junit.Assert.*;
+
+public class AutoCompleteSupportThreadingTest {
+
+    @Test
     public void testNonEDTAccess() throws Exception {
         try {
             AutoCompleteSupport.install(new JComboBox(), new BasicEventList<Object>());

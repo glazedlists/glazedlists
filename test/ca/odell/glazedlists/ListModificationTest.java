@@ -5,10 +5,13 @@ package ca.odell.glazedlists;
 
 // for being a JUnit test case
 import ca.odell.glazedlists.matchers.Matcher;
-import junit.framework.TestCase;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * The ListModificationTest verifies that modifications made to lists are
@@ -19,13 +22,14 @@ import java.util.List;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class ListModificationTest extends TestCase {
+public class ListModificationTest {
 
 
     /**
      * Tests that clearing a transformed list works and has the desired
      * side effects on the original list.
      */
+    @Test
     public void testSubListClear() {
         List<String> alphabet = new BasicEventList<String>();
         alphabet.add("A");
@@ -53,6 +57,7 @@ public class ListModificationTest extends TestCase {
      * Tests that clearing a transformed list works and has the desired
      * side effects on the original list.
      */
+    @Test
     public void testFilterListClear() {
         EventList<String> alphabet = new BasicEventList<String>();
         alphabet.add("A");
@@ -77,6 +82,7 @@ public class ListModificationTest extends TestCase {
      * Tests that removing from a transformed list works and has the desired
      * side effects on the original list.
      */
+    @Test
     public void testRemove() {
         EventList<String> alphabet = new BasicEventList<String>();
         alphabet.add("A");
@@ -101,6 +107,7 @@ public class ListModificationTest extends TestCase {
      * Tests that removing from a transformed list works and has the desired
      * side effects on the original list.
      */
+    @Test
     public void testRemoveAll() {
         EventList<String> alphabet = new BasicEventList<String>();
         alphabet.add("A");
@@ -128,6 +135,7 @@ public class ListModificationTest extends TestCase {
      * Tests that retaining from a transformed list works and has the desired
      * side effects on the original list.
      */
+    @Test
     public void testRetainAll() {
         EventList<String> alphabet = new BasicEventList<String>();
         alphabet.add("A");

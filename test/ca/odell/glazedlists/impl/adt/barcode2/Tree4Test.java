@@ -3,20 +3,22 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.adt.barcode2;
 
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import static org.junit.Assert.*;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class Tree4Test extends TestCase {
+public class Tree4Test {
 
     /** test values */
     private static List<String> colors = GlazedListsTests.stringToList("ABC");
@@ -34,6 +36,7 @@ public class Tree4Test extends TestCase {
     private static final String april = "April";
     private static final String may = "May";
 
+    @Test
     public void testThreeColorInserts() {
         FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
 
@@ -104,6 +107,7 @@ public class Tree4Test extends TestCase {
         assertEquals(37, tree.size(Tree4Test.allColors));
     }
 
+    @Test
     public void testRemoves() {
         FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
 
@@ -145,6 +149,7 @@ public class Tree4Test extends TestCase {
         assertEquals("", tree.asSequenceOfColors());
     }
 
+    @Test
     public void testRemovesFromCenter() {
         FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
 
@@ -158,6 +163,7 @@ public class Tree4Test extends TestCase {
         assertEquals(30, tree.size(Tree4Test.c));
     }
 
+    @Test
     public void testRemoveInBulk() {
         FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
 
@@ -196,6 +202,7 @@ public class Tree4Test extends TestCase {
      * This tests a scenario where the trees used to become unbalanced
      * when the height didn't change when it became unbalanced.
      */
+    @Test
     public void testBalance() {
         FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
         tree.add(0, Tree4Test.allColors, Tree4Test.b, null, 1);
@@ -214,6 +221,7 @@ public class Tree4Test extends TestCase {
      * in the right place. This tree rebalances on the opposite
      * side as is deleted.
      */
+    @Test
     public void testDeleteRebalance() {
         FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
         tree.add(0, Tree4Test.allColors, Tree4Test.a, null, 1);
@@ -231,6 +239,7 @@ public class Tree4Test extends TestCase {
     /**
      * Insert a bunch of stuff randomly into the tree, and hope it works.
      */
+    @Test
     public void testRandomOperations() {
         FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
         List<String> expectedSequenceOfColors = new ArrayList<String>();
@@ -273,6 +282,7 @@ public class Tree4Test extends TestCase {
      * right node shifts in to take its place, but we want to continue to
      * remove on the right hand side.
      */
+    @Test
     public void testRemoveCentreShiftRight() {
         FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
         tree.add(0, Tree4Test.allColors, Tree4Test.b, Tree4Test.february, 4);
@@ -283,6 +293,7 @@ public class Tree4Test extends TestCase {
         assertEquals("BB", tree.asSequenceOfColors());
     }
 
+    @Test
     public void testGet() {
         FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
         tree.add(0, Tree4Test.allColors, Tree4Test.b, Tree4Test.february, 4);
@@ -333,6 +344,7 @@ public class Tree4Test extends TestCase {
 //        assertEquals(4, tree.size(g));
 //    }
 
+    @Test
     public void testTreeAsList() {
         FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
         FourColorTreeAsList<String> treeAsList = new FourColorTreeAsList<String>(tree);
@@ -364,6 +376,7 @@ public class Tree4Test extends TestCase {
         assertEquals(treeAsList, expected);
     }
 
+    @Test
     public void testSetIndexIsCorrect() {
         FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
         tree.add(0, Tree4Test.allColors, Tree4Test.a, Tree4Test.january, 13);
@@ -377,6 +390,7 @@ public class Tree4Test extends TestCase {
     /**
      * Make sure the iterator works for simple operations.
      */
+    @Test
     public void testTreeIterator() {
         FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
         tree.add(0, Tree4Test.allColors, Tree4Test.a, Tree4Test.january, 3);
@@ -430,6 +444,7 @@ public class Tree4Test extends TestCase {
         assertFalse(iterator.hasNext(Tree4Test.b));
     }
 
+    @Test
     public void testSortedTree() {
         FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
         tree.addInSortedOrder(Tree4Test.a, Tree4Test.january, 1);
@@ -441,6 +456,7 @@ public class Tree4Test extends TestCase {
         assertEquals(Arrays.asList(Tree4Test.april, Tree4Test.february, Tree4Test.january, Tree4Test.march, Tree4Test.may), new FourColorTreeAsList<String>(tree));
     }
 
+    @Test
     public void testSortedTreeIndexOf() {
         FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
         tree.addInSortedOrder(Tree4Test.a, "B", 1);
@@ -468,6 +484,7 @@ public class Tree4Test extends TestCase {
         assertEquals("" + value, lastSimulated, tree.indexOfValue(value, false, true, allColors));
     }
 
+    @Test
     public void testRemoveASingleNode() {
         FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
         Element<String> a = tree.addInSortedOrder(Tree4Test.a, "A", 4);
@@ -485,6 +502,7 @@ public class Tree4Test extends TestCase {
         tree.remove(e);
     }
 
+    @Test
     public void testIterator() {
         FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
         tree.addInSortedOrder(Tree4Test.a, "A", 3);
@@ -521,6 +539,7 @@ public class Tree4Test extends TestCase {
     /**
      * Make sure the iterator iterates over blocks as expected.
      */
+    @Test
     public void testIteratorOnBlocks() {
         FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
         // AAABCCDDDEFF
@@ -576,6 +595,7 @@ public class Tree4Test extends TestCase {
     }
 
 
+    @Test
     public void testSetColor() {
         FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
 

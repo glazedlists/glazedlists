@@ -5,7 +5,9 @@ package ca.odell.glazedlists.impl.beans;
 
 import java.awt.Color;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * This test verifies that the BeanProperty works as expected.
@@ -13,11 +15,12 @@ import junit.framework.TestCase;
  * @author <a href="mailto;kevin@swank.ca">Kevin Maltby</a>
  * @author manningj
  */
-public class BeanPropertyTest extends TestCase {
+public class BeanPropertyTest {
 
     /**
      * Tests that simple properties work.
      */
+    @Test
     public void testSimpleProperties() {
         BeanProperty<Automobile> painter = new BeanProperty<Automobile>(Automobile.class, "color", true, true);
         Automobile myCar = new Automobile(false);
@@ -77,6 +80,7 @@ public class BeanPropertyTest extends TestCase {
     /**
      * Tests that navigating properties work.
      */
+    @Test
     public void testNavigatedProperties() {
         // navigated get
         BeanProperty<SupportsTrailerHitch> towAndPaint = new BeanProperty<SupportsTrailerHitch>(SupportsTrailerHitch.class, "towedVehicle.color", true, true);
@@ -100,6 +104,7 @@ public class BeanPropertyTest extends TestCase {
         assertEquals(int.class, red.getValueClass());
     }
 
+    @Test
     public void testBadSetterMethod() {
         BeanProperty<Truck> painter = new BeanProperty<Truck>(Truck.class, "towedVehicle.color", true, true);
         Truck truck = new Truck(2);
@@ -111,6 +116,7 @@ public class BeanPropertyTest extends TestCase {
         }
     }
 
+    @Test
     public void testThisProperty() {
         try {
             new BeanProperty<Truck>(Truck.class, "this", true, true);
@@ -126,11 +132,13 @@ public class BeanPropertyTest extends TestCase {
         assertSame(Truck.class, identity.getValueClass());
     }
 
+    @Test
     public void testResolveGenericReturnType() {
         final BeanProperty<Bus> busPassengers = new BeanProperty<Bus>(Bus.class, "passenger", true, true);
         assertSame(People.class, busPassengers.getValueClass());
     }
 
+    @Test
     public void testResolveGenericParameterType() {
         final BeanProperty<Bus> busDriver = new BeanProperty<Bus>(Bus.class, "driver", false, true);
         assertSame(People.class, busDriver.getValueClass());
@@ -141,6 +149,7 @@ public class BeanPropertyTest extends TestCase {
      *
      * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=183">Issue 183</a>
      */
+    @Test
     public void testInterfaces() {
         BeanProperty<SubInterface> codeProperty = new BeanProperty<SubInterface>(SubInterface.class, "code", true, true);
         NamedCode namedCode = new NamedCode();
@@ -163,16 +172,20 @@ interface SubInterface extends BaseInterface {
 class NamedCode implements SubInterface {
     private String name = "JManning";
     private String code = "Java!";
-    public String getCode() {
+    @Override
+	public String getCode() {
         return code;
     }
-    public void setCode(String code) {
+    @Override
+	public void setCode(String code) {
         this.code = code;
     }
-    public String getName() {
+    @Override
+	public String getName() {
         return name;
     }
-    public void setName(String name) {
+    @Override
+	public void setName(String name) {
         this.name = name;
     }
 }
@@ -228,10 +241,12 @@ class Truck<E extends Passenger,T extends Passenger> extends Automobile<E> imple
     public int getNumSeats() {
         return numSeats;
     }
-    public void setTowedVehicle(Automobile<T> towedVehicle) {
+    @Override
+	public void setTowedVehicle(Automobile<T> towedVehicle) {
         this.towedVehicle = towedVehicle;
     }
-    public Automobile<T> getTowedVehicle() {
+    @Override
+	public Automobile<T> getTowedVehicle() {
         return towedVehicle;
     }
 }
@@ -252,8 +267,10 @@ interface Passenger {
 }
 
 class People implements Passenger {
-    public int getNumLegs() { return 2; }
+    @Override
+	public int getNumLegs() { return 2; }
 }
 class Cattle implements Passenger {
-    public int getNumLegs() { return 4; }
+    @Override
+	public int getNumLegs() { return 4; }
 }

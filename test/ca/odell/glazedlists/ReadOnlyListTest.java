@@ -11,14 +11,18 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * A ReadOnlyListTest tests the functionality of the ReadOnlyList
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class ReadOnlyListTest extends TestCase {
+public class ReadOnlyListTest {
 
     /** attempt to modify this list */
     private EventList<String> readOnlyData = null;
@@ -29,7 +33,7 @@ public class ReadOnlyListTest extends TestCase {
     /**
      * Prepare for the test.
      */
-    @Override
+    @Before
     public void setUp() {
         // create a list of data
         readOnlyData = new BasicEventList<String>();
@@ -44,7 +48,7 @@ public class ReadOnlyListTest extends TestCase {
     /**
      * Clean up after the test.
      */
-    @Override
+    @After
     public void tearDown() {
         readOnlyData = null;
         readOnly = null;
@@ -53,6 +57,7 @@ public class ReadOnlyListTest extends TestCase {
     /**
      * Verifies that the sublist is also read only.
      */
+    @Test
     public void testSubList() {
         try {
             readOnly.subList(0, 3).clear();
@@ -67,6 +72,7 @@ public class ReadOnlyListTest extends TestCase {
     /**
      * Verifies that the sublist is also read only.
      */
+    @Test
     public void testIterator() {
         try {
             Iterator i = readOnly.iterator();
@@ -82,6 +88,7 @@ public class ReadOnlyListTest extends TestCase {
         i.remove();
     }
 
+    @Test
     public void testReadMethods() {
         readOnlyData.clear();
         readOnlyData.addAll(GlazedListsTests.stringToList("ABCDEFGB"));
@@ -96,6 +103,7 @@ public class ReadOnlyListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("CDE"), readOnly.subList(2, 5));
     }
 
+    @Test
     public void testWriteMethods() {
         try {
             readOnly.add(null);
@@ -172,6 +180,7 @@ public class ReadOnlyListTest extends TestCase {
      * Tests {@link GlazedLists#readOnlyList(EventList)}
      */
     @SuppressWarnings("unused")
+    @Test
     public void testGenericsFactoryMethod() {
     	final EventList<AbstractBase> baseList = new BasicEventList<AbstractBase>();
     	final EventList<Derived> derivedList = new BasicEventList<Derived>();

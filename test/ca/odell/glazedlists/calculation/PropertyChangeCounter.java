@@ -3,8 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.calculation;
 
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 class PropertyChangeCounter implements PropertyChangeListener {
     private int count;

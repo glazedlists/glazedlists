@@ -4,18 +4,21 @@
 package ca.odell.glazedlists.impl.rbp;
 
 // for being a JUnit test case
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Validates ResourceUri.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class ResourceUriTest extends TestCase {
+public class ResourceUriTest {
 
     /**
      * Verifies that ResourceUri is sound.
      */
+    @Test
     public void testUris() {
         // compare a couple uris
         ResourceUri localCustomers = ResourceUri.local("/Customers");

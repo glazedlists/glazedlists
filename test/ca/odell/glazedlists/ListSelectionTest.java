@@ -5,18 +5,23 @@ package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import ca.odell.glazedlists.matchers.Matcher;
-import junit.framework.TestCase;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Verifies that {@link ListSelection} works as expected.
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public class ListSelectionTest extends TestCase {
+public class ListSelectionTest {
 
     /** to generate some random values */
     private Random dice = new Random(167);
@@ -36,7 +41,7 @@ public class ListSelectionTest extends TestCase {
     /**
      * Prepare for the test.
      */
-    @Override
+    @Before
     public void setUp() {
         source = new BasicEventList<Integer>();
         listSelection = new ListSelection<Integer>(source);
@@ -52,7 +57,7 @@ public class ListSelectionTest extends TestCase {
     /**
      * Clean up after the test.
      */
-    @Override
+    @After
     public void tearDown() {
         listSelection.dispose();
         listSelection = null;
@@ -64,6 +69,7 @@ public class ListSelectionTest extends TestCase {
     /**
      * Tests selecting all elements.
      */
+    @Test
     public void testSelectAll() {
         source.add(0, new Integer(15));
         source.add(1, new Integer(155));
@@ -84,6 +90,7 @@ public class ListSelectionTest extends TestCase {
     /**
      * Test deselecting all elements
      */
+    @Test
     public void testDeselectAll() {
         source.add(0, new Integer(15));
         source.add(1, new Integer(155));
@@ -106,6 +113,7 @@ public class ListSelectionTest extends TestCase {
      * Tests that adding to the source affects the lists in the expected way
      * for the default selection mode, which is MULTIPLE_INTERVAL_SELECTION_DEFENSIVE.
      */
+    @Test
     public void testDefaultSelectionMode() {
         source.add(0, new Integer(15));
         assertEquals(0, selectedList.size());
@@ -128,6 +136,7 @@ public class ListSelectionTest extends TestCase {
      * Tests that adding to the source affects the lists in the expected way
      * for the MULTIPLE_INTERVAL_SELECTION mode.
      */
+    @Test
     public void testMultipleIntervalSelectionMode() {
         listSelection.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION);
         source.add(0, new Integer(15));
@@ -150,6 +159,7 @@ public class ListSelectionTest extends TestCase {
     /**
      * Test setting selection by index.
      */
+    @Test
     public void testSettingSelectionByIndex() {
         for(int i = 0; i < 20; i++) {
             source.add(new Integer(i));
@@ -168,6 +178,7 @@ public class ListSelectionTest extends TestCase {
     /**
      * Test adding to selection by index.
      */
+    @Test
     public void testSelectingByIndex() {
         for(int i = 0; i < 20; i++) {
             source.add(new Integer(i));
@@ -178,7 +189,9 @@ public class ListSelectionTest extends TestCase {
             int selectionIndex = dice.nextInt(20);
             boolean wasSelected = listSelection.isSelected(selectionIndex);
             listSelection.select(selectionIndex);
-            if(!wasSelected) oldSize++;
+            if(!wasSelected) {
+                oldSize++;
+            }
             assertEquals(oldSize, selectedList.size());
             assertEquals(20 - oldSize, deselectedList.size());
             assertEquals(true, listSelection.isSelected(selectionIndex));
@@ -193,6 +206,7 @@ public class ListSelectionTest extends TestCase {
     /**
      * Test deselecting by index
      */
+    @Test
     public void testDeselectingByIndex() {
         for(int i = 0; i < 20; i++) {
             source.add(new Integer(i));
@@ -204,7 +218,9 @@ public class ListSelectionTest extends TestCase {
             int selectionIndex = dice.nextInt(20);
             boolean wasSelected = listSelection.isSelected(selectionIndex);
             listSelection.deselect(selectionIndex);
-            if(wasSelected) oldSize++;
+            if(wasSelected) {
+                oldSize++;
+            }
             assertEquals(oldSize, deselectedList.size());
             assertEquals(20 - oldSize, selectedList.size());
             assertEquals(false, listSelection.isSelected(selectionIndex));
@@ -219,6 +235,7 @@ public class ListSelectionTest extends TestCase {
     /**
      * Test setting selection with ranges
      */
+    @Test
     public void testSettingSelectionRange() {
         for(int i = 0; i < 20; i++) {
             source.add(new Integer(i));
@@ -256,6 +273,7 @@ public class ListSelectionTest extends TestCase {
     /**
      * Test appending to selection with ranges
      */
+    @Test
     public void testAppendingSelectionRange() {
         for(int i = 0; i < 20; i++) {
             source.add(new Integer(i));
@@ -293,6 +311,7 @@ public class ListSelectionTest extends TestCase {
     /**
      * Test deselecting with ranges
      */
+    @Test
     public void testDeselectionByRange() {
         for(int i = 0; i < 20; i++) {
             source.add(new Integer(i));
@@ -332,6 +351,7 @@ public class ListSelectionTest extends TestCase {
     /**
      * Test setting selection with an index array.
      */
+    @Test
     public void testSettingSelectionByArray() {
         int[] testArray1 = {0, 1, 5, 6, 8, 9, 14, 15, 18, 19};
         int[] testArray2 = {5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
@@ -359,6 +379,7 @@ public class ListSelectionTest extends TestCase {
     /**
      * Test appending to selection with an index array.
      */
+    @Test
     public void testAddingSelectionByArray() {
         int[] allUnselected = {0, 1, 5, 6, 8, 9, 14, 15, 18, 19};
         int[] totallyOverlapping = {5, 6, 9, 14, 19};
@@ -392,6 +413,7 @@ public class ListSelectionTest extends TestCase {
     /**
      * Test deselecting with an index array.
      */
+    @Test
     public void testDeselectingByArray() {
         int[] allDeselected = {0, 1, 5, 6, 8, 9, 14, 15, 18, 19};
         int[] totallyOverlapping = {5, 6, 9, 14, 19};
@@ -427,6 +449,7 @@ public class ListSelectionTest extends TestCase {
     /**
      * Tests inverting selection
      */
+    @Test
     public void testSelectionInversion() {
         for(int i = 0; i < 20; i++) {
             source.add(new Integer(i));
@@ -463,6 +486,7 @@ public class ListSelectionTest extends TestCase {
     /**
      * Test that the selection list supports change operations.
      */
+    @Test
     public void testChangeOperations() {
         for(int i = 0; i < 20; i++) {
             source.add(new Integer(i));
@@ -506,6 +530,7 @@ public class ListSelectionTest extends TestCase {
         assertEquals(new Integer(19), source.get(2));
     }
 
+    @Test
     public void testContradictingUpdates() {
         TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
 
@@ -527,7 +552,9 @@ public class ListSelectionTest extends TestCase {
         source.commitEvent();
 
         source.beginEvent(false);
-        while(!source.isEmpty()) source.remove(0);
+        while(!source.isEmpty()) {
+            source.remove(0);
+        }
         source.add("A");
         source.add("B");
         source.commitEvent();
@@ -551,6 +578,7 @@ public class ListSelectionTest extends TestCase {
      * See feature request,
      * <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=250">Issue 250</a>
      */
+    @Test
     public void testSelectByValue() {
         int result;
         boolean changed;
@@ -618,6 +646,7 @@ public class ListSelectionTest extends TestCase {
         assertEquals(5, listSelection.getMaxSelectionIndex());
     }
 
+    @Test
     public void testTogglingViewAddingAndRemoving(){
 
         source.add(new Integer(0));
@@ -654,6 +683,7 @@ public class ListSelectionTest extends TestCase {
         } catch(IndexOutOfBoundsException e) {}
     }
 
+    @Test
     public void testAddingItemNotInSourceToTogglingView(){
         try {
             listSelection.getTogglingSelected().add(new Integer(6));
@@ -676,6 +706,7 @@ public class ListSelectionTest extends TestCase {
         } catch(IllegalArgumentException e) {}
     }
 
+    @Test
     public void testRemovingItemNotInSourceFromTogglingView() {
         EventList<Integer> togglingSelected = listSelection.getTogglingSelected();
         EventList<Integer> togglingDeselected = listSelection.getTogglingDeselected();
@@ -688,6 +719,7 @@ public class ListSelectionTest extends TestCase {
         assertFalse(togglingDeselected.removeAll(ints));
     }
 
+    @Test
     public void testTogglingViewBulkOperations(){
         List<Integer> ints = new ArrayList<Integer>();
         ints.add(new Integer(0));
@@ -710,9 +742,11 @@ public class ListSelectionTest extends TestCase {
         assertEquals(2, listSelection.getTogglingDeselected().size());
     }
 
+    @Test
     public void testEventsCoverAnchorAndLeadIndexes() {
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < 100; i++) {
             source.add(new Integer(i));
+        }
 
         final ListSelectionCounter counter = new ListSelectionCounter();
         listSelection.addSelectionListener(counter);
@@ -738,11 +772,13 @@ public class ListSelectionTest extends TestCase {
         assertEquals(10, listSelection.getLeadSelectionIndex());
     }
 
+    @Test
     public void testValidSelectionMatchers() {
         // add a bunch of data to the source
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < 100; i++) {
             source.add(new Integer(i));
-        
+        }
+
         // no odd numbers may be selected
         final Matcher<Integer> noOddsMatcher = new OddNumbersUnselectableMatcher();
         listSelection.addValidSelectionMatcher(noOddsMatcher);
@@ -769,13 +805,15 @@ public class ListSelectionTest extends TestCase {
         listSelection.addValidSelectionMatcher(noEvensMatcher);
 
         // verify that no selections exist
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 10; i++) {
             assertFalse(listSelection.isSelected(1));
+        }
 
         // try to establish new selections - all should fail
         listSelection.select(0, 9);
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 10; i++) {
             assertFalse(listSelection.isSelected(1));
+        }
 
         // remove the noOdds restriction
         listSelection.removeValidSelectionMatcher(noOddsMatcher);
@@ -819,12 +857,14 @@ public class ListSelectionTest extends TestCase {
     }
 
     private class OddNumbersUnselectableMatcher implements Matcher<Integer> {
+        @Override
         public boolean matches(Integer item) {
             return item.intValue() % 2 == 0;
         }
     }
 
     private class EvenNumbersUnselectableMatcher implements Matcher<Integer> {
+        @Override
         public boolean matches(Integer item) {
             return item.intValue() % 2 == 1;
         }
@@ -833,6 +873,7 @@ public class ListSelectionTest extends TestCase {
     private class ListSelectionCounter implements ListSelection.Listener {
         private int changeStart, changeEnd, callbacks;
 
+        @Override
         public void selectionChanged(int changeStart, int changeEnd) {
             this.changeStart = changeStart;
             this.changeEnd = changeEnd;

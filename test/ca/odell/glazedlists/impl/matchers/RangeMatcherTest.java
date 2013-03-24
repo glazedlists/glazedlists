@@ -1,8 +1,10 @@
 package ca.odell.glazedlists.impl.matchers;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class RangeMatcherTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class RangeMatcherTest {
 
     /**
      * At one point RangeMatcher was comparing the results of a Comparator
@@ -10,6 +12,7 @@ public class RangeMatcherTest extends TestCase {
      * return *any* negative or positive integer. In fact, java.lang.String
      * does return negative and positive integers that are not -1 and 1.
      */
+    @Test
     public void testRangeMatcher() {
         final RangeMatcher<String, String> rm = new RangeMatcher<String, String>("bad", "dog");
         

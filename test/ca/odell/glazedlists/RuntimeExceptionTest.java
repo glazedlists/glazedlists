@@ -7,14 +7,17 @@ package ca.odell.glazedlists;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import junit.framework.TestCase;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Validates that {@link EventList}s can recover from {@link RuntimeException}s.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class RuntimeExceptionTest extends TestCase {
+public class RuntimeExceptionTest {
 
     /** the exception fired by the event lists */
     private RuntimeException luckyException = new RuntimeException();
@@ -31,6 +34,7 @@ public class RuntimeExceptionTest extends TestCase {
     /**
      * Verifies that an Exception thrown by a ListEventListener is rethrown.
      */
+    @Test
     public void testExceptionRethrown() {
         source.addListEventListener(exceptionThrower);
         listConsistencyListener = ListConsistencyListener.install(source);
@@ -56,6 +60,7 @@ public class RuntimeExceptionTest extends TestCase {
     /**
      * Verifies that an Exception thrown by a ListEventListener is rethrown.
      */
+    @Test
     public void testExceptionRethrownListenerSecond() {
         listConsistencyListener = ListConsistencyListener.install(source);
         source.addListEventListener(exceptionThrower);
@@ -80,6 +85,7 @@ public class RuntimeExceptionTest extends TestCase {
     /**
      * Verifies that an Exception thrown by a ListEventListener is rethrown.
      */
+    @Test
     public void testMultipleExceptions() {
         source.addListEventListener(exceptionThrower);
         listConsistencyListener = ListConsistencyListener.install(source);

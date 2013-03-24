@@ -18,15 +18,18 @@ import java.util.Set;
 
 import javax.swing.JTextField;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
-public class SearchEngineTextMatcherEditorTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class SearchEngineTextMatcherEditorTest {
 
     private FilterList<String> filterList;
     private JTextField textField = new JTextField();
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         filterList = new FilterList<String>(new BasicEventList<String>());
         filterList.addAll(GlazedListsTests.delimitedStringToList("James Jesse Jodie Jimney Jocelyn"));
 
@@ -34,6 +37,7 @@ public class SearchEngineTextMatcherEditorTest extends TestCase {
         filterList.setMatcherEditor(new SearchEngineTextFieldMatcherEditor<String>(textField, GlazedLists.toStringTextFilterator()));
     }
 
+    @Test
     public void testBasicFilter() {
         setNewFilter("Jo");
         assertEquals(GlazedListsTests.delimitedStringToList("Jodie Jocelyn"), filterList);
@@ -48,6 +52,7 @@ public class SearchEngineTextMatcherEditorTest extends TestCase {
         assertEquals(GlazedListsTests.delimitedStringToList("James Jesse Jodie Jimney Jocelyn"), filterList);
     }
 
+    @Test
     public void testNegationFilter() {
         setNewFilter("Jo");
         assertEquals(GlazedListsTests.delimitedStringToList("Jodie Jocelyn"), filterList);
@@ -65,6 +70,7 @@ public class SearchEngineTextMatcherEditorTest extends TestCase {
         assertEquals(GlazedListsTests.delimitedStringToList("James Jesse Jodie Jimney Jocelyn"), filterList);
     }
 
+    @Test
     public void testQuotedFilter() {
         setNewFilter("Jo die");
         assertEquals(GlazedListsTests.delimitedStringToList("Jodie"), filterList);
@@ -79,6 +85,7 @@ public class SearchEngineTextMatcherEditorTest extends TestCase {
         assertEquals(GlazedListsTests.delimitedStringToList("Jodie"), filterList);
     }
 
+    @Test
     public void testFields() {
         final Customer jesse = new Customer("Jesse", "Wilson");
         final Customer james = new Customer("James", "Lemieux");

@@ -3,21 +3,28 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import junit.framework.TestCase;
-
-import java.util.*;
-
 import ca.odell.glazedlists.event.ListEvent;
 
-public class UndoRedoSupportTest extends TestCase {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Random;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+public class UndoRedoSupportTest {
 
     private EventList<String> source;
     private TransactionList<String> nestedSource;
     private UndoRedoSupport undoRedoSupport;
     private UndoSupportWatcher undoSupportWatcher;
 
-    @Override
-    protected void setUp() {
+    @Before
+    public void setUp() {
         source = new BasicEventList<String>();
         nestedSource = new TransactionList<String>(source, true);
         undoRedoSupport = UndoRedoSupport.install(nestedSource);
@@ -26,14 +33,15 @@ public class UndoRedoSupportTest extends TestCase {
         undoRedoSupport.addUndoSupportListener(undoSupportWatcher);
     }
 
-    @Override
-    protected void tearDown() {
+    @After
+    public void tearDown() {
         source = null;
         nestedSource = null;
         undoRedoSupport = null;
         undoSupportWatcher = null;
     }
 
+    @Test
     public void testAdd() {
         source.add("First");
         assertEquals(1, undoSupportWatcher.getEditStack().size());
@@ -57,6 +65,7 @@ public class UndoRedoSupportTest extends TestCase {
         assertEquals(0, undoSupportWatcher.getEditStack().size());
     }
 
+    @Test
     public void testRemove() {
         source.add("First");
         undoSupportWatcher.getEditStack().remove(0);
@@ -82,6 +91,7 @@ public class UndoRedoSupportTest extends TestCase {
         assertEquals(0, undoSupportWatcher.getEditStack().size());
     }
 
+    @Test
     public void testUpdate() {
         source.add("First");
         undoSupportWatcher.getEditStack().remove(0);
@@ -108,6 +118,7 @@ public class UndoRedoSupportTest extends TestCase {
         assertEquals(0, undoSupportWatcher.getEditStack().size());
     }
 
+    @Test
     public void testMutate() {
         source.add("First");
         undoSupportWatcher.getEditStack().remove(0);
@@ -115,6 +126,7 @@ public class UndoRedoSupportTest extends TestCase {
         assertEquals(0, undoSupportWatcher.getEditStack().size());
     }
 
+    @Test
     public void testComplexEdit() {
         source.add("First");
         source.add("Second");
@@ -162,6 +174,7 @@ public class UndoRedoSupportTest extends TestCase {
         assertEquals(0, undoSupportWatcher.getEditStack().size());
     }
 
+    @Test
     public void testLongChainOfRandomEdits() {
         int value = 0;
         Random random = new Random();
@@ -171,12 +184,13 @@ public class UndoRedoSupportTest extends TestCase {
             int changeType = nestedSource.isEmpty() ? ListEvent.INSERT : random.nextInt(3);
             int index = nestedSource.isEmpty() ? 0 : random.nextInt(nestedSource.size());
 
-            if (changeType == ListEvent.INSERT)
+            if (changeType == ListEvent.INSERT) {
                 nestedSource.add(index, String.valueOf(++value));
-            else if (changeType == ListEvent.DELETE)
+            } else if (changeType == ListEvent.DELETE) {
                 nestedSource.remove(index);
-            else if (changeType == ListEvent.UPDATE)
+            } else if (changeType == ListEvent.UPDATE) {
                 nestedSource.set(index, String.valueOf(++value));
+            }
         }
 
         // take a snapshot of the List after 500 random edits
@@ -185,14 +199,16 @@ public class UndoRedoSupportTest extends TestCase {
 
         // undo all edits (should result in an empty list)
         final ListIterator<UndoRedoSupport.Edit> i = undoSupportWatcher.getEditStack().listIterator();
-        while (i.hasNext())
+        while (i.hasNext()) {
             i.next().undo();
+        }
 
         assertTrue(nestedSource.isEmpty());
 
         // redo all edits (should result in snapshot)
-        while (i.hasPrevious())
+        while (i.hasPrevious()) {
             i.previous().redo();
+        }
 
         assertEquals(snapshot, nestedSource);
     }
@@ -200,6 +216,7 @@ public class UndoRedoSupportTest extends TestCase {
     private static class UndoSupportWatcher implements UndoRedoSupport.Listener {
         private List<UndoRedoSupport.Edit> editStack = new ArrayList<UndoRedoSupport.Edit>();
 
+        @Override
         public void undoableEditHappened(UndoRedoSupport.Edit edit) {
             editStack.add(0, edit);
         }

@@ -3,27 +3,30 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.event;
 
-import ca.odell.glazedlists.TransformedList;
-import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Test if providing the deleted element in a list event works.
  *
  * @author jessewilson
  */
-public class RemovedValueTest extends TestCase {
+public class RemovedValueTest {
 
     /**
      * A simple test to see if deleted elements make their way through the system.
      */
+    @Test
     public void testGetRemovedValue() {
         // prep recording the deleted elements
         EventList<String> source = new RemovedValueEventList<String>(new BasicEventList<String>());

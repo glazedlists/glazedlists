@@ -11,6 +11,10 @@ import ca.odell.glazedlists.gui.TableFormat;
 
 import javax.swing.JLabel;
 
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
 
 /**
  * This test attempts to modify an {@link EventList} from two threads simultaneously.
@@ -23,7 +27,8 @@ public class ConflictingThreadsTest extends SwingTestCase {
     /**
      * Verifies that conflicting threads are resolved intelligently.
      */
-    public void guiTestConflictingThreads_FixMe() {
+    @Test
+    public void testConflictingThreads_FixMe() {
         EventList<JLabel> labelsList = new BasicEventList<JLabel>();
         labelsList.add(new JLabel("7-up"));
         labelsList.add(new JLabel("Pepsi"));
@@ -57,19 +62,17 @@ public class ConflictingThreadsTest extends SwingTestCase {
         // call stack (and re-entering JTable) is likely quite problematic!
         assertEquals(1, labelsTable.getRowCount());
     }
+
     private static class ClearListRunnable implements Runnable {
         private final EventList labelsList;
         public ClearListRunnable(EventList labelsList) {
             this.labelsList = labelsList;
         }
+        @Override
         public void run() {
             labelsList.getReadWriteLock().writeLock().lock();
             labelsList.clear();
             labelsList.getReadWriteLock().writeLock().unlock();
         }
-    }
-
-    public static void main(String[] args) {
-        new ConflictingThreadsTest().testGui();
     }
 }

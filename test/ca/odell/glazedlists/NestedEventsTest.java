@@ -5,9 +5,14 @@ package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import junit.framework.TestCase;
 
 import java.util.List;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Verifies that list events are nested properly.
@@ -16,7 +21,7 @@ import java.util.List;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class NestedEventsTest extends TestCase {
+public class NestedEventsTest {
 
     private BasicEventList<String> source = null;
     private NestableEventsList<String> nestableSource = null;
@@ -25,7 +30,7 @@ public class NestedEventsTest extends TestCase {
     /**
      * Prepare for the test.
      */
-    @Override
+    @Before
     public void setUp() {
         source  = new BasicEventList<String>();
         nestableSource = new NestableEventsList<String>(source);
@@ -35,7 +40,7 @@ public class NestedEventsTest extends TestCase {
     /**
      * Clean up after the test.
      */
-    @Override
+    @After
     public void tearDown() {
         counter = null;
         nestableSource = null;
@@ -45,6 +50,7 @@ public class NestedEventsTest extends TestCase {
     /**
      * Validates that simple contradicting events can be nested.
      */
+    @Test
     public void testFullyDeletedInserts() {
         boolean contradictionsAllowed = true;
         nestableSource.beginEvent(false);
@@ -70,6 +76,7 @@ public class NestedEventsTest extends TestCase {
     /**
      * Validates that complex contradicting events can be nested.
      */
+    @Test
     public void testDeletedInserts() {
         List<String> jesse = GlazedListsTests.stringToList("JESSE");
         List<String> wilson = GlazedListsTests.stringToList("WILSON");
@@ -90,6 +97,7 @@ public class NestedEventsTest extends TestCase {
     /**
      * Validates that simple contradicting events can be nested.
      */
+    @Test
     public void testFullyUpdatedInserts() {
         boolean contradictionsAllowed = true;
         nestableSource.beginEvent(false);
@@ -115,6 +123,7 @@ public class NestedEventsTest extends TestCase {
     /**
      * Validates that simple contradicting events can be nested.
      */
+    @Test
     public void testUpdatedInserts() {
         boolean contradictionsAllowed = true;
         nestableSource.beginEvent(false);
@@ -140,6 +149,7 @@ public class NestedEventsTest extends TestCase {
     /**
      * Validates that simple contradicting events can be nested.
      */
+    @Test
     public void testFullyDeletedUpdates() {
         boolean contradictionsAllowed = true;
         nestableSource.beginEvent(false);
@@ -165,6 +175,7 @@ public class NestedEventsTest extends TestCase {
     /**
      * Validates that simple contradicting events can be nested.
      */
+    @Test
     public void testDeletedUpdates() {
         boolean contradictionsAllowed = true;
         nestableSource.beginEvent(false);
@@ -190,6 +201,7 @@ public class NestedEventsTest extends TestCase {
     /**
      * Validates that simple contradicting events can be nested.
      */
+    @Test
     public void testUpdatedUpdates() {
         boolean contradictionsAllowed = true;
         nestableSource.beginEvent(false);
@@ -216,6 +228,7 @@ public class NestedEventsTest extends TestCase {
     /**
      * Validates that simple contradicting events can be nested.
      */
+    @Test
     public void testFullyUpdatedUpdates() {
         boolean contradictionsAllowed = true;
         nestableSource.beginEvent(false);
@@ -242,6 +255,7 @@ public class NestedEventsTest extends TestCase {
     /**
      * Validates that simple contradicting events throw an exception if not allowed.
      */
+    @Test
     public void testSimpleContradictingEventsFail() {
         // test nested events
         try {
@@ -258,6 +272,7 @@ public class NestedEventsTest extends TestCase {
     /**
      * Validates that complex contradicting events throw an exception if not allowed.
      */
+    @Test
     public void testComplexContradictingEventsFail() {
         List<String> jesse = GlazedListsTests.stringToList("JESSE");
         List<String> wilson = GlazedListsTests.stringToList("WILSON");

@@ -8,13 +8,14 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+
+import java.util.Iterator;
+import java.util.List;
+
 import org.hibernate.FetchMode;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * Tests mapping and persisting BasicEventLists with Hibernate. Tested classes are

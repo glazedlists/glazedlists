@@ -2,16 +2,20 @@
 /* http://glazedlists.com/                                                     */
 package ca.odell.glazedlists.impl.adt;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 
 /**
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
-public class IntArrayListTest extends TestCase {
+public class IntArrayListTest {
+
+	@Test
 	public void testSimpleUsage() {
 		IntArrayList list = new IntArrayList( 10 );
-		
+
 		// 0-9
 		for( int i = 0; i < 10; i++ ) {
 			list.add( i );
@@ -27,13 +31,13 @@ public class IntArrayListTest extends TestCase {
 		for( int i = 0; i < 10; i++ ) {
 			assertEquals( i + 1, list.get( i ) );
 		}
-		
-		
+
+
 		list.clear();
 		assertEquals( 0, list.size() );
 		assertEquals( true, list.isEmpty() );
-		
-		
+
+
 		// 0-99
 		for( int i = 0; i < 100; i++ ) {
 			assertEquals( i, list.size() );
@@ -43,8 +47,8 @@ public class IntArrayListTest extends TestCase {
 		for( int i = 0; i < 100; i++ ) {
 			assertEquals( i * 3, list.get( i ) );
 		}
-		
-		
+
+
 		// Out of bounds get
 		try {
 			list.get( 100 );

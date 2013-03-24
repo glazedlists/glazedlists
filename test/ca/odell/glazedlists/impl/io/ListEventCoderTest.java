@@ -3,22 +3,24 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.io;
 
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.io.ByteCoder;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.io.ByteCoder;
+import static org.junit.Assert.*;
 
 /**
  * Tests the ListEventCoder.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class ListEventCoderTest extends TestCase {
+public class ListEventCoderTest {
 
     /** encodes java.lang.Integer */
     private ByteCoder intCoder = new IntegerCoder();
@@ -26,6 +28,7 @@ public class ListEventCoderTest extends TestCase {
     /**
      * Tests that a list event can be encoded and decoded.
      */
+    @Test
     public void testEncodeDecode() throws IOException {
         // prepare the encoding list
         EventList<Integer> toEncode = new BasicEventList<Integer>();
@@ -52,6 +55,7 @@ public class ListEventCoderTest extends TestCase {
     /**
      * Tests that a snapshot can be decoded.
      */
+    @Test
     public void testSnapshotDecode() throws IOException {
         // prepare the encoding list
         EventList<Integer> toEncode = new BasicEventList<Integer>();

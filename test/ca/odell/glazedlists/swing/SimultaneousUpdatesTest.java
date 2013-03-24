@@ -9,22 +9,25 @@ import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.matchers.Matcher;
-import junit.framework.TestCase;
 
-import javax.swing.*;
 import java.util.Random;
+
+import javax.swing.SwingUtilities;
+
+import org.junit.Test;
 
 /**
  * Make sure we can handle multiple updates from different sources.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class SimultaneousUpdatesTest extends TestCase {
+public class SimultaneousUpdatesTest {
 
     /**
      * This test verifies that we can have two threads changing the data and
      * everything will still be consistent as long as proper locks are held.
      */
+    @Test
     public synchronized void testCompetingWriters() {
 
         // prepare a list with a Swing view

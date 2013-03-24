@@ -5,17 +5,21 @@ package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import junit.framework.TestCase;
 
 import java.util.Collections;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Test {@link RangeList}.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class RangeListTest extends TestCase {
+public class RangeListTest {
 
+    @Test
     public void testAddAll() {
         EventList<String> source = new BasicEventList<String>();
         RangeList<String> rangeList = new RangeList<String>(source);
@@ -27,6 +31,7 @@ public class RangeListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("JESSE"), rangeList);
     }
 
+    @Test
     public void testChangeSource() {
         EventList<String> source = new BasicEventList<String>();
         RangeList<String> rangeList = new RangeList<String>(source);
@@ -97,6 +102,7 @@ public class RangeListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("RGHRD"), rangeList);
     }
 
+    @Test
     public void testTailRange() {
         EventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.stringToList("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
@@ -114,6 +120,7 @@ public class RangeListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("XY"), rangeList);
     }
 
+    @Test
     public void testRangeAdjust() {
         EventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.stringToList("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
@@ -175,6 +182,7 @@ public class RangeListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("ABC"), rangeList);
     }
 
+    @Test
     public void testMiddleRange() {
         EventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.stringToList("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
@@ -244,6 +252,7 @@ public class RangeListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("AME"), rangeList);
      }
 
+    @Test
     public void testMiddleRangeZeros() {
         EventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.stringToList("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));

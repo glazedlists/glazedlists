@@ -5,10 +5,12 @@ package ca.odell.glazedlists.impl.swt;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.ExecuteOnMainThread;
 import ca.odell.glazedlists.calculation.Calculation;
 import ca.odell.glazedlists.calculation.Calculations;
 import ca.odell.glazedlists.swt.CalculationsSWT;
-import ca.odell.glazedlists.swt.SwtTestCase;
+import ca.odell.glazedlists.swt.SwtClassRule;
+import ca.odell.glazedlists.swt.SwtTestRule;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -16,6 +18,12 @@ import java.util.Arrays;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.Rule;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * <code>SWTThreadProxyCalculationTest</code> tests the bahaviour of
@@ -23,26 +31,34 @@ import org.eclipse.swt.widgets.Shell;
  *
  * @author Holger Brands
  */
-public class SWTThreadProxyCalculationTest extends SwtTestCase {
+public class SWTThreadProxyCalculationTest {
 
     private EventList<String> source;
     private Calculation<Integer> countCalc;
     private Calculation<Integer> countProxyCalc;
 
-    @Override
-    public void guiSetUp() {
+    @ClassRule
+    public static SwtClassRule swtClassRule = new SwtClassRule();
+
+    @Rule
+    public SwtTestRule swtTestRule = new SwtTestRule(swtClassRule);
+
+    @Before
+    public void setUp() {
         source = new BasicEventList<String>();
         countCalc = Calculations.count(source);
-        countProxyCalc = CalculationsSWT.swtThreadProxyCalculation(countCalc, getDisplay());
+        countProxyCalc = CalculationsSWT.swtThreadProxyCalculation(countCalc, swtClassRule.getDisplay());
     }
 
-    public void guiTestIsProxy() {
+    @Test
+    public void testIsProxy() {
         assertTrue(CalculationsSWT.isSWTThreadProxyCalculation(countProxyCalc));
         assertFalse(CalculationsSWT.isSWTThreadProxyCalculation(countCalc));
     }
 
     /** Tests values after Threadproxying. */
-    public void guiTestValue() {
+    @Test
+    public void testValue() {
         assertEquals(Integer.valueOf(0), countCalc.getValue());
         assertEquals(Integer.valueOf(0), countProxyCalc.getValue());
         source.add("one");
@@ -63,6 +79,8 @@ public class SWTThreadProxyCalculationTest extends SwtTestCase {
      * This tests creates the SWT display and runs an event loop in a different thread than the
      * main thread to test the thread proxy behaviour.
      */
+    @Test
+    @ExecuteOnMainThread
     public void testOnMainThreadPropertyChangeListener() {
         final DisplayRunner displayInit = new DisplayRunner();
         // start the background task to init the display
@@ -131,11 +149,14 @@ public class SWTThreadProxyCalculationTest extends SwtTestCase {
         private Display display;
         private Shell shell;
         private volatile boolean stop;
+        @Override
         public void run() {
             display = new Display();
             shell = new Shell(display);
             while (!shell.isDisposed () && !stop) {
-                if (!display.readAndDispatch ()) display.sleep ();
+                if (!display.readAndDispatch ()) {
+                    display.sleep ();
+                }
             }
             display.dispose();
         }
@@ -159,6 +180,7 @@ public class SWTThreadProxyCalculationTest extends SwtTestCase {
             this.display = display;
         }
 
+        @Override
         public void propertyChange(PropertyChangeEvent evt) {
             callbackCount++;
             lastCallbackThreadWasDisplayThread = (Thread.currentThread() == display.getThread());

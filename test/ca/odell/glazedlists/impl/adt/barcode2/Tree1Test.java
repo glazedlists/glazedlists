@@ -5,16 +5,19 @@ package ca.odell.glazedlists.impl.adt.barcode2;
 
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
-import junit.framework.TestCase;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class Tree1Test extends TestCase {
+public class Tree1Test {
 
     /** test values */
     private static byte allColors = 1;
@@ -25,6 +28,7 @@ public class Tree1Test extends TestCase {
     /**
      * Make sure we can have a few unsorted elements in an otherwise ordered tree.
      */
+    @Test
     public void testUnsortedElementInSortedTree() {
         SimpleTree<String> tree = new SimpleTree<String>();
         Element<String> e = tree.addInSortedOrder(Tree1Test.allColors, "E", 1);
@@ -50,6 +54,7 @@ public class Tree1Test extends TestCase {
      * Tests to verify that the SimpleTree is consistent after a long
      * series of list operations.
      */
+    @Test
     public void testListOperations() {
         SimpleTree indexedTree = new SimpleTree();
         List controlList = new ArrayList();
@@ -86,6 +91,7 @@ public class Tree1Test extends TestCase {
      * Tests to verify that the SimpleTree is consistent with multiple
      * entries that have the same value.
      */
+    @Test
     public void testEqualValues() {
         SimpleTree indexedTree = new SimpleTree(GlazedLists.comparableComparator());
 
@@ -150,6 +156,7 @@ public class Tree1Test extends TestCase {
         assertEquals(DCount, 0);
     }
 
+    @Test
     public void testIterators() {
         SimpleTree<String> tree = new SimpleTree<String>();
         tree.add(0, "A", 1);
@@ -200,6 +207,7 @@ public class Tree1Test extends TestCase {
 //        assertEquals(false, iterator.hasPrevious());
     }
 
+    @Test
     public void testIndexOfEtc() {
         SimpleTree<String> tree = new SimpleTree<String>(GlazedLists.comparableComparator());
         tree.addInSortedOrder((byte)1, "B", 1);

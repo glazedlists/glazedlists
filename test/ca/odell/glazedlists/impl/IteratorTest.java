@@ -7,16 +7,25 @@ package ca.odell.glazedlists.impl;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
-import junit.framework.TestCase;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.NoSuchElementException;
+import java.util.Random;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * This test verifies that the EventListIterator works.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class IteratorTest extends TestCase {
+public class IteratorTest {
 
     /** for randomly choosing list indices */
     private final Random random = new Random();
@@ -25,6 +34,7 @@ public class IteratorTest extends TestCase {
      * Tests to verify that the Iterator can iterate through the list both
      * forwards and backwards.
      */
+    @Test
     public void testIterateThrough() {
         // create a list of values
         final EventList<Integer> originalList = new BasicEventList<Integer>();
@@ -54,6 +64,7 @@ public class IteratorTest extends TestCase {
      * Tests to verify that the ListIterator can iterate through the list
      * while removes are performed directly on the list.
      */
+    @Test
     public void testIterateWithExternalRemove() {
         // create a list of values
         final EventList<Integer> deleteFromList = new BasicEventList<Integer>();
@@ -89,6 +100,7 @@ public class IteratorTest extends TestCase {
      * iterate through the list and remove its elements as it goes without
      * incident.
      */
+    @Test
     public void testIterateWithInternalRemove() {
         // create a list of values
         final EventList<Integer> iterateForwardList = new BasicEventList<Integer>();
@@ -126,6 +138,7 @@ public class IteratorTest extends TestCase {
     /**
      * Tests the edge condition of the previous method.
      */
+    @Test
     public void testPreviousEdgeCondition() {
         // create a list of values
         final EventList<Integer> iterationList = new BasicEventList<Integer>();
@@ -152,6 +165,7 @@ public class IteratorTest extends TestCase {
      * Tests that changing the underlying list externally to the ListIterator
      * doesn't break the expectation of the remove operation.
      */
+    @Test
     public void testRemoveAfterInsertAtCursor() {
         final EventList<String> testList = new BasicEventList<String>();
         String hello = "Hello, world.";
@@ -173,6 +187,7 @@ public class IteratorTest extends TestCase {
      * Tests that changing the underlying list externally to the ListIterator
      * doesn't break the expectation of the remove operation.
      */
+    @Test
     public void testRemoveAfterInsertAtNext() {
         final EventList<String> testList = new BasicEventList<String>();
         String hello = "Hello, world.";
@@ -194,6 +209,7 @@ public class IteratorTest extends TestCase {
      * Tests that changing the underlying list externally to the ListIterator
      * doesn't break the expectation of the remove operation.
      */
+    @Test
     public void testRemoveAfterInsertAtCursorReverse() {
         BasicEventList<String> testList = new BasicEventList<String>();
         String hello = "Hello, world.";
@@ -215,6 +231,7 @@ public class IteratorTest extends TestCase {
      * Tests that changing the underlying list externally to the ListIterator
      * doesn't break the expectation of the remove operation.
      */
+    @Test
     public void testRemoveAfterInsertAtPrevious() {
         BasicEventList<String> testList = new BasicEventList<String>();
         String hello = "Hello, world.";
@@ -235,6 +252,7 @@ public class IteratorTest extends TestCase {
     /**
      * Tests that adding at a particular element does the right thing.
      */
+    @Test
     public void testAdding() {
         // Create a control list to test against
         final List<String> controlList = new ArrayList<String>();
@@ -280,6 +298,7 @@ public class IteratorTest extends TestCase {
     /**
      * Tests empty list adds
      */
+    @Test
     public void testEmptyListAdding() {
         final List<String> testList = new BasicEventList<String>();
         final ListIterator<String> iterator = testList.listIterator();
@@ -294,6 +313,7 @@ public class IteratorTest extends TestCase {
      * Tests that the EventListIterator responds correctly to adding on an
      * empty list from an external call to remove().
      */
+    @Test
     public void testExternalAddingOnEmptyList() {
         final EventList<String> testList = new BasicEventList<String>();
         final ListIterator<String> iterator = testList.listIterator();

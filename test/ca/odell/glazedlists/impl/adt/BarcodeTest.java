@@ -4,16 +4,24 @@
 package ca.odell.glazedlists.impl.adt;
 
 // for being a JUnit test case
-import junit.framework.TestCase;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Random;
 
-import java.util.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * This test verifies that the Barcode works as expected.
  *
  * @author <a href="mailto;kevin@swank.ca">Kevin Maltby</a>
  */
-public class BarcodeTest extends TestCase {
+public class BarcodeTest {
 
     /** for randomly choosing list indices */
     private Random random = new Random(101);
@@ -24,7 +32,7 @@ public class BarcodeTest extends TestCase {
     /**
      * Prepare for the test.
      */
-    @Override
+    @Before
     public void setUp() {
         barcode = new Barcode();
     }
@@ -32,7 +40,7 @@ public class BarcodeTest extends TestCase {
     /**
      * Clean up after the test.
      */
-    @Override
+    @After
     public void tearDown() {
         barcode.clear();
         barcode = null;
@@ -41,6 +49,7 @@ public class BarcodeTest extends TestCase {
     /**
      * Tests that adding works for values
      */
+    @Test
     public void testSimpleAddValue() {
         barcode.add(0, Barcode.BLACK, 1);
         assertEquals(1, barcode.size());
@@ -50,6 +59,7 @@ public class BarcodeTest extends TestCase {
     /**
      * Tests that adding works for Barcode.WHITEs at the end of the tree
      */
+    @Test
     public void testAddTrailingWhitespaceOnEmptyTree() {
         barcode.addWhite(0, 1);
         assertEquals(1, barcode.size());
@@ -59,6 +69,7 @@ public class BarcodeTest extends TestCase {
     /**
      * Tests that adding works for Barcode.WHITEs at the end of the tree
      */
+    @Test
     public void testAddTrailingWhitespaceNonEmptyTree() {
         barcode.addBlack(0, 1);
         barcode.addWhite(1, 1);
@@ -70,6 +81,7 @@ public class BarcodeTest extends TestCase {
     /**
      * Tests that adding works for Barcode.WHITEs at the start of the tree
      */
+    @Test
     public void testAddLeadingWhitespace() {
         barcode.addBlack(0, 1);
         barcode.addWhite(0, 1);
@@ -81,6 +93,7 @@ public class BarcodeTest extends TestCase {
     /**
      * Tests getCompressedIndex()
      */
+    @Test
     public void testGetCompressedIndex() {
         barcode.addBlack(0, 10);
         barcode.addWhite(1, 9);
@@ -109,6 +122,7 @@ public class BarcodeTest extends TestCase {
      *
      * This resulted in the Barcode increasing in size.
      */
+    @Test
     public void testBug121() {
         barcode.addWhite(0, 100);
         barcode.setBlack(50,1);
@@ -120,6 +134,7 @@ public class BarcodeTest extends TestCase {
     /**
      * Tests that WHITE based sequence indexing is working correctly.
      */
+    @Test
     public void testWhiteSequenceIndex() {
         barcode.addWhite(0, 1000);
         int filler = 1000;
@@ -139,7 +154,9 @@ public class BarcodeTest extends TestCase {
             int actualWhiteIndex = barcode.getIndex(i, Barcode.WHITE);
             int previousBlack = barcode.getBlackIndex(actualWhiteIndex, true);
             int actualBlackIndex = -1;
-            if(previousBlack != -1) actualBlackIndex = barcode.getIndex(previousBlack, Barcode.BLACK);
+            if(previousBlack != -1) {
+                actualBlackIndex = barcode.getIndex(previousBlack, Barcode.BLACK);
+            }
 
             assertEquals(actualWhiteIndex - (actualBlackIndex + 1), sequenceIndex);
         }
@@ -148,6 +165,7 @@ public class BarcodeTest extends TestCase {
     /**
      * Tests that getBlackBeforeWhite() is working correctly.
      */
+    @Test
     public void testGetBlackBeforeWhite() {
         barcode.addWhite(0, 1000);
         int filler = 1000;
@@ -175,6 +193,7 @@ public class BarcodeTest extends TestCase {
      * Test that findSequenceOfMinimumSize() is working correctly for the
      * FIRST FIT implementation.
      */
+    @Test
     public void testFindSequenceOfMinimumSize() {
         barcode.addBlack(0, 10);
         barcode.addWhite(10, 3);
@@ -197,6 +216,7 @@ public class BarcodeTest extends TestCase {
     /**
      * Tests that the BarcodeIterator works correctly
      */
+    @Test
     public void testBarcodeIterator() {
         barcode.addBlack(0, 10);
         barcode.addWhite(10, 3);
@@ -220,6 +240,7 @@ public class BarcodeTest extends TestCase {
      * Tests that a BarcodeIterator works correctly by only BLACK iteration
      * methods.
      */
+    @Test
     public void testBlackIterator() {
         barcode.addBlack(0, 10);
         barcode.addWhite(10, 3);
@@ -243,6 +264,7 @@ public class BarcodeTest extends TestCase {
      * Tests that a BarcodeIterator works correctly by only WHITE iteration
      * methods
      */
+    @Test
     public void testWhiteIterator() {
         barcode.addBlack(0, 10);
         barcode.addWhite(10, 3);
@@ -265,6 +287,7 @@ public class BarcodeTest extends TestCase {
     /**
      * Tests all of the iterators on an empty barcode
      */
+    @Test
     public void testEmptyBarcodeIterators() {
         BarcodeIterator iterator = barcode.iterator();
         assertEquals(false, iterator.hasNext());
@@ -278,6 +301,7 @@ public class BarcodeTest extends TestCase {
     /**
      * Tests all of the iterators on a completely WHITE barcode
      */
+    @Test
     public void testCompletelyWhiteBarcodeIterators() {
         barcode.addWhite(0, 10);
 
@@ -311,6 +335,7 @@ public class BarcodeTest extends TestCase {
     /**
      * Tests all of the iterators on a completely BLACK barcode
      */
+    @Test
     public void testCompletelyBlackBarcodeIterators() {
         barcode.addBlack(0, 10);
 
@@ -344,6 +369,7 @@ public class BarcodeTest extends TestCase {
     /**
      * Tests that all write ops fail appropriately on an empty Barcode
      */
+    @Test
     public void testEmptyBarcodeFailures() {
         BarcodeIterator fullIterator = barcode.iterator();
         try {
@@ -372,6 +398,7 @@ public class BarcodeTest extends TestCase {
      * Tests that setting a BLACK value on a completely WHITE Barcode
      * behaves correctly.
      */
+    @Test
     public void testSetBlackOnCompletelyWhiteBarcodeFullIterator() {
         barcode.addWhite(0, 10);
         BarcodeIterator fullIterator = barcode.iterator();
@@ -393,6 +420,7 @@ public class BarcodeTest extends TestCase {
      * Tests that setting a WHITE value on a completely BLACK Barcode
      * behaves correctly.
      */
+    @Test
     public void testSetBlackOnCompletelyBlackBarcodeFullIterator() {
         barcode.addBlack(0, 10);
         BarcodeIterator fullIterator = barcode.iterator();
@@ -414,6 +442,7 @@ public class BarcodeTest extends TestCase {
      * Tests that setting a single WHITE value on a completely BLACK Barcode
      * at the very end of the Barcode behaves correctly.
      */
+    @Test
     public void testSetWhiteAtEndOnCompletelyBlackBarcodeFullIterator() {
         barcode.addBlack(0, 10);
         BarcodeIterator fullIterator = barcode.iterator();
@@ -431,6 +460,7 @@ public class BarcodeTest extends TestCase {
      * Tests that setting a single BLACK value to WHITE on an otherwise
      * completely WHITE Barcode.
      */
+    @Test
     public void testSetOnlyBlackToWhiteFullIterator() {
         barcode.addWhite(0, 9);
         barcode.addBlack(4, 1);
@@ -453,6 +483,7 @@ public class BarcodeTest extends TestCase {
      * Tests that setting the last BLACK element in a Barcode
      * containing several BLACK elements to WHITE works.
      */
+    @Test
     public void testSetLastBlackToWhiteFullIterator() {
         barcode.addWhite(0, 10);
         barcode.addBlack(1, 2);
@@ -480,6 +511,7 @@ public class BarcodeTest extends TestCase {
      * Tests that setting the first WHITE element in the trailing
      * white space on the Barcode to BLACK works as expected.
      */
+    @Test
     public void testSettingLeadOfTrailingWhiteSpaceToBlackFullIterator() {
         barcode.addWhite(0, 5);
         barcode.addBlack(5, 4);
@@ -504,6 +536,7 @@ public class BarcodeTest extends TestCase {
      * Tests that setting the first WHITE element in an entirely
      * WHITE Barcode to BLACK works as expected.
      */
+    @Test
     public void testSetBlackOnFirstCompletelyWhiteFullIterator() {
         barcode.addWhite(0, 10);
         BarcodeIterator fullIterator = barcode.iterator();
@@ -522,6 +555,7 @@ public class BarcodeTest extends TestCase {
      * Tests to verify that the sparse list is consistent after a long
      * series of list operations.
      */
+    @Test
     public void testListOperations() {
         List controlList = new ArrayList();
         int length = 1;
@@ -542,28 +576,40 @@ public class BarcodeTest extends TestCase {
                 System.out.println("\n" + barcode + "\n");
             }
 
-            if(msgCondition) System.out.print("\n" + i + ". ");
+            if(msgCondition) {
+                System.out.print("\n" + i + ". ");
+            }
             int operation = random.nextInt(5);
             int index = controlList.isEmpty() ? 0 : random.nextInt(controlList.size());
 
             if(operation == 0 || controlList.isEmpty()) {
-                if(msgCondition) System.out.println("Adding Barcode.BLACK at " + index + ".");
+                if(msgCondition) {
+                    System.out.println("Adding Barcode.BLACK at " + index + ".");
+                }
                 barcode.add(index, Barcode.BLACK, length);
                 controlList.add(index, Barcode.BLACK);
             } else if(operation == 1) {
-                if(msgCondition) System.out.println("Adding Barcode.WHITE at " + index + ".");
+                if(msgCondition) {
+                    System.out.println("Adding Barcode.WHITE at " + index + ".");
+                }
                 barcode.add(index, Barcode.WHITE, length);
                 controlList.add(index, Barcode.WHITE);
             } else if(operation == 2) {
-                if(msgCondition) System.out.println("Deleting value at " + index + ".");
+                if(msgCondition) {
+                    System.out.println("Deleting value at " + index + ".");
+                }
                 barcode.remove(index, length);
                 controlList.remove(index);
             } else if(operation == 3) {
-                if(msgCondition) System.out.println("Setting value at " + index + " to Barcode.BLACK");
+                if(msgCondition) {
+                    System.out.println("Setting value at " + index + " to Barcode.BLACK");
+                }
                 barcode.set(index, Barcode.BLACK, length);
                 controlList.set(index, Barcode.BLACK);
             } else if(operation == 4) {
-                if(msgCondition) System.out.println("Setting value at " + index + " to Barcode.WHITE.");
+                if(msgCondition) {
+                    System.out.println("Setting value at " + index + " to Barcode.WHITE.");
+                }
                 barcode.set(index, Barcode.WHITE, length);
                 controlList.set(index, Barcode.WHITE);
             }
@@ -583,7 +629,9 @@ public class BarcodeTest extends TestCase {
                 }
                 validate(controlList, barcode);
             }
-            if(msgCondition) System.out.println("List validation successful.");
+            if(msgCondition) {
+                System.out.println("List validation successful.");
+            }
 
 
         }
@@ -647,7 +695,9 @@ public class BarcodeTest extends TestCase {
                     values[i] = Barcode.WHITE;
                     nulls++;
 
-                } else values[i] = Barcode.BLACK;
+                } else {
+                    values[i] = Barcode.BLACK;
+                }
             }
 
             try{
@@ -701,7 +751,9 @@ public class BarcodeTest extends TestCase {
                     values[i] = Barcode.WHITE;
                     nulls++;
 
-                } else values[i] = Barcode.BLACK;
+                } else {
+                    values[i] = Barcode.BLACK;
+                }
             }
 
             System.out.println("Running the performance test for setting 500000 elements.");

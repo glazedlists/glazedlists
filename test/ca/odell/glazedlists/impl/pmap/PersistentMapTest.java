@@ -6,11 +6,14 @@ package ca.odell.glazedlists.impl.pmap;
 // for being a JUnit test case
 import ca.odell.glazedlists.impl.io.Bufferlo;
 import ca.odell.glazedlists.io.GlazedListsIO;
-import junit.framework.TestCase;
 
-import java.awt.*;
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 
 /**
@@ -18,7 +21,7 @@ import java.io.IOException;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class PersistentMapTest extends TestCase {
+public class PersistentMapTest {
 
     /**
      * Creates a map file, reads a key and writes a key. The written value is double
@@ -26,6 +29,7 @@ public class PersistentMapTest extends TestCase {
      * then the written value is one. The key's value will therefore follow the
      * sequence null, 1, 2, 4, 8.
      */
+    @Test
     public void testCreate() throws IOException {
         File mapFile = File.createTempFile("counting", "j81");
         mapFile.deleteOnExit();
@@ -79,6 +83,7 @@ public class PersistentMapTest extends TestCase {
      * Creates a map and adds ten entries. Then removes four. Then verifies that
      * the contents are consistent both in memory and on disk.
      */
+    @Test
     public void testRemove() throws IOException {
         File colorsFile = File.createTempFile("colors", "j81");
         colorsFile.deleteOnExit();
@@ -168,6 +173,7 @@ public class PersistentMapTest extends TestCase {
      * value exists. If it does exist, then the flush worked. Otherwise that value
      * is still to be written.
      */
+    @Test
     public void testFlush() throws IOException {
         File sharedFile = File.createTempFile("shared", "j81");
         sharedFile.deleteOnExit();

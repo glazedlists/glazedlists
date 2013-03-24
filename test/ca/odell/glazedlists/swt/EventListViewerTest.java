@@ -12,6 +12,9 @@ import java.util.Collections;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.List;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests for the {@link EventListViewer}.
@@ -23,7 +26,8 @@ public class EventListViewerTest extends SwtTestCase {
 	/**
 	 * Tests constructor with empty source list.
 	 */
-	public void guiTestEmptyConstruction() {
+    @Test
+	public void testEmptyConstruction() {
         final BasicEventList<String> source = new BasicEventList<String>();
         final List list = new List(getShell(), SWT.MULTI);
         final EventListViewer<String> viewer = new EventListViewer<String>(source, list);
@@ -35,7 +39,8 @@ public class EventListViewerTest extends SwtTestCase {
 	/**
 	 * Tests constructor with non-empty source list.
 	 */
-	public void guiTestPrefilledConstruction() {
+    @Test
+	public void testPrefilledConstruction() {
 		final BasicEventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
         final List list = new List(getShell(), SWT.MULTI);
@@ -54,7 +59,8 @@ public class EventListViewerTest extends SwtTestCase {
 	/**
 	 * Tests, that list changes are reflected in the list.
 	 */
-	public void guiTestChangeList() {
+    @Test
+	public void testChangeList() {
         final BasicEventList<String> source = new BasicEventList<String>();
         final List list = new List(getShell(), SWT.MULTI);
         final EventListViewer<String> viewer = new EventListViewer<String>(source, list);
@@ -87,7 +93,8 @@ public class EventListViewerTest extends SwtTestCase {
 	/**
 	 * Tests the given LabelProvider.
 	 */
-	public void guiTestLabelProvider() {
+    @Test
+	public void testLabelProvider() {
 		final BasicEventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
         final List list = new List(getShell(), SWT.MULTI);
@@ -106,7 +113,8 @@ public class EventListViewerTest extends SwtTestCase {
      * Tests the lists {@link EventListViewer#getTogglingSelected()} and
      * {@link EventListViewer#getTogglingDeselected()} for programmatic selection control.
      */
-    public void guiTestToggleSelection() {
+    @Test
+    public void testToggleSelection() {
         final BasicEventList<String> source = new BasicEventList<String>();
         final List list = new List(getShell(), SWT.MULTI);
         final EventListViewer<String> viewer = new EventListViewer<String>(source, list);
@@ -200,7 +208,8 @@ public class EventListViewerTest extends SwtTestCase {
     /** TestItemFormat. */
     private static class TestItemFormat implements ItemFormat<String> {
 
-    	public String format(String element) {
+    	@Override
+        public String format(String element) {
     		final String result = ((element == null) ? "" : element.toString());
     		return result + result;
     	}

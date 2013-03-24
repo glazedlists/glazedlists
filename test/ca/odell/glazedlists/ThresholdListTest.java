@@ -4,20 +4,24 @@
 package ca.odell.glazedlists;
 
 // for being a JUnit test case
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
-import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import static org.junit.Assert.*;
 
 /**
  * This test verifies that the ThresholdList works as expected.
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public class ThresholdListTest extends TestCase {
+public class ThresholdListTest {
 
     /** the source list */
     private BasicEventList<Integer> source = null;
@@ -34,7 +38,7 @@ public class ThresholdListTest extends TestCase {
     /**
      * Prepare for the test.
      */
-    @Override
+    @Before
     public void setUp() {
         source = new BasicEventList<Integer>();
         evaluator = new IntegerEvaluator();
@@ -46,7 +50,7 @@ public class ThresholdListTest extends TestCase {
     /**
      * Clean up after the test.
      */
-    @Override
+    @After
     public void tearDown() {
         thresholdList.dispose();
         thresholdList = null;
@@ -57,6 +61,7 @@ public class ThresholdListTest extends TestCase {
     /**
      * Verifies that ThresholdList fires the right events.
      */
+    @Test
     public void testEventFiringLower() {
         // populate our sample list
         source.addAll(Arrays.asList(25, 50, 50, 75, 75, 100));
@@ -69,6 +74,7 @@ public class ThresholdListTest extends TestCase {
     /**
      * Verifies that ThresholdList fires the right events.
      */
+    @Test
     public void testEventFiringUpper() {
         // populate our sample list
         source.addAll(Arrays.asList(25, 50, 50, 75, 75, 100));
@@ -81,6 +87,7 @@ public class ThresholdListTest extends TestCase {
     /**
      * Verifies that ThresholdList fires the right events.
      */
+    @Test
     public void testEventFiringFromOneEntryToFullViaLower() {
         thresholdList.setUpperThreshold(100);
         thresholdList.setLowerThreshold(100);
@@ -99,6 +106,7 @@ public class ThresholdListTest extends TestCase {
     /**
      * Verifies that ThresholdList fires the right events.
      */
+    @Test
     public void testEventFiringFromOneEntryToFullViaUpper() {
         thresholdList.setUpperThreshold(25);
         thresholdList.setLowerThreshold(25);
@@ -118,6 +126,7 @@ public class ThresholdListTest extends TestCase {
      * A simple test to validate that ThresholdList is
      * behaving as expected on a list with no missing elements.
      */
+    @Test
     public void testListSimple() {
         // Use two seperate lists for testing upper and lower thresholds
         ThresholdList lowerThresholdList = thresholdList;
@@ -145,6 +154,7 @@ public class ThresholdListTest extends TestCase {
      * A test to validate that ThresholdList is
      * behaving as expected on a list with missing elements.
      */
+    @Test
     public void testListWithMissingElements() {
         // Use two seperate lists for testing upper and lower thresholds
         ThresholdList lowerThresholdList = thresholdList;
@@ -153,8 +163,11 @@ public class ThresholdListTest extends TestCase {
         // Fill the source list with test data such that
         // every fifth element is equal to every fourth element
         for(int i = 0; i < 1000; i ++) {
-            if(i % 5 == 0) source.add(i, new Integer(i-1));
-            else source.add(i, new Integer(i));
+            if(i % 5 == 0) {
+                source.add(i, new Integer(i-1));
+            } else {
+                source.add(i, new Integer(i));
+            }
         }
 
         // Prime the thresholds so that they are non-zero
@@ -178,6 +191,7 @@ public class ThresholdListTest extends TestCase {
      * A test to validate that ThresholdList is behaving as expected
      * when values beyond the threshold are added for an increasing list.
      */
+    @Test
     public void testAddingValuesBeyondLowerThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
@@ -207,6 +221,7 @@ public class ThresholdListTest extends TestCase {
      * A test to validate that ThresholdList is behaving as expected
      * when values beyond the threshold are added for a decreasing list.
      */
+    @Test
     public void testAddingValuesBeyondUpperThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
@@ -236,6 +251,7 @@ public class ThresholdListTest extends TestCase {
      * A test to validate that ThresholdList is behaving as expected
      * when values within the threshold are added for an increasing list.
      */
+    @Test
     public void testAddingValuesWithinLowerThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
@@ -265,6 +281,7 @@ public class ThresholdListTest extends TestCase {
      * A test to validate that ThresholdList is behaving as expected
      * when values within the threshold are added for a decreasing list.
      */
+    @Test
     public void testAddingValuesWithinUpperThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
@@ -294,6 +311,7 @@ public class ThresholdListTest extends TestCase {
      * A test to validate that ThresholdList is behaving as expected
      * when values at the threshold are added for an increasing list.
      */
+    @Test
     public void testAddingValuesAtLowerThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
@@ -323,6 +341,7 @@ public class ThresholdListTest extends TestCase {
      * A test to validate that ThresholdList is behaving as expected
      * when values at the threshold are added for a decreasing list.
      */
+    @Test
     public void testAddingValuesAtUpperThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
@@ -353,6 +372,7 @@ public class ThresholdListTest extends TestCase {
      * Test an edge case where no value is at the current threshold
      * and then a value is added which is at the threshold.
      */
+    @Test
     public void testAddingAtLowerThresholdWithNoValuesAtThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
@@ -382,6 +402,7 @@ public class ThresholdListTest extends TestCase {
      * Test an edge case where no value is at the current threshold
      * and then a value is added which is at the threshold.
      */
+    @Test
     public void testAddingAtUpperThresholdWithNoValuesAtThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
@@ -411,6 +432,7 @@ public class ThresholdListTest extends TestCase {
      * A test to validate that ThresholdList is behaving as expected
      * when values beyond the threshold are removed for an increasing list.
      */
+    @Test
     public void testRemovingValuesBeyondLowerThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
@@ -440,6 +462,7 @@ public class ThresholdListTest extends TestCase {
      * A test to validate that ThresholdList is behaving as expected
      * when values beyond the threshold are removed for a decreasing list.
      */
+    @Test
     public void testRemovingValuesBeyondUpperThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
@@ -469,6 +492,7 @@ public class ThresholdListTest extends TestCase {
      * A test to validate that ThresholdList is behaving as expected
      * when values within the threshold are removed for an increasing list.
      */
+    @Test
     public void testRemovingValuesWithinLowerThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
@@ -498,6 +522,7 @@ public class ThresholdListTest extends TestCase {
      * A test to validate that ThresholdList is behaving as expected
      * when values within the threshold are removed for a decreasing list.
      */
+    @Test
     public void testRemovingValuesWithinUpperThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
@@ -527,6 +552,7 @@ public class ThresholdListTest extends TestCase {
      * A test to validate that ThresholdList is behaving as expected
      * when values at the threshold are removed for an increasing list.
      */
+    @Test
     public void testRemovingValuesAtLowerThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
@@ -555,6 +581,7 @@ public class ThresholdListTest extends TestCase {
      * A test to validate that ThresholdList is behaving as expected
      * when values at the threshold are removed for a decreasing list.
      */
+    @Test
     public void testRemovingValuesAtUpperThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
@@ -582,6 +609,7 @@ public class ThresholdListTest extends TestCase {
      * A test to validate that ThresholdList is behaving as expected
      * when values beyond the threshold are updated for an increasing list.
      */
+    @Test
     public void testUpdatingValuesBeyondLowerThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
@@ -612,6 +640,7 @@ public class ThresholdListTest extends TestCase {
      * A test to validate that ThresholdList is behaving as expected
      * when values beyond the threshold are updated for a decreasing list.
      */
+    @Test
     public void testUpdatingValuesBeyondUpperThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
@@ -642,6 +671,7 @@ public class ThresholdListTest extends TestCase {
      * A test to validate that ThresholdList is behaving as expected
      * when values within the threshold are updated for an increasing list.
      */
+    @Test
     public void testUpdatingValuesWithinLowerThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
@@ -672,6 +702,7 @@ public class ThresholdListTest extends TestCase {
      * A test to validate that ThresholdList is behaving as expected
      * when values within the threshold are updated for a decreasing list.
      */
+    @Test
     public void testUpdatingValuesWithinUpperThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
@@ -702,6 +733,7 @@ public class ThresholdListTest extends TestCase {
      * A test to validate that ThresholdList is behaving as expected
      * when values at the threshold are updated for an increasing list.
      */
+    @Test
     public void testUpdatingValuesAtLowerThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
@@ -741,6 +773,7 @@ public class ThresholdListTest extends TestCase {
      * A test to validate that ThresholdList is behaving as expected
      * when values at the threshold are updated for a decreasing list.
      */
+    @Test
     public void testUpdatingValuesAtUpperThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
@@ -781,6 +814,7 @@ public class ThresholdListTest extends TestCase {
      * Test an edge case where no value is at the current threshold
      * and then a value is added which is at the threshold.
      */
+    @Test
     public void testUpdatingAtLowerThresholdWithNoValuesAtThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 distinct values
@@ -821,6 +855,7 @@ public class ThresholdListTest extends TestCase {
      * Test an edge case where no value is at the current threshold
      * and then a value is added which is at the threshold.
      */
+    @Test
     public void testUpdatingAtUpperThresholdWithNoValuesAtThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
@@ -859,6 +894,7 @@ public class ThresholdListTest extends TestCase {
      * A test to validate the size of an empty size and that the
      * size is still zero once a list is filled and emptied.
      */
+    @Test
     public void testSizeZeroing() {
         // Use two seperate lists for testing upper and lower thresholds
         ThresholdList lowerThresholdList = thresholdList;
@@ -891,6 +927,7 @@ public class ThresholdListTest extends TestCase {
     /**
      * A test to validate events from calls to the threshold setting methods
      */
+    @Test
     public void testThresholdSettingEvents() {
         // Use two seperate lists for testing upper and lower thresholds
         ThresholdList<Integer> lowerThresholdList = thresholdList;
@@ -924,6 +961,7 @@ public class ThresholdListTest extends TestCase {
      * Test the edge conditions where a source list contains values and the
      * thresholds are set such that the list is empty.
      */
+    @Test
     public void testZeroSizeViewOfArbitraryList() {
         // Focus on the lower case 0/-1 case first
         thresholdList.setLowerThreshold(-5);
@@ -942,6 +980,7 @@ public class ThresholdListTest extends TestCase {
      * Tests to see if pre-built source lists are initialized correctly on a
      * freshly constructed ThresholdList without setting any thresholds.
      */
+    @Test
     public void testInitialization() {
         // Prime a sorted source list with data
         SortedList<Integer> sortedBase = new SortedList<Integer>(source, new ThresholdList.ThresholdComparator<Integer>(new IntegerEvaluator()));
@@ -962,6 +1001,7 @@ public class ThresholdListTest extends TestCase {
      * Tests to see if events are handled correctly by a freshly
      * constructed ThresholdList without setting any thresholds.
      */
+    @Test
     public void testEventsOnNewThresholdList() {
         // Layer a new threshold list between two sorted lists and do not change defaults
         SortedList<Integer> sortedBase = new SortedList<Integer>(source, new ThresholdList.ThresholdComparator<Integer>(new IntegerEvaluator()));
@@ -979,6 +1019,7 @@ public class ThresholdListTest extends TestCase {
     /**
      * Verifies that the ThresholdList fires consistent events.
      */
+    @Test
     public void testEventFiringIsConsistent() {
         thresholdList.setLowerThreshold(-14931);
         thresholdList.setUpperThreshold(-1931);
@@ -1003,6 +1044,7 @@ public class ThresholdListTest extends TestCase {
     /**
      * Verifies that the ThresholdList fires consistent events.
      */
+    @Test
     public void testNumberOfEventsFired() {
         // count events
         ListConsistencyListener counter = ListConsistencyListener.install(thresholdList);
@@ -1066,6 +1108,7 @@ public class ThresholdListTest extends TestCase {
      * Tests that a increasing sliding windows works. This is the case where
      * the upper and lower thresholds keep keep shifting to higher values.
      */
+    @Test
     public void testIncreasingSlidingWindow() {
         // count events
         ListConsistencyListener.install(thresholdList);
@@ -1090,6 +1133,7 @@ public class ThresholdListTest extends TestCase {
      * Tests that a decreasing sliding windows works. This is the case where
      * both the upper and lower thresholds keep shifting to lower values.
      */
+    @Test
     public void testDecreasingSlidingWindow() {
         // count events
         ListConsistencyListener.install(thresholdList);
@@ -1101,6 +1145,7 @@ public class ThresholdListTest extends TestCase {
         thresholdList.setLowerThreshold(0);
     }
 
+    @Test
     public void testBoundaryConditions() {
         source.add(new Integer(0));
         source.add(new Integer(25));
@@ -1120,6 +1165,7 @@ public class ThresholdListTest extends TestCase {
      * Tests that the JavaBean constructor and supporting code
      * works as expected.
      */
+    @Test
     public void testJavaBeanConstructor() {
         final BasicEventList<SimpleJavaBeanObject> beanSource = new BasicEventList<SimpleJavaBeanObject>();
         final ThresholdList<SimpleJavaBeanObject> beanThresholdList = new ThresholdList<SimpleJavaBeanObject>(beanSource, "value");
@@ -1135,6 +1181,7 @@ public class ThresholdListTest extends TestCase {
     }
 
 
+    @Test
     public void testNonIntegers() {
         final BasicEventList<String> stringSource = new BasicEventList<String>();
         final ThresholdList<String> stringThresholdList = new ThresholdList<String>(stringSource, new IntegerAsStringEvaluator());
@@ -1186,6 +1233,7 @@ public class ThresholdListTest extends TestCase {
      * Returns an integer value which represents the object.
      */
     private static class IntegerEvaluator implements ThresholdList.Evaluator<Integer> {
+        @Override
         public int evaluate(Integer object) {
             if(object == null) {
                 return Integer.MIN_VALUE;
@@ -1199,6 +1247,7 @@ public class ThresholdListTest extends TestCase {
      * Expects strings like "100" and "50" and returns their integer values.
      */
     private static class IntegerAsStringEvaluator implements ThresholdList.Evaluator<String> {
+        @Override
         public int evaluate(String object) {
             return Integer.valueOf(object).intValue();
         }

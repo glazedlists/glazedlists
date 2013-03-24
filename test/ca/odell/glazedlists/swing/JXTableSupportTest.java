@@ -2,6 +2,7 @@ package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.ExecuteOnMainThread;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.gui.TableFormat;
@@ -16,6 +17,10 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
 import org.jdesktop.swingx.JXTable;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * <b>work in progress</b>
@@ -29,17 +34,19 @@ public class JXTableSupportTest extends SwingTestCase {
     private JXTable table;
     private Comparator<Color> redComparator = GlazedLists.beanPropertyComparator(Color.class, "red");
 
-    @Override
-    protected void setUp() {
+    @Before
+    public void setUp() {
         colors = new BasicEventList<Color>();
         colors.add(Color.GRAY);
         colors.add(Color.WHITE);
         colors.add(Color.BLACK);
         sortedColors = new SortedList<Color>(colors, redComparator);
         table = new JXTable();
+        System.out.println(Thread.currentThread() + " JXTableSupportTest.setUp()");
     }
 
-    public void guiTestInstall() {
+    @Test
+    public void testInstall() {
         final JXTableSupport support = JXTableSupport.install(table, colors, colorTableFormat, sortedColors, TableComparatorChooser.SINGLE_COLUMN);
         assertTrue(support.isInstalled());
         assertNotNull(support.getTableModel());
@@ -55,7 +62,8 @@ public class JXTableSupportTest extends SwingTestCase {
         assertTrue(table.getTableHeader().getDefaultRenderer() instanceof SortArrowHeaderRenderer);
     }
 
-    public void guiTestUninstall() {
+    @Test
+    public void testUninstall() {
         final TableModel oldTableModel = table.getModel();
         final ListSelectionModel oldSelectionModel = table.getSelectionModel();
         final boolean isSortable = table.isSortable();
@@ -76,6 +84,8 @@ public class JXTableSupportTest extends SwingTestCase {
         assertEquals(oldDefaultRenderer, table.getTableHeader().getDefaultRenderer());
     }
 
+    @Test
+    @ExecuteOnMainThread
     public void testOnMainThreadInstallEDTViolation() {
         try {
             JXTableSupport.install(table, colors, colorTableFormat, sortedColors, TableComparatorChooser.SINGLE_COLUMN);
@@ -85,6 +95,8 @@ public class JXTableSupportTest extends SwingTestCase {
         }
     }
 
+    @Test
+    @ExecuteOnMainThread
     public void testOnMainThreadUninstallEDTViolation() throws Exception {
         final InstallRunnable runnable = new InstallRunnable();
         EventQueue.invokeAndWait(runnable);
@@ -95,6 +107,7 @@ public class JXTableSupportTest extends SwingTestCase {
             // expected
         }
         EventQueue.invokeAndWait(new Runnable() {
+            @Override
             public void run() {
                 runnable.getJXTableSupport().uninstall();
             }
@@ -104,6 +117,7 @@ public class JXTableSupportTest extends SwingTestCase {
 
     private class InstallRunnable implements Runnable {
         private JXTableSupport support;
+        @Override
         public void run() {
             support = JXTableSupport.install(table, colors, colorTableFormat, sortedColors, TableComparatorChooser.SINGLE_COLUMN);
         }

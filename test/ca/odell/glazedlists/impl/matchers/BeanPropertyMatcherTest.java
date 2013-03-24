@@ -4,10 +4,14 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.matchers.Matchers;
-import junit.framework.TestCase;
 
-public class BeanPropertyMatcherTest extends TestCase {
+import org.junit.Test;
 
+import static org.junit.Assert.*;
+
+public class BeanPropertyMatcherTest {
+
+    @Test
     public void testConstructor() {
         new BeanPropertyMatcher<Dog>(Dog.class, "legs", new Integer(4));
         new BeanPropertyMatcher<Dog>(Dog.class, "name", null);
@@ -23,6 +27,7 @@ public class BeanPropertyMatcherTest extends TestCase {
         } catch (IllegalArgumentException iae) { }
     }
 
+    @Test
     public void testMatching() {
         final EventList<Dog> dogs = new FilterList<Dog>(new BasicEventList<Dog>(), Matchers.beanPropertyMatcher(Dog.class, "name", "Fido"));
 

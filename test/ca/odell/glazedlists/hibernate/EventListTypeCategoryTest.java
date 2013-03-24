@@ -13,12 +13,12 @@ import ca.odell.glazedlists.impl.testing.GlazedListsTests.UnserializableListener
 import ca.odell.glazedlists.util.concurrent.LockFactory;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
+import java.io.IOException;
+
 import org.hibernate.FetchMode;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-
-import java.io.IOException;
 
 /**
  * Tests mapping and persisting BasicEventLists with Hibernate using list categories. 

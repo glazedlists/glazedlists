@@ -10,6 +10,9 @@ import java.util.Arrays;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Combo;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests for the {@link DefaultEventComboViewer}.
@@ -21,7 +24,8 @@ public class DefaultEventComboViewerTest extends SwtTestCase {
 	/**
 	 * Tests constructor with empty source list.
 	 */
-	public void guiTestEmptyConstruction() {
+    @Test
+	public void testEmptyConstruction() {
         final BasicEventList<String> source = new BasicEventList<String>();
         final Combo combo = new Combo(getShell(), SWT.DROP_DOWN);
         final DefaultEventComboViewer<String> viewer = new DefaultEventComboViewer<String>(source, combo);
@@ -33,7 +37,8 @@ public class DefaultEventComboViewerTest extends SwtTestCase {
 	/**
 	 * Tests constructor with non-empty source list.
 	 */
-	public void guiTestPrefilledConstruction() {
+    @Test
+	public void testPrefilledConstruction() {
 		final BasicEventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
         final Combo combo = new Combo(getShell(), SWT.DROP_DOWN);
@@ -52,7 +57,8 @@ public class DefaultEventComboViewerTest extends SwtTestCase {
 	/**
 	 * Tests, that list chnages are reflected in the combo box.
 	 */
-	public void guiTestChangeList() {
+    @Test
+	public void testChangeList() {
         final BasicEventList<String> source = new BasicEventList<String>();
         final Combo combo = new Combo(getShell(), SWT.DROP_DOWN);
         final DefaultEventComboViewer<String> viewer = new DefaultEventComboViewer<String>(source, combo);
@@ -85,7 +91,8 @@ public class DefaultEventComboViewerTest extends SwtTestCase {
 	/**
 	 * Tests the given LabelProvider.
 	 */
-	public void guiTestLabelProvider() {
+    @Test
+	public void testLabelProvider() {
 		final BasicEventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
         final Combo combo = new Combo(getShell(), SWT.DROP_DOWN);
@@ -104,7 +111,8 @@ public class DefaultEventComboViewerTest extends SwtTestCase {
     /** TestItemFormat. */
     private static class TestItemFormat implements ItemFormat<String> {
 
-    	public String format(String element) {
+    	@Override
+        public String format(String element) {
     		final String result = ((element == null) ? "" : element.toString());
     		return result + result;
     	}

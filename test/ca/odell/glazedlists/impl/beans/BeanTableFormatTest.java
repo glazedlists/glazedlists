@@ -10,14 +10,18 @@ import ca.odell.glazedlists.gui.WritableTableFormat;
 
 import java.awt.Color;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * This test verifies that the BeanTableFormat works as expected.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class BeanTableFormatTest extends TestCase {
+public class BeanTableFormatTest {
 
     /** the formats to test */
     private TableFormat<FootballTeam> footballFormat;
@@ -30,7 +34,7 @@ public class BeanTableFormatTest extends TestCase {
     /**
      * Prepare for the test.
      */
-    @Override
+    @Before
     public void setUp() {
         String[] propertyNames = new String[] { "name", "home", "primary", "secondary", "yearWinner", "matchCount"};
         String[] columnNames = new String[] { "Name", "Home", "Primary Color", "Secondary Color", "Has won this year", "Match count" };
@@ -42,7 +46,7 @@ public class BeanTableFormatTest extends TestCase {
     /**
      * Clean up after the test.
      */
-    @Override
+    @After
     public void tearDown() {
         footballFormat = null;
         classedFootballFormat = null;
@@ -51,6 +55,7 @@ public class BeanTableFormatTest extends TestCase {
     /**
      * Tests that BeanTableFormat works as a TableFormat.
      */
+    @Test
     public void testTableFormat() {
         assertEquals(6,                  footballFormat.getColumnCount());
         assertEquals("Name",             footballFormat.getColumnName(0));
@@ -72,6 +77,7 @@ public class BeanTableFormatTest extends TestCase {
     /**
      * Tests that BeanTableFormat works as a WritableTableFormat.
      */
+    @Test
     public void testWritableTableFormat() {
         WritableTableFormat<FootballTeam> writableFootballFormat = (WritableTableFormat<FootballTeam>) footballFormat;
         assertEquals(false,              writableFootballFormat.isEditable(riders, 0));
@@ -91,6 +97,7 @@ public class BeanTableFormatTest extends TestCase {
     /**
      * Tests that BeanTableFormat works as an AdvancedTableFormat.
      */
+    @Test
     public void testAdvancedTableFormat() {
         AdvancedTableFormat emptyAdvancedFootballFormat = (AdvancedTableFormat)footballFormat;
         assertEquals(Object.class,       emptyAdvancedFootballFormat.getColumnClass(0));
@@ -121,6 +128,7 @@ public class BeanTableFormatTest extends TestCase {
         assertEquals(GlazedLists.comparableComparator(), fullAdvancedFootballFormat.getColumnComparator(5));
     }
 
+    @Test
     public void testIdentityColumn() {
         final String[] propertyNames = {"this"};
         final String[] columnLabels = {"Summary"};

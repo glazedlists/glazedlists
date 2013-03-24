@@ -4,23 +4,26 @@
 package ca.odell.glazedlists.io;
 
 // for being a JUnit test case
-import junit.framework.TestCase;
-
 import java.io.File;
 import java.io.IOException;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * This test verifies that the FileList works.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class FileListTest extends TestCase {
+public class FileListTest {
 
     /**
      * Creates a file list, writes a value and reads a value. The written value
      * is the sum of the last two values read. If less than 2 values are read, then 1 is
      * written.
      */
+    @Test
     public void testCreate() throws IOException {
         File fibonacciFile = File.createTempFile("fibonacci", "j81");
         fibonacciFile.deleteOnExit();

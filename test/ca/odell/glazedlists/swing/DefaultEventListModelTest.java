@@ -5,11 +5,16 @@ package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.ExecuteOnMainThread;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 
 import java.awt.Color;
 
 import javax.swing.JList;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Test <code>DefaultEventListModelTest</code> from the Swing thread.
@@ -21,6 +26,8 @@ public class DefaultEventListModelTest extends SwingTestCase {
      * Verifies that the EDT check works, e.g. an IllegalStateException is thrown when a ListEvent
      * arrives on a non-EDT thread
      */
+    @Test
+    @ExecuteOnMainThread
     public void testOnMainThreadEDTViolation() {
         EventList<Color> colors = new BasicEventList<Color>();
         colors.add(Color.RED);
@@ -39,6 +46,8 @@ public class DefaultEventListModelTest extends SwingTestCase {
     /**
      * Verifies that the factory method for model creation with thread proxy list works.
      */
+    @Test
+    @ExecuteOnMainThread
     public void testOnMainThreadNoEDTViolation() {
         EventList<Color> colors = new BasicEventList<Color>();
         colors.add(Color.RED);
@@ -57,7 +66,8 @@ public class DefaultEventListModelTest extends SwingTestCase {
     /**
      * Verifies that the new getElementAt() method of EventListModel works.
      */
-    public void guiTestGetElementAt() {
+    @Test
+    public void testGetElementAt() {
         EventList<Color> colors = new BasicEventList<Color>();
         colors.add(Color.RED);
         colors.add(Color.GREEN);
@@ -88,7 +98,8 @@ public class DefaultEventListModelTest extends SwingTestCase {
      * Verifies that list selection is preserved, when handling a complex ListEvent with blocks,
      * which triggers a "data changed" ListDateEvent.
      */
-    public void guiTestRemoveWithBlocksInListEvent() {
+    @Test
+    public void testRemoveWithBlocksInListEvent() {
         // setup JList with EventListModel and EventSelectionModel
         final EventList<String> list = new BasicEventList<String>();
         list.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));

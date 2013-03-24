@@ -4,20 +4,24 @@
 package ca.odell.glazedlists;
 
 // for being a JUnit test case
-import java.util.Arrays;
-
-import junit.framework.TestCase;
-
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+
+import java.util.Arrays;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Ensures that ListEventAssembler.forwardEvent() works.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class ForwardEventTest extends TestCase {
+public class ForwardEventTest {
 
     /** the origin of all events */
     private EventList<String> source;
@@ -31,7 +35,7 @@ public class ForwardEventTest extends TestCase {
     /**
      * Prepare for the test.
      */
-    @Override
+    @Before
     public void setUp() {
         source = new BasicEventList<String>();
         forwarding = new ForwardingList<String>(source);
@@ -42,7 +46,7 @@ public class ForwardEventTest extends TestCase {
     /**
      * Clean up after the test.
      */
-    @Override
+    @After
     public void tearDown() {
         source = null;
         forwarding = null;
@@ -52,6 +56,7 @@ public class ForwardEventTest extends TestCase {
     /**
      * Tests that forwardEvent works.
      */
+    @Test
     public void testForwarding() {
         source.add("Pepsi");
         source.add("Coke");
@@ -66,6 +71,7 @@ public class ForwardEventTest extends TestCase {
     /**
      * Tests that forwardEvent works.
      */
+    @Test
     public void testNestedForwarding() {
         forwarding.beginEvent();
         source.add("Pepsi");
@@ -81,6 +87,7 @@ public class ForwardEventTest extends TestCase {
         test.assertConsistent();
     }
 
+    @Test
     public void testBadListEventHandler_FixMe() {
         assertIllegalStateExceptionIsThrown(source, new GetTypeListener());
         assertIllegalStateExceptionIsThrown(source, new GetBlockStartIndexListener());
@@ -136,6 +143,7 @@ public class ForwardEventTest extends TestCase {
     }
 
     static class DoNotStartIteratingListEventListener implements ListEventListener {
+        @Override
         public void listChanged(ListEvent listChanges) {
             breakListEvent(listChanges);
         }
@@ -145,8 +153,11 @@ public class ForwardEventTest extends TestCase {
     }
 
     static class IterateTooFarListEventListener implements ListEventListener {
+        @Override
         public void listChanged(ListEvent listChanges) {
-            while (listChanges.next());
+            while (listChanges.next()) {
+                ;
+            }
 
             // now try breaking the ListEvent
             breakListEvent(listChanges);

@@ -5,6 +5,7 @@ package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.ExecuteOnMainThread;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.IntegerTableFormat;
 import ca.odell.glazedlists.matchers.GlazedListsICU4J;
@@ -17,7 +18,17 @@ import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
 
-import javax.swing.*;
+import javax.swing.Action;
+import javax.swing.ComboBoxEditor;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JComboBox;
+import javax.swing.JList;
+import javax.swing.JPopupMenu;
+import javax.swing.JTextField;
+import javax.swing.ListCellRenderer;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.plaf.ComboBoxUI;
@@ -30,9 +41,14 @@ import javax.swing.text.Element;
 import javax.swing.text.Position;
 import javax.swing.text.Segment;
 
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
 public class AutoCompleteSupportTest extends SwingTestCase {
 
-    public void guiTestUninstall() {
+    @Test
+    public void testUninstall() {
         final JComboBox combo = new JComboBox();
         final EventList<Object> items = new BasicEventList<Object>();
         items.add("First");
@@ -125,7 +141,8 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         }
     }
 
-    public void guiTestInstall() {
+    @Test
+    public void testInstall() {
         JComboBox combo = new JComboBox();
         combo.setEditor(new NoopComboBoxEditor());
         try {
@@ -156,7 +173,8 @@ public class AutoCompleteSupportTest extends SwingTestCase {
     /**
      * Tests that a custom renderer gets not overwritten, when a format is specified.
      */
-    public void guiTestRenderer() {
+    @Test
+    public void testRenderer() {
         final JComboBox combo = new JComboBox();
         final ListCellRenderer renderer = new NoopListCellRenderer();
         combo.setRenderer(renderer);
@@ -181,7 +199,8 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertSame(renderer, combo.getRenderer());
     }
 
-    public void guiTestChangeModel() {
+    @Test
+    public void testChangeModel() {
         final JComboBox combo = new JComboBox();
         AutoCompleteSupport.install(combo, new BasicEventList<Object>());
 
@@ -193,7 +212,8 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         }
     }
 
-    public void guiTestChangeEditorDocumentToNonAbstractDocument() {
+    @Test
+    public void testChangeEditorDocumentToNonAbstractDocument() {
         final JComboBox combo = new JComboBox();
         AutoCompleteSupport.install(combo, new BasicEventList<Object>());
 
@@ -206,7 +226,8 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         }
     }
 
-    public void guiTestNullElements() {
+    @Test
+    public void testNullElements() {
         final JComboBox combo = new JComboBox();
         final EventList<String> items = new BasicEventList<String>();
         items.add(null);
@@ -226,7 +247,8 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals(2, combo.getModel().getSize());
     }
 
-    public void guiTestFiringActionEvent() throws BadLocationException {
+    @Test
+    public void testFiringActionEvent() throws BadLocationException {
         final CountingActionListener listener = new CountingActionListener();
 
         final JComboBox combo = new JComboBox();
@@ -302,7 +324,8 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals(6, listener.getCount());
     }
 
-    public void guiTestCorrectCase() throws BadLocationException {
+    @Test
+    public void testCorrectCase() throws BadLocationException {
         final CountingActionListener listener = new CountingActionListener();
 
         final JComboBox combo = new JComboBox();
@@ -354,7 +377,8 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals(1, listener.getCount());
     }
 
-    public void guiTestStrictMode() throws BadLocationException {
+    @Test
+    public void testStrictMode() throws BadLocationException {
         final CountingActionListener listener = new CountingActionListener();
 
         final JComboBox combo = new JComboBox();
@@ -405,7 +429,8 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals(3, listener.getCount());
     }
 
-    public void guiTestStrictModeWithNull() throws BadLocationException {
+    @Test
+    public void testStrictModeWithNull() throws BadLocationException {
         final JComboBox combo = new JComboBox();
         final EventList<String> items = new BasicEventList<String>();
         items.add("New Brunswick");
@@ -440,7 +465,8 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals(-1, combo.getSelectedIndex()); // should be 1, but JComboBox.getSelecteditem() always returns -1 for null element
     }
 
-    public void guiTestStrictModeAndFirstItem() throws BadLocationException {
+    @Test
+    public void testStrictModeAndFirstItem() throws BadLocationException {
         final JComboBox combo = new JComboBox();
 
         final EventList<String> items = new BasicEventList<String>();
@@ -481,7 +507,8 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals("", textField.getText());
     }
 
-    public void guiTestDeleteKey() throws BadLocationException {
+    @Test
+    public void testDeleteKey() throws BadLocationException {
         final CountingActionListener listener = new CountingActionListener();
         final JComboBox combo = new JComboBox();
         combo.addActionListener(listener);
@@ -521,7 +548,8 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals(1, listener.getCount());
     }
 
-    public void guiTestFilterMode() throws BadLocationException {
+    @Test
+    public void testFilterMode() throws BadLocationException {
         final JComboBox combo = new JComboBox();
 
         final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
@@ -564,7 +592,8 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals("Newfoundland", model.getElementAt(2));
     }
 
-    public void guiTestTextMatchingStrategy() throws BadLocationException {
+    @Test
+    public void testTextMatchingStrategy() throws BadLocationException {
         final JComboBox combo = new JComboBox();
 
         final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
@@ -687,7 +716,8 @@ public class AutoCompleteSupportTest extends SwingTestCase {
 //        assertEquals("Ru\u00dfland", model.getElementAt(0));
     }
 
-    public void guiTestFilterator() {
+    @Test
+    public void testFilterator() {
         AutoCompleteSupport support = AutoCompleteSupport.install(new JComboBox(), new BasicEventList<String>());
         assertSame(AutoCompleteSupport.DefaultTextFilterator.class, support.getTextFilterator().getClass());
 
@@ -719,7 +749,8 @@ public class AutoCompleteSupportTest extends SwingTestCase {
      * b) clear the selection in the model
      * c) leave the caret at position 4
      */
-    public void guiTestExactMatchWhenEditingText() throws BadLocationException {
+    @Test
+    public void testExactMatchWhenEditingText() throws BadLocationException {
         final JComboBox combo = new JComboBox();
 
         final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
@@ -757,7 +788,8 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals("foobar", model.getSelectedItem());
     }
 
-    public void guiTestCreateTableCellEditor() {
+    @Test
+    public void testCreateTableCellEditor() {
         final EventList<Integer> ints = new BasicEventList<Integer>();
         ints.add(new Integer(0));
         ints.add(new Integer(10));
@@ -787,7 +819,8 @@ public class AutoCompleteSupportTest extends SwingTestCase {
      * Our interpretation is that the user has *explicitly* set a value, and
      * that value should be honoured at all costs.
      */
-    public void guiTestSettingSelectedItemInEmptyModel() throws BadLocationException {
+    @Test
+    public void testSettingSelectedItemInEmptyModel() throws BadLocationException {
         final JComboBox combo = new JComboBox();
         final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
         final AbstractDocument doc = (AbstractDocument) textField.getDocument();
@@ -824,7 +857,8 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals("Foo", comboBoxModel.getSelectedItem());
     }
 
-    public void guiTestFirstItem() throws BadLocationException {
+    @Test
+    public void testFirstItem() throws BadLocationException {
         final JComboBox combo = new JComboBox();
         final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
         final AbstractDocument doc = (AbstractDocument) textField.getDocument();
@@ -903,7 +937,8 @@ public class AutoCompleteSupportTest extends SwingTestCase {
      * is fired from AutoCompleteComboBoxModel so that AutoCompleteSupport retains
      * ultimate control over the text in the ComboBoxEditor.
      */
-    public void guiTestChangingComboBoxDataDoesNotAlterComboBoxEditor() throws BadLocationException {
+    @Test
+    public void testChangingComboBoxDataDoesNotAlterComboBoxEditor() throws BadLocationException {
         final JComboBox combo = new JComboBox();
 
         final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
@@ -941,6 +976,8 @@ public class AutoCompleteSupportTest extends SwingTestCase {
      * least partially) an element in the ComboBoxModel. This test case
      * verifies that the invariant is maintained while data changes underneath.
      */
+    @Test
+    @ExecuteOnMainThread
     public void testOnMainThreadChangingComboBoxDataRetainsStrictModeInvariant() throws Exception {
         final JComboBox combo = new JComboBox();
 
@@ -951,6 +988,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         items.add("foobar");
 
         SwingUtilities.invokeAndWait(new Runnable() {
+            @Override
             public void run() {
                 final AutoCompleteSupport support = AutoCompleteSupport.install(combo, items);
                 support.setStrict(true);
@@ -988,44 +1026,77 @@ public class AutoCompleteSupportTest extends SwingTestCase {
     private static class NoopDocument implements Document {
         private Element root = new NoopElement();
 
+        @Override
         public int getLength() { return 0; }
+        @Override
         public void addDocumentListener(DocumentListener listener) { }
+        @Override
         public void removeDocumentListener(DocumentListener listener) { }
+        @Override
         public void addUndoableEditListener(UndoableEditListener listener) { }
+        @Override
         public void removeUndoableEditListener(UndoableEditListener listener) { }
+        @Override
         public Object getProperty(Object key) { return null; }
+        @Override
         public void putProperty(Object key, Object value) { }
+        @Override
         public void remove(int offs, int len) { }
+        @Override
         public void insertString(int offset, String str, AttributeSet a) { }
+        @Override
         public String getText(int offset, int length) { return ""; }
+        @Override
         public void getText(int offset, int length, Segment txt) { }
+        @Override
         public Position getStartPosition() { return null; }
+        @Override
         public Position getEndPosition() { return null; }
+        @Override
         public Position createPosition(int offs) { return null; }
+        @Override
         public Element[] getRootElements() { return null; }
+        @Override
         public Element getDefaultRootElement() { return root; }
+        @Override
         public void render(Runnable r) { }
 
         private class NoopElement implements Element {
+            @Override
             public Document getDocument() { return NoopDocument.this; }
+            @Override
             public Element getParentElement() { return null; }
+            @Override
             public String getName() { return null; }
+            @Override
             public AttributeSet getAttributes() { return null; }
+            @Override
             public int getStartOffset() { return 0; }
+            @Override
             public int getEndOffset() { return 0; }
+            @Override
             public int getElementIndex(int offset) { return 0; }
+            @Override
             public int getElementCount() { return 0; }
+            @Override
             public Element getElement(int index) { return null; }
+            @Override
             public boolean isLeaf() { return false; }
         }
     }
 
     private static class NoopComboBoxEditor implements ComboBoxEditor {
+        @Override
         public Component getEditorComponent() { return null; }
+        @Override
         public void setItem(Object anObject) { }
+        @Override
         public Object getItem() { return null; }
+        @Override
         public void selectAll() { }
+        @Override
         public void addActionListener(ActionListener l) { }
+        @Override
         public void removeActionListener(ActionListener l) { }
     }
 
@@ -1041,6 +1112,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         private int count;
 
         public int getCount() { return count; }
+        @Override
         public void actionPerformed(ActionEvent e) { count++; }
     }
 }

@@ -5,10 +5,15 @@ package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.ExecuteOnMainThread;
 
 import java.awt.Color;
 
 import javax.swing.JComboBox;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Test <code>DefaultEventComboBoxModelTest</code> from the Swing thread.
@@ -20,6 +25,8 @@ public class DefaultEventComboBoxModelTest extends SwingTestCase {
      * Verifies that the EDT check works, e.g. an IllegalStateException is thrown when a ListEvent
      * arrives on a non-EDT thread
      */
+    @Test
+    @ExecuteOnMainThread
     public void testOnMainThreadEDTViolation() {
         EventList<Color> colors = new BasicEventList<Color>();
         colors.add(Color.RED);
@@ -38,6 +45,8 @@ public class DefaultEventComboBoxModelTest extends SwingTestCase {
     /**
      * Verifies that factory method for creating model with thread proxy list works.
      */
+    @Test
+    @ExecuteOnMainThread
     public void testOnMainThreadNoEDTViolation() {
         EventList<Color> colors = new BasicEventList<Color>();
         colors.add(Color.RED);
@@ -56,7 +65,8 @@ public class DefaultEventComboBoxModelTest extends SwingTestCase {
     /**
      * Verifies the selected item.
      */
-    public void guiTestSelectedItem() {
+    @Test
+    public void testSelectedItem() {
         EventList<Color> colors = new BasicEventList<Color>();
         colors.add(Color.RED);
         colors.add(Color.GREEN);

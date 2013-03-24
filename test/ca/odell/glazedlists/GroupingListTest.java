@@ -11,10 +11,13 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class GroupingListTest extends TestCase {
+import static org.junit.Assert.*;
 
+public class GroupingListTest {
+
+    @Test
     public void testConstruct() {
         List<String> source = GlazedListsTests.stringToList("AAAAABBBBCCC");
         GroupingList<String> groupList = GroupingList.create(GlazedLists.eventList(source));
@@ -25,6 +28,7 @@ public class GroupingListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("CCC"), groupList.get(2));
     }
 
+    @Test
     public void testAdd() {
         EventList<String> sourceList = new BasicEventList<String>();
         GroupingList<String> groupList = GroupingList.create(sourceList);
@@ -88,6 +92,7 @@ public class GroupingListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("ZZZ"), groupList.get(2));
     }
 
+    @Test
     public void testAddAll() {
         EventList<String> sourceList = new BasicEventList<String>();
         GroupingList<String> groupList = GroupingList.create(sourceList);
@@ -113,6 +118,7 @@ public class GroupingListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("DD"), groupList.get(3));
     }
 
+    @Test
     public void testInsert() {
         EventList<String> sourceList = new BasicEventList<String>();
         GroupingList<String> groupList = GroupingList.create(sourceList);
@@ -167,6 +173,7 @@ public class GroupingListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("DD"), groupList.get(4));
     }
 
+    @Test
     public void testSourceSet() {
         EventList<String> sourceList = new BasicEventList<String>();
         GroupingList<String> groupList = GroupingList.create(sourceList);
@@ -191,6 +198,7 @@ public class GroupingListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("D"), groupList.get(1));
     }
 
+    @Test
     public void testSet() {
         EventList<String> sourceList = new BasicEventList<String>();
         GroupingList<String> groupList = GroupingList.create(sourceList);
@@ -215,6 +223,7 @@ public class GroupingListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToLists("BBB,CC"), groupList);
     }
 
+    @Test
     public void testRemoveAPair() {
         EventList<String> sourceList = new BasicEventList<String>();
         GroupingList<String> groupList = GroupingList.create(sourceList);
@@ -229,6 +238,7 @@ public class GroupingListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToLists("BBB,D"), groupList);
     }
 
+    @Test
     public void testRemove() {
         EventList<String> sourceList = new BasicEventList<String>();
         GroupingList<String> groupList = GroupingList.create(sourceList);
@@ -259,6 +269,7 @@ public class GroupingListTest extends TestCase {
      * Test the write-through operations of GroupList, the type of list
      * returned as the elements of a GroupingList.
      */
+    @Test
     public void testGroupListAdd() {
         EventList<String> sourceList = GlazedLists.eventListOf("A", "B", "B", "C", "C", "C");
         GroupingList<String> groupList = GroupingList.create(sourceList);
@@ -289,6 +300,7 @@ public class GroupingListTest extends TestCase {
      * The problem we were seeing is that the GroupingList fires a ListEvent
      * that includes an update to a group at an index that NEVER EXISTED.
      */
+    @Test
     public void testGroupListMassUpdate() {
         BasicEventList<String> sourceList = new BasicEventList<String>();
         sourceList.addAll(GlazedListsTests.delimitedStringToList("A A A A"));
@@ -307,6 +319,7 @@ public class GroupingListTest extends TestCase {
         assertEquals(GlazedListsTests.delimitedStringToList("A A A A"), groupList.get(0));
     }
 
+    @Test
     public void testGroupListRemove() {
         EventList<String> sourceList = GlazedLists.eventListOf("A", "B", "B", "C", "C", "C");
         GroupingList<String> groupList = GroupingList.create(sourceList);
@@ -329,6 +342,7 @@ public class GroupingListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("CCC"), groupList.get(1));
     }
 
+    @Test
     public void testGroupListSet() {
         EventList<String> sourceList = GlazedLists.eventListOf("A", "B", "B", "C", "C", "C");
         GroupingList<String> groupList = GroupingList.create(sourceList);
@@ -352,6 +366,7 @@ public class GroupingListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("CCC"), groupList.get(2));
     }
 
+    @Test
     public void testGroupListGet() {
         EventList<String> sourceList = GlazedLists.eventListOf("A", "B", "B", "C", "C", "C");
         GroupingList<String> groupList = GroupingList.create(sourceList);
@@ -369,6 +384,7 @@ public class GroupingListTest extends TestCase {
         assertEquals(groupList.get(2).get(0), "C");
     }
 
+    @Test
     public void testGroupListClear() {
         EventList<String> sourceList = GlazedLists.eventListOf("A", "B", "B", "C", "C", "C");
         GroupingList<String> groupList = GroupingList.create(sourceList);
@@ -392,6 +408,7 @@ public class GroupingListTest extends TestCase {
         assertEquals(groupList.size(), 0);
     }
 
+    @Test
     public void testDispose() {
         final BasicEventList<String> source = new BasicEventList<String>();
         final GroupingList<String> groupingList = GroupingList.create(source);
@@ -409,6 +426,7 @@ public class GroupingListTest extends TestCase {
      *
      * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=326">Issue 326</a>
      */
+    @Test
     public void testStaleGroupHandling() {
         final EventList<String> source = new BasicEventList<String>();
         final GroupingList<String> groupingList = GroupingList.create(source);
@@ -428,6 +446,7 @@ public class GroupingListTest extends TestCase {
         assertEquals(3, cs.size());
     }
 
+    @Test
     public void testWriteThroughGroupListElement() {
         final EventList<String> source = new BasicEventList<String>();
         final GroupingList<String> groupingList = new GroupingList<String>(source, GlazedListsTests.getFirstLetterComparator());
@@ -455,6 +474,7 @@ public class GroupingListTest extends TestCase {
      * Make sure a simple test case that breaks the {@link SeparatorList} doesn't
      * impact the {@link GroupingList}.
      */
+    @Test
     public void testSeparatorListBreaks() {
         TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
         GroupingList<String> grouped = new GroupingList<String>(source, GlazedLists.comparableComparator());
@@ -472,15 +492,18 @@ public class GroupingListTest extends TestCase {
         assertEquals(GlazedListsTests.stringToList("SS"), grouped.get(1));
     }
 
+    @Test
     public void testGenerics() {
         EventList<String> source = new BasicEventList<String>();
 
         EventList<List<String>> testList = new GroupingList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        testList.dispose();
     }
 
     /**
      * Test the replacement of the grouping Comparator.
      */
+    @Test
     public void testSetComparator() {
         final EventList<String> source = new BasicEventList<String>();
         final GroupingList<String> groupingList = new GroupingList<String>(source, GlazedListsTests.getFirstLetterComparator());
@@ -511,6 +534,7 @@ public class GroupingListTest extends TestCase {
         assertEquals(Arrays.asList("Bling"), groupingList.get(2));
     }
 
+    @Test
     public void testIndexOfGroup() {
         final EventList<String> source = new BasicEventList<String>();
         final GroupingList<String> groupingList = new GroupingList<String>(source, GlazedListsTests.getFirstLetterComparator());
@@ -540,6 +564,7 @@ public class GroupingListTest extends TestCase {
         assertEquals(-1, groupingList.indexOfGroup("Steve"));
     }
 
+    @Test
     public void testWithFilters() {
         EventList<String> source = new BasicEventList<String>();
         FilterList<String> filtered = new FilterList<String>(source);
@@ -550,6 +575,7 @@ public class GroupingListTest extends TestCase {
         assertEquals(1, grouped.size());
 
         filtered.setMatcher(new Matcher<String>() {
+            @Override
             public boolean matches(String item) {
                 return !item.equals("CGG");
             }
@@ -567,6 +593,7 @@ public class GroupingListTest extends TestCase {
      * See issue <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=491">491</a>
      * </p>
      */
+    @Test
     public void testChangeOnFirstAndSecondElement() {
         TransactionList<String> source = new TransactionList<String>(
                 new BasicEventList<String>());
@@ -593,6 +620,7 @@ public class GroupingListTest extends TestCase {
      * This tests a corner case that arose from the first attempt at fixing issue <a
      * href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=491">491</a>
      */
+    @Test
     public void testAddOnFirstAndUpdateOnSecondElement() {
         TransactionList<String> source = new TransactionList<String>(
                 new BasicEventList<String>());
@@ -619,6 +647,7 @@ public class GroupingListTest extends TestCase {
      * Testcase from issue <a
      * href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=486">486</a>
      */
+    @Test
     public void testIssue486() {
         TransactionList<String> txList = new TransactionList<String>(
                 new BasicEventList<String>());
@@ -640,7 +669,8 @@ public class GroupingListTest extends TestCase {
         txList.commitEvent();
         assertEquals("[[basket, basket, basket, basket]]", grouped.toString());
     }
-    
+
+    @Test
     public void testIssue522() {
         TransactionList<String> source = new TransactionList<String>(
                 new BasicEventList<String>());
@@ -651,8 +681,9 @@ public class GroupingListTest extends TestCase {
         listener.setPreviousElementTracked(false);
         String[] s = new String[] {"A", "B", "C", "D", "DD", "DDD", "E", "F", "FF"};
 
-        for (int i = 0; i < s.length; i++)
+        for (int i = 0; i < s.length; i++) {
             source.add(s[i]);
+        }
         assertEquals("[[A], [B], [C], [D, DD, DDD], [E], [F, FF]]", grouped.toString());
 
         source.beginEvent();
@@ -661,7 +692,8 @@ public class GroupingListTest extends TestCase {
         source.commitEvent();
         assertEquals("[[A], [B], [C], [D, DD, DDD], [E], [F]]", grouped.toString());
     }
-    
+
+    @Test
     public void testMultipleUpdateDelete() {
         TransactionList<String> source = new TransactionList<String>(
                 new BasicEventList<String>());
@@ -672,8 +704,9 @@ public class GroupingListTest extends TestCase {
         listener.setPreviousElementTracked(false);
         String[] s = new String[] {"C", "CC", "D", "DD", "E", "EE"};
 
-        for (int i = 0; i < s.length; i++)
+        for (int i = 0; i < s.length; i++) {
             source.add(s[i]);
+        }
 
         assertEquals("[[C, CC], [D, DD], [E, EE]]", grouped.toString());
 
@@ -688,7 +721,8 @@ public class GroupingListTest extends TestCase {
 
         assertEquals("[[C], [D], [E]]", grouped.toString());
     }
-    
+
+    @Test
     public void testLastGroup() {
         TransactionList<String> source = new TransactionList<String>(
                 new BasicEventList<String>());
@@ -699,8 +733,9 @@ public class GroupingListTest extends TestCase {
         listener.setPreviousElementTracked(false);
         String[] s = new String[] {"A", "B", "C", "D", "DD", "DDD", "E", "F", "FF"};
 
-        for (int i = 0; i < s.length; i++)
+        for (int i = 0; i < s.length; i++) {
             source.add(s[i]);
+        }
         assertEquals("[[A], [B], [C], [D, DD, DDD], [E], [F, FF]]", grouped.toString());
 
         source.beginEvent();
@@ -711,7 +746,8 @@ public class GroupingListTest extends TestCase {
         source.commitEvent();
         assertEquals("[[A], [B], [C], [D, DD, DDD, DDDD], [E]]", grouped.toString());
     }
-    
+
+	@Test
 	public void testIssue499_FixMe() {
 		TransactionList<String> source = new TransactionList<String>(
 				new BasicEventList<String>());
@@ -727,18 +763,21 @@ public class GroupingListTest extends TestCase {
 		String[] upd = new String[] { "MSFT", "MSFT", "MSFT", "C", "C", "IBM",
 				"IBM", "IBM", "C", "MSFT" };
 
-		for (int i = 0; i < s.length; i++)
-			source.add(s[i]);
-		
+		for (int i = 0; i < s.length; i++) {
+            source.add(s[i]);
+        }
+
 		assertEquals("[[C, C, C, C], [IBM, IBM, IBM, IBM], [MSFT, MSFT]]", grouped.toString());
 
 		source.beginEvent();
-		for (int i = 0; i < upd.length; i++)
-			source.set(i, upd[i]);
+		for (int i = 0; i < upd.length; i++) {
+            source.set(i, upd[i]);
+        }
 		source.commitEvent();
 		assertEquals("[[C, C, C], [IBM, IBM, IBM], [MSFT, MSFT, MSFT, MSFT]]", grouped.toString());
-	}    
-   
+	}
+
+    @Test
     public void testSplitFirstGroup_FixMe() {
         TransactionList<String> source = new TransactionList<String>(
                 new BasicEventList<String>());
@@ -761,7 +800,8 @@ public class GroupingListTest extends TestCase {
 
         assertEquals("[[A], [B], [CCC]]", grouped.toString());
     }
-    
+
+    @Test
     public void testJoinToFirstGroup_FixMe() {
         TransactionList<String> source = new TransactionList<String>(
                 new BasicEventList<String>());
@@ -780,7 +820,7 @@ public class GroupingListTest extends TestCase {
         source.beginEvent();
         source.set(0, "C");
         source.set(1, "CC");
-        source.commitEvent();        
+        source.commitEvent();
         assertEquals("[[C, CC, CCC]]", grouped.toString());
     }
 

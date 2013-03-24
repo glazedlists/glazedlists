@@ -5,10 +5,14 @@ package ca.odell.glazedlists.calculation;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
-import junit.framework.TestCase;
 
-public final class SubtractionTest extends TestCase {
+import org.junit.Test;
 
+import static org.junit.Assert.*;
+
+public final class SubtractionTest {
+
+    @Test
     public void testSubtractionFloat() {
         final EventList<Object> aList = new BasicEventList<Object>();
         final EventList<Object> bList = new BasicEventList<Object>();
@@ -26,6 +30,7 @@ public final class SubtractionTest extends TestCase {
         assertEquals(new Float(0), diff.getValue());
     }
 
+    @Test
     public void testSubtractionDouble() {
         final EventList<Object> aList = new BasicEventList<Object>();
         final EventList<Object> bList = new BasicEventList<Object>();
@@ -43,6 +48,7 @@ public final class SubtractionTest extends TestCase {
         assertEquals(new Double(0), diff.getValue());
     }
 
+    @Test
     public void testSubtractionInteger() {
         final EventList<Object> aList = new BasicEventList<Object>();
         final EventList<Object> bList = new BasicEventList<Object>();
@@ -60,6 +66,7 @@ public final class SubtractionTest extends TestCase {
         assertEquals(new Integer(0), diff.getValue());
     }
 
+    @Test
     public void testSubtractionLong() {
         final EventList<Object> aList = new BasicEventList<Object>();
         final EventList<Object> bList = new BasicEventList<Object>();

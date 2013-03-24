@@ -11,9 +11,11 @@ import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import java.util.Arrays;
 import java.util.Date;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class SequenceListTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class SequenceListTest {
 
     private static final Date apr = GlazedListsTests.createDate(2006, 3, 15);
     private static final Date may = GlazedListsTests.createDate(2006, 4, 15);
@@ -22,6 +24,7 @@ public class SequenceListTest extends TestCase {
     private static final Date aug = GlazedListsTests.createDate(2006, 7, 15);
     private static final Date sep = GlazedListsTests.createDate(2006, 8, 15);
 
+    @Test
     public void testConstructor() {
         try {
             new SequenceList<Date>(new BasicEventList<Date>(), null);
@@ -62,6 +65,7 @@ public class SequenceListTest extends TestCase {
         assertEquals(GlazedListsImpl.getMonthBegin(sep), sequence.get(5));
     }
 
+    @Test
     public void testAdd() {
         final EventList<Date> source = new BasicEventList<Date>();
         final SequenceList<Date> sequence = new SequenceList<Date>(source, Sequencers.monthSequencer());
@@ -99,6 +103,7 @@ public class SequenceListTest extends TestCase {
         assertEquals(6, sequence.size());
     }
 
+    @Test
     public void testRemove() {
         final EventList<Date> source = new BasicEventList<Date>();
         final SequenceList<Date> sequence = new SequenceList<Date>(source, Sequencers.monthSequencer());
@@ -147,6 +152,7 @@ public class SequenceListTest extends TestCase {
         assertEquals(0, sequence.size());
     }
 
+    @Test
     public void testSet() {
         final EventList<Date> source = new BasicEventList<Date>();
         final SequenceList<Date> sequence = new SequenceList<Date>(source, Sequencers.monthSequencer());
@@ -212,6 +218,7 @@ public class SequenceListTest extends TestCase {
         assertEquals(GlazedListsImpl.getMonthBegin(sep), sequence.get(5));
     }
 
+    @Test
     public void testIssue482_FixMe() {
         EventList<Integer> src = new BasicEventList<Integer>();
         src.add(1);

@@ -3,11 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import junit.framework.TestCase;
-
 import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
@@ -15,12 +10,21 @@ import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
 /**
  * This test verifies that the {@link CollectionList} behaves as expected.
  *
  * @author <a href="mailto:rob@starlight-systems.com">Rob Eden</a>
  */
-public class CollectionListTest extends TestCase {
+public class CollectionListTest {
 
     private static final String DEV_ROB = "Rob Eden";
     private static final String DEV_JESSE = "Jesse Wilson";
@@ -34,7 +38,7 @@ public class CollectionListTest extends TestCase {
     /**
      * Do basic setup for the tests.
      */
-    @Override
+    @Before
     public void setUp() {
         parentList = new BasicEventList<String>();
         collectionList = new CollectionList<String, String>(parentList, new StringDecomposerModel());
@@ -49,7 +53,7 @@ public class CollectionListTest extends TestCase {
     /**
      * Clean up after the tests.
      */
-    @Override
+    @After
     public void tearDown() {
         collectionList.dispose();
         collectionList = null;
@@ -60,6 +64,7 @@ public class CollectionListTest extends TestCase {
     /**
      * Make sure the correct events are being fired.
      */
+    @Test
     public void testFireEvents() {
         parentList.add(DEV_ROB);
         parentList.add(DEV_JESSE);
@@ -78,6 +83,7 @@ public class CollectionListTest extends TestCase {
         assertEquals(collectionList.get(8), "J");
     }
 
+    @Test
     public void testMutateThroughCollectionList() {
         final EventList<List<String>> source = new BasicEventList<List<String>>();
         final CollectionList<List<String>, String> collectionList = new CollectionList<List<String>, String>(source, new SimpleListModel());
@@ -113,13 +119,15 @@ public class CollectionListTest extends TestCase {
     /**
      * Make sure all the data is there in the order we expect.
      */
+    @Test
     public void testBasicData() {
-        assertEquals(new String[]{ DEV_ROB, DEV_JESSE, DEV_KEVIN, DEV_JAMES }, collectionList);
+        assertEquals2(new String[]{ DEV_ROB, DEV_JESSE, DEV_KEVIN, DEV_JAMES }, collectionList);
     }
 
     /**
      * Test the starting index mappings.
      */
+    @Test
     public void testStartMappings() {
         // Normal cases
 
@@ -169,6 +177,7 @@ public class CollectionListTest extends TestCase {
     /**
      * Test the ending index mappings.
      */
+    @Test
     public void testEndMappings() {
         // Normal cases
 
@@ -221,42 +230,44 @@ public class CollectionListTest extends TestCase {
     /**
      * Test modifying the list
      */
+    @Test
     public void testModification() {
         // Remove an item  (tests Delete)
         parentList.remove(DEV_ROB);
-        assertEquals(new String[]{ DEV_JESSE, DEV_KEVIN, DEV_JAMES }, collectionList);
+        assertEquals2(new String[]{ DEV_JESSE, DEV_KEVIN, DEV_JAMES }, collectionList);
 
         // Put it on the end (test Insert)
         parentList.add(DEV_ROB);
-        assertEquals(new String[]{ DEV_JESSE, DEV_KEVIN, DEV_JAMES, DEV_ROB }, collectionList);
+        assertEquals2(new String[]{ DEV_JESSE, DEV_KEVIN, DEV_JAMES, DEV_ROB }, collectionList);
 
         // Replace it with something else (tests Update)
         parentList.set(parentList.size() - 1, "Nede Bor");
-        assertEquals(new String[]{ DEV_JESSE, DEV_KEVIN, DEV_JAMES, "Nede Bor" }, collectionList);
+        assertEquals2(new String[]{ DEV_JESSE, DEV_KEVIN, DEV_JAMES, "Nede Bor" }, collectionList);
 
         // Remove that (tests Delete)
         parentList.remove(parentList.size() - 1);
-        assertEquals(new String[]{ DEV_JESSE, DEV_KEVIN, DEV_JAMES }, collectionList);
+        assertEquals2(new String[]{ DEV_JESSE, DEV_KEVIN, DEV_JAMES }, collectionList);
 
         // Add an empty item in the middle  (tests empty parents)
         parentList.add(1, "");
-        assertEquals(new String[]{ DEV_JESSE, "", DEV_KEVIN, DEV_JAMES }, collectionList);
+        assertEquals2(new String[]{ DEV_JESSE, "", DEV_KEVIN, DEV_JAMES }, collectionList);
 
         // Clear the parent (tests a bunch of Deletes and size 0)
         parentList.clear();
-        assertEquals(new String[]{ }, collectionList);
+        assertEquals2(new String[]{ }, collectionList);
 
         // Put it all back to normal (tests a bunch on Inserts)
         parentList.add(DEV_ROB);
         parentList.add(DEV_JESSE);
         parentList.add(DEV_KEVIN);
         parentList.add(DEV_JAMES);
-        assertEquals(new String[]{ DEV_ROB, DEV_JESSE, DEV_KEVIN, DEV_JAMES }, collectionList);
+        assertEquals2(new String[]{ DEV_ROB, DEV_JESSE, DEV_KEVIN, DEV_JAMES }, collectionList);
     }
 
     /**
      * Test modifying the children.
      */
+    @Test
     public void testChildModification() {
         // use a list of Lists instead of Strings
         BasicEventList<List<String>> characterLists = new BasicEventList<List<String>>();
@@ -274,12 +285,12 @@ public class CollectionListTest extends TestCase {
         DEV_KEVIN_MODIFIED.append(DEV_KEVIN);
 
         // they should match out-of-the-gate
-        assertEquals(new CharSequence[]{ DEV_ROB_MODIFIED, DEV_JESSE, DEV_KEVIN_MODIFIED, DEV_JAMES }, characters);
+        assertEquals2(new CharSequence[]{ DEV_ROB_MODIFIED, DEV_JESSE, DEV_KEVIN_MODIFIED, DEV_JAMES }, characters);
 
         // remove a single element
         DEV_ROB_MODIFIED.deleteCharAt(2);
         characters.remove(2);
-        assertEquals(new CharSequence[]{ DEV_ROB_MODIFIED, DEV_JESSE, DEV_KEVIN_MODIFIED, DEV_JAMES }, characters);
+        assertEquals2(new CharSequence[]{ DEV_ROB_MODIFIED, DEV_JESSE, DEV_KEVIN_MODIFIED, DEV_JAMES }, characters);
 
         // set a few elements
         DEV_KEVIN_MODIFIED.setCharAt(2, 'r');
@@ -288,25 +299,26 @@ public class CollectionListTest extends TestCase {
         characters.set(DEV_ROB_MODIFIED.length() + DEV_JESSE.length() + 2, "r");
         characters.set(DEV_ROB_MODIFIED.length() + DEV_JESSE.length() + 1, "a");
         characters.set(DEV_ROB_MODIFIED.length() + DEV_JESSE.length() + 3, "e");
-        assertEquals(new CharSequence[]{ DEV_ROB_MODIFIED, DEV_JESSE, DEV_KEVIN_MODIFIED, DEV_JAMES }, characters);
+        assertEquals2(new CharSequence[]{ DEV_ROB_MODIFIED, DEV_JESSE, DEV_KEVIN_MODIFIED, DEV_JAMES }, characters);
 
         // set a few more elements
         DEV_ROB_MODIFIED.setCharAt(1, '.');
         characters.set(1, ".");
-        assertEquals(new CharSequence[]{ DEV_ROB_MODIFIED, DEV_JESSE, DEV_KEVIN_MODIFIED, DEV_JAMES }, characters);
+        assertEquals2(new CharSequence[]{ DEV_ROB_MODIFIED, DEV_JESSE, DEV_KEVIN_MODIFIED, DEV_JAMES }, characters);
 
         // remove a few more elements
         DEV_ROB_MODIFIED.deleteCharAt(1);
         DEV_ROB_MODIFIED.deleteCharAt(1);
         characters.remove(1);
         characters.remove(1);
-        assertEquals(new CharSequence[]{ DEV_ROB_MODIFIED, DEV_JESSE, DEV_KEVIN_MODIFIED, DEV_JAMES }, characters);
+        assertEquals2(new CharSequence[]{ DEV_ROB_MODIFIED, DEV_JESSE, DEV_KEVIN_MODIFIED, DEV_JAMES }, characters);
     }
 
     /**
      * Tests disposing of CollectionList, where the model produces plain lists containing the
      * children.
      */
+    @Test
     public void testDisposeWithPlainListChildren() {
         final List<String> abcList = GlazedListsTests.stringToList("ABC");
         final List<String> defList = GlazedListsTests.stringToList("DEF");
@@ -361,6 +373,7 @@ public class CollectionListTest extends TestCase {
      * 2) adding further EventLists to the CollectionList after construction
      *    also needs to validate the invariant
      */
+    @Test
     public void testEventListChildrenMustUseSameLocksAsCollectionList() {
         EventList<List<String>> source;
 
@@ -414,6 +427,7 @@ public class CollectionListTest extends TestCase {
      * Tests disposing of CollectionList, where the model produces EventLists
      * containing the children.
      */
+    @Test
     public void testDisposeWithEventListChildren() {
         final EventList<List<String>> parentEventList = new BasicEventList<List<String>>();
         final ListEventPublisher sharedpublisher = parentEventList.getPublisher();
@@ -476,7 +490,7 @@ public class CollectionListTest extends TestCase {
      * Check the basic data on a CollectionList to make sure it's showing the characters
      * from the given Strings.
      */
-    private void assertEquals(CharSequence[] data, CollectionList collection_list) {
+    private void assertEquals2(CharSequence[] data, CollectionList collection_list) {
         assertEquals(GlazedListsTests.stringsToList(data), collection_list);
     }
 
@@ -484,7 +498,8 @@ public class CollectionListTest extends TestCase {
      * Model that breaks a String into a list of characters.
      */
     private static class StringDecomposerModel implements CollectionList.Model<String,String> {
-        public List<String> getChildren(String parent) {
+        @Override
+		public List<String> getChildren(String parent) {
             return GlazedListsTests.stringToList(parent);
         }
     }
@@ -493,7 +508,8 @@ public class CollectionListTest extends TestCase {
      * Model that returns the given List unchanged.
      */
     private static class SimpleListModel implements CollectionList.Model<List<String>,String> {
-        public List<String> getChildren(List<String> parent) {
+        @Override
+		public List<String> getChildren(List<String> parent) {
             return parent;
         }
     }

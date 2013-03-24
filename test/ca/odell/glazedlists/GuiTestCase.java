@@ -3,10 +3,12 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import junit.framework.TestCase;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
+import junit.framework.TestCase;
+
+import org.junit.Test;
 
 /**
  * Utility class for running JUnit tests with GUI code.
@@ -44,6 +46,7 @@ public abstract class GuiTestCase extends TestCase {
      * Execute all methods from the specified GUI test class that start with
      * the prefix "guiTest" on the GUI Thread.
      */
+    @Test
     public final void testGui() {
         executeOnGUIThread(new ExecuteGuiTestsRunnable(this));
     }
@@ -87,7 +90,8 @@ public abstract class GuiTestCase extends TestCase {
             this.testCase = testCase;
         }
 
-        public void run() {
+        @Override
+		public void run() {
             try {
                 final Class guiTestClass = testCase.getClass();
 
@@ -98,15 +102,17 @@ public abstract class GuiTestCase extends TestCase {
                 final Method[] allMethods = guiTestClass.getMethods();
                 for (int i = 0; i < allMethods.length; i++) {
                     final String methodName = allMethods[i].getName();
-                    if (methodName.startsWith(JUNIT_BAD_PREFIX) && !methodName.equals(JUNIT_OK_METHOD) && !methodName.startsWith(JUNIT_OK_METHOD2))
-                        throw new IllegalStateException(methodName + "() must be renamed to guiT" + methodName.substring(1) +"()");
+                    if (methodName.startsWith(JUNIT_BAD_PREFIX) && !methodName.equals(JUNIT_OK_METHOD) && !methodName.startsWith(JUNIT_OK_METHOD2)) {
+						throw new IllegalStateException(methodName + "() must be renamed to guiT" + methodName.substring(1) +"()");
+					}
                 }
 
                 // run all test methods
                 for (int i = 0; i < allMethods.length; i++) {
                     final String methodName = allMethods[i].getName();
-                    if (!methodName.startsWith(TEST_METHOD_PREFIX))
-                        continue;
+                    if (!methodName.startsWith(TEST_METHOD_PREFIX)) {
+						continue;
+					}
 
                     System.out.println("Executing " + methodName);
                     setUp.invoke(testCase, SEND_NO_PARAMETERS);

@@ -3,7 +3,12 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.TreeList;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.matchers.Matchers;
 
@@ -18,6 +23,10 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
 /**
  * This test verifies that the DefaultEventSelectionModelTest works.
  *
@@ -28,7 +37,8 @@ public class DefaultEventSelectionModelTest extends SwingTestCase {
     /**
      * Tests that selection survives a sorting.
      */
-    public void guiTestSort() {
+    @Test
+    public void testSort() {
         EventList<Comparable> list = new BasicEventList<Comparable>();
         SortedList<Comparable> sorted = new SortedList<Comparable>(list, null);
         DefaultEventSelectionModel<Comparable> eventSelectionModel = new DefaultEventSelectionModel<Comparable>(
@@ -80,7 +90,8 @@ public class DefaultEventSelectionModelTest extends SwingTestCase {
     /**
      * Verifies that the selected index is cleared when the selection is cleared.
      */
-    public void guiTestClear() {
+    @Test
+    public void testClear() {
         EventList<String> list = new BasicEventList<String>();
         DefaultEventSelectionModel eventSelectionModel = new DefaultEventSelectionModel<String>(list);
 
@@ -115,7 +126,8 @@ public class DefaultEventSelectionModelTest extends SwingTestCase {
      * Tests the lists {@link DefaultEventSelectionModel#getTogglingSelected()} and
      * {@link DefaultEventSelectionModel#getTogglingDeselected()} for programmatic selection control.
      */
-    public void guiTestToggleSelection() {
+    @Test
+    public void testToggleSelection() {
         EventList<String> list = new BasicEventList<String>();
         DefaultEventSelectionModel<String> eventSelectionModel = new DefaultEventSelectionModel<String>(list);
         assertEquals(Collections.EMPTY_LIST, eventSelectionModel.getSelected());
@@ -227,7 +239,8 @@ public class DefaultEventSelectionModelTest extends SwingTestCase {
      * Tests a problem where the {@link DefaultEventSelectionModel} fails to fire events This test was
      * contributed by: Sergey Bogatyrjov
      */
-    public void guiTestSelectionModel() {
+    @Test
+    public void testSelectionModel() {
         EventList<Object> source = GlazedLists.<Object> eventListOf("one", "two", "three");
         FilterList<Object> filtered = new FilterList<Object>(source, Matchers.trueMatcher());
 
@@ -263,7 +276,8 @@ public class DefaultEventSelectionModelTest extends SwingTestCase {
      * of ListSelectionEvents are produced when inserting and removing at all locations relative
      * to the range of list selections.
      */
-    public void guiTestFireOnlyNecessaryEvents() {
+    @Test
+    public void testFireOnlyNecessaryEvents() {
         EventList<String> source = GlazedLists.eventListOf("Albert", "Alex", "Aaron", "Brian",
                 "Bruce");
 
@@ -343,7 +357,8 @@ public class DefaultEventSelectionModelTest extends SwingTestCase {
         assertEquals(3, model.getMaxSelectionIndex());
     }
 
-    public void guiTestModelChangesProducingSelectionModelEvents() {
+    @Test
+    public void testModelChangesProducingSelectionModelEvents() {
         EventList<String> source = GlazedLists.eventListOf("Albert", "Alex", "Aaron", "Brian",
                 "Bruce");
 
@@ -396,7 +411,8 @@ public class DefaultEventSelectionModelTest extends SwingTestCase {
         assertEquals(0, eventSelectionModelCounter.getCountAndReset());
     }
 
-    public void guiTestDeleteSelectedRows_FixMe() {
+    @Test
+    public void testDeleteSelectedRows_FixMe() {
         EventList<String> source = GlazedLists.eventListOf("one", "two", "three");
 
         // create selection model
@@ -421,7 +437,8 @@ public class DefaultEventSelectionModelTest extends SwingTestCase {
      * Tests, that a selection is preserved when the source is a TreeList and an update event
      * happens for the selected element.
      */
-    public void guiTestSelectionOnTreeListUpdate_FixMe() {
+    @Test
+    public void testSelectionOnTreeListUpdate_FixMe() {
         final EventList<String> source = GlazedLists.eventListOf("zero", "one", "two", "three");
 
         final EventList<String> sourceProxy = GlazedListsSwing.swingThreadProxyList(source);
@@ -437,14 +454,17 @@ public class DefaultEventSelectionModelTest extends SwingTestCase {
 
     /** Simple Format for TreeList testing. */
     private static class StringFormat implements TreeList.Format<String> {
+        @Override
         public boolean allowsChildren(String element) {
             return element.equals("zero");
         }
 
+        @Override
         public Comparator<? super String> getComparator(int depth) {
             return null;
         }
 
+        @Override
         public void getPath(List<String> path, String element) {
             if (!element.equals("zero")) {
                 getPath(path, "zero");
@@ -459,6 +479,7 @@ public class DefaultEventSelectionModelTest extends SwingTestCase {
     private static class ListSelectionChangeCounter implements ListSelectionListener {
         private int count = 0;
 
+        @Override
         public void valueChanged(ListSelectionEvent e) {
             count++;
         }

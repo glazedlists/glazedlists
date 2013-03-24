@@ -6,10 +6,14 @@ package ca.odell.glazedlists.matchers;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
-import junit.framework.TestCase;
 
-public class UnicodeTextMatcherEditorTest extends TestCase {
+import org.junit.Test;
 
+import static org.junit.Assert.*;
+
+public class UnicodeTextMatcherEditorTest {
+
+    @Test
     public void testUnicodeStrategy() {
         TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
         textMatcherEditor.setStrategy(GlazedListsICU4J.UNICODE_TEXT_SEARCH_STRATEGY);
@@ -65,6 +69,7 @@ public class UnicodeTextMatcherEditorTest extends TestCase {
         assertEquals("\u00c6nima", list.get(0));
     }
 
+    @Test
     public void testUnicodeStrategy_StartsWith_FixMe() {
         TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
         textMatcherEditor.setStrategy(GlazedListsICU4J.UNICODE_TEXT_SEARCH_STRATEGY);

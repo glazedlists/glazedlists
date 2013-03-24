@@ -11,13 +11,15 @@ import ca.odell.glazedlists.impl.testing.GlazedListsTests.UnserializableListener
 import ca.odell.glazedlists.util.concurrent.LockFactory;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
-import junit.framework.TestCase;
-
 import java.io.IOException;
 import java.io.ObjectStreamClass;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Makes sure that {@link BasicEventList} works above and beyond its duties as
@@ -25,26 +27,27 @@ import java.util.List;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class BasicEventListTest extends TestCase {
+public class BasicEventListTest {
 
+	@Test
 	public void testConstructors() {
 		BasicEventList<String> list = new BasicEventList<String>();
 		assertNotNull(list.getPublisher());
 		assertNotNull(list.getReadWriteLock());
-		
+
 		list = new BasicEventList<String>(15);
 		assertNotNull(list.getPublisher());
 		assertNotNull(list.getReadWriteLock());
-		
+
 		list = new BasicEventList<String>((ReadWriteLock) null);
 		assertNotNull(list.getPublisher());
 		assertNotNull(list.getReadWriteLock());
-		
+
 		final ReadWriteLock lock = LockFactory.DEFAULT.createReadWriteLock();
 		list = new BasicEventList<String>(lock);
 		assertNotNull(list.getPublisher());
 		assertEquals(lock, list.getReadWriteLock());
-		
+
 		list = new BasicEventList<String>(null, null);
 		assertNotNull(list.getPublisher());
 		assertNotNull(list.getReadWriteLock());
@@ -52,17 +55,18 @@ public class BasicEventListTest extends TestCase {
 		list = new BasicEventList<String>(publisher, lock);
 		assertEquals(lock, list.getReadWriteLock());
 		assertEquals(publisher, list.getPublisher());
-		
+
 		list = new BasicEventList<String>(15, null, null);
 		assertNotNull(list.getPublisher());
 		assertNotNull(list.getReadWriteLock());
 
 		list = new BasicEventList<String>(15, publisher, lock);
 		assertEquals(lock, list.getReadWriteLock());
-		assertEquals(publisher, list.getPublisher());		
+		assertEquals(publisher, list.getPublisher());
 	}
-	
-	
+
+
+    @Test
     public void testSimpleSerialization() throws IOException, ClassNotFoundException {
         EventList<String> serializableList = new BasicEventList<String>();
         serializableList.addAll(GlazedListsTests.stringToList("Saskatchewan Roughriders"));
@@ -73,12 +77,14 @@ public class BasicEventListTest extends TestCase {
         assertFalse(serializableList.equals(serializedCopy));
     }
 
+    @Test
     public void testSerializeEmpty() throws IOException, ClassNotFoundException {
         EventList serializableList = new BasicEventList();
         EventList serializedCopy = GlazedListsTests.serialize(serializableList);
         assertEquals(serializableList, serializedCopy);
     }
 
+    @Test
     public void testSerializableListeners() throws IOException, ClassNotFoundException {
         EventList<String> serializableList = new BasicEventList<String>();
         SerializableListener listener = new SerializableListener();
@@ -95,6 +101,7 @@ public class BasicEventListTest extends TestCase {
         assertEquals(serializedCopy, SerializableListener.getLastSource());
     }
 
+    @Test
     public void testUnserializableListeners() throws IOException, ClassNotFoundException {
         EventList<String> serializableList = new BasicEventList<String>();
         UnserializableListener listener = new UnserializableListener();
@@ -111,6 +118,7 @@ public class BasicEventListTest extends TestCase {
         assertEquals(serializableList, UnserializableListener.getLastSource());
     }
 
+    @Test
     public void testSerialVersionUID() {
         assertEquals(4883958173323072345L, ObjectStreamClass.lookup(BasicEventList.class).getSerialVersionUID());
     }
@@ -120,6 +128,7 @@ public class BasicEventListTest extends TestCase {
      * We created a {@link BasicEventList} containing a sequence of one character
      * Strings, and dumped that to bytes.
      */
+    @Test
     public void testVersion20051003() throws IOException, ClassNotFoundException {
         byte[] serializedBytes = {
             -0x54, -0x13,  0x00,  0x05,  0x73,  0x72,  0x00,  0x23,  0x63,  0x61,  0x2e,  0x6f,  0x64,  0x65,  0x6c,  0x6c,
@@ -156,6 +165,7 @@ public class BasicEventListTest extends TestCase {
      * Locks and Publisher, though the identity is not expected or required
      * to be preserved after deserialization.
      */
+    @Test
     public void testSerializableLocksAndPublisher() throws IOException, ClassNotFoundException {
         // 1. create the Lock and Publisher that will be shared by all BasicEventLists
         final ReadWriteLock sharedLock = LockFactory.DEFAULT.createReadWriteLock();
@@ -175,7 +185,7 @@ public class BasicEventListTest extends TestCase {
 
         // 4. ensure deserialized lists still share the lock and publisher
         final ListEventPublisher publisher = serializedCopy.get(0).getPublisher();
-        final ReadWriteLock lock = serializedCopy.get(0).getReadWriteLock();        
+        final ReadWriteLock lock = serializedCopy.get(0).getReadWriteLock();
         final CompositeList<String> compositeList = new CompositeList<String>(publisher, lock);
         for (int i = 0; i < 4; i++) {
             // explicitly check the identity of the publisher and lock

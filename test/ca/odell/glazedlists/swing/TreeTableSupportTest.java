@@ -3,6 +3,13 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.TreeList;
+import ca.odell.glazedlists.TreeListTest;
+import ca.odell.glazedlists.gui.TableFormat;
+
 import java.awt.event.MouseListener;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -16,12 +23,14 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
-import ca.odell.glazedlists.*;
-import ca.odell.glazedlists.gui.TableFormat;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class TreeTableSupportTest extends SwingTestCase {
 
-    public void guiTestUninstall() {
+    @Test
+    public void testUninstall() {
         // build a TreeList
         final EventList<String> source = new BasicEventList<String>();
         final TreeList<String> treeList = new TreeList<String>(source, TreeListTest.COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -67,7 +76,8 @@ public class TreeTableSupportTest extends SwingTestCase {
         assertEquals(originalMouseListenerSet, new HashSet<MouseListener>(Arrays.asList(table.getMouseListeners())));
     }
 
-    public void guiTestSetDelegateRendererAndEditor() {
+    @Test
+    public void testSetDelegateRendererAndEditor() {
         // build a TreeList
         final EventList<String> source = new BasicEventList<String>();
         final TreeList<String> treeList = new TreeList<String>(source, TreeListTest.COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -105,7 +115,8 @@ public class TreeTableSupportTest extends SwingTestCase {
         assertNull(editor.getDelegate());
     }
 
-    public void guiTestSetRendererAndEditor() {
+    @Test
+    public void testSetRendererAndEditor() {
         // build a TreeList
         final EventList<String> source = new BasicEventList<String>();
         final TreeList<String> treeList = new TreeList<String>(source, TreeListTest.COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -152,7 +163,8 @@ public class TreeTableSupportTest extends SwingTestCase {
         assertNull(newEditor.getDelegate());
     }
 
-    public void guiTestListEventsArriveOnEDT() throws InterruptedException {
+    @Test
+    public void testListEventsArriveOnEDT() throws InterruptedException {
         // build a TreeList
         final EventList<String> source = new BasicEventList<String>();
         final TreeList<String> treeList = new TreeList<String>(source, TreeListTest.COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -187,6 +199,7 @@ public class TreeTableSupportTest extends SwingTestCase {
             this.list = list;
         }
 
+        @Override
         public void run() {
             try {
                 list.add("this should fail");

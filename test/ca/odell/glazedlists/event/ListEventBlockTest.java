@@ -7,17 +7,19 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.TransactionList;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import junit.framework.TestCase;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.junit.Test;
+
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class ListEventBlockTest extends TestCase {
+public class ListEventBlockTest {
 
+    @Test
     public void testSortListEventBlocks() {
         TransactionList<String> list = new TransactionList<String>(new BasicEventList<String>());
         ListConsistencyListener.install(list);
@@ -40,6 +42,7 @@ public class ListEventBlockTest extends TestCase {
         list.commitEvent();
     }
 
+    @Test
     public void testSortListEventBlocks2() {
         TransactionList<String> list = new TransactionList<String>(new BasicEventList<String>());
         ListConsistencyListener.install(list);
@@ -55,6 +58,7 @@ public class ListEventBlockTest extends TestCase {
         list.commitEvent();
     }
 
+    @Test
     public void testSortListEventBlocks3() {
         TransactionList<String> list = new TransactionList<String>(new BasicEventList<String>());
         ListConsistencyListener.install(list);
@@ -70,6 +74,7 @@ public class ListEventBlockTest extends TestCase {
         list.commitEvent();
     }
 
+    @Test
     public void testSortListEventBlocks4() {
         TransactionList<String> list = new TransactionList<String>(new BasicEventList<String>());
         ListConsistencyListener.install(list);
@@ -90,6 +95,7 @@ public class ListEventBlockTest extends TestCase {
     /**
      * Sort all possible permutations of five changes on a five element list.
      */
+    @Test
     public void testSortListEventBlocksAllPermutations() {
         final int LIST_INITIAL_SIZE = 4;
         final int LIST_CHANGE_COUNT = 3;

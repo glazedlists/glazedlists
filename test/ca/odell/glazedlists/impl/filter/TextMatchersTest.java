@@ -12,10 +12,13 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class TextMatchersTest extends TestCase {
+import static org.junit.Assert.*;
 
+public class TextMatchersTest {
+
+    @Test
     public void testParseSimple() {
         SearchTerm[] terms = TextMatchers.parse("blah");
         assertEquals(1, terms.length);
@@ -34,6 +37,7 @@ public class TextMatchersTest extends TestCase {
         checkFilterTerm(terms[2], "blee", false, false);
     }
 
+    @Test
     public void testParseSimpleWithNegation() {
         SearchTerm[] terms = TextMatchers.parse("-blah");
         assertEquals(1, terms.length);
@@ -58,6 +62,7 @@ public class TextMatchersTest extends TestCase {
         checkFilterTerm(terms[2], "blee", true, false);
     }
 
+    @Test
     public void testParseSimpleWithRequired() {
         SearchTerm[] terms = TextMatchers.parse("+blah");
         assertEquals(1, terms.length);
@@ -82,6 +87,7 @@ public class TextMatchersTest extends TestCase {
         checkFilterTerm(terms[2], "blee", false, true);
     }
 
+    @Test
     public void testParseQuotes() {
         SearchTerm[] terms = TextMatchers.parse("\"blah\"");
         assertEquals(1, terms.length);
@@ -104,6 +110,7 @@ public class TextMatchersTest extends TestCase {
         checkFilterTerm(terms[0], "blee \t    boo   \t\t blah   \t", false, false);
     }
 
+    @Test
     public void testParseQuotesWithNegation() {
         SearchTerm[] terms = TextMatchers.parse("-\"blah\"");
         assertEquals(1, terms.length);
@@ -126,6 +133,7 @@ public class TextMatchersTest extends TestCase {
         checkFilterTerm(terms[0], "blee \t    boo   \t\t blah   \t", true, false);
     }
 
+    @Test
     public void testParseQuotesWithRequired() {
         SearchTerm[] terms = TextMatchers.parse("+\"blah\"");
         assertEquals(1, terms.length);
@@ -148,6 +156,7 @@ public class TextMatchersTest extends TestCase {
         checkFilterTerm(terms[0], "blee \t    boo   \t\t blah   \t", false, true);
     }
 
+    @Test
     public void testComplexParsing() {
         SearchTerm[] terms = TextMatchers.parse("+\"blah\" in the -\"plough shares\"");
         assertEquals(4, terms.length);
@@ -169,6 +178,7 @@ public class TextMatchersTest extends TestCase {
         checkFilterTerm(terms[0], "blah", false, false);
     }
 
+    @Test
     public void testParsePartialQuotes() {
         SearchTerm[] terms = TextMatchers.parse("\"blah");
         assertEquals(1, terms.length);
@@ -184,6 +194,7 @@ public class TextMatchersTest extends TestCase {
         checkFilterTerm(terms[1], "boo", false, false);
     }
 
+    @Test
     public void testParseFields() {
         SearchEngineTextMatcherEditor.Field<String> blahField = new SearchEngineTextMatcherEditor.Field<String>("blah", GlazedLists.toStringTextFilterator());
         SearchEngineTextMatcherEditor.Field<String> burpField = new SearchEngineTextMatcherEditor.Field<String>("burp", GlazedLists.toStringTextFilterator());
@@ -237,6 +248,7 @@ public class TextMatchersTest extends TestCase {
         assertSame(field, term.getField());
     }
 
+    @Test
     public void testNormalizeSearchTerms() {
         assertTrue(Arrays.equals(searchTerms(""), normalizedSearchTerms("")));
         assertTrue(Arrays.equals(searchTerms("x"), normalizedSearchTerms("x")));
@@ -252,6 +264,7 @@ public class TextMatchersTest extends TestCase {
         assertTrue(Arrays.equals(searchTerms("blackened this"), normalizedSearchTerms("this blackened")));
     }
 
+    @Test
     public void testNormalizeNegatedSearchTerms() {
         assertTrue(Arrays.equals(searchTerms("-"), normalizedSearchTerms("-")));
         assertTrue(Arrays.equals(searchTerms("-x"), normalizedSearchTerms("-x")));
@@ -267,6 +280,7 @@ public class TextMatchersTest extends TestCase {
         assertTrue(Arrays.equals(searchTerms("-this -blackened"), normalizedSearchTerms("-this -blackened")));
     }
 
+    @Test
     public void testNormalizeFieldfulSearchTerms() {
         SearchEngineTextMatcherEditor.Field<String> blahField = new SearchEngineTextMatcherEditor.Field<String>("blah", GlazedLists.toStringTextFilterator());
         SearchEngineTextMatcherEditor.Field<String> burpField = new SearchEngineTextMatcherEditor.Field<String>("burp", GlazedLists.toStringTextFilterator());
@@ -281,6 +295,7 @@ public class TextMatchersTest extends TestCase {
         assertTrue(Arrays.equals(searchTerms("-blah:cola -law cocacola", fields), normalizedSearchTerms("-law -lawyer cola cocacola -blah:cola", fields)));
     }
 
+    @Test
     public void testNormalizeRequiredSearchTerms() {
         assertTrue(Arrays.equals(searchTerms("+"), normalizedSearchTerms("+")));
         assertTrue(Arrays.equals(searchTerms("+x"), normalizedSearchTerms("+x")));
@@ -296,6 +311,7 @@ public class TextMatchersTest extends TestCase {
         assertTrue(Arrays.equals(searchTerms("+this +blackened"), normalizedSearchTerms("+this +blackened")));
     }
 
+    @Test
     public void testNormalizeComplexSearchTerms() {
         assertTrue(Arrays.equals(searchTerms("+jay bluejay -jack"), normalizedSearchTerms("+jay bluejay -jack")));
         assertTrue(Arrays.equals(searchTerms("-black jailhouse"), normalizedSearchTerms("jail jailhouse -black -blackened")));
@@ -304,6 +320,7 @@ public class TextMatchersTest extends TestCase {
         assertTrue(Arrays.equals(searchTerms("-lamb -horse -alligator raccoon bird cat"), normalizedSearchTerms("bird cat raccoon -horse -lamb -alligator")));
     }
 
+    @Test
     public void testMatcherConstrainedAndRelaxed() {
         assertFalse(TextMatchers.isMatcherConstrained(textMatcher("black"), textMatcher("black")));
         assertFalse(TextMatchers.isMatcherRelaxed(textMatcher("black"), textMatcher("black")));
@@ -324,6 +341,7 @@ public class TextMatchersTest extends TestCase {
         assertFalse(TextMatchers.isMatcherRelaxed(textMatcher("black"), textMatcher("black white")));
     }
 
+    @Test
     public void testMatcherConstrainedAndRelaxedWithNegation() {
         assertFalse(TextMatchers.isMatcherConstrained(textMatcher("-black"), textMatcher("-black")));
         assertFalse(TextMatchers.isMatcherRelaxed(textMatcher("-black"), textMatcher("-black")));
@@ -344,6 +362,7 @@ public class TextMatchersTest extends TestCase {
         assertFalse(TextMatchers.isMatcherRelaxed(textMatcher("-black"), textMatcher("-black -white")));
     }
 
+    @Test
     public void testMatcherConstrainedAndRelaxedWithFields() {
         SearchEngineTextMatcherEditor.Field<String> blahField = new SearchEngineTextMatcherEditor.Field<String>("blah", GlazedLists.toStringTextFilterator());
         SearchEngineTextMatcherEditor.Field<String> burpField = new SearchEngineTextMatcherEditor.Field<String>("burp", GlazedLists.toStringTextFilterator());
@@ -364,6 +383,7 @@ public class TextMatchersTest extends TestCase {
         assertFalse(TextMatchers.isMatcherConstrained(blackBurpMatcher, blackBurpMatcher));
     }
 
+    @Test
     public void testMatcherConstrainedWithModeDifferences() {
         TextMatcher<String> matcherA = new TextMatcher<String>(TextMatchers.parse(""), GlazedLists.toStringTextFilterator(), TextMatcherEditor.CONTAINS, TextMatcherEditor.IDENTICAL_STRATEGY);
         TextMatcher<String> matcherB = new TextMatcher<String>(TextMatchers.parse(""), GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH, TextMatcherEditor.IDENTICAL_STRATEGY);
@@ -375,6 +395,7 @@ public class TextMatchersTest extends TestCase {
         assertFalse(TextMatchers.isMatcherConstrained(matcherB, matcherA));
     }
 
+    @Test
     public void testMatcherConstrainedWithStrategyDifferences() {
         TextMatcher<String> matcherA = new TextMatcher<String>(TextMatchers.parse(""), GlazedLists.toStringTextFilterator(), TextMatcherEditor.CONTAINS, TextMatcherEditor.IDENTICAL_STRATEGY);
         TextMatcher<String> matcherB = new TextMatcher<String>(TextMatchers.parse(""), GlazedLists.toStringTextFilterator(), TextMatcherEditor.CONTAINS, TextMatcherEditor.NORMALIZED_STRATEGY);
@@ -386,6 +407,7 @@ public class TextMatchersTest extends TestCase {
         assertFalse(TextMatchers.isMatcherConstrained(matcherB, matcherA));
     }
 
+    @Test
     public void testRegularExpressionMatcher() {
         TextMatcher<String> matcher = new TextMatcher<String>(TextMatchers.parse("[a-z]"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.REGULAR_EXPRESSION, TextMatcherEditor.IDENTICAL_STRATEGY);
         assertEquals(TextMatcherEditor.REGULAR_EXPRESSION, matcher.getMode());
@@ -394,6 +416,7 @@ public class TextMatchersTest extends TestCase {
         assertFalse(matcher.matches("A"));
     }
 
+    @Test
     public void testExactExpressionMatcher() {
         TextMatcher<String> matcher = new TextMatcher<String>(TextMatchers.parse("abc"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.EXACT, TextMatcherEditor.IDENTICAL_STRATEGY);
         assertEquals(TextMatcherEditor.EXACT, matcher.getMode());
@@ -403,6 +426,7 @@ public class TextMatchersTest extends TestCase {
         assertFalse(matcher.matches("abcd"));
     }
 
+    @Test
     public void testExactExpressionConstrainedAndRelaxed() {
         TextMatcher<String> matcherA = new TextMatcher<String>(TextMatchers.parse("reactor core"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.EXACT, TextMatcherEditor.IDENTICAL_STRATEGY);
         TextMatcher<String> matcherB = new TextMatcher<String>(TextMatchers.parse("reactor"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.EXACT, TextMatcherEditor.IDENTICAL_STRATEGY);
@@ -417,6 +441,7 @@ public class TextMatchersTest extends TestCase {
         assertFalse(TextMatchers.isMatcherConstrained(matcherB, matcherB));
     }
 
+    @Test
     public void testConstructor() {
         new TextMatcher<String>(TextMatchers.parse("[a-z]"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.REGULAR_EXPRESSION, TextMatcherEditor.IDENTICAL_STRATEGY);
 

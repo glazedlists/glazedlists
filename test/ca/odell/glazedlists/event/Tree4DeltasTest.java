@@ -3,18 +3,21 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.event;
 
-import junit.framework.TestCase;
-
 import ca.odell.glazedlists.impl.event.Tree4Deltas;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class Tree4DeltasTest extends TestCase {
+public class Tree4DeltasTest {
 
     /**
      * Make sure the deltas iterator works as expected.
      */
+    @Test
     public void testIterateByBlocks() {
         Tree4Deltas<Object> deltas = new Tree4Deltas<Object>();
         deltas.reset(10);
@@ -37,6 +40,7 @@ public class Tree4DeltasTest extends TestCase {
         assertEquals(false, iterator.hasNextNode());
     }
 
+    @Test
     public void testTargetChanges() {
         Tree4Deltas<Object> deltas = new Tree4Deltas<Object>();
         deltas.reset(10);
@@ -67,6 +71,7 @@ public class Tree4DeltasTest extends TestCase {
         assertEquals("__+++++_______", deltas.toString());
     }
 
+    @Test
     public void testTargetValues() {
         Tree4Deltas<String> deltas = new Tree4Deltas<String>();
         deltas.reset(10);

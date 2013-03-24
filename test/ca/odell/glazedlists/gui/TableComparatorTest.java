@@ -3,14 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.gui;
 
-import java.awt.event.MouseEvent;
-
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumnModel;
-
-import junit.framework.TestCase;
-
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
@@ -18,20 +10,32 @@ import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.swing.DefaultEventTableModel;
 import ca.odell.glazedlists.swing.TableComparatorChooser;
 
+import java.awt.event.MouseEvent;
+
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumnModel;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
 /**
  * Verify that the {@link AbstractTableComparatorChooser} works, especially
  * with respect to handling state dumps as a String.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class TableComparatorTest extends TestCase {
+public class TableComparatorTest {
 
     /** a table comparator choosers to test with */
     private SortedList<String> sortedList;
     private AbstractTableComparatorChooser<String> tableComparatorChooser;
 
-    @Override
-    protected void setUp() {
+    @Before
+    public void setUp() {
         sortedList = SortedList.create(new BasicEventList<String>());
         tableComparatorChooser = new TestTableComparatorChooser(sortedList, 10);
 
@@ -41,8 +45,8 @@ public class TableComparatorTest extends TestCase {
         tableComparatorChooser.getComparatorsForColumn(1).add(GlazedLists.reverseComparator());
     }
 
-    @Override
-    protected void tearDown() {
+    @After
+    public void tearDown() {
         tableComparatorChooser.dispose();
         sortedList.dispose();
 
@@ -53,6 +57,7 @@ public class TableComparatorTest extends TestCase {
     /**
      * Test the parsing behind a table comparator.
      */
+    @Test
     public void testParsing() {
         assertFromAndToString("");
         assertFromAndToString("column 1");
@@ -194,6 +199,7 @@ public class TableComparatorTest extends TestCase {
         assertEquals(0, secondModel.getTableModelListeners().length);
     }
 
+    @Test
     public void testMouseOnlySortingStrategyWithUndo() {
         final TestTableFormat tableFormat = new TestTableFormat(10);
         final JTable table = new JTable(new DefaultEventTableModel<String>(new BasicEventList<String>(), tableFormat));
@@ -253,8 +259,9 @@ public class TableComparatorTest extends TestCase {
 
         // position the x coordinate half way through the column header in question
         int x = 0;
-        for (int i = 0; i < column; i++)
+        for (int i = 0; i < column; i++) {
             x += columnModel.getColumn(i).getWidth();
+        }
 
         x += columnModel.getColumn(column).getWidth() / 2;
 
@@ -276,12 +283,15 @@ public class TableComparatorTest extends TestCase {
         public TestTableFormat(int columns) {
             this.columns = columns;
         }
+        @Override
         public int getColumnCount() {
             return columns;
         }
+        @Override
         public String getColumnName(int column) {
             return "Column " + column;
         }
+        @Override
         public Object getColumnValue(String baseObject, int column) {
             return "Row " + baseObject + ", Column " + column;
         }

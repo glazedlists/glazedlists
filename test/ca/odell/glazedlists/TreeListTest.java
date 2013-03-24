@@ -4,16 +4,23 @@ import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Verifies that TreeList behaves as expected.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class TreeListTest extends TestCase {
+public class TreeListTest {
 
     public static final TreeList.Format<String> COMPRESSED_CHARACTER_TREE_FORMAT = new CharacterTreeFormat();
     public static final TreeList.Format<String> UNCOMPRESSED_CHARACTER_TREE_FORMAT = new CharacterTreeFormat(null);
@@ -21,6 +28,7 @@ public class TreeListTest extends TestCase {
     /**
      * Can we build a tree list?
      */
+    @Test
     public void testCreateAndDispose() throws Exception {
         BasicEventList<Object> source = new BasicEventList<Object>();
         source.add(List.class.getMethod("add", new Class[] {Object.class}));
@@ -78,6 +86,7 @@ public class TreeListTest extends TestCase {
         }
     }
 
+    @Test
     public void testAddsAndRemoves() {
         BasicEventList<String> source = new BasicEventList<String>();
         source.add("ABC");
@@ -123,6 +132,7 @@ public class TreeListTest extends TestCase {
         assertEquals(12, treeList.size());
     }
 
+    @Test
     public void testRemoveByIndexRealNodeWithVirtualParents() {
         BasicEventList<String> source = new BasicEventList<String>();
         source.add("ABC");
@@ -141,6 +151,7 @@ public class TreeListTest extends TestCase {
         assertTreeStructure(treeList, new String[] { });
     }
 
+    @Test
     public void testRemoveByIndexRealNodeWithRealParents() {
         BasicEventList<String> source = new BasicEventList<String>();
         source.add("A");
@@ -164,6 +175,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testRemoveByIndexRealNodeWithMixedParents() {
         BasicEventList<String> source = new BasicEventList<String>();
         source.add("A");
@@ -197,6 +209,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testRemoveByIndexVirtualNodeNotSupported() {
         BasicEventList<String> source = new BasicEventList<String>();
         source.add("ABC");
@@ -219,6 +232,7 @@ public class TreeListTest extends TestCase {
     }
 
     /** Test for <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=489">bug 489</a> */
+    @Test
     public void testDeletionIssues_FixMe() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source,
@@ -241,6 +255,7 @@ public class TreeListTest extends TestCase {
 
     }
 
+    @Test
     public void testSubtreeSize() {
 
         // try a simple hierarchy
@@ -277,6 +292,7 @@ public class TreeListTest extends TestCase {
         assertEquals(1, treeList.subtreeSize(10, true));
     }
 
+    @Test
     public void testSetComparator() {
 
         // try a simple hierarchy
@@ -310,6 +326,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testVirtualParentsAreCleanedUp() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -357,6 +374,7 @@ public class TreeListTest extends TestCase {
         assertEquals(3, treeList.size());
     }
 
+    @Test
     public void testInsertRealOverVirtualParent() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -368,6 +386,7 @@ public class TreeListTest extends TestCase {
         assertEquals(6, treeList.size());
     }
 
+    @Test
     public void testStructureChangingUpdates() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -433,6 +452,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testClear() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -447,6 +467,7 @@ public class TreeListTest extends TestCase {
         assertEquals(0, treeList.size());
     }
 
+    @Test
     public void testSourceChangesOnCollapsedSubtrees() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -640,6 +661,7 @@ public class TreeListTest extends TestCase {
         return nodeListAsStrings;
     }
 
+    @Test
     public void testCollapseExpand() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -763,6 +785,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testSourceUpdateEvents() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -786,6 +809,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testDeletedRealParentIsReplacedByVirtualParent() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -802,6 +826,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testTreeEditing() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -834,6 +859,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testTreeSortingUnsortedTree() {
         EventList<String> source = new BasicEventList<String>();
         SortedList<String> sortedSource = SortedList.create(source);
@@ -861,6 +887,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testTreeSorting() {
         EventList<String> source = new BasicEventList<String>();
         SortedList<String> sortedSource = SortedList.create(source);
@@ -888,6 +915,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testInsertInReverseOrder() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -898,6 +926,7 @@ public class TreeListTest extends TestCase {
         source.add("LAAA");
     }
 
+    @Test
     public void testNonSiblingsBecomeSiblings() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -928,6 +957,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testSiblingsBecomeNonSiblings() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -950,6 +980,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testSiblingsBecomeNonSiblingsWithCollapsedNodes() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -992,6 +1023,7 @@ public class TreeListTest extends TestCase {
      * This test validates that when multiple sets of parents are restored, all
      * the appropriate virtual nodes are assigned the appropriate new parents.
      */
+    @Test
     public void testInsertMultipleParents() {
         TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -1020,6 +1052,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testAttachSiblings() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -1038,6 +1071,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testDeleteParentAndOneChild() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -1062,6 +1096,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testReplaceVirtualWithRealWithSiblings() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -1086,6 +1121,7 @@ public class TreeListTest extends TestCase {
     }
 
 
+    @Test
     public void testAddSubtreePlusSiblings() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -1106,6 +1142,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testInsertUpdateDeleteOnCollapsed() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -1151,6 +1188,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testInsertVirtualParentsOnCollapsed() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -1172,6 +1210,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testReplaceHiddenVirtualParentWithReal() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -1193,6 +1232,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testSortingSource() {
         EventList<String> source = new BasicEventList<String>();
         SortedList<String> sortedList = new SortedList<String>(source, null);
@@ -1215,6 +1255,7 @@ public class TreeListTest extends TestCase {
 
     }
 
+    @Test
     public void testSortingSourceWithVirtualParentsBetween() {
         EventList<String> source = new BasicEventList<String>();
         SortedList<String> sortedList = new SortedList<String>(source, null);
@@ -1232,6 +1273,7 @@ public class TreeListTest extends TestCase {
         sortedList.setComparator(new LastCharComparator());
     }
 
+    @Test
     public void testObsoleteVirtualParentsWithinMovedNodes() {
         EventList<String> source = new BasicEventList<String>();
         SortedList<String> sortedList = new SortedList<String>(source, null);
@@ -1257,6 +1299,7 @@ public class TreeListTest extends TestCase {
         }
     }
 
+    @Test
     public void testVisibilityOnParentMergeFollowerCollapsed() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -1277,6 +1320,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testVisibilityOnParentMergeLeaderCollapsed() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -1297,6 +1341,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testSplitChildrenHoldsSiblings() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -1328,6 +1373,7 @@ public class TreeListTest extends TestCase {
 
     }
 
+    @Test
     public void testAttachSiblingsToStrippedSiblings() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -1357,6 +1403,7 @@ public class TreeListTest extends TestCase {
 
     }
 
+    @Test
     public void testInsertAncestorAfterChild() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -1390,6 +1437,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testSiblingsAttachedToNewParentsFromSplitNodes() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -1425,6 +1473,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testAddExtraRoot() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -1456,6 +1505,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testAddParentAndSibling() {
         EventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -1480,6 +1530,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testRebuildSiblingsInUnnaturalOrder() {
         TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -1513,6 +1564,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testReorderIntoInfiniteLoop() {
         EventList<String> source = new BasicEventList<String>();
         SortedList<String> sortedSource = new SortedList<String>(source, null);
@@ -1540,6 +1592,7 @@ public class TreeListTest extends TestCase {
         }
     }
 
+    @Test
     public void testRemoveHiddenCollapsedSubtrees() {
         BasicEventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -1572,6 +1625,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testCollapsedByDefaultOnInsert() {
         BasicEventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartCollapsed());
@@ -1598,6 +1652,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testCollapsedByDefaultOnCreate() {
         BasicEventList<String> source = new BasicEventList<String>();
         source.addAll(Arrays.asList(
@@ -1625,6 +1680,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testCollapsedByDefaultForSplits() {
         BasicEventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartCollapsed());
@@ -1646,6 +1702,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testInsertParentWithVisibleChildGetsExpandedState() {
         BasicEventList<String> source = new BasicEventList<String>();
         DefaultExternalExpansionModel<String> expansionProvider = new DefaultExternalExpansionModel<String>(TreeList.<String>nodesStartExpanded());
@@ -1671,6 +1728,7 @@ public class TreeListTest extends TestCase {
      * Validate that a virtual parent's state is maintained even if all the
      * children are deleted new children inserted in a single event.
      */
+    @Test
     public void testDeleteAndReinsertLeafRetainsParentState_FixMe() {
         TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
 
@@ -1697,6 +1755,7 @@ public class TreeListTest extends TestCase {
      * Make sure the expansion model provides the correct visibility
      * for new nodes that whose child nodes are already exist.
      */
+    @Test
     public void testExpansionModelWithInsertedNodes() {
         BasicEventList<String> source = new BasicEventList<String>();
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartCollapsed());
@@ -1720,6 +1779,7 @@ public class TreeListTest extends TestCase {
      * Make sure the expansion model provides the correct visibility
      * for new nodes that whose child nodes are already exist.
      */
+    @Test
     public void testInsertCollapsedParentWithExpandedChild() {
         TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
 
@@ -1748,6 +1808,7 @@ public class TreeListTest extends TestCase {
      * because we would call it in the process of fixing the tree. This validates that
      * the setExpanded() method can work while the tree is still changing.
      */
+    @Test
     public void testExpandingParentWhileTreeIsInvalid() {
         TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
 
@@ -1777,6 +1838,7 @@ public class TreeListTest extends TestCase {
         source.commitEvent();
     }
 
+    @Test
     public void testUpdatingElementMovesIt() {
         EventList<String> source = new BasicEventList<String>();
 
@@ -1793,6 +1855,7 @@ public class TreeListTest extends TestCase {
         source.set(3, "ABD");
     }
 
+    @Test
     public void testUpdatingElementsRetainExpandCollapseState() {
         EventList<String> source = new BasicEventList<String>();
 
@@ -1823,6 +1886,7 @@ public class TreeListTest extends TestCase {
         assertFalse(treeList.isExpanded(2));
     }
 
+    @Test
     public void testTemporaryVirtualNodesAreRemoved() {
         TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
         TreeList<String> treeList = new TreeList<String>(source, UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
@@ -1865,6 +1929,7 @@ public class TreeListTest extends TestCase {
      * This test isn't a spec - when the Comparator and equals() disagree, whom
      * should we trust?
      */
+    @Test
     public void testComparatorWeakerThanEquals() {
         TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
         TreeList<String> treeList = new TreeList<String>(source, new CharacterTreeFormat(String.CASE_INSENSITIVE_ORDER), TreeList.<String>nodesStartExpanded());
@@ -1903,6 +1968,7 @@ public class TreeListTest extends TestCase {
         });
     }
 
+    @Test
     public void testComparatorOrdering_FixMe() {
         TreeList.NodeComparator<String> nodeComparator = new TreeList.NodeComparator<String>(new CharacterTreeFormat(String.CASE_INSENSITIVE_ORDER));
 

@@ -14,6 +14,10 @@ import javax.swing.table.TableModel;
 
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.FilterPipeline;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests {@link EventListJXTableSorting} in Swing EDT.
@@ -31,8 +35,8 @@ public class EventListJXTableSortingTest extends SwingTestCase {
     private Comparator<Color> redComparator = GlazedLists.beanPropertyComparator(Color.class, "red");
     private Comparator<Color> alphaComparator = GlazedLists.beanPropertyComparator(Color.class, "alpha");
 
-    @Override
-    public void guiSetUp() {
+    @Before
+    public void setUp() {
         colors = new BasicEventList<Color>();
         colors.add(Color.GRAY);
         colors.add(Color.WHITE);
@@ -45,7 +49,8 @@ public class EventListJXTableSortingTest extends SwingTestCase {
     /**
      * Tests installing without default comparator and without initial sort order.
      */
-    public void guiTestInstallWithoutDefaultComparator() {
+    @Test
+    public void testInstallWithoutDefaultComparator() {
         assertEquals(redComparator, sortedColors.getComparator());
         assertEquals(Arrays.asList(Color.BLACK, Color.GRAY, Color.WHITE), sortedColors);
         EventListJXTableSorting.install(table, sortedColors);
@@ -56,7 +61,8 @@ public class EventListJXTableSortingTest extends SwingTestCase {
     /**
      * Tests installing with default comparator from SortedList and without initial sort order.
      */
-    public void guiTestInstallWithDefaultComparator() {
+    @Test
+    public void testInstallWithDefaultComparator() {
         assertEquals(redComparator, sortedColors.getComparator());
         assertEquals(Arrays.asList(Color.BLACK, Color.GRAY, Color.WHITE), sortedColors);
         EventListJXTableSorting.install(table, sortedColors, sortedColors.getComparator());
@@ -67,7 +73,8 @@ public class EventListJXTableSortingTest extends SwingTestCase {
     /**
      * Tests installing with default comparator different from SortedLists and without initial sort order.
      */
-    public void guiTestInstallWithDefaultComparator2() {
+    @Test
+    public void testInstallWithDefaultComparator2() {
         assertEquals(redComparator, sortedColors.getComparator());
         assertEquals(Arrays.asList(Color.BLACK, Color.GRAY, Color.WHITE), sortedColors);
         EventListJXTableSorting.install(table, sortedColors, alphaComparator);
@@ -78,7 +85,8 @@ public class EventListJXTableSortingTest extends SwingTestCase {
     /**
      * Tests installing without default comparator and with initial sort order.
      */
-    public void guiTestInstallWithSortOrderWithoutDefaultComparator() {
+    @Test
+    public void testInstallWithSortOrderWithoutDefaultComparator() {
         assertEquals(redComparator, sortedColors.getComparator());
         assertEquals(Arrays.asList(Color.BLACK, Color.GRAY, Color.WHITE), sortedColors);
         table.setSortOrder(1, org.jdesktop.swingx.decorator.SortOrder.DESCENDING);
@@ -90,7 +98,8 @@ public class EventListJXTableSortingTest extends SwingTestCase {
     /**
      * Tests installing with default comparator and with initial sort order.
      */
-    public void guiTestInstallWithSortOrderWithDefaultComparator() {
+    @Test
+    public void testInstallWithSortOrderWithDefaultComparator() {
         assertEquals(redComparator, sortedColors.getComparator());
         assertEquals(Arrays.asList(Color.BLACK, Color.GRAY, Color.WHITE), sortedColors);
         table.setSortOrder(1, org.jdesktop.swingx.decorator.SortOrder.DESCENDING);
@@ -102,7 +111,8 @@ public class EventListJXTableSortingTest extends SwingTestCase {
     /**
      * Tests uninstalling.
      */
-    public void guiTestUninstall() {
+    @Test
+    public void testUninstall() {
         final FilterPipeline oldPipeline = table.getFilters();
         final EventListJXTableSorting s = EventListJXTableSorting.install(table, sortedColors, sortedColors.getComparator());
         assertNotSame(oldPipeline, table.getFilters());

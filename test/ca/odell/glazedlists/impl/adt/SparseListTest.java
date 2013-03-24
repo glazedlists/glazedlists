@@ -4,19 +4,23 @@
 package ca.odell.glazedlists.impl.adt;
 
 // for being a JUnit test case
-import junit.framework.TestCase;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * This test verifies that the SparseList works as expected.
  *
  * @author <a href="mailto;kevin@swank.ca">Kevin Maltby</a>
  */
-public class SparseListTest extends TestCase {
+public class SparseListTest {
 
     /** for randomly choosing list indices */
     private Random random = new Random(101);
@@ -27,7 +31,7 @@ public class SparseListTest extends TestCase {
     /**
      * Prepare for the test.
      */
-    @Override
+    @Before
     public void setUp() {
         sparseTree = new SparseList();
     }
@@ -35,7 +39,7 @@ public class SparseListTest extends TestCase {
     /**
      * Clean up after the test.
      */
-    @Override
+    @After
     public void tearDown() {
         sparseTree.clear();
         sparseTree = null;
@@ -44,6 +48,7 @@ public class SparseListTest extends TestCase {
     /**
      * Tests that adding works for values
      */
+    @Test
     public void testSimpleAddValue() {
         sparseTree.add(0, "Test");
         assertEquals(1, sparseTree.size());
@@ -53,6 +58,7 @@ public class SparseListTest extends TestCase {
     /**
      * Tests that adding works for nulls at the end of the tree
      */
+    @Test
     public void testAddTrailingNullOnEmptyTree() {
         sparseTree.add(0, null);
         assertEquals(1, sparseTree.size());
@@ -62,6 +68,7 @@ public class SparseListTest extends TestCase {
     /**
      * Tests that adding works for nulls at the end of the tree
      */
+    @Test
     public void testAddTrailingNullNonEmptyTree() {
         sparseTree.add(0, "Test");
         sparseTree.add(1, null);
@@ -73,6 +80,7 @@ public class SparseListTest extends TestCase {
     /**
      * Tests that adding works for nulls at the end of the tree
      */
+    @Test
     public void testAddLeadingNull() {
         sparseTree.add(0, "Test");
         sparseTree.add(0, null);
@@ -84,6 +92,7 @@ public class SparseListTest extends TestCase {
     /**
      * Tests that adding works when adding a value at the beginning of the tree
      */
+    @Test
     public void testAddValueAtStartNoNulls() {
         sparseTree.add(0, "InitialValue");
         sparseTree.add(0, "Test");
@@ -95,6 +104,7 @@ public class SparseListTest extends TestCase {
     /**
      * Tests that adding works when adding a value at the beginning of the tree
      */
+    @Test
     public void testAddValueAtStartWithNulls() {
         sparseTree.add(0, "InitialValue");
         // Add some leading nulls
@@ -115,6 +125,7 @@ public class SparseListTest extends TestCase {
     /**
      * Tests that adding works when adding a value at the end of the tree
      */
+    @Test
     public void testAddValueAtEndNoNulls() {
         sparseTree.add(0, "InitialValue");
         sparseTree.add(1, "Test");
@@ -126,6 +137,7 @@ public class SparseListTest extends TestCase {
     /**
      * Tests that adding works when adding a value at the end of the tree
      */
+    @Test
     public void testAddValueAtEndWithNulls() {
         sparseTree.add(0, "InitialValue");
         // Add some leading nulls
@@ -146,6 +158,7 @@ public class SparseListTest extends TestCase {
     /**
      * Tests that adding works for a value in the trailing nulls
      */
+    @Test
     public void testAddingValueInTrailingNulls() {
         // Add some trailing nulls
         for(int i = 0; i < 5; i ++) {
@@ -164,6 +177,7 @@ public class SparseListTest extends TestCase {
     /**
      * Tests that adding works for a value somewhere in the leading nulls
      */
+    @Test
     public void testAddingValueInLeadingNulls() {
         sparseTree.add(0, "InitialValue");
         // Add some leading nulls
@@ -184,6 +198,7 @@ public class SparseListTest extends TestCase {
     /**
      * Test that adding works after an AVL-rotation
      */
+    @Test
     public void testAddUntilAVLRotate() {
         for(int i = 0; i < 5; i ++) {
             sparseTree.add(0, new Integer(i));
@@ -198,16 +213,18 @@ public class SparseListTest extends TestCase {
     /**
      * Tests that getIndex() functions correctly
      */
+    @Test
     public void testGetIndex() {
         // Add values and nulls into the tree in no particular order
         for(int i = 0; i < 1000; i++) {
             int index = sparseTree.size() == 0 ? 0 : random.nextInt(sparseTree.size());
 
             // Add a random value at index
-            if(random.nextBoolean()) sparseTree.add(index, new Integer(random.nextInt()));
-
-            // Add a null at index
-            else sparseTree.add(index, null);
+            if(random.nextBoolean()) {
+                sparseTree.add(index, new Integer(random.nextInt()));
+            } else {
+                sparseTree.add(index, null);
+            }
         }
 
         // for each node, look it up and validate
@@ -222,6 +239,7 @@ public class SparseListTest extends TestCase {
     /**
      * Test setting a leading null to a null
      */
+    @Test
     public void testSetNullToNullInTree() {
         // Add three values
         sparseTree.add(0, new Integer(0));
@@ -247,6 +265,7 @@ public class SparseListTest extends TestCase {
     /**
      * Test setting a leading null to a value
      */
+    @Test
     public void testSetNullToValueInTree() {
         // Add three values
         sparseTree.add(0, new Integer(0));
@@ -271,6 +290,7 @@ public class SparseListTest extends TestCase {
     /**
      * Test setting a value to another value
      */
+    @Test
     public void testSetValueToValueInTree() {
         // Add three values
         sparseTree.add(0, new Integer(0));
@@ -295,6 +315,7 @@ public class SparseListTest extends TestCase {
     /**
      * Test setting a value to a null
      */
+    @Test
     public void testSetValueToNullInTree() {
         // Add three values
         sparseTree.add(0, new Integer(0));
@@ -319,6 +340,7 @@ public class SparseListTest extends TestCase {
     /**
      * Test setting a value to a null when the value is at the end of the tree
      */
+    @Test
     public void testSetValueAtEndOfTreeToNull() {
         // Add three values
         sparseTree.add(0, new Integer(0));
@@ -343,6 +365,7 @@ public class SparseListTest extends TestCase {
     /**
      * Test setting a trailing null to a value
      */
+    @Test
     public void testSetNullToNullInTrailingNulls() {
         // Add three values
         sparseTree.add(0, new Integer(0));
@@ -367,6 +390,7 @@ public class SparseListTest extends TestCase {
     /**
      * Test setting a trailing null to a value
      */
+    @Test
     public void testSetNullToValueInTrailingNulls() {
         // Add three values
         sparseTree.add(0, new Integer(0));
@@ -391,6 +415,7 @@ public class SparseListTest extends TestCase {
     /**
      * Tests that a node gets removed from the tree
      */
+    @Test
     public void testSimpleRemove() {
         sparseTree.add(0, new Integer(1));
         sparseTree.remove(0);
@@ -401,6 +426,7 @@ public class SparseListTest extends TestCase {
     /**
      * Tests that a trailing null gets removed
      */
+    @Test
     public void testRemoveTrailingNull() {
         sparseTree.add(0, new Integer(4));
         sparseTree.add(0, new Integer(3));
@@ -421,6 +447,7 @@ public class SparseListTest extends TestCase {
     /**
      * Tests that a leading null gets removed
      */
+    @Test
     public void testRemoveLeadingNull() {
         sparseTree.add(0, new Integer(4));
         sparseTree.add(0, new Integer(3));
@@ -442,6 +469,7 @@ public class SparseListTest extends TestCase {
      * Tests that leading nulls are correctly repositioned when the
      * node they belong to is removed.
      */
+    @Test
     public void testRemovingValueWithLeadingNulls() {
         sparseTree.add(0, new Integer(4));
         sparseTree.add(0, new Integer(3));
@@ -469,6 +497,7 @@ public class SparseListTest extends TestCase {
      * Tests that a remove causing an AVL rotation behaves
      * correctly.
      */
+    @Test
     public void testAVLRotateOnRemove() {
         sparseTree.add(0, new Integer(3));
         sparseTree.add(0, new Integer(2));
@@ -487,6 +516,7 @@ public class SparseListTest extends TestCase {
     /**
      * Test for illegal tree state bug
      */
+    @Test
     public void testIllegalTreeStateBug() {
         sparseTree.add(0, Boolean.TRUE);
         sparseTree.set(0, Boolean.FALSE);
@@ -517,6 +547,7 @@ public class SparseListTest extends TestCase {
      * is the right child of the smallest node in the right subtree
      * of the node being unlinked.
      */
+    @Test
     public void testDisappearingRightChildOnUnlink() {
         sparseTree.add(0, Boolean.TRUE);
         sparseTree.add(1, new Integer(11));
@@ -551,6 +582,7 @@ public class SparseListTest extends TestCase {
     /**
      * Bug Validation
      */
+    @Test
     public void testForNewBug() {
         sparseTree.add(0, new Integer(0));
         sparseTree.add(0, null);
@@ -660,6 +692,7 @@ public class SparseListTest extends TestCase {
     /**
      * Validates that the SparseListIterator is working correctly
      */
+    @Test
     public void testIterator() {
 		for(int i = 0;i < 995;i++) {
 			boolean addInteger = random.nextBoolean();
@@ -696,6 +729,7 @@ public class SparseListTest extends TestCase {
 	/**
 	 * Validates the Iterator works on a SparseList that has no trailing nulls.
 	 */
+	@Test
 	public void testIteratorWithoutTrailingNulls() {
 		// load random values into the SparseList
 		for(int i = 0;i < 145;i++) {
@@ -733,6 +767,7 @@ public class SparseListTest extends TestCase {
 	/**
 	 * Validates the Iterator works on a SparseList that has only trailing nulls.
 	 */
+	@Test
 	public void testIteratorOnTrailingNulls() {
 		// load only trailing nulls into the SparseList
 		for(int i = 0;i < 35;i++) {
@@ -756,6 +791,7 @@ public class SparseListTest extends TestCase {
 	 * Validates that Iterator.remove() works on a SparseList that contains
 	 * only nulls.
 	 */
+	@Test
 	public void testIteratorRemoveWithEmptyTree() {
 		// load only trailing nulls into the SparseList
 		for(int i = 0;i < 10;i++) {
@@ -785,6 +821,7 @@ public class SparseListTest extends TestCase {
      * Tests to verify that the sparse list is consistent after a long
      * series of list operations.
      */
+    @Test
     public void testListOperations() {
         List controlList = new ArrayList();
 
@@ -880,7 +917,9 @@ public class SparseListTest extends TestCase {
                     values[i] = null;
                     nulls++;
 
-                } else values[i] = new Integer(mainRandom.nextInt());
+                } else {
+                    values[i] = new Integer(mainRandom.nextInt());
+                }
             }
 
             try{
@@ -952,7 +991,9 @@ public class SparseListTest extends TestCase {
                     values[i] = null;
                     nulls++;
 
-                } else values[i] = new Integer(mainRandom.nextInt());
+                } else {
+                    values[i] = new Integer(mainRandom.nextInt());
+                }
             }
 
             System.out.println("Running the performance test for setting 500000 elements.");

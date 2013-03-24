@@ -13,9 +13,12 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.table.TableCellRenderer;
 
+import org.junit.Test;
+
 public class TableComparatorChooserTest extends SwingTestCase {
 
-    public void guiTestChangingUIDelegate() throws Exception {
+    @Test
+    public void testChangingUIDelegate() throws Exception {
         String[] properties = {"text"};
         String[] labels = {"Text"};
         TableFormat<JLabel> tableFormat = GlazedLists.tableFormat(properties, labels);

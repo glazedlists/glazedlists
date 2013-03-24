@@ -4,15 +4,17 @@
 package ca.odell.glazedlists.impl.sort;
 
 // for being a JUnit test case
+import ca.odell.glazedlists.GlazedLists;
+
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-import ca.odell.glazedlists.GlazedLists;
+import static org.junit.Assert.*;
 
 /**
  * This test verifies that the BeanComparator works as expected.
@@ -20,11 +22,12 @@ import ca.odell.glazedlists.GlazedLists;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  * @author Andrea Aime
  */
-public class BeanComparatorTest extends TestCase {
+public class BeanComparatorTest {
 
     /**
      * Tests that comparison by property works.
      */
+    @Test
     public void testCompare() {
         Comparator<Position> comparator = GlazedLists.beanPropertyComparator(Position.class, "position");
 
@@ -36,6 +39,7 @@ public class BeanComparatorTest extends TestCase {
     /**
      * Tests that the equals() method of the comparator works.
      */
+    @Test
     public void testEquals() {
         Comparator red = GlazedLists.beanPropertyComparator(Color.class, "red");
         Comparator blue = GlazedLists.beanPropertyComparator(Color.class, "blue");
@@ -50,6 +54,7 @@ public class BeanComparatorTest extends TestCase {
     /**
      * Tests that comparison by property works.
      */
+    @Test
     public void testSort() {
         // prepare the sample list
         List<Position> unsorted = new ArrayList<Position>();

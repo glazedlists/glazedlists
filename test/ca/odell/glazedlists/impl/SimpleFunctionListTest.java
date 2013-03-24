@@ -8,18 +8,21 @@ import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 
 import java.util.Arrays;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests for {@link SimpleFunctionList}.
  *
  * @author Holger Brands
  */
-public class SimpleFunctionListTest extends TestCase {
+public class SimpleFunctionListTest {
     private static final String ZERO = "ZERO";
     private static final String ONE = "ONE";
     private static final String TWO = "TWO";
 
+    @Test
     public void testConstructor() {
         try {
             GlazedLists.transformByFunction(new BasicEventList<String>(), null);
@@ -46,6 +49,7 @@ public class SimpleFunctionListTest extends TestCase {
         assertEquals("T", firstLetters.get(2));
     }
 
+    @Test
     public void testAdd() {
         BasicEventList<String> source = new BasicEventList<String>();
         EventList<String> firstLetters = GlazedLists.transformByFunction(source, GlazedListsTests.getFirstLetterFunction());
@@ -65,6 +69,7 @@ public class SimpleFunctionListTest extends TestCase {
         assertEquals("F", firstLetters.get(4));
     }
 
+    @Test
     public void testSet() {
         BasicEventList<String> source = new BasicEventList<String>();
         EventList<String> firstLetters = GlazedLists.transformByFunction(source, GlazedListsTests.getFirstLetterFunction());
@@ -83,6 +88,7 @@ public class SimpleFunctionListTest extends TestCase {
         assertEquals("T", firstLetters.get(2));
     }
 
+    @Test
     public void testRemove() {
         BasicEventList<String> source = new BasicEventList<String>();
         EventList<String> firstLetters = GlazedLists.transformByFunction(source, GlazedListsTests.getFirstLetterFunction());
@@ -102,6 +108,7 @@ public class SimpleFunctionListTest extends TestCase {
         assertEquals("T", firstLetters.get(1));
     }
 
+    @Test
     public void testReorder() {
         // establish a control for this test case with the normal Function
         SortedList<String> source = new SortedList<String>(new BasicEventList<String>(), null);

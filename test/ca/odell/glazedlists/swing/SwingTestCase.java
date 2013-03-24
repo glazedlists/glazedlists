@@ -3,29 +3,52 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import ca.odell.glazedlists.GuiTestCase;
-
-import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
+
+import javax.swing.SwingUtilities;
+
+import org.junit.Rule;
 
 /**
  * Utility class for running JUnit tests with Swing code.
+ * <p>It uses {@link SwingTestRule} to perfom each test method on the Swing-EDT thread.</p>
  *
- * <p>This class has the following behaviour:
- *
- * <ul>
- *  <li>Extending classes must not define any other <code>testXXX()</code>
- *      methods. The should define only <code>guiTestXXX()</code> methods.</li>
- *
- *  <li>If one test fails, they all fail.</li>
- * </ul>
- *
+ * @author Holger Brands
  * @author James Lemieux
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public abstract class SwingTestCase extends GuiTestCase {
+public abstract class SwingTestCase {
 
-    @Override
+    @Rule
+    public SwingTestRule swingTestRule = new SwingTestRule();
+
+    /**
+     * Run the specified task on a background Thread. If <code>block</code> is
+     * <tt>true</tt> this will method will pause until the task has completed;
+     * otherwise it will return immediately.
+     *
+     * @param task the logic to be executed on a background Thread
+     * @param block true to wait for the background task to complete
+     * @return the thread the background task was started on
+     */
+    protected Thread doBackgroundTask(Runnable task, boolean block) {
+        // start the background task
+        final Thread background = new Thread(task);
+        background.start();
+
+        // wait for the task to complete
+        if (block) {
+            try {
+                background.join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return background;
+    }
+
+//    @Override
     protected final void executeOnGUIThread(Runnable runnable) {
         try {
             SwingUtilities.invokeAndWait(runnable);
@@ -37,14 +60,17 @@ public abstract class SwingTestCase extends GuiTestCase {
             Throwable rootCause = e;
 
             // unwrap all wrapper layers down to the root problem
-            while (rootCause.getCause() != null)
+            while (rootCause.getCause() != null) {
                 rootCause = rootCause.getCause();
+            }
 
-            if (rootCause instanceof RuntimeException)
+            if (rootCause instanceof RuntimeException) {
                 throw (RuntimeException) rootCause;
+            }
 
-            if (rootCause instanceof Error)
+            if (rootCause instanceof Error) {
                 throw (Error) rootCause;
+            }
 
             // embed anything else as a RuntimeException
             throw new RuntimeException(rootCause);

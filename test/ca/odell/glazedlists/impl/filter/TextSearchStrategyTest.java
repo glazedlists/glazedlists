@@ -4,22 +4,26 @@
 package ca.odell.glazedlists.impl.filter;
 
 // for being a JUnit test case
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * This test verifies that the TextSearchStrategy implementations work.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class TextSearchStrategyTest extends TestCase {
+public class TextSearchStrategyTest {
 
     /** the strategies to test */
     private TextSearchStrategy[] strategies;
-    
+
     /**
      * Prepare for the test.
      */
-    @Override
+    @Before
     public void setUp() {
         strategies = new TextSearchStrategy[] {
             new BoyerMooreCaseInsensitiveTextSearchStrategy()
@@ -29,14 +33,15 @@ public class TextSearchStrategyTest extends TestCase {
     /**
      * Clean up after the test.
      */
-    @Override
+    @After
     public void tearDown() {
         strategies = null;
     }
-    
+
     /**
      * Test for a String that is a prefix.
      */
+    @Test
     public void testPrefix() {
         for(int s = 0; s < strategies.length; s++) {
             TextSearchStrategy strategy = strategies[s];
@@ -48,6 +53,7 @@ public class TextSearchStrategyTest extends TestCase {
     /**
      * Test for a String that is a suffix.
      */
+    @Test
     public void testSuffix() {
         for(int s = 0; s < strategies.length; s++) {
             TextSearchStrategy strategy = strategies[s];
@@ -59,6 +65,7 @@ public class TextSearchStrategyTest extends TestCase {
     /**
      * Test for a String that is in the middle.
      */
+    @Test
     public void testMiddle() {
         for(int s = 0; s < strategies.length; s++) {
             TextSearchStrategy strategy = strategies[s];
@@ -70,6 +77,7 @@ public class TextSearchStrategyTest extends TestCase {
     /**
      * Test for a String that is not a substring.
      */
+    @Test
     public void testMissing() {
         for(int s = 0; s < strategies.length; s++) {
             TextSearchStrategy strategy = strategies[s];
@@ -81,6 +89,7 @@ public class TextSearchStrategyTest extends TestCase {
     /**
      * Test for a String that uses characters beyond US-ASCII.
      */
+    @Test
     public void testUnicodeMiddle() {
         for(int s = 0; s < strategies.length; s++) {
             TextSearchStrategy strategy = strategies[s];
@@ -92,6 +101,7 @@ public class TextSearchStrategyTest extends TestCase {
     /**
      * Test for a String that uses characters beyond US-ASCII.
      */
+    @Test
     public void testUnicodeMissing() {
         for(int s = 0; s < strategies.length; s++) {
             TextSearchStrategy strategy = strategies[s];
@@ -110,9 +120,10 @@ public class TextSearchStrategyTest extends TestCase {
      *
      * @see <a href="http://www.unicode.org/charts/">Unicode.org</a>
      */
+    @Test
     public void testUnicodeCollision() {
-        assertEquals(((int)'\u042F'), Character.toUpperCase('\u042F'));
-        assertEquals(((int)'/'), Character.toUpperCase('/'));
+        assertEquals(('\u042F'), Character.toUpperCase('\u042F'));
+        assertEquals(('/'), Character.toUpperCase('/'));
         assertEquals(('\u042F') % 256, ('/') % 256);
 
         for(int s = 0; s < strategies.length; s++) {

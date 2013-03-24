@@ -7,12 +7,16 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.impl.testing.AtLeastMatcherEditor;
-import junit.framework.TestCase;
 
 import java.util.Arrays;
 
-public class WeakReferenceMatcherEditorTest extends TestCase {
+import org.junit.Test;
 
+import static org.junit.Assert.*;
+
+public class WeakReferenceMatcherEditorTest {
+
+    @Test
     public void testWeakReferenceMatcherEditor() {
         final EventList<Integer> source = new BasicEventList<Integer>();
         source.add(new Integer(0));

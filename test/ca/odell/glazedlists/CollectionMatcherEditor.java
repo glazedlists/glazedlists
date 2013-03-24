@@ -3,8 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
+import ca.odell.glazedlists.matchers.Matcher;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -16,7 +16,7 @@ import java.util.Collections;
  */
 public class CollectionMatcherEditor<E> extends AbstractMatcherEditor<E> {
 
-    private Collection current = null;
+    private Collection<E> current = null;
 
     public void matchAll() {
         current = null;
@@ -24,7 +24,7 @@ public class CollectionMatcherEditor<E> extends AbstractMatcherEditor<E> {
     }
 
     public void matchNone() {
-        current = Collections.EMPTY_LIST;
+        current = Collections.emptyList();
         fireMatchNone();
     }
 
@@ -51,7 +51,8 @@ public class CollectionMatcherEditor<E> extends AbstractMatcherEditor<E> {
         public CollectionMatcher(Collection<E> values) {
             this.values = values;
         }
-        public boolean matches(E item) {
+        @Override
+		public boolean matches(E item) {
             return values.contains(item);
         }
     }

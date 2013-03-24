@@ -3,17 +3,21 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
-import junit.framework.TestCase;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Validate that FreezableList freezes and thaws as expected.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class FreezableListTest extends TestCase {
+public class FreezableListTest {
 
+    @Test
     public void testFreezableList() {
         EventList<String> source = new BasicEventList<String>();
         FreezableList<String> freezable = new FreezableList<String>(source);

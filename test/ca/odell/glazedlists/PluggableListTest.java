@@ -3,33 +3,38 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import java.util.Arrays;
-
-import junit.framework.TestCase;
-
 import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
 
-public class PluggableListTest extends TestCase {
+import java.util.Arrays;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+public class PluggableListTest {
 
     private EventList<String> source;
     private PluggableList<String> pl;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         source = new BasicEventList<String>();
         pl = new PluggableList<String>(source);
         ListConsistencyListener.install(pl);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         pl.dispose();
         source = null;
         pl = null;
     }
 
+    @Test
     public void testNormalOperation() {
         source.add("first");
         assertSame("first", pl.get(0));
@@ -41,6 +46,7 @@ public class PluggableListTest extends TestCase {
         assertTrue(pl.isEmpty());
     }
 
+    @Test
     public void testBadSourceSwap() {
         try {
             pl.setSource(null);
@@ -77,6 +83,7 @@ public class PluggableListTest extends TestCase {
         }
     }
 
+    @Test
     public void testListEventFireBySourceSwap() {
         // add some data to the existing source list
         source.addAll(Arrays.asList("james", "kevin", "sam"));

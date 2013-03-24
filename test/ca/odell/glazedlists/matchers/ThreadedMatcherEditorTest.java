@@ -1,19 +1,23 @@
 package ca.odell.glazedlists.matchers;
 
-import java.util.Arrays;
-
-import junit.framework.TestCase;
-
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
+
+import java.util.Arrays;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Test the {@link ThreadedMatcherEditor}.
  *
  * @author James Lemieux
  */
-public class ThreadedMatcherEditorTest extends TestCase {
+public class ThreadedMatcherEditorTest {
 
     // The amount of time (in ms) to wait until the CountingMatcherEditorListener is done processing and begins delaying
     private static final long SIMULATED_PROCESSING_DELAY_STARTS = 100;
@@ -39,8 +43,8 @@ public class ThreadedMatcherEditorTest extends TestCase {
     /**
      * Prepare for the test.
      */
-    @Override
     @SuppressWarnings("unchecked")
+    @Before
     public void setUp() {
         textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
         threadedMatcherEditor = new ThreadedMatcherEditor<String>(textMatcherEditor);
@@ -56,7 +60,7 @@ public class ThreadedMatcherEditorTest extends TestCase {
     /**
      * Clean up after the test.
      */
-    @Override
+    @After
     public void tearDown() {
         threadedMatcherEditor = null;
         textMatcherEditor = null;
@@ -69,6 +73,7 @@ public class ThreadedMatcherEditorTest extends TestCase {
         matchChanged = null;
     }
 
+    @Test
     public void testSimpleCoalescing() {
         this.runCoalescingMatchChangedTest(new MatcherEditor.Event[] {matchAll}, MatcherEditor.Event.MATCH_ALL);
         this.runCoalescingMatchChangedTest(new MatcherEditor.Event[] {matchNone}, MatcherEditor.Event.MATCH_NONE);
@@ -77,6 +82,7 @@ public class ThreadedMatcherEditorTest extends TestCase {
         this.runCoalescingMatchChangedTest(new MatcherEditor.Event[] {matchChanged}, MatcherEditor.Event.CHANGED);
     }
 
+    @Test
     public void testCoalescingSameElements() {
         this.runCoalescingMatchChangedTest(new MatcherEditor.Event[] {matchAll, matchAll, matchAll}, MatcherEditor.Event.MATCH_ALL);
         this.runCoalescingMatchChangedTest(new MatcherEditor.Event[] {matchNone, matchNone, matchNone}, MatcherEditor.Event.MATCH_NONE);
@@ -85,16 +91,19 @@ public class ThreadedMatcherEditorTest extends TestCase {
         this.runCoalescingMatchChangedTest(new MatcherEditor.Event[] {matchChanged, matchChanged, matchChanged}, MatcherEditor.Event.CHANGED);
     }
 
+    @Test
     public void testCoalescingMatchAll() {
         this.runCoalescingMatchChangedTest(new MatcherEditor.Event[] {matchNone, matchRelaxed, matchConstrained, matchChanged, matchAll}, MatcherEditor.Event.MATCH_ALL);
         this.runCoalescingMatchChangedTest(new MatcherEditor.Event[] {matchNone, matchAll}, MatcherEditor.Event.MATCH_ALL);
     }
 
+    @Test
     public void testCoalescingMatchNone() {
         this.runCoalescingMatchChangedTest(new MatcherEditor.Event[] {matchAll, matchRelaxed, matchConstrained, matchChanged, matchNone}, MatcherEditor.Event.MATCH_NONE);
         this.runCoalescingMatchChangedTest(new MatcherEditor.Event[] {matchAll, matchNone}, MatcherEditor.Event.MATCH_NONE);
     }
 
+    @Test
     public void testCoalescingMatchChanged() {
         this.runCoalescingMatchChangedTest(new MatcherEditor.Event[] {matchAll, matchChanged});
         this.runCoalescingMatchChangedTest(new MatcherEditor.Event[] {matchNone, matchChanged});
@@ -136,6 +145,7 @@ public class ThreadedMatcherEditorTest extends TestCase {
     }
 
 
+    @Test
     public void testFiltering() throws InterruptedException {
         filterList.addAll(Arrays.asList("Andy", "Barry", "Colin", "James", "Jesse", "Jesus", "Trevor", "Ursula", "Vanessa", "Zack"));
         assertEquals(10, filterList.size());
@@ -149,6 +159,7 @@ public class ThreadedMatcherEditorTest extends TestCase {
         assertEquals(2, filterList.size());
     }
 
+    @Test
     public void testQueuingConstraints() throws InterruptedException {
         final CountingMatcherEditorListener<String> counter =
             new CountingMatcherEditorListener<String>(SIMULATED_PROCESSING_DELAY);
@@ -169,6 +180,7 @@ public class ThreadedMatcherEditorTest extends TestCase {
         counter.assertCounterState(0, 0, 0, 2, 0);
     }
 
+    @Test
     public void testQueuingRelaxations() throws InterruptedException {
         final CountingMatcherEditorListener<String> counter =
             new CountingMatcherEditorListener<String>(SIMULATED_PROCESSING_DELAY);
@@ -189,6 +201,7 @@ public class ThreadedMatcherEditorTest extends TestCase {
         counter.assertCounterState(0, 0, 0, 1, 1);
     }
 
+    @Test
     public void testQueuingMatchAll() throws InterruptedException {
         final CountingMatcherEditorListener<String> counter =
             new CountingMatcherEditorListener<String>(SIMULATED_PROCESSING_DELAY);
@@ -207,6 +220,7 @@ public class ThreadedMatcherEditorTest extends TestCase {
         counter.assertCounterState(1, 0, 0, 1, 0);
     }
 
+    @Test
     public void testQueuingChanged() throws InterruptedException {
         final CountingMatcherEditorListener<String> counter =
             new CountingMatcherEditorListener<String>(SIMULATED_PROCESSING_DELAY);
@@ -225,6 +239,7 @@ public class ThreadedMatcherEditorTest extends TestCase {
         counter.assertCounterState(0, 0, 1, 1, 0);
     }
 
+    @Test
     public void testQueuingAllSorts_WithPause() throws InterruptedException {
         final CountingMatcherEditorListener<String> counter =
             new CountingMatcherEditorListener<String>(SIMULATED_PROCESSING_DELAY);
@@ -261,6 +276,7 @@ public class ThreadedMatcherEditorTest extends TestCase {
         assertEquals(counter.getChangeCount(), 5);
     }
 
+    @Test
     public void testQueuingAllSorts_WithoutPause() throws InterruptedException {
         final CountingMatcherEditorListener<String> counter =
             new CountingMatcherEditorListener<String>(SIMULATED_PROCESSING_DELAY);

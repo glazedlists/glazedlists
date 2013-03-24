@@ -1,5 +1,12 @@
 package ca.odell.glazedlists.impl;
 
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.DisposableMap;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FunctionList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -13,17 +20,13 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.DisposableMap;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.FunctionList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import static org.junit.Assert.*;
 
-public class GroupingListMultiMapTest extends TestCase {
+public class GroupingListMultiMapTest {
 
+    @Test
     public void testConstructor() {
         // 1. test constructor with filled source list
         EventList<String> source = new BasicEventList<String>();
@@ -66,6 +69,7 @@ public class GroupingListMultiMapTest extends TestCase {
         }
     }
 
+    @Test
     public void testGet() {
         final EventList<String> source = new BasicEventList<String>();
         final Map<? extends Comparable, List<String>> eventMap = GlazedLists.syncEventListToMultiMap(source, new FirstLetterFunction());
@@ -104,6 +108,7 @@ public class GroupingListMultiMapTest extends TestCase {
         assertTrue(eventMap.isEmpty());
     }
 
+    @Test
     public void testContainsKey() {
         final EventList<String> source = new BasicEventList<String>();
         final Map<? extends Comparable, List<String>> eventMap = GlazedLists.syncEventListToMultiMap(source, new FirstLetterFunction());
@@ -144,6 +149,7 @@ public class GroupingListMultiMapTest extends TestCase {
         assertTrue(eventMap.isEmpty());
     }
 
+    @Test
     public void testContainsValue() {
         final EventList<String> source = new BasicEventList<String>();
         final Map<? extends Comparable, List<String>> eventMap = GlazedLists.syncEventListToMultiMap(source, new FirstLetterFunction());
@@ -186,6 +192,7 @@ public class GroupingListMultiMapTest extends TestCase {
         assertTrue(eventMap.isEmpty());
     }
 
+    @Test
     public void testRemove() {
         final EventList<String> source = new BasicEventList<String>();
         final Map<? extends Comparable, List<String>> eventMap = GlazedLists.syncEventListToMultiMap(source, new FirstLetterFunction());
@@ -213,6 +220,7 @@ public class GroupingListMultiMapTest extends TestCase {
         assertNull(eventMap.remove("W"));
     }
 
+    @Test
     public void testValues() {
         final EventList<String> source = new BasicEventList<String>();
         final Map<? extends Comparable, List<String>> eventMap = GlazedLists.syncEventListToMultiMap(source, new FirstLetterFunction());
@@ -242,6 +250,7 @@ public class GroupingListMultiMapTest extends TestCase {
         assertTrue(eventMap.values().contains(GlazedListsTests.delimitedStringToList("Wilson")));
     }
 
+    @Test
     public void testPut() {
         final EventList<String> source = new BasicEventList<String>();
         final Map<Comparable<String>, List<String>> eventMap = GlazedLists.syncEventListToMultiMap(source, new FirstLetterFunction());
@@ -279,6 +288,7 @@ public class GroupingListMultiMapTest extends TestCase {
         }
     }
 
+    @Test
     public void testPutAll() {
         final EventList<String> source = new BasicEventList<String>();
         final Map<Comparable<String>, List<String>> eventMap = GlazedLists.syncEventListToMultiMap(source, new FirstLetterFunction());
@@ -324,6 +334,7 @@ public class GroupingListMultiMapTest extends TestCase {
         }
     }
 
+    @Test
     public void testKeySet() {
         final EventList<String> source = new BasicEventList<String>();
         final Map<Comparable<String>, List<String>> eventMap = GlazedLists.syncEventListToMultiMap(source, new FirstLetterFunction());
@@ -370,6 +381,7 @@ public class GroupingListMultiMapTest extends TestCase {
         assertFalse(eventMap.keySet().contains("J"));
     }
 
+    @Test
     public void testKeySetIterator() {
         final EventList<String> source = new BasicEventList<String>();
         final Map<Comparable<String>, List<String>> eventMap = GlazedLists.syncEventListToMultiMap(source, new FirstLetterFunction());
@@ -450,6 +462,7 @@ public class GroupingListMultiMapTest extends TestCase {
         }
     }
 
+    @Test
     public void testEntrySet() {
         final EventList<String> source = new BasicEventList<String>();
         final Map<Comparable<String>, List<String>> eventMap = GlazedLists.syncEventListToMultiMap(source, new FirstLetterFunction());
@@ -486,6 +499,7 @@ public class GroupingListMultiMapTest extends TestCase {
         assertTrue(eventMap.entrySet().isEmpty());
     }
 
+    @Test
     public void testEntrySetIterator() {
         final EventList<String> source = new BasicEventList<String>();
         final Map<Comparable<String>, List<String>> eventMap = GlazedLists.syncEventListToMultiMap(source, new FirstLetterFunction());
@@ -591,6 +605,7 @@ public class GroupingListMultiMapTest extends TestCase {
         }
     }
 
+    @Test
     public void testMapEntrySetValue() {
         final EventList<String> source = new BasicEventList<String>();
         final Map<Comparable<String>, List<String>> eventMap = GlazedLists.syncEventListToMultiMap(source, new FirstLetterFunction());
@@ -622,6 +637,7 @@ public class GroupingListMultiMapTest extends TestCase {
         }
     }
 
+    @Test
     public void testMapEntryEquals() {
         final EventList<String> source = new BasicEventList<String>();
         final Map<Comparable<String>, List<String>> eventMap = GlazedLists.syncEventListToMultiMap(source, new FirstLetterFunction());
@@ -647,6 +663,7 @@ public class GroupingListMultiMapTest extends TestCase {
         assertFalse(entry.equals(entry2Next));
     }
 
+    @Test
     public void testWriteThroughValues() {
         final EventList<String> source = new BasicEventList<String>();
         final Map<Comparable<String>, List<String>> eventMap = GlazedLists.syncEventListToMultiMap(source, new FirstLetterFunction());
@@ -661,6 +678,7 @@ public class GroupingListMultiMapTest extends TestCase {
         runListIteratorMutationTest(jNames.listIterator(3), "J");
     }
 
+    @Test
     public void testWriteThroughValues2() {
         final EventList<String> source = new BasicEventList<String>();
         FirstLetterFunction f = new FirstLetterFunction();
@@ -676,6 +694,7 @@ public class GroupingListMultiMapTest extends TestCase {
         assertEquals(GlazedListsTests.delimitedStringToList("James Jesse Jordache Jordan"), jNames);
     }
 
+    @Test
     public void testWriteThroughValues3() {
         final EventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.delimitedStringToList("James Lemieux Jesse Wilson"));
@@ -690,6 +709,7 @@ public class GroupingListMultiMapTest extends TestCase {
         runListIteratorMutationTest(jNames.listIterator(3), "J");
     }
 
+    @Test
     public void testExplicitComparatorForUncomparableValues() {
         final EventList<UncomparableValue> source = new BasicEventList<UncomparableValue>();
         final FunctionList.Function<UncomparableValue, UncomparableKey> keyFunction = GlazedLists.beanFunction(UncomparableValue.class, "key");
@@ -719,6 +739,7 @@ public class GroupingListMultiMapTest extends TestCase {
         assertEquals(Arrays.asList(value1, value3), eventMap.get(key3));
     }
 
+    @Test
     public void testExplicitComparatorForUncomparableValues2() {
         final EventList<ComparableValue> source = new BasicEventList<ComparableValue>();
 
@@ -743,6 +764,7 @@ public class GroupingListMultiMapTest extends TestCase {
         assertEquals(naturalMap.get(new AFirstLetterComparable(new ComparableKey("Fred"))), Collections.singletonList(source.get(4)));
     }
 
+    @Test
     public void testImplicitComparatorForComparableValues() {
         final EventList<ComparableValue> source = new BasicEventList<ComparableValue>();
 
@@ -769,6 +791,7 @@ public class GroupingListMultiMapTest extends TestCase {
         assertEquals(naturalMap.get(new ComparableKey("Fred")), Collections.singletonList(source.get(4)));
     }
 
+    @Test
     public void testUnnaturalStringKeyGeneric() {
         final EventList<ComparableValue> source = new BasicEventList<ComparableValue>();
 
@@ -792,6 +815,7 @@ public class GroupingListMultiMapTest extends TestCase {
         assertEquals(naturalMap.get("F"), Collections.singletonList(source.get(4)));
     }
 
+    @Test
     public void testDispose() {
         final EventList<String> source = new BasicEventList<String>();
         final DisposableMap<Comparable<String>, List<String>> eventMap = GlazedLists.syncEventListToMultiMap(source, new FirstLetterFunction());

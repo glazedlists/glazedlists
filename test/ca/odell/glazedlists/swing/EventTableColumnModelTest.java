@@ -3,6 +3,10 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,9 +27,10 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedLists;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * The general testing strategy in this class is to put a DefaultTableColumnModel
@@ -39,16 +44,17 @@ public class EventTableColumnModelTest extends SwingTestCase {
     // so they can be compared for consistency at a later time
     private TableColumnEventWatcher watcher;
 
-    @Override
-    public void guiSetUp() {
+    @Before
+    public void setUp() {
         watcher = new TableColumnEventWatcher();
     }
 
-    public void guiTestConstructor() {
+    @Test
+    public void testConstructor() {
         // test empty models
         EventTableColumnModel eventModel = watcher.createEventModel(new BasicEventList<TableColumn>());
         DefaultTableColumnModel defaultModel = watcher.createDefaultModel(Collections.EMPTY_LIST);
-        assertEquals(eventModel, defaultModel);
+        assertModelEquals(eventModel, defaultModel);
         watcher.assertFiredEventsAgreeAndClear();
 
         // test models with data
@@ -57,7 +63,7 @@ public class EventTableColumnModelTest extends SwingTestCase {
         columns.add(createColumn("age"));
         defaultModel = watcher.createDefaultModel(columns);
         eventModel = watcher.createEventModel(columns);
-        assertEquals(eventModel, defaultModel);
+        assertModelEquals(eventModel, defaultModel);
         watcher.assertFiredEventsAgreeAndClear();
 
         // test model with null TableColumn
@@ -69,7 +75,8 @@ public class EventTableColumnModelTest extends SwingTestCase {
         }
     }
 
-    public void guiTestAddColumn() {
+    @Test
+    public void testAddColumn() {
         // create 3 models with the same TableColumns
         EventList<TableColumn> columns = new BasicEventList<TableColumn>();
         columns.add(createColumn("name"));
@@ -79,9 +86,9 @@ public class EventTableColumnModelTest extends SwingTestCase {
         EventTableColumnModel eventModel1 = watcher.createEventModel(columns);
         EventTableColumnModel eventModel2 = watcher.createEventModel(GlazedLists.eventList(columns));
 
-        assertEquals(eventModel1, defaultModel);
-        assertEquals(eventModel2, defaultModel);
-        assertEquals(eventModel1, eventModel2);
+        assertModelEquals(eventModel1, defaultModel);
+        assertModelEquals(eventModel2, defaultModel);
+        assertModelEquals(eventModel1, eventModel2);
 
         defaultModel.getSelectionModel().addSelectionInterval(0, 0);
         eventModel1.getSelectionModel().addSelectionInterval(0, 0);
@@ -96,13 +103,14 @@ public class EventTableColumnModelTest extends SwingTestCase {
         eventModel2.addColumn(newColumn);
         assertEquals(3, newColumn.getPropertyChangeListeners().length);
 
-        assertEquals(eventModel1, defaultModel);
-        assertEquals(eventModel2, defaultModel);
-        assertEquals(eventModel1, eventModel2);
+        assertModelEquals(eventModel1, defaultModel);
+        assertModelEquals(eventModel2, defaultModel);
+        assertModelEquals(eventModel1, eventModel2);
         watcher.assertFiredEventsAgreeAndClear();
     }
 
-    public void guiTestRemoveColumn() {
+    @Test
+    public void testRemoveColumn() {
         final TableColumn nameColumn = createColumn("name");
         EventList<TableColumn> columns = new BasicEventList<TableColumn>();
         columns.add(nameColumn);
@@ -110,17 +118,17 @@ public class EventTableColumnModelTest extends SwingTestCase {
         DefaultTableColumnModel defaultModel = watcher.createDefaultModel(columns);
         EventTableColumnModel eventModel1 = watcher.createEventModel(columns);
         EventTableColumnModel eventModel2 = watcher.createEventModel(GlazedLists.eventList(columns));
-        assertEquals(eventModel1, defaultModel);
-        assertEquals(eventModel2, defaultModel);
-        assertEquals(eventModel1, eventModel2);
+        assertModelEquals(eventModel1, defaultModel);
+        assertModelEquals(eventModel2, defaultModel);
+        assertModelEquals(eventModel1, eventModel2);
         assertEquals(3, nameColumn.getPropertyChangeListeners().length);
 
         columns.remove(0);
         defaultModel.removeColumn(nameColumn);
         eventModel2.removeColumn(nameColumn);
-        assertEquals(eventModel1, defaultModel);
-        assertEquals(eventModel2, defaultModel);
-        assertEquals(eventModel1, eventModel2);
+        assertModelEquals(eventModel1, defaultModel);
+        assertModelEquals(eventModel2, defaultModel);
+        assertModelEquals(eventModel1, eventModel2);
         assertEquals(0, nameColumn.getPropertyChangeListeners().length);
         watcher.assertFiredEventsAgreeAndClear();
     }
@@ -132,7 +140,8 @@ public class EventTableColumnModelTest extends SwingTestCase {
      * does not yet have a move event defined. The belief is that in practice
      * this will produce the same net results anyway.
      */
-    public void guiTestMoveColumn() {
+    @Test
+    public void testMoveColumn() {
         final TableColumn nameColumn = createColumn("name");
         EventList<TableColumn> columns = new BasicEventList<TableColumn>();
         columns.add(nameColumn);
@@ -140,9 +149,9 @@ public class EventTableColumnModelTest extends SwingTestCase {
         DefaultTableColumnModel defaultModel = watcher.createDefaultModel(columns);
         EventTableColumnModel eventModel1 = watcher.createEventModel(columns);
         EventTableColumnModel eventModel2 = watcher.createEventModel(GlazedLists.eventList(columns));
-        assertEquals(eventModel1, defaultModel);
-        assertEquals(eventModel2, defaultModel);
-        assertEquals(eventModel1, eventModel2);
+        assertModelEquals(eventModel1, defaultModel);
+        assertModelEquals(eventModel2, defaultModel);
+        assertModelEquals(eventModel1, eventModel2);
         assertEquals(3, nameColumn.getPropertyChangeListeners().length);
 
         // move the column at index 0 to index 1
@@ -151,9 +160,9 @@ public class EventTableColumnModelTest extends SwingTestCase {
         defaultModel.removeColumn(nameColumn);
         defaultModel.addColumn(nameColumn);
         eventModel2.moveColumn(0, 1);
-        assertEquals(eventModel1, defaultModel);
-        assertEquals(eventModel2, defaultModel);
-        assertEquals(eventModel1, eventModel2);
+        assertModelEquals(eventModel1, defaultModel);
+        assertModelEquals(eventModel2, defaultModel);
+        assertModelEquals(eventModel1, eventModel2);
         assertEquals(3, nameColumn.getPropertyChangeListeners().length);
 
         // move the column at index 0 to index 0 (this simulates dragging a column to reorder it)
@@ -164,7 +173,8 @@ public class EventTableColumnModelTest extends SwingTestCase {
         watcher.assertFiredEventsAgreeAndClear();
     }
 
-    public void guiTestMoveSelectedColumn() {
+    @Test
+    public void testMoveSelectedColumn() {
         final TableColumn nameColumn = createColumn("name");
         EventList<TableColumn> columns = new BasicEventList<TableColumn>();
         columns.add(nameColumn);
@@ -172,25 +182,26 @@ public class EventTableColumnModelTest extends SwingTestCase {
 
         DefaultTableColumnModel defaultModel = watcher.createDefaultModel(columns);
         EventTableColumnModel eventModel = watcher.createEventModel(columns);
-        assertEquals(eventModel, defaultModel);
+        assertModelEquals(eventModel, defaultModel);
 
         // move the unselected column at index 0 to index 1
         eventModel.moveColumn(0, 1);
         defaultModel.moveColumn(0, 1);
-        assertEquals(eventModel, defaultModel);
+        assertModelEquals(eventModel, defaultModel);
 
         // select column 0
         eventModel.getSelectionModel().addSelectionInterval(0, 0);
         defaultModel.getSelectionModel().addSelectionInterval(0, 0);
-        assertEquals(eventModel, defaultModel);
+        assertModelEquals(eventModel, defaultModel);
 
         // move the *selected* column at index 0 to index 1
         eventModel.moveColumn(0, 1);
         defaultModel.moveColumn(0, 1);
-        assertEquals(eventModel, defaultModel);
+        assertModelEquals(eventModel, defaultModel);
     }
 
-    public void guitTestGetColumnIndex() {
+    @Test
+    public void testGetColumnIndex() {
         EventList<TableColumn> columns = new BasicEventList<TableColumn>();
         columns.add(createColumn("name"));
         columns.add(createColumn("age"));
@@ -218,7 +229,8 @@ public class EventTableColumnModelTest extends SwingTestCase {
         }
     }
 
-    public void guitTestGetColumn() {
+    @Test
+    public void testGetColumn() {
         final TableColumn nameColumn = createColumn("name");
         final TableColumn ageColumn = createColumn("age");
 
@@ -247,7 +259,8 @@ public class EventTableColumnModelTest extends SwingTestCase {
         }
     }
 
-    public void guitTestGetColumnIndexAtX() {
+    @Test
+    public void testGetColumnIndexAtX() {
         final TableColumn nameColumn = createColumn("name");
         final TableColumn ageColumn = createColumn("age");
 
@@ -271,7 +284,7 @@ public class EventTableColumnModelTest extends SwingTestCase {
         return column;
     }
 
-    private void assertEquals(TableColumnModel model1, TableColumnModel model2) {
+    private void assertModelEquals(TableColumnModel model1, TableColumnModel model2) {
         assertTrue(Arrays.equals(model1.getSelectedColumns(), model2.getSelectedColumns()));
         assertEquals(model1.getTotalColumnWidth(), model2.getTotalColumnWidth());
         assertEquals(model1.getSelectedColumnCount(), model2.getSelectedColumnCount());
@@ -328,8 +341,9 @@ public class EventTableColumnModelTest extends SwingTestCase {
 
         private DefaultTableColumnModel createDefaultModel(Collection<TableColumn> columns) {
             DefaultTableColumnModel model = new DefaultTableColumnModel();
-            for (Iterator<TableColumn> i = columns.iterator(); i.hasNext();)
+            for (Iterator<TableColumn> i = columns.iterator(); i.hasNext();) {
                 model.addColumn(i.next());
+            }
 
             model.setColumnSelectionAllowed(true);
             addModel(model);
@@ -343,20 +357,27 @@ public class EventTableColumnModelTest extends SwingTestCase {
         }
 
         private TableColumnModel getTableColumnModel(Object o) {
-            if (o instanceof TableColumnModel)
+            if (o instanceof TableColumnModel) {
                 return (TableColumnModel) o;
+            }
 
             final TableColumnModel model = objectToTableColumnModelMap.get(o);
-            if (model == null)
+            if (model == null) {
                 throw new IllegalArgumentException("unable to locate TableColumnModel for key object: " + o);
+            }
 
             return model;
         }
 
+        @Override
         public void columnAdded(TableColumnModelEvent e) { addEvent(e); }
+        @Override
         public void columnRemoved(TableColumnModelEvent e) { addEvent(e); }
+        @Override
         public void columnMoved(TableColumnModelEvent e) { addEvent(e); }
+        @Override
         public void columnMarginChanged(ChangeEvent e) { addEvent(e); }
+        @Override
         public void columnSelectionChanged(ListSelectionEvent e) { addEvent(e); }
 
         /**

@@ -1,18 +1,22 @@
 package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import junit.framework.TestCase;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class FunctionListTest extends TestCase {
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+public class FunctionListTest {
 
     private static final Integer ZERO = new Integer(0);
     private static final Integer ONE = new Integer(1);
     private static final Integer TWO = new Integer(2);
     private static final Integer NINE = new Integer(9);
 
+    @Test
     public void testConstructor() {
         try {
             new FunctionList<Integer,String>(new BasicEventList<Integer>(), null);
@@ -43,6 +47,7 @@ public class FunctionListTest extends TestCase {
         assertEquals("2", intsToStrings.get(2));
     }
 
+    @Test
     public void testAdd() {
         EventList<Integer> source = new BasicEventList<Integer>();
         FunctionList<Integer, String> intsToStrings = new FunctionList<Integer, String>(source, new IntegerToString(), new StringToInteger());
@@ -84,6 +89,7 @@ public class FunctionListTest extends TestCase {
         } catch (IllegalStateException e) {}
     }
 
+    @Test
     public void testAddAll() {
         EventList<Integer> source = new BasicEventList<Integer>();
         FunctionList<Integer, String> intsToStrings = new FunctionList<Integer, String>(source, new IntegerToString(), new StringToInteger());
@@ -101,6 +107,7 @@ public class FunctionListTest extends TestCase {
         assertEquals("2", intsToStrings.get(2));
     }
 
+    @Test
     public void testSet() {
         EventList<Integer> source = new BasicEventList<Integer>();
         FunctionList<Integer, String> intsToStrings = new FunctionList<Integer, String>(source, new IntegerToString(), new StringToInteger());
@@ -126,6 +133,7 @@ public class FunctionListTest extends TestCase {
         assertEquals("9", intsToStrings.get(0));
     }
 
+    @Test
     public void testRemove() {
         EventList<Integer> source = new BasicEventList<Integer>();
         FunctionList<Integer, String> intsToStrings = new FunctionList<Integer, String>(source, new IntegerToString(), new StringToInteger());
@@ -143,6 +151,7 @@ public class FunctionListTest extends TestCase {
         assertEquals("2", intsToStrings.get(0));
     }
 
+    @Test
     public void testAdvancedFunction() {
         // establish a control for this test case with the normal Function
         EventList<Integer> source = new BasicEventList<Integer>();
@@ -224,6 +233,7 @@ public class FunctionListTest extends TestCase {
         }
     }
 
+    @Test
     public void testReorder() {
         // establish a control for this test case with the normal Function
         SortedList<Integer> source = new SortedList<Integer>(new BasicEventList<Integer>(), null);
@@ -239,6 +249,7 @@ public class FunctionListTest extends TestCase {
         assertEquals(3, consistencyListener.getEventCount());
     }
 
+    @Test
     public void testSetForwardFunction() {
         // establish a control for this test case with the normal Function
         EventList<Integer> source = new BasicEventList<Integer>();
@@ -266,6 +277,7 @@ public class FunctionListTest extends TestCase {
         }
     }
 
+    @Test
     public void testSetReverseFunction() {
         // establish a control for this test case with the normal Function
         EventList<Integer> source = new BasicEventList<Integer>();

@@ -7,11 +7,14 @@ package ca.odell.glazedlists;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.Matchers;
-import junit.framework.TestCase;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests that an event list can depend upon a single source via multiple independent
@@ -22,7 +25,7 @@ import java.util.List;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class MultipleSourcesTest extends TestCase {
+public class MultipleSourcesTest {
 
     /**
      * Tests whether an EventList can depend upon multiple sources simultaneously.
@@ -32,6 +35,7 @@ public class MultipleSourcesTest extends TestCase {
      * be notified one at a time. This verifies that Glazed Lists behaves correctly
      * after the first has been notified but before the second has been notified.
      */
+    @Test
     public void testMultipleSources() {
         BasicEventList<String> source = new BasicEventList<String>();
         FilterList<String> filterOne = new FilterList<String>(source, Matchers.trueMatcher());
@@ -69,6 +73,7 @@ public class MultipleSourcesTest extends TestCase {
      * Tests whether an EventList can depend upon multiple sources simultaneously
      * when not all of the sources are directly registered as ListEventListeners.
      */
+    @Test
     public void testMultipleSourcesNoListener() {
         BasicEventList<String> source = new BasicEventList<String>();
         FilterList<String> filterOne = new FilterList<String>(source, Matchers.trueMatcher());

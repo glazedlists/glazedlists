@@ -3,10 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import java.util.List;
-
-import junit.framework.TestCase;
-
 import ca.odell.glazedlists.impl.testing.AtLeastMatcherEditor;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
@@ -16,10 +12,16 @@ import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.Matchers;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
 
+import java.util.List;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
 /**
  * Tests the generic FilterList class.
  */
-public class FilterListTest extends TestCase {
+public class FilterListTest {
 
     /**
      * This test ensures FilterList's generic arguments are correct.
@@ -32,6 +34,7 @@ public class FilterListTest extends TestCase {
      * <p>FilterList<Number> can accept a MatcherEditor<Number> or MatcherEditor<Object>, but not
      * a MatcherEditor<Integer>.
      */
+    @Test
     public void testGenericsCompile() {
         final Matcher<Number> numberMatcher = GlazedListsTests.matchAtLeast(0);
         final MatcherEditor<Number> numberMatcherEditor = new AtLeastMatcherEditor();
@@ -56,6 +59,7 @@ public class FilterListTest extends TestCase {
         filtered.setMatcherEditor(numberMatcherEditor);
     }
 
+    @Test
     public void testRemovedValueInListEvent() {
         // construct a (contrived) list of initial values
         EventList<String> original = new BasicEventList<String>();
@@ -92,6 +96,7 @@ public class FilterListTest extends TestCase {
     }
 
 
+    @Test
     public void testReplacedValueInListEvent() {
         // construct a (contrived) list of initial values
         EventList<String> original = new BasicEventList<String>();
@@ -121,6 +126,7 @@ public class FilterListTest extends TestCase {
     /**
      * This test demonstrates Issue 213.
      */
+    @Test
     public void testRelax() {
         // construct a (contrived) list of initial values
         EventList<Integer> original = new BasicEventList<Integer>();
@@ -185,6 +191,7 @@ public class FilterListTest extends TestCase {
 	/**
 	 * Test Matchers that fire matchAll() and matchNone() events.
 	 */
+	@Test
 	public void testMatchAllOrNothing() {
 		EventList<Integer> baseList = new BasicEventList<Integer>();
 		baseList.add(new Integer(1));
@@ -218,6 +225,7 @@ public class FilterListTest extends TestCase {
 		assertEquals(5, filterList.size());
 	}
 
+    @Test
     public void testDispose() {
         EventList<String> baseList = GlazedLists.eventListOf("A", "B", "C", "C", "B", "A");
         FilterList<String> filterList = new FilterList<String>(baseList);
@@ -246,12 +254,15 @@ public class FilterListTest extends TestCase {
 /**
  * Matcher that allows testing matchAll() and matchNone().
  */
-class AllOrNothingMatcherEditor extends AbstractMatcherEditor {
+class AllOrNothingMatcherEditor extends AbstractMatcherEditor<Object> {
     /**
      * @param state True show everything, otherwise show nothing
      */
     public void showAll(boolean state) {
-        if (state) fireMatchAll();
-        else fireMatchNone();
+        if (state) {
+            fireMatchAll();
+        } else {
+            fireMatchNone();
+        }
     }
 }

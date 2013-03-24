@@ -16,16 +16,19 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class SeparatorListTest extends TestCase {
+public class SeparatorListTest {
 
     /**
      * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=364">Bug 364</a>
      */
+    @Test
     public void testUpdateProblem() {
         EventList<String> source = new BasicEventList<String>();
         SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
@@ -41,6 +44,7 @@ public class SeparatorListTest extends TestCase {
         assertSeparatorEquals(separatorList.get(2), 2, "B");
     }
 
+    @Test
     public void testUpdate1() {
         EventList<String> source = new BasicEventList<String>();
         SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
@@ -57,6 +61,7 @@ public class SeparatorListTest extends TestCase {
     /**
      * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=364">Bug 364</a>
      */
+    @Test
     public void testUpdateProblem2() {
         EventList<String> source = new BasicEventList<String>();
         SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
@@ -70,6 +75,7 @@ public class SeparatorListTest extends TestCase {
     }
 
     /** Change from AACCC -> AAACC. */
+    @Test
     public void testUpdateBug500() {
         EventList<String> source = new BasicEventList<String>();
         SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
@@ -84,6 +90,7 @@ public class SeparatorListTest extends TestCase {
     }
 
     /** Change from AAACC -> AACCC. */
+    @Test
     public void testUpdate2Bug500() {
         EventList<String> source = new BasicEventList<String>();
         SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
@@ -97,6 +104,7 @@ public class SeparatorListTest extends TestCase {
         assertSeparatorEquals(separatorList.get(3), 3, "C");
     }
 
+    @Test
     public void testUpdate3() {
         EventList<String> source = new BasicEventList<String>();
         SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
@@ -110,6 +118,7 @@ public class SeparatorListTest extends TestCase {
     }
 
 
+    @Test
     public void testUpdate4() {
         EventList<String> source = new BasicEventList<String>();
         SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
@@ -122,6 +131,7 @@ public class SeparatorListTest extends TestCase {
         assertSeparatorEquals(separatorList.get(0), 2, "B");
         assertSeparatorEquals(separatorList.get(3), 1, "C");
     }
+    @Test
     public void testUpdate5() {
         EventList<String> source = new BasicEventList<String>();
         SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
@@ -136,6 +146,7 @@ public class SeparatorListTest extends TestCase {
         assertSeparatorEquals(separatorList.get(4), 2, "C");
     }
 
+    @Test
     public void testUpdate6() {
         EventList<String> source = new BasicEventList<String>();
         SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
@@ -153,6 +164,7 @@ public class SeparatorListTest extends TestCase {
     /**
      * Update element in singleton list.
      */
+    @Test
     public void testUpdateSingletonList() {
         EventList<String> source = new BasicEventList<String>();
         SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
@@ -168,6 +180,7 @@ public class SeparatorListTest extends TestCase {
     /**
      * Updating element leads to group removal.
      */
+    @Test
     public void testUpdateElemRemoveGroup() {
         EventList<String> source = new BasicEventList<String>();
         SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
@@ -182,6 +195,7 @@ public class SeparatorListTest extends TestCase {
     /**
      * Removing element leads to group removal.
      */
+    @Test
     public void testRemoveElemRemoveGroup() {
         EventList<String> source = new BasicEventList<String>();
         SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
@@ -198,6 +212,7 @@ public class SeparatorListTest extends TestCase {
     /**
      * Adding element leads to group addition.
      */
+    @Test
     public void testAddElemAddGroup() {
         EventList<String> source = new BasicEventList<String>();
         SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
@@ -214,6 +229,7 @@ public class SeparatorListTest extends TestCase {
         assertSeparatorEquals(separatorList.get(5), 1, "C");
     }
 
+    @Test
     public void testSimpleSetup() {
         EventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.stringToList("AAAABBBDDD"));
@@ -359,6 +375,7 @@ public class SeparatorListTest extends TestCase {
     }
 
 
+    @Test
     public void testLimit() {
         EventList<String> source = SortedList.create(new BasicEventList<String>());
         source.addAll(GlazedListsTests.stringToList("AAAAAAABBCCCCC"));
@@ -433,6 +450,7 @@ public class SeparatorListTest extends TestCase {
 
     }
 
+    @Test
     public void testMinimumSize() {
         EventList<String> source = SortedList.create(new BasicEventList<String>());
         source.addAll(GlazedListsTests.stringToList("AAABCCC"));
@@ -453,6 +471,7 @@ public class SeparatorListTest extends TestCase {
         assertEquals(9, separatorList.size());
     }
 
+    @Test
     public void testAdjustLimit() {
         EventList<String> source = SortedList.create(new BasicEventList<String>());
         source.addAll(GlazedListsTests.stringToList("AAABBBBBBBCCC"));
@@ -492,6 +511,7 @@ public class SeparatorListTest extends TestCase {
         assertEquals(9, separatorList.size());
     }
 
+    @Test
     public void testClear() {
         EventList<String> source = SortedList.create(new BasicEventList<String>());
         source.addAll(GlazedListsTests.stringToList("AAABBBBBBBCCC"));
@@ -504,6 +524,7 @@ public class SeparatorListTest extends TestCase {
         assertEquals(Collections.EMPTY_LIST, separatorList);
     }
 
+    @Test
     public void testSortedSource() {
         Comparator<String> alphabetical = GlazedLists.comparableComparator();
         Comparator<String> length = GlazedLists.reverseComparator(new StringLengthComparator());
@@ -533,6 +554,7 @@ public class SeparatorListTest extends TestCase {
      * Make sure the SeparatorList handles sortings of the source list correctly,
      * by reflecting the new elements in that list.
      */
+    @Test
     public void testSortSource() {
         Comparator<String> caseSensitive = GlazedLists.comparableComparator();
         Comparator<String> caseInsensitive = String.CASE_INSENSITIVE_ORDER;
@@ -582,6 +604,7 @@ public class SeparatorListTest extends TestCase {
     /**
      * See what happens when we filter out separators.
      */
+    @Test
     public void testRemoveInsertSeparators() {
         BasicEventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.stringToList("AABBBCCCCDDDDEFGHHHH"));
@@ -632,6 +655,7 @@ public class SeparatorListTest extends TestCase {
 
 
 
+    @Test
     public void testSeparatorIsThreadSafe() throws InterruptedException {
         final BasicEventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.stringToList("AABBBCCCCDDDDEFGHHHH"));
@@ -676,6 +700,7 @@ public class SeparatorListTest extends TestCase {
      *
      * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=328">Issue 328</a>
      */
+    @Test
     public void testSetComparator() {
         EventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.stringToList("AAaaaBBBBbCCCddd"));
@@ -717,6 +742,7 @@ public class SeparatorListTest extends TestCase {
      *
      * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=453">Issue 453</a>
      */
+    @Test
     public void testSetComparatorWithLimit() {
         EventList<String> source = new BasicEventList<String>();
         source.addAll(GlazedListsTests.stringToList("AAaaaBBBBbCCCddd"));
@@ -828,6 +854,7 @@ public class SeparatorListTest extends TestCase {
      *
      * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=322">Issue 322</a>
      */
+    @Test
     public void testHandleChange() {
         TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
         FilterList<String> filtered = new FilterList<String>(source);
@@ -883,6 +910,7 @@ public class SeparatorListTest extends TestCase {
     /**
      * A mechanically simplified version of {@link #testHandleChange()}.
      */
+    @Test
     public void testHandleChangeSimplified() {
         TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
         SeparatorList<String> separated = new SeparatorList<String>(source, GlazedLists.comparableComparator(), 1, Integer.MAX_VALUE);
@@ -915,6 +943,7 @@ public class SeparatorListTest extends TestCase {
     /**
      * Make sure that SeparatorList handles update events properly.
      */
+    @Test
     public void testHandleUpdateEvents() {
         EventList<String> source = new BasicEventList<String>();
         SeparatorList<String> separated = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
@@ -936,6 +965,7 @@ public class SeparatorListTest extends TestCase {
         assertEquals(1, separated.size());
     }
 
+    @Test
     public void testSet() {
         EventList<String> source = new BasicEventList<String>();
         SeparatorList<String> separated = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
@@ -971,6 +1001,7 @@ public class SeparatorListTest extends TestCase {
         }
     }
 
+    @Test
     public void testAdd() {
         EventList<String> source = new BasicEventList<String>();
         SeparatorList<String> separated = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
@@ -1012,6 +1043,7 @@ public class SeparatorListTest extends TestCase {
         }
     }
 
+    @Test
     public void testRemove() {
         EventList<String> source = new BasicEventList<String>();
         SeparatorList<String> separated = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);

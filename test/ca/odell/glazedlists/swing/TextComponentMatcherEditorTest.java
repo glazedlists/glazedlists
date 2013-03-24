@@ -8,9 +8,15 @@ import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.impl.filter.TextMatcher;
 import ca.odell.glazedlists.matchers.SimpleMatcherEditorListener;
 
-import javax.swing.*;
+import javax.swing.JTextField;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.PlainDocument;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Test {@link TextComponentMatcherEditor}.
@@ -21,17 +27,18 @@ public class TextComponentMatcherEditorTest extends SwingTestCase {
 
     private SimpleMatcherEditorListener eventCounter;
 
-    @Override
-    public void guiSetUp() {
+    @Before
+    public void setUp() {
         eventCounter = new SimpleMatcherEditorListener();
     }
 
-    @Override
-    public void guiTearDown() {
+    @After
+    public void tearDown() {
         eventCounter = null;
     }
 
-    public void guiTestConstructors() {
+    @Test
+    public void testConstructors() {
         JTextField textComponent = new JTextField();
         AbstractDocument document = (AbstractDocument) textComponent.getDocument();
         int initialDocumentListenerCount = document.getDocumentListeners().length;
@@ -73,7 +80,8 @@ public class TextComponentMatcherEditorTest extends SwingTestCase {
     /**
      * Test that this thing works, even if our document is preloaded with data.
      */
-    public void guiTestPrePopulated() {
+    @Test
+    public void testPrePopulated() {
         eventCounter.assertNoEvents(0);
 
         // test the text field
@@ -92,7 +100,8 @@ public class TextComponentMatcherEditorTest extends SwingTestCase {
     /**
      * Test that this thing works when the document is changed.
      */
-    public void guiTestChangeDocument() {
+    @Test
+    public void testChangeDocument() {
         eventCounter.assertNoEvents(0);
 
         // test the text field
@@ -117,7 +126,8 @@ public class TextComponentMatcherEditorTest extends SwingTestCase {
     /**
      * Test that this thing works when live is turned off.
      */
-    public void guiTestNonLive() {
+    @Test
+    public void testNonLive() {
         eventCounter.assertNoEvents(0);
 
         // test the text field
@@ -137,7 +147,8 @@ public class TextComponentMatcherEditorTest extends SwingTestCase {
     /**
      * Test that this thing works with dispose.
      */
-    public void guiTestDispose() {
+    @Test
+    public void testDispose() {
         eventCounter.assertNoEvents(0);
 
         // test both live and dead
@@ -160,7 +171,8 @@ public class TextComponentMatcherEditorTest extends SwingTestCase {
         }
     }
 
-    public void guiTestDocumentSwap() throws Exception {
+    @Test
+    public void testDocumentSwap() throws Exception {
         final JTextField textField = new JTextField();
         final AbstractDocument documentA = (AbstractDocument) textField.getDocument();
         documentA.insertString(0, "documentA", null);
@@ -190,7 +202,8 @@ public class TextComponentMatcherEditorTest extends SwingTestCase {
         assertEquals("blah", textMatcher.getSearchTerms()[0].getText());
     }
 
-    public void guiTestListeners() {
+    @Test
+    public void testListeners() {
         final JTextField textField = new JTextField();
         final AbstractDocument document = (AbstractDocument) textField.getDocument();
 

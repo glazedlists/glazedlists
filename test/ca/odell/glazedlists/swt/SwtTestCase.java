@@ -3,47 +3,40 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swt;
 
-import ca.odell.glazedlists.GuiTestCase;
-
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.junit.ClassRule;
+import org.junit.Rule;
 
 /**
  * Utility class for running JUnit tests with SWT code.
  *
- * <p>This class has the following behaviour:
+ * <p>
+ * This class has the following behaviour:
  *
  * <ul>
- *  <li>Extending classes must not define any <code>testXXX()</code> methods.
- *      They should define only <code>guiTestXXX()</code> methods.</li>
+ * <li>it uses {@link SwtClassRule} to initialize a SWT display and shell in a dedicated thread</li>
  *
- *  <li>If one test fails, they all fail.</li>
+ * <li>it uses {@link SwtTestRule} to perfom each test method on the SWT display thread</li>
  * </ul>
  *
  * This class provides both the SWT {@link Display} and {@link Shell} for the
  * test methods available via {@link #getDisplay()} and {@link #getShell()}.
  *
  * @author Holger Brands
- * @author James Lemieux
- * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class SwtTestCase extends GuiTestCase {
+public abstract class SwtTestCase {
+    @ClassRule
+    public static SwtClassRule swtClassRule = new SwtClassRule();
 
-    private Display display;
-    private Shell shell;
+    @Rule
+    public SwtTestRule swtTestRule = new SwtTestRule(swtClassRule);
 
-    @Override
-    protected final void executeOnGUIThread(Runnable runnable) {
-        display = new Display();
-        shell = new Shell(display);
-
-        try {
-            display.syncExec(runnable);
-        } finally {
-            display.dispose();
-        }
+    protected Display getDisplay() {
+        return swtClassRule.getDisplay();
     }
 
-    protected Display getDisplay() { return display; }
-    protected Shell getShell() { return shell; }
+    protected Shell getShell() {
+        return swtClassRule.getShell();
+    }
 }

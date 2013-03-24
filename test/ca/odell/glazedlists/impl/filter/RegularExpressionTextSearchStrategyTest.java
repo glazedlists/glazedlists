@@ -1,20 +1,25 @@
 package ca.odell.glazedlists.impl.filter;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class RegularExpressionTextSearchStrategyTest extends TestCase {
+import static org.junit.Assert.*;
+
+public class RegularExpressionTextSearchStrategyTest {
+    @Test
     public void testIndexOf() {
         RegularExpressionTextSearchStrategy strategy = new RegularExpressionTextSearchStrategy();
         strategy.setSubtext("[a-z]");
         assertEquals(0, strategy.indexOf("a"));
     }
 
+    @Test
     public void testMultipleMatches() {
         RegularExpressionTextSearchStrategy strategy = new RegularExpressionTextSearchStrategy();
         strategy.setSubtext("[a-z] [a-z] [a-z] [a-z]");
         assertEquals(0, strategy.indexOf("a b c d"));
     }
 
+    @Test
     public void testPartialMatch() {
         RegularExpressionTextSearchStrategy strategy = new RegularExpressionTextSearchStrategy();
         strategy.setSubtext("[a-z] ");

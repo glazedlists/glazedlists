@@ -7,10 +7,14 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.Matchers;
-import junit.framework.TestCase;
 
-public class ConditionalCountTest extends TestCase {
+import org.junit.Test;
 
+import static org.junit.Assert.*;
+
+public class ConditionalCountTest {
+
+    @Test
     public void testPropertyChanges() {
         final EventList<String> source = new BasicEventList<String>();
         final Matcher<String> aMatcher = Matchers.beanPropertyMatcher(String.class, "this", "a");

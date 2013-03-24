@@ -3,25 +3,33 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.event;
 
-import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.CompositeList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import junit.framework.TestCase;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Make sure that the {@link SequenceDependenciesEventPublisher} class fires events properly.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class SequenceDependenciesEventPublisherTest extends TestCase {
+public class SequenceDependenciesEventPublisherTest {
 
     /**
      * Make sure that all events get fired to all listeners.
      */
+    @Test
     public void testVeryBasicChain() {
         SequenceDependenciesEventPublisher publisher = new SequenceDependenciesEventPublisher();
         SimpleSubjectListener a = new SimpleSubjectListener("A", publisher);
@@ -165,6 +173,7 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
      *        |         V    for B to receive events from A before C receives
      *        '-------> C    those same events.
      */
+    @Test
     public void testDiamondDependency() {
 
         SequenceDependenciesEventPublisher publisher = new SequenceDependenciesEventPublisher();
@@ -220,6 +229,7 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
      * The publisher should throw an IllegalStateException when a cycle in the
      * listener graph is created.
      */
+    @Test
     public void testCycleThrows() {
         SequenceDependenciesEventPublisher publisher = new SequenceDependenciesEventPublisher();
         DependentSubjectListener a = new DependentSubjectListener("A", publisher);
@@ -342,6 +352,7 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
      * Make sure that when the listener graph changes during an event, it gets
      * processed only at the conclusion of that event.
      */
+    @Test
     public void testRemovesAndAddsDuringEvent() {
         SequenceDependenciesEventPublisher publisher = new SequenceDependenciesEventPublisher();
         SimpleSubjectListener a = new SimpleSubjectListener("A", publisher);
@@ -395,6 +406,7 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
      * Make sure we throw an exception when attempting to remove something that's
      * not a listener.
      */
+    @Test
     public void testUnknownRemoveThrowsException() {
         SequenceDependenciesEventPublisher publisher = new SequenceDependenciesEventPublisher();
         SimpleSubjectListener a = new SimpleSubjectListener("A", publisher);
@@ -448,6 +460,7 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
      * This test currently fails in the graph publisher implementation because
      * we don't support merging events in GraphDependenciesListEventPublisher.
      */
+    @Test
     public void testMergingListEvents() {
         CompositeList<String> compositeList = new CompositeList<String>();
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(compositeList);
@@ -482,6 +495,7 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
      * Test that listeners and subjects do not have to use the same identity
      * so long as {@link ListEventPublisher#setRelatedSubject} is used.
      */
+    @Test
     public void testRelatedSubjects() {
         SequenceDependenciesEventPublisher publisher = new SequenceDependenciesEventPublisher();
         DetachedSubject a = new DetachedSubject("A", publisher);
@@ -587,6 +601,7 @@ public class SequenceDependenciesEventPublisherTest extends TestCase {
      * Test that the ListEvent iterator isn't adjusted by calling
      * {@link ListEventAssembler#forwardEvent}.
      */
+    @Test
     public void testEventStateAfterForwardEvent() {
         EventList<String> source = new BasicEventList<String>();
         ListConsistencyListener lcl = ListConsistencyListener.install(source);

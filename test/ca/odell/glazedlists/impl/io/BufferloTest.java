@@ -3,21 +3,30 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.io;
 
-import junit.framework.TestCase;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.text.ParseException;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests the Bufferlo.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class BufferloTest extends TestCase {
+public class BufferloTest {
 
     /**
      * Tests that the streams work.
      */
+    @Test
     public void testStreams() throws IOException {
         Bufferlo bufferlo = new Bufferlo();
         Writer writer = new OutputStreamWriter(bufferlo.getOutputStream(), "US-ASCII");
@@ -79,6 +88,7 @@ public class BufferloTest extends TestCase {
     /**
      * Tests that consume() works.
      */
+    @Test
     public void testConsume() {
         try {
             Bufferlo parser = getBufferlo("hello world");
@@ -99,6 +109,7 @@ public class BufferloTest extends TestCase {
      * Tests that consume() throws exceptions when the regular expression is not
      * contained.
      */
+    @Test
     public void testConsumeBadInput() {
         try {
             Bufferlo parser = getBufferlo("hello world");
@@ -116,6 +127,7 @@ public class BufferloTest extends TestCase {
      * Tests that consume() throws exceptions when the regular expression does not
      * start at the beginning of the String..
      */
+    @Test
     public void testConsumeNotAtStart() {
         try {
             Bufferlo parser = getBufferlo("hello world");
@@ -131,6 +143,7 @@ public class BufferloTest extends TestCase {
     /**
      * Tests that readUntil() works.
      */
+    @Test
     public void testReadUntil() {
         try {
             Bufferlo parser = getBufferlo("hello world");
@@ -150,6 +163,7 @@ public class BufferloTest extends TestCase {
     /**
      * Tests that readUntil() throws an exception if the specified text is not found.
      */
+    @Test
     public void testReadUntilBadInput() {
         try {
             Bufferlo parser = getBufferlo("hello world");
@@ -165,6 +179,7 @@ public class BufferloTest extends TestCase {
     /**
      * Tests that indexOf() works.
      */
+    @Test
     public void testIndexOf() {
         try {
             Bufferlo parser = getBufferlo("hello world");
@@ -179,6 +194,7 @@ public class BufferloTest extends TestCase {
     /**
      * Tests that indexOf() returns -1 if the specified text is not found.
      */
+    @Test
     public void testIndexOfBadInput() {
         try {
             Bufferlo parser = getBufferlo("hello world");
@@ -192,6 +208,7 @@ public class BufferloTest extends TestCase {
     /**
      * Tests that streams mixed with data works.
      */
+    @Test
     public void testMix() throws IOException, ParseException {
         Bufferlo bufferlo = new Bufferlo();
         Writer writer = new OutputStreamWriter(bufferlo.getOutputStream(), "US-ASCII");
@@ -240,6 +257,7 @@ public class BufferloTest extends TestCase {
      * Tests that all bytes from -128 thru 127 work. This is necessary to verfiy
      * that there are no problems with byte encoding.
      */
+    @Test
     public void testAllByteValues() throws IOException {
         Bufferlo bufferlo = new Bufferlo();
         InputStream in = bufferlo.getInputStream();

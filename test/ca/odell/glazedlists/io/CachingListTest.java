@@ -7,16 +7,21 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.event.ListEvent;
-import junit.framework.TestCase;
 
 import java.util.Random;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * This test verifies that the {@link ca.odell.glazedlists.io.CachingList} behaves as expected.
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
-public class CachingListTest extends TestCase {
+public class CachingListTest {
 
     private CachingList cache = null;
     private BasicEventList source = null;
@@ -24,7 +29,7 @@ public class CachingListTest extends TestCase {
     /**
      * Prepare for the test.
      */
-    @Override
+    @Before
     public void setUp() {
         source  = new BasicEventList();
         cache = new CachingList(source, 15);
@@ -33,7 +38,7 @@ public class CachingListTest extends TestCase {
     /**
      * Clean up after the test.
      */
-    @Override
+    @After
     public void tearDown() {
         cache.dispose();
         cache = null;
@@ -45,6 +50,7 @@ public class CachingListTest extends TestCase {
      * Validate that the cache correctly retrieves values from the source
      * and that there are zero cache hits.
      */
+    @Test
     public void testNonRepetitiveLookups() {
         // Load the source with data
         for(int i = 0;i < 25;i++) {
@@ -68,6 +74,7 @@ public class CachingListTest extends TestCase {
      * when fetched repeatedly.  There should be one cache miss, and
      * 24 cached hits.
      */
+    @Test
     public void testRepetitiveLookup() {
         // Load the source with some data
         for(int i = 0;i < 3;i++) {
@@ -94,6 +101,7 @@ public class CachingListTest extends TestCase {
      * cache entry is considered the 'oldest' as that test is covered by
      * {@link #testCacheEntryAccessReorderingForOverflow()}.
      */
+    @Test
     public void testCacheOverflowBehaviour() {
         // Load the source with data
         for(int i = 0;i < 25;i++) {
@@ -130,6 +138,7 @@ public class CachingListTest extends TestCase {
      * based on last access so that the oldest entry is removed when
      * the cache overflows.
      */
+    @Test
     public void testCacheEntryAccessReorderingForOverflow() {
         // Load the source with data
         for(int i = 0;i < 25;i++) {
@@ -182,6 +191,7 @@ public class CachingListTest extends TestCase {
      * that is cached, the value is successfully removed
      * from the cache.
      */
+    @Test
     public void testRemovingCachedValueWithCachedFollower() {
         // Load the source with some data
         for(int i = 0;i < 10;i++) {
@@ -212,6 +222,7 @@ public class CachingListTest extends TestCase {
      * that is cached, the value is successfully removed
      * from the cache.
      */
+    @Test
     public void testRemovingCachedValueAtCacheEdge() {
         // Load the source with some data
         for(int i = 0;i < 10;i++) {
@@ -241,6 +252,7 @@ public class CachingListTest extends TestCase {
      * that has been cached, that the internal cache size
      * decreases.
      */
+    @Test
     public void testRemoveCorrectsCacheSize() {
         // Load the source with data
         for(int i = 0;i < 25;i++) {
@@ -279,6 +291,7 @@ public class CachingListTest extends TestCase {
      * <code>source.size() - 1</code>.  This test is included as
      * a result of CachingList overriding get() from TransformedList.
      */
+    @Test
     public void testBoundsErrorBehaviour() {
         // request beyond bounds with an empty source
         boolean exceptionThrown = false;
@@ -407,8 +420,9 @@ class WaitEventList extends TransformedList {
         this.waitDuration = waitDuration;
     }
 
+//    @Override
     @Override
-    public Object get(int index) {
+	public Object get(int index) {
         try {
             Thread.sleep(waitDuration);
             return source.get(index);
@@ -422,7 +436,7 @@ class WaitEventList extends TransformedList {
      * changes, this sends notification to listening lists.
      */
     @Override
-    public void listChanged(ListEvent listChanges) {
+	public void listChanged(ListEvent listChanges) {
         // just pass on the changes
         updates.beginEvent();
         while(listChanges.next()) {
@@ -431,8 +445,11 @@ class WaitEventList extends TransformedList {
         updates.commitEvent();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    protected boolean isWritable() {
+	protected boolean isWritable() {
         return true;
     }
 }
@@ -609,7 +626,8 @@ class CacheTestHelper {
     /**
      * Prepare for a test.
      */
-    private void setUp() {
+    @Before
+    public void setUp() {
         // Set up and preload the cache with the first items, up to cacheSize
         testCache = new CachingList(sourceList, cacheSize);
         for(int i = 0; i < cacheSize; i++) {
@@ -620,7 +638,8 @@ class CacheTestHelper {
     /**
      * Clean up after a test.
      */
-    private void tearDown() {
+    @After
+    public void tearDown() {
         testCache = null;
     }
 
@@ -634,7 +653,9 @@ class CacheTestHelper {
     private float getCacheHitRatio() {
         int cacheHits = testCache.getCacheHits();
         int cacheMisses = testCache.getCacheMisses() - cacheSize;
-        if(cacheHits + cacheMisses == 0) return 0.0F;
+        if(cacheHits + cacheMisses == 0) {
+			return 0.0F;
+		}
         return (float)cacheHits / (float)(cacheHits + cacheMisses);
     }
 }

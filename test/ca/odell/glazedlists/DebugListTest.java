@@ -3,17 +3,21 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
-import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import static org.junit.Assert.*;
 
-public class DebugListTest extends TestCase {
+public class DebugListTest {
 
     private static final Pattern BAD_READER_THREAD_PATTERN = Pattern.compile("DebugList detected an unexpected Thread (.*) attempting to perform a read operation");
     private static final Pattern BAD_WRITER_THREAD_PATTERN = Pattern.compile("DebugList detected an unexpected Thread (.*) attempting to perform a write operation");
@@ -48,18 +52,19 @@ public class DebugListTest extends TestCase {
         new Clear()
     );
 
-    @Override
-    protected void setUp() {
+    @Before
+    public void setUp() {
         list = new DebugList<String>();
         list.addAll(Arrays.asList("one", "two", "three", "four", "five"));
         ListConsistencyListener.install(list);
     }
 
-    @Override
-    protected void tearDown() {
+    @After
+    public void tearDown() {
         list = null;
     }
 
+    @Test
     public void testDebugListPassThrough() {
         final EventList<String> sorted = SortedList.create(list);
 
@@ -71,6 +76,7 @@ public class DebugListTest extends TestCase {
         assertFalse(sorted.contains("one"));
     }
 
+    @Test
     public void testSanctionedReaderThread() throws InterruptedException {
         // No sanctioned reader Threads implies ALL Threads can read
         for (Iterator<Runnable> i = READ_OPERATIONS.iterator(); i.hasNext();) {
@@ -86,8 +92,9 @@ public class DebugListTest extends TestCase {
         list.getSanctionedReaderThreads().add(Thread.currentThread());
 
         // All reads from THIS Thread should succeed
-        for (Iterator<Runnable> i = READ_OPERATIONS.iterator(); i.hasNext();)
+        for (Iterator<Runnable> i = READ_OPERATIONS.iterator(); i.hasNext();) {
             i.next().run();
+        }
 
         // Now, reads from an alterate Thread should fail, since we have specified which reader Threads are valid
         for (Iterator<Runnable> i = READ_OPERATIONS.iterator(); i.hasNext();) {
@@ -102,6 +109,7 @@ public class DebugListTest extends TestCase {
         }
     }
 
+    @Test
     public void testSanctionedWriterThread() throws InterruptedException {
         // No sanctioned writer Threads implies ALL Threads can write
         for (Iterator<Runnable> i = WRITE_OPERATIONS.iterator(); i.hasNext();) {
@@ -119,8 +127,9 @@ public class DebugListTest extends TestCase {
         // All writes from THIS Thread should succeed
         list.clear();
         list.addAll(Arrays.asList("one", "two", "three", "four", "five"));
-        for (Iterator<Runnable> i = WRITE_OPERATIONS.iterator(); i.hasNext();)
+        for (Iterator<Runnable> i = WRITE_OPERATIONS.iterator(); i.hasNext();) {
             i.next().run();
+        }
 
         // Now, writes from an alterate Thread should fail, since we have specified which writer Threads are valid
         list.clear();
@@ -137,56 +146,67 @@ public class DebugListTest extends TestCase {
         }
     }
 
+    @Test
     public void testReadLockOperations() {
         // DebugList has not yet been told to perform lock checking, so all reads should succeed
-        for (Iterator<Runnable> i = READ_OPERATIONS.iterator(); i.hasNext();)
+        for (Iterator<Runnable> i = READ_OPERATIONS.iterator(); i.hasNext();) {
             i.next().run();
+        }
 
         list.setLockCheckingEnabled(true);
 
         // all read operations should now fail without locks
-        for (Iterator<Runnable> i = READ_OPERATIONS.iterator(); i.hasNext();)
+        for (Iterator<Runnable> i = READ_OPERATIONS.iterator(); i.hasNext();) {
             runReadLockFailure(i.next());
+        }
 
         // holding the readLock during reads is acceptable
         list.getReadWriteLock().readLock().lock();
-        for (Iterator<Runnable> i = READ_OPERATIONS.iterator(); i.hasNext();)
+        for (Iterator<Runnable> i = READ_OPERATIONS.iterator(); i.hasNext();) {
             i.next().run();
+        }
         list.getReadWriteLock().readLock().unlock();
 
         // holding the writeLock during reads is acceptable
         list.getReadWriteLock().writeLock().lock();
-        for (Iterator<Runnable> i = READ_OPERATIONS.iterator(); i.hasNext();)
+        for (Iterator<Runnable> i = READ_OPERATIONS.iterator(); i.hasNext();) {
             i.next().run();
+        }
         list.getReadWriteLock().writeLock().unlock();
     }
 
+    @Test
     public void testWriteLockOperations() {
         // DebugList has not yet been told to perform lock checking, so all writes should succeed
-        for (Iterator<Runnable> i = WRITE_OPERATIONS.iterator(); i.hasNext();)
+        for (Iterator<Runnable> i = WRITE_OPERATIONS.iterator(); i.hasNext();) {
             i.next().run();
+        }
 
         list.clear();
         list.addAll(Arrays.asList("one", "two", "three", "four", "five"));
         list.setLockCheckingEnabled(true);
 
         // all write operations should now fail without locks
-        for (Iterator<Runnable> i = WRITE_OPERATIONS.iterator(); i.hasNext();)
+        for (Iterator<Runnable> i = WRITE_OPERATIONS.iterator(); i.hasNext();) {
             runWriteLockFailure(i.next());
+        }
 
         // holding the readLock during writes is unacceptable
         list.getReadWriteLock().readLock().lock();
-        for (Iterator<Runnable> i = WRITE_OPERATIONS.iterator(); i.hasNext();)
+        for (Iterator<Runnable> i = WRITE_OPERATIONS.iterator(); i.hasNext();) {
             runWriteLockFailure(i.next());
+        }
         list.getReadWriteLock().readLock().unlock();
 
         // holding the writeLock during writes is acceptable
         list.getReadWriteLock().writeLock().lock();
-        for (Iterator<Runnable> i = WRITE_OPERATIONS.iterator(); i.hasNext();)
+        for (Iterator<Runnable> i = WRITE_OPERATIONS.iterator(); i.hasNext();) {
             i.next().run();
+        }
         list.getReadWriteLock().writeLock().unlock();
     }
 
+    @Test
     public void testCreateNewDebugList() {
         DebugList<String> list1 = new DebugList<String>();
         DebugList<Integer> list2 = list1.createNewDebugList();
@@ -228,10 +248,12 @@ public class DebugListTest extends TestCase {
         private final int index;
 
         public Get(int index) { this.index = index; }
+        @Override
         public void run() { list.get(index); }
     }
 
     private class Size implements Runnable {
+        @Override
         public void run() { list.size(); }
     }
 
@@ -239,6 +261,7 @@ public class DebugListTest extends TestCase {
         private final Object o;
 
         public Contains(Object o) { this.o = o; }
+        @Override
         public void run() { list.contains(o); }
     }
 
@@ -246,6 +269,7 @@ public class DebugListTest extends TestCase {
         private final Collection<?> collection;
 
         public ContainsAll(Collection<?> collection) { this.collection = collection; }
+        @Override
         public void run() { list.containsAll(collection); }
     }
 
@@ -253,6 +277,7 @@ public class DebugListTest extends TestCase {
         private final Object o;
 
         public IndexOf(Object o) { this.o = o; }
+        @Override
         public void run() { list.indexOf(o); }
     }
 
@@ -260,14 +285,17 @@ public class DebugListTest extends TestCase {
         private final Object o;
 
         public LastIndexOf(Object o) { this.o = o; }
+        @Override
         public void run() { list.lastIndexOf(o); }
     }
 
     private class IsEmpty implements Runnable {
+        @Override
         public void run() { list.isEmpty(); }
     }
 
     private class ToArray implements Runnable {
+        @Override
         public void run() { list.toArray(); }
     }
 
@@ -275,6 +303,7 @@ public class DebugListTest extends TestCase {
         private final Object[] array;
 
         public ToArray_Array(Object[] array) { this.array = array; }
+        @Override
         public void run() { list.toArray(array); }
     }
 
@@ -282,14 +311,17 @@ public class DebugListTest extends TestCase {
         private final Object o;
 
         public Equals(Object o) { this.o = o; }
+        @Override
         public void run() { list.equals(o); }
     }
 
     private class HashCode implements Runnable {
+        @Override
         public void run() { list.hashCode(); }
     }
 
     private class ToString implements Runnable {
+        @Override
         public void run() { list.toString(); }
     }
 
@@ -301,6 +333,7 @@ public class DebugListTest extends TestCase {
         private final String o;
 
         public Add(String o) { this.o = o; }
+        @Override
         public void run() { list.add(o); }
     }
 
@@ -308,6 +341,7 @@ public class DebugListTest extends TestCase {
         private final String o;
 
         public Remove(String o) { this.o = o; }
+        @Override
         public void run() { list.remove(o); }
     }
 
@@ -317,6 +351,7 @@ public class DebugListTest extends TestCase {
         public AddAll(Collection<String> collection) {
             this.collection = collection;
         }
+        @Override
         public void run() { list.addAll(collection); }
     }
 
@@ -328,6 +363,7 @@ public class DebugListTest extends TestCase {
             this.index = index;
             this.collection = collection;
         }
+        @Override
         public void run() { list.addAll(index, collection); }
     }
 
@@ -335,6 +371,7 @@ public class DebugListTest extends TestCase {
         private final Collection<?> collection;
 
         public RemoveAll(Collection<?> collection) { this.collection = collection; }
+        @Override
         public void run() { list.removeAll(collection); }
     }
 
@@ -342,10 +379,12 @@ public class DebugListTest extends TestCase {
         private final Collection<?> collection;
 
         public RetainAll(Collection<?> collection) { this.collection = collection; }
+        @Override
         public void run() { list.retainAll(collection); }
     }
 
     private class Clear implements Runnable {
+        @Override
         public void run() { list.clear(); }
     }
 
@@ -357,6 +396,7 @@ public class DebugListTest extends TestCase {
             this.index = index;
             this.o = o;
         }
+        @Override
         public void run() { list.set(index, o); }
     }
 
@@ -368,6 +408,7 @@ public class DebugListTest extends TestCase {
             this.index = index;
             this.o = o;
         }
+        @Override
         public void run() { list.add(index, o); }
     }
 
@@ -377,6 +418,7 @@ public class DebugListTest extends TestCase {
         public Remove_Index(int index) {
             this.index = index;
         }
+        @Override
         public void run() { list.remove(index); }
     }
 
@@ -386,6 +428,7 @@ public class DebugListTest extends TestCase {
 
         RecorderRunnable(Runnable runnable) { this.delegate = runnable; }
 
+        @Override
         public void run() {
             try {
                 delegate.run();

@@ -6,20 +6,28 @@ package ca.odell.glazedlists;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
-import junit.framework.TestCase;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * A PopularityListTest tests the functionality of the PopularityList.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class PopularityListTest extends TestCase {
+public class PopularityListTest {
 
     /**
      * Test that the Popularity List works with simple data.
      */
+    @Test
     public void testSimpleData() {
         EventList<String> source = new BasicEventList<String>();
         PopularityList popularityList = PopularityList.create(source);
@@ -60,6 +68,7 @@ public class PopularityListTest extends TestCase {
     /**
      * Tests that the Popularity List works by using a random sequence of operations.
      */
+    @Test
     public void testRandom() {
         Random dice = new Random(0);
         
@@ -90,6 +99,7 @@ public class PopularityListTest extends TestCase {
     /**
      * Tests that the PopularityList can handle multiple simultaneous events.
      */
+    @Test
     public void testMultipleEvents() {
         EventList<int[]> source = new BasicEventList<int[]>();
         source.add(new int[] { 86, 1, 1, 1, 1, 0, 0 });
@@ -119,6 +129,7 @@ public class PopularityListTest extends TestCase {
     /**
      * Tests that the PopularityList can handle edge case sets.
      */
+    @Test
     public void testEdgeSets() {
         EventList<String> source = new BasicEventList<String>();
         source.add("Audi");      // A
@@ -161,6 +172,7 @@ public class PopularityListTest extends TestCase {
     /**
      * Tests that the PopularityList can handle edge case sets.
      */
+    @Test
     public void testLeftEdgeSet() {
         EventList<String> source = new BasicEventList<String>();
         SortedList<String> sortedList = SortedList.create(source);
@@ -179,6 +191,7 @@ public class PopularityListTest extends TestCase {
      * Tests that the PopularityList elements that have the same count are in sorted
      * order.
      */
+    @Test
     public void testEqualPopularityOrdering() {
         EventList<String> source = new BasicEventList<String>();
         PopularityList<String> popularityList = PopularityList.create(source);

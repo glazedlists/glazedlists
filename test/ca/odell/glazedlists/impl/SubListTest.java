@@ -9,23 +9,27 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import junit.framework.TestCase;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
 /**
  * This test verifies that the SubList works.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class SubListTest extends TestCase {
+public class SubListTest {
 
     /**
      * Tests to verify that the SubList views a segment of a list.
      */
+    @Test
     public void testSubList() {
         // create a source list of values
         BasicEventList<Integer> eventList = new BasicEventList<Integer>();
@@ -47,6 +51,7 @@ public class SubListTest extends TestCase {
      * Tests to verify that the SubList views a segment of a list while
      * that segment changes.
      */
+    @Test
     public void testSubListChanges() {
         // create a source list of values, from 0,1,2...49,100,101..149
         BasicEventList eventList = new BasicEventList();
@@ -95,6 +100,7 @@ public class SubListTest extends TestCase {
     /**
      * Test that SubList works with a single index, even if the list is sorted.
      */
+    @Test
     public void testSingleIndexSorting() {
         EventList<String> eventList = new BasicEventList<String>();
         SortedList<String> sortedList = SortedList.create(eventList);
@@ -146,6 +152,7 @@ public class SubListTest extends TestCase {
     /**
      * Test that SubList works while the underlying list changes.
      */
+    @Test
     public void testSingleIndexListChanges() {
         EventList<String> eventList = new BasicEventList<String>();
         eventList.add("Viper");

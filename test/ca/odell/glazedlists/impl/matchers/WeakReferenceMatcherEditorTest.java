@@ -1,16 +1,19 @@
 package ca.odell.glazedlists.impl.matchers;
 
-import java.lang.ref.WeakReference;
-
-import junit.framework.TestCase;
-
 import ca.odell.glazedlists.matchers.CountingMatcherEditorListener;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.Matchers;
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
 
-public class WeakReferenceMatcherEditorTest extends TestCase {
+import java.lang.ref.WeakReference;
 
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
+public class WeakReferenceMatcherEditorTest {
+
+    @Test
     public void testAddRemoveListener() {
         final TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>();
         MatcherEditor<String> weakMatcherEditor = Matchers.weakReferenceProxy(textMatcherEditor);
@@ -27,6 +30,7 @@ public class WeakReferenceMatcherEditorTest extends TestCase {
         counter.assertCounterState(0, 0, 0, 1, 0);
     }
 
+    @Test
     public void testGarbageCollectWeakListener() {
         final TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>();
         MatcherEditor<String> weakMatcherEditor = Matchers.weakReferenceProxy(textMatcherEditor);
@@ -48,6 +52,7 @@ public class WeakReferenceMatcherEditorTest extends TestCase {
         assertNull(weakRef.get());
     }
 
+    @Test
     public void testGarbageCollectWeakReferenceProxy() {
         final TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>();
         MatcherEditor<String> weakMatcherEditor = Matchers.weakReferenceProxy(textMatcherEditor);

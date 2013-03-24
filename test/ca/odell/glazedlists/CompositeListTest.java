@@ -9,21 +9,25 @@ import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
-import junit.framework.TestCase;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * A CompositeListTest tests the functionality of the CompositeList.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class CompositeListTest extends TestCase {
+public class CompositeListTest {
 
     /**
      * Verifies that a single source works.
      */
+    @Test
     public void testSingleSource() {
         CompositeList<String> fastFood = new CompositeList<String>();
         ListConsistencyListener.install(fastFood);
@@ -53,6 +57,7 @@ public class CompositeListTest extends TestCase {
     /**
      * Verifies that multiple sources work.
      */
+    @Test
     public void testMultipleSources() {
         CompositeList<String> fastFood = new CompositeList<String>();
         ListConsistencyListener.install(fastFood);
@@ -122,6 +127,7 @@ public class CompositeListTest extends TestCase {
     /**
      * Verifies that remove member list does so by reference.
      */
+    @Test
     public void testRemoveByReference() {
         CompositeList<String> fastFood = new CompositeList<String>();
         ListConsistencyListener.install(fastFood);
@@ -146,6 +152,7 @@ public class CompositeListTest extends TestCase {
     /**
      * Verifies that multiple copies of the same list can be added.
      */
+    @Test
     public void testMultipleCopies() {
         List<String> fastFoodVerify = new ArrayList<String>();
         CompositeList<String> fastFood = new CompositeList<String>();
@@ -187,6 +194,7 @@ public class CompositeListTest extends TestCase {
      * Test that {@link CompositeList} is well behaved when only a single element
      * is removed.
      */
+    @Test
     public void testSingleElements() {
         CompositeList<String> aToB = new CompositeList<String>();
         ListConsistencyListener.install(aToB);
@@ -205,6 +213,7 @@ public class CompositeListTest extends TestCase {
      * Test that when {@link CompositeList} is constructed with a publisher and read/write
      * lock, it uses them and produces member lists which also use them.
      */
+    @Test
     public void testPublisherAndLockConstructor() {
         final ReadWriteLock sharedLock = LockFactory.DEFAULT.createReadWriteLock();
         final ListEventPublisher sharedPublisher = ListEventAssembler.createListEventPublisher();
@@ -233,6 +242,7 @@ public class CompositeListTest extends TestCase {
      * Tests that when EventLists are added as members, an IllegalArgumentException should be thrown
      * if they don'to share the same lock and publisher with the CompositeList.
      */
+    @Test
     public void testAddMemberList() {
         final ReadWriteLock sharedLock = LockFactory.DEFAULT.createReadWriteLock();
         final ListEventPublisher sharedPublisher = ListEventAssembler.createListEventPublisher();
@@ -264,6 +274,7 @@ public class CompositeListTest extends TestCase {
      * Tests that after disposing {@link CompositeList}, all installed ListEventListeners
      * have been removed, e.g. changes to member lists are ignored.
      */
+    @Test
     public void testDispose() {
         final CompositeList<String> composite = new CompositeList<String>();
 
@@ -297,6 +308,7 @@ public class CompositeListTest extends TestCase {
      * *any* CompositeList, since it may be transformed *before* being used by
      * the CompositeList.
      */
+    @Test
     public void testCreateMemberListGenerics() {
         CompositeList<String> strings = new CompositeList<String>();
 
