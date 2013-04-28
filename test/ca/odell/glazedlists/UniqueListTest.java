@@ -18,6 +18,7 @@ import java.util.TreeSet;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -1664,6 +1665,7 @@ public class UniqueListTest {
         final UniqueList<Integer> unique = new UniqueList<Integer>(source, comparator);
     }
 
+    @Ignore("Fix me")
     @Test
     public void testAllPossibleGrouperStateChanges_FixMe() {
         final TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>(), true);

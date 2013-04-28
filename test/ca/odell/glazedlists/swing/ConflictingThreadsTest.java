@@ -11,6 +11,7 @@ import ca.odell.glazedlists.gui.TableFormat;
 
 import javax.swing.JLabel;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -27,6 +28,7 @@ public class ConflictingThreadsTest extends SwingTestCase {
     /**
      * Verifies that conflicting threads are resolved intelligently.
      */
+    @Ignore("Fix me")
     @Test
     public void testConflictingThreads_FixMe() {
         EventList<JLabel> labelsList = new BasicEventList<JLabel>();

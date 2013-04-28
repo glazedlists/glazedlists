@@ -11,6 +11,7 @@ import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import java.util.Arrays;
 import java.util.Date;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -218,6 +219,7 @@ public class SequenceListTest {
         assertEquals(GlazedListsImpl.getMonthBegin(sep), sequence.get(5));
     }
 
+    @Ignore("Fix me")
     @Test
     public void testIssue482_FixMe() {
         EventList<Integer> src = new BasicEventList<Integer>();
@@ -226,10 +228,12 @@ public class SequenceListTest {
 
         SequenceList<Integer> integers = new SequenceList<Integer>(src,
                 new Sequencer<Integer>() {
+                    @Override
                     public Integer next(Integer value) {
                         return value + 1;
                     }
 
+                    @Override
                     public Integer previous(Integer value) {
                         return value - 1;
                     }

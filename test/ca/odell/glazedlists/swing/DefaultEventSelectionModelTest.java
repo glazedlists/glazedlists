@@ -23,6 +23,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -411,6 +412,7 @@ public class DefaultEventSelectionModelTest extends SwingTestCase {
         assertEquals(0, eventSelectionModelCounter.getCountAndReset());
     }
 
+    @Ignore("Fix me")
     @Test
     public void testDeleteSelectedRows_FixMe() {
         EventList<String> source = GlazedLists.eventListOf("one", "two", "three");
@@ -437,6 +439,7 @@ public class DefaultEventSelectionModelTest extends SwingTestCase {
      * Tests, that a selection is preserved when the source is a TreeList and an update event
      * happens for the selected element.
      */
+    @Ignore("Fix me")
     @Test
     public void testSelectionOnTreeListUpdate_FixMe() {
         final EventList<String> source = GlazedLists.eventListOf("zero", "one", "two", "three");

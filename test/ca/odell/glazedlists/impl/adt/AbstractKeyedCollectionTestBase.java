@@ -7,7 +7,7 @@ import static org.junit.Assert.*;
 /**
  * @author jessewilson
  */
-public abstract class AbstractKeyedCollectionTest {
+public abstract class AbstractKeyedCollectionTestBase {
 
     private NamePosition a = new NamePosition("A");
     private NamePosition b = new NamePosition("B");
@@ -18,7 +18,7 @@ public abstract class AbstractKeyedCollectionTest {
 
     private final KeyedCollection<NamePosition, String> collection;
 
-    public AbstractKeyedCollectionTest(KeyedCollection<NamePosition, String> collection) {
+    public AbstractKeyedCollectionTestBase(KeyedCollection<NamePosition, String> collection) {
         this.collection = collection;
     }
 

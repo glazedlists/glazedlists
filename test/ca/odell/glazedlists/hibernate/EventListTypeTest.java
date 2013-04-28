@@ -20,7 +20,7 @@ import org.hibernate.Transaction;
 /**
  * Tests mapping and persisting BasicEventLists with Hibernate. Tested classes are
  * {@link EventListType} and {@link PersistentEventList}.
- * 
+ *
  * @author Holger Brands
  */
 public class EventListTypeTest extends AbstractHibernateTestCase {
@@ -43,12 +43,12 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
      * Tests an eager loaded value collection.
      */
     public void testEagerValueCollection() {
-        doTestValueCollection(false);        
+        doTestValueCollection(false);
     }
-    
+
     /**
      * Runs tests for a value collection of Strings.
-     * 
+     *
      * @param lazy indicates lazy or eager loading of nick name collection
      */
     private void doTestValueCollection(boolean lazy) {
@@ -61,7 +61,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
 
         // load saved user again
         u = loadUser(s, lazy);
-        
+
         assertNotNull(u);
 
         final GlazedListsTests.ListEventCounter<String> listener = new GlazedListsTests.ListEventCounter<String>();
@@ -69,7 +69,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
         if (lazy) {
             // lazy collection still uninitialized
             assertFalse(Hibernate.isInitialized(u.getNickNames()));
-            // call EventList methods            
+            // call EventList methods
             u.getNickNames().addListEventListener(listener);
             u.getNickNames().removeListEventListener(listener);
             u.getNickNames().addListEventListener(listener);
@@ -80,7 +80,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
             assertFalse(Hibernate.isInitialized(u.getNickNames()));
             assertEquals(0, listener.getCountAndReset());
 
-            // trigger initialization        
+            // trigger initialization
             assertEquals(2, u.getNickNames().size());
             assertTrue(Hibernate.isInitialized(u.getNickNames()));
             // ATTENTION: NO ListEvents should be produced by Hibernate's lazy initialization
@@ -119,25 +119,25 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
         u = loadUser(s, lazy);
         assertEquals(u, null);
         t.commit();
-        s.close();        
+        s.close();
     }
-    
+
     /**
-     * Tests a lazy loaded, one-to-many, unidirectional association with entity collection. 
+     * Tests a lazy loaded, one-to-many, unidirectional association with entity collection.
      */
     public void testLazyOneToManyUniDirectionalAssociation() {
         doTestOneToManyUniDirectionalAssociation(true);
     }
 
     /**
-     * Tests an eager loaded, one-to-many, unidirectional association with entity collection. 
+     * Tests an eager loaded, one-to-many, unidirectional association with entity collection.
      */
     public void testEagerOneToManyUniDirectionalAssociation() {
         doTestOneToManyUniDirectionalAssociation(false);
     }
 
     /**
-     * Gets mapping files for this test case. 
+     * Gets mapping files for this test case.
      */
     @Override
     protected String[] getMappings() {
@@ -146,7 +146,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
 
     /**
      * Runs tests for a one-to-many, unidirectional association with entity collection.
-     * 
+     *
      * @param lazy indicates lazy or eager loading of email address collection
      */
     private void doTestOneToManyUniDirectionalAssociation(boolean lazy) {
@@ -170,7 +170,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
         if (lazy) {
             // lazy collection still uninitialized
             assertFalse(Hibernate.isInitialized(u.getEmailAddresses()));
-            // call EventList methods            
+            // call EventList methods
             u.getEmailAddresses().addListEventListener(listener);
             u.getEmailAddresses().removeListEventListener(listener);
             u.getEmailAddresses().addListEventListener(listener);
@@ -192,7 +192,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
             u.getEmailAddresses().addListEventListener(listener);
         }
         assertEquals(PersistentEventList.class, u.getEmailAddresses().getClass());
-        
+
         // test manipulating list
         u.getEmailAddresses().remove(1);
         u.getEmailAddresses().add(1, new Email("admin@web.de"));
@@ -231,16 +231,16 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
         t.commit();
         s.close();
     }
-    
+
     /**
-     * Tests a lazy loaded, many-to-many association with entity collection. 
+     * Tests a lazy loaded, many-to-many association with entity collection.
      */
     public void testLazyManyToManyAssociation() {
         doTestManyToManyAssociation(true);
     }
 
     /**
-     * Tests an eager loaded, one-to-many, unidirectional association with entity collection. 
+     * Tests an eager loaded, one-to-many, unidirectional association with entity collection.
      */
     public void testEagerManyToManyAssociation() {
         doTestManyToManyAssociation(false);
@@ -271,7 +271,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
         if (lazy) {
             // lazy collection still uninitialized
             assertFalse(Hibernate.isInitialized(u.getRoles()));
-            // call EventList methods            
+            // call EventList methods
             u.getRoles().addListEventListener(listener);
             u.getRoles().removeListEventListener(listener);
             u.getRoles().addListEventListener(listener);
@@ -299,7 +299,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
             u.getRoles().addListEventListener(listener);
         }
         assertEquals(PersistentEventList.class, u.getRoles().getClass());
-        
+
         // test manipulating list
         u.getRoles().remove(1);
         u.getRoles().add(1, new Role("Developer"));
@@ -319,20 +319,20 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
         u.getRoles().clear();
         assertEquals(1, listener.getCountAndReset());
         assertEquals(0, u.getRoles().size());
-        assertTrue(Hibernate.isInitialized(u.getRoles()));        
+        assertTrue(Hibernate.isInitialized(u.getRoles()));
         roles = s.createCriteria(Role.class).list();
         assertEquals(3, roles.size());
         assertEquals("Developer", ((Role) roles.get(2)).getName());
 
         // delete user
         s.delete(u);
-        
+
         // delete roles
         for (Iterator iter = roles.iterator(); iter.hasNext();) {
             final Role role = (Role) iter.next();
             s.delete(role);
         }
-                
+
         t.commit();
         s.close();
 
@@ -345,7 +345,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
         // no roles should be found
         roles = s.createCriteria(Role.class).list();
         assertEquals(0, roles.size());
-        
+
         t.commit();
         s.close();
     }
@@ -370,7 +370,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
         t.commit();
         s.close();
         final ListEventSourceHandler handler2 = new ListEventSourceHandler();
-        u.getNickNames().addListEventListener(handler2);        
+        u.getNickNames().addListEventListener(handler2);
         u.addNickName("Tricky");
         // delete user again
         s = openSession();
@@ -379,9 +379,9 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
         t.commit();
         s.close();
         // compare list event source, should be the same
-        assertTrue(handler1.source == handler2.source);        
+        assertTrue(handler1.source == handler2.source);
     }
-    
+
     /**
      * Creates and persists an example user with emial addresses.
      */
@@ -397,7 +397,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
         s.close();
         return u;
     }
-    
+
     /**
      * Creates and persists an example user with nicknames.
      */
@@ -413,7 +413,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
         s.close();
         return u;
     }
-    
+
     /**
      * Creates and persists an example user with roles.
      */
@@ -432,7 +432,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
 
     /**
      * Loads the example user.
-     * 
+     *
      * @param lazy <code>true</code>, if collections shoud be lazy loaded, <code>false</code> otherwise
      */
     private User loadUser(Session s, boolean lazy) {
@@ -446,20 +446,21 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
             	.uniqueResult();
         }
     }
-    
+
     /**
      * Helper class for capturing source list of list events
      */
     private static class ListEventSourceHandler implements ListEventListener {
         public EventList source;
-        
+
         /** {@inheritDoc} */
+        @Override
         public void listChanged(ListEvent listChanges) {
             if (source == null) {
                 source = listChanges.getSourceList();
             } else if (source != listChanges.getSourceList()) {
                     throw new IllegalStateException("SourceList changed");
             }
-        }        
+        }
     }
 }

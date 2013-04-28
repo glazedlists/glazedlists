@@ -8,7 +8,7 @@ import java.util.Comparator;
 /**
  * @author jessewilson
  */
-public class KeyedCollectionForHashableValuesTest extends AbstractKeyedCollectionTest {
+public class KeyedCollectionForHashableValuesTest extends AbstractKeyedCollectionTestBase {
 
     public static Comparator comparableComparator = GlazedLists.comparableComparator();
 

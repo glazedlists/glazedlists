@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -56,10 +57,12 @@ public class TreeListTest {
      */
     static class JavaStructureTreeFormat implements TreeList.Format<Object> {
 
+        @Override
         public boolean allowsChildren(Object element) {
             return (!(element instanceof Method));
         }
 
+        @Override
         public void getPath(List<Object> path, Object element) {
             Method javaMethod = (Method)element;
             path.addAll(Arrays.asList(javaMethod.getDeclaringClass().getName().split("\\.")));
@@ -71,7 +74,9 @@ public class TreeListTest {
             signature.append("(");
             Class<?>[] parameterTypes = javaMethod.getParameterTypes();
             for(int c = 0; c < parameterTypes.length; c++) {
-                if(c > 0) signature.append(", ");
+                if(c > 0) {
+                    signature.append(", ");
+                }
                 String[] parameterClassNameParts = parameterTypes[c].getName().split("\\.");
                 signature.append(parameterClassNameParts[parameterClassNameParts.length - 1]);
             }
@@ -81,6 +86,7 @@ public class TreeListTest {
         }
 
 
+        @Override
         public Comparator<Object> getComparator(int depth) {
             return (Comparator)GlazedLists.comparableComparator();
         }
@@ -232,6 +238,7 @@ public class TreeListTest {
     }
 
     /** Test for <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=489">bug 489</a> */
+    @Ignore("Fix me")
     @Test
     public void testDeletionIssues_FixMe() {
         EventList<String> source = new BasicEventList<String>();
@@ -1291,6 +1298,7 @@ public class TreeListTest {
     }
 
     private class LastCharComparator implements Comparator<String> {
+        @Override
         public int compare(String a, String b) {
             return lastCharOf(a) - lastCharOf(b);
         }
@@ -1587,6 +1595,7 @@ public class TreeListTest {
     }
 
     private static final class NullCompartor<E> implements Comparator<E> {
+        @Override
         public int compare(E o1, E o2) {
             return 0;
         }
@@ -1728,6 +1737,7 @@ public class TreeListTest {
      * Validate that a virtual parent's state is maintained even if all the
      * children are deleted new children inserted in a single event.
      */
+    @Ignore("Fix me")
     @Test
     public void testDeleteAndReinsertLeafRetainsParentState_FixMe() {
         TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
@@ -1929,6 +1939,7 @@ public class TreeListTest {
      * This test isn't a spec - when the Comparator and equals() disagree, whom
      * should we trust?
      */
+    @Ignore("Fix me")
     @Test
     public void testComparatorWeakerThanEquals() {
         TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
@@ -1968,6 +1979,7 @@ public class TreeListTest {
         });
     }
 
+    @Ignore("Fix me")
     @Test
     public void testComparatorOrdering_FixMe() {
         TreeList.NodeComparator<String> nodeComparator = new TreeList.NodeComparator<String>(new CharacterTreeFormat(String.CASE_INSENSITIVE_ORDER));
@@ -1994,13 +2006,16 @@ public class TreeListTest {
             this.comparator = comparator;
         }
 
+        @Override
         public boolean allowsChildren(String element) {
             return Character.isUpperCase(element.charAt(0));
         }
+        @Override
         public void getPath(List<String> path, String element) {
             path.addAll(GlazedListsTests.stringToList(element));
         }
 
+        @Override
         public Comparator<String> getComparator(int depth) {
             return comparator;
         }
