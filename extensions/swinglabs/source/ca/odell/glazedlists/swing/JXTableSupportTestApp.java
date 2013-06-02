@@ -3,9 +3,11 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import ca.odell.glazedlists.*;
-
-import com.publicobject.issuesbrowser.*;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.SortedList;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -18,9 +20,21 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import org.jdesktop.swingx.JXTable;
+
+import com.publicobject.issuesbrowser.Issue;
+import com.publicobject.issuesbrowser.IssueTableFormat;
+import com.publicobject.issuesbrowser.IssueTextFilterator;
+import com.publicobject.issuesbrowser.IssueTrackingSystem;
+import com.publicobject.issuesbrowser.Project;
 
 /**
  * Demonstrate sorting using JXTable with Glazed Lists' {@link ca.odell.glazedlists.SortedList}
@@ -36,6 +50,7 @@ class JXTableSupportTestApp implements Runnable {
         this.issues = issues;
     }
 
+    @Override
     public void run() {
         final List<Issue> issuesCopy = new ArrayList<Issue>();
         issues.getReadWriteLock().writeLock().lock();
@@ -56,6 +71,7 @@ class JXTableSupportTestApp implements Runnable {
             final JButton addAllButton = new JButton("Add All");
             addAllButton.setEnabled(false);
             clearButton.addActionListener(new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent e) {
                     issuesCopy.addAll(issues);
                     issues.clear();
@@ -64,6 +80,7 @@ class JXTableSupportTestApp implements Runnable {
                 }
             });
             addAllButton.addActionListener(new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent e) {
                     issues.addAll(issuesCopy);
                     issuesCopy.clear();
@@ -94,9 +111,10 @@ class JXTableSupportTestApp implements Runnable {
         public IssueLoader(EventList<Issue> issues, String filename) {
             this.issues = issues;
 
-            this.project = new Project("Glazed Lists", "Glazed Lists", IssueTrackingSystem.getJavaNetJira());
+            this.project = new Project("Glazed Lists", "Glazed Lists", IssueTrackingSystem.getTigrisIssuezilla());
             project.setFileName(filename);
         }
+        @Override
         public void run() {
             try {
 
@@ -110,10 +128,13 @@ class JXTableSupportTestApp implements Runnable {
 
     private static class IssueStateComparator implements Comparator {
         private static final List STATES = Arrays.asList("UNCONFIRMED", "NEW", "STARTED", "REOPENED", "RESOLVED", "VERIFIED", "CLOSED");
+        @Override
         public int compare(Object a, Object b) {
             int stateIndexA = STATES.indexOf(a);
             int stateIndexB = STATES.indexOf(b);
-            if(stateIndexA == -1 || stateIndexB == -1) throw new IllegalStateException();
+            if(stateIndexA == -1 || stateIndexB == -1) {
+                throw new IllegalStateException();
+            }
             return stateIndexA - stateIndexB;
         }
     }

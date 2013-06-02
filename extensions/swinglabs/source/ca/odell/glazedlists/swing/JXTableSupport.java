@@ -9,6 +9,7 @@ import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.Preconditions;
 import ca.odell.glazedlists.impl.beans.BeanProperty;
 import ca.odell.glazedlists.impl.gui.SortingStrategy;
+import ca.odell.glazedlists.swing.TableModelEventAdapter.Factory;
 
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
@@ -171,7 +172,16 @@ public class JXTableSupport<E> {
         // set state needed to integrate with Glazed Lists
         tableMemento.configureStateForGlazedLists(table);
         // prepare and set TableModel und SelectionModel
-        tableModel = GlazedListsSwing.eventTableModelWithThreadProxyList(eventList, tableFormat);
+        if (table.getFillsViewportHeight()) {
+            // workaround the problem of repainting issues when this property is
+            // set, because of the known mismatch between ListEvents and TableModelEvents
+            // use another event conversion strategy in this case
+            final Factory<E> eventAdapterFactory = GlazedListsSwing.manyToOneEventAdapterFactory();
+            tableModel = GlazedListsSwing.eventTableModelWithThreadProxyList(eventList, tableFormat, eventAdapterFactory);
+        } else {
+            // use default event conversion strategy
+            tableModel = GlazedListsSwing.eventTableModelWithThreadProxyList(eventList, tableFormat);
+        }
         table.setModel(tableModel);
         selectionModel = GlazedListsSwing.eventSelectionModelWithThreadProxyList(eventList);
         table.setSelectionModel(selectionModel);
@@ -185,10 +195,11 @@ public class JXTableSupport<E> {
      * Dispatch Thread.
      */
     private static void checkAccessThread() {
-        if (!SwingUtilities.isEventDispatchThread())
+        if (!SwingUtilities.isEventDispatchThread()) {
             throw new IllegalStateException(
                     "JXTableSupport must be accessed from the Swing Event Dispatch Thread, but was called on Thread \""
                             + Thread.currentThread().getName() + "\"");
+        }
     }
 
     /**

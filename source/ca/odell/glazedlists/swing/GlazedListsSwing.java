@@ -1,4 +1,4 @@
-/* Glazed Lists                                                 (c) 2003-2006 */
+/* Glazed Lists                                                 (c) 2003-2013 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
@@ -7,13 +7,19 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ThresholdList;
 import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.gui.TableFormat;
+import ca.odell.glazedlists.impl.swing.DefaultTableModelEventAdapterFactory;
 import ca.odell.glazedlists.impl.swing.LowerThresholdRangeModel;
+import ca.odell.glazedlists.impl.swing.ManyToOneTableModelEventAdapterFactory;
 import ca.odell.glazedlists.impl.swing.SwingThreadProxyEventList;
 import ca.odell.glazedlists.impl.swing.UpperThresholdRangeModel;
+import ca.odell.glazedlists.swing.TableModelEventAdapter.Factory;
 
 import javax.swing.BoundedRangeModel;
+import javax.swing.JTable;
 import javax.swing.SwingUtilities;
+import javax.swing.event.TableModelEvent;
 
 /**
  * A factory for creating all sorts of objects to be used with Glazed Lists.
@@ -108,6 +114,58 @@ public final class GlazedListsSwing {
     }
 
     /**
+     * Creates a new table model that extracts column data from the given
+     * <code>source</code> using the the given <code>tableFormat</code>.
+     *
+     * <p>The <code>eventAdapterFactory</code> is used to create a {@link TableModelEventAdapter},
+     * which is then used by the created table model to convert list events to table model events.</p>
+     *
+     * <p>The returned table model is <strong>not thread-safe</strong>. Unless otherwise
+     * noted, all methods are only safe to be called from the event dispatch thread.
+     * To do this programmatically, use {@link SwingUtilities#invokeAndWait(Runnable)} and
+     * wrap the source list (or some part of the source list's pipeline) using
+     * {@link GlazedListsSwing#swingThreadProxyList(EventList)}.</p>
+     *
+     * @param source the EventList that provides the row objects
+     * @param tableFormat the object responsible for extracting column data
+     *      from the row objects
+     * @param eventAdapterFactory factory for creating a {@link TableModelEventAdapter}
+     */
+    public static <E> AdvancedTableModel<E> eventTableModel(EventList<E> source, TableFormat<? super E> tableFormat, TableModelEventAdapter.Factory<E> eventAdapterFactory) {
+        final DefaultEventTableModel<E> result = new DefaultEventTableModel<E>(source, tableFormat);
+        final TableModelEventAdapter<E> eventAdapter = eventAdapterFactory.create(result);
+        result.setEventAdapter(eventAdapter);
+        return result;
+    }
+
+    /**
+     * Creates a new table model that extracts column data from the given <code>source</code>
+     * using the the given <code>tableFormat</code>.
+     *
+     * <p>While holding a read lock, this method wraps the source list using
+     * {@link GlazedListsSwing#swingThreadProxyList(EventList)}.</p>
+     *
+     * <p>The <code>eventAdapterFactory</code> is used to create a {@link TableModelEventAdapter},
+     * which is then used by the created table model to convert list events to table model events.</p>
+     *
+     * <p>
+     * The returned table model is <strong>not thread-safe</strong>. Unless otherwise noted, all
+     * methods are only safe to be called from the event dispatch thread.
+     * </p>
+     *
+     * @param source the EventList that provides the row objects
+     * @param tableFormat the object responsible for extracting column data from the row objects
+     * @param eventAdapterFactory factory for creating a {@link TableModelEventAdapter}
+     */
+    public static <E> AdvancedTableModel<E> eventTableModelWithThreadProxyList(EventList<E> source, TableFormat<? super E> tableFormat, TableModelEventAdapter.Factory<E> eventAdapterFactory) {
+        final EventList<E> proxySource = createSwingThreadProxyList(source);
+        final DefaultEventTableModel<E> result = new DefaultEventTableModel<E>(proxySource, true, tableFormat);
+        final TableModelEventAdapter<E> eventAdapter = eventAdapterFactory.create(result);
+        result.setEventAdapter(eventAdapter);
+        return result;
+    }
+
+    /**
      * Creates a new table model that renders the specified list with an automatically
      * generated {@link TableFormat}. It uses JavaBeans and reflection to create
      * a {@link TableFormat} as specified.
@@ -166,6 +224,57 @@ public final class GlazedListsSwing {
      */
     public static <E> AdvancedTableModel<E> eventTableModelWithThreadProxyList(EventList<E> source, String[] propertyNames, String[] columnLabels, boolean[] writable) {
         return eventTableModelWithThreadProxyList(source, GlazedLists.tableFormat(propertyNames, columnLabels, writable));
+    }
+
+    // event adapter factories
+
+    /**
+     * Gets a factory for creating a default {@link TableModelEventAdapter}.
+     * <p>The default strategy to convert list events to table model events is to be as accurate as possible.
+     * In particular, each list event block as converted to and fired as a separate {@link TableModelEvent}.
+     * So, one list event can cause multiple table model events.
+     * </p>
+     * <p>In some cases, this conversion strategy can lead to undesirable effects, such as table repainting issues.
+     * One known case is when the table property {@link JTable#getFillsViewportHeight() fillsViewportHeight} is <code>true</code>.
+     * Using the {@link #manyToOneEventAdapterFactory() other standard factory} is then recommended.
+     *
+     * @return the factory for creating a default {@link TableModelEventAdapter}
+     *
+     * @see #manyToOneEventAdapterFactory()
+     * @see Factory
+     * @see ListEvent
+     * @see TableModelEvent
+     */
+    public static <E> Factory<E> defaultEventAdapterFactory() {
+        return DefaultTableModelEventAdapterFactory.getInstance();
+    }
+
+    /**
+     * Gets a factory for creating a non-default {@link TableModelEventAdapter}.
+     * <p>
+     * Whereas the default TableModelEventAdapter converts each ListEvent block to a
+     * TableModelEvent, this strategy tries to create only one TableModelEvent
+     * for a ListEvent, if it does not represent a reorder. If the ListEvent
+     * contains multiple blocks, a special <em>data changed</em> TableModelEvent
+     * will be fired, indicating that all row data has changed. Note, that such
+     * a <em>data changed</em> TableModelEvent can lead to a loss of the table
+     * selection.
+     * </p>
+     * <p>
+     * Therefore you should use this strategy only, when the
+     * {@link #defaultEventAdapterFactory() default strategy} doesn't fit your
+     * needs or causes undesirable effects/behaviour.
+     * </p>
+     *
+     * @return the factory for creating a non-default {@link TableModelEventAdapter}
+     *
+     * @see #defaultEventAdapterFactory()
+     * @see Factory
+     * @see ListEvent
+     * @see TableModelEvent
+     */
+    public static <E> Factory<E> manyToOneEventAdapterFactory() {
+        return ManyToOneTableModelEventAdapterFactory.getInstance();
     }
 
     // ListSelectionModel convenience creators

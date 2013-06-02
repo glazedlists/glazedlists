@@ -19,13 +19,24 @@ import javax.swing.event.TableModelEvent;
  * converts each ListEvent block to a TableModelEvent, EventJXTableModel tries
  * to create only one TableModelEvent for a ListEvent, that does not represent a
  * reorder. If the ListEvent contains multiple blocks, a special
- * <em>data changed</em> TableModelEvent will be fired, indicating that all
- * row data has changed. Note, that such a <em>data changed</em> TableModelEvent
- * can lead to a loss of the table selection.
+ * <em>data changed</em> TableModelEvent will be fired, indicating that all row
+ * data has changed. Note, that such a <em>data changed</em> TableModelEvent can
+ * lead to a loss of the table selection.
  * </p>
  *
+ * @deprecated Use {@link DefaultEventTableModel} with a
+ *             {@link GlazedListsSwing#manyToOneEventAdapterFactory()
+ *             ManyToOneTableModelEventAdapter} instead. This class will be
+ *             removed in the GL 2.0 release. The wrapping of the source list
+ *             with an EDT safe list has been determined to be undesirable (it
+ *             is better for the user to provide their own EDT safe list).
+ *
+ * @see GlazedListsSwing#eventTableModelWithThreadProxyList(EventList,
+ *      TableFormat, ca.odell.glazedlists.swing.TableModelEventAdapter.Factory)
+ * @see GlazedListsSwing#manyToOneEventAdapterFactory()
  * @author Holger Brands
  */
+@Deprecated
 public class EventJXTableModel<E> extends EventTableModel<E> {
 
     /**
@@ -34,6 +45,7 @@ public class EventJXTableModel<E> extends EventTableModel<E> {
     public EventJXTableModel(EventList<E> source, String[] propertyNames, String[] columnLabels,
             boolean[] writable) {
         super(source, propertyNames, columnLabels, writable);
+        setEventAdapter(GlazedListsSwing.<E>manyToOneEventAdapterFactory().create(this));
     }
 
     /**
@@ -41,36 +53,6 @@ public class EventJXTableModel<E> extends EventTableModel<E> {
      */
     public EventJXTableModel(EventList<E> source, TableFormat<? super E> tableFormat) {
         super(source, tableFormat);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void handleListChange(ListEvent<E> listChanges) {
-        if (listChanges.isReordering()) {
-            super.handleListChange(listChanges);
-        } else {
-            fireOneTableModelEvent(listChanges);
-        }
-    }
-
-    /**
-     * Ensures that only one TableModelEvent is created and fired for the given ListEvent.
-     */
-    private void fireOneTableModelEvent(ListEvent<E> listChanges) {
-        // build an "optimized" TableModelEvent describing the precise range of rows in the first block
-        listChanges.nextBlock();
-        final int startIndex = listChanges.getBlockStartIndex();
-        final int endIndex = listChanges.getBlockEndIndex();
-        final int changeType = listChanges.getType();
-        getMutableTableModelEvent().setValues(startIndex, endIndex, changeType);
-
-        // if another block exists, fallback to using a generic "data changed" TableModelEvent
-        if (listChanges.nextBlock())
-            getMutableTableModelEvent().setAllDataChanged();
-
-        // fire the single TableModelEvent representing the entire ListEvent
-        fireTableChanged(getMutableTableModelEvent());
+        setEventAdapter(GlazedListsSwing.<E>manyToOneEventAdapterFactory().create(this));
     }
 }

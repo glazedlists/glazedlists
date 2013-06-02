@@ -420,8 +420,8 @@
         <mkdir dir="extensions/swinglabs/lib"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>        	
-            <arg value="${download.lib.url}/swinglabs/1.0.0/swingx.jar"/>
-            <arg value="extensions/swinglabs/lib/swingx.jar"/>
+            <arg value="${download.lib.url}/swinglabs/1.6.5-1/swingx-all.jar"/>
+            <arg value="extensions/swinglabs/lib/swingx-all.jar"/>
         </java>
         <javac destdir="${classes.dir}" srcdir="extensions/swinglabs/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
             <classpath>

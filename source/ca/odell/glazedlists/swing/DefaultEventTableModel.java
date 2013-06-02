@@ -10,9 +10,8 @@ import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 
-import java.awt.EventQueue;
-
 import javax.swing.SwingUtilities;
+import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 
@@ -48,8 +47,8 @@ public class DefaultEventTableModel<E> extends AbstractTableModel implements Adv
     /** specifies how column data is extracted from each row object */
     private TableFormat<? super E> tableFormat;
 
-    /** reusable TableModelEvent for broadcasting changes */
-    private final MutableTableModelEvent tableModelEvent = new MutableTableModelEvent(this);
+    /** encapsulates the strategy how to convert {@link ListEvent}s to {@link TableModelEvent}s */
+    private TableModelEventAdapter<E> eventAdapter = GlazedListsSwing.<E>defaultEventAdapterFactory().create(this);
 
     /**
      * Creates a new table model that extracts column data from the given
@@ -83,6 +82,7 @@ public class DefaultEventTableModel<E> extends AbstractTableModel implements Adv
     /**
      * {@inheritDoc}
      */
+    @Override
     public TableFormat<? super E> getTableFormat() {
         return tableFormat;
     }
@@ -90,15 +90,16 @@ public class DefaultEventTableModel<E> extends AbstractTableModel implements Adv
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setTableFormat(TableFormat<? super E> tableFormat) {
         this.tableFormat = tableFormat;
-        tableModelEvent.setStructureChanged();
-        fireTableChanged(tableModelEvent);
+        eventAdapter.fireTableStructureChanged();
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public E getElementAt(int index) {
         source.getReadWriteLock().readLock().lock();
         try {
@@ -114,6 +115,7 @@ public class DefaultEventTableModel<E> extends AbstractTableModel implements Adv
      * backed by {@link GlazedListsSwing#swingThreadProxyList}, all natural
      * calls to this method are guaranteed to occur on the Swing EDT.
      */
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
         handleListChange(listChanges);
     }
@@ -126,27 +128,15 @@ public class DefaultEventTableModel<E> extends AbstractTableModel implements Adv
      * @param listChanges ListEvent to translate
      */
     protected void handleListChange(ListEvent<E> listChanges) {
-        if (!EventQueue.isDispatchThread())
-            throw new IllegalStateException("Events to " + this.getClass().getSimpleName() + " must arrive on the EDT - consider adding GlazedListsSwing.swingThreadProxyList(source) somewhere in your list pipeline");
-
-        // for all changes, one block at a time
-        while (listChanges.nextBlock()) {
-            // get the current change info
-            int startIndex = listChanges.getBlockStartIndex();
-            int endIndex = listChanges.getBlockEndIndex();
-            int changeType = listChanges.getType();
-            // create a table model event for this block
-            tableModelEvent.setValues(startIndex, endIndex, changeType);
-            fireTableChanged(tableModelEvent);
-        }
+        eventAdapter.listChanged(listChanges);
     }
 
-    /**
-     * @return reusable TableModelEvent for broadcasting changes
-     */
-    protected final MutableTableModelEvent getMutableTableModelEvent() {
-        return tableModelEvent;
-    }
+//    /**
+//     * @return reusable TableModelEvent for broadcasting changes
+//     */
+//    protected final MutableTableModelEvent getMutableTableModelEvent() {
+//        return tableModelEvent;
+//    }
 
     /**
      * Fetch the name for the specified column.
@@ -159,6 +149,7 @@ public class DefaultEventTableModel<E> extends AbstractTableModel implements Adv
     /**
      * The number of rows equals the number of entries in the source event list.
      */
+    @Override
     public int getRowCount() {
         source.getReadWriteLock().readLock().lock();
         try {
@@ -171,6 +162,7 @@ public class DefaultEventTableModel<E> extends AbstractTableModel implements Adv
     /**
      * Get the column count as specified by the table format.
      */
+    @Override
     public int getColumnCount() {
         return tableFormat.getColumnCount();
     }
@@ -193,6 +185,7 @@ public class DefaultEventTableModel<E> extends AbstractTableModel implements Adv
     /**
      * Retrieves the value at the specified location of the table.
      */
+    @Override
     public Object getValueAt(int row, int column) {
         source.getReadWriteLock().readLock().lock();
         try {
@@ -209,8 +202,9 @@ public class DefaultEventTableModel<E> extends AbstractTableModel implements Adv
      */
     @Override
     public boolean isCellEditable(int row, int column) {
-        if (!(tableFormat instanceof WritableTableFormat))
+        if (!(tableFormat instanceof WritableTableFormat)) {
             return false;
+        }
 
         source.getReadWriteLock().readLock().lock();
         try {
@@ -232,8 +226,9 @@ public class DefaultEventTableModel<E> extends AbstractTableModel implements Adv
     @Override
     public void setValueAt(Object editedValue, int row, int column) {
         // ensure this is a writable table
-        if (!(tableFormat instanceof WritableTableFormat))
+        if (!(tableFormat instanceof WritableTableFormat)) {
             throw new UnsupportedOperationException("Unexpected setValueAt() on read-only table");
+        }
 
         source.getReadWriteLock().writeLock().lock();
         try {
@@ -252,8 +247,9 @@ public class DefaultEventTableModel<E> extends AbstractTableModel implements Adv
 
                 // if the row is still present in its original location, update it to induce a
                 // TableModelEvent that will redraw that row in the table
-                if (baseObjectHasNotMoved)
+                if (baseObjectHasNotMoved) {
                     source.set(row, updatedObject);
+                }
             }
         } finally {
             source.getReadWriteLock().writeLock().unlock();
@@ -263,10 +259,31 @@ public class DefaultEventTableModel<E> extends AbstractTableModel implements Adv
     /**
      * {@inheritDoc}
      */
+    @Override
     public void dispose() {
         source.removeListEventListener(this);
-        if (disposeSource) source.dispose();
+        if (disposeSource) {
+            source.dispose();
+        }
         // this encourages exceptions to be thrown if this model is incorrectly accessed again
         source = null;
+    }
+
+    /**
+     * Gets the {@link TableModelEventAdapter} used to convert {@link ListEvent}s to {@link TableModelEvent}s.
+     *
+     * @return the {@link TableModelEventAdapter}
+     */
+    public final TableModelEventAdapter<E> getEventAdapter() {
+        return eventAdapter;
+    }
+
+    /**
+     * Sets the {@link TableModelEventAdapter} used to convert {@link ListEvent}s to {@link TableModelEvent}s.
+     *
+     * @param eventAdapter the new {@link TableModelEventAdapter} not <code>null</code>
+     */
+    public final void setEventAdapter(TableModelEventAdapter<E> eventAdapter) {
+        this.eventAdapter = eventAdapter;
     }
 }

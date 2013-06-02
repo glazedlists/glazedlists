@@ -3,9 +3,11 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import ca.odell.glazedlists.*;
-
-import com.publicobject.issuesbrowser.*;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.SortedList;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -15,11 +17,23 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableModel;
 
 import org.jdesktop.swingx.JXTable;
+
+import com.publicobject.issuesbrowser.Issue;
+import com.publicobject.issuesbrowser.IssueTableFormat;
+import com.publicobject.issuesbrowser.IssueTextFilterator;
+import com.publicobject.issuesbrowser.IssueTrackingSystem;
+import com.publicobject.issuesbrowser.Project;
 
 /**
  * Demonstrate sorting using JXTable with Glazed Lists'
@@ -35,6 +49,7 @@ class JXTableTestApp2 implements Runnable {
         this.issues = issues;
     }
 
+    @Override
     public void run() {
         issues.getReadWriteLock().writeLock().lock();
         try {
@@ -53,7 +68,8 @@ class JXTableTestApp2 implements Runnable {
             JXTable table = new JXTable(tableModel);
             table.setSortable(false);
             table.getTableHeader().setDefaultRenderer(new JTableHeader().getDefaultRenderer());
-            table.getSelectionMapper().setEnabled(false);
+            table.setAutoCreateRowSorter(false);
+            table.setRowSorter(null);
             table.setSelectionModel(selectionModel);
             table.setColumnControlVisible(true);
 
@@ -80,9 +96,10 @@ class JXTableTestApp2 implements Runnable {
         public IssueLoader(EventList<Issue> issues, String filename) {
             this.issues = issues;
 
-            this.project = new Project("Glazed Lists", "Glazed Lists", IssueTrackingSystem.getJavaNetJira());
+            this.project = new Project("Glazed Lists", "Glazed Lists", IssueTrackingSystem.getTigrisIssuezilla());
             project.setFileName(filename);
         }
+        @Override
         public void run() {
             try {
 
@@ -96,10 +113,13 @@ class JXTableTestApp2 implements Runnable {
 
     private static class IssueStateComparator implements Comparator {
         private static final List STATES = Arrays.asList("UNCONFIRMED", "NEW", "STARTED", "REOPENED", "RESOLVED", "VERIFIED", "CLOSED");
+        @Override
         public int compare(Object a, Object b) {
             int stateIndexA = STATES.indexOf(a);
             int stateIndexB = STATES.indexOf(b);
-            if(stateIndexA == -1 || stateIndexB == -1) throw new IllegalStateException();
+            if(stateIndexA == -1 || stateIndexB == -1) {
+                throw new IllegalStateException();
+            }
             return stateIndexA - stateIndexB;
         }
     }
