@@ -32,7 +32,7 @@
         </list>
         <!-- mapping a many-to-many entity association -->
         <list name="roles" table="USER_ROLE" cascade="save-update" access="field" lazy="extra"
-            collection-type="ca.odell.glazedlists.hibernate.EventListTypeCategoryTest$TestEventListType2">
+            collection-type="ca.odell.glazedlists.hibernate.TestEventListType2">
             <key column="USERNAME"/>
             <list-index column="DISPLAY_ORDER"/>
             <many-to-many class="Role" column="ROLE_ID"/>

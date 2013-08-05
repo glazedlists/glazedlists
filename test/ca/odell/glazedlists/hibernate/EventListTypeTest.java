@@ -1,4 +1,4 @@
-/* Glazed Lists                                                 (c) 2003-2006 */
+/* Glazed Lists                                                 (c) 2003-2013 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.hibernate;
@@ -16,6 +16,10 @@ import org.hibernate.FetchMode;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Tests mapping and persisting BasicEventLists with Hibernate. Tested classes are
@@ -23,18 +27,13 @@ import org.hibernate.Transaction;
  *
  * @author Holger Brands
  */
-public class EventListTypeTest extends AbstractHibernateTestCase {
-
-    /**
-     * Constructor with name.
-     */
-    public EventListTypeTest(String name) {
-        super(name);
-    }
+@HibernateConfig(mappings={"User.hbm.xml"})
+public class EventListTypeTest extends HibernateTestCase {
 
     /**
      * Tests a lazy loaded value collection.
      */
+    @Test
     public void testLazyValueCollection() {
         doTestValueCollection(true);
     }
@@ -42,6 +41,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
     /**
      * Tests an eager loaded value collection.
      */
+    @Test
     public void testEagerValueCollection() {
         doTestValueCollection(false);
     }
@@ -125,6 +125,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
     /**
      * Tests a lazy loaded, one-to-many, unidirectional association with entity collection.
      */
+    @Test
     public void testLazyOneToManyUniDirectionalAssociation() {
         doTestOneToManyUniDirectionalAssociation(true);
     }
@@ -132,16 +133,9 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
     /**
      * Tests an eager loaded, one-to-many, unidirectional association with entity collection.
      */
+    @Test
     public void testEagerOneToManyUniDirectionalAssociation() {
         doTestOneToManyUniDirectionalAssociation(false);
-    }
-
-    /**
-     * Gets mapping files for this test case.
-     */
-    @Override
-    protected String[] getMappings() {
-        return new String[] { "User.hbm.xml" };
     }
 
     /**
@@ -235,6 +229,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
     /**
      * Tests a lazy loaded, many-to-many association with entity collection.
      */
+    @Test
     public void testLazyManyToManyAssociation() {
         doTestManyToManyAssociation(true);
     }
@@ -242,6 +237,7 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
     /**
      * Tests an eager loaded, one-to-many, unidirectional association with entity collection.
      */
+    @Test
     public void testEagerManyToManyAssociation() {
         doTestManyToManyAssociation(false);
     }
@@ -353,6 +349,8 @@ public class EventListTypeTest extends AbstractHibernateTestCase {
     /**
      * Tests behaviour when Hibernate wraps an EventList.
      */
+    @Ignore("Fix me")
+    @Test
     public void testListWrapOnSave_FixMe() {
         // create user with nicknames and persist
         Session s = openSession();
