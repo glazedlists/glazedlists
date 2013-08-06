@@ -7,11 +7,15 @@ import org.hibernate.HibernateException;
 import org.hibernate.Interceptor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.engine.SessionFactoryImplementor;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.jdbc.Work;
 import org.junit.Rule;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * A {@link TestRule} implementation for use as {@link Rule}, that wraps all
@@ -68,7 +72,7 @@ public class HibernateTestRule implements TestRule {
      */
     public Session openSession(Interceptor interceptor)
             throws HibernateException {
-        session = getSessions().openSession(interceptor);
+        session = getSessions().withOptions().interceptor(interceptor).openSession();
         return session;
     }
 
@@ -104,23 +108,14 @@ public class HibernateTestRule implements TestRule {
             }
 
             if (session != null && session.isOpen()) {
-                if (session.isConnected()) {
-                    session.connection().rollback();
-                }
-                session.close();
-                session = null;
+                cleanupSession();
                 throw new IllegalStateException("unclosed session");
             } else {
                 session = null;
             }
         } catch (Throwable e) {
             try {
-                if (session != null && session.isOpen()) {
-                    if (session.isConnected()) {
-                        session.connection().rollback();
-                    }
-                    session.close();
-                }
+                cleanupSession();
             } catch (Exception ignore) {
             }
             try {
@@ -130,6 +125,23 @@ public class HibernateTestRule implements TestRule {
                         + ignore);
             }
             throw e;
+        }
+    }
+
+    private void cleanupSession() {
+        if (session != null && session.isOpen()) {
+            if (session.isConnected()) {
+                session.doWork(new Rollback());
+            }
+            session.close();
+            session = null;
+        }
+    }
+
+    private static class Rollback implements Work {
+        @Override
+        public void execute(Connection connection) throws SQLException {
+            connection.rollback();
         }
     }
 }

@@ -9,8 +9,8 @@ import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 import org.hibernate.HibernateException;
-import org.hibernate.collection.PersistentCollection;
-import org.hibernate.engine.SessionImplementor;
+import org.hibernate.collection.spi.PersistentCollection;
+import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.persister.collection.CollectionPersister;
 import org.hibernate.usertype.ParameterizedType;
 import org.hibernate.usertype.UserCollectionType;
@@ -62,8 +62,9 @@ public class EventListType implements UserCollectionType, ParameterizedType {
      * Sets a new EventListFactory.
      */
     public final void setListFactory(EventListFactory newListFactory) {
-        if (newListFactory == null)
+        if (newListFactory == null) {
             throw new IllegalArgumentException("EventListFactory must not be null");
+        }
         listFactory = newListFactory;
     }
 
@@ -71,8 +72,11 @@ public class EventListType implements UserCollectionType, ParameterizedType {
      * When Hibernate bug <a href="http://opensource.atlassian.com/projects/hibernate/browse/HHH-2336">HHH-2336</a>
      * is fixed, this method will be called by Hibernate when reading its mapping files.
      */
+    @Override
     public final void setParameterValues(Properties parameters) {
-        if (parameters == null) return;
+        if (parameters == null) {
+            return;
+        }
         final String category = parameters.getProperty(PROPERTYNAME_EVENTLIST_CATEGORY);
         if (category != null) {
             useListCategory(category);
@@ -95,16 +99,19 @@ public class EventListType implements UserCollectionType, ParameterizedType {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean contains(Object collection, Object entity) {
         return ((EventList) collection).contains(entity);
     }
 
     /** {@inheritDoc} */
+    @Override
     public Iterator getElementsIterator(Object collection) {
         return ((EventList) collection).iterator();
     }
 
     /** {@inheritDoc} */
+    @Override
     public Object indexOf(Object collection, Object obj) {
         final int index = ((EventList) collection).indexOf(obj);
         return (index < 0) ? null : new Integer(index);
@@ -119,18 +126,21 @@ public class EventListType implements UserCollectionType, ParameterizedType {
     }
 
     /** {@inheritDoc} */
+    @Override
     public Object instantiate(int anticipatedSize) {
         final EventListFactory fac = getListFactory();
         return anticipatedSize < 0 ? fac.createEventList() : fac.createEventList(anticipatedSize);
     }
 
     /** {@inheritDoc} */
+    @Override
     public PersistentCollection instantiate(SessionImplementor session,
             CollectionPersister persister) throws HibernateException {
         return new PersistentEventList(session, getListFactory());
     }
 
     /** {@inheritDoc} */
+    @Override
     public Object replaceElements(Object original, Object target, CollectionPersister persister,
             Object owner, Map copyCache, SessionImplementor session) throws HibernateException {
         final EventList result = (EventList) target;
@@ -141,6 +151,7 @@ public class EventListType implements UserCollectionType, ParameterizedType {
     }
 
     /** {@inheritDoc} */
+    @Override
     public PersistentCollection wrap(SessionImplementor session, Object collection) {
         return new PersistentEventList(session, (EventList) collection);
     }

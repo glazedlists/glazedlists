@@ -9,15 +9,15 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 
-import java.util.Iterator;
-import java.util.List;
-
 import org.hibernate.FetchMode;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import java.util.Iterator;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -448,12 +448,12 @@ public class EventListTypeTest extends HibernateTestCase {
     /**
      * Helper class for capturing source list of list events
      */
-    private static class ListEventSourceHandler implements ListEventListener {
-        public EventList source;
+    private static class ListEventSourceHandler implements ListEventListener<String> {
+        public EventList<String> source;
 
         /** {@inheritDoc} */
         @Override
-        public void listChanged(ListEvent listChanges) {
+        public void listChanged(ListEvent<String> listChanges) {
             if (source == null) {
                 source = listChanges.getSourceList();
             } else if (source != listChanges.getSourceList()) {

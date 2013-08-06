@@ -3,24 +3,33 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.hibernate;
 
-import java.sql.Blob;
-import java.sql.Clob;
-import java.util.Iterator;
-
-import junit.framework.TestCase;
-
 import org.hibernate.SessionFactory;
+import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
 import org.hibernate.dialect.Dialect;
+import org.hibernate.internal.util.config.ConfigurationHelper;
 import org.hibernate.mapping.Collection;
 import org.hibernate.mapping.PersistentClass;
 import org.hibernate.mapping.Property;
 import org.hibernate.mapping.SimpleValue;
+import org.hibernate.service.BootstrapServiceRegistry;
+import org.hibernate.service.BootstrapServiceRegistryBuilder;
+import org.hibernate.service.ServiceRegistryBuilder;
+import org.hibernate.service.internal.StandardServiceRegistryImpl;
 import org.junit.ClassRule;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
+
+import java.sql.Blob;
+import java.sql.Clob;
+import java.util.Iterator;
+import java.util.Properties;
+
+import javax.imageio.spi.ServiceRegistry;
+
+import junit.framework.TestCase;
 
 /**
  * A {@link TestRule} that initializes Hibernate. In particular it determines
@@ -42,6 +51,9 @@ public class HibernateClassRule implements TestRule {
 
     /** Cached Configuration. */
     private Configuration cfg;
+
+    /** Service Registry. */
+    private StandardServiceRegistryImpl serviceRegistry;
 
     /** Cached Dialect. */
     private Dialect dialect;
@@ -116,6 +128,10 @@ public class HibernateClassRule implements TestRule {
         if (getSessions() != null) {
             getSessions().close();
             setSessions(null);
+        }
+        if (serviceRegistry != null) {
+            serviceRegistry.destroy();
+            serviceRegistry = null;
         }
     }
 
@@ -207,13 +223,14 @@ public class HibernateClassRule implements TestRule {
         if (getSessions() != null) {
             throw new IllegalStateException("Found SessionFactory at test start");
         }
+        if (serviceRegistry != null) {
+            throw new IllegalStateException("Found ServiceRegistry at test start");
+        }
 
         setDialect(Dialect.getDialect());
-        setCfg(new Configuration());
+        setCfg(createConfiguration());
 
-        if (recreateSchema()) {
-            cfg.setProperty(Environment.HBM2DDL_AUTO, "create-drop");
-        }
+        serviceRegistry = createServiceRegistry(getCfg());
 
         for (int i = 0; i < files.length; i++) {
             if (!files[i].startsWith("net/")) {
@@ -221,7 +238,48 @@ public class HibernateClassRule implements TestRule {
             }
             getCfg().addResource(files[i], TestCase.class.getClassLoader());
         }
+        getCfg().buildMappings();
 
+        applyCacheSettings(getCfg());
+
+        setSessions(getCfg().buildSessionFactory(serviceRegistry));
+    }
+
+    /**
+     * Cretes a new Hibernate {@link Configuration}.
+     *
+     * @return the created configuration
+     */
+    private Configuration createConfiguration() {
+        final Configuration result = new Configuration();
+        result.setProperty(AvailableSettings.USE_NEW_ID_GENERATOR_MAPPINGS, "true");
+        if (recreateSchema()) {
+            result.setProperty(AvailableSettings.HBM2DDL_AUTO, "create-drop");
+        }
+        result.setProperty(AvailableSettings.DIALECT, getDialect().getClass().getName());
+        return result;
+    }
+
+    /**
+     * Creates a new Hibernate {@link ServiceRegistry}.
+     *
+     * @param configuration the used configuration
+     * @return the created service registry
+     */
+    private static StandardServiceRegistryImpl createServiceRegistry(Configuration configuration) {
+        Properties properties = new Properties();
+        properties.putAll( configuration.getProperties() );
+        Environment.verifyProperties( properties );
+        ConfigurationHelper.resolvePlaceHolders( properties );
+
+        BootstrapServiceRegistry bootstrapServiceRegistry =
+                new BootstrapServiceRegistryBuilder().build();
+        ServiceRegistryBuilder registryBuilder = new ServiceRegistryBuilder(
+                bootstrapServiceRegistry).applySettings(properties);
+        return (StandardServiceRegistryImpl) registryBuilder.buildServiceRegistry();
+    }
+
+    private void applyCacheSettings(Configuration configuration) {
         if (getCacheConcurrencyStrategy() != null) {
 
             Iterator iter = cfg.getClassMappings();
@@ -255,6 +313,5 @@ public class HibernateClassRule implements TestRule {
             }
 
         }
-        setSessions(getCfg().buildSessionFactory());
     }
 }

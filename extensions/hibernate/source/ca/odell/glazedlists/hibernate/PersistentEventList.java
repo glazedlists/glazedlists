@@ -10,8 +10,9 @@ import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
-import org.hibernate.collection.PersistentList;
-import org.hibernate.engine.SessionImplementor;
+
+import org.hibernate.collection.internal.PersistentList;
+import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.persister.collection.CollectionPersister;
 
 import java.io.IOException;
@@ -62,7 +63,9 @@ public final class PersistentEventList extends PersistentList implements EventLi
      */
     public PersistentEventList(SessionImplementor session, EventList newList) {
         super(session, newList);
-        if (newList == null) throw new IllegalArgumentException("EventList parameter may not be null");
+        if (newList == null) {
+            throw new IllegalArgumentException("EventList parameter may not be null");
+        }
 
         updates = new ListEventAssembler(this, newList.getPublisher());
         newList.addListEventListener(this);
@@ -84,38 +87,47 @@ public final class PersistentEventList extends PersistentList implements EventLi
      */
     private void beforeInitialize() {
         assert !wasInitialized() : "PersistentEventList is already initialized";
-        if (this.list == null) throw new IllegalStateException("'list' member is undefined");
+        if (this.list == null) {
+            throw new IllegalStateException("'list' member is undefined");
+        }
     }
 
     /** {@inheritDoc} */
+    @Override
     public ListEventPublisher getPublisher() {
         return ((EventList) list).getPublisher();
     }
 
     /** {@inheritDoc} */
+    @Override
     public ReadWriteLock getReadWriteLock() {
         return ((EventList) list).getReadWriteLock();
     }
 
     /** {@inheritDoc} */
+    @Override
     public void addListEventListener(ListEventListener listChangeListener) {
         updates.addListEventListener(listChangeListener);
     }
 
     /** {@inheritDoc} */
+    @Override
     public void removeListEventListener(ListEventListener listChangeListener) {
         updates.removeListEventListener(listChangeListener);
     }
 
     /** {@inheritDoc} */
+    @Override
     public void listChanged(ListEvent listChanges) {
         // ignore ListEvents during Hibernate's initialization
         // (initialization should always appear to be transparent and thus should not produce ListEvents)
-        if (wasInitialized())
+        if (wasInitialized()) {
             updates.forwardEvent(listChanges);
+        }
     }
 
     /** {@inheritDoc} */
+    @Override
     public void dispose() {
         // TODO Holger please implement me!
     }
@@ -129,7 +141,9 @@ public final class PersistentEventList extends PersistentList implements EventLi
         List<ListEventListener> serializableListeners = new ArrayList<ListEventListener>();
         for(Iterator<ListEventListener> i = updates.getListEventListeners().iterator(); i.hasNext(); ) {
             ListEventListener listener = i.next();
-            if(!(listener instanceof Serializable)) continue;
+            if(!(listener instanceof Serializable)) {
+                continue;
+            }
             serializableListeners.add(listener);
         }
         ListEventListener[] listeners = serializableListeners.toArray(new ListEventListener[serializableListeners.size()]);
