@@ -80,13 +80,6 @@ public class EventObservableList<E> extends AbstractList<E> implements Observabl
 
         source.removeListEventListener(this);
 
-        // Notify that the list is no longer valid
-        synchronized (invalidation_listeners) {
-            for (InvalidationListener listener : invalidation_listeners) {
-                listener.invalidated(this);
-            }
-        }
-
         // Clear all listeners
         synchronized (list_listeners) {
             list_listeners.clear();
@@ -513,6 +506,12 @@ public class EventObservableList<E> extends AbstractList<E> implements Observabl
 
     @Override
     public void listChanged(ListEvent<E> source_changes) {
+	    synchronized (invalidation_listeners) {
+		    for (int i = invalidation_listeners.size() - 1; i >= 0; i--) {
+			    invalidation_listeners.get(i).invalidated(this);
+		    }
+	    }
+
         synchronized (list_listeners) {
             for (int i = list_listeners.size() - 1; i >= 0; i--) {
                 ListEvent<E> changes_to_distribute = source_changes.copy();

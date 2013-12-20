@@ -599,35 +599,9 @@ public class EventObservableListTest {
 
         assertFalse(listener_called.get());
 
-        wrapper.dispose();
+	    wrapper.add( "Watermellon" );
 
-        assertTrue(listener_called.compareAndSet(true, false));
-
-        // Disposing again shouldn't call again
-        wrapper.dispose();
-
-        assertFalse(listener_called.get());
-    }
-
-    @Test
-    public void testInvalidationListenerRemove() {
-        final AtomicBoolean listener_called = new AtomicBoolean(false);
-        InvalidationListener listener = new InvalidationListener() {
-            @Override
-            public void invalidated(Observable observable) {
-                listener_called.set(true);
-            }
-        };
-
-        wrapper.addListener(listener);
-
-        assertFalse(listener_called.get());
-
-        wrapper.removeListener(listener);
-
-        wrapper.dispose();
-
-        assertFalse(listener_called.get());
+	    assertTrue(listener_called.get());
     }
 
     @Test
