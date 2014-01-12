@@ -65,6 +65,8 @@
 	<!-- output directory for javadocs -->
 	<property name="docs.dir" value="${target.dir}/docs"/>
 
+	<property name="java.encoding" value="UTF-8"/>
+
 	<!-- title for javadocs -->
     <property name="doctitle" value="Glazed Lists ${version}"/>
 
@@ -136,7 +138,7 @@
 	
 	<!-- use windows files as default if nothing matches -->
 	<property name="swt.jar.file" value="org.eclipse.swt.win32.win32.x86.jar"/>
-	
+		
    <target name="ant_version_check">
         <antversion property="ant.version.running" />
         <fail message="FATAL ERROR:  The running Ant version, ${ant.version.running}, is too old.">
@@ -323,7 +325,7 @@
 
 	<target name="core" depends="ant_version_check">
         <mkdir dir="${classes.dir}"/>
-		<javac destdir="${classes.dir}" srcdir="source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+		<javac destdir="${classes.dir}" srcdir="source" debug="on" source="${java.target.version}" target="${java.target.version}" encoding="${java.encoding}" deprecation="off">
             <!-- swing -->
             <exclude name="**/swing/**"/>
             <!-- io -->
@@ -336,20 +338,20 @@
 	</target>
 
     <target name="migrationkit" depends="core">
-        <javac destdir="${classes.dir}" srcdir="source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+        <javac destdir="${classes.dir}" srcdir="source" debug="on" source="${java.target.version}" target="${java.target.version}" encoding="${java.encoding}" deprecation="off">
             <include name="**/migrationkit/**"/>
         </javac>
     </target>
 
 	<target name="swing" depends="core">
-		<javac destdir="${classes.dir}" srcdir="source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+		<javac destdir="${classes.dir}" srcdir="source" debug="on" source="${java.target.version}" target="${java.target.version}" encoding="${java.encoding}" deprecation="off">
 			<include name="**/swing/**"/>
 			<exclude name="**/migrationkit/**"/>
 		</javac>
 	</target>
 
 	<target name="io" depends="core">
-		<javac destdir="${classes.dir}" srcdir="source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+		<javac destdir="${classes.dir}" srcdir="source" debug="on" source="${java.target.version}" target="${java.target.version}" encoding="${java.encoding}" deprecation="off">
 			<include name="**/ctp/**"/>
 			<include name="**/io/**"/>
 			<include name="**/nio/**"/>
@@ -365,7 +367,7 @@
 
     <target name="calculation" depends="swing">
         <mkdir dir="extensions/calculation/lib"/>
-        <javac destdir="${classes.dir}" srcdir="extensions/calculation/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+        <javac destdir="${classes.dir}" srcdir="extensions/calculation/source" debug="on" source="${java.target.version}" target="${java.target.version}" encoding="${java.encoding}" deprecation="off">
             <classpath>
                 <fileset dir="extensions/calculation/lib/" includes="*.jar"/>
             </classpath>
@@ -379,7 +381,7 @@
             <arg value="${swt.jar.path}/${swt.jar.file}"/>
             <arg value="extensions/swt/lib/${swt.jar.file}"/>
         </java>
-        <javac destdir="${classes.dir}" srcdir="extensions/swt/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+        <javac destdir="${classes.dir}" srcdir="extensions/swt/source" debug="on" source="${java.target.version}" target="${java.target.version}" encoding="${java.encoding}" deprecation="off">
             <classpath>
                 <fileset dir="extensions/swt/lib/" includes="*.jar"/>
             </classpath>
@@ -393,7 +395,7 @@
             <arg value="${download.lib.url}/ktable/2.1.2/ktable.jar"/>
             <arg value="extensions/ktable/lib/ktable.jar"/>
         </java>
-        <javac destdir="${classes.dir}" srcdir="extensions/ktable/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+        <javac destdir="${classes.dir}" srcdir="extensions/ktable/source" debug="on" source="${java.target.version}" target="${java.target.version}" encoding="${java.encoding}" deprecation="off">
             <classpath>
                 <fileset dir="extensions/ktable/lib/" includes="*.jar"/>
                 <fileset dir="extensions/swt/lib/" includes="*.jar"/>
@@ -408,7 +410,7 @@
             <arg value="${download.lib.url}/forms/1.0.5/forms.jar"/>
             <arg value="extensions/jgoodiesforms/lib/forms.jar"/>
         </java>
-        <javac destdir="${classes.dir}" srcdir="extensions/jgoodiesforms/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+        <javac destdir="${classes.dir}" srcdir="extensions/jgoodiesforms/source" debug="on" source="${java.target.version}" target="${java.target.version}" encoding="${java.encoding}" deprecation="off">
             <classpath>
                 <fileset dir="extensions/jgoodiesforms/lib/" includes="*.jar"/>
             </classpath>
@@ -424,7 +426,7 @@
             <arg value="${download.lib.url}/swinglabs/1.6.5-1/swingx-all.jar"/>
             <arg value="extensions/swinglabs/lib/swingx-all.jar"/>
         </java>
-        <javac destdir="${classes.dir}" srcdir="extensions/swinglabs/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+        <javac destdir="${classes.dir}" srcdir="extensions/swinglabs/source" debug="on" source="${java.target.version}" target="${java.target.version}" encoding="${java.encoding}" deprecation="off">
             <classpath>
                 <fileset dir="extensions/swinglabs/lib/" includes="*.jar"/>
             </classpath>
@@ -438,7 +440,7 @@
             <arg value="${download.lib.url}/icu4j/3.6/icu4j.jar"/>
             <arg value="extensions/icu4j/lib/icu4j.jar"/>
         </java>
-        <javac destdir="${classes.dir}" srcdir="extensions/icu4j/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+        <javac destdir="${classes.dir}" srcdir="extensions/icu4j/source" debug="on" source="${java.target.version}" target="${java.target.version}" encoding="${java.encoding}" deprecation="off">
             <classpath>
                 <fileset dir="extensions/icu4j/lib/" includes="*.jar"/>
             </classpath>
@@ -452,7 +454,7 @@
             <arg value="${download.lib.url}/nachocalendar/0.23/nachocalendar.jar"/>
             <arg value="extensions/nachocalendar/lib/nachocalendar.jar"/>
         </java>
-        <javac destdir="${classes.dir}" srcdir="extensions/nachocalendar/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+        <javac destdir="${classes.dir}" srcdir="extensions/nachocalendar/source" debug="on" source="${java.target.version}" target="${java.target.version}" encoding="${java.encoding}" deprecation="off">
             <classpath>
                 <fileset dir="extensions/nachocalendar/lib/" includes="*.jar"/>
             </classpath>
@@ -460,7 +462,7 @@
     </target>
 
     <target name="treetable" depends="swing">
-        <javac destdir="${classes.dir}" srcdir="extensions/treetable/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off"/>
+        <javac destdir="${classes.dir}" srcdir="extensions/treetable/source" debug="on" source="${java.target.version}" target="${java.target.version}" encoding="${java.encoding}" deprecation="off"/>
     </target>
 
     <target name="jfreechart" depends="swing,calculation">
@@ -475,7 +477,7 @@
             <arg value="${download.lib.url}/jfreechart/1.0.0/jfreechart.jar"/>
             <arg value="extensions/jfreechart/lib/jfreechart.jar"/>
         </java>
-        <javac destdir="${classes.dir}" srcdir="extensions/jfreechart/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+        <javac destdir="${classes.dir}" srcdir="extensions/jfreechart/source" debug="on" source="${java.target.version}" target="${java.target.version}" encoding="${java.encoding}" deprecation="off">
             <classpath>
                 <fileset dir="extensions/jfreechart/lib/" includes="*.jar"/>
             </classpath>
@@ -499,7 +501,7 @@
             <arg value="${download.lib.url}/hsqldb/2.2.6/hsqldb-jdk5.jar"/>
             <arg value="extensions/hibernate/lib/hsqldb-jdk5.jar"/>
         </java>				
-        <javac destdir="${classes.dir}" srcdir="extensions/hibernate/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+        <javac destdir="${classes.dir}" srcdir="extensions/hibernate/source" debug="on" source="${java.target.version}" target="${java.target.version}" encoding="${java.encoding}" deprecation="off">
             <classpath>
                 <fileset dir="extensions/hibernate/lib/" includes="*.jar"/>
             </classpath>
@@ -513,7 +515,7 @@
             <arg value="${download.lib.url}/javafx-6/2.2.21/jfxrt.jar"/>
             <arg value="extensions/javafx/lib/jfxrt.jar"/>
         </java>     
-        <javac destdir="${classes.dir}" srcdir="extensions/javafx/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+        <javac destdir="${classes.dir}" srcdir="extensions/javafx/source" debug="on" source="${java.target.version}" target="${java.target.version}" encoding="${java.encoding}" deprecation="off">
             <classpath>
                 <fileset dir="extensions/javafx/lib/" includes="*.jar"/>
             </classpath>
@@ -539,7 +541,7 @@
             <arg value="extensions/japex/lib/mail.jar"/>
         </java>
         <!-- compile the Japex performance tests -->
-        <javac destdir="${classes.dir}" srcdir="extensions/japex/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+        <javac destdir="${classes.dir}" srcdir="extensions/japex/source" debug="on" source="${java.target.version}" target="${java.target.version}" encoding="${java.encoding}" deprecation="off">
             <classpath>
                 <fileset dir="extensions/japex/lib/" includes="*.jar"/>
             </classpath>
@@ -567,7 +569,7 @@
             <arg value="${download.lib.url}/httpclient/0.3.3/http.jar"/>
             <arg value="extensions/issuesbrowser/lib/http.jar"/>
         </java>
-        <javac destdir="${classes.dir}" srcdir="extensions/issuesbrowser/source" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+        <javac destdir="${classes.dir}" srcdir="extensions/issuesbrowser/source" debug="on" source="${java.target.version}" target="${java.target.version}" encoding="${java.encoding}" deprecation="off">
             <classpath>
                 <fileset dir="extensions/swt/lib/" includes="*.jar"/>
                 <fileset dir="extensions/jfreechart/lib/" includes="*.jar"/>
@@ -746,7 +748,7 @@
 
     <target name="compiletests" depends="compileall, downloadJUnit">
 		<mkdir dir="${testclasses.dir}"/>
-	    <javac destdir="${testclasses.dir}" srcdir="test" debug="on" source="${java.target.version}" target="${java.target.version}" deprecation="off">
+	    <javac destdir="${testclasses.dir}" srcdir="test" debug="on" source="${java.target.version}" target="${java.target.version}" encoding="${java.encoding}" deprecation="off">
             <classpath>
                 <pathelement location="${classes.dir}"/>
                 <fileset dir="extensions" includes="**/*.jar"/>

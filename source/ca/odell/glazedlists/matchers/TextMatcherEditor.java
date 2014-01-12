@@ -5,8 +5,16 @@ package ca.odell.glazedlists.matchers;
 
 import ca.odell.glazedlists.TextFilterable;
 import ca.odell.glazedlists.TextFilterator;
-import ca.odell.glazedlists.impl.filter.*;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
+import ca.odell.glazedlists.impl.filter.BoyerMooreCaseInsensitiveTextSearchStrategy;
+import ca.odell.glazedlists.impl.filter.ExactCaseInsensitiveTextSearchStrategy;
+import ca.odell.glazedlists.impl.filter.RegularExpressionTextSearchStrategy;
+import ca.odell.glazedlists.impl.filter.SearchTerm;
+import ca.odell.glazedlists.impl.filter.SingleCharacterCaseInsensitiveTextSearchStrategy;
+import ca.odell.glazedlists.impl.filter.StartsWithCaseInsensitiveTextSearchStrategy;
+import ca.odell.glazedlists.impl.filter.TextMatcher;
+import ca.odell.glazedlists.impl.filter.TextMatchers;
+import ca.odell.glazedlists.impl.filter.TextSearchStrategy;
 
 /**
  * A matcher editor that matches Objects that contain a filter text string.
@@ -44,7 +52,7 @@ import ca.odell.glazedlists.impl.GlazedListsImpl;
  *   <li>{@link #NORMALIZED_STRATEGY} defines a text match more leniently for
  *        Latin-character based languages. Specifically, diacritics are
  *        stripped from all Latin characters before comparisons are made.
- *        Consequently, filters like "resume" match words like "r�sum�".
+ *        Consequently, filters like "resume" match words like "résumé".
  * </ul>
  *
  * @author James Lemieux
@@ -88,6 +96,7 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
     public static final Object IDENTICAL_STRATEGY = new IdenticalStrategyFactory();
     // this would be an inner class if declawer supported it
     private static class IdenticalStrategyFactory implements TextSearchStrategy.Factory {
+        @Override
         public TextSearchStrategy create(int mode, String filter) {
             if (mode == TextMatcherEditor.CONTAINS) {
                 if (filter.length() == 1) {
@@ -116,10 +125,10 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      * have their diacritical marks stripped in an effort to normalize words to
      * their most basic form. This allows a degree of fuzziness within the
      * matching algorithm, since words like "resume" will match similar words
-     * with diacritics like "r�sum�". This strategy is particularly useful when
+     * with diacritics like "résumé". This strategy is particularly useful when
      * the text to be searched contains text like names in foreign languages,
      * and your application would like search terms such as "Muller" to match
-     * the actual native spelling: "M�ller".
+     * the actual native spelling: "Müller".
      */
     public static final Object NORMALIZED_STRATEGY = new NormalizedStrategyFactory();
     // this would be an inner class if declawer supported it
@@ -177,13 +186,16 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      * Set the filterator used to extract Strings from the matched elements.
      */
     public void setFilterator(TextFilterator<? super E> filterator) {
-        if (filterator == this.filterator) return;
+        if (filterator == this.filterator) {
+            return;
+        }
         this.filterator = filterator;
 
         // if no filter text exists, no Matcher change is necessary
         final TextMatcher<E> currentTextMatcher = getCurrentTextMatcher();
-        if (currentTextMatcher == null)
+        if (currentTextMatcher == null) {
             return;
+        }
 
         fireChanged(currentTextMatcher.newFilterator(filterator));
     }
@@ -196,10 +208,13 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      *      {@link #REGULAR_EXPRESSION}, or {@link #EXACT}
      */
     public void setMode(int mode) {
-        if (mode != CONTAINS && mode != STARTS_WITH && mode != REGULAR_EXPRESSION && mode != EXACT)
+        if (mode != CONTAINS && mode != STARTS_WITH && mode != REGULAR_EXPRESSION && mode != EXACT) {
             throw new IllegalArgumentException("mode must be one of: TextMatcherEditor.CONTAINS, STARTS_WITH, REGULAR_EXPRESSION or EXACT");
+        }
 
-        if (mode == this.mode) return;
+        if (mode == this.mode) {
+            return;
+        }
 
         // apply the new mode
         final int oldMode = this.mode;
@@ -207,8 +222,9 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
 
         // if no filter text exists, no Matcher change is necessary
         final TextMatcher<E> currentTextMatcher = getCurrentTextMatcher();
-        if (currentTextMatcher == null)
+        if (currentTextMatcher == null) {
             return;
+        }
 
         if (oldMode == CONTAINS && mode == STARTS_WITH) {
             // CONTAINS -> STARTS_WITH is a constraining change
@@ -242,15 +258,20 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      * @param strategy either {@link #IDENTICAL_STRATEGY} or {@link #NORMALIZED_STRATEGY}
      */
     public void setStrategy(Object strategy) {
-        if(strategy == this.strategy) return;
-        if(!(strategy instanceof TextSearchStrategy.Factory)) throw new IllegalArgumentException();
+        if(strategy == this.strategy) {
+            return;
+        }
+        if(!(strategy instanceof TextSearchStrategy.Factory)) {
+            throw new IllegalArgumentException();
+        }
 
         this.strategy = (TextSearchStrategy.Factory)strategy;
 
         // if no filter text exists, no Matcher change is necessary
         final TextMatcher<E> currentTextMatcher = getCurrentTextMatcher();
-        if (currentTextMatcher == null)
+        if (currentTextMatcher == null) {
             return;
+        }
 
         fireChanged(currentTextMatcher.newStrategy(strategy));
     }
@@ -271,8 +292,9 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
      */
     protected TextMatcher<E> getCurrentTextMatcher() {
         final Matcher<E> currentMatcher = getMatcher();
-        if (currentMatcher instanceof TextMatcher)
+        if (currentMatcher instanceof TextMatcher) {
             return ((TextMatcher<E>) currentMatcher);
+        }
 
         return null;
     }
@@ -286,8 +308,9 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
     public void setFilterText(String[] newFilters) {
         // wrap the filter Strings with SearchTerm objects
         final SearchTerm<E>[] searchTerms = new SearchTerm[newFilters.length];
-        for (int i = 0; i < searchTerms.length; i++)
+        for (int i = 0; i < searchTerms.length; i++) {
             searchTerms[i] = new SearchTerm<E>(newFilters[i]);
+        }
 
         // adjust the TextMatcher
         setTextMatcher(new TextMatcher<E>(searchTerms, getFilterator(), getMode(), getStrategy()));
@@ -306,25 +329,28 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
         final TextMatcher<E> oldMatcher = getCurrentTextMatcher();
 
         // fire the event only as necessary
-        if (newMatcher.equals(oldMatcher))
+        if (newMatcher.equals(oldMatcher)) {
             return;
+        }
 
         // if the newMatcher does not have any search terms then it
         // automatically matches
         if (newMatcher.getSearchTerms().length == 0) {
-            if (!isCurrentlyMatchingAll())
+            if (!isCurrentlyMatchingAll()) {
                 fireMatchAll();
+            }
             return;
         }
 
         // this is the case when the current Matcher is not a TextMatcher
-        if (isCurrentlyMatchingAll())
+        if (isCurrentlyMatchingAll()) {
             fireConstrained(newMatcher);
-        else if (TextMatchers.isMatcherRelaxed(oldMatcher, newMatcher))
+        } else if (TextMatchers.isMatcherRelaxed(oldMatcher, newMatcher)) {
             fireRelaxed(newMatcher);
-        else if (TextMatchers.isMatcherConstrained(oldMatcher, newMatcher))
+        } else if (TextMatchers.isMatcherConstrained(oldMatcher, newMatcher)) {
             fireConstrained(newMatcher);
-        else
+        } else {
             fireChanged(newMatcher);
+        }
     }
 }

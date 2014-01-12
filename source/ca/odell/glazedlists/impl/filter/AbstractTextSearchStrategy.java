@@ -11,7 +11,7 @@ package ca.odell.glazedlists.impl.filter;
  *
  * <p>Some implementations may support mapping characters to other characters
  * in order to support fuzzy matching. For example, diacritical marks could be
- * stripped during the text search by mapping characters like 'é' to 'e'.
+ * stripped during the text search by mapping characters like 'Ã©' to 'e'.
  *
  * @author James Lemieux
  */
@@ -27,7 +27,7 @@ abstract class AbstractTextSearchStrategy implements TextSearchStrategy {
     /**
      * Sets the strategy used to map characters immediately before they
      * are compared. For example, if the <code>characterMap</code>
-     * converts 'é' to 'e', then it allows "resume" to match "résumé". By
+     * converts 'Ã©' to 'e', then it allows "resume" to match "rÃ©sumÃ©". By
      * plugging in arbitrary <code>characterMap</code> strategies, the
      * "fuzziness" of text matches can be controlled.
      */

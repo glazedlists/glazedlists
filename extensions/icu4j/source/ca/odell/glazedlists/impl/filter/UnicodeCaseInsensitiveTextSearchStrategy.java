@@ -4,6 +4,7 @@
 package ca.odell.glazedlists.impl.filter;
 
 import ca.odell.glazedlists.matchers.TextMatcherEditor;
+
 import com.ibm.icu.text.Collator;
 import com.ibm.icu.text.RuleBasedCollator;
 import com.ibm.icu.text.StringSearch;
@@ -18,9 +19,9 @@ import java.text.StringCharacterIterator;
  * complicated text matching scenarios like
  *
  * <ul>
- *   <li>'�' matches "ae"
- *   <li>'�' matches "ss"
- *   <li>"resume" matches "r�sum�"
+ *   <li>'ä' matches "ae"
+ *   <li>'ß' matches "ss"
+ *   <li>"resume" matches "résumé"
  * </ul>
  *
  * Since text matching algorithms is not the focus of Glazed Lists, it makes
@@ -63,6 +64,7 @@ public class UnicodeCaseInsensitiveTextSearchStrategy implements TextSearchStrat
      * @throws UnsupportedOperationException since UnicodeCaseInsensitiveTextSearchStrategy
      *  does not support remapping characters
      */
+    @Override
     public void setCharacterMap(char[] charMap) {
         throw new UnsupportedOperationException("character maps are not supported by the UnicodeCaseInsensitiveTextSearchStrategy");
     }
@@ -72,6 +74,7 @@ public class UnicodeCaseInsensitiveTextSearchStrategy implements TextSearchStrat
      *
      * @param subtext the String to locate in {@link #indexOf(String)}
      */
+    @Override
     public void setSubtext(String subtext) {
         this.pattern = subtext;
     }
@@ -86,12 +89,15 @@ public class UnicodeCaseInsensitiveTextSearchStrategy implements TextSearchStrat
      *      <code>text</code>; or <code>-1</code>
      * @throws IllegalStateException if no subtext has been set
      */
+    @Override
     public int indexOf(String text) {
-        if (pattern == null)
+        if (pattern == null) {
             throw new IllegalStateException("setSubtext must be called with a valid value before this method can operate");
+        }
 
-        if (text.length() == 0)
+        if (text.length() == 0) {
             return -1;
+        }
 
         final int index = new StringSearch(pattern, new StringCharacterIterator(text), COLLATOR).first();
         return mode == TextMatcherEditor.STARTS_WITH && index != 0 ? -1 : index;

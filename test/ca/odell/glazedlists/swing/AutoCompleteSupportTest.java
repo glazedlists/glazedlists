@@ -608,7 +608,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         items.add("Ru\u00dfland"); // Russland (with a special char that means 'ss')
         items.add("Nova Scotia");
         items.add("Newfoundland");
-        items.add("école");
+        items.add("Ã©cole");
         items.add("wei\u00dfe Wasserwelle");
 
         AutoCompleteSupport support = AutoCompleteSupport.install(combo, items);
@@ -632,9 +632,9 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals("\u00c6nima", model.getElementAt(0));
         doc.replace(0, doc.getLength(), "ecole", null);
         assertEquals(0, combo.getItemCount());
-        doc.replace(0, doc.getLength(), "école", null);
+        doc.replace(0, doc.getLength(), "Ã©cole", null);
         assertEquals(1, combo.getItemCount());
-        assertEquals("école", model.getElementAt(0));
+        assertEquals("Ã©cole", model.getElementAt(0));
         doc.replace(0, doc.getLength(), "Ru\u00df", null);
         assertEquals(1, combo.getItemCount());
         assertEquals("Ru\u00dfland", model.getElementAt(0));
@@ -664,10 +664,10 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals("\u00c6nima", model.getElementAt(0));
         doc.replace(0, doc.getLength(), "ecole", null);
         assertEquals(1, combo.getItemCount());
-        assertEquals("école", model.getElementAt(0));
-        doc.replace(0, doc.getLength(), "école", null);
+        assertEquals("Ã©cole", model.getElementAt(0));
+        doc.replace(0, doc.getLength(), "Ã©cole", null);
         assertEquals(1, combo.getItemCount());
-        assertEquals("école", model.getElementAt(0));
+        assertEquals("Ã©cole", model.getElementAt(0));
         doc.replace(0, doc.getLength(), "Ru\u00df", null);
         assertEquals(1, combo.getItemCount());
         assertEquals("Ru\u00dfland", model.getElementAt(0));
@@ -699,10 +699,10 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals("\u00c6nima", model.getElementAt(1));
         doc.replace(0, doc.getLength(), "ecole", null);
         assertEquals(1, combo.getItemCount());
-        assertEquals("école", model.getElementAt(0));
-        doc.replace(0, doc.getLength(), "école", null);
+        assertEquals("Ã©cole", model.getElementAt(0));
+        doc.replace(0, doc.getLength(), "Ã©cole", null);
         assertEquals(1, combo.getItemCount());
-        assertEquals("école", model.getElementAt(0));
+        assertEquals("Ã©cole", model.getElementAt(0));
         doc.replace(0, doc.getLength(), "Ru\u00df", null);
         assertEquals(1, combo.getItemCount());
         assertEquals("Ru\u00dfland", model.getElementAt(0));
