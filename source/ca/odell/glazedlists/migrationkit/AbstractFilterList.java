@@ -53,6 +53,7 @@ import ca.odell.glazedlists.matchers.MatcherEditor;
  * @since 2004
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
+@Deprecated
 public abstract class AbstractFilterList extends TransformedList {
 
     /** implement Matcher's requirements in one quick inner class */
@@ -166,6 +167,7 @@ public abstract class AbstractFilterList extends TransformedList {
         }
     
         /** {@inheritDoc} */
+        @Override
         public boolean matches(Object item) {
             return filterMatches(item);
         }

@@ -73,7 +73,8 @@ public class CountingMatcherEditorListener<E> implements MatcherEditor.Listener<
 		Assert.assertEquals(relaxed, this.relaxed);
 	}
 
-	public void changedMatcher(MatcherEditor.Event<E> matcherEvent) {
+	@Override
+    public void changedMatcher(MatcherEditor.Event<E> matcherEvent) {
 		switch (matcherEvent.getType()) {
 			case MatcherEditor.Event.CONSTRAINED: this.constrained++; break;
 			case MatcherEditor.Event.RELAXED: this.relaxed++; break;

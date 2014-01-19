@@ -73,6 +73,7 @@ class StatusMatcherEditor extends AbstractMatcherEditor<Issue> implements ListEv
     /**
      * Returns the component responsible for editing the status filter.
      */
+    @Override
     public JComponent getComponent() {
         return this.checkBoxPanel;
     }
@@ -82,6 +83,7 @@ class StatusMatcherEditor extends AbstractMatcherEditor<Issue> implements ListEv
         return "Status";
     }
 
+    @Override
     public MatcherEditor<Issue> getMatcherEditor() {
         return this;
     }
@@ -114,6 +116,7 @@ class StatusMatcherEditor extends AbstractMatcherEditor<Issue> implements ListEv
         return new StatusMatcher(allowedStates);
     }
 
+    @Override
     public void listChanged(ListEvent<List<Issue>> listChanges) {
         while (listChanges.next()) {
             final int type = listChanges.getType();
@@ -145,6 +148,7 @@ class StatusMatcherEditor extends AbstractMatcherEditor<Issue> implements ListEv
         }
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
         // determine if the checkbox that generated this ActionEvent is freshly checked or freshly unchecked
         // - we'll use that information to determine whether this is a constrainment or relaxation of the matcher
@@ -179,6 +183,7 @@ class StatusMatcherEditor extends AbstractMatcherEditor<Issue> implements ListEv
             return this.allowedStatuses.size();
         }
 
+        @Override
         public boolean matches(Issue issue) {
             return this.allowedStatuses.contains(issue.getStatus());
         }

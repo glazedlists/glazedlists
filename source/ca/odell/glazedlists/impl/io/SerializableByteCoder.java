@@ -15,6 +15,7 @@ import java.io.*;
 public class SerializableByteCoder implements ByteCoder {
 
     /** {@inheritDoc} */
+    @Override
     public void encode(Object source, OutputStream target) throws IOException {
         ObjectOutputStream objectOut = new ObjectOutputStream(target);
         objectOut.writeObject(source);
@@ -22,6 +23,7 @@ public class SerializableByteCoder implements ByteCoder {
     }
     
     /** {@inheritDoc} */
+    @Override
     public Object decode(InputStream source) throws IOException {
         try {
             ObjectInputStream objectIn = new ObjectInputStream(source);

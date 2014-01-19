@@ -90,6 +90,7 @@ public class IssuesBrowser implements Runnable {
     /**
      * Loads the issues browser as standalone application.
      */
+    @Override
     public void run() {
         constructStandalone();
 
@@ -232,6 +233,7 @@ public class IssuesBrowser implements Runnable {
      * Listens for changes in the selection on the issues table.
      */
     class IssuesSelectionListener implements ListSelectionListener {
+        @Override
         public void valueChanged(ListSelectionEvent e) {
             // get the newly selected issue
             Issue selectedIssue = null;
@@ -254,6 +256,7 @@ public class IssuesBrowser implements Runnable {
      * being loaded.
      */
     class ProjectChangeListener implements ItemListener {
+        @Override
         public void itemStateChanged(ItemEvent e) {
             if (e.getStateChange() != ItemEvent.SELECTED) return;
 
@@ -280,6 +283,7 @@ public class IssuesBrowser implements Runnable {
             this.args = args;
         }
 
+        @Override
         public void run() {
             try {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -314,6 +318,7 @@ public class IssuesBrowser implements Runnable {
             this.issueCount = issueCount;
             this.setText(issueCountFormat.format(new Object[] {new Integer(issueCount)}));
         }
+        @Override
         public void listChanged(ListEvent<Issue> listChanges) {
             setIssueCount(listChanges.getSourceList().size());
         }
@@ -353,16 +358,19 @@ public class IssuesBrowser implements Runnable {
             this.panel.add(nameLabel, BorderLayout.CENTER);
         }
 
+        @Override
         public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
             configure(value);
             return panel;
         }
 
+        @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             configure(value);
             return panel;
         }
 
+        @Override
         public Object getCellEditorValue() {
             return this.separator;
         }
@@ -375,6 +383,7 @@ public class IssuesBrowser implements Runnable {
             nameLabel.setText(nameFormat.format(new Object[] {issue.getSubcomponent(), new Integer(separator.size())}));
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             separatorList.getReadWriteLock().writeLock().lock();
             boolean collapsed;
@@ -425,18 +434,23 @@ public class IssuesBrowser implements Runnable {
             super.setIcon(icons[state]);
         }
 
+        @Override
         public void mouseClicked(MouseEvent e) {
             // do nothing
         }
+        @Override
         public void mousePressed(MouseEvent e) {
             setState(DOWN);
         }
+        @Override
         public void mouseReleased(MouseEvent e) {
             setState(OVER);
         }
+        @Override
         public void mouseEntered(MouseEvent e) {
             setState(OVER);
         }
+        @Override
         public void mouseExited(MouseEvent e) {
             setState(UP);
         }

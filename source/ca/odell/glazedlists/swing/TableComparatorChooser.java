@@ -96,6 +96,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      * identical but uses a more fitting name to convey the action that is
      * performed and fixes an API flaw by explicitly requiring the TableFormat.
      */
+    @Deprecated
     public TableComparatorChooser(JTable table, SortedList<E> sortedList, boolean multipleColumnSort) {
         this(table, sortedList, multipleColumnSort ? MULTIPLE_COLUMN_MOUSE : SINGLE_COLUMN);
     }
@@ -107,6 +108,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      * identical but uses a more fitting name to convey the action that is
      * performed and fixes an API flaw by explicitly requiring the TableFormat.
      */
+    @Deprecated
     public TableComparatorChooser(JTable table, SortedList<E> sortedList, Object strategy) {
         this(table, sortedList,strategy,((AdvancedTableModel<E>)table.getModel()).getTableFormat());
     }
@@ -395,6 +397,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      * TableHeaderUI.
      */
     private class TableHeaderUIHandler implements PropertyChangeListener {
+        @Override
         public void propertyChange(PropertyChangeEvent evt) {
             wrapDefaultTableHeaderRenderer();
         }
@@ -413,6 +416,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
          * EventTableModel and start listening to the new one. It also resets
          * the sorting state of this TableComparatorChooser.
          */
+        @Override
         public void propertyChange(PropertyChangeEvent evt) {
             // get the two EventTableModels
             final AdvancedTableModel<E> oldModel = evt.getOldValue() instanceof AdvancedTableModel ? (AdvancedTableModel<E>) evt.getOldValue() : null;
@@ -433,6 +437,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
          * When the number of columns changes in the table, we need to
          * clear the comparators and columns.
          */
+        @Override
         public void tableChanged(TableModelEvent event) {
             if(event.getFirstRow() == TableModelEvent.HEADER_ROW && event.getColumn() == TableModelEvent.ALL_COLUMNS) {
                 if (table.getModel() instanceof AdvancedTableModel) {
@@ -491,6 +496,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
          * Renders the header in the default way but with the addition of an
          * icon to indicate sorting state.
          */
+        @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             // if column index is negative, just call the delegate renderer
             // this is a special case for JideTable with nested table columns

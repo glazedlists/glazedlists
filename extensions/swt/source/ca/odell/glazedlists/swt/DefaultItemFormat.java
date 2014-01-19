@@ -37,7 +37,8 @@ public class DefaultItemFormat<E> implements ItemFormat<E> {
 	}
 
 	/** @inheritDoc */
-	public String format(E element) {
+	@Override
+    public String format(E element) {
 		return (element == null) ? valueForNullElement : element.toString();
 	}
 }

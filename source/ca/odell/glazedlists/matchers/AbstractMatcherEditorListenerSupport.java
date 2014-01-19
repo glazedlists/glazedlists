@@ -19,13 +19,15 @@ public abstract class AbstractMatcherEditorListenerSupport<E> implements
 	private EventListenerList listenerList = new EventListenerList();
 
 	/** {@inheritDoc} */
-	public final void addMatcherEditorListener(
+	@Override
+    public final void addMatcherEditorListener(
 			MatcherEditor.Listener<E> listener) {
 		listenerList.add(MatcherEditor.Listener.class, listener);
 	}
 
 	/** {@inheritDoc} */
-	public final void removeMatcherEditorListener(
+	@Override
+    public final void removeMatcherEditorListener(
 			MatcherEditor.Listener<E> listener) {
 		listenerList.remove(Listener.class, listener);
 	}

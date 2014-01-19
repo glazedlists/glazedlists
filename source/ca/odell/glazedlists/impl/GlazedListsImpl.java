@@ -177,6 +177,7 @@ public final class GlazedListsImpl {
         return new EqualsComparator<Object>();
     }
     private static class EqualsComparator<T> implements Comparator<T> {
+        @Override
         public int compare(T alpha, T beta) {
             boolean equal = alpha == null ? beta == null : alpha.equals(beta);
             return equal ? 0 : 1;
@@ -191,6 +192,7 @@ public final class GlazedListsImpl {
         return new IdentityFunction<E>();
     }
     private static class IdentityFunction<E> implements FunctionList.Function<E,E> {
+        @Override
         public E evaluate(E sourceValue) {
             return sourceValue;
         }

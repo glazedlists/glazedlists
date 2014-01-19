@@ -86,6 +86,7 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
      * Return a decorated form of the component returned by the data
      * {@link TableCellEditor}.
      */
+    @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
         treeList.getReadWriteLock().readLock().lock();
         try {
@@ -198,6 +199,7 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
     }
 
     /** @inheritDoc */
+    @Override
     public Object getCellEditorValue() {
         return delegate.getCellEditorValue();
     }
@@ -243,9 +245,11 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
      * When the delegate TableCellEditor changes its editing state, we follow suit.
      */
     private class DelegateTableCellEditorListener implements CellEditorListener {
+        @Override
         public void editingCanceled(ChangeEvent e) {
             cancelCellEditing();
         }
+        @Override
         public void editingStopped(ChangeEvent e) {
             stopCellEditing();
         }

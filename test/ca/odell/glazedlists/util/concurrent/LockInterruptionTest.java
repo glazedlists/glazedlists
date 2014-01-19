@@ -82,6 +82,7 @@ public class LockInterruptionTest {
         public LockALockRunnable(Lock lock) {
             this.lock = lock;
         }
+        @Override
         public void run() {
             lock.lock();
         }
@@ -92,6 +93,7 @@ public class LockInterruptionTest {
      * we can't do anonymous inner classes.
      */
     private static class FailIfNotInterruptedRunnable implements Runnable {
+        @Override
         public void run() {
             if(!Thread.interrupted()) {
                 fail();

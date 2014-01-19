@@ -71,11 +71,13 @@ public class EventTreeModel<E> implements TreeModel, ListEventListener<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public Object getRoot() {
         return treeRoot;
     }
 
     /** {@inheritDoc} */
+    @Override
     public Object getChild(Object parent, int index) {
         if(parent == treeRoot) {
             return treeList.getRoots().get(index);
@@ -86,6 +88,7 @@ public class EventTreeModel<E> implements TreeModel, ListEventListener<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getChildCount(Object parent) {
         if(parent == treeRoot) {
             return treeList.getRoots().size();
@@ -96,6 +99,7 @@ public class EventTreeModel<E> implements TreeModel, ListEventListener<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isLeaf(Object node) {
         if(node == treeRoot) {
             return treeList.isEmpty();
@@ -106,11 +110,13 @@ public class EventTreeModel<E> implements TreeModel, ListEventListener<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void valueForPathChanged(TreePath path, Object newValue) {
         // todo
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getIndexOfChild(Object parent, Object child) {
         if(parent == treeRoot) {
             return treeList.getRoots().indexOf(child);
@@ -121,16 +127,19 @@ public class EventTreeModel<E> implements TreeModel, ListEventListener<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void addTreeModelListener(TreeModelListener listener) {
         listenerList.add(listener);
     }
 
     /** {@inheritDoc} */
+    @Override
     public void removeTreeModelListener(TreeModelListener listener) {
         listenerList.remove(listener);
     }
 
     /** {@inheritDoc} */
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
         // todo: fire a more general event
         for(Iterator<TreeModelListener> i = listenerList.iterator(); i.hasNext(); ) {

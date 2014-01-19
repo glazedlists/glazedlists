@@ -37,6 +37,7 @@ public class ItemTreeFormat implements TreeList.Format<Item> {
     /**
      * Only virtual items have children.
      */
+    @Override
     public boolean allowsChildren(Item element) {
         return element.getASIN() == null;
     }
@@ -45,6 +46,7 @@ public class ItemTreeFormat implements TreeList.Format<Item> {
      * Populates a List of Items produced by consulting the List of
      * TreeCriterion objects this ItemTreeFormat was constructed with.
      */
+    @Override
     public void getPath(List<Item> path, Item item) {
         // add the generated Item from each TreeCriterion
         for (TreeCriterion criterion : criteria)
@@ -53,6 +55,7 @@ public class ItemTreeFormat implements TreeList.Format<Item> {
         path.add(item);
     }
 
+    @Override
     public Comparator<Item> getComparator(int depth) {
         return GlazedLists.comparableComparator();
     }

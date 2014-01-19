@@ -17,12 +17,14 @@ import java.io.OutputStream;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class IntegerCoder implements ByteCoder {
+    @Override
     public void encode(Object source, OutputStream target) throws IOException {
         DataOutputStream dataOut = new DataOutputStream(target);
         Integer sourceInt = (Integer)source;
         dataOut.writeInt(sourceInt.intValue());
         dataOut.flush();
     }
+    @Override
     public Object decode(InputStream source) throws IOException {
         DataInputStream dataIn = new DataInputStream(source);
         int value = dataIn.readInt();

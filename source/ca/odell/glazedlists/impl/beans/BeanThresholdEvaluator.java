@@ -26,6 +26,7 @@ public final class BeanThresholdEvaluator<E> implements ThresholdList.Evaluator<
      * compare that object against a threshold.  This value is
      * not relative to any other object unlike a <code>Comparator</code>.
      */
+    @Override
     public int evaluate(E object) {
         if(beanProperty == null) loadPropertyDescriptors(object);
         Object property = beanProperty.get(object);

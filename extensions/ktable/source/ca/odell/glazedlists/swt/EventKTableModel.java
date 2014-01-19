@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Display;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  * @author Holger Brands
  */
+@Deprecated
 public class EventKTableModel extends DefaultEventKTableModel {
 
 	/** indicates, if source list has to be disposed */

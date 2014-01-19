@@ -280,6 +280,7 @@ public class PopularityListTest {
         /**
          * Handle the source PopularityList changing by validating that list.
          */
+        @Override
         public void listChanged(ListEvent listEvent) {
             List<Integer> changedIndices = new ArrayList<Integer>();
             

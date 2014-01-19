@@ -88,6 +88,7 @@ public class EventTableColumnModel<T extends TableColumn> implements TableColumn
     }
 
     /** @inheritDoc */
+    @Override
     public void addColumn(TableColumn column) {
         swingThreadSource.getReadWriteLock().writeLock().lock();
         try {
@@ -98,6 +99,7 @@ public class EventTableColumnModel<T extends TableColumn> implements TableColumn
     }
 
     /** @inheritDoc */
+    @Override
     public void removeColumn(TableColumn column) {
         swingThreadSource.getReadWriteLock().writeLock().lock();
         try {
@@ -108,6 +110,7 @@ public class EventTableColumnModel<T extends TableColumn> implements TableColumn
     }
 
     /** @inheritDoc */
+    @Override
     public void moveColumn(int columnIndex, int newIndex) {
         if (columnIndex < 0 || columnIndex >= getColumnCount())
             throw new IllegalArgumentException("columnIndex out of range");
@@ -140,6 +143,7 @@ public class EventTableColumnModel<T extends TableColumn> implements TableColumn
     }
 
     /** @inheritDoc */
+    @Override
     public void setColumnMargin(int newMargin) {
         if (newMargin != columnMargin) {
             columnMargin = newMargin;
@@ -148,11 +152,13 @@ public class EventTableColumnModel<T extends TableColumn> implements TableColumn
     }
 
     /** @inheritDoc */
+    @Override
     public int getColumnMargin() {
         return columnMargin;
     }
 
     /** @inheritDoc */
+    @Override
     public int getColumnCount() {
         swingThreadSource.getReadWriteLock().readLock().lock();
         try {
@@ -163,11 +169,13 @@ public class EventTableColumnModel<T extends TableColumn> implements TableColumn
     }
 
     /** @inheritDoc */
+    @Override
     public Enumeration<TableColumn> getColumns() {
         return new IteratorAsEnumeration<TableColumn>(swingThreadSource.iterator());
     }
 
     /** @inheritDoc */
+    @Override
     public int getColumnIndex(Object identifier) {
         if (identifier == null)
             throw new IllegalArgumentException("identifier is null");
@@ -186,6 +194,7 @@ public class EventTableColumnModel<T extends TableColumn> implements TableColumn
     }
 
     /** @inheritDoc */
+    @Override
     public TableColumn getColumn(int columnIndex) {
         swingThreadSource.getReadWriteLock().readLock().lock();
         try {
@@ -196,6 +205,7 @@ public class EventTableColumnModel<T extends TableColumn> implements TableColumn
     }
 
     /** @inheritDoc */
+    @Override
     public int getColumnIndexAtX(int x) {
         if (x < 0) return -1;
 
@@ -215,6 +225,7 @@ public class EventTableColumnModel<T extends TableColumn> implements TableColumn
     }
 
     /** @inheritDoc */
+    @Override
     public int getTotalColumnWidth() {
         if (totalColumnWidth == -1)
             recalcWidthCache();
@@ -245,16 +256,19 @@ public class EventTableColumnModel<T extends TableColumn> implements TableColumn
     }
 
     /** @inheritDoc */
+    @Override
     public void setColumnSelectionAllowed(boolean flag) {
 	    columnSelectionAllowed = flag;
     }
 
     /** @inheritDoc */
+    @Override
     public boolean getColumnSelectionAllowed() {
 	    return columnSelectionAllowed;
     }
 
     /** @inheritDoc */
+    @Override
     public int[] getSelectedColumns() {
         if (selectionModel != null) {
             int iMin = selectionModel.getMinSelectionIndex();
@@ -279,6 +293,7 @@ public class EventTableColumnModel<T extends TableColumn> implements TableColumn
     }
 
     /** @inheritDoc */
+    @Override
     public int getSelectedColumnCount() {
         if (selectionModel != null) {
             int iMin = selectionModel.getMinSelectionIndex();
@@ -295,6 +310,7 @@ public class EventTableColumnModel<T extends TableColumn> implements TableColumn
     }
 
     /** @inheritDoc */
+    @Override
     public void setSelectionModel(ListSelectionModel newModel) {
         if (newModel == null)
             throw new IllegalArgumentException("newModel may not be null");
@@ -310,16 +326,19 @@ public class EventTableColumnModel<T extends TableColumn> implements TableColumn
     }
 
     /** @inheritDoc */
+    @Override
     public ListSelectionModel getSelectionModel() {
         return selectionModel;
     }
 
     /** @inheritDoc */
+    @Override
     public void addColumnModelListener(TableColumnModelListener listener) {
 	    listenerList.add(TableColumnModelListener.class, listener);
     }
 
     /** @inheritDoc */
+    @Override
     public void removeColumnModelListener(TableColumnModelListener listener) {
 	    listenerList.remove(TableColumnModelListener.class, listener);
     }
@@ -328,6 +347,7 @@ public class EventTableColumnModel<T extends TableColumn> implements TableColumn
      * Watch for changes to the column width or preferred column width and
      * trigger a relayout of the table header when they change.
      */
+    @Override
     public void propertyChange(PropertyChangeEvent evt) {
         String name = evt.getPropertyName();
 
@@ -337,10 +357,12 @@ public class EventTableColumnModel<T extends TableColumn> implements TableColumn
         }
     }
 
+    @Override
     public void valueChanged(ListSelectionEvent e) {
         fireColumnSelectionChanged(e);
     }
 
+    @Override
     public void listChanged(ListEvent<T> listChanges) {
         // arbitrary changes have occurred so we begin by invalidating the cached total width of all TableColumns
         invalidateWidthCache();

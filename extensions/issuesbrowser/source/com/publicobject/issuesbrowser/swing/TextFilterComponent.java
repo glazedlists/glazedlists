@@ -21,10 +21,12 @@ public class TextFilterComponent implements FilterComponent<Issue> {
     private JTextField filterEdit = new JTextField(15);
     private TextComponentMatcherEditor<Issue> textComponentMatcherEditor = new TextComponentMatcherEditor<Issue>(filterEdit, ISSUE_TEXT_FILTERATOR);
 
+    @Override
     public JComponent getComponent() {
         return filterEdit;
     }
 
+    @Override
     public MatcherEditor<Issue> getMatcherEditor() {
         return textComponentMatcherEditor;
     }

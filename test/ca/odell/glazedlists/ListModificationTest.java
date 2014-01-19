@@ -163,6 +163,7 @@ public class ListModificationTest {
      * A simple filter that filters out anything that is not a vowel.
      */
     static class VowelMatcher implements Matcher<String> {
+        @Override
         public boolean matches(String letter) {
             if(letter.length() != 1) return false;
             return ("AEIOUaeiou".indexOf(letter) != -1);

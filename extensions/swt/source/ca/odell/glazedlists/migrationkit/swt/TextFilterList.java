@@ -50,6 +50,7 @@ import org.eclipse.swt.widgets.Text;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
+@Deprecated
 public class TextFilterList extends TransformedList {
 
     /** the text matcher editor does all the real work */
@@ -187,9 +188,11 @@ public class TextFilterList extends TransformedList {
      * {@link SelectionListener} can be used to update the filter in response.
      */
     private class FilterSelectionListener implements SelectionListener {
+        @Override
         public void widgetSelected(SelectionEvent selectionEvent) {
             matcherEditor.setFilterText(filterEdit.getText().split("[ \t]"));
         }
+        @Override
         public void widgetDefaultSelected(SelectionEvent selectionEvent) {
             matcherEditor.setFilterText(filterEdit.getText().split("[ \t]"));
         }

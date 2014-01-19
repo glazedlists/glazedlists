@@ -48,6 +48,7 @@ public class BarcodeIterator implements Iterator {
      * Returns whether or not there are more values in the {@link Barcode} to
      * iterate over.
      */
+    @Override
     public boolean hasNext() {
         if(getIndex() == barcode.size() - 1) {
             return false;
@@ -88,6 +89,7 @@ public class BarcodeIterator implements Iterator {
     /**
      * Gets the next value in this SparseList.
      */
+    @Override
     public Object next() {
         // iterate on this node
         localIndex++;
@@ -234,6 +236,7 @@ public class BarcodeIterator implements Iterator {
     /**
      * Removes the current value at the Iterator from the {@link Barcode}.
      */
+    @Override
     public void remove() {
         // Fast fail if the Iterator isn't set up right yet
         if(localIndex == -1) {

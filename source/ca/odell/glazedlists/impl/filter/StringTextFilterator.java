@@ -15,6 +15,7 @@ import java.util.List;
  */
 public class StringTextFilterator<E> implements TextFilterator<E> {
     /** {@inheritDoc} */
+    @Override
     public void getFilterStrings(List<String> baseList, E element) {
         if (element != null) baseList.add(element.toString());
     }

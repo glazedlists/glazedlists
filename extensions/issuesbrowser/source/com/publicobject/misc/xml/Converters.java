@@ -73,6 +73,7 @@ public final class Converters {
             this.format = format;
         }
 
+        @Override
         public Date convert(String value) {
             value = value.trim();
 
@@ -98,24 +99,28 @@ public final class Converters {
     }
 
     private static class IntegerConverter implements Converter<String,Integer> {
+        @Override
         public Integer convert(String value) {
             return Integer.valueOf(value.trim());
         }
     }
 
     private static class TrimConverter implements Converter<String,String> {
+        @Override
         public String convert(String value) {
             return value.trim();
         }
     }
 
     private static class TrimAndInternConverter implements Converter<String,String> {
+        @Override
         public String convert(String value) {
             return value.trim().intern();
         }
     }
 
     private static class IdentityConverter<T> implements Converter<T,T> {
+        @Override
         public T convert(T value) {
             return value;
         }

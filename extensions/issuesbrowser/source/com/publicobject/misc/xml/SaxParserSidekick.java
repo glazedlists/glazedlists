@@ -28,6 +28,7 @@ public final class SaxParserSidekick implements EntityResolver, ErrorHandler {
     /**
      * Don't fetch a DTD from a remote webserver.
      */
+    @Override
     public InputSource resolveEntity(String publicId, String systemId) {
         // skip the DTD
         if(systemId.endsWith("issuezilla.dtd")) {
@@ -37,12 +38,15 @@ public final class SaxParserSidekick implements EntityResolver, ErrorHandler {
             return null;
         }
     }
+    @Override
     public void error(SAXParseException exception) {
         System.out.println("Sax error, \"" + exception.getMessage() + "\"");
     }
+    @Override
     public void fatalError(SAXParseException exception) {
         System.out.println("Sax fatal error, \"" + exception.getMessage() + "\"");
     }
+    @Override
     public void warning(SAXParseException exception) {
         System.out.println("Sax warning, \"" + exception.getMessage() + "\"");
     }

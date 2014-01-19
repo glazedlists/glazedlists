@@ -445,6 +445,7 @@ public final class FilterList<E> extends TransformedList<E,E> {
          * @param matcherEvent a MatcherEvent describing the change in the
          *      Matcher produced by the MatcherEditor
          */
+        @Override
         public void changedMatcher(MatcherEditor.Event<E> matcherEvent) {
             final MatcherEditor<? super E> matcherEditor = matcherEvent.getMatcherEditor();
             final Matcher<? super E> matcher = matcherEvent.getMatcher();

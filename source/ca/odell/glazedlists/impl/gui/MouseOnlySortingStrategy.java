@@ -28,6 +28,7 @@ public final class MouseOnlySortingStrategy implements SortingStrategy {
     /**
      * Adjust the sorting state based on receiving the specified clicks.
      */
+    @Override
     public void columnClicked(SortingState sortingState, int column, int clicks, boolean shift, boolean control) {
         SortingState.SortingColumn clickedColumn = sortingState.getColumns().get(column);
         if(clickedColumn.getComparators().isEmpty()) return;

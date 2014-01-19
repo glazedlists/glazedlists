@@ -78,6 +78,7 @@ public class LockPerformance {
     private static class ReaderRunnable implements Runnable {
         private int writes = 0;
 
+        @Override
         public void run() {
             while (writes++ < numWrites) {
                 long startTime = System.currentTimeMillis();
@@ -97,6 +98,7 @@ public class LockPerformance {
     private static class WriterRunnable implements Runnable {
         private int reads = 0;
 
+        @Override
         public void run() {
             while (reads++ < numReads) {
                 long startTime = System.currentTimeMillis();

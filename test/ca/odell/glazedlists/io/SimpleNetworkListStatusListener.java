@@ -28,6 +28,7 @@ public class SimpleNetworkListStatusListener implements NetworkListStatusListene
     /**
      * Called each time a resource becomes connected.
      */
+    @Override
     public void connected(NetworkList list) {
         connected = true;
     }
@@ -36,6 +37,7 @@ public class SimpleNetworkListStatusListener implements NetworkListStatusListene
      * Called each time a resource's disconnected status changes. This method may
      * be called for each attempt it makes to reconnect to the network.
      */
+    @Override
     public void disconnected(NetworkList list, Exception reason) {
         connected = false;
         this.reason = reason;

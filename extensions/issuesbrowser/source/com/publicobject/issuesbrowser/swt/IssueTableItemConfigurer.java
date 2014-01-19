@@ -24,6 +24,7 @@ public class IssueTableItemConfigurer implements TableItemConfigurer<Issue> {
     private final DateFormat dateFormatter = DateFormat.getDateInstance();
 
     /** {@inheritDoc} */
+    @Override
     public void configure(TableItem item, Issue rowValue, Object columnValue, int row, int column) {
         switch (column) {
             case 2: item.setText(column, dateToString(columnValue)); break;

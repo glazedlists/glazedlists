@@ -96,6 +96,7 @@ public class NachoDateRangeMatcherEditor<E> extends RangeMatcherEditor<Date,E> {
      * describing the change that occurred to the date range.
      */
     private class DateRangeChangeListener implements ChangeListener {
+        @Override
         public void stateChanged(ChangeEvent e) {
             final Date fromDate = (Date) fromDateField.getValue();
             final Date toDate = (Date) toDateField.getValue();

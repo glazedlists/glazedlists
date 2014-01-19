@@ -77,6 +77,7 @@ public class QueuedExecutor {
    * never make sense here.
    **/
   protected class RunLoop implements Runnable {
+    @Override
     public void run() {
       try {
         while (!shutdown_) {
@@ -215,6 +216,7 @@ public class QueuedExecutor {
    * this Executor.
    */
   private static class EndTaskRunnable implements Runnable {
-      public void run() {}
+      @Override
+    public void run() {}
   }
 }

@@ -54,6 +54,7 @@ public abstract class ThreadProxyCalculation<E> extends AbstractCalculation<E> {
      * Note, that the source calculation will not be disposed by this method.
      * </p>
      */
+    @Override
     public void dispose() {
         source.removePropertyChangeListener(pcl);
         source = null;
@@ -79,8 +80,10 @@ public abstract class ThreadProxyCalculation<E> extends AbstractCalculation<E> {
      * on another thread, determined by the subclass.
      */
     private class PCL implements PropertyChangeListener {
+        @Override
         public void propertyChange(final PropertyChangeEvent evt) {
             schedule(new Runnable() {
+                @Override
                 @SuppressWarnings("unchecked")
                 public void run() {
                     fireValueChange((E) evt.getOldValue(), (E) evt.getNewValue());

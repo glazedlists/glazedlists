@@ -50,6 +50,7 @@ import java.awt.event.ActionListener;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
+@Deprecated
 public class TextFilterList extends TransformedList {
 
     /** the text component matcher editor does all the real work */
@@ -179,6 +180,7 @@ public class TextFilterList extends TransformedList {
      * {@link ActionListener} can be used to update the filter in response.
      */
     private class FilterActionListener implements ActionListener {
+        @Override
         public void actionPerformed(ActionEvent e) {
             matcherEditor.setFilterText(filterEdit.getText().split("[ \t]"));
         }

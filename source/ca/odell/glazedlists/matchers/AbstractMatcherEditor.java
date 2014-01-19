@@ -28,7 +28,8 @@ public abstract class AbstractMatcherEditor<E> extends AbstractMatcherEditorList
 	private Matcher<E> currentMatcher = Matchers.trueMatcher();
 
 	/** {@inheritDoc} */
-	public final Matcher<E> getMatcher() {
+	@Override
+    public final Matcher<E> getMatcher() {
 		return currentMatcher;
 	}
 

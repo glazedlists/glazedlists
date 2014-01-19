@@ -35,6 +35,7 @@ public final class BeanPropertyComparator<T> implements Comparator<T> {
     /**
      * Compares the specified objects by the JavaBean property.
      */
+    @Override
     public int compare(T alpha, T beta) {
         // Inspect alpha
         Object alphaProperty = null;

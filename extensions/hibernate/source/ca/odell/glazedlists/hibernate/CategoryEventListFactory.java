@@ -91,12 +91,14 @@ public final class CategoryEventListFactory implements EventListFactory {
     }
     
     /** {@inheritDoc} */
+    @Override
     public EventList createEventList() {
         final ListInfo info = getListInfo();
         return new BasicEventList(info.publisher, info.lock);
     }
 
     /** {@inheritDoc} */
+    @Override
     public EventList createEventList(int initalCapacity) {
         final ListInfo info = getListInfo();
         return new BasicEventList(initalCapacity, info.publisher, info.lock);

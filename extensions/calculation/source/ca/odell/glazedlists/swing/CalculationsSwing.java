@@ -82,6 +82,7 @@ public final class CalculationsSwing {
             }
         }
 
+        @Override
         public void propertyChange(PropertyChangeEvent evt) {
             update(evt.getNewValue());
         }

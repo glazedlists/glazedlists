@@ -210,6 +210,7 @@ public class PersistentMapTest {
      * Ignores a value callback.
      */
     static class NullValueCallback implements ValueCallback {
+        @Override
         public void valueLoaded(Chunk member, Bufferlo value) {
             // do nothing
         }

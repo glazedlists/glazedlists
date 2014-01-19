@@ -129,6 +129,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     }
 
     /** @deprecated use the constructor that takes an {@link ExpansionModel} */
+    @Deprecated
     public TreeList(EventList<E> source, Format<E> format) {
         this(new InitializationData<E>(source, format, TreeList.<E>nodesStartExpanded()));
     }
@@ -840,6 +841,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
          * Compare two nodes by their position in the tree.
          */
         private final class NodeIndexComparator implements Comparator<Node<E>> {
+            @Override
             public int compare(Node<E> a, Node<E> b) {
                 if(a.element == null || b.element == null) {
                     throw new IllegalStateException();
@@ -964,6 +966,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         }
 
         private class ElementLocationComparator implements Comparator<Element<Node<E>>> {
+            @Override
             public int compare(Element<Node<E>> a, Element<Node<E>> b) {
                 if (a == b) {
                     return 0;
@@ -980,6 +983,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         }
 
         private class PathAsListComparator implements Comparator<List<E>> {
+            @Override
             public int compare(List<E> a, List<E> b) {
                 int aPathLength = a.size();
                 int bPathLength = b.size();
@@ -1275,9 +1279,11 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         public DefaultExpansionModel(boolean expanded) {
             this.expanded = expanded;
         }
+        @Override
         public boolean isExpanded(E element, List<E> path) {
             return expanded;
         }
+        @Override
         public void setExpanded(E element, List<E> path, boolean expanded) {
             // do nothing
         }
@@ -1315,9 +1321,11 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 }
             }
         }
+        @Override
         public boolean isExpanded(E element, List<E> path) {
             return expandedStateByDepth[path.size() - 1];
         }
+        @Override
         public void setExpanded(E element, List<E> path, boolean expanded) {
             // do nothing
         }
@@ -1372,6 +1380,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             this.format = format;
         }
 
+        @Override
         public int compare(Node<E> a, Node<E> b) {
             int aPathLength = a.path.size();
             int bPathLength = b.path.size();
@@ -1405,6 +1414,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             this.format = format;
             this.expansionModel = expansionModel;
         }
+        @Override
         public Node<E> evaluate(E sourceValue) {
             // populate the path using the working path as a temporary variable
             List<E> path = new ArrayList<E>();
@@ -1414,6 +1424,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             return result;
         }
 
+        @Override
         public Node<E> reevaluate(E sourceValue, Node<E> transformedValue) {
             assert(!transformedValue.virtual);
             Node<E> result = evaluate(sourceValue);
@@ -1421,11 +1432,13 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             return result;
         }
 
+        @Override
         public void dispose(E sourceValue, Node<E> transformedValue) {
             // do nothing
         }
     }
     private static class NoOpFunction implements FunctionList.Function {
+        @Override
         public Object evaluate(Object sourceValue) {
             return sourceValue;
         }
@@ -1799,12 +1812,19 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     }
 
     private static class FakeElement implements Element {
+        @Override
         public Object get() { return null; }
+        @Override
         public void set(Object value) { }
+        @Override
         public byte getColor() { return 0; }
+        @Override
         public void setSorted(int sorted) { }
+        @Override
         public int getSorted() { return 0; }
+        @Override
         public Element next() { return null; }
+        @Override
         public Element previous() { return null; }
     }
 }

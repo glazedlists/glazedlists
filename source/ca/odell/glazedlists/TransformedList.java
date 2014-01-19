@@ -64,6 +64,7 @@ public abstract class TransformedList<S, E> extends AbstractEventList<E> impleme
     protected abstract boolean isWritable();
 
     /** {@inheritDoc} */
+    @Override
     public abstract void listChanged(ListEvent<S> listChanges);
 
     /** {@inheritDoc} */
@@ -166,6 +167,7 @@ public abstract class TransformedList<S, E> extends AbstractEventList<E> impleme
      * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
      * to call any method on a {@link TransformedList} after it has been disposed.
      */
+    @Override
     public void dispose() {
         source.removeListEventListener(this);
     }

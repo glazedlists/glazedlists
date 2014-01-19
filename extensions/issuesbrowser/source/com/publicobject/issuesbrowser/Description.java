@@ -55,7 +55,8 @@ public class Description implements TextFilterable {
 	/**
 	 * Gets the strings to filter this issue by.
 	 */
-	public void getFilterStrings(List<String> baseList) {
+	@Override
+    public void getFilterStrings(List<String> baseList) {
 		baseList.add(text);
 		baseList.add(who);
 	}

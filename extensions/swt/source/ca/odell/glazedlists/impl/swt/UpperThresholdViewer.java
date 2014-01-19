@@ -39,6 +39,7 @@ public class UpperThresholdViewer implements SelectionListener {
     /**
      * Allows this Viewer to respond to changes to the BoundedRangeControl
      */
+    @Override
     public void widgetSelected(SelectionEvent e) {
         target.getReadWriteLock().writeLock().lock();
         try {
@@ -56,6 +57,7 @@ public class UpperThresholdViewer implements SelectionListener {
      * No-op on a Slider, but the SWT documentation excludes information
      * on whether or not it is called for Scale.
      */
+    @Override
     public void widgetDefaultSelected(SelectionEvent e) {
         widgetSelected(e);
     }

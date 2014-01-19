@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.List;
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  * @author Holger Brands
  */
+@Deprecated
 public class EventListViewer<E> extends DefaultEventListViewer<E> {
 
 	/** indicates, if source list has to be disposed */

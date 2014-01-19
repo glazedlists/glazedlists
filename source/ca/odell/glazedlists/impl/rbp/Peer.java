@@ -45,6 +45,7 @@ public class Peer implements CTPHandlerFactory {
      * Upon a connect, a CTPHandler is required to handle the data of this connection.
      * The returned CTPHandler will be delegated to handle the connection's data.
      */
+    @Override
     public CTPHandler constructHandler() {
         PeerConnection incoming = new PeerConnection(this);
         connections.add(incoming);
@@ -65,6 +66,7 @@ public class Peer implements CTPHandlerFactory {
         connectionManager.getNIODaemon().invokeAndWait(new StopRunnable());
     }
     private class StopRunnable implements Runnable {
+        @Override
         public void run() {
             // unsubscribe from everything
             for(Iterator s = subscribed.values().iterator(); s.hasNext(); ) {

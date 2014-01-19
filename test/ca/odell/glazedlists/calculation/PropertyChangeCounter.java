@@ -9,6 +9,7 @@ import java.beans.PropertyChangeListener;
 class PropertyChangeCounter implements PropertyChangeListener {
     private int count;
 
+    @Override
     public void propertyChange(PropertyChangeEvent evt) {
         count++;
     }

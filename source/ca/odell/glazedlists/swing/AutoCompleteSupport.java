@@ -1664,6 +1664,7 @@ public final class AutoCompleteSupport<E> {
             this.offset = offset;
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             if (comboBox.isShowing()) {
                 if (comboBox.isPopupVisible()) {
@@ -1684,6 +1685,7 @@ public final class AutoCompleteSupport<E> {
         private int previousItemCount = -1;
         private final Runnable checkStrictModeInvariantRunnable = new CheckStrictModeInvariantRunnable();
 
+        @Override
         public void contentsChanged(ListDataEvent e) {
             final int newItemCount = comboBox.getItemCount();
 
@@ -1739,10 +1741,13 @@ public final class AutoCompleteSupport<E> {
             }
         }
 
+        @Override
         public void intervalAdded(ListDataEvent e) { contentsChanged(e); }
+        @Override
         public void intervalRemoved(ListDataEvent e) { contentsChanged(e); }
 
         private class CheckStrictModeInvariantRunnable implements Runnable {
+            @Override
             public void run() {
                 final JTextField editor = comboBoxEditorComponent;
                 if (editor != null) {
@@ -1771,6 +1776,7 @@ public final class AutoCompleteSupport<E> {
      * box contains one.
      */
     private class PopupSizer implements PopupMenuListener {
+        @Override
         public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
             // if the combo box does not contain a prototype display value, skip our sizing logic
             final Object prototypeValue = comboBox.getPrototypeDisplayValue();
@@ -1817,6 +1823,7 @@ public final class AutoCompleteSupport<E> {
             return comp.getPreferredSize();
         }
 
+        @Override
         public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
             if (doNotClearFilterOnPopupHide) return;
 
@@ -1824,6 +1831,7 @@ public final class AutoCompleteSupport<E> {
             applyFilter("");
         }
 
+        @Override
         public void popupMenuCanceled(PopupMenuEvent e) {}
     }
 
@@ -1858,6 +1866,7 @@ public final class AutoCompleteSupport<E> {
             this.decorated = decorated;
         }
 
+        @Override
         public void mousePressed(MouseEvent e) {
             // clear the filter if we're about to hide or show the popup
             // by clicking on the arrow button (this is EXPLICITLY different
@@ -1866,9 +1875,13 @@ public final class AutoCompleteSupport<E> {
             decorated.mousePressed(e);
         }
         public MouseListener getDecorated() { return decorated; }
+        @Override
         public void mouseClicked(MouseEvent e) { decorated.mouseClicked(e); }
+        @Override
         public void mouseReleased(MouseEvent e) { decorated.mouseReleased(e); }
+        @Override
         public void mouseEntered(MouseEvent e) { decorated.mouseEntered(e); }
+        @Override
         public void mouseExited(MouseEvent e) { decorated.mouseExited(e); }
     }
 
@@ -2007,6 +2020,7 @@ public final class AutoCompleteSupport<E> {
      * behaviour customizations.
      */
     private class UIWatcher implements PropertyChangeListener {
+        @Override
         public void propertyChange(PropertyChangeEvent evt) {
             undecorateOriginalUI();
             decorateCurrentUI();
@@ -2017,6 +2031,7 @@ public final class AutoCompleteSupport<E> {
      * Watch for a change of the ComboBoxModel and report it as a violation.
      */
     private class ModelWatcher implements PropertyChangeListener {
+        @Override
         public void propertyChange(PropertyChangeEvent evt) {
             throwIllegalStateException("The ComboBoxModel cannot be changed. It was changed to: " + evt.getNewValue());
         }
@@ -2028,6 +2043,7 @@ public final class AutoCompleteSupport<E> {
      * Document and install it on the new.
      */
     private class DocumentWatcher implements PropertyChangeListener {
+        @Override
         public void propertyChange(PropertyChangeEvent evt) {
             final Document newDocument = (Document) evt.getNewValue();
 
@@ -2095,6 +2111,7 @@ public final class AutoCompleteSupport<E> {
          * we intercept and replace it with our own String conversion logic
          * to remain consistent throughout.
          */
+        @Override
         public void setItem(Object anObject) {
             oldValue = anObject;
             ((JTextField) getEditorComponent()).setText(convertToString(anObject));
@@ -2106,6 +2123,7 @@ public final class AutoCompleteSupport<E> {
          * item. We attempt to find a user-supplied Format before
          * resorting to the valueOf(String) call.
          */
+        @Override
         public Object getItem() {
             final String oldValueString = convertToString(oldValue);
             final String currentString = ((JTextField) getEditorComponent()).getText();
@@ -2132,9 +2150,13 @@ public final class AutoCompleteSupport<E> {
             return currentString;
         }
 
+        @Override
         public Component getEditorComponent() { return delegate.getEditorComponent(); }
+        @Override
         public void selectAll() { delegate.selectAll(); }
+        @Override
         public void addActionListener(ActionListener l) { delegate.addActionListener(l); }
+        @Override
         public void removeActionListener(ActionListener l) { delegate.removeActionListener(l); }
     }
 
@@ -2144,6 +2166,7 @@ public final class AutoCompleteSupport<E> {
      * renderer and editor.
      */
     class DefaultTextFilterator implements TextFilterator<E> {
+        @Override
         public void getFilterStrings(List<String> baseList, E element) {
             baseList.add(convertToString(element));
         }
@@ -2342,6 +2365,7 @@ public final class AutoCompleteSupport<E> {
         /**
          * Repaint and request focus if editable.
          */
+        @Override
         public void focusGained(FocusEvent e) {
         	final ComboBoxEditor currentEditor = getEditor();
             if (currentEditor != null && currentEditor.getEditorComponent() != e.getSource()) {
@@ -2358,6 +2382,7 @@ public final class AutoCompleteSupport<E> {
 		 * first keystroke and represent the reason why we must tear out the
 		 * FocusListener and replace it with one of our own.
 		 */
+        @Override
         public void focusLost(FocusEvent e) {
         	final ComboBoxEditor currentEditor = getEditor();
             if (!e.isTemporary() && currentEditor != null && currentEditor.getEditorComponent() == e.getSource()) {
@@ -2495,6 +2520,7 @@ public final class AutoCompleteSupport<E> {
             this.columnIndex = columnIndex;
         }
 
+        @Override
         public Object evaluate(E sourceValue) {
             return tableFormat.getColumnValue(sourceValue, columnIndex);
         }

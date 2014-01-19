@@ -19,10 +19,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @author James Lemieux
  */
 public class J2SE50LockFactory implements LockFactory {
+    @Override
     public ReadWriteLock createReadWriteLock() {
         return new J2SE50ReadWriteLock();
     }
 
+    @Override
     public Lock createLock() {
         return new LockAdapter(new java.util.concurrent.locks.ReentrantLock());
     }
@@ -56,6 +58,7 @@ final class J2SE50ReadWriteLock implements ReadWriteLock, Serializable {
     /**
      * Return the lock used for reading.
      */
+    @Override
     public Lock readLock() {
         return this.readLock;
     }
@@ -63,6 +66,7 @@ final class J2SE50ReadWriteLock implements ReadWriteLock, Serializable {
     /**
      * Return the lock used for writing.
      */
+    @Override
     public Lock writeLock() {
         return this.writeLock;
     }
@@ -81,14 +85,17 @@ final class LockAdapter implements Lock {
         this.delegateLock = delegateLock;
     }
 
+    @Override
     public void lock() {
         delegateLock.lock();
     }
 
+    @Override
     public boolean tryLock() {
         return delegateLock.tryLock();
     }
 
+    @Override
     public void unlock() {
         delegateLock.unlock();
     }

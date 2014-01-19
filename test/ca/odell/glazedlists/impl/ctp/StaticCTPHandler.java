@@ -50,6 +50,7 @@ class StaticCTPHandler implements CTPHandler {
     /**
      * Notify that this connection is ready for use.
      */
+    @Override
     public synchronized void connectionReady(CTPConnection source) {
         if(ready) throw new IllegalStateException("Connection already ready");
         ready = true;
@@ -60,6 +61,7 @@ class StaticCTPHandler implements CTPHandler {
     /**
      * Handle the specified incoming data.
      */
+    @Override
     public synchronized void receiveChunk(CTPConnection source, Bufferlo data) {
         incoming.append(data);
         
@@ -83,6 +85,7 @@ class StaticCTPHandler implements CTPHandler {
     /**
      * Notify that this connection is no longer ready for use.
      */
+    @Override
     public synchronized void connectionClosed(CTPConnection source, Exception closeReason) {
         if(closed) throw new IllegalStateException("Connection already closed");
         closed = true;
@@ -223,6 +226,7 @@ class StaticCTPHandlerFactory implements CTPHandlerFactory {
     public void addHandler(CTPHandler handler) {
         handlers.add(handler);
     }
+    @Override
     public CTPHandler constructHandler() {
         if(handlers.isEmpty()) throw new IllegalStateException("No more handlers");
         return (CTPHandler)handlers.remove(0);

@@ -20,6 +20,7 @@ public class MouseKeyboardSortingStrategy implements SortingStrategy {
     /**
      * Adjust the sorting state based on receiving the specified click event.
      */
+    @Override
     public void columnClicked(SortingState sortingState, int column, int clicks, boolean shift, boolean control) {
         SortingState.SortingColumn sortingColumn = sortingState.getColumns().get(column);
         if(sortingColumn.getComparators().isEmpty()) return;

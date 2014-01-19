@@ -183,6 +183,7 @@ public class JiraXMLParser {
      * This Converter can lookup Priority objects using Strings.
      */
     private static class JiraPriorityConverter implements Converter<String,Priority> {
+        @Override
         public Priority convert(String value) {
             return Priority.lookupJira(value.trim());
         }
@@ -196,6 +197,7 @@ public class JiraXMLParser {
     private static class AddIssueToTargetListProcessor implements PopProcessor<EventList<Issue>,Issue> {
         private final Date loadingStarted = new Date();
 
+        @Override
         public void process(EventList<Issue> issues, Issue issue) {
             // populate the descriptions with useful data when missing
             // it's the case for the main description

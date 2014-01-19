@@ -75,6 +75,7 @@ public class TreeCriteriaEditor extends JListPanel<TreeCriteriaEditor.TreeCriter
      * TreeCriteriaEditor.
      */
     private class ActiveCriteriaListener implements ListEventListener<TreeCriterion> {
+        @Override
         public void listChanged(ListEvent<TreeCriterion> listChanges) {
             firePropertyChange("activeCriteria", null, getActiveCriteria());
         }
@@ -85,6 +86,7 @@ public class TreeCriteriaEditor extends JListPanel<TreeCriteriaEditor.TreeCriter
      * TreeCriterionEditorPanel that edits them.
      */
     private static class ForwardFunction implements FunctionList.Function<TreeCriterion,TreeCriterionEditorPanel> {
+        @Override
         public TreeCriterionEditorPanel evaluate(TreeCriterion tc) {
             return new TreeCriterionEditorPanel(tc);
         }
@@ -95,6 +97,7 @@ public class TreeCriteriaEditor extends JListPanel<TreeCriteriaEditor.TreeCriter
      * TreeCriterion that edits them.
      */
     private static class ReverseFunction implements FunctionList.Function<TreeCriterionEditorPanel,TreeCriterion> {
+        @Override
         public TreeCriterion evaluate(TreeCriterionEditorPanel c) {
             return c.getTreeCriterion();
         }
@@ -142,6 +145,7 @@ public class TreeCriteriaEditor extends JListPanel<TreeCriteriaEditor.TreeCriter
             return treeCriterion;
         }
 
+        @Override
         public void propertyChange(PropertyChangeEvent evt) {
             update();
         }
@@ -153,6 +157,7 @@ public class TreeCriteriaEditor extends JListPanel<TreeCriteriaEditor.TreeCriter
         }
 
         private class ButtonHandler implements ActionListener {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 treeCriterion.setActive(!treeCriterion.isActive());
             }

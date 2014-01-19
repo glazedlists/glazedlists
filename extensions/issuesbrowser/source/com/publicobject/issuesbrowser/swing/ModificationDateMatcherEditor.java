@@ -28,6 +28,7 @@ public class ModificationDateMatcherEditor extends NachoDateRangeMatcherEditor<I
         return "Modification Date";
     }
 
+    @Override
     public MatcherEditor<Issue> getMatcherEditor() {
         return this;
     }
@@ -36,6 +37,7 @@ public class ModificationDateMatcherEditor extends NachoDateRangeMatcherEditor<I
      * This Filterator extracts the delta date from each Issue object.
      */
     private static final class IssueDeltaDateFilterator implements Filterator<Date,Issue> {
+        @Override
         public void getFilterValues(List<Date> baseList, Issue element) {
             baseList.add(element.getDeltaTimestamp());
         }

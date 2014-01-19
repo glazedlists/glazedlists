@@ -31,6 +31,7 @@ public class DefaultExternalExpansionModel<E> implements TreeList.ExpansionModel
         this(TreeList.<E>nodesStartExpanded());
     }
 
+    @Override
     public boolean isExpanded(E element, List<E> path) {
         Boolean expanded = elementsExpandedStates.get(element);
         if(expanded == null) {
@@ -40,6 +41,7 @@ public class DefaultExternalExpansionModel<E> implements TreeList.ExpansionModel
         return expanded.booleanValue();
     }
 
+    @Override
     public void setExpanded(E element, List<E> path, boolean expanded) {
         elementsExpandedStates.put(element, Boolean.valueOf(expanded));
     }

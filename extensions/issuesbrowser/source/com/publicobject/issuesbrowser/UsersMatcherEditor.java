@@ -68,6 +68,7 @@ public class UsersMatcherEditor extends AbstractMatcherEditor<Issue> {
     private final class SelectionChangeEventList implements ListEventListener<String> {
 
         /** {@inheritDoc} */
+        @Override
         public void listChanged(ListEvent<String> listChanges) {
             // if we have all or no users selected, match all users
             if(selectedUsers.isEmpty() || selectedUsers.size() == allUsers.size()) {
@@ -130,6 +131,7 @@ public class UsersMatcherEditor extends AbstractMatcherEditor<Issue> {
          * Test whether to include or not include the specified issue based
          * on whether or not their user is selected.
          */
+        @Override
         public boolean matches(Issue issue) {
             for (Iterator<String> i = issue.getAllUsers().iterator(); i.hasNext(); ) {
                 if(this.users.contains(i.next())) return true;

@@ -83,6 +83,7 @@ public class AutoCompleteSupportComplexTestApp {
     }
 
     private static final class UrlListCellRenderer extends JLabel implements ListCellRenderer {
+        @Override
         public Component getListCellRendererComponent(JList list, Object value, int index,
                 boolean isSelected, boolean cellHasFocus) {
             if (value instanceof Url) {
@@ -355,6 +356,7 @@ public class AutoCompleteSupportComplexTestApp {
      * <code>laf</code>.
      */
     private class ChangeLookAndFeelAction extends AbstractAction {
+        @Override
         public void actionPerformed(ActionEvent e) {
             JRadioButtonMenuItem selectedMenuItem = (JRadioButtonMenuItem) e.getSource();
 
@@ -372,24 +374,28 @@ public class AutoCompleteSupportComplexTestApp {
     }
 
     private class CorrectCaseActionHandler implements ActionListener {
+        @Override
         public void actionPerformed(ActionEvent e) {
             autoCompleteSupport.setCorrectsCase(correctsCaseCheckBox.isSelected());
         }
     }
 
     private class StrictModeActionHandler implements ActionListener {
+        @Override
         public void actionPerformed(ActionEvent e) {
             autoCompleteSupport.setStrict(strictModeCheckBox.isSelected());
         }
     }
 
     private class SelectTextOnFocusGainActionHandler implements ActionListener {
+        @Override
         public void actionPerformed(ActionEvent e) {
             autoCompleteSupport.setSelectsTextOnFocusGain(selectTextOnFocusGainCheckBox.isSelected());
         }
     }
 
     private class HidePopupOnFocusLostActionHandler implements ActionListener {
+        @Override
         public void actionPerformed(ActionEvent e) {
             autoCompleteSupport.setHidesPopupOnFocusLost(hidesPopupOnFocusLostCheckBox.isSelected());
         }
@@ -402,6 +408,7 @@ public class AutoCompleteSupportComplexTestApp {
             this.mode = mode;
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             autoCompleteSupport.setFilterMode(this.mode);
         }
@@ -415,6 +422,7 @@ public class AutoCompleteSupportComplexTestApp {
             this.comboBox = comboBox;
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             final ComboBoxModel model = this.comboBox.getModel();
             this.comboBox.setSelectedItem(model.getElementAt(model.getSize()-1));
@@ -510,6 +518,7 @@ public class AutoCompleteSupportComplexTestApp {
     }
 
     private static class Starter implements Runnable {
+        @Override
         public void run() {
             new AutoCompleteSupportComplexTestApp();
         }
@@ -524,6 +533,7 @@ public class AutoCompleteSupportComplexTestApp {
             this.model = model;
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             final JComboBox comboBox = (JComboBox) e.getSource();
             final String actionSummary = String.valueOf(++count) + ": " + comboBox.getSelectedItem();
@@ -563,6 +573,7 @@ public class AutoCompleteSupportComplexTestApp {
      * </ul>
      */
     private static final class URLTextFilterator implements TextFilterator<AutoCompleteSupportComplexTestApp.Url> {
+        @Override
         public void getFilterStrings(List<String> baseList, AutoCompleteSupportComplexTestApp.Url url) {
             final String location = url.getLocation();
             baseList.add(location);

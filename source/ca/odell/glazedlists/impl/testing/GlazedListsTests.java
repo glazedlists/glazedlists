@@ -134,6 +134,7 @@ public class GlazedListsTests {
         public AtLeastMatcher(int minimum) {
             this.minimum = minimum;
         }
+        @Override
         public boolean matches(Number value) {
             return value.intValue() >= minimum;
         }
@@ -148,6 +149,7 @@ public class GlazedListsTests {
         return FIRST_LETTER_COMPARATOR;
     }
     private static class FirstLetterComparator implements Comparator<String> {
+        @Override
         public int compare(String o1, String o2) {
             return o1.charAt(0) - o2.charAt(0);
         }
@@ -162,6 +164,7 @@ public class GlazedListsTests {
         return LAST_LETTER_COMPARATOR;
     }
     private static class LastLetterComparator implements Comparator<String> {
+        @Override
         public int compare(String o1, String o2) {
             return o1.charAt(o1.length()-1) - o2.charAt(o2.length()-1);
         }
@@ -179,6 +182,7 @@ public class GlazedListsTests {
         public IntArrayComparator(int index) {
             this.index = index;
         }
+        @Override
         public int compare(int[] a, int[] b) {
             return a[index] - b[index];
         }
@@ -189,6 +193,7 @@ public class GlazedListsTests {
     }
 
     private static final class FirstLetterFunction implements FunctionList.Function<String, String> {
+        @Override
         public String evaluate(String sourceValue) {
             return String.valueOf(sourceValue.charAt(0));
         }
@@ -237,6 +242,7 @@ public class GlazedListsTests {
             this.pause = pause;
         }
 
+        @Override
         public void run() {
             final long endTime = System.currentTimeMillis() + this.duration;
 
@@ -265,6 +271,7 @@ public class GlazedListsTests {
     public static class ListEventCounter<E> implements ListEventListener<E> {
         private int count = 0;
 
+        @Override
         public void listChanged(ListEvent<E> listChanges) {
             count++;
         }
@@ -282,6 +289,7 @@ public class GlazedListsTests {
     public static class SerializableListener implements ListEventListener, Serializable {
         private static EventList lastSource = null;
 
+        @Override
         public void listChanged(ListEvent listChanges) {
             lastSource = listChanges.getSourceList();
         }
@@ -297,6 +305,7 @@ public class GlazedListsTests {
     public static class UnserializableListener implements ListEventListener {
         private static EventList lastSource = null;
 
+        @Override
         public void listChanged(ListEvent listChanges) {
             lastSource = listChanges.getSourceList();
         }

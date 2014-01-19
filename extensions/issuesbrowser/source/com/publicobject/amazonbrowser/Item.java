@@ -41,6 +41,7 @@ public class Item implements Comparable<Item> {
     /**
      * Items are ordered by their title by default.
      */
+    @Override
     public int compareTo(Item o) {
         return GlazedLists.comparableComparator().compare(itemAttributes.getTitle(), o.itemAttributes.getTitle());
     }

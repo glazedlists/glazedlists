@@ -15,6 +15,7 @@ public class TypeMatcher<E> implements Matcher<E> {
         this.classes = classes;
     }
 
+    @Override
     public boolean matches(E item) {
         if (item == null) return false;
 

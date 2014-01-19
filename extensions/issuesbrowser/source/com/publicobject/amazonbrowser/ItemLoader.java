@@ -44,6 +44,7 @@ public class ItemLoader implements Runnable {
         itemLoaderThread.start();
     }
 
+    @Override
     public void run() {
         // loop forever, loading items
         String currentKeywords;

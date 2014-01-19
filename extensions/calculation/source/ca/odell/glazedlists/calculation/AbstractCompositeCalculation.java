@@ -41,6 +41,7 @@ public abstract class AbstractCompositeCalculation<N extends Number> extends Abs
     }
 
     /** @inheritDoc */
+    @Override
     public void dispose() {
         // stop listening to the input Calculations for changes
         for (int i = 0; i < inputs.length; i++)
@@ -75,6 +76,7 @@ public abstract class AbstractCompositeCalculation<N extends Number> extends Abs
      * When any of the input Calculations report a change, this composite
      * calculation is also recalculated in response.
      */
+    @Override
     public void propertyChange(PropertyChangeEvent evt) {
         final N oldValue = getValue();
         final N newValue = recompute(getInputValues());

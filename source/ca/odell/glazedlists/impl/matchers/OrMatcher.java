@@ -18,6 +18,7 @@ public class OrMatcher<E> implements Matcher<E> {
     }
     
     /** {@inheritDoc} */
+    @Override
     public boolean matches(E item) {
         for (int i = 0; i < matchers.length; i++) {
             if (matchers[i].matches(item))

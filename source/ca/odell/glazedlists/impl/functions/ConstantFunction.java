@@ -19,6 +19,7 @@ public class ConstantFunction<E,V> implements FunctionList.Function<E,V> {
         this.value = value;
     }
 
+    @Override
     public V evaluate(E sourceValue) {
         return value;
     }

@@ -35,6 +35,7 @@ class JEventListPanelDemo {
             return 3;
         }
 
+        @Override
         public JComponent getComponent(String element, int component) {
             final String sillyObject = element;
             if(component == 0) {
@@ -58,6 +59,7 @@ class JEventListPanelDemo {
             this.sillyObject = sillyObject;
         }
 
+        @Override
         public void actionPerformed(ActionEvent actionEvent) {
             sillyObjects.remove(sillyObject);
         }
@@ -94,6 +96,7 @@ class JEventListPanelDemo {
         public AddAction(EventList<String> target) {
             this.target = target;
         }
+        @Override
         public void actionPerformed(ActionEvent e) {
             target.add(3, "X " + (dice.nextInt(100)));
         }

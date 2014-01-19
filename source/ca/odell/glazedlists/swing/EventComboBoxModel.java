@@ -23,6 +23,7 @@ import javax.swing.event.ListDataEvent;
  *             safe list).
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
+@Deprecated
 public class EventComboBoxModel<E> extends EventListModel<E> implements ComboBoxModel {
 
     /** the currently selected item which typically belong to the source list */
@@ -39,6 +40,7 @@ public class EventComboBoxModel<E> extends EventListModel<E> implements ComboBox
     /**
      * Gets the currently selected item.
      */
+    @Override
     public Object getSelectedItem() {
         return selected;
     }
@@ -50,6 +52,7 @@ public class EventComboBoxModel<E> extends EventListModel<E> implements ComboBox
      * a ListDataEvent where the range is between -1 and -1. This is identical
      * to the notification process used by the {@link DefaultComboBoxModel}.
      */
+    @Override
     public void setSelectedItem(Object selected) {
         // if the selected item isn't actually changing values, avoid the work
         if (this.selected == selected)

@@ -32,11 +32,13 @@ public final class IteratorAsEnumeration<E> implements Enumeration<E> {
     }
 
     /** @inheritDoc */
+    @Override
     public boolean hasMoreElements() {
         return iterator.hasNext();
     }
 
     /** @inheritDoc */
+    @Override
     public E nextElement() {
         return iterator.next();
     }

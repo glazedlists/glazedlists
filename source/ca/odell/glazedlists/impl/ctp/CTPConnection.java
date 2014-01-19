@@ -184,6 +184,7 @@ public final class CTPConnection implements NIOAttachment {
     /**
      * Handles the incoming bytes.
      */
+    @Override
     public void handleRead() {
         // read at least a byte of data
         try {
@@ -218,6 +219,7 @@ public final class CTPConnection implements NIOAttachment {
     /**
      * When we can write, flush the output stream.
      */
+    @Override
     public void handleWrite() {
         // do the write
         try {
@@ -230,6 +232,7 @@ public final class CTPConnection implements NIOAttachment {
     /**
      * When connected, prepare the higher-level connection.
      */
+    @Override
     public void handleConnect() {
         // finish up the connect() process
         try {
@@ -537,6 +540,7 @@ public final class CTPConnection implements NIOAttachment {
      * <li>If the state is SERVER_AWAITING_REQUEST, the goodbye is a request error
      * <li>If the state is RECEIVED_CLOSE, no goodbye message is sent
      */
+    @Override
     public void close(Exception reason) {
         manager.getNIODaemon().invokeLater(new CloseConnection(this, reason));
         //return false;

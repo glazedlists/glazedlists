@@ -69,6 +69,7 @@ public class SearchEngineTextFieldMatcherEditor<E> extends SearchEngineTextMatch
      * filter text of this TextMatcherEditor to the contents of the JTextField.
      */
     private class FilterHandler implements ActionListener {
+        @Override
         public void actionPerformed(ActionEvent e) {
             refilter(textField.getText());
         }

@@ -83,6 +83,7 @@ public abstract class AbstractKeyedCollectionTestBase {
         public NamePosition(String name) {
             this.name = name;
         }
+        @Override
         public int compareTo(NamePosition other) {
             return name.compareTo(other.name);
         }

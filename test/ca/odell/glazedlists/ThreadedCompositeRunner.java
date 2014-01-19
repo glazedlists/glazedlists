@@ -54,6 +54,7 @@ public class ThreadedCompositeRunner {
         public ReaderThread(EventList listToRead) {
             this.listToRead = listToRead;
         }
+        @Override
         public void run() {
             while(true) {
                 // read one element
@@ -85,6 +86,7 @@ public class ThreadedCompositeRunner {
         public WriterThread(EventList listToWrite) {
             this.listToWrite = listToWrite;
         }
+        @Override
         public void run() {
             while(true) {
                 int repeat = dice.nextInt(1000);

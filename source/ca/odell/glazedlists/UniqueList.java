@@ -116,6 +116,7 @@ public final class UniqueList<E> extends TransformedList<E, E> {
      * Handle changes to the grouper's groups.
      */
     private class GrouperClient implements Grouper.Client<E> {
+        @Override
         public void groupChanged(int index, int groupIndex, int groupChangeType, boolean primary, int elementChangeType, E oldValue, E newValue) {
             switch (groupChangeType) {
                 case ListEvent.INSERT: updates.elementInserted(groupIndex, newValue); break;

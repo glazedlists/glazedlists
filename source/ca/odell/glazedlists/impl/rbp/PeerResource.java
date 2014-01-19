@@ -90,6 +90,7 @@ class PeerResource {
          * Handles a change in a resource contained by the specified delta. This method
          * will be called while holding the Resource's write lock.
          */
+        @Override
         public void resourceUpdated(Resource resource, Bufferlo delta) {
             resourceUpdateId++;
             peer.invokeLater(new UpdatedRunnable(delta, resourceUpdateId));
@@ -101,6 +102,7 @@ class PeerResource {
                 this.delta = delta;
                 this.updateId = updateId;
             }
+            @Override
             public void run() {
                 // if nobody's listening, we're done
                 if(subscribers.isEmpty()) return;
@@ -134,15 +136,18 @@ class PeerResource {
         private boolean connected = false;
     
         /** {@inheritDoc} */
+        @Override
         public synchronized boolean isConnected() {
             return connected;
         }
         
         /** {@inheritDoc} */
+        @Override
         public void connect() {
             peer.invokeLater(new ConnectRunnable());
         }
         private class ConnectRunnable implements Runnable {
+            @Override
             public void run() {
                 // if this is remote, subscribe to this resource
                 if(resourceUri.isRemote()) {
@@ -165,10 +170,12 @@ class PeerResource {
         }
     
         /** {@inheritDoc} */
+        @Override
         public void disconnect() {
             peer.invokeLater(new DisconnectRunnable());
         }
         private class DisconnectRunnable implements Runnable {
+            @Override
             public void run() {
                 // we're immediately disconnected
                 resourceStatus.setConnected(false, null);
@@ -205,11 +212,13 @@ class PeerResource {
         }
         
         /** {@inheritDoc} */
+        @Override
         public synchronized void addResourceStatusListener(ResourceStatusListener listener) {
             statusListeners.add(listener);
         }
 
         /** {@inheritDoc} */
+        @Override
         public synchronized void removeResourceStatusListener(ResourceStatusListener listener) {
             statusListeners.remove(listener);
         }

@@ -166,6 +166,7 @@ final class TableCheckFilterList<S, E> extends TransformedList<S, E> implements 
             return checkedOnly;
         }
         private class CheckMatcher<V> implements Matcher<V> {
+            @Override
             public boolean matches(V element) {
                 return getChecked(element);
             }
@@ -224,6 +225,7 @@ final class TableCheckFilterList<S, E> extends TransformedList<S, E> implements 
     /**
      * Sent when selection occurs in the control.
      */
+    @Override
     public void widgetSelected(SelectionEvent e) {
         if(e.detail == SWT.CHECK) {
             getReadWriteLock().writeLock().lock();
@@ -234,6 +236,7 @@ final class TableCheckFilterList<S, E> extends TransformedList<S, E> implements 
             }
         }
     }
+    @Override
     public void widgetDefaultSelected(SelectionEvent e) {
         if(e.detail == SWT.CHECK) {
             getReadWriteLock().writeLock().lock();
@@ -304,6 +307,7 @@ final class TableCheckFilterList<S, E> extends TransformedList<S, E> implements 
                 table.getItem(i).setChecked(checked);
             }
         }
+        @Override
         public void listChanged(ListEvent listChanges) {
             while(listChanges.next()) {
                 int changeIndex = listChanges.getIndex();

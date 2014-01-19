@@ -65,6 +65,7 @@ public abstract class AbstractEventListCalculation<N, E> extends AbstractCalcula
      * situations where an {@link AbstractEventListCalculation} is short-lived
      * but its source {@link EventList} is long-lived.
      */
+    @Override
     public void dispose() {
         this.source.removeListEventListener(this);
     }
@@ -101,6 +102,7 @@ public abstract class AbstractEventListCalculation<N, E> extends AbstractCalcula
      *
      * @param listChanges describes the changes to the backing EventList
      */
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
         // store the value for later when we fire a PropertyChangeEvent
         final N oldValue = getValue();

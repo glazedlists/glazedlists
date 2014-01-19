@@ -37,6 +37,7 @@ public class ListPrice implements Comparable<ListPrice> {
     /**
      * ListPrice are ordered by their amount by default.
      */
+    @Override
     public int compareTo(ListPrice o) {
         return GlazedLists.comparableComparator().compare(new Integer(getAmount()), new Integer(o.getAmount()));
     }

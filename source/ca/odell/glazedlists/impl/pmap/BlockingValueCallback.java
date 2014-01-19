@@ -42,6 +42,7 @@ class BlockingValueCallback implements ValueCallback {
     /**
      * Handles a value being completely loaded into memory and ready to read.
      */
+    @Override
     public void valueLoaded(Chunk member, Bufferlo value) {
          synchronized(this) {
              this.value = value;

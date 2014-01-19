@@ -62,6 +62,7 @@ class PeerConnection implements CTPHandler {
     /**
      * Handles the connection being ready for chunks to be sent.
      */
+    @Override
     public void connectionReady(CTPConnection connection) {
         // know where we were before
         int priorState = state;
@@ -88,6 +89,7 @@ class PeerConnection implements CTPHandler {
      * @param reason An exception if the connection was closed as the result of
      *      a failure. This may be null.
      */
+    @Override
     public void connectionClosed(CTPConnection source, Exception reason) {
         this.connection = null;
         this.state = CLOSED;
@@ -112,6 +114,7 @@ class PeerConnection implements CTPHandler {
      *      relevant bytes start at data.position() and end at data.limit(). This
      *      buffer is only valid for the duration of this method call.
      */
+    @Override
     public void receiveChunk(CTPConnection source, Bufferlo data) {
         // get all the data in the working block
         currentBlock.append(data);

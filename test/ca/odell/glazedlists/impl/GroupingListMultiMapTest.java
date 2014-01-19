@@ -894,6 +894,7 @@ public class GroupingListMultiMapTest {
     }
 
     private static final class FirstLetterFunction implements FunctionList.Function<String,Comparable<String>> {
+        @Override
         public String evaluate(String sourceValue) {
             return String.valueOf(sourceValue.charAt(0));
         }
@@ -910,6 +911,7 @@ public class GroupingListMultiMapTest {
             return name;
         }
 
+        @Override
         public int compareTo(ComparableKey o) {
             return name.compareTo(o.name);
         }
@@ -978,6 +980,7 @@ public class GroupingListMultiMapTest {
     }
 
     private static final class BAFirstLetterFunction implements FunctionList.Function<ComparableValue,AFirstLetterComparable> {
+        @Override
         public AFirstLetterComparable evaluate(ComparableValue sourceValue) {
             return new AFirstLetterComparable(sourceValue.getKey());
         }
@@ -985,6 +988,7 @@ public class GroupingListMultiMapTest {
 
 
     private static final class BAFirstLetterStringFunction implements FunctionList.Function<ComparableValue,String> {
+        @Override
         public String evaluate(ComparableValue sourceValue) {
             return sourceValue.getKey().getName().substring(0, 1);
         }
@@ -997,6 +1001,7 @@ public class GroupingListMultiMapTest {
             this.contained = contained;
         }
 
+        @Override
         public int compareTo(final AFirstLetterComparable o) {
             return new Character(contained.getName().charAt(0)).compareTo(new Character(o.contained.getName().charAt(0)));
         }
@@ -1080,6 +1085,7 @@ public class GroupingListMultiMapTest {
     }
 
     private static class UncomparableThingComparator implements Comparator<UncomparableKey> {
+        @Override
         public int compare(UncomparableKey o1, UncomparableKey o2) {
             return o1.getName().compareTo(o2.getName());
         }

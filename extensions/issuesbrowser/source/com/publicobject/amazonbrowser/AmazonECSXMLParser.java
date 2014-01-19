@@ -190,6 +190,7 @@ public class AmazonECSXMLParser {
      * This Converter can lookup AudienceRating objects using Strings.
      */
     private static class AudienceRatingConverter implements Converter<String,AudienceRating> {
+        @Override
         public AudienceRating convert(String value) {
             return AudienceRating.lookup(value);
         }
@@ -247,6 +248,7 @@ public class AmazonECSXMLParser {
                 this.progressBar = progressBar;
             }
 
+            @Override
             public void listChanged(ListEvent<Item> listChanges) {
                 if (progressBar != null) {
                     final int numLoaded = listChanges.getSourceList().size();
@@ -258,6 +260,7 @@ public class AmazonECSXMLParser {
         }
 
         private class RequestEnqueuer implements ListEventListener<String> {
+            @Override
             public void listChanged(ListEvent<String> listChanges) {
                 final EventList<String> source = listChanges.getSourceList();
 
@@ -334,6 +337,7 @@ public class AmazonECSXMLParser {
                 this.asin = asin;
             }
 
+            @Override
             public void run() {
                 try {
                     // do the request
@@ -363,6 +367,7 @@ public class AmazonECSXMLParser {
                 this.asin = asin;
                 this.response = response;
             }
+            @Override
             public void run() {
                 InputStream inputStream = null;
                 try {

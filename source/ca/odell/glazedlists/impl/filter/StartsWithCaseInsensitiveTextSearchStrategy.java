@@ -22,6 +22,7 @@ public class StartsWithCaseInsensitiveTextSearchStrategy extends AbstractTextSea
      *
      * @param subtext the String check for as the prefix in {@link #indexOf(String)}
      */
+    @Override
     public void setSubtext(String subtext) {
         if (subtext.length() == 1)
             indexOfStrategy = new SingleCharacterIndexOfStrategy(subtext.charAt(0));
@@ -39,6 +40,7 @@ public class StartsWithCaseInsensitiveTextSearchStrategy extends AbstractTextSea
      * @return <code>0</code> if the prefix was matched; <code>-1</code> if it
      *      was not
      */
+    @Override
     public int indexOf(String text) {
         // ensure we are in a state to search the text
         if (indexOfStrategy == null)
@@ -69,6 +71,7 @@ public class StartsWithCaseInsensitiveTextSearchStrategy extends AbstractTextSea
             this.lowerCase = Character.toLowerCase(c);
         }
 
+        @Override
         public int indexOf(String text) {
             // if the text is not long enough to match the subtext, bail early
             if (text.length() < 1)
@@ -101,6 +104,7 @@ public class StartsWithCaseInsensitiveTextSearchStrategy extends AbstractTextSea
             this.subtextCharsLower = prefix.toLowerCase().toCharArray();
         }
 
+        @Override
         public int indexOf(String text) {
             // if the text is not long enough to match the subtext, bail early
             if (text.length() < subtextLength)

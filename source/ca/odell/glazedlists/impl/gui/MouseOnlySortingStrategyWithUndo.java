@@ -15,6 +15,7 @@ public class MouseOnlySortingStrategyWithUndo implements SortingStrategy {
      */
     private final SortingStrategy decorated = new MouseOnlySortingStrategy(true);
 
+    @Override
     public void columnClicked(SortingState sortingState, int column, int clicks, boolean shift, boolean control) {
         final SortingState.SortingColumn clickedColumn = sortingState.getColumns().get(column);
 

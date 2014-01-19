@@ -75,7 +75,8 @@ public final class AudienceRating implements Comparable<AudienceRating> {
 		return name;
 	}
 
-	public int compareTo(AudienceRating ar) {
+	@Override
+    public int compareTo(AudienceRating ar) {
 		return rating - ar.rating;
 	}
 }

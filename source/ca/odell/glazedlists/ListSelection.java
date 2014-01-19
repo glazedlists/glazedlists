@@ -130,6 +130,7 @@ public class ListSelection<E> implements ListEventListener<E> {
      * Handle changes to the source list by adjusting our selection state and
      * the contents of the selected and deselected lists.
      */
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
 
         // keep track of what used to be selected

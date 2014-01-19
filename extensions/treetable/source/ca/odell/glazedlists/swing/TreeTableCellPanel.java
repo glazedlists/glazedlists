@@ -252,6 +252,7 @@ public class TreeTableCellPanel extends JPanel {
             this.component = component;
         }
 
+        @Override
         public void run() {
             component.requestFocus();
             component.dispatchEvent(keyEvent);
@@ -278,6 +279,7 @@ public class TreeTableCellPanel extends JPanel {
         private Component spacer;
         private Component nodeComponent;
 
+        @Override
         public void addLayoutComponent(Component comp, Object constraints) {
             if (constraints == INDENTER) indenter = comp;
             else if (constraints == EXPANDER) expander = comp;
@@ -286,6 +288,7 @@ public class TreeTableCellPanel extends JPanel {
             else throw new IllegalArgumentException("Unexpected constraints object: " + constraints);
         }
 
+        @Override
         public void removeLayoutComponent(Component comp) {
             if (comp == indenter) indenter = null;
             if (comp == expander) expander = null;
@@ -293,6 +296,7 @@ public class TreeTableCellPanel extends JPanel {
             if (comp == nodeComponent) nodeComponent = null;
         }
 
+        @Override
         public void layoutContainer(Container target) {
             // 0. calculate the amount of space we have to work with
             final Insets insets = target.getInsets();
@@ -350,6 +354,7 @@ public class TreeTableCellPanel extends JPanel {
             }
         }
 
+        @Override
         public Dimension preferredLayoutSize(Container target) {
             final Dimension preferredSize = new Dimension(0, 0);
 
@@ -384,11 +389,17 @@ public class TreeTableCellPanel extends JPanel {
             return preferredSize;
         }
 
+        @Override
         public void invalidateLayout(Container target) { }
+        @Override
         public float getLayoutAlignmentX(Container target) { throw new UnsupportedOperationException(); }
+        @Override
         public float getLayoutAlignmentY(Container target) { throw new UnsupportedOperationException(); }
+        @Override
         public void addLayoutComponent(String name, Component comp) { throw new UnsupportedOperationException(); }
+        @Override
         public Dimension minimumLayoutSize(Container parent) { throw new UnsupportedOperationException(); }
+        @Override
         public Dimension maximumLayoutSize(Container target) { throw new UnsupportedOperationException(); }
     }
 }

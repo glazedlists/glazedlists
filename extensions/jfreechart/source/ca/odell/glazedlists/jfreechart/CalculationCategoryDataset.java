@@ -99,28 +99,39 @@ public class CalculationCategoryDataset extends AbstractDataset implements Categ
     //
     // Methods for reporting row key information
     //
+    @Override
     public Comparable getRowKey(int row) { return rowKeys.get(row); }
+    @Override
     public int getRowIndex(Comparable key) { return rowKeys.indexOf(key); }
+    @Override
     public List getRowKeys() { return rowKeys; }
+    @Override
     public int getRowCount() { return rowKeys.size(); }
 
     //
     // Methods for reporting column key information
     //
+    @Override
     public Comparable getColumnKey(int column) { return COLUMN_KEYS.get(column); }
+    @Override
     public int getColumnIndex(Comparable key) { return COLUMN_KEYS.indexOf(key); }
+    @Override
     public List getColumnKeys() { return COLUMN_KEYS; }
+    @Override
     public int getColumnCount() { return COLUMN_KEYS.size(); }
 
     //
     // Methods for reporting value information
     //
+    @Override
     public Number getValue(Comparable rowKey, Comparable columnKey) { return calculations.get(getRowIndex(rowKey)).getValue(); }
+    @Override
     public Number getValue(int row, int column) { return calculations.get(row).getValue(); }
 
     /**
      * This listener rebroadcasts ListEvents as DatasetChangeEvents.
      */
+    @Override
     public void listChanged(ListEvent<Calculation<? extends Number>> listChanges) {
         fireDatasetChanged();
     }
@@ -156,6 +167,7 @@ public class CalculationCategoryDataset extends AbstractDataset implements Categ
     }
 
     private static class NameFunction implements FunctionList.Function<Calculation<? extends Number>, String> {
+        @Override
         public String evaluate(Calculation<? extends Number> sourceValue) {
             return sourceValue.getName();
         }

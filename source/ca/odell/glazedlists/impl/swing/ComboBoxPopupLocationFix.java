@@ -60,13 +60,16 @@ public final class ComboBoxPopupLocationFix {
      * Reposition the popup immediately before it is shown.
      */
     private class Listener implements PopupMenuListener {
+        @Override
         public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
             final JComponent popupComponent = (JComponent) e.getSource();
             fixPopupLocation(popupComponent);
         }
+        @Override
         public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
             // do nothing
         }
+        @Override
         public void popupMenuCanceled(PopupMenuEvent e) {
             // do nothing
         }

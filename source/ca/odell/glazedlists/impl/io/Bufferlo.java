@@ -399,6 +399,7 @@ public class Bufferlo implements CharSequence {
     /**
      * Get the number of bytes available.
      */
+    @Override
     public int length() {
         int bytesAvailable = 0;
         for(Iterator b = buffers.iterator(); b.hasNext(); ) {
@@ -411,6 +412,7 @@ public class Bufferlo implements CharSequence {
     /**
      * Gets the character at the specified index.
      */
+    @Override
     public char charAt(int index) {
         int bytesLeft = index;
         for(Iterator b = buffers.iterator(); b.hasNext(); ) {
@@ -427,6 +429,7 @@ public class Bufferlo implements CharSequence {
     /**
      * Returns a new character sequence that is a subsequence of this.
      */
+    @Override
     public CharSequence subSequence(int start, int end) {
         Bufferlo clone = duplicate();
         clone.skip(start);

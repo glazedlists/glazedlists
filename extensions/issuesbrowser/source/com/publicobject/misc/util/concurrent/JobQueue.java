@@ -21,6 +21,7 @@ public class JobQueue implements Runnable {
     /** the tasks to invoke, in order of invocation */
     private List<Job> jobs = new ArrayList<Job>();
 
+    @Override
     public void run() {
         boolean interrupted = false;
         while(true) {
@@ -105,6 +106,7 @@ public class JobQueue implements Runnable {
     }
 
     private class NoOpRunnable implements Runnable {
+        @Override
         public void run() {
             // do nothing
         }

@@ -20,6 +20,7 @@ public class Tag implements Comparable<Tag> {
         this.text = "";
     }
 
+    @Override
     public int compareTo(Tag o) {
         return qName.compareTo(o.qName);
     }

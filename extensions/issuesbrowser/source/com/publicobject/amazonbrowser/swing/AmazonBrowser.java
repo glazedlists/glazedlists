@@ -72,6 +72,7 @@ public class AmazonBrowser implements Runnable {
     /**
      * Loads the AmazonBrowser as standalone application.
      */
+    @Override
     public void run() {
         constructStandalone();
 
@@ -209,6 +210,7 @@ public class AmazonBrowser implements Runnable {
      * It is guaranteed to be executed on the EventDispatch Thread.
      */
     private static class AmazonBrowserStarter implements Runnable {
+        @Override
         public void run() {
             try {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -225,6 +227,7 @@ public class AmazonBrowser implements Runnable {
      * Notified when the user wishes to begin a new Search of Amazon Items.
      */
     private class StartNewSearchActionListener implements ActionListener {
+        @Override
         public void actionPerformed(ActionEvent e) {
             final String keywords = searchField.getText();
 
@@ -239,6 +242,7 @@ public class AmazonBrowser implements Runnable {
      * AmazonBrowser treetable to respect the new tree criteria.
      */
     private class ActiveCriteriaPropertyChangeListener implements PropertyChangeListener {
+        @Override
         public void propertyChange(PropertyChangeEvent evt) {
             final List<TreeCriterion> treeCriteria = (List<TreeCriterion>) evt.getNewValue();
             treeList.setTreeFormat(new ItemTreeFormat(treeCriteria));
@@ -279,12 +283,14 @@ public class AmazonBrowser implements Runnable {
     }
 
     private static final class TitleTextFilterator implements TextFilterator<Item> {
+        @Override
         public void getFilterStrings(List<String> baseList, Item element) {
             baseList.add(element.getItemAttributes().getTitle());
         }
     }
 
     private static final class DirectorTextFilterator implements TextFilterator<Item> {
+        @Override
         public void getFilterStrings(List<String> baseList, Item element) {
             baseList.add(element.getItemAttributes().getDirector());
         }
@@ -300,6 +306,7 @@ public class AmazonBrowser implements Runnable {
         /** The delegate renderer that does most of the rendering. We simply tweak the result. */
         private TableCellRenderer delegate = new DefaultTableCellRenderer();
 
+        @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             // fetch the component from the delegate renderer
             final JLabel label = (JLabel) delegate.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);

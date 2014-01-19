@@ -11,6 +11,7 @@ import java.util.List;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class IssueUserator implements CollectionList.Model<Issue, String> {
+    @Override
     public List<String> getChildren(Issue issue) {
         return issue.getAllUsers();
     }

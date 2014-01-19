@@ -30,6 +30,7 @@ class CloseFile implements Runnable {
     /**
      * Close the file.
      */
+    @Override
     public void run() {
         try {
             persistentMap.getFileChannel().close();

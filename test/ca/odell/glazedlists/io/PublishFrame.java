@@ -104,6 +104,7 @@ public class PublishFrame implements ActionListener, NetworkListStatusListener {
     /**
      * Called each time a resource becomes connected.
      */
+    @Override
     public void connected(NetworkList list) {
         connectButton.setText("Disconnect");
     }
@@ -112,6 +113,7 @@ public class PublishFrame implements ActionListener, NetworkListStatusListener {
      * Called each time a resource's disconnected status changes. This method may
      * be called for each attempt it makes to reconnect to the network.
      */
+    @Override
     public void disconnected(NetworkList list, Exception reason) {
         connectButton.setText("Connect");
     }
@@ -119,6 +121,7 @@ public class PublishFrame implements ActionListener, NetworkListStatusListener {
     /**
      * When a button is pressed.
      */
+    @Override
     public void actionPerformed(ActionEvent e) {
         peer.print();
 

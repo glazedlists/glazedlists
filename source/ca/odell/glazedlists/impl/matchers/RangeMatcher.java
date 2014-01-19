@@ -71,6 +71,7 @@ public class RangeMatcher<D extends Comparable,E> implements Matcher<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean matches(E item) {
         filterComparables.clear();
 

@@ -106,6 +106,7 @@ public final class PersistentMap implements Map {
     /**
      * Removes all mappings from this map.
      */
+    @Override
     public void clear() {
         // This must merge all chunks into one massive chunk.
         throw new UnsupportedOperationException();
@@ -114,6 +115,7 @@ public final class PersistentMap implements Map {
     /**
      * Returns true if this map contains a mapping for the  specified key.
      */
+    @Override
     public boolean containsKey(Object key) {
         return map.containsKey(key);
     }
@@ -121,6 +123,7 @@ public final class PersistentMap implements Map {
     /**
      * Returns true if this map maps one or more keys to the  specified value.
      */
+    @Override
     public boolean containsValue(Object value) {
         return map.containsValue(value);
     }
@@ -128,6 +131,7 @@ public final class PersistentMap implements Map {
     /**
      * Returns a collection view of the mappings contained in this map.
      */
+    @Override
     public Set entrySet() {
         throw new UnsupportedOperationException();
     }
@@ -137,6 +141,7 @@ public final class PersistentMap implements Map {
      *
      * @throws IllegalArgumentException if value is not a chunk.
      */
+    @Override
     public Object put(Object key, Object value) {
         if(!(value instanceof Chunk)) throw new IllegalArgumentException("value must be a chunk");
         Chunk newValue = (Chunk)value;
@@ -157,6 +162,7 @@ public final class PersistentMap implements Map {
     /**
      * Returns the value to which the specified key is mapped in this weak  hash map, or null if the map contains no mapping for  this key.
      */
+    @Override
     public Object get(Object key) {
         return map.get(key);
     }
@@ -164,6 +170,7 @@ public final class PersistentMap implements Map {
     /**
      * Removes the mapping for this key from this map if present.
      */
+    @Override
     public Object remove(Object key) {
         // remove from the memory-map
         Chunk removed = (Chunk)map.remove(key);
@@ -181,6 +188,7 @@ public final class PersistentMap implements Map {
     /**
      * Returns a set view of the keys contained in this map.
      */
+    @Override
     public Set keySet() {
         return Collections.unmodifiableSet(map.keySet());
     }
@@ -188,6 +196,7 @@ public final class PersistentMap implements Map {
     /**
      * Returns a collection view of the values contained in this map.
      */
+    @Override
     public Collection values() {
         return Collections.unmodifiableCollection(map.values());
     }
@@ -195,6 +204,7 @@ public final class PersistentMap implements Map {
     /**
      * Returns true if this map contains no key-value mappings.
      */
+    @Override
     public boolean isEmpty() {
         return map.isEmpty();
     }
@@ -202,6 +212,7 @@ public final class PersistentMap implements Map {
     /**
      * Copies all of the mappings from the specified map to this map These  mappings will replace any mappings that this map had for any of the  keys currently in the specified map.
      */
+    @Override
     public void putAll(Map m) {
         // this allocates a big chunk that is off and puts all the little chunks inside
         // then the big chunk is split into small chunks that are all on
@@ -211,6 +222,7 @@ public final class PersistentMap implements Map {
     /**
      * Returns the number of key-value mappings in this map.
      */
+    @Override
     public int size() {
         return map.size();
     }

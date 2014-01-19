@@ -70,10 +70,12 @@ class SwingUsersMatcherEditor extends UsersMatcherEditor implements FilterCompon
         return "Users";
     }
 
+    @Override
     public JComponent getComponent() {
         return scrollPane;
     }
 
+    @Override
     public MatcherEditor<Issue> getMatcherEditor() {
         return this;
     }

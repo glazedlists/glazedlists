@@ -114,6 +114,7 @@ public class RangeList<E> extends TransformedList<E, E> {
      * introduction of {@link #setMiddleRange(int, int)} caused us to want a
      * consistent naming scheme for all set*Range methods.
      */
+    @Deprecated
     public void setRange(int startIndex, int endIndex) {
         this.setHeadRange(startIndex, endIndex);
     }

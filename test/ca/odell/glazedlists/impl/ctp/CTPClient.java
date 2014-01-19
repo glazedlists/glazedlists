@@ -89,6 +89,7 @@ public class CTPClient {
      * Simple handlers display user text as typed.
      */
     class ClientHandler implements CTPHandler {
+        @Override
         public void connectionClosed(CTPConnection source, Exception reason) {
             if(reason == null) System.out.println("CLOSED: " + source);
             else System.out.println("CLOSED " + source + ", REASON=" + reason.getMessage());
@@ -96,18 +97,21 @@ public class CTPClient {
                 connection = null;
             }
         }
+        @Override
         public void connectionReady(CTPConnection source) {
             System.out.println("READY: " + source);
             synchronized(CTPClient.this) {
                 connection = source;
             }
         }
+        @Override
         public void receiveChunk(CTPConnection source, Bufferlo data) {
             System.out.println(data.toDebugString());
             System.out.println("DATA: \"" + data.toString() + "\"");
         }
     }
     class ClientHandlerFactory implements CTPHandlerFactory {
+        @Override
         public CTPHandler constructHandler() {
             return new ClientHandler();
         }

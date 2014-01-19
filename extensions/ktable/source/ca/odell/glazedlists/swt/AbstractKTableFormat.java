@@ -17,27 +17,32 @@ public abstract class AbstractKTableFormat implements KTableFormat {
     private final List<Integer> columnWidths = new ArrayList<Integer>();
 
     /** {@inheritDoc} */
+    @Override
     public int getFixedHeaderRowCount() {
         return 0;
     }
 
+    @Override
     public int getRowHeight(Object rowObject) {
         /** {@inheritDoc} */
         return 20;
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isRowResizable(Object rowObject) {
         return false;
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getColumnWidth(int column) {
         prepareDefaultColumnWidths();
         return columnWidths.get(column).intValue();
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setColumnWidth(int column, int width) {
         prepareDefaultColumnWidths();
         columnWidths.set(column, new Integer(width));
@@ -51,31 +56,37 @@ public abstract class AbstractKTableFormat implements KTableFormat {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getRowHeightMinimum() {
         return 20;
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getFixedSelectableColumnCount() {
         return 0;
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getFixedHeaderColumnCount() {
         return 0;
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isColumnResizable(int column) {
         return true;
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setRowHeight(Object rowObject, int rowHeight) {
         // do nothing
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getColumnTooltip(Object baseObject, int column) {
         return null;
     }

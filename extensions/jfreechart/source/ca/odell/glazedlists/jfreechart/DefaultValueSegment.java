@@ -51,16 +51,19 @@ public class DefaultValueSegment<T extends Comparable, V extends Comparable> imp
     }
 
     /** {@inheritDoc} */
+    @Override
     public T getStart() {
         return start;
     }
 
     /** {@inheritDoc} */
+    @Override
     public T getEnd() {
         return end;
     }
 
     /** {@inheritDoc} */
+    @Override
     public V getValue() {
         return value;
     }
@@ -69,6 +72,7 @@ public class DefaultValueSegment<T extends Comparable, V extends Comparable> imp
      * DefaultValueSegments are compared by value, then by segment start,
      * then by segment end.
      */
+    @Override
     public int compareTo(ValueSegment<T,V> o) {
         // 1. compare by value
         final int valueComparison = GlazedLists.comparableComparator().compare(value, o.getValue());

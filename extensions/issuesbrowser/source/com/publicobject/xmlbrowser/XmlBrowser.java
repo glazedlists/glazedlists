@@ -61,6 +61,7 @@ public class XmlBrowser {
             this.eventList = GlazedListsSwing.swingThreadProxyList(eventList);
         }
 
+        @Override
         public void run() {
             try {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -126,10 +127,12 @@ public class XmlBrowser {
 
     public static class TagElementTableFormat implements TableFormat<TreeList.Node<Tag>> {
 
+        @Override
         public int getColumnCount() {
             return 2;
         }
 
+        @Override
         public String getColumnName(int column) {
             switch(column) {
                 case 0 : return "Element";
@@ -140,6 +143,7 @@ public class XmlBrowser {
             throw new IllegalStateException();
         }
 
+        @Override
         public Object getColumnValue(TreeList.Node<Tag> baseObject, int column) {
             switch(column) {
                 case 0 : return baseObject.getElement().getQName();
@@ -155,16 +159,19 @@ public class XmlBrowser {
      * Adapt {@link Tag}s for use in a tree.
      */
     private static class TagTreeFormat implements TreeList.Format<Tag> {
+        @Override
         public void getPath(List<Tag> path, Tag tag) {
             if(tag == null) return;
             getPath(path, tag.getParent());
             path.add(tag);
         }
 
+        @Override
         public boolean allowsChildren(Tag element) {
             return true;
         }
 
+        @Override
         public Comparator<Tag> getComparator(int depth) {
             return null;
         }

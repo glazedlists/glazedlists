@@ -87,6 +87,7 @@ public class BeanComparatorTest {
         public String toString() {
             return "P:" + position;
         }
+        @Override
         public int compareTo(Position o) {
             return position - o.position;
         }

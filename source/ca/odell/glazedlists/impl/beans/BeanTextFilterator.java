@@ -38,6 +38,7 @@ public class BeanTextFilterator<D,E> implements TextFilterator<E>, Filterator<D,
     }
 
     /** {@inheritDoc} */
+    @Override
     public void getFilterStrings(List<String> baseList, E element) {
         if(element == null) return;
 
@@ -53,6 +54,7 @@ public class BeanTextFilterator<D,E> implements TextFilterator<E>, Filterator<D,
     }
 
     /** {@inheritDoc} */
+    @Override
     public void getFilterValues(List<D> baseList, E element) {
         if(element == null) return;
 

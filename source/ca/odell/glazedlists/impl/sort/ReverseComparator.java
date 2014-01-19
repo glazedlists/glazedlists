@@ -27,6 +27,7 @@ public final class ReverseComparator<T> implements Comparator<T> {
     /**
      * Compares the specified objects and flips the result.
      */
+    @Override
     public int compare(T alpha, T beta) {
         return source.compare(beta, alpha);
     }

@@ -93,6 +93,7 @@ public class ThreadedMatcherEditor<E> extends AbstractMatcherEditorListenerSuppo
      *
      * @return the current Matcher specified by the source {@link MatcherEditor}
      */
+    @Override
     public Matcher<E> getMatcher() {
         return this.source.getMatcher();
     }
@@ -197,6 +198,7 @@ public class ThreadedMatcherEditor<E> extends AbstractMatcherEditorListenerSuppo
      * MatcherEvents as soon as possible.
      */
     private class QueuingMatcherEditorListener implements MatcherEditor.Listener<E> {
+        @Override
         public void changedMatcher(Event<E> matcherEvent) {
             synchronized(matcherEventQueue) {
                 matcherEventQueue.add(matcherEvent);
@@ -221,6 +223,7 @@ public class ThreadedMatcherEditor<E> extends AbstractMatcherEditorListenerSuppo
      * MatcherEvents otherwise the DrainMatcherEventQueueRunnable exits.
      */
     private class DrainMatcherEventQueueRunnable implements Runnable {
+        @Override
         public void run() {
             while (true) {
                 // acquire the monitor that guards assigning the drainMatcherEventQueueRunnable

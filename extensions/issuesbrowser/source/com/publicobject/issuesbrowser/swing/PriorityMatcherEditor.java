@@ -56,14 +56,17 @@ public class PriorityMatcherEditor implements FilterComponent<Issue>, ChangeList
         return "Priority";
     }
 
+    @Override
     public JComponent getComponent() {
         return slider;
     }
 
+    @Override
     public MatcherEditor<Issue> getMatcherEditor() {
         return rangeMatcherEditor;
     }
 
+    @Override
     public void stateChanged(ChangeEvent changeEvent) {
         rangeMatcherEditor.setRange(new Integer(slider.getValue()), null);
     }

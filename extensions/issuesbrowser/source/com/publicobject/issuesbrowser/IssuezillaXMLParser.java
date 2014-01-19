@@ -186,6 +186,7 @@ public class IssuezillaXMLParser {
      * This Converter can lookup Priority objects using Strings.
      */
     private static class PriorityConverter implements Converter<String,Priority> {
+        @Override
         public Priority convert(String value) {
             return Priority.lookupIssuzilla(value.trim());
         }
@@ -201,6 +202,7 @@ public class IssuezillaXMLParser {
     private static class AddIssueToTargetListProcessor implements PopProcessor<EventList<Issue>,Issue> {
         private final Date loadingStarted = new Date();
 
+        @Override
         public void process(EventList<Issue> issues, Issue issue) {
             final String statusCode = issue.getStatusCode();
 

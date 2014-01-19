@@ -57,6 +57,7 @@ public class CompositeList<E> extends CollectionList<EventList<E>, E> {
      *             prebuilt member lists should share lock <em>and</em> publisher with the
      *             CompositeList.
      */
+    @Deprecated
     public CompositeList(ReadWriteLock lock) {
         super(new BasicEventList<EventList<E>>(lock), (Model)GlazedLists.listCollectionListModel());
     }

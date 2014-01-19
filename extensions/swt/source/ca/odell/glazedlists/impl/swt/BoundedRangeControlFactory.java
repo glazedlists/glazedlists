@@ -58,21 +58,25 @@ public class BoundedRangeControlFactory {
         }
 
         /** {@inheritDoc} */
+        @Override
         public void addSelectionListener(SelectionListener listener) {
             slider.addSelectionListener(listener);
         }
 
         /** {@inheritDoc} */
+        @Override
         public int getMinimum() {
             return slider.getMinimum();
         }
 
         /** {@inheritDoc} */
+        @Override
         public int getMaximum() {
             return slider.getMaximum();
         }
 
         /** {@inheritDoc} */
+        @Override
         public int getSelection() {
             return slider.getSelection();
         }
@@ -96,21 +100,25 @@ public class BoundedRangeControlFactory {
         }
 
         /** {@inheritDoc} */
+        @Override
         public void addSelectionListener(SelectionListener listener) {
             scale.addSelectionListener(listener);
         }
 
         /** {@inheritDoc} */
+        @Override
         public int getMinimum() {
             return scale.getMinimum();
         }
 
         /** {@inheritDoc} */
+        @Override
         public int getMaximum() {
             return scale.getMaximum();
         }
 
         /** {@inheritDoc} */
+        @Override
         public int getSelection() {
             return scale.getSelection();
         }

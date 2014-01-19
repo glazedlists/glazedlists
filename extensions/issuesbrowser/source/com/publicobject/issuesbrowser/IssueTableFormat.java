@@ -19,10 +19,12 @@ import java.util.Date;
  */
 public class IssueTableFormat implements WritableTableFormat<Object>, AdvancedTableFormat<Object> {
 
+    @Override
     public int getColumnCount() {
         return 8;
     }
 
+    @Override
     public String getColumnName(int column) {
         switch (column) {
             case 0: return "ID";
@@ -37,6 +39,7 @@ public class IssueTableFormat implements WritableTableFormat<Object>, AdvancedTa
         }
     }
 
+    @Override
     public Class getColumnClass(int column) {
         switch (column) {
             case 0: return String.class;
@@ -47,6 +50,7 @@ public class IssueTableFormat implements WritableTableFormat<Object>, AdvancedTa
         }
     }
 
+    @Override
     public Comparator getColumnComparator(int column) {
         switch (column) {
             case 0: return null;
@@ -55,14 +59,17 @@ public class IssueTableFormat implements WritableTableFormat<Object>, AdvancedTa
         }
     }
 
+    @Override
     public boolean isEditable(Object baseObject, int column) {
         return baseObject instanceof SeparatorList.Separator;
     }
 
+    @Override
     public Object setColumnValue(Object baseObject, Object editedValue, int column) {
         return null;
     }
 
+    @Override
     public Object getColumnValue(Object baseObject, int column) {
         if (baseObject == null) return null;
         if (baseObject instanceof SeparatorList.Separator) {

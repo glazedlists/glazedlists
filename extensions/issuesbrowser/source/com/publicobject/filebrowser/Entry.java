@@ -67,6 +67,7 @@ public class Entry implements Comparable<Entry> {
         return file;
     }
 
+    @Override
     public int compareTo(Entry other) {
         return file.compareTo(other.file);
     }

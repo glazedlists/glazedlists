@@ -290,18 +290,21 @@ public class MatcherTest {
             this.value = value;
         }
 
+        @Override
         public boolean matches(Number item) {
             return value.doubleValue() == item.doubleValue();
         }
     }
 
     private static class CapitalizedStringMatcher implements Matcher<String> {
+        @Override
         public boolean matches(String item) {
             return item != null && item.length() > 0 && Character.isUpperCase(item.charAt(0));
         }
     }
 
     private static class OnMatcher implements Matcher<Boolean> {
+        @Override
         public boolean matches(Boolean item) {
             return item != null && item.booleanValue();
         }

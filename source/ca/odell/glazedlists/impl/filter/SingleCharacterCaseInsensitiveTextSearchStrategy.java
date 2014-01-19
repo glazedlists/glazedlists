@@ -30,6 +30,7 @@ public class SingleCharacterCaseInsensitiveTextSearchStrategy extends AbstractTe
      *      <code>null</code> or does not contain precisely <code>1</code>
      *      character
      */
+    @Override
     public void setSubtext(String subtext) {
         if (subtext == null) throw new IllegalArgumentException("subtext may not be null");
         if (subtext.length() != 1) throw new IllegalArgumentException("subtext (" + subtext + ") must contain a single character");
@@ -41,6 +42,7 @@ public class SingleCharacterCaseInsensitiveTextSearchStrategy extends AbstractTe
     }
 
     /** {@inheritDoc} */
+    @Override
     public int indexOf(String text) {
         // ensure we are in a state to search the text
         if(!this.subtextInitialized) throw new IllegalStateException("setSubtext must be called with a valid value before this method can operate");

@@ -42,6 +42,7 @@ public class SyncListener<E> implements ListEventListener<E> {
 
 
     /** {@inheritDoc} */
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
         EventList<E> source = listChanges.getSourceList();
 

@@ -121,6 +121,7 @@ class FilterPanel {
 
             setFilterComponent(filterComponent);
         }
+        @Override
         public void actionPerformed(ActionEvent actionEvent) {
             if(actionEvent.getSource() == closeButton) {
                 selectedFilterComponents.remove(this);
@@ -198,6 +199,7 @@ class FilterPanel {
         }
 
         /** {@inheritDoc} */
+        @Override
         public void listChanged(ListEvent<CloseableFilterComponent> listChanges) {
             boolean enabled = !remainingFilterComponents.isEmpty();
             filterSelect.setEnabled(enabled);
@@ -205,7 +207,8 @@ class FilterPanel {
         }
 
         /** {@inheritDoc} */
-         public void itemStateChanged(ItemEvent e) {
+         @Override
+        public void itemStateChanged(ItemEvent e) {
             if(e.getStateChange() != ItemEvent.SELECTED) return;
             CloseableFilterComponent selectedFilterComponent = (CloseableFilterComponent)filterSelect.getSelectedItem();
             if(selectedFilterComponent == null) return;
@@ -226,6 +229,7 @@ class FilterPanel {
             setCellConstraints(new String[] { "2, 2", "2, 4", "1, 1, 3, 5" });
         }
 
+        @Override
         public JComponent getComponent(CloseableFilterComponent element, int component) {
             if(component == 0) return element.getHeader();
             else if(component == 1) return element.getComponent();
@@ -239,6 +243,7 @@ class FilterPanel {
      * {@link ca.odell.glazedlists.matchers.MatcherEditor}s.
      */
     private static class CloseableFilterComponentToMatcherEditor<E> implements FunctionList.Function<CloseableFilterComponent,MatcherEditor<E>> {
+        @Override
         public MatcherEditor<E> evaluate(CloseableFilterComponent sourceValue) {
             return sourceValue.getMatcherEditor();
         }

@@ -89,6 +89,7 @@ public class DebugList<E> extends AbstractEventList<E> {
      * BasicEventList since we're only decorating the BasicEventList.
      */
     private class ListEventForwarder implements ListEventListener<E> {
+        @Override
         public void listChanged(ListEvent<E> listChanges) {
             updates.forwardEvent(listChanges);
         }
@@ -436,6 +437,7 @@ public class DebugList<E> extends AbstractEventList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void dispose() {
         delegate.removeListEventListener(this.delegateWatcher);
         delegate = null;
@@ -456,7 +458,9 @@ public class DebugList<E> extends AbstractEventList<E> {
             this.writeLock = new DebugLock(decorated.writeLock());
         }
 
+        @Override
         public Lock readLock() { return readLock; }
+        @Override
         public Lock writeLock() { return writeLock; }
 
         /**
@@ -488,6 +492,7 @@ public class DebugList<E> extends AbstractEventList<E> {
                 this.delegate = delegate;
             }
 
+            @Override
             public void lock() {
                 delegate.lock();
 
@@ -495,6 +500,7 @@ public class DebugList<E> extends AbstractEventList<E> {
                 threadsHoldingLock.add(Thread.currentThread());
             }
 
+            @Override
             public boolean tryLock() {
                 final boolean success = delegate.tryLock();
 
@@ -504,6 +510,7 @@ public class DebugList<E> extends AbstractEventList<E> {
                 return success;
             }
 
+            @Override
             public void unlock() {
                 delegate.unlock();
 

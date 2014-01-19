@@ -57,6 +57,7 @@ public class RemovedValueTest {
     static class RemovedValuesListener<E> implements ListEventListener<E> {
         List<E> deleteLog = new ArrayList<E>();
 
+        @Override
         public void listChanged(ListEvent<E> listChanges) {
             while(listChanges.next()) {
                 int type = listChanges.getType();

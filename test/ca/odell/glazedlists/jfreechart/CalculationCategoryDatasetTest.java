@@ -57,6 +57,7 @@ public class CalculationCategoryDatasetTest {
     private static final class DatasetChangeEventCounter implements DatasetChangeListener {
         private int count;
 
+        @Override
         public void datasetChanged(DatasetChangeEvent event) {
             count++;
         }

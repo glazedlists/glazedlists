@@ -54,6 +54,7 @@ public final class NIODaemon implements Runnable {
     /**
      * Continuously selects a connection which needs servicing and services it.
      */
+    @Override
     public void run() {
         // the list of runnables to run this iteration
         List toExecute = new ArrayList();
@@ -175,6 +176,7 @@ public final class NIODaemon implements Runnable {
      * Stops the server after it has been shut down.
      */
     private class Stop implements Runnable {
+        @Override
         public void run() {
             // warn if unsatisfied keys remain
             if(selector.keys().size() != 0) {

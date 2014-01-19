@@ -145,6 +145,7 @@ class  FourColorNode <  T0>   implements Element<T0> {
     /**
      * Get the value of this element.
      */
+    @Override
     public T0 get() {
         return t0;
     }
@@ -152,6 +153,7 @@ class  FourColorNode <  T0>   implements Element<T0> {
     /**
      * Set the value of this element.
      */
+    @Override
     public void set(T0 value) {
         this.t0 = value;
     }
@@ -167,6 +169,7 @@ class  FourColorNode <  T0>   implements Element<T0> {
     /**
      * Get the color of this element.
      */
+    @Override
     public byte getColor() {
         return   color   ;
     }
@@ -294,6 +297,7 @@ class  FourColorNode <  T0>   implements Element<T0> {
     /**
      * Toggle whether this node is sorted.
      */
+    @Override
     public void setSorted(int sorted) {
         this.sorted = sorted;
     }
@@ -305,16 +309,19 @@ class  FourColorNode <  T0>   implements Element<T0> {
      * user expects order to be both sorted and stable during edits which would
      * otherwise change the sorting order.
      */
+    @Override
     public int getSorted() {
         return sorted;
     }
 
     /** {@inheritDoc} */
+    @Override
     public Element<T0> next() {
         return FourColorTree.next(this);
     }
 
     /** {@inheritDoc} */
+    @Override
     public Element<T0> previous() {
         return FourColorTree.previous(this);
     }

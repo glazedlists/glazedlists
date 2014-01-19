@@ -61,6 +61,7 @@ public class IssueLoader implements Runnable {
         issueLoaderThread.start();
     }
 
+    @Override
     public void run() {
         // loop forever, loading projects
         Project currentProject;

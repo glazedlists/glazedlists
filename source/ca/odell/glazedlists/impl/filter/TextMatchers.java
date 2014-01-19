@@ -417,6 +417,7 @@ public final class TextMatchers {
      */
     private static final class SearchTermLengthComparator implements Comparator<SearchTerm> {
         /** {@inheritDoc} */
+        @Override
         public int compare(SearchTerm a, SearchTerm b) {
             return b.getText().length() - a.getText().length();
         }

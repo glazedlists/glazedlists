@@ -43,12 +43,14 @@ final class ConditionalCount<E> extends AbstractCalculation<Integer> implements 
     }
 
     /** @inheritDoc */
+    @Override
     public void dispose() {
         filtered.removeListEventListener(this);
         filtered.dispose();
     }
 
     /** @inheritDoc */
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
         final Integer oldValue = getValue();
         setValue(new Integer(listChanges.getSourceList().size()));

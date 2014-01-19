@@ -232,6 +232,7 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher, Se
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setRelatedListener(Object subject, Object relatedListener) {
         // force the dependency by adding a listener that just doesn't
         // do anything. This will make sure that subject is always after
@@ -240,21 +241,25 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher, Se
     }
 
     /** {@inheritDoc} */
+    @Override
     public void clearRelatedListener(Object subject, Object relatedListener) {
         removeListener(relatedListener, subject);
     }
 
     /** {@inheritDoc} */
+    @Override
     public void addDependency(EventList dependency, ListEventListener listener) {
         // do nothing
     }
 
     /** {@inheritDoc} */
+    @Override
     public void removeDependency(EventList dependency, ListEventListener listener) {
         // do nothing
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setRelatedSubject(Object listener, Object relatedSubject) {
         if(relatedSubject != null) {
             listenersToRelatedSubjects.put(listener, relatedSubject);
@@ -264,6 +269,7 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher, Se
     }
 
     /** {@inheritDoc} */
+    @Override
     public void clearRelatedSubject(Object listener) {
         listenersToRelatedSubjects.remove(listener);
     }
@@ -402,12 +408,15 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher, Se
      */
     private static class NoOpEventFormat implements SequenceDependenciesEventPublisher.EventFormat {
         public static final SequenceDependenciesEventPublisher.EventFormat INSTANCE = new NoOpEventFormat();
+        @Override
         public void fire(Object subject, Object event, Object listener) {
             throw new UnsupportedOperationException();
         }
+        @Override
         public void postEvent(Object subject) {
             throw new UnsupportedOperationException();
         }
+        @Override
         public boolean isStale(Object subject, Object listener) {
             return false;
         }

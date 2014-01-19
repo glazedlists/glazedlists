@@ -15,6 +15,7 @@ import java.util.List;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class ListCollectionListModel<E> implements CollectionList.Model<List<E>,E> {
+    @Override
     public List<E> getChildren(List<E> parent) {
         if(parent == null) return Collections.emptyList();
         return parent;

@@ -31,6 +31,7 @@ public class CreationDateMatcherEditor extends NachoDateRangeMatcherEditor<Issue
         return "Creation Date";
     }
 
+    @Override
     public MatcherEditor<Issue> getMatcherEditor() {
         return this;
     }
@@ -39,6 +40,7 @@ public class CreationDateMatcherEditor extends NachoDateRangeMatcherEditor<Issue
      * This Filterator extracts the creation date from each Issue object.
      */
     private static final class IssueCreationDateFilterator implements Filterator<Date,Issue> {
+        @Override
         public void getFilterValues(List<Date> baseList, Issue element) {
             baseList.add(element.getCreationTimestamp());
         }

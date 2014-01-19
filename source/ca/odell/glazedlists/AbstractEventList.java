@@ -60,21 +60,25 @@ public abstract class AbstractEventList<E> implements EventList<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public ListEventPublisher getPublisher() {
         return publisher;
     }
 
     /** {@inheritDoc} */
+    @Override
     public ReadWriteLock getReadWriteLock() {
         return readWriteLock;
     }
 
     /** {@inheritDoc} */
+    @Override
     public void addListEventListener(ListEventListener<? super E> listChangeListener) {
         updates.addListEventListener(listChangeListener);
     }
 
     /** {@inheritDoc} */
+    @Override
     public void removeListEventListener(ListEventListener<? super E> listChangeListener) {
         updates.removeListEventListener(listChangeListener);
     }
@@ -86,6 +90,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      *
      * @return the number of elements in this list.
      */
+    @Override
     public abstract int size();
 
 
@@ -94,6 +99,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      *
      * @return <tt>true</tt> if this list contains no elements.
      */
+    @Override
     public boolean isEmpty() {
         return (size() == 0);
     }
@@ -111,6 +117,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      * @throws NullPointerException if the specified element is null and this
      *         list does not support null elements (optional).
      */
+    @Override
     public boolean contains(Object object) {
         // for through this, looking for the lucky object
         for(Iterator i = iterator(); i.hasNext(); ) {
@@ -131,6 +138,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      *
      * @return an iterator over the elements in this list in proper sequence.
      */
+    @Override
     public Iterator<E> iterator() {
         return new SimpleIterator<E>(this);
     }
@@ -144,6 +152,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      *         sequence.
      * @see Arrays#asList
      */
+    @Override
     public Object[] toArray() {
         // copy values into the array
         Object[] array = new Object[size()];
@@ -171,6 +180,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      *        this list.
      * @throws NullPointerException if the specified array is <tt>null</tt>.
      */
+    @Override
     public <T> T[] toArray(T[] array) {
         // create an array of the same type as the array passed
         if (array.length < size()) {
@@ -212,6 +222,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      * @throws IllegalArgumentException if some aspect of this element
      *            prevents it from being added to this list.
      */
+    @Override
     public boolean add(E value) {
         final int initialSize = this.size();
         this.add(this.size(), value);
@@ -234,6 +245,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      * @throws UnsupportedOperationException if the <tt>remove</tt> method is
      *        not supported by this list.
      */
+    @Override
     public boolean remove(Object toRemove) {
         int index = indexOf(toRemove);
         if(index == -1) return false;
@@ -258,6 +270,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      *         <tt>null</tt>.
      * @see #contains(Object)
      */
+    @Override
     public boolean containsAll(Collection<?> values) {
         // look for something that is missing
         for(Iterator i = values.iterator(); i.hasNext(); ) {
@@ -291,6 +304,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      *         list.
      * @see #add(Object)
      */
+    @Override
     public boolean addAll(Collection<? extends E> values) {
         return addAll(size(), values);
     }
@@ -325,6 +339,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      * @throws IndexOutOfBoundsException if the index is out of range (index
      *        &lt; 0 || index &gt; size()).
      */
+    @Override
     public boolean addAll(int index, Collection<? extends E> values) {
         // don't do an add of an empty set
         if(index < 0 || index > size()) throw new IndexOutOfBoundsException("Cannot add at " + index + " on list of size " + size());
@@ -364,6 +379,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      * @see #remove(Object)
      * @see #contains(Object)
      */
+    @Override
     public boolean removeAll(Collection<?> values) {
         boolean changed = false;
         for(Iterator i = iterator(); i.hasNext(); ) {
@@ -399,6 +415,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      * @see #remove(Object)
      * @see #contains(Object)
      */
+    @Override
     public boolean retainAll(Collection<?> values) {
         boolean changed = false;
         for(Iterator i = iterator(); i.hasNext();) {
@@ -418,6 +435,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      * @throws UnsupportedOperationException if the <tt>clear</tt> method is
      *        not supported by this list.
      */
+    @Override
     public void clear() {
         for(Iterator i = iterator(); i.hasNext();) {
             i.next();
@@ -500,6 +518,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      * @throws IndexOutOfBoundsException if the index is out of range (index
      *        &lt; 0 || index &gt;= size()).
      */
+    @Override
     public abstract E get(int index);
 
     /**
@@ -521,6 +540,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      * @throws    IndexOutOfBoundsException if the index is out of range
      *        (index &lt; 0 || index &gt;= size()).
      */
+    @Override
     public E set(int index, E value) {
         throw new UnsupportedOperationException("this list does not support set()");
     }
@@ -545,6 +565,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      * @throws    IndexOutOfBoundsException if the index is out of range
      *        (index &lt; 0 || index &gt; size()).
      */
+    @Override
     public void add(int index, E value) {
         throw new UnsupportedOperationException("this list does not support add()");
     }
@@ -563,6 +584,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      * @throws IndexOutOfBoundsException if the index is out of range (index
      *            &lt; 0 || index &gt;= size()).
      */
+    @Override
     public E remove(int index) {
         throw new UnsupportedOperationException("this list does not support remove()");
     }
@@ -582,6 +604,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      * @throws NullPointerException if the specified element is null and this
      *         list does not support null elements (optional).
      */
+    @Override
     public int indexOf(Object object) {
         // for through this, looking for the lucky object
         int index = 0;
@@ -608,6 +631,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      * @throws NullPointerException if the specified element is null and this
      *         list does not support null elements (optional).
      */
+    @Override
     public int lastIndexOf(Object object) {
         // for through this, looking for the lucky object
         for(int i = size() - 1; i >= 0; i--) {
@@ -630,6 +654,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      * @return a list iterator of the elements in this list (in proper
      *         sequence).
      */
+    @Override
     public ListIterator<E> listIterator() {
         return listIterator(0);
     }
@@ -655,6 +680,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      * @throws IndexOutOfBoundsException if the index is out of range (index
      *         &lt; 0 || index &gt; size()).
      */
+    @Override
     public ListIterator<E> listIterator(int index) {
         return new EventListIterator<E>(this, index);
     }
@@ -692,6 +718,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      * @throws IndexOutOfBoundsException for an illegal endpoint index value
      *     (fromIndex &lt; 0 || toIndex &gt; size || fromIndex &gt; toIndex).
      */
+    @Override
     public List<E> subList(int fromIndex, int toIndex) {
         return new SubEventList<E>(this, fromIndex, toIndex, true);
     }

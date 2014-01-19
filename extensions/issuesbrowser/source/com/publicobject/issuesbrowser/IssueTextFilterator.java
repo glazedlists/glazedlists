@@ -15,6 +15,7 @@ import ca.odell.glazedlists.TextFilterator;
  */
 public class IssueTextFilterator implements TextFilterator<Issue> {
     /** {@inheritDoc} */
+    @Override
     public void getFilterStrings(List<String> baseList, Issue i) {
         // the displayed strings
         baseList.add(i.getId());

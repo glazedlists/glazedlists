@@ -218,11 +218,16 @@ public class TextComponentMatcherEditor<E> extends TextMatcherEditor<E> {
      * text of this TextMatcherEditor to the contents of the Document.
      */
     private class FilterHandler implements DocumentListener, ActionListener, PropertyChangeListener {
+        @Override
         public void insertUpdate(DocumentEvent e) { refilter(); }
+        @Override
         public void removeUpdate(DocumentEvent e) { refilter(); }
+        @Override
         public void changedUpdate(DocumentEvent e) { refilter(); }
+        @Override
         public void actionPerformed(ActionEvent e) { refilter(); }
 
+        @Override
         public void propertyChange(PropertyChangeEvent evt) {
             if ("document" == evt.getPropertyName()) {
                 // stop listening to the old Document

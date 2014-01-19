@@ -149,6 +149,7 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
      * Handle changes to the grouping list groups.
      */
     private class GrouperClient implements Grouper.Client<E> {
+        @Override
         public void groupChanged(int index, int groupIndex, int groupChangeType, boolean primary, int elementChangeType, E oldValue, E newValue) {
             if(groupChangeType == ListEvent.INSERT) {
                 insertGroupList(groupIndex);

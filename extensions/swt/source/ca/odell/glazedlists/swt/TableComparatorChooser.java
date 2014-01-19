@@ -50,6 +50,7 @@ public final class TableComparatorChooser<E> extends AbstractTableComparatorChoo
      * identical but uses a more fitting name to convey the action that is
      * performed.
      */
+    @Deprecated
     public TableComparatorChooser(DefaultEventTableViewer<E> eventTableViewer, SortedList<E> sortedList, boolean multipleColumnSort) {
         super(sortedList, eventTableViewer.getTableFormat());
 
@@ -104,12 +105,14 @@ public final class TableComparatorChooser<E> extends AbstractTableComparatorChoo
      * Handles column clicks.
      */
     class ColumnListener implements org.eclipse.swt.events.SelectionListener {
+        @Override
         public void widgetSelected(SelectionEvent e) {
             TableColumn column = (TableColumn)e.widget;
             Table table = column.getParent();
             int columnIndex = table.indexOf(column);
             sortingStrategy.columnClicked(sortingState, columnIndex, 1, false, false);
         }
+        @Override
         public void widgetDefaultSelected(SelectionEvent e) {
             // Do Nothing
         }

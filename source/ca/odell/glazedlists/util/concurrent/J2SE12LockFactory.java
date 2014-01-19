@@ -208,7 +208,9 @@ class WriterPreferenceReadWriteLock implements ReadWriteLock {
     protected final ReaderLock readerLock_ = new ReaderLock();
     protected final WriterLock writerLock_ = new WriterLock();
 
+    @Override
     public Lock writeLock() { return writerLock_; }
+    @Override
     public Lock readLock() { return readerLock_; }
 
     /*
@@ -315,6 +317,7 @@ class WriterPreferenceReadWriteLock implements ReadWriteLock {
 
     protected class ReaderLock extends Signaller implements Lock {
 
+        @Override
         public  void lock() {
             //if (Thread.interrupted()) throw new RuntimeException("Lock interrupted", new InterruptedException());
             InterruptedException ie = null;
@@ -344,6 +347,7 @@ class WriterPreferenceReadWriteLock implements ReadWriteLock {
         }
 
 
+        @Override
         public void unlock() {
             Signaller s = endRead();
             if (s != null) s.signalWaiters();
@@ -353,6 +357,7 @@ class WriterPreferenceReadWriteLock implements ReadWriteLock {
         @Override
         synchronized void signalWaiters() { ReaderLock.this.notifyAll(); }
 
+        @Override
         public boolean tryLock() {
             long msecs = 0;
             //if (Thread.interrupted()) throw new RuntimeException("Lock interrupted", new InterruptedException());
@@ -393,6 +398,7 @@ class WriterPreferenceReadWriteLock implements ReadWriteLock {
 
     protected class WriterLock extends Signaller implements Lock {
 
+        @Override
         public void lock() {
             //if (Thread.interrupted()) throw new RuntimeException("Lock interrupted", new InterruptedException());
             InterruptedException ie = null;
@@ -422,6 +428,7 @@ class WriterPreferenceReadWriteLock implements ReadWriteLock {
             }
         }
 
+        @Override
         public void unlock(){
             Signaller s = endWrite();
             if (s != null) s.signalWaiters();
@@ -430,6 +437,7 @@ class WriterPreferenceReadWriteLock implements ReadWriteLock {
         @Override
         synchronized void signalWaiters() { WriterLock.this.notify(); }
 
+        @Override
         public boolean tryLock() {
             long msecs = 0;
             //if (Thread.interrupted()) throw new RuntimeException("Lock interrupted", new InterruptedException());

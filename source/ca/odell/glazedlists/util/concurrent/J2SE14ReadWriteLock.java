@@ -168,7 +168,9 @@ public class J2SE14ReadWriteLock implements ReadWriteLock, java.io.Serializable 
         this.sync = new NonfairSync();
     }
 
+    @Override
     public Lock writeLock() { return writerLock_; }
+    @Override
     public Lock readLock()  { return readerLock_; }
 
     /** Use a {@link SerializedReadWriteLock} as placeholder in the serialization stream. */
@@ -410,6 +412,7 @@ public class J2SE14ReadWriteLock implements ReadWriteLock, java.io.Serializable 
          * the current thread becomes disabled for thread scheduling
          * purposes and lies dormant until the read lock has been acquired.
          */
+        @Override
         public void lock() {
             synchronized (this) {
                 if (lock.sync.startReadFromNewReader()) return;
@@ -525,6 +528,7 @@ public class J2SE14ReadWriteLock implements ReadWriteLock, java.io.Serializable 
          *
          * @return {@code true} if the read lock was acquired
          */
+        @Override
         public boolean tryLock() {
             return lock.sync.startRead();
         }
@@ -535,6 +539,7 @@ public class J2SE14ReadWriteLock implements ReadWriteLock, java.io.Serializable 
          * <p> If the number of readers is now zero then the lock
          * is made available for write lock attempts.
          */
+        @Override
         public void unlock() {
             switch (lock.sync.endRead()) {
                 case Sync.NONE: return;
@@ -599,6 +604,7 @@ public class J2SE14ReadWriteLock implements ReadWriteLock, java.io.Serializable 
          * lies dormant until the write lock has been acquired, at which
          * time the write lock hold count is set to one.
          */
+        @Override
         public void lock() {
             synchronized (this) {
                 if (lock.sync.startWriteFromNewWriter()) return;
@@ -729,6 +735,7 @@ public class J2SE14ReadWriteLock implements ReadWriteLock, java.io.Serializable 
          * by the current thread, or the write lock was already held
          * by the current thread; and {@code false} otherwise.
          */
+        @Override
         public boolean tryLock() {
             return lock.sync.startWrite();
         }
@@ -745,6 +752,7 @@ public class J2SE14ReadWriteLock implements ReadWriteLock, java.io.Serializable 
          * @throws IllegalMonitorStateException if the current thread does not
          * hold this lock.
          */
+        @Override
         public void unlock() {
             switch (lock.sync.endWrite()) {
                 case Sync.NONE: return;

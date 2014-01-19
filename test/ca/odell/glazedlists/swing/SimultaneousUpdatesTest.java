@@ -66,6 +66,7 @@ public class SimultaneousUpdatesTest {
         public FilterUnfilter(EvenOrAllMatcherEditor matcherEditor) {
             this.matcherEditor = matcherEditor;
         }
+        @Override
         public synchronized void run() {
             matcherEditor.setEven();
             matcherEditor.setAll();
@@ -81,6 +82,7 @@ public class SimultaneousUpdatesTest {
         public AddThenRemoveOnList(EventList<Integer> list) {
             this.list = list;
         }
+        @Override
         public synchronized void run() {
             try {
                 for(int j = 0; j < 500; ) {
@@ -113,6 +115,7 @@ public class SimultaneousUpdatesTest {
             fireChanged(new EvenMatcherEditor());
         }
         private static class EvenMatcherEditor implements Matcher<Integer> {
+            @Override
             public boolean matches(Integer item) {
                 return item.intValue() % 2 == 0;
             }

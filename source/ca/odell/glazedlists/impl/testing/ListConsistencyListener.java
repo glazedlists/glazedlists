@@ -126,6 +126,7 @@ public class ListConsistencyListener<E> {
      */
     private class ListChangeHandler implements ListEventListener<E> {
 
+        @Override
         public void listChanged(ListEvent<E> listChanges) {
             try {
 

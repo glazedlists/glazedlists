@@ -70,7 +70,8 @@ public final class Priority implements Comparable<Priority> {
 		return name;
 	}
 
-	public int compareTo(Priority p) {
+	@Override
+    public int compareTo(Priority p) {
 		// Note: toggle the sign because P1 is a "higher" priority than P5, etc.
 		return value - p.value;
 	}

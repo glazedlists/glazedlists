@@ -132,6 +132,7 @@ public class MultipleSourcesTest {
             return changeCount;
         }
 
+        @Override
         public void listChanged(ListEvent<String> e) {
             changeCount++;
             for(Iterator<EventList<String>> i = sources.iterator(); i.hasNext(); ) {

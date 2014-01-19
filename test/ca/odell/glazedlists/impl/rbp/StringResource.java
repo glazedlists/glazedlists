@@ -29,6 +29,7 @@ public class StringResource implements Resource {
     /**
      * Get a binary snapshot of this resource in its current state.
      */
+    @Override
     public Bufferlo toSnapshot() {
         Bufferlo result = new Bufferlo();
         result.write(value);
@@ -46,6 +47,7 @@ public class StringResource implements Resource {
     /**
      * Populate this resource with the data from the specified snapshot.
      */
+    @Override
     public void fromSnapshot(Bufferlo snapshot) {
         value = snapshot.toString();
         notifyListeners();
@@ -55,6 +57,7 @@ public class StringResource implements Resource {
      * Apply the specified delta to the binary image of this resource. After the
      * update has been applied, all {@link ResourceListener}s must be notified.
      */
+    @Override
     public void update(Bufferlo delta) {
         fromSnapshot(delta);
     }
@@ -63,13 +66,15 @@ public class StringResource implements Resource {
      * Register the {@link ResourceListener} to receive notification when this
      * resource is modified.
      */
-     public void addResourceListener(ResourceListener listener) {
+     @Override
+    public void addResourceListener(ResourceListener listener) {
          listeners.add(listener);
      }
     
     /**
      * Degregister the {@link ResourceListener} from receiving update events.
      */
+    @Override
     public void removeResourceListener(ResourceListener listener) {
         listeners.add(listener);
     }
@@ -80,6 +85,7 @@ public class StringResource implements Resource {
      * @return a re-entrant {@link ReadWriteLock} that guarantees thread safe
      *      access to this list.
      */
+    @Override
     public ReadWriteLock getReadWriteLock() {
         return readWriteLock;
     }

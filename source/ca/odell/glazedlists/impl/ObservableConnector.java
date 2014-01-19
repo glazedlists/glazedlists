@@ -30,6 +30,7 @@ public class ObservableConnector<E extends Observable> implements ObservableElem
      * @param o the Observable that has been updated
      * @param arg an argument passed to observers which is ignored here
      */
+    @Override
     public void update(Observable o, Object arg) {
         list.elementChanged(o);
     }
@@ -41,6 +42,7 @@ public class ObservableConnector<E extends Observable> implements ObservableElem
      * @return the listener that was installed on the <code>element</code>
      *      to be used as a parameter to {@link #uninstallListener(Object, EventListener)}
      */
+    @Override
     public EventListener installListener(E element) {
         element.addObserver(this);
         return this;
@@ -53,11 +55,13 @@ public class ObservableConnector<E extends Observable> implements ObservableElem
      * @param listener the listener that was installed on the <code>element</code>
      *      in {@link #installListener(Object)}
      */
+    @Override
     public void uninstallListener(E element, EventListener listener) {
         element.deleteObserver(this);
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setObservableElementList(ObservableElementList<? extends E> list) {
         this.list = list;
     }

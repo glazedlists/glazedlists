@@ -35,6 +35,7 @@ public class SimpleIterator<E> implements Iterator<E> {
      * Returns true if this iterator has more elements when traversing the
      * list in the forward direction.
      */
+    @Override
     public boolean hasNext() {
         return nextIndex < source.size();
     }
@@ -42,6 +43,7 @@ public class SimpleIterator<E> implements Iterator<E> {
     /**
      * Returns the next element in the list.
      */
+    @Override
     public E next() {
         // there are no more values
         if (nextIndex == source.size())
@@ -55,6 +57,7 @@ public class SimpleIterator<E> implements Iterator<E> {
      * Removes from the list the last element that was returned by next
      * or previous.
      */
+    @Override
     public void remove() {
         if (nextIndex == 0)
             throw new IllegalStateException("Cannot remove() without a prior call to next() or previous()");

@@ -47,6 +47,7 @@ public interface TableItemConfigurer<E> {
     class DefaultTableItemConfigurer<E> implements TableItemConfigurer<E> {
 
         /** {@inheritDoc} */
+        @Override
         public void configure(TableItem item, E rowValue, Object columnValue, int row, int column) {
             item.setText(column, columnValue == null ? "" : columnValue.toString());
         }

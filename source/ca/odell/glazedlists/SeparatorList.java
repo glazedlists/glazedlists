@@ -634,6 +634,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
          * actual list element.
          */
         private class GrouperClient implements Grouper.Client<E> {
+            @Override
             public void groupChanged(int index, int groupIndex, int groupChangeType, boolean primary, int elementChangeType, E oldValue, E newValue) {
                 boolean fixSeparatorForInsertGroupUpdateElement = false;
                 // handle the group change first
@@ -773,11 +774,13 @@ public class SeparatorList<E> extends TransformedList<E, E> {
             private Element<GroupSeparator> node = null;
 
             /** {@inheritDoc} */
+            @Override
             public int getLimit() {
                 return limit;
             }
 
             /** {@inheritDoc} */
+            @Override
             public void setLimit(int limit) {
                 applyLimit(limit, true);
             }
@@ -807,15 +810,18 @@ public class SeparatorList<E> extends TransformedList<E, E> {
             }
 
             /** {@inheritDoc} */
+            @Override
             public List<E> getGroup() {
                 if(node == null) return Collections.emptyList();
                 return source.subList(start(), end());
             }
             /** {@inheritDoc} */
+            @Override
             public E first() {
                 return first;
             }
             /** {@inheritDoc} */
+            @Override
             public int size() {
                 return size;
             }

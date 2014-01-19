@@ -193,6 +193,7 @@ public final class JEventListPanel<E> extends JPanel {
         /**
          * When the components list changes, this updates the panel.
          */
+        @Override
         public void listChanged(ListEvent<E> listChanges) {
             while(listChanges.next()) {
                 int type = listChanges.getType();
@@ -323,6 +324,7 @@ public final class JEventListPanel<E> extends JPanel {
         }
 
         /** {@inheritDoc} */
+        @Override
         public RowSpec[] getElementRows() {
             return elementRows;
         }
@@ -335,6 +337,7 @@ public final class JEventListPanel<E> extends JPanel {
         }
 
         /** {@inheritDoc} */
+        @Override
         public ColumnSpec[] getElementColumns() {
             return elementColumns;
         }
@@ -355,11 +358,13 @@ public final class JEventListPanel<E> extends JPanel {
         }
 
         /** {@inheritDoc} */
+        @Override
         public int getComponentsPerElement() {
             return cellConstraints.length;
         }
 
         /** {@inheritDoc} */
+        @Override
         public CellConstraints getConstraints(int component) {
             return cellConstraints[component];
         }
@@ -379,11 +384,13 @@ public final class JEventListPanel<E> extends JPanel {
         }
 
         /** {@inheritDoc} */
+        @Override
         public RowSpec getGapRow() {
             return gapRow;
         }
 
         /** {@inheritDoc} */
+        @Override
         public ColumnSpec getGapColumn() {
             return gapColumn;
         }

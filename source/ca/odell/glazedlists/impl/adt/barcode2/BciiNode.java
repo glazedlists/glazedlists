@@ -100,6 +100,7 @@ class /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ implements Ele
     /**
      * Get the value of this element.
      */
+    @Override
     public T0 get() {
         return t0;
     }
@@ -107,6 +108,7 @@ class /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ implements Ele
     /**
      * Set the value of this element.
      */
+    @Override
     public void set(T0 value) {
         this.t0 = value;
     }
@@ -123,6 +125,7 @@ class /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ implements Ele
     /**
      * Get the color of this element.
      */
+    @Override
     public byte getColor() {
         return /*[ COLORED_START(1) ]*/ color /*[ COLORED_END ]*/;
     }
@@ -256,6 +259,7 @@ class /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ implements Ele
     /**
      * Toggle whether this node is sorted.
      */
+    @Override
     public void setSorted(int sorted) {
         this.sorted = sorted;
     }
@@ -267,16 +271,19 @@ class /*[ NODENAME_START ]*/ BciiNode<T0,T1> /*[ NODENAME_END ]*/ implements Ele
      * user expects order to be both sorted and stable during edits which would
      * otherwise change the sorting order.
      */
+    @Override
     public int getSorted() {
         return sorted;
     }
 
     /** {@inheritDoc} */
+    @Override
     public Element<T0> next() {
         return BciiTree.next(this);
     }
 
     /** {@inheritDoc} */
+    @Override
     public Element<T0> previous() {
         return BciiTree.previous(this);
     }

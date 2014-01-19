@@ -41,11 +41,13 @@ public interface EventListFactory {
 final class DefaultFactory implements EventListFactory {
 
     /** {@inheritDoc} */
+    @Override
     public EventList createEventList() {
         return new BasicEventList();
     }
 
     /** {@inheritDoc} */
+    @Override
     public EventList createEventList(int initalCapacity) {
         return new BasicEventList(initalCapacity);
     }

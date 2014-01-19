@@ -32,6 +32,7 @@ public final class ComparatorChain<T> implements Comparator<T> {
     /**
      * Compares the two objects with each comparator in sequence.
      */
+    @Override
     public int compare(T alpha, T beta) {
         for (int i = 0; i < comparators.length; i++) {
             int compareResult = comparators[i].compare(alpha, beta);

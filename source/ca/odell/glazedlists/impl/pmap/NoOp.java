@@ -30,6 +30,7 @@ class NoOp implements Runnable {
     /**
      * Doesn't do anything!
      */
+    @Override
     public void run() {
         // nothing
     }

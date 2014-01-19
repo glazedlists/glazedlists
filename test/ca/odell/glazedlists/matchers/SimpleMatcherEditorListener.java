@@ -14,6 +14,7 @@ public class SimpleMatcherEditorListener implements MatcherEditor.Listener {
     private boolean constrained = false;
     private boolean relaxed = false;
     private int changes = 0;
+    @Override
     public void changedMatcher(MatcherEditor.Event matcherEvent) {
         switch (matcherEvent.getType()) {
             case MatcherEditor.Event.CONSTRAINED: changes++; constrained = true; break;

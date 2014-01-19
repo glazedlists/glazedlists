@@ -79,6 +79,7 @@ public class TreeTableCellRenderer implements TableCellRenderer {
      * Return a decorated form of the component returned by the data
      * {@link TableCellRenderer}.
      */
+    @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         treeList.getReadWriteLock().readLock().lock();
         try {

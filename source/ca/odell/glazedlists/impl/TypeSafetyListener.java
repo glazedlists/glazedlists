@@ -41,6 +41,7 @@ public class TypeSafetyListener<E> implements ListEventListener<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
         final EventList<E> source = listChanges.getSourceList();
         while (listChanges.next()) {

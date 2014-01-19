@@ -686,6 +686,7 @@ public final class SparseListNode {
          * Returns whether or not there are more values in the SparseList to
          * iterate over.
          */
+        @Override
         public boolean hasNext() {
             if(index >= treeSize - 1 && index == size - 1) {
                 return false;
@@ -696,6 +697,7 @@ public final class SparseListNode {
         /**
          * Gets the next value in this SparseList.
          */
+        @Override
         public Object next() {
             // iterate on this node
             timesRequested++;
@@ -752,6 +754,7 @@ public final class SparseListNode {
          * @throws UnsupportedOperationException This feature is not yet implemented.
          *
          */
+        @Override
         public void remove() {
             // handle the uninitialized iterator case
             if(timesRequested == -1) {

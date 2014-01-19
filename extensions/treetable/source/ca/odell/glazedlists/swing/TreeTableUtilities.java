@@ -132,6 +132,7 @@ public class TreeTableUtilities {
             return eventSelectionModel;
         }
 
+        @Override
         public void run() {
             table.putClientProperty("JTable.autoStartsEdit", autoStartsEdit);
 

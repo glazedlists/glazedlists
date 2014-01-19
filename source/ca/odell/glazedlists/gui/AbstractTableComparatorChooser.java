@@ -136,6 +136,7 @@ public abstract class AbstractTableComparatorChooser<E> {
      * to the {@link SortedList}.
      */
     private class SortingStateListener implements PropertyChangeListener {
+        @Override
         public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
             rebuildComparator();
         }

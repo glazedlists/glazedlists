@@ -110,6 +110,7 @@ public final class PopularityList<E> extends TransformedList<E, E> {
         public PopularityComparator(UniqueList<E> target) {
             this.target = target;
         }
+        @Override
         public int compare(E a, E b) {
             int aCount = target.getCount(a);
             int bCount = target.getCount(b);

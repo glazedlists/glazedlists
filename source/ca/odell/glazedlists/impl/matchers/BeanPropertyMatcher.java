@@ -32,6 +32,7 @@ public final class BeanPropertyMatcher<E> implements Matcher<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean matches(E item) {
         if (item == null) return false;
         return GlazedListsImpl.equal(this.beanProperty.get(item), this.value);

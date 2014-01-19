@@ -101,6 +101,7 @@ class IssueSummaryChartsComponent {
      * {@link Issue} objects that share the same status.
      */
     private static class StatusFunction implements FunctionList.Function<List<Issue>, Comparable<String>> {
+        @Override
         public Comparable<String> evaluate(List<Issue> sourceValue) {
             return sourceValue.get(0).getStatus();
         }
@@ -111,6 +112,7 @@ class IssueSummaryChartsComponent {
      * share the same status.
      */
     private static class ListSizeFunction implements FunctionList.Function<List<Issue>, Number> {
+        @Override
         public Number evaluate(List<Issue> sourceValue) {
             return new Integer(sourceValue.size());
         }

@@ -150,12 +150,15 @@ public class SequenceDependenciesEventPublisherTest {
      */
     private static class SimpleSubjectListenerEventFormat implements SequenceDependenciesEventPublisher.EventFormat<SimpleSubjectListener,SimpleSubjectListener,String> {
         public static final SimpleSubjectListenerEventFormat INSTANCE = new SimpleSubjectListenerEventFormat();
+        @Override
         public void fire(SimpleSubjectListener subject, String event, SimpleSubjectListener listener) {
             listener.handleChange(event);
         }
+        @Override
         public void postEvent(SimpleSubjectListener subject) {
             // do nothing
         }
+        @Override
         public boolean isStale(SimpleSubjectListener subject, SimpleSubjectListener listener) {
             return false;
         }
@@ -329,6 +332,7 @@ public class SequenceDependenciesEventPublisherTest {
      */
     private static class DependentSubjectListenerEventFormat implements SequenceDependenciesEventPublisher.EventFormat<DependentSubjectListener,DependentSubjectListener,Integer> {
         public static final DependentSubjectListenerEventFormat INSTANCE = new DependentSubjectListenerEventFormat();
+        @Override
         public void fire(DependentSubjectListener subject, Integer event, DependentSubjectListener listener) {
             // update the listener
             boolean incremented = listener.latestRevision < event.intValue();
@@ -340,9 +344,11 @@ public class SequenceDependenciesEventPublisherTest {
                 listener.increment(0);
             }
         }
+        @Override
         public void postEvent(DependentSubjectListener subject) {
             // do nothing
         }
+        @Override
         public boolean isStale(DependentSubjectListener subject, DependentSubjectListener listener) {
             return false;
         }
@@ -436,6 +442,7 @@ public class SequenceDependenciesEventPublisherTest {
             this.subject = subject;
             this.listener = listener;
         }
+        @Override
         public void run() {
             subject.addListener(listener);
         }
@@ -451,6 +458,7 @@ public class SequenceDependenciesEventPublisherTest {
             this.subject = subject;
             this.listener = listener;
         }
+        @Override
         public void run() {
             subject.removeListener(listener);
         }
@@ -580,6 +588,7 @@ public class SequenceDependenciesEventPublisherTest {
      */
     private static class DetachedSubjectAndListenerEventFormat implements SequenceDependenciesEventPublisher.EventFormat<DetachedSubject,DetachedSubject.Listener,Integer> {
         public static final DetachedSubjectAndListenerEventFormat INSTANCE = new DetachedSubjectAndListenerEventFormat();
+        @Override
         public void fire(DetachedSubject subject, Integer event, DetachedSubject.Listener listener) {
             boolean changed = listener.subject.latestRevision < event.intValue();
             // update the listener
@@ -589,9 +598,11 @@ public class SequenceDependenciesEventPublisherTest {
             // send the event forward
             if(changed) listener.subject.increment(0);
         }
+        @Override
         public void postEvent(DetachedSubject subject) {
             // do nothing
         }
+        @Override
         public boolean isStale(DetachedSubject subject, DetachedSubject.Listener listener) {
             return false;
         }

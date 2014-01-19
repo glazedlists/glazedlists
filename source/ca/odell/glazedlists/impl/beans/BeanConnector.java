@@ -161,6 +161,7 @@ public class BeanConnector<E> implements ObservableElementList.Connector<E> {
      * @throws RuntimeException if the reflection call fails to successfully
      *      install the PropertyChangeListener
      */
+    @Override
     public EventListener installListener(E element) {
         try {
             this.addListenerMethod.invoke(element, this.reflectionParameters);
@@ -183,6 +184,7 @@ public class BeanConnector<E> implements ObservableElementList.Connector<E> {
      * @throws RuntimeException if the reflection call fails to successfully
      *      uninstall the PropertyChangeListener
      */
+    @Override
     public void uninstallListener(E element, EventListener listener) {
         try {
             this.removeListenerMethod.invoke(element, this.reflectionParameters);
@@ -194,6 +196,7 @@ public class BeanConnector<E> implements ObservableElementList.Connector<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setObservableElementList(ObservableElementList<? extends E> list) {
         this.list = list;
     }
@@ -229,6 +232,7 @@ public class BeanConnector<E> implements ObservableElementList.Connector<E> {
      * Connector of changes to list elements.
      */
     public class PropertyChangeHandler implements PropertyChangeListener {
+        @Override
         public void propertyChange(PropertyChangeEvent event) {
             if (getEventMatcher().matches(event)) {
             	list.elementChanged(event.getSource());

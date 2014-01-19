@@ -252,6 +252,7 @@ public class ThresholdMatcherEditor<E, T> extends AbstractMatcherEditor<E> {
         }
 
         /** {@inheritDoc} */
+        @Override
         public boolean matches(E item) {
             return matchesThreshold(function.evaluate(item));
         }

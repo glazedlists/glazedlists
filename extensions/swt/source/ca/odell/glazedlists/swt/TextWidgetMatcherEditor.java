@@ -161,12 +161,15 @@ public final class TextWidgetMatcherEditor<E> extends TextMatcherEditor<E> {
      * SelectionListener can be used to update the filter in response.
      */
     private class FilterChangeListener implements SelectionListener, ModifyListener {
+        @Override
         public void widgetSelected(SelectionEvent e) {
             refilter();
         }
+        @Override
         public void widgetDefaultSelected(SelectionEvent e) {
             refilter();
         }
+        @Override
         public void modifyText(ModifyEvent e) {
             refilter();
         }

@@ -165,6 +165,7 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
      * "lifetime" of the Issue.
      */
     private static class StateChangesCollectionModel implements CollectionList.Model<Issue, ValueSegment<Date,String>> {
+        @Override
         public List<ValueSegment<Date, String>> getChildren(Issue parent) {
             return parent.getStateChanges();
         }
@@ -180,6 +181,7 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
         public OpenIssuesMatcher(StatusProvider statusProvider) {
             this.statusProvider = statusProvider;
         }
+        @Override
         public boolean matches(ValueSegment<Date, String> item) {
             final String value = item.getValue();
             return statusProvider.statusFor(value).isActive();

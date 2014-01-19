@@ -12,14 +12,17 @@ import ca.odell.glazedlists.gui.TableFormat;
  */
 public class IntegerTableFormat implements TableFormat<Integer> {
 
+    @Override
     public int getColumnCount() {
         return 1;
     }
 
+    @Override
     public String getColumnName(int column) {
         return "Value";
     }
 
+    @Override
     public Object getColumnValue(Integer baseObject, int column) {
         return baseObject;
     }

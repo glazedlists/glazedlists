@@ -125,6 +125,7 @@ public class JListPanel<C extends Component> extends JPanel implements ListEvent
      * reacts by keeping the component hierarchy of the JListPanel in sync
      * with those changes.
      */
+    @Override
     public void listChanged(ListEvent<C> listChanges) {
         // incorporate the model changes into the view
         relayout();
@@ -218,11 +219,13 @@ public class JListPanel<C extends Component> extends JPanel implements ListEvent
         /** The MouseListener installed on each of the model's components to detect drag and drop gestures. */
         private final DnDMouseListener dndMouseListener = new DnDMouseListener();
 
+        @Override
         public void componentAdded(ContainerEvent e) {
             e.getChild().addMouseListener(dndMouseListener);
             e.getChild().addMouseMotionListener(dndMouseListener);
         }
 
+        @Override
         public void componentRemoved(ContainerEvent e) {
             e.getChild().removeMouseListener(dndMouseListener);
             e.getChild().removeMouseMotionListener(dndMouseListener);
@@ -234,6 +237,7 @@ public class JListPanel<C extends Component> extends JPanel implements ListEvent
      * JListPanel's model.
      */
     private class ListPanelLayoutManager implements LayoutManager2 {
+        @Override
         public void layoutContainer(Container target) {
             final Insets insets = target.getInsets();
             final int totalWidth = target.getWidth() - insets.left - insets.right;
@@ -257,6 +261,7 @@ public class JListPanel<C extends Component> extends JPanel implements ListEvent
             }
         }
 
+        @Override
         public Dimension minimumLayoutSize(Container parent) {
             int x = 0, y = 0;
 
@@ -273,6 +278,7 @@ public class JListPanel<C extends Component> extends JPanel implements ListEvent
             return new Dimension(x, y);
         }
 
+        @Override
         public Dimension maximumLayoutSize(Container parent) {
             int x = 0, y = 0;
 
@@ -289,6 +295,7 @@ public class JListPanel<C extends Component> extends JPanel implements ListEvent
             return new Dimension(x, y);
         }
 
+        @Override
         public Dimension preferredLayoutSize(Container parent) {
             int x = 0, y = 0;
 
@@ -305,11 +312,17 @@ public class JListPanel<C extends Component> extends JPanel implements ListEvent
             return new Dimension(x, y);
         }
 
+        @Override
         public void addLayoutComponent(Component comp, Object constraints) { }
+        @Override
         public void removeLayoutComponent(Component comp) { }
+        @Override
         public void invalidateLayout(Container target) { }
+        @Override
         public float getLayoutAlignmentX(Container target) { throw new UnsupportedOperationException(); }
+        @Override
         public float getLayoutAlignmentY(Container target) { throw new UnsupportedOperationException(); }
+        @Override
         public void addLayoutComponent(String name, Component comp) { throw new UnsupportedOperationException(); }
     }
 }

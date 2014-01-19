@@ -25,11 +25,13 @@ public final class SerializedReadWriteLock implements ReadWriteLock, Serializabl
     private static final long serialVersionUID = -8627867501684280198L;
 
     /** {@inheritDoc} */
+    @Override
     public Lock readLock() {
         throw new UnsupportedOperationException("SerializedReadWriteLock is only used for serialization");
     }
 
     /** {@inheritDoc} */
+    @Override
     public Lock writeLock() {
         throw new UnsupportedOperationException("SerializedReadWriteLock is only used for serialization");
     }

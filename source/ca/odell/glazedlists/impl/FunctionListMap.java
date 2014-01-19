@@ -91,6 +91,7 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
     }
 
     /** @inheritDoc */
+    @Override
     public void dispose() {
         valueList.removeListEventListener(this);
 
@@ -101,31 +102,37 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
     }
 
     /** @inheritDoc */
+    @Override
     public int size() {
         return delegate.size();
     }
 
     /** @inheritDoc */
+    @Override
     public boolean isEmpty() {
         return delegate.isEmpty();
     }
 
     /** @inheritDoc */
+    @Override
     public boolean containsKey(Object key) {
         return delegate.containsKey(key);
     }
 
     /** @inheritDoc */
+    @Override
     public boolean containsValue(Object value) {
         return delegate.containsValue(value);
     }
 
     /** @inheritDoc */
+    @Override
     public V get(Object key) {
         return delegate.get(key);
     }
 
     /** @inheritDoc */
+    @Override
     public V put(K key, V value) {
         checkKeyValueAgreement(key, value);
 
@@ -151,6 +158,7 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
     }
 
     /** @inheritDoc */
+    @Override
     public void putAll(Map<? extends K, ? extends V> m) {
         // verify the contents of the given Map and ensure all key/value pairs agree with the keyFunction
         for (Iterator<? extends Entry<? extends K, ? extends V>> i = m.entrySet().iterator(); i.hasNext();) {
@@ -182,11 +190,13 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
     }
 
     /** @inheritDoc */
+    @Override
     public void clear() {
         valueList.clear();
     }
 
     /** @inheritDoc */
+    @Override
     public V remove(Object key) {
         if (!containsKey(key))
             return null;
@@ -197,11 +207,13 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
     }
 
     /** @inheritDoc */
+    @Override
     public Collection<V> values() {
         return valueList;
     }
 
     /** @inheritDoc */
+    @Override
     public Set<K> keySet() {
         if (this.keySet == null)
             this.keySet = new KeySet();
@@ -210,6 +222,7 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
     }
 
     /** @inheritDoc */
+    @Override
     public Set<Entry<K, V>> entrySet() {
         if (this.entrySet == null)
             this.entrySet = new EntrySet();
@@ -250,6 +263,7 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
      *
      * @param listChanges an event describing the changes in the FunctionList
      */
+    @Override
     public void listChanged(ListEvent<V> listChanges) {
         int offset = 0;
 
@@ -392,6 +406,7 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
         }
 
         /** {@inheritDoc} */
+        @Override
         public boolean hasNext() {
             return keyIter.hasNext();
         }
@@ -399,12 +414,14 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
         /**
          * Returns a new {@link Map.Entry} each time this method is called.
          */
+        @Override
         public Entry<K, V> next() {
             final K key = keyIter.next();
             return new MapEntry(key, get(key));
         }
 
         /** {@inheritDoc} */
+        @Override
         public void remove() {
             final int index = keyIter.previousIndex();
             if (index == -1) throw new IllegalStateException("Cannot remove() without a prior call to next()");
@@ -438,16 +455,19 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
         }
 
         /** {@inheritDoc} */
+        @Override
         public K getKey() {
             return key;
         }
 
         /** {@inheritDoc} */
+        @Override
         public V getValue() {
             return value;
         }
 
         /** {@inheritDoc} */
+        @Override
         public V setValue(V newValue) {
             // ensure the newValue element agrees with the key of this Entry
             checkKeyValueAgreement(key, newValue);
@@ -544,16 +564,19 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
         }
 
         /** {@inheritDoc} */
+        @Override
         public boolean hasNext() {
             return keyIter.hasNext();
         }
 
         /** {@inheritDoc} */
+        @Override
         public K next() {
             return keyIter.next();
         }
 
         /** {@inheritDoc} */
+        @Override
         public void remove() {
             final int index = keyIter.previousIndex();
             if (index == -1) throw new IllegalStateException("Cannot remove() without a prior call to next()");

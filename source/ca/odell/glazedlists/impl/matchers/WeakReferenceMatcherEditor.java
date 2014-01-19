@@ -63,6 +63,7 @@ public final class WeakReferenceMatcherEditor<E> implements MatcherEditor<E>, Ma
      *
      * @return a non-null {@link Matcher}
      */
+    @Override
     public Matcher<E> getMatcher() {
         return this.source.getMatcher();
     }
@@ -74,11 +75,13 @@ public final class WeakReferenceMatcherEditor<E> implements MatcherEditor<E>, Ma
      * via hard references, and will be cleaned up the next time a new
      * {@link MatcherEditor.Event} is fired.
      */
+    @Override
     public void addMatcherEditorListener(Listener<E> listener) {
         this.listenerList.add(Listener.class, new WeakMatcherEditorListener<E>(this, listener));
     }
 
     /** {@inheritDoc} */
+    @Override
     public void removeMatcherEditorListener(Listener<E> listener) {
         final Object[] listeners = this.listenerList.getListenerList();
 
@@ -106,6 +109,7 @@ public final class WeakReferenceMatcherEditor<E> implements MatcherEditor<E>, Ma
      * @param matcherEvent a MatcherEditor.Event describing the change in the
      *      delegate Matcher produced by the MatcherEditor
      */
+    @Override
     public void changedMatcher(Event<E> matcherEvent) {
         final Object[] listeners = this.listenerList.getListenerList();
         for (int i = listeners.length - 2; i >= 0; i -= 2)
@@ -159,6 +163,7 @@ public final class WeakReferenceMatcherEditor<E> implements MatcherEditor<E>, Ma
          * @param matcherEvent a MatcherEditor.Event describing the change in the
          *      Matcher produced by the MatcherEditor
          */
+        @Override
         public void changedMatcher(Event<E> matcherEvent) {
             // fetch the underlying MatcherEditor.Listener
             final Listener<E> matcherEditorListener = this.weakListener.get();

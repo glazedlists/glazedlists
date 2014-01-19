@@ -49,6 +49,7 @@ public class BoyerMooreCaseInsensitiveTextSearchStrategy extends AbstractTextSea
      *
      * @param subtext the String to locate in {@link #indexOf(String)}
      */
+    @Override
     public void setSubtext(String subtext) {
         // record the length of the subtext
         this.subtextLength = subtext.length();
@@ -76,6 +77,7 @@ public class BoyerMooreCaseInsensitiveTextSearchStrategy extends AbstractTextSea
     }
 
     /** {@inheritDoc} */
+    @Override
     public int indexOf(String text) {
         // ensure we are in a state to search the text
         if(this.subtextCharsUpper == null) {

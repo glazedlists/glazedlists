@@ -24,9 +24,11 @@ public class NoFocusRenderer implements TableCellRenderer, ListCellRenderer {
         this.delegateListCellRenderer = delegate;
     }
 
+    @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         return delegateTableCellRenderer.getTableCellRendererComponent(table, value, isSelected, false, row, column);
     }
+    @Override
     public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean hasFocus) {
         return delegateListCellRenderer.getListCellRendererComponent(list, value, index, isSelected, false);
     }

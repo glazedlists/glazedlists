@@ -177,18 +177,21 @@ public class FunctionListTest {
     }
 
     private static class StringToInteger implements FunctionList.Function<String,Integer> {
+        @Override
         public Integer evaluate(String value) {
             return new Integer(value);
         }
     }
 
     private static class IntegerToString implements FunctionList.Function<Integer,String> {
+        @Override
         public String evaluate(Integer value) {
             return value.toString();
         }
     }
 
     private static class IntegerToCardinalityString implements FunctionList.Function<Integer,String> {
+        @Override
         public String evaluate(Integer value) {
             switch (value.intValue()) {
                 case 0: return "0th";
@@ -201,6 +204,7 @@ public class FunctionListTest {
     }
 
     private static class CardinalityStringToInteger implements FunctionList.Function<String,Integer> {
+        @Override
         public Integer evaluate(String value) {
             if ("0th" == value) return ZERO;
             if ("1st" == value) return ONE;
@@ -215,11 +219,13 @@ public class FunctionListTest {
         private int reevaluateCount = 0;
         private int disposeCount = 0;
 
+        @Override
         public String reevaluate(Integer value, String oldValue) {
             this.reevaluateCount++;
             return this.evaluate(value);
         }
 
+        @Override
         public void dispose(Integer sourceValue, String transformedValue) {
             this.disposeCount++;
         }

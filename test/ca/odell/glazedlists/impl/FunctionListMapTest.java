@@ -830,12 +830,14 @@ public class FunctionListMapTest {
     }
 
     private static final class FirstLetterComparator implements Comparator<String> {
+        @Override
         public int compare(String o1, String o2) {
             return o1.charAt(0) - o2.charAt(0);
         }
     }
 
     private static final class FirstLetterFunction implements FunctionList.Function<String, String> {
+        @Override
         public String evaluate(String sourceValue) {
             return String.valueOf(sourceValue.charAt(0));
         }

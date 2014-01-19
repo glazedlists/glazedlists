@@ -69,6 +69,7 @@ class SelectionManager<E> {
     private final class SelectionListListener implements ListSelection.Listener {
 
         /** {@inheritDoc} */
+        @Override
         public void selectionChanged(int changeStart, int changeEnd) {
             // don't repaint selection on the Selectable widget if the
             // widget already knows about the selection change
@@ -116,6 +117,7 @@ class SelectionManager<E> {
         /**
          * Responds to a double-click selection.
          */
+        @Override
         public void widgetDefaultSelected(SelectionEvent event) {
             widgetSelected(event);
         }
@@ -123,6 +125,7 @@ class SelectionManager<E> {
         /**
          * Responds to a single click or arrow key based selection.
          */
+        @Override
         public void widgetSelected(SelectionEvent event) {
             // don't set selection on the SelectionList if it has already been set
             if(!selectionInProgress) {
@@ -147,6 +150,7 @@ class SelectionManager<E> {
         /**
          * Responds to a double-click selection.
          */
+        @Override
         public void widgetDefaultSelected(SelectionEvent event) {
             widgetSelected(event);
         }
@@ -154,6 +158,7 @@ class SelectionManager<E> {
         /**
          * Responds to a single click or arrow key based selection.
          */
+        @Override
         public void widgetSelected(SelectionEvent event) {
             // don't set selection on the SelectionList if it has already been set
             if(!selectionInProgress) {

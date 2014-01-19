@@ -150,6 +150,7 @@ public final class Processors {
             }
         }
 
+        @Override
         public T evaluate() {
             try {
                 return constructor.newInstance(args);
@@ -164,6 +165,7 @@ public final class Processors {
     }
 
     private static class AddObjectToTargetListProcessor<T> implements PopProcessor<EventList<T>,T> {
+        @Override
         public void process(EventList<T> baseObject, T value) {
             // add the object to the targetList in a thread-safe manner
             baseObject.getReadWriteLock().writeLock().lock();
@@ -186,6 +188,7 @@ public final class Processors {
             this.converter = converter;
         }
 
+        @Override
         public void process(T baseObject, O value) {
             // if a converter has been specified, run the value through the converter
             C convertedValue = converter.convert(value);
@@ -210,6 +213,7 @@ public final class Processors {
         }
 
 
+        @Override
         public void process(T baseObject, V value) {
             // if a converter has been specified, run the value through the converter
             value = converter.convert(value);

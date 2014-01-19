@@ -27,6 +27,7 @@ public class IndeterminateToggler implements Runnable, Throbber {
         this.staticIcon = staticIcon;
     }
 
+    @Override
     public synchronized void setOn() {
         if (!on) {
             on = true;
@@ -34,6 +35,7 @@ public class IndeterminateToggler implements Runnable, Throbber {
         }
     }
 
+    @Override
     public synchronized void setOff() {
         if (on) {
             on = false;
@@ -41,6 +43,7 @@ public class IndeterminateToggler implements Runnable, Throbber {
         }
     }
 
+    @Override
     public synchronized void run() {
         throbber.setIcon(on ? activeIcon : staticIcon);
     }

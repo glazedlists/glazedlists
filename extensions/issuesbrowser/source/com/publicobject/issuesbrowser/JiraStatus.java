@@ -52,6 +52,7 @@ public enum JiraStatus implements Status {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getId() {
         return getName();
     }
@@ -59,6 +60,7 @@ public enum JiraStatus implements Status {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -66,6 +68,7 @@ public enum JiraStatus implements Status {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Color getColor() {
         return color;
     }
@@ -73,6 +76,7 @@ public enum JiraStatus implements Status {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isActive() {
         return active;
     }

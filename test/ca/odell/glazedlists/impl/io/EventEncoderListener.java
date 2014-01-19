@@ -34,6 +34,7 @@ public class EventEncoderListener implements ListEventListener {
     /**
      * Handles a change by adding the encoding of the change.
      */
+    @Override
     public void listChanged(ListEvent listChanges) {
         try {
             Bufferlo encoding = ListEventToBytes.toBytes(listChanges, byteCoder);

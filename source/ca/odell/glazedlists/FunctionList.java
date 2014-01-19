@@ -404,6 +404,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
         /**
          * Defers to the delegate.
          */
+        @Override
         public B evaluate(A sourceValue) {
             return delegate.evaluate(sourceValue);
         }
@@ -411,10 +412,12 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
         /**
          * Defers to the delegate's {@link Function#evaluate} method.
          */
+        @Override
         public B reevaluate(A sourceValue, B transformedValue) {
             return evaluate(sourceValue);
         }
 
+        @Override
         public void dispose(A sourceValue, B transformedValue) {
             // do nothing
         }

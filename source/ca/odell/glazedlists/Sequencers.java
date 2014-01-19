@@ -45,6 +45,7 @@ public final class Sequencers {
          *   <li> previous(January 1, 2006 0:00:00.000) returns December 1, 2005 0:00:00.000
          * </ul>
          */
+        @Override
         public Date previous(Date date) {
             if (date == null)
                 throw new IllegalArgumentException("date may not be null");
@@ -68,6 +69,7 @@ public final class Sequencers {
          *   <li> next(January 1, 2006 0:00:00.000) returns February 1, 2006 0:00:00.000
          * </ul>
          */
+        @Override
         public Date next(Date date) {
             if (date == null)
                 throw new IllegalArgumentException("date may not be null");

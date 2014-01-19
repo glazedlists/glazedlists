@@ -331,6 +331,7 @@ public abstract class ListEvent<E> extends EventObject {
      * yet fit for human consumption. Hopefully the full implementation is
      * complete for Glazed Lists 2.0.
      */
+    @Deprecated
     public abstract E getOldValue();
 
     /**
@@ -341,6 +342,7 @@ public abstract class ListEvent<E> extends EventObject {
      * yet fit for human consumption. Hopefully the full implementation is
      * complete for Glazed Lists 2.0.
      */
+    @Deprecated
     public abstract E getNewValue();
 
     /**
@@ -350,6 +352,7 @@ public abstract class ListEvent<E> extends EventObject {
      *      how list events are stored internally, and this implementation has
      *      since changed.
      */
+    @Deprecated
     public abstract int getBlocksRemaining();
 
     /**

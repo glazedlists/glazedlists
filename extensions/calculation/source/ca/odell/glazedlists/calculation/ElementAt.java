@@ -36,11 +36,13 @@ final class ElementAt<E> extends AbstractCalculation<E> implements ListEventList
     }
 
     /** @inheritDoc */
+    @Override
     public void dispose() {
         source.removeListEventListener(this);
     }
 
     /** @inheritDoc */
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
         final E oldValue = getValue();
         setValue(source.size() > index ? source.get(index) : defaultValue);

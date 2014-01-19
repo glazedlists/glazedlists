@@ -21,6 +21,7 @@ public final class ComparableComparator implements Comparator<Comparable> {
      * Compares object alpha to object beta by casting object one
      * to Comparable, and calling its compareTo method.
      */
+    @Override
     public int compare(Comparable alpha, Comparable beta) {
         // compare using Comparable
         if(alpha != null && beta != null) {

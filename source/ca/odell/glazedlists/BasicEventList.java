@@ -112,6 +112,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
      *     the required events being fired. This constructor has been replaced by
      *     the factory method {@link GlazedLists#eventList(Collection)}.
      */
+    @Deprecated
     public BasicEventList(List<E> list) {
         super(null);
         this.data = list;
@@ -271,6 +272,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
     /**
      * This method does nothing. It is not necessary to dispose a BasicEventList.
      */
+    @Override
     public void dispose() { }
 
     /**

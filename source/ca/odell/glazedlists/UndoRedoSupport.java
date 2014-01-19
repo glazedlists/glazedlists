@@ -140,6 +140,7 @@ public final class UndoRedoSupport<E> {
      * {@link Listener}s.
      */
     private class TXSourceListener implements ListEventListener<E> {
+        @Override
         public void listChanged(ListEvent<E> listChanges) {
             // if an undo or redo caused this ListEvent, it is not an undoable edit
             if (ignoreListEvent > 0)
@@ -230,6 +231,7 @@ public final class UndoRedoSupport<E> {
         /** Initially the Edit can be undone but not redone. */
         protected boolean canUndo = true;
 
+        @Override
         public void undo() {
             // validate that we can proceed with the undo
             if (!canUndo())
@@ -245,6 +247,7 @@ public final class UndoRedoSupport<E> {
             canUndo = false;
         }
 
+        @Override
         public void redo() {
             // validate that we can proceed with the redo
             if (!canRedo())
@@ -263,7 +266,9 @@ public final class UndoRedoSupport<E> {
         protected abstract void undoImpl();
         protected abstract void redoImpl();
 
+        @Override
         public final boolean canUndo() { return canUndo; }
+        @Override
         public final boolean canRedo() { return !canUndo; }
     }
 

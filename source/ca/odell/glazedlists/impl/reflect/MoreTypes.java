@@ -299,14 +299,17 @@ class MoreTypes {
             }
         }
 
+        @Override
         public Type[] getActualTypeArguments() {
             return typeArguments.clone();
         }
 
+        @Override
         public Type getRawType() {
             return rawType;
         }
 
+        @Override
         public Type getOwnerType() {
             return ownerType;
         }

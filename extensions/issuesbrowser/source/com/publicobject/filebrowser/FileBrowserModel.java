@@ -36,6 +36,7 @@ public class FileBrowserModel implements Runnable {
         this.root = new Entry(new File(rootString), null);
     }
 
+    @Override
     public void run() {
         jobQueue.invokeLater(new LoadChildren(root, files));
         jobQueue.run();
@@ -51,6 +52,7 @@ public class FileBrowserModel implements Runnable {
             this.sink = sink;
         }
 
+        @Override
         public void run() {
             File[] children = parent.getFile().listFiles();
             for(int f = 0; f < children.length; f++) {

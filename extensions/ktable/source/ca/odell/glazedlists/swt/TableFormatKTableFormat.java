@@ -36,31 +36,37 @@ public class TableFormatKTableFormat extends AbstractKTableFormat {
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getColumnName(int column) {
         return tableFormat.getColumnName(column);
     }
 
     /** {@inheritDoc} */
+    @Override
     public Object getColumnValue(Object baseObject, int column) {
         return tableFormat.getColumnValue(baseObject, column);
     }
 
     /** {@inheritDoc} */
+    @Override
     public Object getColumnHeaderValue(int headerRow, int column) {
         return tableFormat.getColumnName(column);
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getColumnCount() {
         return tableFormat.getColumnCount();
     }
 
     /** {@inheritDoc} */
+    @Override
     public KTableCellEditor getColumnEditor(Object baseObject, int column) {
         return null;
     }
 
     /** {@inheritDoc} */
+    @Override
     public KTableCellRenderer getColumnRenderer(Object baseObject, int column) {
         return KTableCellRenderer.defaultRenderer;
     }

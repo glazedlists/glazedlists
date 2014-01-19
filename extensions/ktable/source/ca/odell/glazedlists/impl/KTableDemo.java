@@ -66,10 +66,12 @@ public class KTableDemo {
     }
 
     private static class SimpleThrobber implements Throbber {
+        @Override
         public void setOn() {
             System.out.println("Throb on");
         }
 
+        @Override
         public void setOff() {
             System.out.println("Throb off");
         }
@@ -77,10 +79,12 @@ public class KTableDemo {
 
     private static final class IssuesTableFormat implements TableFormat {
 
+        @Override
         public int getColumnCount() {
             return 6;
         }
 
+        @Override
         public String getColumnName(int column) {
             switch(column) {
                 case 0: return "ID";
@@ -93,6 +97,7 @@ public class KTableDemo {
             throw new IllegalStateException();
         }
 
+        @Override
         public Object getColumnValue(Object baseObject, int column) {
             Issue issue = (Issue)baseObject;
             switch(column) {

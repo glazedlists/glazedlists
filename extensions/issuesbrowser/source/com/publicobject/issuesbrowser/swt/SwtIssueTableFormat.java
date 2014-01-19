@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.TableColumn;
 public class SwtIssueTableFormat extends IssueTableFormat implements TableColumnConfigurer {
 
     /** {@inheritedDoc} */
+    @Override
     public void configure(TableColumn tableColumn, int column) {
         switch (column) {
             case 0:

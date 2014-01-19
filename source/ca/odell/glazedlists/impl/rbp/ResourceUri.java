@@ -133,6 +133,7 @@ class ResourceUri implements Comparable {
     /**
      * Compares two resources.
      */
+    @Override
     public int compareTo(Object other) {
         if(other == null) throw new NullPointerException();
         ResourceUri otherUri = (ResourceUri)other;

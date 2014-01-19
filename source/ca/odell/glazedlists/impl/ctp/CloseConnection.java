@@ -36,6 +36,7 @@ class CloseConnection implements Runnable {
     /**
      * Runs this task.
      */
+    @Override
     public void run() {        
         // if this is already closed, we're done
         if(connection.state == CTPConnection.STATE_CLOSED_PERMANENTLY) return;

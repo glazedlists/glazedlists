@@ -112,6 +112,7 @@ public class BeanTableFormat<E> implements WritableTableFormat<E>, AdvancedTable
     /**
      * The number of columns to display.
      */
+    @Override
     public int getColumnCount() {
         return columnLabels.length;
     }
@@ -119,6 +120,7 @@ public class BeanTableFormat<E> implements WritableTableFormat<E>, AdvancedTable
     /**
      * Gets the title of the specified column.
      */
+    @Override
     public String getColumnName(int column) {
         return columnLabels[column];
     }
@@ -129,6 +131,7 @@ public class BeanTableFormat<E> implements WritableTableFormat<E>, AdvancedTable
      * column. If you have defined a custom renderer, you may choose to return
      * simply the baseObject.
      */
+    @Override
     public Object getColumnValue(E baseObject, int column) {
         if(baseObject == null) return null;
 
@@ -152,6 +155,7 @@ public class BeanTableFormat<E> implements WritableTableFormat<E>, AdvancedTable
      * @return true if the object and column are editable, false otherwise.
      * @since 2004-August-27, as a replacement for isColumnEditable(int).
      */
+    @Override
     public boolean isEditable(E baseObject, int column) {
         return editable[column];
     }
@@ -169,6 +173,7 @@ public class BeanTableFormat<E> implements WritableTableFormat<E>, AdvancedTable
      *      If not null, the EventTableModel will set() this revised value in
      *      the list and overwrite the previous value.
      */
+    @Override
     public E setColumnValue(E baseObject, Object editedValue, int column) {
         if(baseObject == null) return null;
 
@@ -188,6 +193,7 @@ public class BeanTableFormat<E> implements WritableTableFormat<E>, AdvancedTable
     /**
      * Get the class of the specified column.
      */
+    @Override
     public Class getColumnClass(int column) {
         return classes[column];
     }
@@ -195,6 +201,7 @@ public class BeanTableFormat<E> implements WritableTableFormat<E>, AdvancedTable
     /**
      * Get the comparator for the specified column.
      */
+    @Override
     public Comparator getColumnComparator(int column) {
         return comparators[column];
     }

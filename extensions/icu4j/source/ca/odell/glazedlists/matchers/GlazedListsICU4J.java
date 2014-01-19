@@ -17,6 +17,7 @@ public class GlazedListsICU4J {
     public static final Object UNICODE_TEXT_SEARCH_STRATEGY = new UnicodeStrategyFactory();
     // this would be an anonymous class if declawer supported them!
     private static class UnicodeStrategyFactory implements TextSearchStrategy.Factory {
+        @Override
         public TextSearchStrategy create(int mode, String filter) {
             return new UnicodeCaseInsensitiveTextSearchStrategy(mode);
         }

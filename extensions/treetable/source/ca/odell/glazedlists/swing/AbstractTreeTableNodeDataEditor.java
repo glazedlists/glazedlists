@@ -13,6 +13,7 @@ public abstract class AbstractTreeTableNodeDataEditor implements TreeTableNodeDa
     private TreeNodeData treeNodeData;
 
     /** @inheritDoc */
+    @Override
     public final void setTreeNodeData(TreeNodeData treeNodeData) {
         this.treeNodeData = treeNodeData;
     }

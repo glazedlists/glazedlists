@@ -235,22 +235,27 @@ public class DiffTest {
             this.beta = beta;
         }
 
+        @Override
         public int getAlphaLength() {
             return alpha.length();
         }
 
+        @Override
         public char alphaAt(int index) {
             return alpha.charAt(index);
         }
 
+        @Override
         public char betaAt(int index) {
             return beta.charAt(index);
         }
 
+        @Override
         public int getBetaLength() {
             return beta.length();
         }
 
+        @Override
         public boolean matchPair(int alphaIndex, int betaIndex) {
             return alpha.charAt(alphaIndex) == beta.charAt(betaIndex);
         }
@@ -268,6 +273,7 @@ public class DiffTest {
         /**
          * When an event occurs, count that.
          */
+        @Override
         public void listChanged(ListEvent<E> listChanges) {
             int changesForEvent = 0;
             while(listChanges.next()) {

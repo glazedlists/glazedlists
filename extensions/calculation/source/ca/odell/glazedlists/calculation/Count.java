@@ -28,11 +28,13 @@ final class Count extends AbstractCalculation<Integer> implements ListEventListe
     }
 
     /** @inheritDoc */
+    @Override
     public void dispose() {
         this.source.removeListEventListener(this);
     }
 
     /** @inheritDoc */
+    @Override
     public void listChanged(ListEvent listChanges) {
         final Integer oldValue = getValue();
         setValue(new Integer(listChanges.getSourceList().size()));

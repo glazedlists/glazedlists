@@ -13,6 +13,7 @@ import java.util.Comparator;
  */
 public final class AgedNodeComparator implements Comparator {
 
+    @Override
     public final int compare(Object o1, Object o2) {
         AgedNode node1 = (AgedNode)o1;
         AgedNode node2 = (AgedNode)o2;

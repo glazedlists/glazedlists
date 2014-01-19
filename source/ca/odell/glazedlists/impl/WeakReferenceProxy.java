@@ -72,6 +72,7 @@ public final class WeakReferenceProxy<E> implements ListEventListener<E> {
      * Accepts notification for the changes and forwards them to the proxy
      * target if it has not yet been garbage collected.
      */
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
         // if this listener has already been cleaned up, ignore ListEvents
         if (source == null) return;

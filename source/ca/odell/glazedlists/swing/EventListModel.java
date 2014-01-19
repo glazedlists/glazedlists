@@ -34,6 +34,7 @@ import javax.swing.SwingUtilities;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  * @author Holger Brands
  */
+@Deprecated
 public class EventListModel<E> extends DefaultEventListModel<E> {
     /** indicates, if source list has to be disposed */
     private boolean disposeSource;

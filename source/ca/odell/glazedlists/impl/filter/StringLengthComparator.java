@@ -12,6 +12,7 @@ import java.util.Comparator;
  */
 public final class StringLengthComparator implements Comparator<String> {
     /** {@inheritDoc} */
+    @Override
     public int compare(String a, String b) {
         return b.length() - a.length();
     }

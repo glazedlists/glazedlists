@@ -68,6 +68,7 @@ public final class PropertyEventNameMatcher implements Matcher<PropertyChangeEve
     }
     
     /** {@inheritDoc} */
+    @Override
     public boolean matches(PropertyChangeEvent event) {
         final boolean containsProperty = propertyNames.contains(event.getPropertyName());
         return matchPropertyNames ? containsProperty : !containsProperty;

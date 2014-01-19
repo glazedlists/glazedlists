@@ -503,6 +503,7 @@ public class TextMatcherTest {
      * all of the filterator's object)
      */
     private static class IntegerTextFilterator implements TextFilterator<Integer> {
+        @Override
         public void getFilterStrings(List<String> baseList, Integer element) {
             ((List) baseList).add(element);
         }

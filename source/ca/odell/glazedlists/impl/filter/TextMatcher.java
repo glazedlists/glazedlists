@@ -106,6 +106,7 @@ public class TextMatcher<E> implements Matcher<E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean matches(E element) {
         return TextMatchers.matches(filterStrings, filterator, searchTerms, filterStrategies, element);
     }

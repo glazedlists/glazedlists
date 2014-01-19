@@ -155,6 +155,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
      *
      * @throws IndexOutOfBoundsException if <code>row</code> is out of bounds
      */
+    @Override
     public Comparable getRowKey(int row) {
         return rowKeys.get(row);
     }
@@ -165,6 +166,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
      * @param key the row key
      * @return the row index, or <code>-1</code> if the key is unrecognized
      */
+    @Override
     public int getRowIndex(Comparable key) {
         return rowKeys.indexOf(key);
     }
@@ -172,6 +174,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
     /**
      * Returns the row keys.
      */
+    @Override
     public List getRowKeys() {
         return rowKeys;
     }
@@ -179,6 +182,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
     /**
      * Returns the number of rows in the table.
      */
+    @Override
     public int getRowCount() {
         return rowKeys.size();
     }
@@ -191,6 +195,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
      *
      * @throws IndexOutOfBoundsException if <code>column</code> is out of bounds
      */
+    @Override
     public Comparable getColumnKey(int column) {
         return columnKeys.get(column);
     }
@@ -201,6 +206,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
      * @param key the column key
      * @return the column index, or <code>-1</code> if the key is unrecognized
      */
+    @Override
     public int getColumnIndex(Comparable key) {
         return columnKeys.indexOf(key);
     }
@@ -208,6 +214,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
     /**
      * Returns the column keys.
      */
+    @Override
     public List getColumnKeys() {
         return columnKeys;
     }
@@ -215,6 +222,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
     /**
      * Returns the number of columns in the table.
      */
+    @Override
     public int getColumnCount() {
         return columnKeys.size();
     }
@@ -229,6 +237,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
      * @throws IndexOutOfBoundsException if the <code>row</code>
      *      or <code>column</code> is out of bounds
      */
+    @Override
     public Number getValue(int row, int column) {
         return getValue(getRowKey(row), getColumnKey(column));
     }
@@ -242,6 +251,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
      *
      * @throws UnknownKeyException if either key is not recognized
      */
+    @Override
     public abstract Number getValue(Comparable rowKey, Comparable columnKey);
 
     /**
@@ -344,6 +354,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
      *
      * This listener also rebroadcasts ListEvents as DatasetChangeEvents.
      */
+    @Override
     public void listChanged(ListEvent<ValueSegment<C,R>> listChanges) {
         // speed up the case when listChanges describes a total clearing of
         // the data structures, (which occurs when switching between projects)

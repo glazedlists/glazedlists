@@ -9,14 +9,17 @@ import ca.odell.glazedlists.gui.TableFormat;
  */
 public class StringTableFormat implements TableFormat<String> {
 
+    @Override
     public int getColumnCount() {
         return 1;
     }
 
+    @Override
     public String getColumnName(int column) {
         return "Value";
     }
 
+    @Override
     public Object getColumnValue(String baseObject, int column) {
         return baseObject;
     }

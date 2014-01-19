@@ -16,10 +16,12 @@ import java.util.Date;
  * @author James Lemieux
  */
 public class ItemTableFormat implements WritableTableFormat<Item>, AdvancedTableFormat<Item> {
+    @Override
     public int getColumnCount() {
         return 6;
     }
 
+    @Override
     public String getColumnName(int column) {
         switch (column) {
             case 0: return "ASIN";
@@ -32,6 +34,7 @@ public class ItemTableFormat implements WritableTableFormat<Item>, AdvancedTable
         }
     }
 
+    @Override
     public Class getColumnClass(int column) {
         switch (column) {
             case 3: return AudienceRating.class;
@@ -40,14 +43,17 @@ public class ItemTableFormat implements WritableTableFormat<Item>, AdvancedTable
         }
     }
 
+    @Override
     public Comparator getColumnComparator(int column) {
         return GlazedLists.comparableComparator();
     }
 
+    @Override
     public boolean isEditable(Item item, int column) {
         return column == 2;
     }
 
+    @Override
     public Item setColumnValue(Item item, Object editedValue, int column) {
         switch (column) {
             case 2: item.getItemAttributes().setTitle((String) editedValue); break;
@@ -57,6 +63,7 @@ public class ItemTableFormat implements WritableTableFormat<Item>, AdvancedTable
         return item;
     }
 
+    @Override
     public Object getColumnValue(Item item, int column) {
         if(item == null) return null;
 

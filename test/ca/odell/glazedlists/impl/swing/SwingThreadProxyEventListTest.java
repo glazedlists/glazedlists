@@ -53,6 +53,7 @@ public class SwingThreadProxyEventListTest {
         private boolean lastCallbackThreadWasEDT = true;
         private boolean throwException = false;
 
+        @Override
         public void listChanged(ListEvent<String> listChanges) {
             callbackCount++;
             lastCallbackThreadWasEDT = SwingUtilities.isEventDispatchThread();

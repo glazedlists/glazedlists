@@ -79,6 +79,7 @@ public final class ExceptionHandlerFactory {
             super(parentComponent);
         }
 
+        @Override
         public boolean recognize(Exception e) {
             return e instanceof UnknownHostException;
         }
@@ -94,6 +95,7 @@ public final class ExceptionHandlerFactory {
             super(parentComponent);
         }
 
+        @Override
         public boolean recognize(Exception e) {
             return e instanceof ConnectException;
         }
@@ -111,10 +113,12 @@ public final class ExceptionHandlerFactory {
             this.parentComponent = parentComponent;
         }
 
+        @Override
         public boolean recognize(Exception e) {
             return e instanceof NoRouteToHostException;
         }
 
+        @Override
         public void handle(Exception e) {
             final String title = "Unable to find a route to the Host";
 
@@ -152,10 +156,12 @@ public final class ExceptionHandlerFactory {
             this.parentComponent = parentComponent;
         }
 
+        @Override
         public boolean recognize(Exception e) {
             return e instanceof AccessControlException && messageMatcher.reset(e.getMessage()).matches();
         }
 
+        @Override
         public void handle(Exception e) {
             final String title = "Unable to connect to Host";
 
@@ -194,10 +200,12 @@ public final class ExceptionHandlerFactory {
             this.parentComponent = parentComponent;
         }
 
+        @Override
         public boolean recognize(Exception e) {
             return e instanceof IOException && messageMatcher.reset(e.getMessage()).matches();
         }
 
+        @Override
         public void handle(Exception e) {
             final String title = "Internal Server Error";
 
@@ -223,6 +231,7 @@ public final class ExceptionHandlerFactory {
             this.parentComponent = parentComponent;
         }
 
+        @Override
         public void handle(Exception e) {
             final String title = "Unable to connect to the Internet";
 
@@ -255,6 +264,7 @@ public final class ExceptionHandlerFactory {
             this.message = message;
         }
 
+        @Override
         public void run() {
             JOptionPane.showMessageDialog(parentComponent, message, title, JOptionPane.WARNING_MESSAGE);
         }

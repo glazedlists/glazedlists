@@ -15,6 +15,7 @@ import java.util.List;
  */
 public class ItemTextFilterator implements TextFilterator<Item> {
 
+    @Override
     public void getFilterStrings(List<String> baseList, Item element) {
         final ItemAttributes attribs = element.getItemAttributes();
         final ListPrice listPrice = attribs.getListPrice();

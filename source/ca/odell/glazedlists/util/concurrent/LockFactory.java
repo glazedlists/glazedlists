@@ -51,10 +51,12 @@ class DelegateLockFactory implements LockFactory {
         }
     }
 
+    @Override
     public ReadWriteLock createReadWriteLock() {
         return delegate.createReadWriteLock();
     }
 
+    @Override
     public Lock createLock() {
         return delegate.createLock();
     }

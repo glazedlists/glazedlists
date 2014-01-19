@@ -219,6 +219,7 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> impl
          * hack for the time being. Hopefully later we can refine this so that a
          * new event is created with these changes properly.
          */
+        @Override
         public void run() {
             getReadWriteLock().writeLock().lock();
             try {
@@ -238,6 +239,7 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> impl
         /**
          * Update local state as a consequence of the change event.
          */
+        @Override
         public void listChanged(ListEvent<E> listChanges) {
             localCache = applyChangeToCache(source, listChanges, localCache);
         }

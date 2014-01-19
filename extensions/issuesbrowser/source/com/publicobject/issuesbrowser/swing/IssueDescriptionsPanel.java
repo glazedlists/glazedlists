@@ -31,6 +31,7 @@ class IssueDescriptionsPanel {
     private JTextPane descriptionsTextPane = new JTextPane();
 
     private final HyperlinkListener hyperLinkListener = new HyperlinkListener() {
+        @Override
         public void hyperlinkUpdate(HyperlinkEvent event) {
             if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
                 openURLIfPossible(event.getURL());

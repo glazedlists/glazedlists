@@ -31,6 +31,7 @@ abstract class AbstractTextSearchStrategy implements TextSearchStrategy {
      * plugging in arbitrary <code>characterMap</code> strategies, the
      * "fuzziness" of text matches can be controlled.
      */
+    @Override
     public void setCharacterMap(char[] characterMap) {
         this.characterMap = characterMap;
     }

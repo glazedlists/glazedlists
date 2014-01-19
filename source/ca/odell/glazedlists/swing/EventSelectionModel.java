@@ -49,6 +49,7 @@ import javax.swing.event.ListSelectionListener;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
+@Deprecated
 public final class EventSelectionModel<E> implements AdvancedListSelectionModel<E> {
 
 	/** The DefaultEventSelectionModel this delegates to. */
@@ -90,14 +91,16 @@ public final class EventSelectionModel<E> implements AdvancedListSelectionModel<
      * advised not to <code>for()</code> through the changed range without
      * also verifying that each row is still in the table.
      */
-	public void addListSelectionListener(ListSelectionListener listener) {
+	@Override
+    public void addListSelectionListener(ListSelectionListener listener) {
 		delegateSelectionModel.addListSelectionListener(listener);
 	}
 
     /**
      * Change the selection to be the set union of the current selection  and the indices between index0 and index1 inclusive
      */
-	public void addSelectionInterval(int index0, int index1) {
+	@Override
+    public void addSelectionInterval(int index0, int index1) {
 		delegateSelectionModel.addSelectionInterval(index0, index1);
 	}
 
@@ -107,14 +110,16 @@ public final class EventSelectionModel<E> implements AdvancedListSelectionModel<
      * @param validSelectionMatcher returns <tt>true</tt> if a source element
      *      can be selected; <tt>false</tt> otherwise
      */
-	public void addValidSelectionMatcher(Matcher<E> validSelectionMatcher) {
+	@Override
+    public void addValidSelectionMatcher(Matcher<E> validSelectionMatcher) {
 		delegateSelectionModel.addValidSelectionMatcher(validSelectionMatcher);
 	}
 
     /**
      * Change the selection to the empty set.
      */
-	public void clearSelection() {
+	@Override
+    public void clearSelection() {
 		delegateSelectionModel.clearSelection();
 	}
 
@@ -132,7 +137,8 @@ public final class EventSelectionModel<E> implements AdvancedListSelectionModel<
      * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
      * to call any method on a {@link EventSelectionModel} after it has been disposed.
      */
-	public void dispose() {
+	@Override
+    public void dispose() {
 		delegateSelectionModel.dispose();
 		swingThreadSource.dispose();
 	}
@@ -140,7 +146,8 @@ public final class EventSelectionModel<E> implements AdvancedListSelectionModel<
     /**
      * Return the first index argument from the most recent call to setSelectionInterval(), addSelectionInterval() or removeSelectionInterval().
      */
-	public int getAnchorSelectionIndex() {
+	@Override
+    public int getAnchorSelectionIndex() {
 		return delegateSelectionModel.getAnchorSelectionIndex();
 	}
 
@@ -151,14 +158,16 @@ public final class EventSelectionModel<E> implements AdvancedListSelectionModel<
      * Adding and removing items from this list performs the same operation on
      * the source list.
      */
-	public EventList<E> getDeselected() {
+	@Override
+    public EventList<E> getDeselected() {
 		return delegateSelectionModel.getDeselected();
 	}
 
     /**
      * Returns whether the EventSelectionModel is editable or not.
      */
-	public boolean getEnabled() {
+	@Override
+    public boolean getEnabled() {
 		return delegateSelectionModel.getEnabled();
 	}
 
@@ -168,14 +177,16 @@ public final class EventSelectionModel<E> implements AdvancedListSelectionModel<
      * @deprecated As of 2005/02/18, the naming of this method became
      *             ambiguous.  Please use {@link #getSelected()}.
      */
-	public EventList<E> getEventList() {
+	@Deprecated
+    public EventList<E> getEventList() {
 		return delegateSelectionModel.getSelected();
 	}
 
     /**
      * Return the second index argument from the most recent call to setSelectionInterval(), addSelectionInterval() or removeSelectionInterval().
      */
-	public int getLeadSelectionIndex() {
+	@Override
+    public int getLeadSelectionIndex() {
 		return delegateSelectionModel.getLeadSelectionIndex();
 	}
 
@@ -185,21 +196,24 @@ public final class EventSelectionModel<E> implements AdvancedListSelectionModel<
      * @deprecated As of 2004/11/26, the {@link EventSelectionModel} implements
      *      {@link ListSelectionModel} directly.
      */
-	public ListSelectionModel getListSelectionModel() {
+	@Deprecated
+    public ListSelectionModel getListSelectionModel() {
 		return delegateSelectionModel;
 	}
 
     /**
      * Gets the index of the last selected element.
      */
-	public int getMaxSelectionIndex() {
+	@Override
+    public int getMaxSelectionIndex() {
 		return delegateSelectionModel.getMaxSelectionIndex();
 	}
 
     /**
      * Gets the index of the first selected element.
      */
-	public int getMinSelectionIndex() {
+	@Override
+    public int getMinSelectionIndex() {
 		return delegateSelectionModel.getMinSelectionIndex();
 	}
 
@@ -210,14 +224,16 @@ public final class EventSelectionModel<E> implements AdvancedListSelectionModel<
      * Adding and removing items from this list performs the same operation on
      * the source list.
      */
-	public EventList<E> getSelected() {
+	@Override
+    public EventList<E> getSelected() {
 		return delegateSelectionModel.getSelected();
 	}
 
     /**
      * Returns the current selection mode.
      */
-	public int getSelectionMode() {
+	@Override
+    public int getSelectionMode() {
 		return delegateSelectionModel.getSelectionMode();
 	}
 
@@ -229,7 +245,8 @@ public final class EventSelectionModel<E> implements AdvancedListSelectionModel<
      * If an item not in the source list is added an
      * {@link IllegalArgumentException} is thrown
      */
-	public EventList<E> getTogglingDeselected() {
+	@Override
+    public EventList<E> getTogglingDeselected() {
 		return delegateSelectionModel.getTogglingDeselected();
 	}
 
@@ -241,28 +258,32 @@ public final class EventSelectionModel<E> implements AdvancedListSelectionModel<
      * If an item not in the source list is added an
      * {@link IllegalArgumentException} is thrown.
      */
-	public EventList<E> getTogglingSelected() {
+	@Override
+    public EventList<E> getTogglingSelected() {
 		return delegateSelectionModel.getTogglingSelected();
 	}
 
     /**
      * Returns true if the value is undergoing a series of changes.
      */
-	public boolean getValueIsAdjusting() {
+	@Override
+    public boolean getValueIsAdjusting() {
 		return delegateSelectionModel.getValueIsAdjusting();
 	}
 
     /**
      * Insert length indices beginning before/after index.
      */
-	public void insertIndexInterval(int index, int length, boolean before) {
+	@Override
+    public void insertIndexInterval(int index, int length, boolean before) {
 		delegateSelectionModel.insertIndexInterval(index, length, before);
 	}
 
     /**
      * Inverts the current selection.
      */
-	public void invertSelection() {
+	@Override
+    public void invertSelection() {
 		delegateSelectionModel.invertSelection();
 	}
 
@@ -274,35 +295,40 @@ public final class EventSelectionModel<E> implements AdvancedListSelectionModel<
      * in the event queue that notifies this model of the change
      * in table size.
      */
-	public boolean isSelectedIndex(int index) {
+	@Override
+    public boolean isSelectedIndex(int index) {
 		return delegateSelectionModel.isSelectedIndex(index);
 	}
 
     /**
      * Returns true if no indices are selected.
      */
-	public boolean isSelectionEmpty() {
+	@Override
+    public boolean isSelectionEmpty() {
 		return delegateSelectionModel.isSelectionEmpty();
 	}
 
     /**
      * Remove the indices in the interval index0,index1 (inclusive) from  the selection model.
      */
-	public void removeIndexInterval(int index0, int index1) {
+	@Override
+    public void removeIndexInterval(int index0, int index1) {
 		delegateSelectionModel.removeIndexInterval(index0, index1);
 	}
 
     /**
      * Remove a listener from the list that's notified each time a change to the selection occurs.
      */
-	public void removeListSelectionListener(ListSelectionListener listener) {
+	@Override
+    public void removeListSelectionListener(ListSelectionListener listener) {
 		delegateSelectionModel.removeListSelectionListener(listener);
 	}
 
     /**
      * Change the selection to be the set difference of the current selection  and the indices between index0 and index1 inclusive.
      */
-	public void removeSelectionInterval(int index0, int index1) {
+	@Override
+    public void removeSelectionInterval(int index0, int index1) {
 		delegateSelectionModel.removeSelectionInterval(index0, index1);
 	}
 
@@ -312,7 +338,8 @@ public final class EventSelectionModel<E> implements AdvancedListSelectionModel<
      * @param validSelectionMatcher returns <tt>true</tt> if a source element
      *      can be selected; <tt>false</tt> otherwise
      */
-	public void removeValidSelectionMatcher(Matcher<E> validSelectionMatcher) {
+	@Override
+    public void removeValidSelectionMatcher(Matcher<E> validSelectionMatcher) {
 		delegateSelectionModel
 				.removeValidSelectionMatcher(validSelectionMatcher);
 	}
@@ -320,7 +347,8 @@ public final class EventSelectionModel<E> implements AdvancedListSelectionModel<
     /**
      * Set the anchor selection index.
      */
-	public void setAnchorSelectionIndex(int anchorSelectionIndex) {
+	@Override
+    public void setAnchorSelectionIndex(int anchorSelectionIndex) {
 		delegateSelectionModel.setAnchorSelectionIndex(anchorSelectionIndex);
 	}
 
@@ -333,14 +361,16 @@ public final class EventSelectionModel<E> implements AdvancedListSelectionModel<
      * <strong>programatically</strong>. Therefore you must use setEnabled(true) to
      * modify the selection in code.
      */
-	public void setEnabled(boolean enabled) {
+	@Override
+    public void setEnabled(boolean enabled) {
 		delegateSelectionModel.setEnabled(enabled);
 	}
 
     /**
      * Set the lead selection index.
      */
-	public void setLeadSelectionIndex(int leadSelectionIndex) {
+	@Override
+    public void setLeadSelectionIndex(int leadSelectionIndex) {
 		delegateSelectionModel.setLeadSelectionIndex(leadSelectionIndex);
 	}
 
@@ -356,21 +386,24 @@ public final class EventSelectionModel<E> implements AdvancedListSelectionModel<
      *
      * <p>If the selection does not change, this will not fire any events.
      */
-	public void setSelectionInterval(int index0, int index1) {
+	@Override
+    public void setSelectionInterval(int index0, int index1) {
 		delegateSelectionModel.setSelectionInterval(index0, index1);
 	}
 
     /**
      * Set the selection mode.
      */
-	public void setSelectionMode(int selectionMode) {
+	@Override
+    public void setSelectionMode(int selectionMode) {
 		delegateSelectionModel.setSelectionMode(selectionMode);
 	}
 
     /**
      * This property is true if upcoming changes to the value  of the model should be considered a single event.
      */
-	public void setValueIsAdjusting(boolean valueIsAdjusting) {
+	@Override
+    public void setValueIsAdjusting(boolean valueIsAdjusting) {
 		delegateSelectionModel.setValueIsAdjusting(valueIsAdjusting);
 	}
 

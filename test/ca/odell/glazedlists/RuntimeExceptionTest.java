@@ -118,6 +118,7 @@ public class RuntimeExceptionTest {
         public void setNextException(RuntimeException nextException) {
             this.nextException = nextException;
         }
+        @Override
         public void listChanged(ListEvent<String> listChanges) {
             if(nextException == null) return;
             RuntimeException toThrow = nextException;

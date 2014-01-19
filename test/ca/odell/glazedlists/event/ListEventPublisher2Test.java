@@ -121,12 +121,15 @@ public class ListEventPublisher2Test {
      */
     private static class SimpleSubjectListenerEventformat implements SequenceDependenciesEventPublisher.EventFormat<SimpleSubjectListener,SimpleSubjectListener,String> {
         public static final SimpleSubjectListenerEventformat INSTANCE = new SimpleSubjectListenerEventformat();
+        @Override
         public void fire(SimpleSubjectListener subject, String event, SimpleSubjectListener listener) {
             listener.handleChange(event);
         }
+        @Override
         public void postEvent(SimpleSubjectListener subject) {
             // do nothing
         }
+        @Override
         public boolean isStale(SimpleSubjectListener subject, SimpleSubjectListener listener) {
             return false;
         }
@@ -155,6 +158,7 @@ public class ListEventPublisher2Test {
     }
     
     private static class NotFirstMatcherEditor<E> extends AbstractMatcherEditor<E> implements ListEventListener<E> {
+        @Override
         public void listChanged(ListEvent<E> listChanges) {
             EventList<E> sourceList = listChanges.getSourceList();
             if(sourceList.size() > 0) {
@@ -168,6 +172,7 @@ public class ListEventPublisher2Test {
             public NotSameMatcher(E item) {
                 this.item = item;
             }
+            @Override
             public boolean matches(E item) {
                 return item != this.item;
             }

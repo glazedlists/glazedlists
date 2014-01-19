@@ -24,6 +24,7 @@ public interface ListEventPublisher {
      * @deprecated replaced with {@link #setRelatedSubject}, which has different
      *      semantics and takes different arguments, but accomplishes the same goal
      */
+    @Deprecated
     void addDependency(EventList dependency, ListEventListener listener);
 
     /**
@@ -35,6 +36,7 @@ public interface ListEventPublisher {
      * @deprecated replaced with {@link #clearRelatedSubject}, which has different
      *      semantics and takes different arguments, but accomplishes the same goal
      */
+    @Deprecated
     void removeDependency(EventList dependency, ListEventListener listener);
 
     /**

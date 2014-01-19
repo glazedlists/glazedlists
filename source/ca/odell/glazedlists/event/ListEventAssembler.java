@@ -139,6 +139,7 @@ public final class ListEventAssembler<E> {
     /**
      * @deprecated replaced with {@link #elementUpdated(int, Object, Object)}.
      */
+    @Deprecated
     public void elementUpdated(int index, E oldValue) {
         elementUpdated(index, oldValue, ListEvent.<E>unknownValue());
     }
@@ -153,6 +154,7 @@ public final class ListEventAssembler<E> {
      * @deprecated replaced with {@link #elementInserted}, {@link #elementUpdated}
      *     and {@link #elementDeleted}.
      */
+    @Deprecated
     public void addChange(int type, int startIndex, int endIndex) {
         addChange(type, startIndex, endIndex, ListEvent.<E>unknownValue(), ListEvent.<E>unknownValue());
     }
@@ -162,6 +164,7 @@ public final class ListEventAssembler<E> {
      * @deprecated replaced with {@link #elementInserted}, {@link #elementUpdated}
      *     and {@link #elementDeleted}.
      */
+    @Deprecated
     public void addChange(int type, int index) {
         addChange(type, index, index);
     }
@@ -170,6 +173,7 @@ public final class ListEventAssembler<E> {
      *
      * @deprecated replaced with {@link #elementInserted}.
      */
+    @Deprecated
     public void addInsert(int index) {
         addChange(ListEvent.INSERT, index);
     }
@@ -178,6 +182,7 @@ public final class ListEventAssembler<E> {
      *
      * @deprecated replaced with {@link #elementDeleted}.
      */
+    @Deprecated
     public void addDelete(int index) {
         addChange(ListEvent.DELETE, index);
     }
@@ -186,6 +191,7 @@ public final class ListEventAssembler<E> {
      *
      * @deprecated replaced with {@link #elementUpdated}.
      */
+    @Deprecated
     public void addUpdate(int index) {
         addChange(ListEvent.UPDATE, index);
     }
@@ -194,6 +200,7 @@ public final class ListEventAssembler<E> {
      *
      * @deprecated replaced with {@link #elementInserted}.
      */
+    @Deprecated
     public void addInsert(int startIndex, int endIndex) {
         addChange(ListEvent.INSERT, startIndex, endIndex);
     }
@@ -202,6 +209,7 @@ public final class ListEventAssembler<E> {
      *
      * @deprecated replaced with {@link #elementDeleted}.
      */
+    @Deprecated
     public void addDelete(int startIndex, int endIndex) {
         addChange(ListEvent.DELETE, startIndex, endIndex);
     }
@@ -210,6 +218,7 @@ public final class ListEventAssembler<E> {
      *
      * @deprecated replaced with {@link #elementUpdated}.
      */
+    @Deprecated
     public void addUpdate(int startIndex, int endIndex) {
         addChange(ListEvent.UPDATE, startIndex, endIndex);
     }
@@ -419,14 +428,17 @@ public final class ListEventAssembler<E> {
      * Adapt {@link SequenceDependenciesEventPublisher.EventFormat} for use with {@link ListEvent}s.
      */
     private class ListEventFormat implements SequenceDependenciesEventPublisher.EventFormat<EventList<E>,ListEventListener<? super E>,ListEvent<E>> {
+        @Override
         public void fire(EventList<E> subject, ListEvent<E> event, ListEventListener<? super E> listener) {
             event.reset();
             listener.listChanged((ListEvent) event);
         }
+        @Override
         public void postEvent(EventList<E> subject) {
             cleanup();
             eventIsBeingPublished = false;
         }
+        @Override
         public boolean isStale(EventList<E> subject, ListEventListener<? super E> listener) {
             if(listener instanceof WeakReferenceProxy && ((WeakReferenceProxy)listener).getReferent() == null) {
                 ((WeakReferenceProxy)listener).dispose();

@@ -232,6 +232,7 @@ public class TransactionList<E> extends TransformedList<E, E> {
      * necessary.
      */
     private class RollbackSupportListener implements UndoRedoSupport.Listener {
+        @Override
         public void undoableEditHappened(UndoRedoSupport.Edit edit) {
             // if a tx context exists we are in the middle of a transaction
             if (!txContextStack.isEmpty())

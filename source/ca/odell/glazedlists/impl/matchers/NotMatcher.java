@@ -20,7 +20,8 @@ public class NotMatcher<E> implements Matcher<E> {
 	}
 
     /** {@inheritDoc} */
-	public boolean matches(E item) {
+	@Override
+    public boolean matches(E item) {
 		return !parent.matches(item);
 	}
 

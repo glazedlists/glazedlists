@@ -91,6 +91,7 @@ public class CompositeMatcherEditor<E> extends AbstractMatcherEditor<E> {
      * Handle changes to the MatcherEditors.
      */
     private class MatcherEditorsListListener implements ListEventListener<MatcherEditor<E>> {
+        @Override
         public void listChanged(ListEvent<MatcherEditor<E>> listChanges) {
             // update listeners for the list change
             boolean inserts = false;
@@ -205,6 +206,7 @@ public class CompositeMatcherEditor<E> extends AbstractMatcherEditor<E> {
          * @param matcherEvent a MatcherEvent describing the change in the
          *      Matcher produced by the MatcherEditor
          */
+        @Override
         public void changedMatcher(MatcherEditor.Event<E> matcherEvent) {
             switch (matcherEvent.getType()) {
                 case Event.CONSTRAINED: this.constrained(); break;

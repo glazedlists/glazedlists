@@ -28,6 +28,7 @@ public class RoundedBorder implements Border {
         this.stroke = stroke;
     }
 
+    @Override
     public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
         Graphics2D g2d = (Graphics2D)g.create();
         g2d.addRenderingHints(Icons.RENDERING_HINTS);
@@ -88,10 +89,12 @@ public class RoundedBorder implements Border {
         }
     }
 
+    @Override
     public Insets getBorderInsets(Component c) {
         return new Insets(radius, radius, radius, radius);
     }
 
+    @Override
     public boolean isBorderOpaque() {
         return false;
     }
@@ -101,6 +104,7 @@ public class RoundedBorder implements Border {
     }
 
     private static class TestRunnable implements Runnable {
+        @Override
         public void run() {
             JPanel panel = new JPanel(new FlowLayout());
             final Color background = new Color(204, 204, 255);

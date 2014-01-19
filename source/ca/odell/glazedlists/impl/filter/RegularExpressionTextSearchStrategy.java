@@ -17,10 +17,12 @@ public class RegularExpressionTextSearchStrategy extends AbstractTextSearchStrat
 
     private Matcher matcher;
 
+    @Override
     public void setSubtext(String regex) {
         matcher = Pattern.compile(regex).matcher("");
     }
 
+    @Override
     public int indexOf(String text) {
         return matcher.reset(text).matches() ? matcher.start() : -1;
     }

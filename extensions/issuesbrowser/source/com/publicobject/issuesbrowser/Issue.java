@@ -380,6 +380,7 @@ public class Issue implements Comparable {
     /**
      * Compares two issues by ID.
      */
+    @Override
     public int compareTo(Object other) {
         if (other == null) return -1;
         Issue otherIssue = (Issue) other;

@@ -367,6 +367,7 @@ public class IssuesBrowser {
         }
 
         /** {@inheritDoc} */
+        @Override
         public void listChanged(ListEvent<Issue> listChanges) {
             boolean selectionAffected = false;
             while(listChanges.next()) {
@@ -449,16 +450,19 @@ public class IssuesBrowser {
         /** whether the throbber will be turned on and off */
         private boolean on = false;
 
+        @Override
         public synchronized void setOn() {
             on = true;
             System.out.println("THROB ON");
         }
 
+        @Override
         public synchronized void setOff() {
             on = false;
             System.out.println("THROB OFF");
         }
 
+        @Override
         public synchronized void run() {
             if(on) {
                 // TODO

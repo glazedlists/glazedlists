@@ -319,6 +319,7 @@ public class AutoCompleteSupportTestApp {
      * <code>laf</code>.
      */
     private class ChangeLookAndFeelAction extends AbstractAction {
+        @Override
         public void actionPerformed(ActionEvent e) {
             JRadioButtonMenuItem selectedMenuItem = (JRadioButtonMenuItem) e.getSource();
 
@@ -336,24 +337,28 @@ public class AutoCompleteSupportTestApp {
     }
 
     private class CorrectCaseActionHandler implements ActionListener {
+        @Override
         public void actionPerformed(ActionEvent e) {
             autoCompleteSupport.setCorrectsCase(correctsCaseCheckBox.isSelected());
         }
     }
 
     private class StrictModeActionHandler implements ActionListener {
+        @Override
         public void actionPerformed(ActionEvent e) {
             autoCompleteSupport.setStrict(strictModeCheckBox.isSelected());
         }
     }
 
     private class SelectTextOnFocusGainActionHandler implements ActionListener {
+        @Override
         public void actionPerformed(ActionEvent e) {
             autoCompleteSupport.setSelectsTextOnFocusGain(selectTextOnFocusGainCheckBox.isSelected());
         }
     }
 
     private class HidePopupOnFocusLostActionHandler implements ActionListener {
+        @Override
         public void actionPerformed(ActionEvent e) {
             autoCompleteSupport.setHidesPopupOnFocusLost(hidesPopupOnFocusLostCheckBox.isSelected());
         }
@@ -366,6 +371,7 @@ public class AutoCompleteSupportTestApp {
             this.mode = mode;
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             autoCompleteSupport.setFilterMode(this.mode);
         }
@@ -379,6 +385,7 @@ public class AutoCompleteSupportTestApp {
             this.comboBox = comboBox;
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             this.comboBox.setSelectedItem(URL_SAMPLE_DATA[URL_SAMPLE_DATA.length-1]);
         }
@@ -471,6 +478,7 @@ public class AutoCompleteSupportTestApp {
     }
 
     private static class Starter implements Runnable {
+        @Override
         public void run() {
             new AutoCompleteSupportTestApp();
         }
@@ -485,6 +493,7 @@ public class AutoCompleteSupportTestApp {
             this.model = model;
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             final JComboBox comboBox = (JComboBox) e.getSource();
             final String actionSummary = String.valueOf(++count) + ": " + comboBox.getSelectedItem();
@@ -524,6 +533,7 @@ public class AutoCompleteSupportTestApp {
      * </ul>
      */
     private static final class URLTextFilterator implements TextFilterator<String> {
+        @Override
         public void getFilterStrings(List<String> baseList, String element) {
             baseList.add(element);
             if (element != null) {

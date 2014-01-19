@@ -21,6 +21,7 @@ import java.io.OutputStream;
 public class BeanXMLByteCoder implements ByteCoder {
 
     /** {@inheritDoc} */
+    @Override
     public void encode(Object source, OutputStream target) throws IOException {
         XMLEncoder xmlOut = new XMLEncoder(target);
         xmlOut.writeObject(source);
@@ -28,6 +29,7 @@ public class BeanXMLByteCoder implements ByteCoder {
     }
     
     /** {@inheritDoc} */
+    @Override
     public Object decode(InputStream source) throws IOException {
         XMLDecoder xmlIn = new XMLDecoder(source);
         return xmlIn.readObject();

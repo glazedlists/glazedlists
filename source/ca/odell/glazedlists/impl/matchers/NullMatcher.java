@@ -25,7 +25,8 @@ public final class NullMatcher<E> implements Matcher<E> {
 	}
 
     /** {@inheritDoc} */
-	public boolean matches(E item) {
+	@Override
+    public boolean matches(E item) {
 		return item == null;
 	}
 

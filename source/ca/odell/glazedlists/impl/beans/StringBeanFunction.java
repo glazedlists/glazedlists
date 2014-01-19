@@ -26,6 +26,7 @@ public class StringBeanFunction<E> implements FunctionList.Function<E,String> {
     }
 
     /** @inheritDoc */
+    @Override
     public String evaluate(E sourceValue) {
         final Object rawValue = property.get(sourceValue);
         return rawValue == null ? null : String.valueOf(rawValue);

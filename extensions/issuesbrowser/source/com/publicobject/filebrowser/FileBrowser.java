@@ -40,6 +40,7 @@ public class FileBrowser implements Runnable {
         fileBrowserModel.run();
     }
 
+    @Override
     public void run() {
         TableFormat<Entry> tableFormat = new EntryTableFormat();
         TreeList.Format<Entry> treeFormat = new EntryTreeFormat();
@@ -72,24 +73,29 @@ public class FileBrowser implements Runnable {
      * Describe how to show an {@link com.publicobject.filebrowser.Entry} in a hierarchy.
      */
     private class EntryTreeFormat implements TreeList.Format<Entry> {
+        @Override
         public void getPath(List<Entry> path, Entry element) {
             for(Entry e = element; e != null; e = e.getParent()) {
                 path.add(0, e);
             }
         }
+        @Override
         public boolean allowsChildren(Entry element) {
             return element.isDirectory();
         }
 
+        @Override
         public Comparator<Entry> getComparator(int depth) {
             return GlazedLists.comparableComparator();
         }
     }
 
     private class EntryTableFormat implements TableFormat<Entry> {
+        @Override
         public int getColumnCount() {
             return 5;
         }
+        @Override
         public String getColumnName(int column) {
             switch(column) {
                 case 0: return "Name";
@@ -100,6 +106,7 @@ public class FileBrowser implements Runnable {
             }
             throw new IllegalStateException();
         }
+        @Override
         public Object getColumnValue(Entry baseObject, int column) {
             switch(column) {
                 case 0: return baseObject.getName();

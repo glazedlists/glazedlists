@@ -841,6 +841,7 @@ public class SeparatorListTest {
     }
 
     private static class CaseComparator implements Comparator<String> {
+        @Override
         public int compare(String a, String b) {
             boolean aIsUpperCase = Character.isUpperCase(a.charAt(0));
             boolean bIsUpperCase = Character.isUpperCase(b.charAt(0));
@@ -935,6 +936,7 @@ public class SeparatorListTest {
         public SubstringMatcher(String enclosing) {
             this.enclosing = enclosing;
         }
+        @Override
         public boolean matches(String contained) {
             return enclosing.indexOf(contained) != -1;
         }

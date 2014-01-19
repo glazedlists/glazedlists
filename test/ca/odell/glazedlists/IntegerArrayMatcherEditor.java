@@ -27,6 +27,7 @@ public class IntegerArrayMatcherEditor extends AbstractMatcherEditor<int[]> {
             this.index = index;
             this.threshhold = threshhold;
         }
+        @Override
         public boolean matches(int[] array) {
             return (array[index] >= threshhold);
         }

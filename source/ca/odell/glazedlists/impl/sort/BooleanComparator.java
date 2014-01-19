@@ -18,6 +18,7 @@ import java.util.Comparator;
      * Compares two Boolean objects using the following sort order:
      * null, Boolean.FALSE, Boolean.TRUE;
      */
+    @Override
     public int compare(Boolean alpha, Boolean beta) {
         final int alphaOrdinal = alpha == null ? 0 : !alpha.booleanValue() ? 1 : 2;
         final int betaOrdinal = beta == null ? 0 : !beta.booleanValue() ? 1 : 2;

@@ -373,10 +373,12 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
             this.node = node;
         }
 
+        @Override
         public E get(int index) {
             return children.get(index);
         }
 
+        @Override
         public E remove(int index) {
             E removed = children.remove(index);
 
@@ -396,6 +398,7 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
             return removed;
         }
 
+        @Override
         public E set(int index, E element) {
             E replaced = children.set(index, element);
 
@@ -411,6 +414,7 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
             return replaced;
         }
 
+        @Override
         public void dispose() {
             // do nothing
         }
@@ -440,20 +444,24 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
             children.addListEventListener(this);
         }
 
+        @Override
         public E get(int index) {
             return children.get(index);
         }
 
+        @Override
         public E remove(int index) {
             // events will be fired from this call
             return children.remove(index);
         }
 
+        @Override
         public E set(int index, E element) {
             // events will be fired from this call
             return children.set(index, element);
         }
 
+        @Override
         public void listChanged(ListEvent<E> listChanges) {
             int parentIndex = childElements.indexOfNode(node, (byte)1);
             int absoluteIndex = getAbsoluteIndex(parentIndex);
@@ -484,6 +492,7 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
             updates.commitEvent();
         }
 
+        @Override
         public void dispose() {
             children.removeListEventListener(this);
             children.getPublisher().clearRelatedSubject(this);

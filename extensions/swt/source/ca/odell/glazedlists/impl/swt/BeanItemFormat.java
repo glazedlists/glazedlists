@@ -51,7 +51,8 @@ public final class BeanItemFormat<E> implements ItemFormat<E> {
 	}
 
 	/** @inheritDoc */
-	public String format(E element) {
+	@Override
+    public String format(E element) {
 		if (element == null) {
 			return delegateItemFormat.format(element);
 		}

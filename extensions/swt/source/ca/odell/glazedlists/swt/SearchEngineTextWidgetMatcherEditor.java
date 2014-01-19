@@ -80,9 +80,11 @@ public class SearchEngineTextWidgetMatcherEditor<E> extends SearchEngineTextMatc
      * SelectionListener can be used to update the filter in response.
      */
     private class FilterChangeListener implements SelectionListener {
+        @Override
         public void widgetSelected(SelectionEvent e) {
             refilter(text.getText());
         }
+        @Override
         public void widgetDefaultSelected(SelectionEvent e) {
             refilter(text.getText());
         }

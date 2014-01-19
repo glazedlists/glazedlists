@@ -285,22 +285,27 @@ public final class Diff {
             this.comparator = comparator;
         }
 
+        @Override
         public int getAlphaLength() {
             return alpha.size();
         }
 
+        @Override
         public char alphaAt(int index) {
             return alpha.get(index).toString().charAt(0);
         }
 
+        @Override
         public char betaAt(int index) {
             return beta.get(index).toString().charAt(0);
         }
 
+        @Override
         public int getBetaLength() {
             return beta.size();
         }
 
+        @Override
         public boolean matchPair(int alphaIndex, int betaIndex) {
             return (comparator.compare(alpha.get(alphaIndex), beta.get(betaIndex)) == 0);
         }

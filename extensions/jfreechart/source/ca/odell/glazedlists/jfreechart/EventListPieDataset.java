@@ -113,6 +113,7 @@ public class EventListPieDataset<E,K> extends AbstractDataset implements PieData
      *
      * @throws IndexOutOfBoundsException if <code>index</code> is out of bounds
      */
+    @Override
     public Comparable getKey(int index) {
         return this.keyList.get(index);
     }
@@ -123,6 +124,7 @@ public class EventListPieDataset<E,K> extends AbstractDataset implements PieData
      * @param key the key
      * @return the index, or <code>-1</code> if the key is unrecognised
      */
+    @Override
     public int getIndex(Comparable key) {
         return this.keyList.indexOf(key);
     }
@@ -135,6 +137,7 @@ public class EventListPieDataset<E,K> extends AbstractDataset implements PieData
      *
      * @return the keys (never <code>null</code>).
      */
+    @Override
     public List getKeys() {
         return this.keyList;
     }
@@ -147,6 +150,7 @@ public class EventListPieDataset<E,K> extends AbstractDataset implements PieData
      *
      * @throws org.jfree.data.UnknownKeyException if the key is not recognised
      */
+    @Override
     public Number getValue(Comparable key) {
         return getValue(this.getIndex(key));
     }
@@ -154,6 +158,7 @@ public class EventListPieDataset<E,K> extends AbstractDataset implements PieData
     /**
      * Returns the number of items (values).
      */
+    @Override
     public int getItemCount() {
         return this.keyList.size();
     }
@@ -164,6 +169,7 @@ public class EventListPieDataset<E,K> extends AbstractDataset implements PieData
      * @param index the index of interest (zero-based index).
      * @return the value
      */
+    @Override
     public Number getValue(int index) {
         return this.valueList.get(index);
     }
@@ -200,6 +206,7 @@ public class EventListPieDataset<E,K> extends AbstractDataset implements PieData
      * This listener rebroadcasts ListEvents as DatasetChangeEvents.
      */
     private class DatasetEventListener implements ListEventListener {
+        @Override
         public void listChanged(ListEvent listChanges) {
             fireDatasetChanged();
         }

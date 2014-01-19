@@ -126,6 +126,7 @@ class  SimpleNode <  T0>   implements Element<T0> {
     /**
      * Get the value of this element.
      */
+    @Override
     public T0 get() {
         return t0;
     }
@@ -133,6 +134,7 @@ class  SimpleNode <  T0>   implements Element<T0> {
     /**
      * Set the value of this element.
      */
+    @Override
     public void set(T0 value) {
         this.t0 = value;
     }
@@ -148,6 +150,7 @@ class  SimpleNode <  T0>   implements Element<T0> {
     /**
      * Get the color of this element.
      */
+    @Override
     public byte getColor() {
         return  1 ;
     }
@@ -253,6 +256,7 @@ class  SimpleNode <  T0>   implements Element<T0> {
     /**
      * Toggle whether this node is sorted.
      */
+    @Override
     public void setSorted(int sorted) {
         this.sorted = sorted;
     }
@@ -264,16 +268,19 @@ class  SimpleNode <  T0>   implements Element<T0> {
      * user expects order to be both sorted and stable during edits which would
      * otherwise change the sorting order.
      */
+    @Override
     public int getSorted() {
         return sorted;
     }
 
     /** {@inheritDoc} */
+    @Override
     public Element<T0> next() {
         return SimpleTree.next(this);
     }
 
     /** {@inheritDoc} */
+    @Override
     public Element<T0> previous() {
         return SimpleTree.previous(this);
     }

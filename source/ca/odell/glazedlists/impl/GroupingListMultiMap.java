@@ -97,6 +97,7 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
     }
 
     /** {@inheritDoc} */
+    @Override
     public void dispose() {
         valueList.removeListEventListener(this);
         valueList.dispose();
@@ -109,31 +110,37 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
     }
 
     /** {@inheritDoc} */
+    @Override
     public int size() {
         return delegate.size();
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isEmpty() {
         return delegate.isEmpty();
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean containsKey(Object key) {
         return delegate.containsKey(key);
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean containsValue(Object value) {
         return delegate.containsValue(value);
     }
 
     /** {@inheritDoc} */
+    @Override
     public List<V> get(Object key) {
         return delegate.get(key);
     }
 
     /** {@inheritDoc} */
+    @Override
     public List<V> put(K key, List<V> value) {
         checkKeyValueAgreement(key, value);
 
@@ -145,6 +152,7 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
 
     /** {@inheritDoc} */
 
+    @Override
     public void putAll(Map<? extends K, ? extends List<V>> m) {
         // verify the contents of the given Map and ensure all key/value pairs agree with the keyFunction
         for (Iterator<? extends Entry<? extends K, ? extends List<V>>> i = m.entrySet().iterator(); i.hasNext();) {
@@ -194,22 +202,26 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
     }
 
     /** {@inheritDoc} */
+    @Override
     public void clear() {
         groupingList.clear();
     }
 
     /** {@inheritDoc} */
+    @Override
     public List<V> remove(Object key) {
         final int index = keyList.indexOf(key);
         return index == -1 ? null : groupingList.remove(index);
     }
 
     /** {@inheritDoc} */
+    @Override
     public Collection<List<V>> values() {
         return groupingList;
     }
 
     /** {@inheritDoc} */
+    @Override
     public Set<K> keySet() {
         if (keySet == null)
             keySet = new KeySet();
@@ -218,6 +230,7 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
     }
 
     /** {@inheritDoc} */
+    @Override
     public Set<Entry<K, List<V>>> entrySet() {
         if (entrySet == null)
             entrySet = new EntrySet();
@@ -250,6 +263,7 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
      *
      * @param listChanges an event describing the changes in the GroupingList
      */
+    @Override
     public void listChanged(ListEvent<List<V>> listChanges) {
         while (listChanges.next()) {
             final int changeIndex = listChanges.getIndex();
@@ -365,6 +379,7 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
         }
 
         /** {@inheritDoc} */
+        @Override
         public boolean hasNext() {
             return keyIter.hasNext();
         }
@@ -372,12 +387,14 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
         /**
          * Returns a new {@link Map.Entry} each time this method is called.
          */
+        @Override
         public Entry<K, List<V>> next() {
             final K key = keyIter.next();
             return new MultiMapEntry(key, get(key));
         }
 
         /** {@inheritDoc} */
+        @Override
         public void remove() {
             final int index = keyIter.previousIndex();
             if (index == -1) throw new IllegalStateException("Cannot remove() without a prior call to next()");
@@ -411,11 +428,13 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
         }
 
         /** {@inheritDoc} */
+        @Override
         public K getKey() {
             return key;
         }
 
         /** {@inheritDoc} */
+        @Override
         public List<V> getValue() {
             return value;
         }
@@ -431,6 +450,7 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
          * @param newValue the new values use as elements of the value List
          * @return the old value List of this Entry
          */
+        @Override
         public List<V> setValue(List<V> newValue) {
             // ensure all of the newValue elements agree with the key of this Entry
             checkKeyValueAgreement(getKey(), newValue);
@@ -536,16 +556,19 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
         }
 
         /** {@inheritDoc} */
+        @Override
         public boolean hasNext() {
             return keyIter.hasNext();
         }
 
         /** {@inheritDoc} */
+        @Override
         public K next() {
             return keyIter.next();
         }
 
         /** {@inheritDoc} */
+        @Override
         public void remove() {
             final int index = keyIter.previousIndex();
             if (index == -1) throw new IllegalStateException("Cannot remove() without a prior call to next()");
@@ -578,6 +601,7 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
         }
 
         /** {@inheritDoc} */
+        @Override
         public int compare(V o1, V o2) {
             final K k1 = function.evaluate(o1);
             final K k2 = function.evaluate(o2);
@@ -591,6 +615,7 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
      * constraints required by this MultiMap.
      */
     private final class ValueListFunction implements FunctionList.Function<List<V>, List<V>> {
+        @Override
         public List<V> evaluate(List<V> sourceValue) {
             return new ValueList(sourceValue);
         }
@@ -614,62 +639,85 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
             this.key = key(delegate.get(0));
         }
 
+        @Override
         public int size() { return delegate.size(); }
+        @Override
         public boolean isEmpty() { return delegate.isEmpty(); }
+        @Override
         public boolean contains(Object o) { return delegate.contains(o); }
+        @Override
         public Iterator<V> iterator() { return delegate.iterator(); }
+        @Override
         public Object[] toArray() { return delegate.toArray(); }
+        @Override
         public <T>T[] toArray(T[] a) { return delegate.toArray(a); }
 
+        @Override
         public boolean add(V o) {
             checkKeyValueAgreement(key, o);
             return delegate.add(o);
         }
 
+        @Override
         public boolean addAll(Collection<? extends V> c) {
             checkKeyValueAgreement(key, c);
             return delegate.addAll(c);
         }
 
+        @Override
         public boolean addAll(int index, Collection<? extends V> c) {
             checkKeyValueAgreement(key, c);
             return delegate.addAll(index, c);
         }
 
+        @Override
         public void add(int index, V element) {
             checkKeyValueAgreement(key, element);
             delegate.add(index, element);
         }
 
+        @Override
         public V set(int index, V element) {
             checkKeyValueAgreement(key, element);
             return delegate.set(index, element);
         }
 
+        @Override
         public List<V> subList(int fromIndex, int toIndex) {
             return new ValueList(delegate.subList(fromIndex, toIndex));
         }
 
+        @Override
         public ListIterator<V> listIterator() {
             return new ValueListIterator(delegate.listIterator());
         }
 
+        @Override
         public ListIterator<V> listIterator(int index) {
             return new ValueListIterator(delegate.listIterator(index));
         }
 
+        @Override
         public boolean remove(Object o) { return delegate.remove(o); }
+        @Override
         public boolean containsAll(Collection<?> c) { return delegate.containsAll(c); }
+        @Override
         public boolean removeAll(Collection<?> c) { return delegate.removeAll(c); }
+        @Override
         public boolean retainAll(Collection<?> c) { return delegate.retainAll(c); }
+        @Override
         public void clear() { delegate.clear(); }
         @Override
         public boolean equals(Object o) { return delegate.equals(o); }
         @Override
         public int hashCode() { return delegate.hashCode(); }
+        @Override
         public V get(int index) { return delegate.get(index); }
+        @Override
         public V remove(int index) { return delegate.remove(index); }
+        @Override
         public int indexOf(Object o) { return delegate.indexOf(o); }
+        @Override
         public int lastIndexOf(Object o) { return delegate.lastIndexOf(o); }
         @Override
         public String toString() { return delegate.toString(); }
@@ -686,22 +734,31 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
                 this.delegate = delegate;
             }
 
+            @Override
             public void set(V o) {
                 checkKeyValueAgreement(key, o);
                 delegate.set(o);
             }
 
+            @Override
             public void add(V o) {
                 checkKeyValueAgreement(key, o);
                 delegate.add(o);
             }
 
+            @Override
             public boolean hasNext() { return delegate.hasNext(); }
+            @Override
             public V next() { return delegate.next(); }
+            @Override
             public boolean hasPrevious() { return delegate.hasPrevious(); }
+            @Override
             public V previous() { return delegate.previous(); }
+            @Override
             public int nextIndex() { return delegate.nextIndex(); }
+            @Override
             public void remove() { delegate.remove(); }
+            @Override
             public int previousIndex() { return delegate.previousIndex(); }
         }
     }

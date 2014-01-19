@@ -26,6 +26,7 @@ public class BeanFunction<E,V> implements FunctionList.Function<E,V> {
     }
 
     /** @inheritDoc */
+    @Override
     public V evaluate(E sourceValue) {
         return (V) property.get(sourceValue);
     }

@@ -43,6 +43,7 @@ public class TableColumnComparator<E> implements Comparator<E> {
     /**
      * Compares the two objects, returning a result based on how they compare.
      */
+    @Override
     public int compare(E alpha, E beta) {
         final Object alphaField = tableFormat.getColumnValue(alpha, column);
         final Object betaField = tableFormat.getColumnValue(beta, column);

@@ -40,11 +40,13 @@ final class SizeInRange extends AbstractCalculation<Boolean> implements ListEven
     }
 
     /** @inheritDoc */
+    @Override
     public void dispose() {
         this.source.removeListEventListener(this);
     }
 
     /** @inheritDoc */
+    @Override
     public void listChanged(ListEvent listChanges) {
         final Boolean oldValue = getValue();
         final int size = listChanges.getSourceList().size();

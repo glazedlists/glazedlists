@@ -315,6 +315,7 @@ public final class ThresholdList<E> extends RangeList<E> {
          * if the underlying {@link Evaluator} were to return the negation
          * of an <code>Integer</code>.
          */
+        @Override
         public int compare(E alpha, E beta) {
             int alphaValue;
             if(alpha instanceof Integer) alphaValue = ((Integer)alpha).intValue();

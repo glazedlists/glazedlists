@@ -590,6 +590,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
      * @deprecated Deprecated as of 12/11/2005. Replaced with {@link #sortIndex(Object)}
      *      which has cleaner semantics.
      */
+    @Deprecated
     public int indexOfSimulated(Object object) {
         return comparator != null ? ((SimpleTree)sorted).indexOfValue(object, true, true, ALL_COLORS) : size();
     }
@@ -629,6 +630,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
         /**
          * Compares object alpha to object beta by using the source comparator.
          */
+        @Override
         public int compare(Object alpha, Object beta) {
             Object alphaObject = alpha;
             Object betaObject = beta;
@@ -658,6 +660,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
         /**
          * Compares the alpha object to the beta object by their indices.
          */
+        @Override
         public int compare(Object alpha, Object beta) {
             Element alphaTreeNode = (Element)alpha;
             Element betaTreeNode = (Element)beta;
@@ -684,6 +687,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
         /**
          * Returns true iff there are more value to iterate on by caling next()
          */
+        @Override
         public boolean hasNext() {
             return treeIterator.hasNext();
         }
@@ -691,6 +695,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
         /**
          * Returns the next value in the iteration.
          */
+        @Override
         public E next() {
             treeIterator.next();
             Element unsortedNode = treeIterator.value();
@@ -700,6 +705,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
         /**
          * Removes the last value returned by this iterator.
          */
+        @Override
         public void remove() {
             int indexToRemove = treeIterator.index();
             SortedList.this.source.remove(getSourceIndex(indexToRemove));

@@ -58,6 +58,7 @@ public class AutoCompleteSupportThreadingTest {
     private static final class InstallAutoCompleteSupportRunnable implements Runnable {
         private AutoCompleteSupport support;
 
+        @Override
         public void run() {
             support = AutoCompleteSupport.install(new JComboBox(), new BasicEventList<Object>());
         }

@@ -89,6 +89,7 @@ public class EventListIterator<E> implements ListIterator<E>, ListEventListener<
      * Returns true if this list iterator has more elements when traversing the
      * list in the forward direction.
      */
+    @Override
     public boolean hasNext() {
         return nextIndex < source.size();
     }
@@ -96,6 +97,7 @@ public class EventListIterator<E> implements ListIterator<E>, ListEventListener<
     /**
      * Returns the next element in the list.
      */
+    @Override
     public E next() {
         // next shouldn't have been called.
         if(nextIndex == source.size()) {
@@ -112,6 +114,7 @@ public class EventListIterator<E> implements ListIterator<E>, ListEventListener<
     /**
      * Returns the index of the element that would be returned by a subsequent call to next.
      */
+    @Override
     public int nextIndex() {
         return nextIndex;
     }
@@ -120,6 +123,7 @@ public class EventListIterator<E> implements ListIterator<E>, ListEventListener<
      * Returns true if this list iterator has more elements when traversing the
      * list in the reverse direction.
      */
+    @Override
     public boolean hasPrevious() {
         return nextIndex > 0;
     }
@@ -127,6 +131,7 @@ public class EventListIterator<E> implements ListIterator<E>, ListEventListener<
     /**
      * Returns the previous element in the list.
      */
+    @Override
     public E previous() {
         // previous shouldn't have been called
         if(nextIndex == 0) {
@@ -143,6 +148,7 @@ public class EventListIterator<E> implements ListIterator<E>, ListEventListener<
     /**
      * Returns the index of the element that would be returned by a subsequent call to previous.
      */
+    @Override
     public int previousIndex() {
         return nextIndex - 1;
     }
@@ -150,6 +156,7 @@ public class EventListIterator<E> implements ListIterator<E>, ListEventListener<
     /**
      * Inserts the specified element into the list (optional operation).
      */
+    @Override
     public void add(E o) {
         source.add(nextIndex, o);
     }
@@ -158,6 +165,7 @@ public class EventListIterator<E> implements ListIterator<E>, ListEventListener<
      * Removes from the list the last element that was returned by next
      * or previous (optional operation).
      */
+    @Override
     public void remove() {
         if(lastIndex == -1) throw new IllegalStateException("Cannot remove() without a prior call to next() or previous()");
         source.remove(lastIndex);
@@ -167,6 +175,7 @@ public class EventListIterator<E> implements ListIterator<E>, ListEventListener<
      * Replaces the last element returned by next or previous with the
      * specified element (optional operation).
      */
+    @Override
     public void set(E o) {
         if(lastIndex == -1) throw new IllegalStateException("Cannot set() without a prior call to next() or previous()");
         source.set(lastIndex, o);
@@ -175,6 +184,7 @@ public class EventListIterator<E> implements ListIterator<E>, ListEventListener<
     /**
      * When the list is changed, the iterator adjusts its index.
      */
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
         while(listChanges.next()) {
             int changeIndex = listChanges.getIndex();

@@ -35,19 +35,23 @@ public abstract class AbstractCalculation<N> implements Calculation<N> {
     }
 
     /** @inheritDoc */
+    @Override
     public void addPropertyChangeListener(PropertyChangeListener pcl) {
         support.addPropertyChangeListener(pcl);
     }
 
     /** @inheritDoc */
+    @Override
     public void removePropertyChangeListener(PropertyChangeListener pcl) {
         support.removePropertyChangeListener(pcl);
     }
 
     /** @inheritDoc */
+    @Override
     public String getName() { return name; }
 
     /** @inheritDoc */
+    @Override
     public void setName(String name) {
         if (!GlazedListsImpl.equal(this.name, name)) {
             final String oldName = this.name;
@@ -57,6 +61,7 @@ public abstract class AbstractCalculation<N> implements Calculation<N> {
     }
 
     /** @inheritDoc */
+    @Override
     public N getValue() {
         return value;
     }

@@ -99,6 +99,7 @@ public class ProgressClock extends JComponent {
             this.progressClock = progressClock;
         }
 
+        @Override
         public void run() {
             JPanel panel = new JPanel(new BorderLayout());
             Image before = new ImageIcon(getClass().getClassLoader().getResource("resources/before.png")).getImage();

@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Table;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  * @author Holger Brands
  */
+@Deprecated
 public class EventTableViewer<E> extends DefaultEventTableViewer<E> {
 
     /** the ThreadProxyEventList to which this EventTableViewer is listening */
@@ -52,6 +53,7 @@ public class EventTableViewer<E> extends DefaultEventTableViewer<E> {
      *             {@link #EventTableViewer(EventList, Table, TableFormat)}
      *             instead
      */
+    @Deprecated
     public EventTableViewer(EventList<E> source, Table table, String[] propertyNames, String[] columnLabels) {
         this(source, table, GlazedLists.tableFormat(propertyNames, columnLabels));
     }
