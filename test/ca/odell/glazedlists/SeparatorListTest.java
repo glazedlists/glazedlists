@@ -9,14 +9,14 @@ import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.Matchers;
 
+import org.junit.Test;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
-
-import org.junit.Test;
 
 import static org.junit.Assert.*;
 
@@ -579,7 +579,9 @@ public class SeparatorListTest {
         // collapse some
         for(int i = 0; i < separatorList.size(); i++) {
             Object value = separatorList.get(i);
-            if(!(value instanceof SeparatorList.Separator)) continue;
+            if(!(value instanceof SeparatorList.Separator)) {
+                continue;
+            }
             SeparatorList.Separator separator = (SeparatorList.Separator)value;
             if(dice.nextBoolean()) {
                 separator.setLimit(0);
@@ -688,7 +690,9 @@ public class SeparatorListTest {
         // expand all
         for(int i = 0; i < separatorList.size(); i++) {
             Object value = separatorList.get(i);
-            if(!(value instanceof SeparatorList.Separator)) continue;
+            if(!(value instanceof SeparatorList.Separator)) {
+                continue;
+            }
             SeparatorList.Separator separator = (SeparatorList.Separator)value;
             separator.setLimit(Integer.MAX_VALUE);
         }
@@ -748,7 +752,7 @@ public class SeparatorListTest {
         source.addAll(GlazedListsTests.stringToList("AAaaaBBBBbCCCddd"));
 
         SeparatorList<String> separatorList = new SeparatorList<String>(source,
-                (Comparator) GlazedLists.caseInsensitiveComparator(), 0, 2);
+                GlazedLists.caseInsensitiveComparator(), 0, 2);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener
                 .install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
@@ -811,7 +815,9 @@ public class SeparatorListTest {
         int s = 0;
 
         while(true) {
-            if(e == source.size() && s == separatorList.size()) break;
+            if(e == source.size() && s == separatorList.size()) {
+                break;
+            }
 
             Object sourceValue = source.get(e);
             Object separatorValue = separatorList.get(s);
