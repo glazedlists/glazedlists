@@ -22,7 +22,7 @@ import java.util.Random;
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
 public class ThreadedCompositeRunner {
-    
+
     /** the global clock of the threaded composite runner */
     private int clock = 0;
 
@@ -43,7 +43,7 @@ public class ThreadedCompositeRunner {
             }
         }
     }
-    
+
     /**
      * The reader thread alternates between reading a single random value
      * and reading the entire list.
@@ -74,8 +74,8 @@ public class ThreadedCompositeRunner {
             }
         }
     }
-        
-    
+
+
     /**
      * The writer thread alternates between inserting a single random value
      * and removing a single random value.
@@ -107,14 +107,14 @@ public class ThreadedCompositeRunner {
             }
         }
     }
-    
+
     /**
      * The main method starts this experiment.
      */
     public static void main(String[] args) {
         new ThreadedCompositeRunner().run(args);
     }
-    
+
     /**
      * Starts a series of reader and writer threads and verifies that they
      * continue reading and writing.
@@ -138,28 +138,28 @@ public class ThreadedCompositeRunner {
             System.out.println("increments.");
             return;
         }
-        
+
         int writerCount = Integer.parseInt(args[0]);
         int readerCount = Integer.parseInt(args[1]);
         int compositeSize = Integer.parseInt(args[2]);
-        
+
         // prepare a random number generator
         Random dice = new Random();
 
         // create a list of lists
         List lists = new ArrayList();
-        
+
         // accumulate a list of threads
         List threads = new ArrayList();
-        
-        // start some writer threads 
+
+        // start some writer threads
         for(int i = 0; i < writerCount; i++) {
             BasicEventList list = new BasicEventList();
             lists.add(list);
             WriterThread thread = new WriterThread(list);
             threads.add(thread);
         }
-        
+
         // create some composite lists & reader threads
         List compositeLists = new ArrayList();
         for(int i = 0; i < readerCount; i++) {
@@ -173,14 +173,14 @@ public class ThreadedCompositeRunner {
             threads.add(readerThread);
 
         }
-        
+
         // start the threads
         int threadId = 100;
         for(Iterator i = threads.iterator(); i.hasNext(); ) {
             ClockedThread runnable = (ClockedThread)i.next();
             new Thread(runnable, "T" + threadId++).start();
         }
-        
+
         // watch the times
         int lastMinTime = -1;
         while(true) {

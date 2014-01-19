@@ -9,7 +9,7 @@ package ca.odell.glazedlists.io;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class SimpleNetworkListStatusListener implements NetworkListStatusListener {
-    
+
     /** whether the list is connected */
     private boolean connected = false;
 
@@ -24,7 +24,7 @@ public class SimpleNetworkListStatusListener implements NetworkListStatusListene
         target.addStatusListener(this);
         connected = target.isConnected();
     }
-    
+
     /**
      * Called each time a resource becomes connected.
      */
@@ -32,7 +32,7 @@ public class SimpleNetworkListStatusListener implements NetworkListStatusListene
     public void connected(NetworkList list) {
         connected = true;
     }
-    
+
     /**
      * Called each time a resource's disconnected status changes. This method may
      * be called for each attempt it makes to reconnect to the network.
@@ -42,14 +42,14 @@ public class SimpleNetworkListStatusListener implements NetworkListStatusListene
         connected = false;
         this.reason = reason;
     }
-    
+
     /**
      * Get whether the NetworkList reported a connection.
      */
     public boolean isConnected() {
         return connected;
     }
-    
+
     /**
      * Get why the NetworkList disconnected.
      */

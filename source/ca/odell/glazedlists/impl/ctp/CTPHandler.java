@@ -11,7 +11,7 @@ import ca.odell.glazedlists.impl.io.Bufferlo;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public interface CTPHandler {
-    
+
     /**
      * Handles the connection being ready for chunks to be sent.
      */

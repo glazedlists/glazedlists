@@ -31,7 +31,7 @@ public class PopularityListTest {
     public void testSimpleData() {
         EventList<String> source = new BasicEventList<String>();
         PopularityList popularityList = PopularityList.create(source);
-        
+
         source.add("Mike");
         source.add("Kevin");
         source.add("Graham");
@@ -42,10 +42,10 @@ public class PopularityListTest {
         source.add("Jodie");
         source.add("Andrew");
         source.add("Melissa");
-        
+
         assertEquals("Melissa", popularityList.get(0));
         assertEquals("Mike", popularityList.get(1));
-        
+
         source.add("Jonathan");
         source.add("Jonathan");
         source.remove("Mike");
@@ -61,22 +61,22 @@ public class PopularityListTest {
         assertEquals("Mike", popularityList.get(0));
         assertEquals("Jonathan", popularityList.get(1));
         assertEquals("Melissa", popularityList.get(2));
-        
+
         source.clear();
     }
-    
+
     /**
      * Tests that the Popularity List works by using a random sequence of operations.
      */
     @Test
     public void testRandom() {
         Random dice = new Random(0);
-        
+
         EventList<Integer> source = new BasicEventList<Integer>();
         SortedList<Integer> sortedSource = SortedList.create(source);
         PopularityList<Integer> popularityList = PopularityList.create(source);
         new PopularityListValidator(popularityList, sortedSource);
-        
+
         // add 1000
         for(int i = 0; i < 1000; i++) {
             source.add(new Integer(dice.nextInt(50)));
@@ -87,7 +87,7 @@ public class PopularityListTest {
             int remIndex = dice.nextInt(source.size());
             source.remove(remIndex);
         }
-        
+
         // set 800
         for(int i = 0; i < 800; i++) {
             int updateIndex = dice.nextInt(source.size());
@@ -144,7 +144,7 @@ public class PopularityListTest {
         SortedList<String> sortedList = SortedList.create(source);
         PopularityList<String> popularityList = PopularityList.create(source);
         new PopularityListValidator(popularityList, sortedList);
-        
+
         // in sorted order changes
         source.set(2, "BMW");    // A A B B C C C D
         source.set(1, "BMW");    // A B B B C C C D
@@ -168,7 +168,7 @@ public class PopularityListTest {
         source.set(6, "Chevy");  // A B B B C C C F
         source.set(7, "Chevy");  // A B B B C C C C
     }
-    
+
     /**
      * Tests that the PopularityList can handle edge case sets.
      */
@@ -178,7 +178,7 @@ public class PopularityListTest {
         SortedList<String> sortedList = SortedList.create(source);
         PopularityList<String> popularityList = PopularityList.create(source);
         new PopularityListValidator(popularityList, sortedList);
-        
+
         // in sorted order changes
         source.add(0, "Audi");   // A
         source.add(1, "Audi");   // A A
@@ -195,7 +195,7 @@ public class PopularityListTest {
     public void testEqualPopularityOrdering() {
         EventList<String> source = new BasicEventList<String>();
         PopularityList<String> popularityList = PopularityList.create(source);
-        
+
         // in sorted order changes
         source.add(0, "chaos"); // c
         source.add(1, "fiery"); // c f
@@ -231,7 +231,7 @@ public class PopularityListTest {
         source.add("album"); // a b c d f g h a b c d e f g h c f g b d h a
         source.add("eerie"); // a b c d e f g h a b c d e f g h c f g b d h a e
         assertEquals(sortedSingleCopy, popularityList);
-        
+
         // now break into two classes 2 x { A C E F } and 4 x { B D G H }
         source.set(0, "gecko"); // g b c d e f g h a b c d e f g h c f g b d h a e
         source.set(2, "hippo"); // g b h d e f g h a b c d e f g h c f g b d h a e
@@ -262,7 +262,7 @@ public class PopularityListTest {
 
         /**
          * Creates a PopularityListValidator that validates that the specified
-         * popularity list ranks the elements in the speceified sortedlist in 
+         * popularity list ranks the elements in the speceified sortedlist in
          * order of popularity. A SortedList is used because it has much better
          * performance for {@link List#indexOf(Object)} and {@link List#lastIndexOf(Object)}
          * operations.
@@ -273,23 +273,23 @@ public class PopularityListTest {
             for(int i = 0; i < popularityList.size(); i++) {
                 elementCounts.add(new Integer(count(popularityList.get(i))));
             }
-            
+
             popularityList.addListEventListener(this);
         }
-        
+
         /**
          * Handle the source PopularityList changing by validating that list.
          */
         @Override
         public void listChanged(ListEvent listEvent) {
             List<Integer> changedIndices = new ArrayList<Integer>();
-            
+
             // apply the changes
             while(listEvent.next()) {
                 int changeIndex = listEvent.getIndex();
                 int changeType = listEvent.getType();
                 changedIndices.add(new Integer(changeIndex));
-                
+
                 if(changeType == ListEvent.DELETE) {
                     elementCounts.remove(changeIndex);
                 } else if(changeType == ListEvent.INSERT) {
@@ -298,7 +298,7 @@ public class PopularityListTest {
                     elementCounts.set(changeIndex, new Integer(count(popularityList.get(changeIndex))));
                 }
             }
-            
+
             // validate the changes
             assertEquals(popularityList.size(), elementCounts.size());
             for(Iterator<Integer> c = changedIndices.iterator(); c.hasNext(); ) {

@@ -18,10 +18,10 @@ public interface TableFormat<E> {
     public int getColumnCount();
 
     /**
-     * Gets the title of the specified column. 
+     * Gets the title of the specified column.
      */
     public String getColumnName(int column);
-    
+
     /**
      * Gets the value of the specified field for the specified object. This
      * is the value that will be passed to the editor and renderer for the

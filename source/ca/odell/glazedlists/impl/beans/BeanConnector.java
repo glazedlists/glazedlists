@@ -35,8 +35,8 @@ public class BeanConnector<E> implements ObservableElementList.Connector<E> {
     protected PropertyChangeListener propertyChangeListener = this.createPropertyChangeListener();
 
     /** Matches PropertyChangeEvents to deliver to the ObservableElementList. */
-    private Matcher<PropertyChangeEvent> eventMatcher = Matchers.trueMatcher();    
-    
+    private Matcher<PropertyChangeEvent> eventMatcher = Matchers.trueMatcher();
+
     /**
      * Reflection is used to install/uninstall the {@link #propertyChangeListener}
      * on list elements, so we cache the Object[] used in the reflection call
@@ -129,11 +129,11 @@ public class BeanConnector<E> implements ObservableElementList.Connector<E> {
             throw new IllegalArgumentException("Failed to find method " + e.getMessage() + " in " + beanClass);
         }
     }
-    
+
     /**
      * Constructs a new Connector which uses reflection to add and remove a PropertyChangeListener
      * from instances of the <code>beanClass</code> using the named methods.
-     * 
+     *
      * @param beanClass the Class of all list elements within the {@link ObservableElementList}
      * @param addListenerMethodName the name of the method which adds PropertyChangeListeners to the
      *        elements within the {@link ObservableElementList}
@@ -215,7 +215,7 @@ public class BeanConnector<E> implements ObservableElementList.Connector<E> {
      * it serves as a filter for PropertyChangeEvents.
      */
     private void setEventMatcher(Matcher<PropertyChangeEvent> eventMatcher) {
-        if (eventMatcher == null) throw new IllegalArgumentException("Event matcher may not be null."); 
+        if (eventMatcher == null) throw new IllegalArgumentException("Event matcher may not be null.");
         this.eventMatcher = eventMatcher;
     }
 

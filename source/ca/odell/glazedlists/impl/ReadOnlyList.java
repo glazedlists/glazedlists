@@ -16,7 +16,7 @@ import java.util.List;
  *
  * <p>The {@link ReadOnlyList} is useful for programming defensively. A
  * {@link ReadOnlyList} is useful to supply an unknown class read-only access
- * to your {@link EventList}. 
+ * to your {@link EventList}.
  *
  * <p>The {@link ReadOnlyList} provides an up-to-date view of its source
  * {@link EventList} so changes to the source {@link EventList} will still be

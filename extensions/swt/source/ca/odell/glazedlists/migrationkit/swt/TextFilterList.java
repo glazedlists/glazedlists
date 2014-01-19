@@ -55,7 +55,7 @@ public class TextFilterList extends TransformedList {
 
     /** the text matcher editor does all the real work */
     private TextWidgetMatcherEditor matcherEditor;
-    
+
     /** the filter edit text field */
     private Text filterEdit;
 

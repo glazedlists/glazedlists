@@ -26,7 +26,7 @@ class CloseFile implements Runnable {
     public CloseFile(PersistentMap persistentMap) {
         this.persistentMap = persistentMap;
     }
-    
+
     /**
      * Close the file.
      */

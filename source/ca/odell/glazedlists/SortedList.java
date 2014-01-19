@@ -83,11 +83,11 @@ public final class SortedList<E> extends TransformedList<E,E> {
 
     /** one of {@link #STRICT_SORT_ORDER} or {@link #AVOID_MOVING_ELEMENTS}. */
     private int mode = STRICT_SORT_ORDER;
-    
+
     /**
      * Creates a {@link SortedList} that sorts the specified {@link EventList}.
      * All elements in the specified {@link EventList} must implement {@link Comparable}.
-     * 
+     *
      * @param source the {@link EventList} to be sorted
      */
     public static <E extends Comparable<? super E>> SortedList<E> create(EventList<E> source) {
@@ -100,7 +100,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
      * elements in the specified {@link EventList} must implement {@link Comparable}
      * or a {@link ClassCastException} will be thrown.
      * <p>Usage of factory method {@link #create(EventList)} is preferable.
-     * 
+     *
      * @param source the {@link EventList} to be sorted
      */
     public SortedList(EventList<E> source) {
@@ -273,7 +273,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
         // value relative to their neighbours
         for(int i = 0, size = updateNodes.size(); i < size; i++) {
             Element<Element> sortedNode = updateNodes.get(i);
-            // we may have already handled this via a neighbour 
+            // we may have already handled this via a neighbour
             if(sortedNode.getSorted() != Element.PENDING) continue;
 
             // find the bounds (by value) on this element. this is the last element

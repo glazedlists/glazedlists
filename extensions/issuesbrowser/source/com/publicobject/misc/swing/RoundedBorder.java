@@ -9,7 +9,7 @@ import java.awt.*;
 
 /**
  * A border with cute rounded edges.
- * 
+ *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class RoundedBorder implements Border {

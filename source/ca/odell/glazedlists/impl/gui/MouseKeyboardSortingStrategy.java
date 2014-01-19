@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * @see ca.odell.glazedlists.gui.AbstractTableComparatorChooser#MULTIPLE_COLUMN_KEYBOARD
- * 
+ *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class MouseKeyboardSortingStrategy implements SortingStrategy {

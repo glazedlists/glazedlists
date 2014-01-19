@@ -13,19 +13,19 @@ import java.util.logging.Logger;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 class AddChunk implements Runnable {
-     
+
     /** logging */
     private static Logger logger = Logger.getLogger(AddChunk.class.toString());
-    
+
     /** the host map */
     private final PersistentMap persistentMap;
 
     /** the value to write out */
     private final Chunk newValue;
-    
+
     /** the value to erase */
     private final Chunk oldValue;
-    
+
     /**
      * Create a new AddChunk.
      */
@@ -34,7 +34,7 @@ class AddChunk implements Runnable {
         this.newValue = newValue;
         this.oldValue = oldValue;
     }
-    
+
     /**
      * Write the chunk to disk.
      *
@@ -52,13 +52,13 @@ class AddChunk implements Runnable {
         try {
             // allocate
             persistentMap.allocate(newValue);
-            
+
             // get a sequence id
             newValue.setSequenceId(persistentMap.nextSequenceId());
-            
+
             // write out the data
             newValue.writeData();
-            
+
             // clear the old value
             if(oldValue != null) {
                 oldValue.delete();

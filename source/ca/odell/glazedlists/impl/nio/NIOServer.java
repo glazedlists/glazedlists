@@ -11,7 +11,7 @@ import java.nio.channels.Selector;
  * Handles incoming NIO connections.
  */
 public interface NIOServer {
-    
+
     /**
      * Handle an accept-ready selection key.
      */

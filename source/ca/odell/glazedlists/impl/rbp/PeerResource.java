@@ -20,29 +20,29 @@ class PeerResource {
 
     /** the peer that owns all connections */
     private Peer peer;
-    
+
     /** the resource being managed */
     private Resource resource = null;
     /** the update ID of the resource */
     private int resourceUpdateId = 0;
-    
+
     /** the address that this resource is being published as */
     private ResourceUri resourceUri;
-    
+
     /** the publisher of this resource */
     private PeerConnection publisher = null;
     /** subscribers interested in this resource */
     private List subscribers = new ArrayList();
-    
+
     /** the session ID is a simple validation */
     private int sessionId = -1;
 
     /** listens to changes in the resource */
     private PrivateResourceListener resourceListener = new PrivateResourceListener();
-    
+
     /** provides information about the status of this resource */
     private PrivateResourceStatus resourceStatus = new PrivateResourceStatus();
-    
+
     /**
      * Create a new PeerResource for an incoming or outgoing resource.
      */
@@ -50,24 +50,24 @@ class PeerResource {
         this.peer = peer;
         this.resource = resource;
         this.resourceUri = resourceUri;
-        
+
         // create a random session ID as a check
         if(resourceUri.isLocal()) {
             this.sessionId = new Random(System.currentTimeMillis()).nextInt();
         }
-        
+
         // subscribe to the resource
         resourceStatus.connect();
     }
-    
-    
+
+
     /**
      * Gets the address of this resource.
      */
     public ResourceUri getResourceUri() {
         return resourceUri;
     }
-    
+
     /**
      * Handle the state of the specified connection changing.
      */
@@ -81,7 +81,7 @@ class PeerResource {
             connection.getConnection().outgoingPublications.remove(resourceUri);
         }
     }
-    
+
     /**
      * Listens to changes in the resource, so they can be broadcast to subscribers.
      */
@@ -106,10 +106,10 @@ class PeerResource {
             public void run() {
                 // if nobody's listening, we're done
                 if(subscribers.isEmpty()) return;
-                
+
                 // forward the event to listeners
                 PeerBlock block = PeerBlock.update(resourceUri, sessionId, updateId, delta);
-                
+
                 // send the block to interested subscribers
                 for(int s = 0; s < subscribers.size(); s++) {
                     ResourceConnection subscriber = (ResourceConnection)subscribers.get(s);
@@ -123,24 +123,24 @@ class PeerResource {
     public ResourceListener resourceListener() {
         return resourceListener;
     }
-    
+
     /**
      * Provides information about the status of this resource.
      */
     private class PrivateResourceStatus implements ResourceStatus {
-        
+
         /** listeners interested in status changes */
         private List statusListeners = new ArrayList();
-        
+
         /** connected if the current subscription has been confirmed */
         private boolean connected = false;
-    
+
         /** {@inheritDoc} */
         @Override
         public synchronized boolean isConnected() {
             return connected;
         }
-        
+
         /** {@inheritDoc} */
         @Override
         public void connect() {
@@ -152,23 +152,23 @@ class PeerResource {
                 // if this is remote, subscribe to this resource
                 if(resourceUri.isRemote()) {
                     publisher = peer.getConnection(resourceUri.getHost(), resourceUri.getPort());
-                
+
                     peer.subscribed.put(resourceUri, PeerResource.this);
                     publisher.incomingSubscriptions.put(resourceUri, new ResourceConnection(publisher, PeerResource.this));
                     PeerBlock subscribe = PeerBlock.subscribe(resourceUri);
                     publisher.writeBlock(PeerResource.this, subscribe);
-        
+
                 // if this is local, we're immediately connected
                 } else if(resourceUri.isLocal()) {
                     resource.addResourceListener(resourceListener);
-                
+
                     resourceStatus.setConnected(true, null);
                     if(peer.published.get(resourceUri) != null) throw new IllegalStateException();
                     peer.published.put(resourceUri, PeerResource.this);
                 }
             }
         }
-    
+
         /** {@inheritDoc} */
         @Override
         public void disconnect() {
@@ -179,11 +179,11 @@ class PeerResource {
             public void run() {
                 // we're immediately disconnected
                 resourceStatus.setConnected(false, null);
-                
+
                 // if this is remote, unsubscribe
                 if(resourceUri.isRemote()) {
                     peer.subscribed.remove(resourceUri);
-                    
+
                     // clean up the publisher
                     if(publisher != null) {
                         publisher.writeBlock(PeerResource.this, PeerBlock.unsubscribe(resourceUri));
@@ -191,14 +191,14 @@ class PeerResource {
                         if(publisher.isIdle()) publisher.close();
                         publisher = null;
                     }
-    
+
                 // if this is local, unpublish everyone
                 } else if(resourceUri.isLocal()) {
                     resource.removeResourceListener(resourceListener);
-                    
+
                     if(peer.published.get(resourceUri) == null) throw new IllegalStateException();
                     peer.published.remove(resourceUri);
-                    
+
                     // unpublish the subscribers
                     for(Iterator s = subscribers.iterator(); s.hasNext(); ) {
                         ResourceConnection subscriber = (ResourceConnection)s.next();
@@ -210,7 +210,7 @@ class PeerResource {
                 }
             }
         }
-        
+
         /** {@inheritDoc} */
         @Override
         public synchronized void addResourceStatusListener(ResourceStatusListener listener) {
@@ -222,7 +222,7 @@ class PeerResource {
         public synchronized void removeResourceStatusListener(ResourceStatusListener listener) {
             statusListeners.remove(listener);
         }
-        
+
         /**
          * Update the status of this PeerResource and notify everyone who's interested.
          */
@@ -242,7 +242,7 @@ class PeerResource {
     public ResourceStatus status() {
         return resourceStatus;
     }
-    
+
 
     /**
      * Handles a block of incoming data.
@@ -285,12 +285,12 @@ class PeerResource {
             } finally {
                 resource.getReadWriteLock().writeLock().unlock();
             }
-            
+
             // create the subscription
             subscriber.setUpdateId(updateId);
             subscriber.getConnection().outgoingPublications.put(resourceUri, subscriber);
             subscribers.add(subscriber);
-            
+
             // now send the snapshot to this subscriber
             PeerBlock subscribeConfirm = PeerBlock.subscribeConfirm(resourceUri, sessionId, updateId, snapshot);
             subscriber.getConnection().writeBlock(this, subscribeConfirm);
@@ -314,10 +314,10 @@ class PeerResource {
         } finally {
             resource.getReadWriteLock().writeLock().unlock();
         }
-        
+
         // save a session cookie to verify this is the same source
         sessionId = block.getSessionId();
-        
+
         // finally we're connected
         resourceStatus.setConnected(true, null);
     }
@@ -329,7 +329,7 @@ class PeerResource {
     private void remoteUnpublish(ResourceConnection subscriber, PeerBlock block) {
         // immediately disconnected
         resourceStatus.setConnected(false, new Exception("Resource became unavailable"));
-        
+
         // clean up the publisher
         if(publisher != null) {
             publisher.incomingSubscriptions.remove(resourceUri);
@@ -337,7 +337,7 @@ class PeerResource {
             publisher = null;
         }
     }
-    
+
     /**
      * Gets this resource as a String for debugging.
      */

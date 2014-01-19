@@ -35,17 +35,17 @@ import java.util.List;
 
 # define a function NODE_WIDTH(boolean) to get the node's size for this color
 
-    
+
 
 
 # define a function NODE_SIZE(node, colors) to no node.nodeSize()
 
-   
+
 
 
 # define a function to refresh counts
 
-   
+
 
 
 # multiple values
@@ -59,7 +59,7 @@ import java.util.List;
 
 
 */
-/*[ BEGIN_M4_JAVA ]*/   
+/*[ BEGIN_M4_JAVA ]*/
 
 /**
  * Adapt a {@link SimpleTree} for use as a {@link List}.
@@ -70,9 +70,9 @@ public class SimpleTreeAsList <  T0>   extends AbstractList<T0> {
 
     private final SimpleTree <  T0>   tree;
 
-      
 
-      
+
+
 
     /**
      * Create a new {@link SimpleTreeAsList}, adapting the specified colors subset
@@ -81,7 +81,7 @@ public class SimpleTreeAsList <  T0>   extends AbstractList<T0> {
      */
     public SimpleTreeAsList/**/(SimpleTree <  T0>   tree   ) {
         this.tree = tree;
-          
+
     }
 
     /** {@inheritDoc} */

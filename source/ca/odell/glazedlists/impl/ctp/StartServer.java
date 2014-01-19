@@ -17,16 +17,16 @@ import java.util.logging.Logger;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 class StartServer implements Runnable {
-    
+
     /** logging */
     private static Logger logger = Logger.getLogger(StartServer.class.toString());
 
     /** the I/O event queue daemon */
     private CTPConnectionManager connectionManager = null;
-    
+
     /** port to listen for incoming connections */
     private int listenPort = -1;
-    
+
     /**
      * Create a new CTPStartUp that starts a server using the specified
      * NIODaemon.
@@ -35,7 +35,7 @@ class StartServer implements Runnable {
         this.connectionManager = connectionManager;
         this.listenPort = listenPort;
     }
-    
+
     /**
      * Runs the specified task.
      */
@@ -48,12 +48,12 @@ class StartServer implements Runnable {
             serverSocket.setReuseAddress(false); // fix for Apple JVM bug 3922515
             InetSocketAddress listenAddress = new InetSocketAddress(listenPort);
             serverSocket.bind(listenAddress);
-            
+
             // prepare for non-blocking, selectable IO
             serverChannel.configureBlocking(false);
             serverChannel.register(connectionManager.getNIODaemon().getSelector(), SelectionKey.OP_ACCEPT);
             connectionManager.getNIODaemon().setServer(connectionManager);
-    
+
             // bind success
             logger.info("Connection Manager ready, listening on " + listenAddress);
         } catch(IOException e) {

@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 /**
  * Helper class for Email.
- * 
+ *
  * @author Holger Brands
  */
 public class Email implements Serializable {

@@ -118,7 +118,7 @@ public class EventTableColumnModel<T extends TableColumn> implements TableColumn
         if (newIndex < 0 || newIndex >= getColumnCount())
             throw new IllegalArgumentException("newIndex out of range");
 
-        // If the column has not yet moved far enough to change positions 
+        // If the column has not yet moved far enough to change positions
         // post the event anyway, the "draggedDistance" property of the
         // tableHeader will say how far the column has been dragged.
         // Here we are really trying to get the best out of an

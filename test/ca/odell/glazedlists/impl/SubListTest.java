@@ -84,7 +84,7 @@ public class SubListTest {
         // ensure the sublists took the change
         subListAfter = (EventList)eventList.subList(13, 63);
         assertEquals(subListBefore, subListAfter);
-        
+
         // make some set calls
         eventList.set(15, "Fifteen");
         eventList.set(18, "Eighteen");

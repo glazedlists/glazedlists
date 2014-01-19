@@ -34,19 +34,19 @@ import java.util.NoSuchElementException;
 
 # define a function NODE_WIDTH(boolean) to get the node's size for this color
 
-    
+
 
 
 # define a function NODE_SIZE(node, colors) to no node.nodeSize()
 
-    
-       
-    
+
+
+
 
 
 # define a function to refresh counts
 
-   
+
 
 
 # multiple values
@@ -60,7 +60,7 @@ import java.util.NoSuchElementException;
 
 
 */
-/*[ BEGIN_M4_JAVA ]*/   
+/*[ BEGIN_M4_JAVA ]*/
 
 /**
  * Iterate through a {@link FourColorTree}, one element at a time.
@@ -75,14 +75,14 @@ import java.util.NoSuchElementException;
  */
 public class FourColorTreeIterator <  T0>   {
 
-     
+
     int count1;
     int count2;
     int count4;
     int count8;
-    
-    
-     
+
+
+
 
     private FourColorTree <  T0>   tree;
     private FourColorNode <  T0>   node;
@@ -108,24 +108,24 @@ public class FourColorTreeIterator <  T0>   {
             this.node = ( FourColorNode <  T0>  )tree.get(currentIndex  , nextIndexColors   );
 
             // find the counts
-             
+
             count1 = tree.convertIndexColor(currentIndex, nextIndexColors, (byte)1) + (node.color == 1 ? 0 : 1);
             count2 = tree.convertIndexColor(currentIndex, nextIndexColors, (byte)2) + (node.color == 2 ? 0 : 1);
             count4 = tree.convertIndexColor(currentIndex, nextIndexColors, (byte)4) + (node.color == 4 ? 0 : 1);
             count8 = tree.convertIndexColor(currentIndex, nextIndexColors, (byte)8) + (node.color == 8 ? 0 : 1);
-            
-            
-             
+
+
+
 
             // find out the index in the node
-             
+
             if(node.color == 1) this.index = count1 - tree.indexOfNode(this.node, (byte)1);
             if(node.color == 2) this.index = count2 - tree.indexOfNode(this.node, (byte)2);
             if(node.color == 4) this.index = count4 - tree.indexOfNode(this.node, (byte)4);
             if(node.color == 8) this.index = count8 - tree.indexOfNode(this.node, (byte)8);
-            
-            
-             
+
+
+
 
         // just start before the beginning of the tree
         } else {
@@ -142,14 +142,14 @@ public class FourColorTreeIterator <  T0>   {
     public FourColorTreeIterator <  T0>   copy() {
         FourColorTreeIterator <  T0>   result = new FourColorTreeIterator <  T0>  (tree);
 
-         
+
         result.count1 = this.count1;
         result.count2 = this.count2;
         result.count4 = this.count4;
         result.count8 = this.count8;
-        
-        
-         
+
+
+
 
         result.node = node;
         result.index = index;
@@ -198,28 +198,28 @@ public class FourColorTreeIterator <  T0>   {
 
         // increment within the current node
         } else if(  (node.color & colors) != 0 &&    index <   node.size    - 1) {
-             
+
             if(node.color == 1) count1++;
             if(node.color == 2) count2++;
             if(node.color == 4) count4++;
             if(node.color == 8) count8++;
-            
-            
-             
+
+
+
             index++;
             return;
         }
 
         // scan through the nodes, looking for the first one of the right color
         while(true) {
-             
+
             if(node.color == 1) count1 += node.size - index;
             if(node.color == 2) count2 += node.size - index;
             if(node.color == 4) count4 += node.size - index;
             if(node.color == 8) count8 += node.size - index;
-            
-            
-             
+
+
+
             node = FourColorTree.next(node);
             index = 0;
 
@@ -245,14 +245,14 @@ public class FourColorTreeIterator <  T0>   {
 
         // scan through the nodes, looking for the first one of the right color
         while(true) {
-             
+
             if(node.color == 1) count1 += node.size - index;
             if(node.color == 2) count2 += node.size - index;
             if(node.color == 4) count4 += node.size - index;
             if(node.color == 8) count8 += node.size - index;
-            
-            
-             
+
+
+
             node = FourColorTree.next(node);
             index = 0;
 
@@ -274,7 +274,7 @@ public class FourColorTreeIterator <  T0>   {
         }
     }
 
-     
+
     /**
      * The color of the current element.
      */
@@ -282,7 +282,7 @@ public class FourColorTreeIterator <  T0>   {
         if(node == null) throw new IllegalStateException();
         return node.color;
     }
-      
+
 
     /**
      * Expected values for index should be in the range  ( 0, size() - 1 )
@@ -293,14 +293,14 @@ public class FourColorTreeIterator <  T0>   {
         // total the values of the specified array for the specified colors.
         int result = 0;
 
-         
+
         if((colors & 1) != 0) result += count1;
         if((colors & 2) != 0) result += count2;
         if((colors & 4) != 0) result += count4;
         if((colors & 8) != 0) result += count8;
-        
-        
-         
+
+
+
         return result;
     }
     /**
@@ -313,14 +313,14 @@ public class FourColorTreeIterator <  T0>   {
         int result = 0;
 
         // this should merely be the sum of each count
-         
+
         if((colors & 1) != 0) result += count1;
         if((colors & 2) != 0) result += count2;
         if((colors & 4) != 0) result += count4;
         if((colors & 8) != 0) result += count8;
-        
-        
-         
+
+
+
 
         // subtract the count of anything in the current node which we may
         // have included inadvertently

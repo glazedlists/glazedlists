@@ -14,39 +14,39 @@ import java.util.List;
  * A CTPHandler where all data is known beforehand.
  */
 class StaticCTPHandler implements CTPHandler {
-    
+
     /** the actions to be performed on this connection */
     private List tasks = new ArrayList();
-    
+
     /** whether this connection has connected */
     private boolean ready = false;
-    
+
     /** whether this connection has disconnected */
     private boolean closed = false;
-    
+
     /** the reason this connection was closed */
     private Exception closeReason = null;
-    
+
     /** the connection being handled */
     private CTPConnection connection = null;
-    
+
     /** the incoming data */
     private Bufferlo incoming = new Bufferlo();
-    
+
     /**
      * Add expected incoming data.
      */
     public void addExpected(String data) {
         tasks.add(new Expected(data));
     }
-    
+
     /**
      * Add queued outgoing data.
      */
     public void addEnqueued(String data) {
         tasks.add(new Enqueued(data));
     }
-    
+
     /**
      * Notify that this connection is ready for use.
      */
@@ -57,21 +57,21 @@ class StaticCTPHandler implements CTPHandler {
         this.connection = source;
         handlePendingTasks();
     }
-    
+
     /**
      * Handle the specified incoming data.
      */
     @Override
     public synchronized void receiveChunk(CTPConnection source, Bufferlo data) {
         incoming.append(data);
-        
+
         // read all the expected elements from the data
         try {
             while(incoming.length() > 0) {
                 Expected expected = (Expected)tasks.get(0);
                 boolean consumed = expected.tryConsume(incoming);
                 if(!consumed) return;
-                
+
                 tasks.remove(0);
                 handlePendingTasks();
             }
@@ -81,7 +81,7 @@ class StaticCTPHandler implements CTPHandler {
             throw new RuntimeException(e);
         }
     }
-    
+
     /**
      * Notify that this connection is no longer ready for use.
      */
@@ -94,7 +94,7 @@ class StaticCTPHandler implements CTPHandler {
         this.closeReason = closeReason;
         notifyAll();
     }
-    
+
     /**
      * Handle pending tasks that can be performed immediately.
      */
@@ -107,7 +107,7 @@ class StaticCTPHandler implements CTPHandler {
             notifyAll();
         }
     }
-    
+
     /**
      * Close this connection.
      */
@@ -116,7 +116,7 @@ class StaticCTPHandler implements CTPHandler {
         if(!ready) throw new IllegalStateException("Connection not established");
         connection.close();
     }
-    
+
     /**
      * Ensures that this handler has completed its tasks. If it has not, a RuntimeException
      * shall be thrown.
@@ -129,10 +129,10 @@ class StaticCTPHandler implements CTPHandler {
                 throw new RuntimeException(e);
             }
         }
-        
+
         if(!tasks.isEmpty()) throw new IllegalStateException(tasks.size() + " uncompleted tasks " + tasks + ", pending data \"" + incoming + "\"");
     }
-    
+
     /**
      * Ensures that this handler has been closed.
      */
@@ -144,7 +144,7 @@ class StaticCTPHandler implements CTPHandler {
                 throw new RuntimeException(e);
             }
         }
-        
+
         if(!closed) throw new IllegalStateException("Open connection with " + tasks.size() + " uncompleted tasks");
         return closeReason;
     }
@@ -154,7 +154,7 @@ class StaticCTPHandler implements CTPHandler {
  * Models an expected incoming chunk.
  */
 class Expected {
-    
+
     /** the expected data */
     private String expected = null;
 
@@ -173,20 +173,20 @@ class Expected {
      */
     public boolean tryConsume(Bufferlo lunch) throws IOException, ParseException {
         if(lunch.length() < expected.length()) return false;
-        
+
         lunch.consume(expected);
         expected = null;
         return true;
     }
-    
+
     /**
      * Whether this has been satisfied.
      */
     private boolean done() {
         return (expected == null);
     }
-    
-    /** 
+
+    /**
      * Print the expected string.
      */
     @Override
@@ -200,9 +200,9 @@ class Expected {
  * Models an outgoing chunk.
  */
 class Enqueued {
-    
+
     private Bufferlo data = new Bufferlo();
-    
+
     public Enqueued(String charData) {
         data.write(charData);
     }
@@ -210,7 +210,7 @@ class Enqueued {
     public Bufferlo getData() {
         return data;
     }
-    
+
     @Override
     public String toString() {
         if(data.length() > 30) return "Enqueued \"" + data.length() + ":" + data.toString().substring(0, 30) + "\"";

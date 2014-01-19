@@ -14,7 +14,7 @@ import java.util.logging.Logger;
  * A task that gracefully shuts down the NIO daemon.
  */
 class Shutdown implements Runnable {
-    
+
     /** logging */
     private static Logger logger = Logger.getLogger(Shutdown.class.toString());
 
@@ -28,7 +28,7 @@ class Shutdown implements Runnable {
     public Shutdown(NIODaemon nioDaemon) {
         this.nioDaemon = nioDaemon;
     }
-    
+
     /**
      * Runs the specified task.
      */
@@ -54,7 +54,7 @@ class Shutdown implements Runnable {
                 } catch(IOException e) {
                     logger.warning("Error closing server socket, " + e.getMessage());
                 }
-                
+
             // close a connection socket
             } else {
                 NIOAttachment attachment = (NIOAttachment)key.attachment();

@@ -77,7 +77,7 @@ public final class CTPConnection implements NIOAttachment {
 
     /** logging */
     private static Logger logger = Logger.getLogger(CTPConnection.class.toString());
-    
+
     /** track the current state of this protocol */
     static final int STATE_SERVER_AWAITING_CONNECT = 0;
     static final int STATE_CLIENT_AWAITING_CONNECT = 1;
@@ -88,20 +88,20 @@ public final class CTPConnection implements NIOAttachment {
     static final int STATE_READY = 6;
     static final int STATE_RECEIVED_CLOSE = 7;
     static final int STATE_CLOSED_PERMANENTLY = 8;
-    
+
     /** standard HTTP response headers, see HTTP/1.1 RFC, 6.1.1 */
     static final int RESPONSE_OK = 200;
     static final int RESPONSE_ERROR = 500;
 
     /** the current state of this protocol */
     int state = -1;
-    
+
     /** the key to this protocol's channel */
     SelectionKey selectionKey = null;
-    
+
     /** the channel where communication occurs */
     SocketChannel socketChannel = null;
-    
+
     /** parse the input channel */
     private Bufferlo parser;
 
@@ -110,22 +110,22 @@ public final class CTPConnection implements NIOAttachment {
 
     /** the handler to delegate data interpretation to */
     CTPHandler handler;
-    
+
     /** the manager that owns this connection */
     CTPConnectionManager manager;
-    
+
     /** the remote host */
     String remoteHost = "remotehost";
-    
+
     /** the local host, as known by the client */
     String localHost = "localhost";
-    
+
     /** the only URI allowed by CTPConnection */
     static final String CTP_URI = "/glazedlists";
-    
+
     /** if our source is not chunked, we have to break up chunks arbitrarily */
     boolean sourceChunked = false;
-    
+
     /**
      * Creates a new CTPConnection.
      *
@@ -133,7 +133,7 @@ public final class CTPConnection implements NIOAttachment {
      */
     private CTPConnection(SelectionKey selectionKey, CTPHandler handler, CTPConnectionManager manager) {
         if(selectionKey == null) throw new IllegalArgumentException();
-        
+
         this.selectionKey = selectionKey;
         this.handler = handler;
         this.manager = manager;
@@ -141,7 +141,7 @@ public final class CTPConnection implements NIOAttachment {
         this.parser = new Bufferlo();
         this.writer = new Bufferlo();
     }
-    
+
     /**
      * Create a new CTPConnection for use as a client.
      */
@@ -151,7 +151,7 @@ public final class CTPConnection implements NIOAttachment {
         client.remoteHost = host;
         return client;
     }
-    
+
     /**
      * Create a new CTPConnection for use as a server.
      */
@@ -161,7 +161,7 @@ public final class CTPConnection implements NIOAttachment {
         server.remoteHost = ((InetSocketAddress)server.socketChannel.socket().getRemoteSocketAddress()).getAddress().getHostAddress();
         return server;
     }
-    
+
     /**
      * Gets the hostname that the local party is referred to by the remote party.
      */
@@ -193,29 +193,29 @@ public final class CTPConnection implements NIOAttachment {
         } catch(IOException e) {
             close(e);
         }
-        
+
         // continually handle incoming data
         boolean satisfied = true;
         while(satisfied) {
             // read a request
             if(state == STATE_SERVER_AWAITING_REQUEST) {
                 satisfied = handleRequest();
-                
+
             // read a response
             } else if(state == STATE_CLIENT_AWAITING_RESPONSE) {
                 satisfied = handleResponse();
-                
+
             // read a chunk
             } else if(state == STATE_READY) {
                 satisfied = handleChunk();
-                
+
             // we don't know what to read
             } else {
                 throw new IllegalStateException("Cannot handle read from state " + state);
             }
         }
     }
-    
+
     /**
      * When we can write, flush the output stream.
      */
@@ -228,7 +228,7 @@ public final class CTPConnection implements NIOAttachment {
             close(e);
         }
     }
-    
+
     /**
      * When connected, prepare the higher-level connection.
      */
@@ -241,20 +241,20 @@ public final class CTPConnection implements NIOAttachment {
             close(e);
             return;
         }
-            
+
         // the connection is successful for a client
         if(state == STATE_CLIENT_AWAITING_CONNECT) {
             logger.fine("Opened connection to " + this);
             selectionKey.interestOps(SelectionKey.OP_READ);
             state = STATE_CLIENT_CONSTRUCTING_REQUEST;
             sendRequest(CTP_URI, Collections.EMPTY_MAP);
-            
+
         // the connection is successful for a server
         } else if(state == STATE_SERVER_AWAITING_CONNECT) {
             logger.fine("Accepted connection from " + this);
             selectionKey.interestOps(SelectionKey.OP_READ);
             state = STATE_SERVER_AWAITING_REQUEST;
-            
+
         // invalid state
         } else {
             throw new IllegalStateException();
@@ -270,13 +270,13 @@ public final class CTPConnection implements NIOAttachment {
      */
     void sendRequest(String uri, Map headers) {
         if(state != STATE_CLIENT_CONSTRUCTING_REQUEST) throw new IllegalStateException();
-        
+
         try {
             // write the request line
             writer.write("POST ");
             writer.write(uri);
             writer.write(" HTTP/1.1\r\n");
-            
+
             // write all the headers provided, plus some extras
             Map responseHeaders = new TreeMap();
             responseHeaders.putAll(headers);
@@ -285,15 +285,15 @@ public final class CTPConnection implements NIOAttachment {
             writeHeaders(responseHeaders);
             writer.write("\r\n");
             writer.writeToChannel(socketChannel, selectionKey);
-            
+
             // we're waiting for the response
             state = STATE_CLIENT_AWAITING_RESPONSE;
-            
+
         } catch(IOException e) {
             close(e);
         }
     }
-     
+
     /**
      * Handle a request by parsing the contents of the input buffer. If the input
      * buffer does not contain a complete request, this will return. If it does
@@ -307,7 +307,7 @@ public final class CTPConnection implements NIOAttachment {
      */
     private boolean handleRequest() {
         if(state != STATE_SERVER_AWAITING_REQUEST) throw new IllegalStateException();
-        
+
         try {
             // if the entire header has not loaded, load more
             if(parser.indexOf("\\r\\n\\r\\n") == -1) return false;
@@ -317,12 +317,12 @@ public final class CTPConnection implements NIOAttachment {
             String uri = parser.readUntil("( )+");
             parser.consume("HTTP\\/1\\.1 *");
             parser.consume("\\r\\n");
-            
+
             // parse the headers
             Map headers = readHeaders();
             handleHeaders(headers);
             parser.consume("\\r\\n");
-            
+
             // handle the request
             if(CTP_URI.equals(uri)) {
                 state = STATE_SERVER_CONSTRUCTING_RESPONSE;
@@ -341,7 +341,7 @@ public final class CTPConnection implements NIOAttachment {
             return false;
         }
     }
-    
+
     /**
      * Sends the response header to the client.
      *
@@ -351,7 +351,7 @@ public final class CTPConnection implements NIOAttachment {
      */
     void sendResponse(int code, Map headers) {
         if(state != STATE_SERVER_CONSTRUCTING_RESPONSE) throw new IllegalStateException();
-        
+
         try {
             // write the status line
             if(code == RESPONSE_OK) {
@@ -361,7 +361,7 @@ public final class CTPConnection implements NIOAttachment {
             } else {
                 throw new IllegalArgumentException("Unsupported code: " + code);
             }
-    
+
             // write all the headers provided, plus some extras
             Map responseHeaders = new TreeMap();
             responseHeaders.putAll(headers);
@@ -369,7 +369,7 @@ public final class CTPConnection implements NIOAttachment {
             writeHeaders(responseHeaders);
             writer.write("\r\n");
             writer.writeToChannel(socketChannel, selectionKey);
-            
+
             // we're ready
             logger.info("Accepted connection from " + this);
             state = STATE_READY;
@@ -379,7 +379,7 @@ public final class CTPConnection implements NIOAttachment {
             close(e);
         }
     }
-    
+
     /**
      * Handle a response by parsing the contents of the input buffer. If the input
      * buffer does not contain a complete response, this will return. If it does
@@ -393,22 +393,22 @@ public final class CTPConnection implements NIOAttachment {
      */
     private boolean handleResponse() {
         if(state != STATE_CLIENT_AWAITING_RESPONSE) throw new IllegalStateException();
-        
+
         try {
             // if the entire header has not loaded, load more
             if(parser.indexOf("\\r\\n\\r\\n") == -1) return false;
-            
+
             // parse the status line
             parser.consume("HTTP\\/1\\.1( )+");
             String codeString = parser.readUntil("( )+");
             int code = Integer.parseInt(codeString);
             String description = parser.readUntil("\\r\\n");
-            
+
             // parse the headers
             Map headers = readHeaders();
             handleHeaders(headers);
             parser.consume("\\r\\n");
-            
+
             // handle the response
             if(code == RESPONSE_OK) {
                 logger.info("Established connection to " + this);
@@ -466,22 +466,22 @@ public final class CTPConnection implements NIOAttachment {
                 // if the chunk size has not loaded, load more
                 int chunkEndIndex = parser.indexOf("\\r\\n");
                 if(chunkEndIndex == -1) return false;
-                
+
                 // calculate the chunk size
                 String chunkSizeInHex = parser.readUntil("(\\;[^\\r\\n]*)?\\r\\n", false);
                 int chunkSize = Integer.parseInt(chunkSizeInHex, 16);
-                
+
                 // if the full chunk has not loaded, load more
                 int bytesRequired = chunkEndIndex + 2 + chunkSize + 2;
                 if(parser.length() < bytesRequired) {
                     return false;
                 }
-            
+
                 // load the chunk
                 parser.consume("[^\\r\\n]*\\r\\n");
                 Bufferlo chunkData = parser.consume(chunkSize);
                 parser.consume("\\r\\n");
-                
+
                 // handle the chunk
                 if(chunkData.length() > 0) {
                     handler.receiveChunk(this, chunkData);
@@ -493,7 +493,7 @@ public final class CTPConnection implements NIOAttachment {
 
             } else {
                 Bufferlo chunkData = parser.consume(parser.length());
-            
+
                 // handle the simulated chunk
                 if(chunkData.length() > 0) {
                     handler.receiveChunk(this, chunkData);
@@ -502,7 +502,7 @@ public final class CTPConnection implements NIOAttachment {
                     return false;
                 }
             }
-            
+
         } catch(NumberFormatException e) {
             close(new IOException("Failed to decode HTTP request, " + e.getMessage()));
             return false;
@@ -528,9 +528,9 @@ public final class CTPConnection implements NIOAttachment {
         //return close(null);
         close(null);
     }
-    
+
     /**
-     * Close the connection to the client. 
+     * Close the connection to the client.
      *
      * <p>The closing behaviour is dictated by the current state of the connection
      * and the reason for closing.
@@ -558,7 +558,7 @@ public final class CTPConnection implements NIOAttachment {
             writer.write("\r\n");
         }
     }
-    
+
     /**
      * Reads the headers, one per line in standard HTTP form.
      */
@@ -587,7 +587,7 @@ public final class CTPConnection implements NIOAttachment {
         } else {
             sourceChunked = false;
         }
-        
+
         // the name the remote host uses to refer to this host
         String headerLocalHost = (String)headers.get("Host");
         if(headerLocalHost != null) localHost = headerLocalHost;

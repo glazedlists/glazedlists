@@ -64,7 +64,7 @@ public void add(int index, T element) {
     if (size < arrayLength) {
       return;
     }
-    
+
     Object[] biggerValues = new Object[values.length * 2];
     int tail = tail();
 

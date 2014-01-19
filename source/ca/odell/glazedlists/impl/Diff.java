@@ -44,7 +44,7 @@ public final class Diff {
                                       boolean updates, Comparator<E> comparator) {
         DiffMatcher listDiffMatcher = new ListDiffMatcher<E>(target, source, comparator);
         List<Point> editScript = shortestEditScript(listDiffMatcher);
-        
+
         // target is x axis. Changes in X mean advance target index
         // source is y axis. Changes to y mean advance source index
         int targetIndex = 0;
@@ -54,17 +54,17 @@ public final class Diff {
         Point previousPoint = null;
         for(Iterator<Point> i = editScript.iterator(); i.hasNext();) {
             Point currentPoint = i.next();
-            
+
             // skip the first point
             if(previousPoint == null) {
                 previousPoint = currentPoint;
                 continue;
             }
-            
+
             // figure out what the relationship in the values is
             int deltaX = currentPoint.getX() - previousPoint.getX();
             int deltaY = currentPoint.getY() - previousPoint.getY();
-            
+
             // handle an update
             if(deltaX == deltaY) {
                 if(updates) {
@@ -89,7 +89,7 @@ public final class Diff {
             } else {
                 throw new IllegalStateException();
             }
-            
+
             // the next previous point is this current point
             previousPoint = currentPoint;
         }
@@ -106,8 +106,8 @@ public final class Diff {
         int M = input.getBetaLength();
         Point maxPoint = new Point(N, M);
         int maxSteps = N + M;
-        
-        // use previous round furthest reaching D-path to determine the 
+
+        // use previous round furthest reaching D-path to determine the
         // new furthest reaching (D+1)-path
         Map<Integer,Point> furthestReachingPoints = new HashMap<Integer,Point>();
 
@@ -124,10 +124,10 @@ public final class Diff {
                 // not be representative of the point positions
                 Point belowLeft = furthestReachingPoints.get(new Integer(k - 1));
                 Point aboveRight = furthestReachingPoints.get(new Integer(k + 1));
-                
+
                 // the new furthest reaching point to create
                 Point point;
-                
+
                 // first round: we have matched zero in word X
                 if(furthestReachingPoints.isEmpty()) {
                     point = new Point(0, 0);
@@ -143,7 +143,7 @@ public final class Diff {
                 } else {
                     point = belowLeft.createDeltaPoint(1, 0);
                 }
-                
+
                 // match as much diagonal as possible from the previous endpoint
                 while(point.isLessThan(maxPoint) && input.matchPair(point.getX(), point.getY())) {
                     point = point.incrementDiagonally();
@@ -151,7 +151,7 @@ public final class Diff {
 
                 // save this furthest reaching path
                 furthestReachingPoints.put(new Integer(k), point);
-                
+
                 // if we're past the end, we have a solution!
                 if(point.isEqualToOrGreaterThan(maxPoint)) {
                     return point.trail();

@@ -7,7 +7,7 @@ package ca.odell.glazedlists.gui;
  * Specifies how to edit the elements of table.
  *
  * <p>This class can be used as an alternative to the simple {@link TableFormat}
- * class to provide editable cells. The 
+ * class to provide editable cells. The
  * {@link ca.odell.glazedlists.swing.DefaultEventTableModel EventTableModel} detects if a
  * class implements {@link WritableTableFormat} for modifying the table. If a table
  * is not editable at all, it is sufficient to implement {@link TableFormat}
@@ -31,7 +31,7 @@ public interface WritableTableFormat<E> extends TableFormat<E> {
      * @since 2004-August-27, as a replacement for isColumnEditable(int).
      */
     public boolean isEditable(E baseObject, int column);
-    
+
     /**
      * Sets the specified field of the base object to the edited value. When
      * a column of a table is edited, this method is called so that the user

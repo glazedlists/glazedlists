@@ -17,7 +17,7 @@ import java.util.TreeMap;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 class PeerBlock {
-    
+
     /** constants used in the protocol */
     private static final String RESOURCE_URI = "Resource-Uri";
     private static final String SESSION_ID = "Session-Id";
@@ -31,19 +31,19 @@ class PeerBlock {
 
     /** the resource this block is concerned with */
     private ResourceUri resourceUri = null;
-    
+
     /** a check id */
     private int sessionId = -1;
-    
+
     /** the action of this block */
     private String action = null;
 
     /** the sequence ID of this block */
     private int updateId = -1;
-    
+
     /** the binary data of this block */
     private Bufferlo payload = null;
-    
+
     /**
      * Create a new PeerBlock.
      */
@@ -54,21 +54,21 @@ class PeerBlock {
         this.updateId = updateId;
         this.payload = payload;
     }
-    
+
     /**
      * Create a new subscribe block.
      */
     public static PeerBlock subscribeConfirm(ResourceUri resourceUri, int sessionId, int updateId, Bufferlo snapshot) {
         return new PeerBlock(resourceUri, sessionId, PeerBlock.ACTION_SUBSCRIBE_CONFIRM, updateId, snapshot);
     }
-    
+
     /**
      * Create a new subscribe block.
      */
     public static PeerBlock update(ResourceUri resourceUri, int sessionId, int updateId, Bufferlo delta) {
         return new PeerBlock(resourceUri, sessionId, PeerBlock.ACTION_UPDATE, updateId, delta);
     }
-    
+
     /**
      * Create a new subscribe block.
      */
@@ -89,28 +89,28 @@ class PeerBlock {
     public static PeerBlock unpublish(ResourceUri resourceUri) {
         return new PeerBlock(resourceUri, -1, PeerBlock.ACTION_UNPUBLISH, -1, null);
     }
-    
+
     /**
      * Whether this is a subscribe-confirm block.
      */
     public boolean isSubscribeConfirm() {
         return ACTION_SUBSCRIBE_CONFIRM.equals(action);
     }
-    
+
     /**
      * Whether this is an update block.
      */
     public boolean isUpdate() {
         return ACTION_UPDATE.equals(action);
     }
-    
+
     /**
      * Whether this is a subscribe block.
      */
     public boolean isSubscribe() {
         return ACTION_SUBSCRIBE.equals(action);
     }
-    
+
     /**
      * Whether this is an unsubscribe block.
      */
@@ -124,7 +124,7 @@ class PeerBlock {
     public boolean isUnpublish() {
         return ACTION_UNPUBLISH.equals(action);
     }
-    
+
     /**
      * Get the PeerBlock from the specified bytes.
      *
@@ -136,20 +136,20 @@ class PeerBlock {
         // if a full block is not loaded
         int blockEndIndex = bytes.indexOf("\\r\\n");
         if(blockEndIndex == -1) return null;
-        
+
         // read the bytes of the first block
         String blockSizeInDecimal = bytes.readUntil("\\r\\n", false);
         int blockSizeWithHeaders = Integer.parseInt(blockSizeInDecimal);
-        
+
         // if the full block is not loaded, give up
         int bytesRequired = blockEndIndex + 2 + blockSizeWithHeaders + 2;
         if(bytes.length() < bytesRequired) {
             return null;
         }
-        
+
         // consume the size
         bytes.consume("[0-9]*\\r\\n");
-        
+
         // load the headers
         int lengthBeforeHeaders = bytes.length();
         Map headers = new TreeMap();
@@ -162,12 +162,12 @@ class PeerBlock {
         bytes.consume("\\r\\n");
         int lengthAfterHeaders = bytes.length();
         int headersLength = lengthBeforeHeaders - lengthAfterHeaders;
-        
+
         // load the data
         int payloadLength = blockSizeWithHeaders - headersLength;
         Bufferlo payload = bytes.consume(payloadLength);
         bytes.consume("\\r\\n");
-        
+
         // parse the headers
         String resourceUriString = (String)headers.get(RESOURCE_URI);
         ResourceUri resourceUri = ResourceUri.localOrRemote(resourceUriString, localHost, localPort);
@@ -176,7 +176,7 @@ class PeerBlock {
         String updateIdString = (String)headers.get(UPDATE_ID);
         int sessionId = (sessionIdString != null) ? Integer.parseInt(sessionIdString) : -1;
         int updateId = (updateIdString != null) ? Integer.parseInt(updateIdString) : -1;
-        
+
         // return the result
         return new PeerBlock(resourceUri, sessionId, action, updateId, payload);
     }
@@ -187,14 +187,14 @@ class PeerBlock {
     public Bufferlo toBytes(String localHost, int localPort) {
         // the writer with no size info
         Bufferlo writer = new Bufferlo();
-        
+
         // populate the map of headers
         Map headers = new TreeMap();
         if(resourceUri != null) headers.put(RESOURCE_URI, resourceUri.toString(localHost, localPort));
         if(sessionId != -1) headers.put(SESSION_ID, new Integer(sessionId));
         if(action != null) headers.put(ACTION, action);
         if(updateId != -1) headers.put(UPDATE_ID, new Integer(updateId));
-        
+
         // write the header values
         for(Iterator i = headers.entrySet().iterator(); i.hasNext(); ) {
             Map.Entry mapEntry = (Map.Entry)i.next();
@@ -209,32 +209,32 @@ class PeerBlock {
         if(payload != null) {
             writer.append(payload.duplicate());
         }
-        
+
         // wrap the size
         Bufferlo writerWithSize = new Bufferlo();
         writerWithSize.write("" + writer.length());
         writerWithSize.write("\r\n");
         writerWithSize.append(writer);
         writerWithSize.write("\r\n");
-        
+
         // all done
         return writerWithSize;
     }
-    
+
     /**
      * Gets the action of this block.
      */
     public String getAction() {
         return action;
     }
-    
+
     /**
      * Gets the binary data of this block.
      */
     public Bufferlo getPayload() {
         return payload;
     }
-    
+
     /**
      * Gets the update ID of this block.
      */
@@ -248,7 +248,7 @@ class PeerBlock {
     public int getSessionId() {
         return sessionId;
     }
-    
+
     /**
      * Gets the resource that this block is for.
      */

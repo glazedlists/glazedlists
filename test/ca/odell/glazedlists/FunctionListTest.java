@@ -261,7 +261,7 @@ public class FunctionListTest {
         EventList<Integer> source = new BasicEventList<Integer>();
         FunctionList<Integer, String> intsToStrings = new FunctionList<Integer, String>(source, new IntegerToString());
         ListConsistencyListener.install(intsToStrings);
-        
+
         source.add(ZERO);
         assertEquals("0", intsToStrings.get(0));
 

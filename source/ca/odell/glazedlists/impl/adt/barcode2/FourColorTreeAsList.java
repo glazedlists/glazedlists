@@ -35,19 +35,19 @@ import java.util.List;
 
 # define a function NODE_WIDTH(boolean) to get the node's size for this color
 
-    
+
 
 
 # define a function NODE_SIZE(node, colors) to no node.nodeSize()
 
-    
-       
-    
+
+
+
 
 
 # define a function to refresh counts
 
-   
+
 
 
 # multiple values
@@ -61,7 +61,7 @@ import java.util.List;
 
 
 */
-/*[ BEGIN_M4_JAVA ]*/   
+/*[ BEGIN_M4_JAVA ]*/
 
 /**
  * Adapt a {@link FourColorTree} for use as a {@link List}.
@@ -72,21 +72,21 @@ public class FourColorTreeAsList <  T0>   extends AbstractList<T0> {
 
     private final FourColorTree <  T0>   tree;
 
-     
+
     private final byte colors;
 
     /** the color of inserted or added elements */
     private final byte color;
-      
 
-     
+
+
     /**
      * Create a new {@link FourColorTreeAsList} adapting the specified tree.
      */
     public FourColorTreeAsList/**/(FourColorTree tree) {
         this(tree, tree.getCoder().colorsToByte(tree.getCoder().getColors()), (byte)1);
     }
-      
+
 
     /**
      * Create a new {@link FourColorTreeAsList}, adapting the specified colors subset
@@ -95,10 +95,10 @@ public class FourColorTreeAsList <  T0>   extends AbstractList<T0> {
      */
     public FourColorTreeAsList/**/(FourColorTree <  T0>   tree   , byte colors, byte color   ) {
         this.tree = tree;
-         
+
         this.colors = colors;
         this.color = color;
-          
+
     }
 
     /** {@inheritDoc} */

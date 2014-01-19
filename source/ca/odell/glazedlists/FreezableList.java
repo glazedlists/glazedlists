@@ -11,10 +11,10 @@ import java.util.List;
 
 /**
  * An {@link EventList} that shows the current contents of its source {@link EventList}.
- * 
+ *
  * <p>When this {@link EventList} is <i>frozen</i>, changes to its source {@link EventList}
  * will not be reflected. Instead, the {@link FreezableList} will continue to show
- * the state of its source {@link EventList} at the time it was frozen. 
+ * the state of its source {@link EventList} at the time it was frozen.
  *
  * <p>When this {@link EventList} is <i>thawed</i>, changes to its source
  * {@link EventList} will be reflected.
@@ -96,7 +96,7 @@ public final class FreezableList<E> extends TransformedList<E, E> {
      * Locks this {@link FreezableList} on the current state of the source
      * {@link EventList}. While frozen, changes to the source {@link EventList}
      * will not be reflected by this list.
-     * 
+     *
      * <p><strong><font color="#FF0000">Warning:</font></strong> This method is
      * thread ready but not thread safe. See {@link EventList} for an example
      * of thread safe code.

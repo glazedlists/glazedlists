@@ -35,19 +35,19 @@ import java.util.List;
 
 # define a function NODE_WIDTH(boolean) to get the node's size for this color
 
-    
+
 
 
 # define a function NODE_SIZE(node, colors) to no node.nodeSize()
 
-    
-       
-    
+
+
+
 
 
 # define a function to refresh counts
 
-   
+
 
 
 # multiple values
@@ -61,7 +61,7 @@ import java.util.List;
 
 
 */
-/*[ BEGIN_M4_JAVA ]*/   
+/*[ BEGIN_M4_JAVA ]*/
 
 /**
  * A node in a tree which supports both a value and compressed nodes that
@@ -78,31 +78,31 @@ import java.util.List;
 class  FourColorNode <  T0>   implements Element<T0> {
 
     /** the number of elements of each color in this subtree */
-     
+
     int count1;
     int count2;
     int count4;
     int count8;
-    
-    
-     
 
-     
+
+
+
+
     /** the node's color */
     byte color;
-      
+
 
     /** the node's value */
-     
-    T0 t0;
-    
-    
-     
 
-     
+    T0 t0;
+
+
+
+
+
     /** the size of this node */
     int size;
-      
+
 
     /** values for managing the node within the tree */
     byte height;
@@ -121,25 +121,25 @@ class  FourColorNode <  T0>   implements Element<T0> {
      *      root node.
      */
     public FourColorNode/**/(  byte color,    int size, T0 value,  FourColorNode <  T0>   parent) {
-         
+
         assert(FourColorTree.colorAsIndex(color) >= 0 && FourColorTree.colorAsIndex(color) < 7);
         this.color = color;
-          
-         
+
+
         this.size = size;
-          
+
         this.t0 = value;
         this.height = 1;
         this.parent = parent;
 
-         
+
         if(color == 1) count1 += size;
         if(color == 2) count2 += size;
         if(color == 4) count4 += size;
         if(color == 8) count8 += size;
-        
-        
-         
+
+
+
     }
 
     /**
@@ -159,12 +159,12 @@ class  FourColorNode <  T0>   implements Element<T0> {
     }
 
     /** access the node's values */
-     
+
     public T0 get0() { return t0; }
     public void set0(T0 value) { this.t0 = value; }
-    
-    
-     
+
+
+
 
     /**
      * Get the color of this element.
@@ -182,25 +182,25 @@ class  FourColorNode <  T0>   implements Element<T0> {
         // total the values of the specified array for the specified colors.
         int result = 0;
 
-         
+
         if((colors & 1) != 0) result += count1;
         if((colors & 2) != 0) result += count2;
         if((colors & 4) != 0) result += count4;
         if((colors & 8) != 0) result += count8;
-        
-        
-         
+
+
+
         return result;
     }
 
-     
+
     /**
      * The size of the node for the specified colors.
      */
     final int nodeSize(byte colors) {
         return (colors & color) > 0 ? size : 0;
     }
-      
+
 
     /**
      * Update the counts member variable by examining the counts of
@@ -208,48 +208,48 @@ class  FourColorNode <  T0>   implements Element<T0> {
      */
     final void refreshCounts(  ) {
 
-         
+
         count1 = 0;
         count2 = 0;
         count4 = 0;
         count8 = 0;
-        
-        
-         
+
+
+
 
         // left child
         if(left != null) {
-             
+
             count1 += left.count1;
             count2 += left.count2;
             count4 += left.count4;
             count8 += left.count8;
-            
-            
-             
+
+
+
         }
 
         // right child
         if(right != null) {
-             
+
             count1 += right.count1;
             count2 += right.count2;
             count4 += right.count4;
             count8 += right.count8;
-            
-            
-             
+
+
+
         }
 
         // this node
-         
+
         if(color == 1) count1 += size;
         if(color == 2) count2 += size;
         if(color == 4) count4 += size;
         if(color == 8) count8 += size;
-        
-        
-         
+
+
+
     }
 
     /** {@inheritDoc} */
@@ -278,8 +278,8 @@ class  FourColorNode <  T0>   implements Element<T0> {
         for(int i = 0; i < indentation; i++) {
             out.append("   ");
         }
-          out.append(colors.get(FourColorTree.colorAsIndex(color)));   
-          out.append(" [").append(size).append("]");   
+          out.append(colors.get(FourColorTree.colorAsIndex(color)));
+          out.append(" [").append(size).append("]");
         if(t0 != null) {
             out.append(": ");
             if(t0 instanceof FourColorNode) {

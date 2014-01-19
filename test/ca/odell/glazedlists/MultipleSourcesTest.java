@@ -40,18 +40,18 @@ public class MultipleSourcesTest {
         BasicEventList<String> source = new BasicEventList<String>();
         FilterList<String> filterOne = new FilterList<String>(source, Matchers.trueMatcher());
         FilterList<String> filterTwo = new FilterList<String>(source, Matchers.trueMatcher());
-        
+
         source.add("Game Cube");
         source.add("Genesis");
         source.add("XBox");
         source.add("PlayStation");
         source.add("Turbo Graphics 16");
-        
+
         List<EventList<String>> filterLists = new ArrayList<EventList<String>>();
         filterLists.add(filterOne);
         filterLists.add(filterTwo);
         MultipleSourcesListener filtersListener = new MultipleSourcesListener(filterLists, true);
-        
+
         // modify the source
         source.clear();
         assertEquals(2, filtersListener.getChangeCount());
@@ -63,12 +63,12 @@ public class MultipleSourcesTest {
         // modify filter one
         filterOne.setMatcher(Matchers.falseMatcher());
         assertEquals(9, filtersListener.getChangeCount());
-        
+
         // modify filter two
         filterTwo.setMatcher(Matchers.trueMatcher());
         assertEquals(9, filtersListener.getChangeCount());
     }
-    
+
     /**
      * Tests whether an EventList can depend upon multiple sources simultaneously
      * when not all of the sources are directly registered as ListEventListeners.
@@ -78,20 +78,20 @@ public class MultipleSourcesTest {
         BasicEventList<String> source = new BasicEventList<String>();
         FilterList<String> filterOne = new FilterList<String>(source, Matchers.trueMatcher());
         FilterList<String> filterTwo = new FilterList<String>(source, Matchers.trueMatcher());
-        
+
         source.add("Game Cube");
         source.add("Genesis");
         source.add("XBox");
         source.add("PlayStation");
         source.add("Turbo Graphics 16");
-        
+
         List<EventList<String>> filterLists = new ArrayList<EventList<String>>();
         filterLists.add(filterOne);
         filterLists.add(filterTwo);
         MultipleSourcesListener filtersListener = new MultipleSourcesListener(filterLists, false);
         filterOne.addListEventListener(filtersListener);
         filterOne.getPublisher().addDependency(filterTwo, filtersListener);
-        
+
         // modify the source
         source.clear();
         assertEquals(1, filtersListener.getChangeCount());
@@ -103,12 +103,12 @@ public class MultipleSourcesTest {
         // modify filter one
         filterOne.setMatcher(Matchers.falseMatcher());
         assertEquals(5, filtersListener.getChangeCount());
-        
+
         // modify filter two
         filterTwo.setMatcher(Matchers.trueMatcher());
         assertEquals(5, filtersListener.getChangeCount());
     }
-    
+
 
     /**
      * Listens to multiple sources, and when one source changes, this iterates all

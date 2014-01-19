@@ -9,7 +9,7 @@ import javax.swing.event.EventListenerList;
  * Basic building block for {@link MatcherEditor} implementations that handles
  * the details of dealing with registered {@link MatcherEditor.Listener}s. In
  * addition, it provides helper methods for creating matcher events.
- * 
+ *
  * @author Holger Brands
  */
 public abstract class AbstractMatcherEditorListenerSupport<E> implements

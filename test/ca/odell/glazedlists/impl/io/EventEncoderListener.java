@@ -17,20 +17,20 @@ import java.util.List;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class EventEncoderListener implements ListEventListener {
-    
+
     /** the Bufferlo encodings */
     public List encodings = new ArrayList();
-    
+
     /** the delegate coder for elements */
     public ByteCoder byteCoder = null;
-    
+
     /**
      * Create a new EventEncoderListener.
      */
     public EventEncoderListener(ByteCoder byteCoder) {
         this.byteCoder = byteCoder;
     }
-    
+
     /**
      * Handles a change by adding the encoding of the change.
      */

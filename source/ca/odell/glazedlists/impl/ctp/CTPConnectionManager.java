@@ -24,19 +24,19 @@ import java.nio.channels.SocketChannel;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public final class CTPConnectionManager implements NIOServer {
-    
+
     /** default port to bind to */
     private static final int DEFAULT_PORT = 5309;
 
     /** port to listen for incoming connections */
     private int listenPort = -1;
-    
+
     /** factory for handlers of incoming connections */
     private CTPHandlerFactory handlerFactory;
-    
+
     /** the I/O event queue daemon */
     private NIODaemon nioDaemon = null;
-    
+
     /**
      * Creates a connection manager that handles incoming connections using the
      * specified connect handler. This binds to the default port.
@@ -44,7 +44,7 @@ public final class CTPConnectionManager implements NIOServer {
     public CTPConnectionManager(CTPHandlerFactory handlerFactory) {
         this(handlerFactory, DEFAULT_PORT);
     }
-    
+
     /**
      * Creates a connection manager that handles incoming connections using the
      * specified connect handler. This binds to the specified port.
@@ -53,7 +53,7 @@ public final class CTPConnectionManager implements NIOServer {
         this.handlerFactory = handlerFactory;
         this.listenPort = listenPort;
     }
-    
+
     /**
      * Starts the CTPConnectionManager listening to incoming connections and
      * managing outgoing connections.
@@ -63,11 +63,11 @@ public final class CTPConnectionManager implements NIOServer {
     public synchronized boolean start() throws IOException {
         // verify we haven't already started
         if(nioDaemon != null) throw new IllegalStateException();
-        
+
         // start the nio daemon
         nioDaemon = new NIODaemon();
         nioDaemon.start();
-        
+
         // start the server
         try {
             nioDaemon.invokeAndWait(new StartServer(this, listenPort));
@@ -76,7 +76,7 @@ public final class CTPConnectionManager implements NIOServer {
             if(e.getCause() instanceof IOException) throw (IOException)e.getCause();
             else throw e;
         }
-        
+
         // success
         return true;
     }
@@ -87,14 +87,14 @@ public final class CTPConnectionManager implements NIOServer {
     public void stop() {
         nioDaemon.stop();
     }
-    
+
     /**
      * Get the daemon that does all the threading and selection.
      */
     public NIODaemon getNIODaemon() {
         return nioDaemon;
     }
-    
+
     /**
      * Handle an incoming connection.
      *
@@ -127,7 +127,7 @@ public final class CTPConnectionManager implements NIOServer {
         channelKey.attach(server);
         server.handleConnect();
     }
-    
+
     /**
      * Connect to the specified host.
      */

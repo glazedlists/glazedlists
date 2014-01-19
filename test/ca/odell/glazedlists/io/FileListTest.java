@@ -27,13 +27,13 @@ public class FileListTest {
     public void testCreate() throws IOException {
         File fibonacciFile = File.createTempFile("fibonacci", "j81");
         fibonacciFile.deleteOnExit();
-        
+
         int expectedSecondLast = 0;
         int expectedLast = 0;
         int current = 0;
         for(int i = 0; i < 16; i++) {
             FileList fibonacci = new FileList(fibonacciFile, GlazedListsIO.serializableByteCoder());
-            
+
             // base case
             if(fibonacci.size() < 2) {
                 current = 1;
@@ -45,15 +45,15 @@ public class FileListTest {
                 assertEquals(expectedSecondLast, secondLast.intValue());
                 Integer last = (Integer)fibonacci.get(fibonacci.size() - 1);
                 assertEquals(expectedLast, last.intValue());
-                
+
                 // prepare the new value
                 current = secondLast.intValue() + last.intValue();
             }
-            
+
             // save the new value to the file
             fibonacci.add(new Integer(current));
             fibonacci.close();
-            
+
             // prepare for the next round
             expectedSecondLast = expectedLast;
             expectedLast = current;

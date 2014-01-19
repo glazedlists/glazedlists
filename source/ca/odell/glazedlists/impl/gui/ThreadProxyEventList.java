@@ -228,7 +228,7 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> impl
                 // This is necessary so that intermediate states in this list
                 // are visible to larger list changes (such as clearing tables,
                 // see bug 447)
-                cacheUpdates.commitEvent(); 
+                cacheUpdates.commitEvent();
                 updates.commitEvent();
             } finally {
                 scheduled = false;

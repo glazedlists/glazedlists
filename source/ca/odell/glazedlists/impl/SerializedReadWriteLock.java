@@ -16,7 +16,7 @@ import java.io.Serializable;
  * representated by this class on the serialization stream. Upon
  * deserialization on the target JVM, an appropriate lock implementation is
  * reconstructed according to the capabilities of the target platform.
- *  
+ *
  * @author Holger Brands
  */
 public final class SerializedReadWriteLock implements ReadWriteLock, Serializable {

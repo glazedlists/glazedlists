@@ -15,17 +15,17 @@ import java.text.ParseException;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 class ResourceUri implements Comparable {
-    
+
     /** the resource host */
     private String host;
     private int port;
-    
+
     /** the resource path */
     private String path;
-    
+
     /** true if this resource is sourced locally */
     private boolean local;
-    
+
     /**
      * Creates a new {@link ResourceUri}.
      */
@@ -35,14 +35,14 @@ class ResourceUri implements Comparable {
         this.path = path;
         this.local = local;
     }
-    
+
     /**
      * Creates a new returns a {@link ResourceUri} for the specified local path.
      */
     public static ResourceUri local(String path) {
         return new ResourceUri(null, -1, path, true);
     }
-    
+
     /**
      * Creates and returns a {@link ResourceUri} for the specified uri. This resource
      * will be considered local if the host specified matches the host in the uri.
@@ -52,13 +52,13 @@ class ResourceUri implements Comparable {
         try {
             Bufferlo parser = new Bufferlo();
             parser.write(uri);
-            
+
             parser.consume("glazedlists\\:\\/\\/");
             String host = parser.readUntil("\\:");
             String portString = parser.readUntil("\\/");
             int port = Integer.parseInt(portString);
             String path = "/" + parser.toString();
-            
+
             boolean local = (localHost.equals(host)) && (localPort == port);
             return new ResourceUri(host, port, path, local);
         } catch(ParseException e) {
@@ -67,14 +67,14 @@ class ResourceUri implements Comparable {
             throw new IllegalStateException(e.getMessage());
         }
     }
-    
+
     /**
      * Creates a new remote {@link ResourceUri}.
      */
     public static ResourceUri remote(String host, int port, String path) {
         return new ResourceUri(host, port, path, false);
     }
-    
+
     /**
      * Test if this URI is local.
      */
@@ -87,7 +87,7 @@ class ResourceUri implements Comparable {
     public boolean isRemote() {
         return !local;
     }
-    
+
     /**
      * Get the URI host.
      */
@@ -100,7 +100,7 @@ class ResourceUri implements Comparable {
     public int getPort() {
         return port;
     }
-    
+
     /**
      * Gets this resource as a String, substituting the specified local host and
      * local port as necessary.
@@ -116,7 +116,7 @@ class ResourceUri implements Comparable {
     public String toString() {
         return "Resource URI [local=" + local + ", host=" + host + ", port=" + port + ", path=" + path + "]";
     }
-    
+
     /**
      * Computes a hash of this resource uri.
      */
@@ -129,7 +129,7 @@ class ResourceUri implements Comparable {
         }
         return result;
     }
-    
+
     /**
      * Compares two resources.
      */
@@ -138,10 +138,10 @@ class ResourceUri implements Comparable {
         if(other == null) throw new NullPointerException();
         ResourceUri otherUri = (ResourceUri)other;
         if(otherUri.local != this.local) throw new IllegalStateException("Cannot compare local URI with remote URI: " + other + " vs. " + this);
-        
+
         int result = path.compareTo(otherUri.path);
         if(result != 0) return result;
-        
+
         if(!local) {
             result = host.compareTo(otherUri.host);
             if(result != 0) return result;
@@ -149,10 +149,10 @@ class ResourceUri implements Comparable {
             result = port - otherUri.port;
             if(result != 0) return result;
         }
-        
+
         return 0;
     }
-    
+
     /**
      * Tests if this ResourceUri equals that ResourceUri.
      */

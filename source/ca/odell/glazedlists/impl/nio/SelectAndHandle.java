@@ -14,20 +14,20 @@ import java.util.logging.Logger;
  * The SelectAndHandle selects ready keys and handles them.
  */
 class SelectAndHandle implements Runnable {
-     
+
     /** logging */
     private static Logger logger = Logger.getLogger(SelectAndHandle.class.toString());
 
     /** the I/O event queue daemon */
     private NIODaemon nioDaemon = null;
-    
+
     /**
      * Create a new SelectorHandler for the specified NIO Daemon.
      */
     public SelectAndHandle(NIODaemon nioDaemon) {
         this.nioDaemon = nioDaemon;
     }
-    
+
     /**
      * Select and handle.
      */
@@ -36,7 +36,7 @@ class SelectAndHandle implements Runnable {
         select();
         handle();
     }
-    
+
     /**
      * Selects keys which are ready to be processed.
      */
@@ -49,7 +49,7 @@ class SelectAndHandle implements Runnable {
             logger.log(Level.WARNING, e.getMessage(), e);
         }
     }
-    
+
     /**
      * Handles all keys which are ready to be processed.
      */
@@ -58,12 +58,12 @@ class SelectAndHandle implements Runnable {
         for(Iterator i = nioDaemon.getSelector().selectedKeys().iterator(); i.hasNext(); ) {
             SelectionKey key = (SelectionKey)i.next();
             i.remove();
-            
+
             // Is a new connection coming in?
             if(key.isValid() && key.isAcceptable()) {
                 nioDaemon.getServer().handleAccept(key, nioDaemon.getSelector());
             }
-            
+
             // an outgoing connection has been established
             if(key.isValid() && key.isConnectable()) {
                 NIOAttachment attachment = (NIOAttachment)key.attachment();
@@ -75,7 +75,7 @@ class SelectAndHandle implements Runnable {
                 NIOAttachment attachment = (NIOAttachment)key.attachment();
                 attachment.handleRead();
             }
-            
+
             // outgoing data can be written
             if(key.isValid() && key.isWritable()) {
                 NIOAttachment attachment = (NIOAttachment)key.attachment();

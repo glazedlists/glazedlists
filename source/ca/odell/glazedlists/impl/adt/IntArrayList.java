@@ -21,9 +21,9 @@ public class IntArrayList {
 
 	/**
 	 * Create a list with the given initial capacity.
-	 * 
+	 *
 	 * @param initial_capacity  The capacity to initially allow in the list without
-	 *                          requiring additional array space to be allocated.   
+	 *                          requiring additional array space to be allocated.
 	 */
 	public IntArrayList( int initial_capacity ) {
 		data = new int[ initial_capacity ];
@@ -62,7 +62,7 @@ public class IntArrayList {
 	 */
 	public int get( int index ) {
 		checkAccess( index );
-		
+
 		return data[ index ];
 	}
 
@@ -72,7 +72,7 @@ public class IntArrayList {
 	 */
 	public void add( int value ) {
 		checkGrow( 1 );
-		
+
 		data[ size ] = value;
 		size++;
 	}
@@ -87,7 +87,7 @@ public class IntArrayList {
 	 */
 	public void set( int index, int value ) {
 		checkAccess( index );
-		
+
 		data[ index ] = value;
 	}
 
@@ -118,12 +118,12 @@ public class IntArrayList {
 	 */
 	private void checkGrow( int amount ) {
 		if ( size + amount <= data.length ) return;
-		
+
 		int new_length = data.length * 2;
 		while( new_length < ( size + amount ) ) {
 			new_length = data.length * 2;
 		}
-		
+
 		int[] new_data = new int[ new_length ];
 		System.arraycopy( data, 0, new_data, 0, size );
 		data = new_data;

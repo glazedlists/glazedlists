@@ -193,7 +193,7 @@ public final class ThreadSafeList<E> extends TransformedList<E, E> {
             getReadWriteLock().writeLock().unlock();
         }
     }
-        
+
     /** {@inheritDoc} */
     @Override
     public boolean remove(Object toRemove) {
@@ -248,7 +248,7 @@ public final class ThreadSafeList<E> extends TransformedList<E, E> {
             getReadWriteLock().writeLock().unlock();
         }
     }
-        
+
     /** {@inheritDoc} */
     @Override
     public void clear() {
@@ -292,7 +292,7 @@ public final class ThreadSafeList<E> extends TransformedList<E, E> {
             getReadWriteLock().writeLock().unlock();
         }
     }
-    
+
     /** {@inheritDoc} */
     @Override
     public String toString() {

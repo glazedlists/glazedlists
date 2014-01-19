@@ -118,7 +118,7 @@ public class PluggableList<E> extends TransformedList<E, E> {
 
             if (this.source == source)
                 return;
-            
+
             updates.beginEvent();
             // add deletions to the ListEvent for all the elements in the old source
             for (int i = 0, n = size(); i < n; i++)

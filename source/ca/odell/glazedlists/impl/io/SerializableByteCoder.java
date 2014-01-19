@@ -21,7 +21,7 @@ public class SerializableByteCoder implements ByteCoder {
         objectOut.writeObject(source);
         objectOut.close();
     }
-    
+
     /** {@inheritDoc} */
     @Override
     public Object decode(InputStream source) throws IOException {

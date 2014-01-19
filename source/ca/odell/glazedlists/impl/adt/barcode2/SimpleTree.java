@@ -38,17 +38,17 @@ import java.util.List;
 
 # define a function NODE_WIDTH(boolean) to get the node's size for this color
 
-    
+
 
 
 # define a function NODE_SIZE(node, colors) to no node.nodeSize()
 
-   
+
 
 
 # define a function to refresh counts
 
-   
+
 
 
 # multiple values
@@ -62,7 +62,7 @@ import java.util.List;
 
 
 */
-/*[ BEGIN_M4_JAVA ]*/   
+/*[ BEGIN_M4_JAVA ]*/
 
 /**
  * Our second generation tree class.
@@ -94,7 +94,7 @@ import java.util.List;
  */
 public class SimpleTree <  T0>   {
 
-      
+
 
     /** the tree's root, or <code>null</code> for an empty tree */
     private  SimpleNode <  T0>   root = null;
@@ -120,10 +120,10 @@ public class SimpleTree <  T0>   {
      *      tree. If this tree is unsorted, use the one-argument constructor.
      */
     public SimpleTree/**/(   Comparator<? super T0> comparator) {
-          
+
         if(comparator == null) throw new NullPointerException("Comparator cannot be null.");
 
-          
+
         this.comparator = comparator;
     }
 
@@ -134,7 +134,7 @@ public class SimpleTree <  T0>   {
         this(   (Comparator)GlazedLists.comparableComparator());
     }
 
-      
+
 
     public Comparator<? super T0> getComparator() {
         return comparator;
@@ -241,7 +241,7 @@ public class SimpleTree <  T0>   {
             // current node, since that's the cheapest thing to do:
             if( false &&     value == parent.t0 && value != null) {
                 if(index >= parentLeftSize && index <= parentRightStartIndex) {
-                      
+
                     fixCountsThruRoot(parent,    size);
                     return parent;
                 }
@@ -268,7 +268,7 @@ public class SimpleTree <  T0>   {
             // centre, and inserting the value
             if(index < parentRightStartIndex) {
                 int parentRightHalfSize = parentRightStartIndex - index;
-                  
+
                 fixCountsThruRoot(parent,    -parentRightHalfSize);
                 // insert as null first to make sure this doesn't get merged back
                 Element<T0> inserted = insertIntoSubtree(parent, index,    null, parentRightHalfSize);
@@ -358,7 +358,7 @@ public class SimpleTree <  T0>   {
             // the first thing we want to try is to merge this value into the
             // current node, since that's the cheapest thing to do:
             if( false &&  sortSide == 0 &&    value == parent.t0 && value != null) {
-                  
+
                 fixCountsThruRoot(parent,    size);
                 return parent;
             }
@@ -411,14 +411,14 @@ public class SimpleTree <  T0>   {
      * (which may be positive or negative).
      */
     private final void fixCountsThruRoot( SimpleNode <  T0>   node,    int delta) {
-         
+
         for( ; node != null; node = node.parent) node.count1 += delta;
-        
-        
-         
+
+
+
     }
 
-      
+
 
     /**
      * Fix the height of the specified ancestor after inserting a child node.
@@ -514,13 +514,13 @@ public class SimpleTree <  T0>   {
         byte subtreeRootLeftHeight = subtreeRoot.left != null ? subtreeRoot.left.height : 0;
         byte subtreeRootRightHeight = subtreeRoot.right != null ? subtreeRoot.right.height : 0;
         subtreeRoot.height = (byte)(Math.max(subtreeRootLeftHeight, subtreeRootRightHeight) + 1);
-         subtreeRoot.refreshCounts(!zeroQueue.contains(subtreeRoot));  
+         subtreeRoot.refreshCounts(!zeroQueue.contains(subtreeRoot));
 
         // update height and counts of the new subtree root
         byte newSubtreeRootLeftHeight = newSubtreeRoot.left != null ? newSubtreeRoot.left.height : 0;
         byte newSubtreeRootRightHeight = newSubtreeRoot.right != null ? newSubtreeRoot.right.height : 0;
         newSubtreeRoot.height = (byte)(Math.max(newSubtreeRootLeftHeight, newSubtreeRootRightHeight) + 1);
-         newSubtreeRoot.refreshCounts(!zeroQueue.contains(newSubtreeRoot));  
+         newSubtreeRoot.refreshCounts(!zeroQueue.contains(newSubtreeRoot));
 
         return newSubtreeRoot;
     }
@@ -551,13 +551,13 @@ public class SimpleTree <  T0>   {
         byte subtreeRootLeftHeight = subtreeRoot.left != null ? subtreeRoot.left.height : 0;
         byte subtreeRootRightHeight = subtreeRoot.right != null ? subtreeRoot.right.height : 0;
         subtreeRoot.height = (byte)(Math.max(subtreeRootLeftHeight, subtreeRootRightHeight) + 1);
-         subtreeRoot.refreshCounts(!zeroQueue.contains(subtreeRoot));  
+         subtreeRoot.refreshCounts(!zeroQueue.contains(subtreeRoot));
 
         // update height and counts of the new subtree root
         byte newSubtreeRootLeftHeight = newSubtreeRoot.left != null ? newSubtreeRoot.left.height : 0;
         byte newSubtreeRootRightHeight = newSubtreeRoot.right != null ? newSubtreeRoot.right.height : 0;
         newSubtreeRoot.height = (byte)(Math.max(newSubtreeRootLeftHeight, newSubtreeRootRightHeight) + 1);
-         newSubtreeRoot.refreshCounts(!zeroQueue.contains(newSubtreeRoot));  
+         newSubtreeRoot.refreshCounts(!zeroQueue.contains(newSubtreeRoot));
 
         return newSubtreeRoot;
     }
@@ -567,12 +567,12 @@ public class SimpleTree <  T0>   {
      */
     public void remove(Element<T0> element) {
          SimpleNode <  T0>   node = ( SimpleNode <  T0>  )element;
-          
+
         assert(root != null);
 
         // delete the node by adding to the zero queue
         fixCountsThruRoot(node,     -1 );
-          
+
         zeroQueue.add(node);
         drainZeroQueue();
 
@@ -610,7 +610,7 @@ public class SimpleTree <  T0>   {
     private void drainZeroQueue() {
         for(int i = 0, size = zeroQueue.size(); i < size; i++) {
              SimpleNode <  T0>   node = zeroQueue.get(i);
-              
+
 
             if(node.right == null) {
                 replaceChild(node, node.left);
@@ -659,7 +659,7 @@ public class SimpleTree <  T0>   {
             if(index < rightStartIndex) {
                 int toRemove = Math.min(rightStartIndex - index, size);
                 // decrement the appropriate counts all the way up
-                  
+
                 size -= toRemove;
                 rightStartIndex -= toRemove;
                 fixCountsThruRoot(node,    -toRemove);
@@ -716,7 +716,7 @@ public class SimpleTree <  T0>   {
      * @return the replacement node
      */
     private  SimpleNode <  T0>   replaceEmptyNodeWithChild( SimpleNode <  T0>   toReplace) {
-          
+
         assert(toReplace.left != null);
         assert(toReplace.right != null);
 
@@ -737,7 +737,7 @@ public class SimpleTree <  T0>   {
         replacement.right = toReplace.right;
         if(replacement.right != null) replacement.right.parent = replacement;
         replacement.height = toReplace.height;
-         replacement.refreshCounts(!zeroQueue.contains(replacement));  
+         replacement.refreshCounts(!zeroQueue.contains(replacement));
         replaceChild(toReplace, replacement);
         fixCountsThruRoot(replacement.parent,     1 );
 
@@ -923,7 +923,7 @@ public class SimpleTree <  T0>   {
     /**
      * Print this tree as a list of colors, removing all hierarchy.
      */
-      
+
 
 
     /**
@@ -992,17 +992,17 @@ public class SimpleTree <  T0>   {
         for( SimpleNode <  T0>   node = firstNode(); node != null; node = next(node)) {
             // sizes (counts) are valid
 
-             
+
             int originalCount1 = node.count1;
-            
-            
-             
-             node.refreshCounts(!zeroQueue.contains(node));  
-             
+
+
+
+             node.refreshCounts(!zeroQueue.contains(node));
+
             assert(originalCount1 == node.count1) : "Incorrect count 0 on node: \n" + node  + "\n Expected " + node.count1 + " but was " + originalCount1;
-            
-            
-             
+
+
+
 
             // heights are valid
             int leftHeight = node.left != null ? node.left.height : 0;

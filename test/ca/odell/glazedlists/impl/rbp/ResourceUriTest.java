@@ -25,13 +25,13 @@ public class ResourceUriTest {
         ResourceUri localCustomers2 = ResourceUri.localOrRemote("glazedlists://localhost:1000/Customers", "localhost", 1000);
         assertEquals(localCustomers, localCustomers2);
         assertEquals(localCustomers.hashCode(), localCustomers2.hashCode());
-        
+
         ResourceUri remoteCustomers = ResourceUri.localOrRemote("glazedlists://localhost:1000/Customers", "localhost", 2000);
         assertFalse(remoteCustomers.isLocal());
-        
+
         ResourceUri remoteCustomers2 = ResourceUri.localOrRemote("glazedlists://localhost:1000/Customers", "localhost.com", 1000);
         assertFalse(remoteCustomers2.isLocal());
-        
+
         ResourceUri remoteCustomers3 = ResourceUri.remote("localhost", 1000, "/Customers");
         assertEquals(remoteCustomers, remoteCustomers3);
         assertEquals(remoteCustomers, remoteCustomers2);

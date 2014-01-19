@@ -19,13 +19,13 @@ public class StringResource implements Resource {
 
     /** the read/write lock provides mutual exclusion to access */
     private ReadWriteLock readWriteLock = LockFactory.DEFAULT.createReadWriteLock();
-    
+
     /** the value of this resource */
     private String value = "";
-    
+
     /** the listeners to this resource */
     private List listeners = new ArrayList();
-    
+
     /**
      * Get a binary snapshot of this resource in its current state.
      */
@@ -35,7 +35,7 @@ public class StringResource implements Resource {
         result.write(value);
         return result;
     }
-    
+
     public String getValue() {
         return value;
     }
@@ -43,7 +43,7 @@ public class StringResource implements Resource {
         this.value = value;
         notifyListeners();
     }
-    
+
     /**
      * Populate this resource with the data from the specified snapshot.
      */
@@ -52,7 +52,7 @@ public class StringResource implements Resource {
         value = snapshot.toString();
         notifyListeners();
     }
-    
+
     /**
      * Apply the specified delta to the binary image of this resource. After the
      * update has been applied, all {@link ResourceListener}s must be notified.
@@ -61,7 +61,7 @@ public class StringResource implements Resource {
     public void update(Bufferlo delta) {
         fromSnapshot(delta);
     }
-    
+
     /**
      * Register the {@link ResourceListener} to receive notification when this
      * resource is modified.
@@ -70,7 +70,7 @@ public class StringResource implements Resource {
     public void addResourceListener(ResourceListener listener) {
          listeners.add(listener);
      }
-    
+
     /**
      * Degregister the {@link ResourceListener} from receiving update events.
      */
@@ -78,7 +78,7 @@ public class StringResource implements Resource {
     public void removeResourceListener(ResourceListener listener) {
         listeners.add(listener);
     }
-    
+
     /**
      * Gets the lock required to share this resource between multiple threads.
      *
@@ -89,7 +89,7 @@ public class StringResource implements Resource {
     public ReadWriteLock getReadWriteLock() {
         return readWriteLock;
     }
-    
+
     /**
      * Notify listeners that the value of this String has changed.
      */

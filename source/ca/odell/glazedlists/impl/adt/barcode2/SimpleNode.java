@@ -35,17 +35,17 @@ import java.util.List;
 
 # define a function NODE_WIDTH(boolean) to get the node's size for this color
 
-    
+
 
 
 # define a function NODE_SIZE(node, colors) to no node.nodeSize()
 
-   
+
 
 
 # define a function to refresh counts
 
-   
+
 
 
 # multiple values
@@ -59,7 +59,7 @@ import java.util.List;
 
 
 */
-/*[ BEGIN_M4_JAVA ]*/   
+/*[ BEGIN_M4_JAVA ]*/
 
 /**
  * A node in a tree which supports both a value and compressed nodes that
@@ -76,22 +76,22 @@ import java.util.List;
 class  SimpleNode <  T0>   implements Element<T0> {
 
     /** the number of elements of each color in this subtree */
-     
-    int count1;
-    
-    
-     
 
-      
+    int count1;
+
+
+
+
+
 
     /** the node's value */
-     
-    T0 t0;
-    
-    
-     
 
-      
+    T0 t0;
+
+
+
+
+
 
     /** values for managing the node within the tree */
     byte height;
@@ -110,17 +110,17 @@ class  SimpleNode <  T0>   implements Element<T0> {
      *      root node.
      */
     public SimpleNode/**/(   int size, T0 value,  SimpleNode <  T0>   parent) {
-          
-         assert(size == 1); 
+
+         assert(size == 1);
         this.t0 = value;
         this.height = 1;
         this.parent = parent;
 
-         
+
         count1 += size;
-        
-        
-         
+
+
+
     }
 
     /**
@@ -140,12 +140,12 @@ class  SimpleNode <  T0>   implements Element<T0> {
     }
 
     /** access the node's values */
-     
+
     public T0 get0() { return t0; }
     public void set0(T0 value) { this.t0 = value; }
-    
-    
-     
+
+
+
 
     /**
      * Get the color of this element.
@@ -163,15 +163,15 @@ class  SimpleNode <  T0>   implements Element<T0> {
         // total the values of the specified array for the specified colors.
         int result = 0;
 
-         
+
         if((colors & 1) != 0) result += count1;
-        
-        
-         
+
+
+
         return result;
     }
 
-      
+
 
     /**
      * Update the counts member variable by examining the counts of
@@ -179,36 +179,36 @@ class  SimpleNode <  T0>   implements Element<T0> {
      */
     final void refreshCounts( boolean countSelf ) {
 
-         
+
         count1 = 0;
-        
-        
-         
+
+
+
 
         // left child
         if(left != null) {
-             
+
             count1 += left.count1;
-            
-            
-             
+
+
+
         }
 
         // right child
         if(right != null) {
-             
+
             count1 += right.count1;
-            
-            
-             
+
+
+
         }
 
         // this node
-         
+
         count1 += countSelf ? 1 : 0;
-        
-        
-         
+
+
+
     }
 
     /** {@inheritDoc} */
@@ -237,8 +237,8 @@ class  SimpleNode <  T0>   implements Element<T0> {
         for(int i = 0; i < indentation; i++) {
             out.append("   ");
         }
-          
-          
+
+
         if(t0 != null) {
             out.append(": ");
             if(t0 instanceof SimpleNode) {

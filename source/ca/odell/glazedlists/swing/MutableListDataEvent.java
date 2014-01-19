@@ -19,7 +19,7 @@ final class MutableListDataEvent extends ListDataEvent {
     private int index0;
     private int index1;
     private int type;
-    
+
     /**
      * Creates a new mutable data event that always uses the specified object
      * as its source.
@@ -27,7 +27,7 @@ final class MutableListDataEvent extends ListDataEvent {
     public MutableListDataEvent(Object source) {
         super(source, CONTENTS_CHANGED, 0, 0);
     }
-    
+
     /**
      * Sets the start and end range for this event. The values are inclusive.
      */
@@ -35,7 +35,7 @@ final class MutableListDataEvent extends ListDataEvent {
         this.index0 = index0;
         this.index1 = index1;
     }
-    
+
     /**
      * Sets the type of change. This value must be either CONTENTS_CHANGED,
      * INTERVAL_ADDED, or INTERVAL REMOVED.
@@ -43,7 +43,7 @@ final class MutableListDataEvent extends ListDataEvent {
     public void setType(int type) {
         this.type = type;
     }
-    
+
     /**
      * Accessors for the change information do not use any information
      * in the parent class.
@@ -60,7 +60,7 @@ final class MutableListDataEvent extends ListDataEvent {
     public int getType() {
         return type;
     }
-    
+
     /**
      * Gets this event as a String for debugging.
      */

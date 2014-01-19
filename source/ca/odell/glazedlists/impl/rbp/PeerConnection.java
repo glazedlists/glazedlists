@@ -23,13 +23,13 @@ import java.util.logging.Logger;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 class PeerConnection implements CTPHandler {
-    
+
     /** logging */
     private static Logger logger = Logger.getLogger(PeerConnection.class.toString());
 
     /** the peer that owns all connections */
     private Peer peer;
-    
+
     /** the lower level connection to this peer */
     private CTPConnection connection = null;
 
@@ -66,11 +66,11 @@ class PeerConnection implements CTPHandler {
     public void connectionReady(CTPConnection connection) {
         // know where we were before
         int priorState = state;
-        
+
         // now that we're connected
         this.connection = connection;
         this.state = READY;
-        
+
         // handle any pending operations: data
         if(pendingConnect.length() > 0) {
             connection.sendChunk(pendingConnect);
@@ -94,7 +94,7 @@ class PeerConnection implements CTPHandler {
         this.connection = null;
         this.state = CLOSED;
         peer.connections.remove(this);
-        
+
         // notify resources of the close
         List resourcesToNotify = new ArrayList();
         resourcesToNotify.addAll(incomingSubscriptions.values());
@@ -118,13 +118,13 @@ class PeerConnection implements CTPHandler {
     public void receiveChunk(CTPConnection source, Bufferlo data) {
         // get all the data in the working block
         currentBlock.append(data);
-        
+
         // handle all blocks
         try {
             PeerBlock block = null;
             while((block = PeerBlock.fromBytes(currentBlock, source.getLocalHost(), source.getLocalPort())) != null) {
                 ResourceUri resourceUri = block.getResourceUri();
-                
+
                 // get the resource for this connection
                 ResourceConnection resource = null;
                 if(block.isSubscribe()) {
@@ -136,14 +136,14 @@ class PeerConnection implements CTPHandler {
                 } else {
                     throw new UnsupportedOperationException();
                 }
-                
+
                 // handle an unknown resource name
                 if(resource == null) {
                     logger.warning("Unknown resource: \"" + resourceUri + "\"");
                     close();
                     return;
                 }
-                
+
                 // handle the block
                 resource.getResource().incomingBlock(resource, block);
             }
@@ -156,7 +156,7 @@ class PeerConnection implements CTPHandler {
             source.close(e);
         }
     }
-    
+
     /**
      * Test whether this connection is being used by incoming subscriptions or
      * outgoing publications.
@@ -174,7 +174,7 @@ class PeerConnection implements CTPHandler {
             logger.warning("Closing a closed connection");
             return;
         }
-        
+
         // close now
         state = AWAITING_CLOSE;
         if(connection != null) {
@@ -182,7 +182,7 @@ class PeerConnection implements CTPHandler {
             peer.connections.remove(this);
         }
     }
-    
+
     /**
      * Writes the specified block to this peer.
      */
@@ -197,7 +197,7 @@ class PeerConnection implements CTPHandler {
             throw new IllegalStateException();
         }
     }
-    
+
     /**
      * Gets this connection as a String.
      */
@@ -209,7 +209,7 @@ class PeerConnection implements CTPHandler {
         else if(state == AWAITING_CLOSE) return "closing";
         else throw new IllegalStateException();
     }
-    
+
     /**
      * Prints the current state of this connection.
      */

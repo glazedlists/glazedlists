@@ -301,7 +301,7 @@ public class Grouper<E> {
                 if(deleted == UNIQUE) {
                 	if (changeIndex == lastFakedUniqueChangeIndex) {
                 		// case: AACC -> AAC (list change __UX)
-                		// in the last group we have deleted a duplicate element that was marked as UNIQUE 
+                		// in the last group we have deleted a duplicate element that was marked as UNIQUE
                 		// because of an update event of the preceding UNIQUE element in the first iteration.
                 		// Duplicate deletion is a group update, but it was already triggered by the UNIQUE element update,
                 		// so nothing to do here

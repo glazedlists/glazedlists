@@ -9,7 +9,7 @@ import java.util.Collection;
 
 /**
  * Represents a role a user can have.
- * 
+ *
  * @author Holger Brands
  */
 public class Role implements Serializable {
@@ -18,7 +18,7 @@ public class Role implements Serializable {
 
     /** Id. */
     private Long id;
-    
+
     /** Role name. */
     private String name;
 
@@ -32,12 +32,12 @@ public class Role implements Serializable {
     }
 
     /**
-     * Constructor with name. 
+     * Constructor with name.
      */
     public Role(String name) {
         this.name = name;
     }
-    
+
     /**
      * Gets the Id.
      */
@@ -51,7 +51,7 @@ public class Role implements Serializable {
     private void setId(Long id) {
         this.id = id;
     }
-    
+
     public String getName() {
         return name;
     }
@@ -63,11 +63,11 @@ public class Role implements Serializable {
     public Collection<User> getUsers() {
         return users;
     }
-    
+
     public void addUser(User user) {
         users.add(user);
     }
-    
+
     public void removeUser(User user) {
         users.remove(user);
     }

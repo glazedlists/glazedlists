@@ -16,7 +16,7 @@ public class OrMatcher<E> implements Matcher<E> {
     public OrMatcher(Matcher<? super E>... matchers) {
         this.matchers = matchers;
     }
-    
+
     /** {@inheritDoc} */
     @Override
     public boolean matches(E item) {

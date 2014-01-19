@@ -647,7 +647,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      *
      * <p>Unlike the {@link ListIterator} from a regular {@link List}, the
      * {@link EventList}'s {@link ListIterator} will remain consistent even if the
-     * {@link EventList} is changed externally. Note that when used concurrently, 
+     * {@link EventList} is changed externally. Note that when used concurrently,
      * the returned {@link ListIterator} requires locking via this list's
      * {@link #getReadWriteLock() ReadWriteLock}.
      *
@@ -669,7 +669,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      *
      * <p>Unlike the {@link ListIterator} from a regular {@link List}, the
      * {@link EventList}'s {@link ListIterator} will remain consistent even if the
-     * {@link EventList} is changed externally. Note that when used concurrently, 
+     * {@link EventList} is changed externally. Note that when used concurrently,
      * the returned {@link ListIterator} requires locking via this list's
      * {@link #getReadWriteLock() ReadWriteLock}.
      *
@@ -689,12 +689,12 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      * Returns a view of the portion of this list between the specified
      * <tt>fromIndex</tt>, inclusive, and <tt>toIndex</tt>, exclusive.  (If
      * <tt>fromIndex</tt> and <tt>toIndex</tt> are equal, the returned list is
-     * empty.)  
+     * empty.)
 
      * <p>Unlike the standard {@link List#subList(int,int) List.subList()}
-     * method, the {@link List} returned by this method will continue to be 
-     * consistent even if the {@link EventList} it views is modified, 
-     * structurally or otherwise. The returned {@link List} can always be safely 
+     * method, the {@link List} returned by this method will continue to be
+     * consistent even if the {@link EventList} it views is modified,
+     * structurally or otherwise. The returned {@link List} can always be safely
      * cast to {@link EventList}. Note that when used concurrently, the returned
      * {@link List} requires locking via this list's
      * {@link #getReadWriteLock() ReadWriteLock}.

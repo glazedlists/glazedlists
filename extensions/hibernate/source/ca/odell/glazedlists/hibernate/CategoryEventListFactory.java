@@ -18,17 +18,17 @@ import java.util.Map;
  * {@link ListEventPublisher} and {@link ReadWriteLock} should be used to create EventLists.
  * All factory instances that use the same category produce EventLists wich share the same publisher
  * and lock.
- * 
+ *
  * @author Holger Brands
  */
 public final class CategoryEventListFactory implements EventListFactory {
 
     /** Map holding {@link ListInfo} per unique category. */
     private static final Map<String, ListInfo> CATEGORY_MAP = new HashMap<String, ListInfo>();
-    
+
     /** List category used by this factory instance. */
     private final String category;
-    
+
     /**
      * Constructor with list category to use. If the category is not registered yet, it will be
      * registered with a new ReadWriteLock and ListEventPublisher.
@@ -42,7 +42,7 @@ public final class CategoryEventListFactory implements EventListFactory {
     /**
      * Constructor with list category, lock and publisher to use. If the category is not registered
      * yet, it will be registered with the given ReadWriteLock and ListEventPublisher.
-     * 
+     *
      * @throws IllegalStateException if the same category is already registered with different values
      */
     public CategoryEventListFactory(String category, ReadWriteLock lock, ListEventPublisher publisher) {
@@ -52,7 +52,7 @@ public final class CategoryEventListFactory implements EventListFactory {
         this.category = category;
         registerCategory(category, lock, publisher);
     }
-    
+
     /**
      * Registers a new list category, if not already there.
      */
@@ -60,13 +60,13 @@ public final class CategoryEventListFactory implements EventListFactory {
         synchronized (CATEGORY_MAP) {
             if (!CATEGORY_MAP.containsKey(newCategory)) {
                 CATEGORY_MAP.put(newCategory, new ListInfo());
-            }            
+            }
         }
     }
 
     /**
      * Registers a new list category with the given lock and publisher, if not already there.
-     * 
+     *
      * @throws IllegalStateException if the same category is already registered with different values
      */
     private void registerCategory(String newCategory, ReadWriteLock lock, ListEventPublisher publisher) {
@@ -79,7 +79,7 @@ public final class CategoryEventListFactory implements EventListFactory {
                 }
             } else {
                 CATEGORY_MAP.put(newCategory, new ListInfo(lock, publisher));
-            }            
+            }
         }
     }
 
@@ -89,7 +89,7 @@ public final class CategoryEventListFactory implements EventListFactory {
     public String getCategory() {
         return category;
     }
-    
+
     /** {@inheritDoc} */
     @Override
     public EventList createEventList() {
@@ -112,19 +112,19 @@ public final class CategoryEventListFactory implements EventListFactory {
             return CATEGORY_MAP.get(getCategory());
         }
     }
-    
+
     /**
      * Helper method to clear the mapping of categories to publisher/lock pairs.
      */
     public static void clearCategoryMapping() {
         synchronized (CATEGORY_MAP) {
             CATEGORY_MAP.clear();
-        }        
+        }
     }
-    
+
     /**
      * Helper class to hold a ReadWriteLock and a ListEventPublisher.
-     *  
+     *
      * @author Holger Brands
      */
     private static class ListInfo {
@@ -136,7 +136,7 @@ public final class CategoryEventListFactory implements EventListFactory {
             publisher = ListEventAssembler.createListEventPublisher();
         }
         ListInfo(ReadWriteLock lock, ListEventPublisher publisher) {
-            this.lock = lock; 
+            this.lock = lock;
             this.publisher = publisher;
         }
     }

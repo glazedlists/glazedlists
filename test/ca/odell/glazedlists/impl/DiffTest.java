@@ -39,7 +39,7 @@ public class DiffTest {
         assertEquals(0, getChangeCount("Jesse", "JESSE", true));
         assertEquals(8, getChangeCount("Jesse", "JESSE", false));
     }
-    
+
     /**
      * Tests that diff works for a large number of elements.
      */

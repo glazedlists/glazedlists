@@ -15,7 +15,7 @@ public class ElementAtTest {
     @Test
     public void testPropertyChanges() throws Exception {
         final EventList<String> source = new BasicEventList<String>();
-        
+
         final PropertyChangeCounter counter = new PropertyChangeCounter();
         final Calculation<String> elementAt = Calculations.elementAt(source, 0, "default");
         elementAt.addPropertyChangeListener(counter);
@@ -43,7 +43,7 @@ public class ElementAtTest {
         source.set(1, "d");
         assertEquals("c", elementAt.getValue());
         assertEquals(0, counter.getCountAndReset());
-        
+
         // test remove (list is now [d])
         source.remove(0);
         assertEquals("d", elementAt.getValue());

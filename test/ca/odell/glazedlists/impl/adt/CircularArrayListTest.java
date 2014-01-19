@@ -17,7 +17,7 @@ import static org.junit.Assert.*;
 public class CircularArrayListTest {
 
   private final CircularArrayList<Object> list = new CircularArrayList<Object>();
-  
+
   @Test
   public void testRightShifts() {
     Object[] innerArray = new Object[] { "A", "B", "C", "D", "E", "a", "b", "c" };

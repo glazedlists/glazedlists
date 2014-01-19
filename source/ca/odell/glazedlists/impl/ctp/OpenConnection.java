@@ -19,7 +19,7 @@ import java.nio.channels.SocketChannel;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 class OpenConnection implements Runnable {
-     
+
     /** the place to connect to */
     private CTPConnectionManager connectionManager;
     private String host;
@@ -35,7 +35,7 @@ class OpenConnection implements Runnable {
         this.host = host;
         this.port = port;
     }
-    
+
     /**
      * Establish the connection. This creates a CTPProtocol for the client and
      * registers it with the selector.
@@ -47,11 +47,11 @@ class OpenConnection implements Runnable {
             // prepare a channel to connect
             InetSocketAddress address = new InetSocketAddress(host, port);
             SocketChannel channel = SocketChannel.open();
-    
+
             // configure the channel for no-blocking and selection
             channel.configureBlocking(false);
             SelectionKey selectionKey = channel.register(connectionManager.getNIODaemon().getSelector(), SelectionKey.OP_CONNECT);
-    
+
             // prepare the handler for the connection
             client = CTPConnection.client(host, selectionKey, handler, connectionManager);
             selectionKey.attach(client);

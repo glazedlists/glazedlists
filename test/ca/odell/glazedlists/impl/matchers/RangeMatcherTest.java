@@ -15,7 +15,7 @@ public class RangeMatcherTest {
     @Test
     public void testRangeMatcher() {
         final RangeMatcher<String, String> rm = new RangeMatcher<String, String>("bad", "dog");
-        
+
         assertFalse(rm.matches("a"));
         assertFalse(rm.matches("b"));
         assertFalse(rm.matches("babe"));

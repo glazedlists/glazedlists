@@ -46,7 +46,7 @@ import java.util.List;
  *    <li>Clients may be served even if they are behind NAT or Firewalls
  *    <li>The connection could be proxied by a standard HTTP proxy server, if necessary
  *    <li>In theory, the served port could be shared with another HTTP daemon such as Tomcat
- * 
+ *
  * <p>And HTTP brings some disadvantages also:
  *    <li>A persistent connection must be held, even if updates are infrequent
  *    <li>It cannot be differentiated from web traffic for analysis
@@ -76,22 +76,22 @@ public final class NetworkList<E> extends TransformedList<E, E> {
 
     /** listeners to resource changes */
     private List<ResourceListener> resourceListeners = new ArrayList<ResourceListener>();
-    
+
     /** listeners to status changes */
     private List<NetworkListStatusListener> statusListeners = new ArrayList<NetworkListStatusListener>();
-    
+
     /** how bytes are encoded and decoded */
     private ByteCoder byteCoder;
-    
+
     /** who manages this resource's connection */
     private ResourceStatus resourceStatus = null;
-    
+
     /** whether this NetworkList is writable via its own API */
     private boolean writable = false;
-    
+
     /** implementations of ResourceStatusListener and Resource */
     private PrivateInterfaces privateInterfaces = new PrivateInterfaces();
-    
+
     /**
      * Create a {@link NetworkList} that brings the specified source online.
      */
@@ -100,7 +100,7 @@ public final class NetworkList<E> extends TransformedList<E, E> {
         this.byteCoder = byteCoder;
         source.addListEventListener(this);
     }
-    
+
     /**
      * Sets the ResourceStatus to delegate connection information requests to.
      */
@@ -109,8 +109,8 @@ public final class NetworkList<E> extends TransformedList<E, E> {
         this.resourceStatus = resourceStatus;
         resourceStatus.addResourceStatusListener(privateInterfaces);
     }
-    
-    /** 
+
+    /**
      * Set the NetworkList as writable.
      */
     void setWritable(boolean writable) {
@@ -121,14 +121,14 @@ public final class NetworkList<E> extends TransformedList<E, E> {
     public boolean isWritable() {
         return writable;
     }
-    
+
     /**
      * Gets the {@link Resource} that is the peer of this NetworkList.
      */
     Resource getResource() {
         return privateInterfaces;
     }
-    
+
     /** {@inheritDoc} */
     @Override
     public void listChanged(ListEvent<E> listChanges) {
@@ -143,11 +143,11 @@ public final class NetworkList<E> extends TransformedList<E, E> {
         } catch(IOException e) {
             throw new IllegalStateException(e.getMessage());
         }
-        
+
         // forward the event
         updates.forwardEvent(listChanges);
     }
-    
+
     /**
      * Returns true if this resource is on the network. For published lists, this
      * requires that the list is being served. For subscribed lists, this requires
@@ -156,7 +156,7 @@ public final class NetworkList<E> extends TransformedList<E, E> {
     public boolean isConnected() {
          return resourceStatus.isConnected();
     }
-    
+
     /**
      * Attempts to bring this {@link NetworkList} online. When the connection attempt
      * is successful (or when it fails), all {@link ResourceStatusListener}s will be
@@ -165,7 +165,7 @@ public final class NetworkList<E> extends TransformedList<E, E> {
     public void connect() {
         resourceStatus.connect();
     }
-    
+
     /**
      * Attempts to take this {@link NetworkList} offline. When the {@link NetworkList}
      * is fully disconnected, all {@link ResourceStatusListener}s will be notified.
@@ -173,12 +173,12 @@ public final class NetworkList<E> extends TransformedList<E, E> {
     public void disconnect() {
         resourceStatus.disconnect();
     }
-    
+
     /**
      * Implementations of all private interfaces.
      */
     private class PrivateInterfaces implements Resource, ResourceStatusListener {
-    
+
         /**
          * Called each time a resource becomes connected.
          */
@@ -189,7 +189,7 @@ public final class NetworkList<E> extends TransformedList<E, E> {
                 listener.connected(NetworkList.this);
             }
         }
-        
+
         /**
          * Called each time a resource's disconnected status changes. This method may
          * be called for each attempt it makes to reconnect to the network.
@@ -214,13 +214,13 @@ public final class NetworkList<E> extends TransformedList<E, E> {
                 getReadWriteLock().writeLock().unlock();
             }
         }
-    
+
         /** {@inheritDoc} */
         @Override
         public void fromSnapshot(Bufferlo snapshot) {
             applyCodedEvent(snapshot);
         }
-        
+
         /** {@inheritDoc} */
         private void applyCodedEvent(Bufferlo data) {
             getReadWriteLock().writeLock().lock();
@@ -234,19 +234,19 @@ public final class NetworkList<E> extends TransformedList<E, E> {
                 getReadWriteLock().writeLock().unlock();
             }
         }
-        
+
         /** {@inheritDoc} */
         @Override
         public void update(Bufferlo delta) {
             applyCodedEvent(delta);
         }
-        
+
         /** {@inheritDoc} */
         @Override
         public void addResourceListener(ResourceListener listener) {
             resourceListeners.add(listener);
         }
-        
+
         /** {@inheritDoc} */
         @Override
         public void removeResourceListener(ResourceListener listener) {
@@ -257,7 +257,7 @@ public final class NetworkList<E> extends TransformedList<E, E> {
                 }
             }
         }
-        
+
         /** {@inheritDoc} */
         @Override
         public ReadWriteLock getReadWriteLock() {
@@ -268,7 +268,7 @@ public final class NetworkList<E> extends TransformedList<E, E> {
             return NetworkList.this.toString();
         }
     }
-        
+
     /**
      * Registers the specified listener to receive events about the status of this
      * {@link NetworkList}.
@@ -276,7 +276,7 @@ public final class NetworkList<E> extends TransformedList<E, E> {
     public void addStatusListener(NetworkListStatusListener listener) {
         statusListeners.add(listener);
     }
-    
+
     /**
      * Deregisters the specified listener from receiving events about the status of
      * this {@link NetworkList}.
@@ -284,7 +284,7 @@ public final class NetworkList<E> extends TransformedList<E, E> {
     public void removeStatusListener(NetworkListStatusListener listener) {
         statusListeners.remove(listener);
     }
-    
+
     /** {@inheritDoc} */
     @Override
     public void dispose() {

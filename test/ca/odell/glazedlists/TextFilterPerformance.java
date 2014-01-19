@@ -38,12 +38,12 @@ public class TextFilterPerformance {
             System.out.println("<element string> is a string component of an element");
             return;
         }
-        
+
         // start reading
         System.out.print("Reading input...");
         BufferedReader in = new BufferedReader(new FileReader(args[0]));
         String line = "";
-        
+
         // read the filter strings
         List<String> testFilters = new ArrayList<String>();
         List<Integer> testHitCounts = new ArrayList<Integer>();
@@ -51,7 +51,7 @@ public class TextFilterPerformance {
             testFilters.add(line);
             testHitCounts.add(new Integer(in.readLine()));
         }
-        
+
         // read the input texts
         List<Collection<String>> elements = new ArrayList<Collection<String>>();
         List<String> currentElement = new ArrayList<String>();
@@ -64,7 +64,7 @@ public class TextFilterPerformance {
                 currentElement.add(line);
             }
         }
-        
+
         // we're done reading
         System.out.println(" done. " + elements.size() + " elements");
         in.close();
@@ -73,13 +73,13 @@ public class TextFilterPerformance {
         for(int f = 0; f < testFilters.size(); f++) {
             System.out.println("Filter " + f + ": " + testFilters.get(f) + ", expect: " + testHitCounts.get(f) + " matches");
         }
-        
+
         // prepare the filter list
         BasicEventList<Collection<String>> unfiltered = new BasicEventList<Collection<String>>();
         unfiltered.addAll(elements);
         TextMatcherEditor<Collection<String>> textMatcherEditor = new TextMatcherEditor<Collection<String>>(new CollectionTextFilterator());
         FilterList<Collection<String>> filtered = new FilterList<Collection<String>>(unfiltered, textMatcherEditor);
-        
+
         // track time
         long startTime = 0;
         long finishTime = 0;
@@ -284,7 +284,7 @@ public class TextFilterPerformance {
 
         System.out.println("Total: " + fullFilterTime);
     }
-    
+
     /**
      * A TextFilterator for collections of Strings.
      */

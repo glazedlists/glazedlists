@@ -11,7 +11,7 @@ import java.util.Random;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class RandomDataFactory {
-    
+
     /** the raw random data */
     private static Random dice = new Random();
     private static String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";

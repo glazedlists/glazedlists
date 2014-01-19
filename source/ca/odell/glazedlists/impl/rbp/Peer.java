@@ -18,29 +18,29 @@ import java.util.logging.Logger;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class Peer implements CTPHandlerFactory {
-    
+
     /** logging */
     private static Logger logger = Logger.getLogger(Peer.class.toString());
 
-    /** the resources being subscribed to */ 
+    /** the resources being subscribed to */
     Map subscribed = new TreeMap();
-    
+
     /** the resources being published */
     Map published = new TreeMap();
-     
+
     /** the active connections to peers */
     List connections = new ArrayList();
-    
+
     /** the connection management */
     private CTPConnectionManager connectionManager;
-    
+
     /**
      * Creates a new peer that binds to the specified port.
      */
     public Peer(int listenPort) {
         this.connectionManager = new CTPConnectionManager(this, listenPort);
     }
-    
+
     /**
      * Upon a connect, a CTPHandler is required to handle the data of this connection.
      * The returned CTPHandler will be delegated to handle the connection's data.
@@ -58,7 +58,7 @@ public class Peer implements CTPHandlerFactory {
     public void start() throws IOException {
         connectionManager.start();
     }
-    
+
     /**
      * Stops the peer.
      */
@@ -74,10 +74,10 @@ public class Peer implements CTPHandlerFactory {
                 resource.status().disconnect();
             }
             subscribed.clear();
-            
+
             // unpublish everything
             logger.warning("Closing with published entries");
-            
+
             // close all connections
             List connectionsToClose = new ArrayList();
             connectionsToClose.addAll(connections);
@@ -85,12 +85,12 @@ public class Peer implements CTPHandlerFactory {
                 PeerConnection connection = (PeerConnection)c.next();
                 connection.close();
             }
-            
+
             // stop the connection manager
             connectionManager.stop();
         }
     }
-    
+
     /**
      * Prints the current state of this peer.
      */
@@ -115,7 +115,7 @@ public class Peer implements CTPHandlerFactory {
         }
         System.out.println("");
     }
-    
+
     /**
      * Subscribe to the specified resource.
      */
@@ -123,7 +123,7 @@ public class Peer implements CTPHandlerFactory {
         PeerResource peerResource = new PeerResource(this, resource, ResourceUri.remote(host, port, path));
         return peerResource.status();
     }
-    
+
     /**
      * Publish the specified resource.
      */
@@ -131,14 +131,14 @@ public class Peer implements CTPHandlerFactory {
         PeerResource peerResource = new PeerResource(this, resource, ResourceUri.local(path));
         return peerResource.status();
     }
-    
+
      /**
       * Gets the specified published resource.
       */
      PeerResource getPublishedResource(ResourceUri resourceUri) {
          return (PeerResource)published.get(resourceUri);
      }
-     
+
      /**
       * Gets the specified connection, or creates it if necessary.
       */
@@ -148,7 +148,7 @@ public class Peer implements CTPHandlerFactory {
          connections.add(peerConnection);
          return peerConnection;
      }
-     
+
      /**
       * Runs the specified task on the network thread.
       */

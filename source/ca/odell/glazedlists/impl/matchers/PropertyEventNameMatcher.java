@@ -18,9 +18,9 @@ import java.util.Set;
  * for the #matchPropertyNames} property. Alternatively, when you specify <code>false</code>,
  * the specified property names will serve as an exclude list, e.g. if an event matches a specified
  * property name, it will be filtered out.
- * 
+ *
  * @see #isMatchPropertyNames()
- * 
+ *
  * @author Holger Brands
  */
 public final class PropertyEventNameMatcher implements Matcher<PropertyChangeEvent> {
@@ -30,18 +30,18 @@ public final class PropertyEventNameMatcher implements Matcher<PropertyChangeEve
 
     /**
      * Specifies how to use the {@link #propertyNames} to match property change events.
-     * 
+     *
      * @see #isMatchPropertyNames()
      */
     private boolean matchPropertyNames;
-   
+
     /**
      * Creates a PropertyEventNameMatcher.
-     * 
+     *
      * @param matchPropertyNames if <code>true</code> the property names are used to match events
      *        by name, if <code>false</code> they are used to filter events
      * @param properties the property names to consider
-     * 
+     *
      * @see #isMatchPropertyNames()
      */
     public PropertyEventNameMatcher(boolean matchPropertyNames, String... properties) {
@@ -51,22 +51,22 @@ public final class PropertyEventNameMatcher implements Matcher<PropertyChangeEve
             propertyNames.add(properties[i]);
         }
     }
-    
+
     /**
      * Creates a PropertyEventNameMatcher.
-     * 
+     *
      * @param matchPropertyNames if <code>true</code> the property names are used to match
      *        events by name, if <code>false</code> they are used to filter events
      * @param properties the property names to consider
-     * 
+     *
      * @see #isMatchPropertyNames()
-     */    
+     */
     public PropertyEventNameMatcher(boolean matchPropertyNames, Collection<String> properties) {
         if (properties == null) throw new IllegalArgumentException("Collection of property names may not be null");
         this.matchPropertyNames = matchPropertyNames;
         propertyNames.addAll(properties);
     }
-    
+
     /** {@inheritDoc} */
     @Override
     public boolean matches(PropertyChangeEvent event) {

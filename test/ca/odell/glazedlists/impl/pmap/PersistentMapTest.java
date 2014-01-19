@@ -33,11 +33,11 @@ public class PersistentMapTest {
     public void testCreate() throws IOException {
         File mapFile = File.createTempFile("counting", "j81");
         mapFile.deleteOnExit();
-        
+
         Integer value = null;
         Integer expectedValue = null;
         String key = "lucky#";
-        
+
         for(int i = 0; i < 5; i++) {
             PersistentMap map = new PersistentMap(mapFile);
 
@@ -50,17 +50,17 @@ public class PersistentMapTest {
                 value = null;
             }
             assertEquals(expectedValue, value);
-            
+
             // write the next value
             expectedValue = (expectedValue == null) ? new Integer(1) : new Integer(expectedValue.intValue() * 2);
             Bufferlo expectedValueBufferlo = new Bufferlo();
             expectedValueBufferlo.write(expectedValue.toString());
             map.put(key, new Chunk(expectedValueBufferlo));
-            
+
             map.close();
         }
     }
-    
+
     /**
      * Get a Chunk from a value.
      */
@@ -70,7 +70,7 @@ public class PersistentMapTest {
         System.err.println("CHUNKIFIED " + data.length() + " BYTES");
         return new Chunk(data);
     }
-    
+
     /**
      * Get a value from a Chunk.
      */
@@ -104,11 +104,11 @@ public class PersistentMapTest {
         colors.remove("red");
         colors.remove("white");
         colors.remove("blue");
-        
+
         // persist and restore
         colors.close();
         colors = new PersistentMap(colorsFile);
-        
+
         // meet expectations
         assertNull(colors.get("red"));
         assertEquals(deChunkify((Chunk)colors.get("orange")), Color.orange);
@@ -122,7 +122,7 @@ public class PersistentMapTest {
         assertNull(colors.get("turquoise"));
         assertNull(colors.get("creme"));
         assertNull(colors.get("lavender"));
-        
+
         // delete stuff created earlier
         colors.remove("sunny");
         colors.remove("dark");
@@ -144,7 +144,7 @@ public class PersistentMapTest {
         // persist and restore
         colors.close();
         colors = new PersistentMap(colorsFile);
-        
+
         // meet expectations
         assertNull(colors.get("red"));
         assertEquals(deChunkify((Chunk)colors.get("orange")), Color.orange);
@@ -159,7 +159,7 @@ public class PersistentMapTest {
         assertNull(colors.get("creme"));
         assertNull(colors.get("lavender"));
     }
-    
+
     /**
      * Tests that the flush() method of PersistentMap works.
      *
@@ -188,24 +188,24 @@ public class PersistentMapTest {
             writer.put("big data", chunk);
             chunk.fetchValue(callback);;
         }
-        
+
         // write a token
         String tokenKey = "Saskatchewan";
         String tokenValue = "Roughriders";
         writer.put(tokenKey, chunkify(tokenValue));
         writer.flush();
-        
+
         // whatever you do, don't do this:
         PersistentMap reader = new PersistentMap(sharedFile);
         Chunk chunk = (Chunk)reader.get(tokenKey);
         Object tokenValuePersisted = (chunk == null) ? null : deChunkify(chunk);
         assertEquals(tokenValue, tokenValuePersisted);
         reader.close();
-        
+
         // and clean up
         writer.close();
     }
-    
+
     /**
      * Ignores a value callback.
      */

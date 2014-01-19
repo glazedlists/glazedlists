@@ -27,7 +27,7 @@ public class BeanXMLByteCoder implements ByteCoder {
         xmlOut.writeObject(source);
         xmlOut.close();
     }
-    
+
     /** {@inheritDoc} */
     @Override
     public Object decode(InputStream source) throws IOException {

@@ -6,7 +6,7 @@ package ca.odell.glazedlists.impl.nio;
 // NIO is used for CTP
 /**
  * Handles all sorts of incoming NIO events. An object implementing this interface
- * must be set as the attachment for all SelectionKeys used by the NIODaemon. 
+ * must be set as the attachment for all SelectionKeys used by the NIODaemon.
  */
 public interface NIOAttachment {
 

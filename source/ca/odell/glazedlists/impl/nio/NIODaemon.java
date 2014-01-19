@@ -16,32 +16,32 @@ import java.util.logging.Logger;
  * An event queue of I/O events and a thread to run them on.
  */
 public final class NIODaemon implements Runnable {
-    
+
     /** logging */
     private static Logger logger = Logger.getLogger(NIODaemon.class.toString());
-    
+
     /** asynch queue of tasks to execute */
     private List pendingRunnables = new ArrayList();
-    
+
     /** the only thread that shall access the network resources of this manager */
     private Thread ioThread = null;
-    
+
     /** the selector to awaken when necessary */
     private Selector selector;
-    
+
     /** whether the connection manager shall shut down */
     private boolean keepRunning = false;
-    
+
     /** whom to handle incoming connections */
     private NIOServer server = null;
-    
+
     /**
      * Starts the NIODaemon.
      */
     public synchronized void start() throws IOException {
         // verify we haven't already started
         if(ioThread != null) throw new IllegalStateException();
-        
+
         // prepare for non-blocking, selectable IO
         selector = Selector.open();
 
@@ -50,7 +50,7 @@ public final class NIODaemon implements Runnable {
         ioThread = new Thread(this, "GlazedLists nio");
         ioThread.start();
     }
-        
+
     /**
      * Continuously selects a connection which needs servicing and services it.
      */
@@ -58,7 +58,7 @@ public final class NIODaemon implements Runnable {
     public void run() {
         // the list of runnables to run this iteration
         List toExecute = new ArrayList();
-            
+
         // always run the selector handler
         SelectAndHandle selectAndHandle = new SelectAndHandle(this);
 
@@ -71,7 +71,7 @@ public final class NIODaemon implements Runnable {
                 toExecute.add(selectAndHandle);
                 pendingRunnables.clear();
             }
-            
+
             // run the runnables
             for(Iterator i = toExecute.iterator(); keepRunning && i.hasNext(); ) {
                 Runnable runnable = (Runnable)i.next();
@@ -83,7 +83,7 @@ public final class NIODaemon implements Runnable {
                 }
             }
         }
-        
+
         // do final clean up of state
         synchronized(this) {
             pendingRunnables.clear();
@@ -92,7 +92,7 @@ public final class NIODaemon implements Runnable {
             keepRunning = false;
         }
     }
-    
+
     /**
      * Tests whether this connection manager has started.
      */
@@ -106,20 +106,20 @@ public final class NIODaemon implements Runnable {
     public synchronized boolean isNetworkThread() {
         return Thread.currentThread() == ioThread;
     }
-    
+
     /**
      * Wake up the CTP thread so that it may process pending events.
      */
     private void wakeUp() {
         selector.wakeup();
     }
-    
+
     /**
      * Runs the specified task on the NIODaemon thread.
      */
     public void invokeAndWait(Runnable runnable) {
         // if the server has not yet been started
-        if(!isRunning()) throw new IllegalStateException(); 
+        if(!isRunning()) throw new IllegalStateException();
 
         // invoke immediately if possible
         if(isNetworkThread()) {
@@ -134,41 +134,41 @@ public final class NIODaemon implements Runnable {
                     pendingRunnables.add(blockingRunnable);
                 }
                 wakeUp();
-                
+
                 // wait for it to be completed
                 try {
                     blockingRunnable.wait();
                 } catch(InterruptedException e) {
                     throw new RuntimeException("Wait interrupted " + e.getMessage());
                 }
-                
+
                 // propagate any RuntimeExceptions
                 RuntimeException problem = blockingRunnable.getInvocationTargetException();
                 if(problem != null) throw problem;
             }
         }
     }
-    
+
     /**
      * Runs the specified task the next time the NIODaemon thread has a chance.
      */
     public void invokeLater(Runnable runnable) {
         synchronized(this) {
             // if the server has not yet been started
-            if(!isRunning()) throw new IllegalStateException(); 
-            
+            if(!isRunning()) throw new IllegalStateException();
+
             pendingRunnables.add(runnable);
             wakeUp();
         }
     }
-    
+
     /**
      * Stops the NIODaemon.
      */
     public void stop() {
         // shutdown the server
         invokeAndWait(new Shutdown(this));
-        
+
         // stop the server
         invokeAndWait(new Stop());
     }
@@ -184,19 +184,19 @@ public final class NIODaemon implements Runnable {
             } else {
                 logger.info("Server stopping with " + selector.keys().size() + " active connections");
             }
-    
+
             // break out of the server dispatch loop
             keepRunning = false;
         }
     }
-    
+
     /**
      * Gets the selector that this NIODaemon manages.
      */
     public Selector getSelector() {
         return selector;
     }
-    
+
     /**
      * Configure this NIODaemon to use the specified server handler for acceptable
      * selection keys.

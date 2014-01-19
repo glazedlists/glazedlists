@@ -17,7 +17,7 @@ public interface NetworkListStatusListener extends EventListener {
      * Called each time a {@link NetworkList} becomes connected.
      */
     public void connected(NetworkList list);
-    
+
     /**
      * Called each time a {@link NetworkList}'s connection status changes. This
      * method may be called for each attempt it makes to reconnect to the network.

@@ -21,10 +21,10 @@ import java.util.List;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class ListEventToBytes {
-    
+
     /** the virtual event type */
     private static final int CLEAR = -1;
-    
+
     /**
      * Convert the specified ListEvent to bytes.
      */
@@ -38,28 +38,28 @@ public class ListEventToBytes {
             if(type == ListEvent.INSERT || type == ListEvent.UPDATE) value = listEvent.getSourceList().get(index);
             parts.add(new ListEventPart(index, type, value));
         }
-        
+
         return partsToBytes(parts, byteCoder);
     }
-    
+
     /**
      * Convert the List to a ListEvent. This is for snapshots or compressions.
      */
     public static Bufferlo toBytes(EventList list, ByteCoder byteCoder) throws IOException {
         List parts = new ArrayList();
-        
+
         // start with a clear
         parts.add(new ListEventPart(-1, ListEventToBytes.CLEAR, null));
-        
+
         // add all values as adds
         for(int i = 0; i < list.size(); i++) {
             parts.add(new ListEventPart(i, ListEvent.INSERT, list.get(i)));
         }
-        
+
         // get the whole list
         return partsToBytes(parts, byteCoder);
     }
-    
+
     /**
      * Apply the specified list event to the specified target list. The write lock
      * for this list must already be acquired if the list is shared between threads.
@@ -79,7 +79,7 @@ public class ListEventToBytes {
             }
         }
     }
-        
+
     /**
      * Encode the parts into bytes.
      */
@@ -87,20 +87,20 @@ public class ListEventToBytes {
         // prepare the result
         Bufferlo partsAsBytes = new Bufferlo();
         DataOutputStream dataOut = new DataOutputStream(partsAsBytes.getOutputStream());
-        
+
         // convert each part in sequence
         for(int i = 0; i < parts.size(); i++) {
             ListEventPart part = (ListEventPart)parts.get(i);
-            
+
             // write the index of this part
             dataOut.writeInt(i);
-            
+
             // write the type
             dataOut.writeInt(part.getType());
 
             // write the index of the change
             if(part.hasIndex()) dataOut.writeInt(part.getIndex());
-            
+
             // write the value
             if(part.hasValue()) {
                 Bufferlo valueBuffer = new Bufferlo();
@@ -110,11 +110,11 @@ public class ListEventToBytes {
                 partsAsBytes.append(valueBuffer);
             }
         }
-        
+
         // that was easy
         return partsAsBytes;
     }
-    
+
     /**
      * Decode the bytes into parts.
      */
@@ -124,24 +124,24 @@ public class ListEventToBytes {
 
         // read till the end of the file
         DataInputStream dataIn = new DataInputStream(partsAsBytes.getInputStream());
-        
+
         // convert each part in sequence
         while(partsAsBytes.length() > 0) {
             ListEventPart currentPart = new ListEventPart();
-            
+
             // read the index of this part
             int expectedPartIndex = parts.size();
             int partIndex = dataIn.readInt();
             if(partIndex != expectedPartIndex) throw new IOException("Expected " + expectedPartIndex + " but found " + partIndex);
-            
+
             // read in the type of this part
             currentPart.setType(dataIn.readInt());
-            
+
             // read in the index of this change
             if(currentPart.hasIndex()) {
                 currentPart.setIndex(dataIn.readInt());
             }
-            
+
             // read the value
             if(currentPart.hasValue()) {
                 int valueLength = dataIn.readInt();
@@ -149,11 +149,11 @@ public class ListEventToBytes {
                 Object value = delegate.decode(valueBuffer.getInputStream());
                 currentPart.setValue(value);
             }
-            
+
             // we've completed one part
             parts.add(currentPart);
         }
-        
+
         // that was easy
         return parts;
     }
@@ -162,16 +162,16 @@ public class ListEventToBytes {
      * A part of a ListEvent that is byte codable.
      */
     static class ListEventPart {
-        
+
         /** the changed index */
         private int index = -1;
-        
+
         /** the type of change, INSERT, UPDATE, DELETE or CLEAR */
         private int type = ListEventToBytes.CLEAR;
-        
+
         /** the inserted or updated value */
         private Object value = null;
-        
+
         /**
          * Create a new ByteCodableListEventBlock.
          */
@@ -180,13 +180,13 @@ public class ListEventToBytes {
             this.type = type;
             this.value = value;
         }
-        
+
         /**
          * Create a new empty ByteCodableListEventBlock.
          */
         public ListEventPart() {
         }
-        
+
         public int getIndex() {
             return index;
         }

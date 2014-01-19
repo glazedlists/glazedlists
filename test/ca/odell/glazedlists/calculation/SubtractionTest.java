@@ -16,7 +16,7 @@ public final class SubtractionTest {
     public void testSubtractionFloat() {
         final EventList<Object> aList = new BasicEventList<Object>();
         final EventList<Object> bList = new BasicEventList<Object>();
-        
+
         final Calculation<Integer> a = Calculations.count(aList);
         final Calculation<Integer> b = Calculations.count(bList);
         final Calculation<Float> diff = Calculations.subtractFloats(a, b);

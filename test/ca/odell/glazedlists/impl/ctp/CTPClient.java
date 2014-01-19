@@ -18,27 +18,27 @@ public class CTPClient {
 
     /** the connection to act as a client on */
     private CTPConnection connection = null;
-    
+
     /**
      * Creates a new CTPConnectionManager and possibly a connection.
      */
     public void start(int listenPort, String targetHost, int targetPort) throws IOException {
-        
+
         // start the connection manager
         CTPConnectionManager manager = new CTPConnectionManager(new ClientHandlerFactory(), listenPort);
         manager.start();
-        
+
         // connect to the target host
         if(targetHost != null) {
             manager.connect(new ClientHandler(), targetHost, targetPort);
-        
+
             // wait for the connection
             while(true) {
                 synchronized(this) {
                     if(connection != null) break;
                 }
             }
-            
+
             // read data and write it to the connection
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             while(true) {
@@ -58,7 +58,7 @@ public class CTPClient {
             }
         }
     }
-    
+
     /**
      * Creates a new CTPClient and starts it.
      */
@@ -67,7 +67,7 @@ public class CTPClient {
             System.out.println("Usage: CTPClient <listenport> [<targethost> <targetport>]");
             return;
         }
-        
+
         // parse input
         int listenPort = Integer.parseInt(args[0]);
         String targetHost = null;
@@ -76,7 +76,7 @@ public class CTPClient {
             targetHost = args[1];
             targetPort = Integer.parseInt(args[2]);
         }
-        
+
         // start it up
         try {
             new CTPClient().start(listenPort, targetHost, targetPort);
@@ -84,7 +84,7 @@ public class CTPClient {
             e.printStackTrace();
         }
     }
-    
+
     /**
      * Simple handlers display user text as typed.
      */

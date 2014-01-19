@@ -15,16 +15,16 @@ import java.util.logging.Logger;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 class CloseConnection implements Runnable {
-    
+
     /** logging */
     private static Logger logger = Logger.getLogger(CloseConnection.class.toString());
 
     /** the target connection */
     private CTPConnection connection;
-    
+
     /** the reason for the connection to be closed */
     private Exception reason;
-    
+
     /**
      * Creates a CTPConnectionToClose that closes the specified connection.
      */
@@ -32,15 +32,15 @@ class CloseConnection implements Runnable {
         this.connection = connection;
         this.reason = reason;
     }
-    
+
     /**
      * Runs this task.
      */
     @Override
-    public void run() {        
+    public void run() {
         // if this is already closed, we're done
         if(connection.state == CTPConnection.STATE_CLOSED_PERMANENTLY) return;
-        
+
         // close is not a result of a connection error, so say goodbye
         if(reason == null || !(reason instanceof IOException)) {
 
@@ -54,7 +54,7 @@ class CloseConnection implements Runnable {
                 connection.sendChunk(null);
             }
         }
-        
+
         // try to flush what we have left
         try {
             connection.writer.writeToChannel(connection.socketChannel, connection.selectionKey);
@@ -77,7 +77,7 @@ class CloseConnection implements Runnable {
         } else {
             logger.info("Closed connection to " + connection);
         }
-        
+
         // close the connection for use
         connection.state = CTPConnection.STATE_CLOSED_PERMANENTLY;
         connection.handler.connectionClosed(connection, reason);

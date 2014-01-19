@@ -372,7 +372,7 @@ public final class ListEventAssembler<E> {
      * ListChangeView object is used for all notifications to the specified
      * listener, so if a listener does not process a set of changes, those
      * changes will persist in the next notification.
-     * 
+     *
      * @param listChangeListener event listener != null
      * @throws NullPointerException if the specified listener is null
      */
@@ -388,7 +388,7 @@ public final class ListEventAssembler<E> {
      * <p>This uses the <code>==</code> identity comparison to find the listener
      * instead of <code>equals()</code>. This is because multiple Lists may be
      * listening and therefore <code>equals()</code> may be ambiguous.
-     * 
+     *
      * @param listChangeListener event listener != null
      * @throws NullPointerException if the specified listener is null
      * @throws IllegalArgumentException if the specified listener wasn't added before

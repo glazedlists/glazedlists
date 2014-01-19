@@ -616,7 +616,7 @@ public class SequenceDependenciesEventPublisherTest {
     public void testEventStateAfterForwardEvent() {
         EventList<String> source = new BasicEventList<String>();
         ListConsistencyListener lcl = ListConsistencyListener.install(source);
-        
+
         source.add("Hello");
         assertEquals(1, lcl.getChangeCount(0));
     }

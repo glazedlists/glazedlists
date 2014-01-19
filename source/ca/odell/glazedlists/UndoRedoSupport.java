@@ -68,7 +68,7 @@ public final class UndoRedoSupport<E> {
 
     private UndoRedoSupport(EventList<E> source) {
         // build a TransactionList that does NOT support rollback - we don't
-        // need it and it relies on UndoRedoSupport, so we would have 
+        // need it and it relies on UndoRedoSupport, so we would have
         this.txSource = new TransactionList<E>(source, false);
         this.txSource.addListEventListener(txSourceListener);
 

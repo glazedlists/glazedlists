@@ -26,16 +26,16 @@ public class BeanXMLByteCoderTest {
     @Test
     public void testCoding() throws IOException {
         Bufferlo data = new Bufferlo();
-        
+
         JLabel bean = new JLabel();
         bean.setText("Limp Bizkit");
         bean.setToolTipText("Fred Durst");
         bean.setEnabled(false);
-        
+
         ByteCoder beanXMLByteCoder = new BeanXMLByteCoder();
         beanXMLByteCoder.encode(bean, data.getOutputStream());
         JLabel beanCopy = (JLabel)beanXMLByteCoder.decode(data.getInputStream());
-        
+
         assertEquals(bean.getText(), beanCopy.getText());
         assertEquals(bean.getToolTipText(), beanCopy.getToolTipText());
         assertEquals(bean.isEnabled(), beanCopy.isEnabled());

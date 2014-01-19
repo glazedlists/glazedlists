@@ -13,16 +13,16 @@ import java.util.logging.Logger;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 class LoadValue implements Runnable {
-     
+
     /** logging */
     private static Logger logger = Logger.getLogger(LoadValue.class.toString());
 
     /** the chunk with the data of interest */
     private final Chunk chunk;
-    
+
     /** the interested party */
     private final ValueCallback valueCallback;
-    
+
     /**
      * Create a new LoadValue.
      */
@@ -30,7 +30,7 @@ class LoadValue implements Runnable {
         this.chunk = chunk;
         this.valueCallback = valueCallback;
     }
-    
+
     /**
      * Read a chunk's value from disk.
      */

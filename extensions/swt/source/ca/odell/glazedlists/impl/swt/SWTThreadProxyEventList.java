@@ -18,7 +18,7 @@ public class SWTThreadProxyEventList<E> extends ThreadProxyEventList<E> {
 
     /** the display which owns the user interface thread */
     private final Display display;
-    
+
     /**
      * Create a {@link SWTThreadProxyEventList} that mirrors the specified
      * source {@link EventList} for access on the SWT thread.

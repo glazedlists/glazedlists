@@ -13,16 +13,16 @@ import java.util.logging.Logger;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 class RemoveChunk implements Runnable {
-     
+
     /** logging */
     private static Logger logger = Logger.getLogger(RemoveChunk.class.toString());
-    
+
     /** the host map */
     private final PersistentMap persistentMap;
 
     /** the value to erase */
     private final Chunk chunk;
-    
+
     /**
      * Create a new RemoveChunk.
      */
@@ -30,7 +30,7 @@ class RemoveChunk implements Runnable {
         this.persistentMap = persistentMap;
         this.chunk = chunk;
     }
-    
+
     /**
      * Removes the chunk by marking it off.
      */
@@ -39,7 +39,7 @@ class RemoveChunk implements Runnable {
         try {
             chunk.delete();
             logger.info("Successfully removed value for key \"" + chunk.getKey() + "\"");
-            
+
         } catch(IOException e) {
             persistentMap.fail(e, "Failed to write to file " + persistentMap.getFile().getPath());
         }

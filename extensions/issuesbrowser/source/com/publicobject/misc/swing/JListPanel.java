@@ -205,7 +205,7 @@ public class JListPanel<C extends Component> extends JPanel implements ListEvent
             revalidate();
             repaint();
         }
-        
+
         @Override
         public void mouseMoved(MouseEvent e) { }
     }

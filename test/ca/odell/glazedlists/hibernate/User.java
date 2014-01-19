@@ -10,11 +10,11 @@ import java.io.Serializable;
 
 /**
  * Helper class for User.
- * 
+ *
  * @author Holger Brands
  */
 public class User implements Serializable {
-    
+
     private static final long serialVersionUID = 0L;
 
     /** Username is Id. */
@@ -36,7 +36,7 @@ public class User implements Serializable {
     }
 
     /**
-     * Constructor with name. 
+     * Constructor with name.
      */
     public User(String userName) {
         this.userName = userName;
@@ -69,7 +69,7 @@ public class User implements Serializable {
     public void setEmailAddresses(EventList<Email> emailAddresses) {
         this.emailAddresses = emailAddresses;
     }
-    
+
     /**
      * Gets the nicknames.
      */
@@ -83,7 +83,7 @@ public class User implements Serializable {
     private void setNickNames(EventList<String> nickNames) {
         this.nickNames = nickNames;
     }
-    
+
     public void addNickName(String nickName) {
         nickNames.add(nickName);
     }
@@ -91,11 +91,11 @@ public class User implements Serializable {
     public void removeNickName(String nickName) {
         nickNames.remove(nickName);
     }
-    
+
     public EventList<Role> getRoles() {
         return roles;
     }
-    
+
     public void addRole(Role role) {
         roles.add(role);
         role.addUser(this);
@@ -105,5 +105,5 @@ public class User implements Serializable {
         roles.remove(role);
         role.removeUser(this);
     }
-    
+
 }

@@ -24,13 +24,13 @@ import java.util.regex.Pattern;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public class Bufferlo implements CharSequence {
-    
+
     /** the buffers managed by this Bufferlo */
     private LinkedList buffers = new LinkedList();
-    
+
     /** write to this bufferlo */
     private BufferloOutputStream out = new BufferloOutputStream();
-    
+
     /** read from this bufferlo */
     private BufferloInputStream in = new BufferloInputStream();
 
@@ -40,8 +40,8 @@ public class Bufferlo implements CharSequence {
     public void clear() {
         buffers.clear();
     }
-    
-    /** 
+
+    /**
      * Populate this Bufferlo with the data from the specified channel.
      */
     public int readFromChannel(ReadableByteChannel source) throws IOException {
@@ -49,7 +49,7 @@ public class Bufferlo implements CharSequence {
         while(true) {
             // we need a new place to write into
             ByteBuffer writeInto = getWriteIntoBuffer();
-            
+
             // read in
             int bytesRead = source.read(writeInto);
             doneWriting();
@@ -60,10 +60,10 @@ public class Bufferlo implements CharSequence {
             else totalRead += bytesRead;
         }
     }
-    
-    /** 
+
+    /**
      * Populate this Bufferlo with the data from the specified channel, up to
-     * 
+     *
      * @param bytesRequested the maximum number of bytes to read.
      */
     public int readFromChannel(ReadableByteChannel source, int bytesRequested) throws IOException {
@@ -74,7 +74,7 @@ public class Bufferlo implements CharSequence {
             int bytesRemaining = bytesRequested - totalRead;
             int maxBytesToRead = Math.min(bytesRemaining, writeInto.remaining());
             writeInto.limit(writeInto.position() + maxBytesToRead);
-            
+
             // read in
             int bytesRead = source.read(writeInto);
             doneWriting();
@@ -84,18 +84,18 @@ public class Bufferlo implements CharSequence {
             else if(bytesRead <= 0) return totalRead;
             else totalRead += bytesRead;
         }
-        
+
         // we've read all we want
         return totalRead;
     }
-    
+
     /**
      * Write the content of this Bufferlo to the specified channel.
      */
     public long writeToChannel(GatheringByteChannel target) throws IOException {
         // nothing to write
         if(length() == 0) return 0;
-        
+
         // make all buffers readable
         ByteBuffer[] toWrite = new ByteBuffer[buffers.size()];
         for(int b = 0; b < buffers.size(); b++) {
@@ -103,10 +103,10 @@ public class Bufferlo implements CharSequence {
             buffer.flip();
             toWrite[b] = buffer;
         }
-        
+
         // write them all out
         long totalWritten = target.write(toWrite);
-        
+
         // restore the state on all buffers
         for(ListIterator b = buffers.listIterator(); b.hasNext(); ) {
             ByteBuffer buffer = (ByteBuffer)b.next();
@@ -124,23 +124,23 @@ public class Bufferlo implements CharSequence {
                 buffer.position(buffer.limit());
             }
         }
-        
+
         // return the count of bytes written
         return totalWritten;
     }
-    
-    /** 
+
+    /**
      * Write the content of this Bufferlo to the specified channel, updating the
      * specified {@link SelectionKey} as necessary.
      */
     public long writeToChannel(GatheringByteChannel target, SelectionKey selectionKey) throws IOException {
         // verify we can still write
         if(!selectionKey.isValid()) throw new IOException("Key cancelled");
-        
+
         // do the write
         long totalWritten = writeToChannel(target);
-        
-        // adjust the key based on whether we have leftovers 
+
+        // adjust the key based on whether we have leftovers
         if(length() > 0) {
             selectionKey.interestOps(selectionKey.interestOps() | SelectionKey.OP_WRITE);
         } else {
@@ -150,7 +150,7 @@ public class Bufferlo implements CharSequence {
         // return the count of bytes written
         return totalWritten;
     }
-    
+
     /**
      * Gets the bytes of this Bufferlo.
      */
@@ -167,21 +167,21 @@ public class Bufferlo implements CharSequence {
             throw new IllegalStateException(e.getMessage());
         }
     }
-    
+
     /**
      * Gets an InputStream that reads this buffer.
      */
     public BufferloInputStream getInputStream() {
         return in;
     }
-    
+
     /**
      * Gets an OutputStream that writes this buffer.
      */
     public BufferloOutputStream getOutputStream() {
         return out;
     }
-    
+
     /**
      * Duplicates the exact state of this buffer. The returned buffer is read-only.
      */
@@ -193,7 +193,7 @@ public class Bufferlo implements CharSequence {
         }
         return result;
     }
-    
+
     /**
      * Read the specified bytes into a new Bufferlo. The returned buffer is read-only.
      */
@@ -204,14 +204,14 @@ public class Bufferlo implements CharSequence {
         skip(bytes);
         return result;
     }
-    
+
     /**
      * Writes the specified String to this Bufferlo.
      */
     public void write(String data) {
         append(stringToBytes(data));
     }
-    
+
     /**
      * Converts the specified String to bytes, one byte per character. The input
      * String must contain US-ASCII one-byte characters or the result of this
@@ -224,12 +224,12 @@ public class Bufferlo implements CharSequence {
             throw new IllegalStateException(e.getMessage());
         }
     }
-    
+
     /**
      * Writes the specified data to this bufferlo. This shortens the last ByteBuffer
      * in the added set so that it will not be written to. This allows a read-only
      * buffer to be added without it ever being modified.
-     * 
+     *
      * This will consume the specified Bufferlo.
      */
     public Bufferlo append(Bufferlo data) {
@@ -237,7 +237,7 @@ public class Bufferlo implements CharSequence {
         data.buffers.clear();
         return this;
     }
-    
+
     /**
      * Appends a the specified data. The data will be consumed so it should be
      * a duplicate if it is to be reused.
@@ -249,7 +249,7 @@ public class Bufferlo implements CharSequence {
         data.position(data.limit());
         return this;
     }
-    
+
     /**
      * Limits this Bufferlo to the specified size.
      */
@@ -257,10 +257,10 @@ public class Bufferlo implements CharSequence {
         int bytesLeft = bytes;
         for(ListIterator b = buffers.listIterator(); b.hasNext(); ) {
             ByteBuffer current = (ByteBuffer)b.next();
-            
+
             if(bytesLeft <= 0) {
                 b.remove();
-            
+
             } else if(current.capacity() >= bytesLeft) {
                 current.position(bytesLeft);
                 current.limit(bytesLeft);
@@ -269,7 +269,7 @@ public class Bufferlo implements CharSequence {
             bytesLeft -= current.capacity();
         }
     }
-    
+
     /**
      * Skips the specified number of bytes.
      */
@@ -278,7 +278,7 @@ public class Bufferlo implements CharSequence {
         int bytesLeft = bytes;
         for(ListIterator b = buffers.listIterator(); b.hasNext(); ) {
             ByteBuffer current = (ByteBuffer)b.next();
-            
+
             if(bytesLeft >= current.limit()) {
                 bytesLeft -= current.limit();
                 b.remove();
@@ -291,7 +291,7 @@ public class Bufferlo implements CharSequence {
             }
         }
     }
-    
+
     /**
      * Creates a new ByteBuffer identical to the parameter but without space trailing
      * after the limit. This allows a buffer to be added to the Bufferlo without
@@ -306,7 +306,7 @@ public class Bufferlo implements CharSequence {
         noTrailingSpace.position(noTrailingSpace.limit());
         return noTrailingSpace;
     }
-    
+
     /**
      * Write to the Bufferlo as a Stream.
      */
@@ -318,7 +318,7 @@ public class Bufferlo implements CharSequence {
             doneWriting();
         }
     }
-    
+
     /**
      * Read from the Bufferlo as a Stream.
      */
@@ -332,26 +332,26 @@ public class Bufferlo implements CharSequence {
             return result;
         }
     }
-    
+
     /**
      * Gets a buffer that we can read from. This buffer must be flipped back into
      * write mode when this is complete by calling doneReading().
      */
     private ByteBuffer getReadFromBuffer() {
         if(buffers.isEmpty()) return null;
-        
+
         ByteBuffer readFrom = (ByteBuffer)buffers.getFirst();
         readFrom.flip();
-        
+
         return readFrom;
     }
-    
+
     /**
      * Finishes reading the current read from buffer.
      */
     private void doneReading() {
         ByteBuffer readFrom = (ByteBuffer)buffers.getFirst();
-        
+
         // if we've exhaused this buffer
         if(!readFrom.hasRemaining()) {
             buffers.removeFirst();
@@ -366,7 +366,7 @@ public class Bufferlo implements CharSequence {
             buffers.set(0, noneRead);
         }
     }
-    
+
     /**
      * Gets a buffer that we can write data into.
      */
@@ -385,7 +385,7 @@ public class Bufferlo implements CharSequence {
         buffers.addLast(writeInto);
         return writeInto;
     }
-    
+
     /**
      * Finishes writing the current buffer.
      */
@@ -394,8 +394,8 @@ public class Bufferlo implements CharSequence {
         writeInto.limit(writeInto.position());
     }
 
-    
-    
+
+
     /**
      * Get the number of bytes available.
      */
@@ -408,7 +408,7 @@ public class Bufferlo implements CharSequence {
         }
         return bytesAvailable;
     }
-    
+
     /**
      * Gets the character at the specified index.
      */
@@ -425,7 +425,7 @@ public class Bufferlo implements CharSequence {
         }
         throw new IndexOutOfBoundsException();
     }
-    
+
     /**
      * Returns a new character sequence that is a subsequence of this.
      */
@@ -436,7 +436,7 @@ public class Bufferlo implements CharSequence {
         clone.limit(end - start);
         return clone;
     }
-    
+
     /**
      * Gets this Bufferlo as a String.
      */
@@ -448,11 +448,11 @@ public class Bufferlo implements CharSequence {
         }
         return result.toString();
     }
-    
+
     public String toDebugString() {
         return "BUFFERLO {" + buffers + "}";
     }
-    
+
 
     /**
      * Finds the first index of the specified regular expression.
@@ -492,7 +492,7 @@ public class Bufferlo implements CharSequence {
     public String readUntil(String regex) throws ParseException {
         return readUntil(regex, true);
     }
-    
+
     /**
      * Reads the String up until the specified regular expression and returns it.
      *
@@ -512,7 +512,7 @@ public class Bufferlo implements CharSequence {
      * Gets a new buffer by creating it or removing it from the pool.
      */
     private ByteBuffer getNewBuffer() {
-        int BUFFER_SIZE = 8196; 
+        int BUFFER_SIZE = 8196;
         return ByteBuffer.allocateDirect(BUFFER_SIZE);
     }
 }

@@ -17,7 +17,7 @@ public interface ResourceStatusListener extends EventListener {
      * Called each time a resource becomes connected.
      */
     public void resourceConnected(ResourceStatus resource);
-    
+
     /**
      * Called each time a resource's disconnected status changes. This method may
      * be called for each attempt it makes to reconnect to the network.

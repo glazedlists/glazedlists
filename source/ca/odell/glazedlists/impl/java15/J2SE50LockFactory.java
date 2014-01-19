@@ -40,7 +40,7 @@ final class J2SE50ReadWriteLock implements ReadWriteLock, Serializable {
 
     /** For versioning as a {@link Serializable} */
     private static final long serialVersionUID = 188277016505951193L;
-    
+
     private transient final Lock readLock;
     private transient final Lock writeLock;
 
@@ -54,7 +54,7 @@ final class J2SE50ReadWriteLock implements ReadWriteLock, Serializable {
     private Object writeReplace() throws ObjectStreamException {
         return new SerializedReadWriteLock();
     }
-    
+
     /**
      * Return the lock used for reading.
      */

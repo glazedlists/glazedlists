@@ -34,17 +34,17 @@ import java.util.NoSuchElementException;
 
 # define a function NODE_WIDTH(boolean) to get the node's size for this color
 
-    
+
 
 
 # define a function NODE_SIZE(node, colors) to no node.nodeSize()
 
-   
+
 
 
 # define a function to refresh counts
 
-   
+
 
 
 # multiple values
@@ -58,7 +58,7 @@ import java.util.NoSuchElementException;
 
 
 */
-/*[ BEGIN_M4_JAVA ]*/   
+/*[ BEGIN_M4_JAVA ]*/
 
 /**
  * Iterate through a {@link SimpleTree}, one element at a time.
@@ -73,11 +73,11 @@ import java.util.NoSuchElementException;
  */
 public class SimpleTreeIterator <  T0>   {
 
-     
+
     int count1;
-    
-    
-     
+
+
+
 
     private SimpleTree <  T0>   tree;
     private SimpleNode <  T0>   node;
@@ -103,18 +103,18 @@ public class SimpleTreeIterator <  T0>   {
             this.node = ( SimpleNode <  T0>  )tree.get(currentIndex   );
 
             // find the counts
-             
+
             count1 = currentIndex;
-            
-            
-             
+
+
+
 
             // find out the index in the node
-             
+
             this.index = count1 - tree.indexOfNode(this.node, (byte)1);
-            
-            
-             
+
+
+
 
         // just start before the beginning of the tree
         } else {
@@ -131,11 +131,11 @@ public class SimpleTreeIterator <  T0>   {
     public SimpleTreeIterator <  T0>   copy() {
         SimpleTreeIterator <  T0>   result = new SimpleTreeIterator <  T0>  (tree);
 
-         
+
         result.count1 = this.count1;
-        
-        
-         
+
+
+
 
         result.node = node;
         result.index = index;
@@ -184,22 +184,22 @@ public class SimpleTreeIterator <  T0>   {
 
         // increment within the current node
         } else if(   index <  1  - 1) {
-             
+
             count1++;
-            
-            
-             
+
+
+
             index++;
             return;
         }
 
         // scan through the nodes, looking for the first one of the right color
         while(true) {
-             
+
             count1 += 1 - index;
-            
-            
-             
+
+
+
             node = SimpleTree.next(node);
             index = 0;
 
@@ -225,11 +225,11 @@ public class SimpleTreeIterator <  T0>   {
 
         // scan through the nodes, looking for the first one of the right color
         while(true) {
-             
+
             count1 += 1 - index;
-            
-            
-             
+
+
+
             node = SimpleTree.next(node);
             index = 0;
 
@@ -251,7 +251,7 @@ public class SimpleTreeIterator <  T0>   {
         }
     }
 
-      
+
 
     /**
      * Expected values for index should be in the range  ( 0, size() - 1 )
@@ -262,11 +262,11 @@ public class SimpleTreeIterator <  T0>   {
         // total the values of the specified array for the specified colors.
         int result = 0;
 
-         
+
         result += count1;
-        
-        
-         
+
+
+
         return result;
     }
     /**
@@ -279,11 +279,11 @@ public class SimpleTreeIterator <  T0>   {
         int result = 0;
 
         // this should merely be the sum of each count
-         
+
         result += count1;
-        
-        
-         
+
+
+
 
         // subtract the count of anything in the current node which we may
         // have included inadvertently

@@ -22,13 +22,13 @@ import java.util.List;
 /**
  * Small test application to write and read some serialized BasicEventLists.
  * Intended to test serialization and deserialization on different JRE's.
- * 
+ *
  * @author Holger Brands
  */
 public class SerializationTestApp {
     /** name of test file. */
     private static final String TESTDATA_FILENAME = "testdata.ser";
-    
+
     /** main method for reading and writing test data. */
     public static void main(String[] args) throws Exception {
         if ((args.length != 1) || !args[0].equals("-write") && !args[0].equals("-read")) {
@@ -45,7 +45,7 @@ public class SerializationTestApp {
             System.out.println("Test data read from " + TESTDATA_FILENAME);
             verifyTestData(rootObj);
             System.out.println("Test data verified");
-        }        
+        }
     }
 
     /** verifies the test data. */
@@ -53,21 +53,21 @@ public class SerializationTestApp {
         // ensure deserialzed lists still share the lock and publisher
         final List<ListHolder> serializedCopy = (List<ListHolder>) rootObj;
         assert (serializedCopy != null && serializedCopy.size() > 0);
-        
+
         final ListEventPublisher publisher = serializedCopy.get(0).names.getPublisher();
-        final ReadWriteLock lock = serializedCopy.get(0).names.getReadWriteLock();        
-        
+        final ReadWriteLock lock = serializedCopy.get(0).names.getReadWriteLock();
+
         final CompositeList<String> compositeList = new CompositeList<String>(publisher, lock);
-        
+
         for (Iterator<ListHolder> iter = serializedCopy.iterator(); iter.hasNext();) {
-            compositeList.addMemberList(iter.next().names);            
+            compositeList.addMemberList(iter.next().names);
         }
 
         for (int i = 0; i < compositeList.size(); i++) {
             assert(compositeList.get(i).equals("Test " + i));
         }
     }
-    
+
     /** creates some test data to serialize. */
     private static Object createTestData() {
         final ReadWriteLock sharedLock = LockFactory.DEFAULT.createReadWriteLock();
@@ -81,7 +81,7 @@ public class SerializationTestApp {
         }
         return rootList;
     }
-    
+
     /** write test data to file. */
     private static void writeTestData(Object rootObj) throws Exception {
         final FileOutputStream fileOut = new FileOutputStream(new File(TESTDATA_FILENAME));
@@ -98,13 +98,13 @@ public class SerializationTestApp {
         objectsIn.close();
         return result;
     }
-    
+
     /** Serializable helper class to hold BasicEventList. */
     private static class ListHolder implements Serializable {
         private static final long serialVersionUID = 5097886240645131830L;
-        
+
         private EventList<String> names;
-        
+
         public ListHolder(BasicEventList<String> names) {
             this.names = names;
         }

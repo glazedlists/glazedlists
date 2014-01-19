@@ -31,13 +31,13 @@ public class BufferloTest {
         Bufferlo bufferlo = new Bufferlo();
         Writer writer = new OutputStreamWriter(bufferlo.getOutputStream(), "US-ASCII");
         BufferedReader reader = new BufferedReader(new InputStreamReader(bufferlo.getInputStream(), "US-ASCII"));
-        
+
         // verify write and read works
         writer.write("Hello World");
         writer.write("\n");
         writer.flush();
         assertEquals("Hello World", reader.readLine());
-        
+
         // verify duplicate works
         writer.write("Disco Inferno\n");
         writer.flush();
@@ -45,7 +45,7 @@ public class BufferloTest {
         assertEquals("Disco Inferno", reader.readLine());
         BufferedReader discoReader = new BufferedReader(new InputStreamReader(disco.getInputStream(), "US-ASCII"));
         assertEquals("Disco Inferno", discoReader.readLine());
-        
+
         // verify consume works
         writer.write("World\n O Hell\n");
         writer.flush();
@@ -53,7 +53,7 @@ public class BufferloTest {
         BufferedReader worldReader = new BufferedReader(new InputStreamReader(world.getInputStream(), "US-ASCII"));
         assertEquals("World", worldReader.readLine());
         assertEquals(" O Hell", reader.readLine());
-        
+
         // verify we can write to a duplicate
         Writer discoWriter = new OutputStreamWriter(disco.getOutputStream(), "US-ASCII");
         discoWriter.write("Burito Jungle\n");
@@ -73,7 +73,7 @@ public class BufferloTest {
         discoWriter.write("No Grease\n");
         discoWriter.flush();
         assertEquals("No Grease", discoReader.readLine());
-        
+
         // verify that skip and limit work
         Writer worldWriter = new OutputStreamWriter(world.getOutputStream(), "US-ASCII");
         worldWriter.write("Dasher Dancer Prancer Vixen");
@@ -104,7 +104,7 @@ public class BufferloTest {
             fail(e.getMessage());
         }
     }
-    
+
     /**
      * Tests that consume() throws exceptions when the regular expression is not
      * contained.
@@ -121,7 +121,7 @@ public class BufferloTest {
             fail(e.getMessage());
         }
     }
-    
+
 
     /**
      * Tests that consume() throws exceptions when the regular expression does not
@@ -212,7 +212,7 @@ public class BufferloTest {
     public void testMix() throws IOException, ParseException {
         Bufferlo bufferlo = new Bufferlo();
         Writer writer = new OutputStreamWriter(bufferlo.getOutputStream(), "US-ASCII");
-        
+
         // write a bunch of bytes
         int bytesWritten = 0;
         for(int i = 0; i < 10; i++) {
@@ -220,7 +220,7 @@ public class BufferloTest {
             writer.write("Hello World");
             writer.flush();
             bytesWritten += 11;
-            
+
             // write some buffers
             bufferlo.write("World O Hell");
             bytesWritten += 12;
@@ -228,7 +228,7 @@ public class BufferloTest {
             // we should be consistent
             assertEquals(bytesWritten, bufferlo.length());
         }
-        
+
         // verify we wrote what we thought
         int bytesRemaining = bytesWritten;
         for(int i = 0; i < 10; i++) {
@@ -237,22 +237,22 @@ public class BufferloTest {
             assertEquals(data[0], (byte)'H');
             assertEquals(data[4], (byte)'o');
             bytesRemaining -= 5;
-            
+
             // read some text
             bufferlo.consume(" WorldWorld ");
             bytesRemaining -= 12;
-            
+
             // read some bytes
             byte[] data2 = bufferlo.consumeBytes(6);
             assertEquals(data2[0], (byte)'O');
             assertEquals(data2[5], (byte)'l');
             bytesRemaining -= 6;
-            
+
             // we should be consistent
             assertEquals(bytesRemaining, bufferlo.length());
         }
     }
-    
+
     /**
      * Tests that all bytes from -128 thru 127 work. This is necessary to verfiy
      * that there are no problems with byte encoding.
@@ -272,7 +272,7 @@ public class BufferloTest {
             assertEquals(valueOut[0], valueIn[0]);
         }
     }
-    
+
     /**
      * Gets a Bufferlo with the specified contents.
      */

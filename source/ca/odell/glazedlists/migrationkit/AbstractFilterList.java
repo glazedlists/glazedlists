@@ -58,7 +58,7 @@ public abstract class AbstractFilterList extends TransformedList {
 
     /** implement Matcher's requirements in one quick inner class */
     private PrivateMatcherEditor editor = null;
-    
+
     /**
      * Creates a {@link AbstractFilterList} that includes a subset of the specified
      * source {@link EventList}.
@@ -67,7 +67,7 @@ public abstract class AbstractFilterList extends TransformedList {
      */
     protected AbstractFilterList(EventList source) {
         super(new FilterList(source));
-        
+
         // listen for changes to the source list
         this.source.addListEventListener(this);
     }
@@ -153,19 +153,19 @@ public abstract class AbstractFilterList extends TransformedList {
     protected boolean isWritable() {
         return true;
     }
-    
+
     /**
      * The MatcherEditor within the {@link AbstractFilterList} is a simple way for
      * it to fit into the new {@link Matcher}s micro framework.
      */
     private class PrivateMatcherEditor extends AbstractMatcherEditor implements Matcher {
-        /** 
+        /**
          * This MatcherEditor's Matcher is itself.
          */
         public PrivateMatcherEditor() {
             fireChanged();
         }
-    
+
         /** {@inheritDoc} */
         @Override
         public boolean matches(Object item) {

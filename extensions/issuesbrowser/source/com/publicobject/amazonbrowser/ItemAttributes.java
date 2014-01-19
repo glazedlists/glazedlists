@@ -6,7 +6,7 @@ package com.publicobject.amazonbrowser;
 import java.util.Date;
 
 /**
- * Models a grab bag of attributes associated with an {@link Item}. 
+ * Models a grab bag of attributes associated with an {@link Item}.
  *
  * @author James Lemieux
  */

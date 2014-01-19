@@ -156,7 +156,7 @@ public class ListEventPublisher2Test {
         ListConsistencyListener filteredListener = ListConsistencyListener.install(filtered);
         assertEquals(0, filteredListener.getEventCount());
     }
-    
+
     private static class NotFirstMatcherEditor<E> extends AbstractMatcherEditor<E> implements ListEventListener<E> {
         @Override
         public void listChanged(ListEvent<E> listChanges) {

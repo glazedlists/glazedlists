@@ -12,10 +12,10 @@ import ca.odell.glazedlists.impl.io.Bufferlo;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 class BlockingValueCallback implements ValueCallback {
-    
+
     /** the value returned */
     private Bufferlo value = null;
-    
+
     /**
      * Gets the value for the specified Chunk.
      */
@@ -23,7 +23,7 @@ class BlockingValueCallback implements ValueCallback {
         // queue the get
         BlockingValueCallback callback = new BlockingValueCallback();
         member.fetchValue(callback);
-        
+
         // wait till its ready
         synchronized(callback) {
             if(callback.value == null) {
@@ -34,11 +34,11 @@ class BlockingValueCallback implements ValueCallback {
                 }
             }
         }
-        
+
         // return the result
         return callback.value;
     }
-    
+
     /**
      * Handles a value being completely loaded into memory and ready to read.
      */

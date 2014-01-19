@@ -339,7 +339,7 @@ public class ObservableElementList<E> extends TransformedList<E, E> {
             iter.nextBlack();
             this.multiEventListenerRegistry.set(iter.getIndex(), this.singleEventListener);
         }
-        
+
         // null out the reference to the single EventListener,
         // since we'll now track the EventListener for each element
         this.singleEventListener = null;

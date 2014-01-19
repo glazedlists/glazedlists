@@ -22,12 +22,12 @@ public interface Lock {
      * Acquires the lock.
      */
     public void lock();
-    
+
     /**
      * Acquires the lock only if it is free at the time of invocation.
      */
     public boolean tryLock();
-    
+
     /**
      * Releases the lock.
      */
