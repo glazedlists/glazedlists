@@ -9,10 +9,19 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ThresholdList;
 import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.gui.TableFormat;
-import ca.odell.glazedlists.impl.swt.*;
+import ca.odell.glazedlists.impl.swt.BeanItemFormat;
+import ca.odell.glazedlists.impl.swt.BoundedRangeControlFactory;
+import ca.odell.glazedlists.impl.swt.LowerThresholdViewer;
+import ca.odell.glazedlists.impl.swt.SWTThreadProxyEventList;
+import ca.odell.glazedlists.impl.swt.UpperThresholdViewer;
 
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.List;
+import org.eclipse.swt.widgets.Scale;
+import org.eclipse.swt.widgets.Slider;
+import org.eclipse.swt.widgets.Table;
 
 
 /**
@@ -83,7 +92,7 @@ public final class GlazedListsSWT {
 	 * property as the formatted value of a list element. If the list element or
 	 * the propery value is <code>null</code>, the emtpy string is returned.
 	 *
-	 * @param propertyName the JavaBean property name
+	 * @param property the JavaBean property name
      */
     public static <E> ItemFormat<E> beanItemFormat(String property) {
         return new BeanItemFormat<E>(property);
@@ -94,7 +103,7 @@ public final class GlazedListsSWT {
 	 * property as the formatted value of a list element. If the list element or
 	 * the propery value is <code>null</code>, the given value is returned.
 	 *
-	 * @param propertyName the JavaBean property name
+	 * @param property the JavaBean property name
 	 * @param valueForNullElement
 	 *            string value to be used for a <code>null</code> element or
 	 *            property value

@@ -73,8 +73,8 @@ public interface TableModelEventAdapter<E> extends ListEventListener<E> {
      *
      * @param <E> list element type
      *
-     * @see GlazedListsSwing#eventTableModel(ca.odell.glazedlists.EventList, ca.odell.glazedlists.gui.TableFormat, Factory)
-     * @see GlazedListsSwing#eventTableModelWithThreadProxyList(ca.odell.glazedlists.EventList, ca.odell.glazedlists.gui.TableFormat, Factory)
+     * @see GlazedListsSwing#eventTableModel(ca.odell.glazedlists.EventList, ca.odell.glazedlists.gui.TableFormat, ca.odell.glazedlists.swing.TableModelEventAdapter.Factory)
+     * @see GlazedListsSwing#eventTableModelWithThreadProxyList(ca.odell.glazedlists.EventList, ca.odell.glazedlists.gui.TableFormat, ca.odell.glazedlists.swing.TableModelEventAdapter.Factory)
      *
      * @author Holger Brands
      */

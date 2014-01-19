@@ -206,8 +206,9 @@ public final class TreeTableSupport {
         final int viewColumnIndex = table.convertColumnIndexToView(modelColumnIndex);
 
         // ensure we can find the view column index of the hierarchical column
-        if (viewColumnIndex == -1)
+        if (viewColumnIndex == -1) {
             throw new IllegalArgumentException("Unable to locate a view index for the given model index: " + modelColumnIndex);
+        }
 
         // look up the hierarchical TableColumn
         final TableColumn viewColumn = table.getColumnModel().getColumn(viewColumnIndex);
@@ -339,12 +340,14 @@ public final class TreeTableSupport {
         final TableCellEditor editor = viewColumn.getCellEditor();
 
         // if the TreeTableCellRenderer is still installed, reinstall the original TableCellRenderer
-        if (renderer == treeTableCellRenderer)
+        if (renderer == treeTableCellRenderer) {
             viewColumn.setCellRenderer(originalRenderer);
+        }
 
         // if the TreeTableCellEditor is still installed, reinstall the original TableCellEditor
-        if (editor == treeTableCellEditor)
+        if (editor == treeTableCellEditor) {
             viewColumn.setCellEditor(originalEditor);
+        }
 
         treeTableCellRenderer.dispose();
         treeTableCellEditor.dispose();
@@ -357,13 +360,14 @@ public final class TreeTableSupport {
      * nodes that may contain children in the future are displayed with a
      * visible expander; otherwise they are displayed without the expander.
      * A node signals that it may contain children in the future by returning
-     * <tt>true</tt> from {@link TreeList.Format#allowsChildren(Object)}.
+     * <tt>true</tt> from {@link ca.odell.glazedlists.TreeList.Format#allowsChildren(Object)}.
      */
     public void setShowExpanderForEmptyParent(boolean showExpanderForEmptyParent) {
         checkAccessThread();
 
-        if (this.showExpanderForEmptyParent == showExpanderForEmptyParent)
+        if (this.showExpanderForEmptyParent == showExpanderForEmptyParent) {
             return;
+        }
 
         this.showExpanderForEmptyParent = showExpanderForEmptyParent;
 
@@ -409,8 +413,9 @@ public final class TreeTableSupport {
         checkAccessThread();
 
         // make sure we're actually changing the value
-        if (this.arrowKeyExpansionEnabled == arrowKeyExpansionEnabled)
+        if (this.arrowKeyExpansionEnabled == arrowKeyExpansionEnabled) {
             return;
+        }
 
         final TableColumnModel tableColumnModel = table.getColumnModel();
         if (arrowKeyExpansionEnabled) {
@@ -419,8 +424,9 @@ public final class TreeTableSupport {
             tableColumnModel.setSelectionModel(NOOP_SELECTION_MODEL);
         } else {
             // if arrow key expansion is turned off, restore the original column selection model
-            if (tableColumnModel.getSelectionModel() == NOOP_SELECTION_MODEL)
+            if (tableColumnModel.getSelectionModel() == NOOP_SELECTION_MODEL) {
                 tableColumnModel.setSelectionModel(originalColumnSelectionModel);
+            }
             originalColumnSelectionModel = null;
         }
 
@@ -463,8 +469,9 @@ public final class TreeTableSupport {
 
         // ensure we can find the view column index of the hierarchical column
         final int viewColumnIndex = table.convertColumnIndexToView(hierarchyColumnModelIndex);
-        if (viewColumnIndex == -1)
+        if (viewColumnIndex == -1) {
             throw new IllegalArgumentException("Unable to locate a view index for the given model index: " + hierarchyColumnModelIndex);
+        }
 
         // look up the hierarchical TableColumn
         final TableColumn viewColumn = table.getColumnModel().getColumn(viewColumnIndex);
@@ -514,8 +521,9 @@ public final class TreeTableSupport {
 
         // ensure we can find the view column index of the hierarchical column
         final int viewColumnIndex = table.convertColumnIndexToView(hierarchyColumnModelIndex);
-        if (viewColumnIndex == -1)
+        if (viewColumnIndex == -1) {
             throw new IllegalArgumentException("Unable to locate a view index for the given model index: " + hierarchyColumnModelIndex);
+        }
 
         // look up the hierarchical TableColumn
         final TableColumn viewColumn = table.getColumnModel().getColumn(viewColumnIndex);
@@ -561,8 +569,9 @@ public final class TreeTableSupport {
      * accessed from the Event Dispatch Thread.
      */
     private static void checkAccessThread() {
-        if (!SwingUtilities.isEventDispatchThread())
+        if (!SwingUtilities.isEventDispatchThread()) {
             throw new IllegalStateException("TreeTableSupport must be accessed from the Swing Event Dispatch Thread, but was called on Thread \"" + Thread.currentThread().getName() + "\"");
+        }
     }
 
     /**
@@ -581,8 +590,9 @@ public final class TreeTableSupport {
          * Decorate the given <code>delegate</code> with extra functionality.
          */
         public ExpandAndCollapseMouseListener(MouseListener delegate) {
-            if (delegate == null)
+            if (delegate == null) {
                 throw new IllegalArgumentException("delegate may not be null");
+            }
 
             this.delegate = delegate;
         }
@@ -594,10 +604,12 @@ public final class TreeTableSupport {
             return delegate;
         }
 
+        @Override
         public void mousePressed(MouseEvent me) {
             // if the table isn't enabled, break early
-            if (!table.isEnabled())
+            if (!table.isEnabled()) {
                 return;
+            }
 
             // we're going to check if the single click was overtop of the
             // expander button and toggle the expansion of the row if it was
@@ -609,8 +621,9 @@ public final class TreeTableSupport {
             final int column = table.columnAtPoint(clickPoint);
 
             // ensure a valid cell has clicked
-            if (row == -1 || column == -1)
+            if (row == -1 || column == -1) {
                 return;
+            }
 
             // translate the clickPoint to be relative to the rendered component
             final Rectangle cellRect = table.getCellRect(row, column, true);
@@ -622,8 +635,9 @@ public final class TreeTableSupport {
                 treeList.getReadWriteLock().writeLock().lock();
                 try {
                     // expand/collapse the row if possible
-                    if (treeList.getAllowsChildren(row))
+                    if (treeList.getAllowsChildren(row)) {
                         TreeTableUtilities.toggleExpansion(table, treeList, row).run();
+                    }
                 } finally {
                     treeList.getReadWriteLock().writeLock().unlock();
                 }
@@ -635,9 +649,13 @@ public final class TreeTableSupport {
             delegate.mousePressed(me);
         }
 
+        @Override
         public void mouseClicked(MouseEvent me) { delegate.mouseClicked(me); }
+        @Override
         public void mouseReleased(MouseEvent me) { delegate.mouseReleased(me); }
+        @Override
         public void mouseEntered(MouseEvent me) { delegate.mouseEntered(me); }
+        @Override
         public void mouseExited(MouseEvent me) { delegate.mouseExited(me); }
     }
 
@@ -658,38 +676,45 @@ public final class TreeTableSupport {
 
         @Override
         public void keyPressed(KeyEvent e) {
-            if (!getSpaceKeyExpansionEnabled())
+            if (!getSpaceKeyExpansionEnabled()) {
                 return;
+            }
             // if the table isn't enabled, break early
-            if (!table.isEnabled())
+            if (!table.isEnabled()) {
                 return;
+            }
 
             // if the table doesn't own the focus, break early
-            if (!table.isFocusOwner())
+            if (!table.isFocusOwner()) {
                 return;
+            }
 
             // if the key pressed is not the space bar, break early
-            if (e.getKeyCode() != KeyEvent.VK_SPACE || e.getModifiers() != 0)
+            if (e.getKeyCode() != KeyEvent.VK_SPACE || e.getModifiers() != 0) {
                 return;
+            }
 
             final int row = table.getSelectionModel().getLeadSelectionIndex();
             final int column = table.getColumnModel().getSelectionModel().getLeadSelectionIndex();
 
             // ensure a valid row has focus
-            if (row == -1)
+            if (row == -1) {
                 return;
+            }
 
             // if a column is selected, ensure it is the hierarchy column
-            if (column != -1 && table.convertColumnIndexToModel(column) != hierarchyColumnModelIndex)
+            if (column != -1 && table.convertColumnIndexToModel(column) != hierarchyColumnModelIndex) {
                 return;
+            }
 
             treeList.getReadWriteLock().writeLock().lock();
             try {
                 // if the row is expandable, toggle its expanded state
                 if (treeList.getAllowsChildren(row)) {
                     final Runnable r = TreeTableUtilities.toggleExpansion(table, treeList, row);
-                    if (restoreStateRunnable == null)
+                    if (restoreStateRunnable == null) {
                         restoreStateRunnable = r;
+                    }
                 }
             } finally {
                 treeList.getReadWriteLock().writeLock().unlock();
@@ -717,38 +742,44 @@ public final class TreeTableSupport {
     private class ArrowKeyListener extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {
-            if (!arrowKeyExpansionEnabled)
+            if (!arrowKeyExpansionEnabled) {
                 return;
+            }
 
             // if the table isn't enabled, break early
-            if (!table.isEnabled())
+            if (!table.isEnabled()) {
                 return;
+            }
 
             // if column selection is allowed, we want normal table handling of
             // the arrow key, not this special tree node toggling logic
-            if (table.getColumnSelectionAllowed())
+            if (table.getColumnSelectionAllowed()) {
                 return;
+            }
 
             // if the key pressed is not the space bar, break early
             final int c = e.getKeyCode();
             final boolean isLeftArrowKey = c == KeyEvent.VK_LEFT;
             final boolean isRightArrowKey = c == KeyEvent.VK_RIGHT;
-            if (!(isLeftArrowKey || isRightArrowKey) || e.getModifiers() != 0)
+            if (!(isLeftArrowKey || isRightArrowKey) || e.getModifiers() != 0) {
                 return;
+            }
 
             final int row = table.getSelectionModel().getLeadSelectionIndex();
 
             // ensure a valid cell has focus
-            if (row == -1)
+            if (row == -1) {
                 return;
+            }
 
             treeList.getReadWriteLock().writeLock().lock();
             try {
                 // if the row is expandable, toggle its expanded state
                 if (treeList.getAllowsChildren(row)) {
                     final boolean expanded = treeList.isExpanded(row);
-                    if ((expanded && isLeftArrowKey) || (!expanded && isRightArrowKey))
+                    if ((expanded && isLeftArrowKey) || (!expanded && isRightArrowKey)) {
                         TreeTableUtilities.toggleExpansion(table, treeList, row).run();
+                    }
                 }
             } finally {
                 treeList.getReadWriteLock().writeLock().unlock();
@@ -764,12 +795,14 @@ public final class TreeTableSupport {
      * guarantee that their reads are atomic.
      */
     private static class EventDispathThreadChecker implements ListEventListener {
+        @Override
         public void listChanged(ListEvent listChanges) {
-            if (!SwingUtilities.isEventDispatchThread())
+            if (!SwingUtilities.isEventDispatchThread()) {
                 throw new IllegalStateException("TreeTableSupport has detected that its underlying TreeList was changed on a Thread that is NOT the Swing Event Dispatch Thread. " +
                         "This can cause unreliable results including sporadic exceptions since the TreeList is read from the EDT. Two solutions exist for this problem:\n\n" +
                         "a) ensure each and every write to the EventList pipeline occurs on the Swing EDT\n" +
                         "b) wrap the source EventList of TreeList in a Swing Thread Proxy List using GlazedListsSwing.swingThreadProxyList(...) before passing it to the TreeList constructor");
+            }
         }
     }
 
@@ -782,25 +815,45 @@ public final class TreeTableSupport {
      * treetables.
      */
     private static class NoopColumnSelectionModel implements ListSelectionModel {
+        @Override
         public void setSelectionInterval(int index0, int index1) { }
+        @Override
         public void addSelectionInterval(int index0, int index1) { }
+        @Override
         public void removeSelectionInterval(int index0, int index1) { }
+        @Override
         public int getMinSelectionIndex() { return -1; }
+        @Override
         public int getMaxSelectionIndex() { return -1; }
+        @Override
         public boolean isSelectedIndex(int index) { return false; }
+        @Override
         public int getAnchorSelectionIndex() { return -1; }
+        @Override
         public void setAnchorSelectionIndex(int index) { }
+        @Override
         public int getLeadSelectionIndex() { return -1; }
+        @Override
         public void setLeadSelectionIndex(int index) { }
+        @Override
         public void clearSelection() { }
+        @Override
         public boolean isSelectionEmpty() { return true; }
+        @Override
         public void insertIndexInterval(int index, int length, boolean before) { }
+        @Override
         public void removeIndexInterval(int index0, int index1) { }
+        @Override
         public void setValueIsAdjusting(boolean valueIsAdjusting) { }
+        @Override
         public boolean getValueIsAdjusting() { return false; }
+        @Override
         public void setSelectionMode(int selectionMode) { }
+        @Override
         public int getSelectionMode() { return ListSelectionModel.SINGLE_SELECTION; }
+        @Override
         public void addListSelectionListener(ListSelectionListener x) { }
+        @Override
         public void removeListSelectionListener(ListSelectionListener x) { }
     }
 }

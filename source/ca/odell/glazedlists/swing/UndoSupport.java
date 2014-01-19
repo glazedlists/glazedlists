@@ -7,13 +7,15 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FunctionList;
 import ca.odell.glazedlists.UndoRedoSupport;
 
-import javax.swing.undo.*;
-import javax.swing.*;
+import javax.swing.SwingUtilities;
+import javax.swing.undo.AbstractUndoableEdit;
+import javax.swing.undo.UndoManager;
+import javax.swing.undo.UndoableEdit;
 
 /**
  * This class adapts the generic {@link UndoRedoSupport} provided by Glazed
  * Lists for specific use with Swing's native {@link UndoManager}. Each
- * {@link UndoRedoSupport.Edit} produced by Glazed List's
+ * {@link ca.odell.glazedlists.UndoRedoSupport.Edit} produced by Glazed List's
  * {@link UndoRedoSupport} is adapted to Swing's {@link UndoableEdit} interface
  * and then {@link UndoManager#addEdit added} into the given UndoManager.
  *
@@ -121,7 +123,7 @@ public final class UndoSupport<E> {
 
         undoRedoSupport.removeUndoSupportListener(undoSupportHandler);
         undoRedoSupport.uninstall();
-        
+
         undoSupportHandler = null;
         undoRedoSupport = null;
         undoManager = null;
@@ -133,8 +135,9 @@ public final class UndoSupport<E> {
      * from the Event Dispatch Thread.
      */
     private static void checkAccessThread() {
-        if (!SwingUtilities.isEventDispatchThread())
+        if (!SwingUtilities.isEventDispatchThread()) {
             throw new IllegalStateException("UndoRedoSupport must be accessed from the Swing Event Dispatch Thread, but was called on Thread \"" + Thread.currentThread().getName() + "\"");
+        }
     }
 
     /**
@@ -142,6 +145,7 @@ public final class UndoSupport<E> {
      * and posting them to the given UndoManager.
      */
     private class UndoSupportHandler implements UndoRedoSupport.Listener {
+        @Override
         public void undoableEditHappened(UndoRedoSupport.Edit edit) {
             undoManager.addEdit(editAdapter.evaluate(edit));
         }
@@ -151,6 +155,7 @@ public final class UndoSupport<E> {
      * The default strategy for transforming GL edits into Swing edits.
      */
     private static class DefaultEditAdapter implements FunctionList.Function<UndoRedoSupport.Edit, UndoableEdit> {
+        @Override
         public UndoableEdit evaluate(UndoRedoSupport.Edit edit) {
             return new EditAdapter(edit);
         }

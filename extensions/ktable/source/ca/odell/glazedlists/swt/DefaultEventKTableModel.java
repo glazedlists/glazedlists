@@ -9,12 +9,12 @@ import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
 
+import org.eclipse.swt.graphics.Point;
+
 import de.kupzog.ktable.KTable;
 import de.kupzog.ktable.KTableCellEditor;
 import de.kupzog.ktable.KTableCellRenderer;
 import de.kupzog.ktable.KTableModel;
-
-import org.eclipse.swt.graphics.Point;
 
 /**
  * A {@link KTableModel} that displays an {@link EventList}. Each element of the
@@ -78,7 +78,7 @@ public class DefaultEventKTableModel implements KTableModel, ListEventListener {
      *      If the value implements the {@link KTableFormat} interface, those
      *      methods will be used to provide further details such as cell renderers,
      *      cell editors and row heights.
-     * @param diposeSource <code>true</code> if the source list should be disposed when disposing
+     * @param disposeSource <code>true</code> if the source list should be disposed when disposing
      *            this model, <code>false</code> otherwise
      *
      */
@@ -101,6 +101,7 @@ public class DefaultEventKTableModel implements KTableModel, ListEventListener {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void listChanged(ListEvent listChanges) {
         // KTable has no fine-grained event notification,
         // so each time the data changes we'll probably break
@@ -111,6 +112,7 @@ public class DefaultEventKTableModel implements KTableModel, ListEventListener {
     }
 
     /** {@inheritDoc} */
+    @Override
     public Object getContentAt(int column, int row) {
         // get header content
         if(row < getFixedHeaderRowCount()) {
@@ -128,6 +130,7 @@ public class DefaultEventKTableModel implements KTableModel, ListEventListener {
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getTooltipAt(int column, int row) {
         // headers have no tooltips
         if(row < getFixedHeaderRowCount()) {
@@ -145,6 +148,7 @@ public class DefaultEventKTableModel implements KTableModel, ListEventListener {
     }
 
     /** {@inheritDoc} */
+    @Override
     public KTableCellEditor getCellEditor(int column, int row) {
         // header rows aren't editable
         if(row < getFixedHeaderRowCount()) {
@@ -167,6 +171,7 @@ public class DefaultEventKTableModel implements KTableModel, ListEventListener {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setContentAt(int column, int row, Object value) {
         // header rows aren't editable
         if(row < getFixedHeaderRowCount()) {
@@ -193,6 +198,7 @@ public class DefaultEventKTableModel implements KTableModel, ListEventListener {
     }
 
     /** {@inheritDoc} */
+    @Override
     public KTableCellRenderer getCellRenderer(int column, int row) {
         // headers get the default renderer
         if(row < getFixedHeaderRowCount()) {
@@ -210,12 +216,14 @@ public class DefaultEventKTableModel implements KTableModel, ListEventListener {
     }
 
     /** {@inheritDoc} */
+    @Override
     public Point belongsToCell(int column, int row) {
         // no spanning by default
         return new Point(column, row);
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getRowCount() {
         // a row for every list element, plus the headers
         source.getReadWriteLock().readLock().lock();
@@ -227,46 +235,55 @@ public class DefaultEventKTableModel implements KTableModel, ListEventListener {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getFixedHeaderRowCount() {
         return kTableFormat.getFixedHeaderRowCount();
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getFixedSelectableRowCount() {
         return kTableFormat.getFixedSelectableColumnCount();
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getColumnCount() {
         return kTableFormat.getColumnCount();
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getFixedHeaderColumnCount() {
         return kTableFormat.getFixedHeaderColumnCount();
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getFixedSelectableColumnCount() {
         return kTableFormat.getFixedSelectableColumnCount();
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getColumnWidth(int col) {
         return kTableFormat.getColumnWidth(col);
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isColumnResizable(int col) {
         return kTableFormat.isColumnResizable(col);
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setColumnWidth(int col, int width) {
         kTableFormat.setColumnWidth(col, width);
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getRowHeight(int row) {
         // header row height
         if(row < getFixedHeaderRowCount()) {
@@ -288,6 +305,7 @@ public class DefaultEventKTableModel implements KTableModel, ListEventListener {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isRowResizable(int row) {
         // header rows are not resizable
         if(row < getFixedHeaderRowCount()) {
@@ -305,11 +323,13 @@ public class DefaultEventKTableModel implements KTableModel, ListEventListener {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int getRowHeightMinimum() {
         return kTableFormat.getRowHeightMinimum();
     }
 
     /** {@inheritDoc} */
+    @Override
     public void setRowHeight(int row, int value) {
         // header rows are not resizable
         if(row < getFixedHeaderRowCount()) {
@@ -342,6 +362,8 @@ public class DefaultEventKTableModel implements KTableModel, ListEventListener {
      */
     public void dispose() {
         source.removeListEventListener(this);
-        if (disposeSource) source.dispose();
+        if (disposeSource) {
+            source.dispose();
+        }
     }
 }

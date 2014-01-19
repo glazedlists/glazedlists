@@ -9,11 +9,15 @@ import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.adt.Barcode;
 import ca.odell.glazedlists.impl.adt.BarcodeIterator;
 
-import java.util.List;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+
+import java.util.List;
 
 
 /**
@@ -91,20 +95,24 @@ public class DefaultEventTableViewer<E> implements ListEventListener<E> {
      * @param tableFormat the object responsible for extracting column data
      *      from the row objects
      * @param tableItemConfigurer responsible for configuring table items
-     * @param diposeSource <code>true</code> if the source list should be disposed when disposing
+     * @param disposeSource <code>true</code> if the source list should be disposed when disposing
      *            this model, <code>false</code> otherwise
      */
     protected DefaultEventTableViewer(EventList<E> source, Table table, TableFormat<? super E> tableFormat,
             TableItemConfigurer<? super E> tableItemConfigurer, boolean disposeSource) {
         // check for valid arguments early
-        if (source == null)
+        if (source == null) {
             throw new IllegalArgumentException("source list may not be null");
-        if (table == null)
+        }
+        if (table == null) {
             throw new IllegalArgumentException("Table may not be null");
-        if (tableFormat == null)
+        }
+        if (tableFormat == null) {
             throw new IllegalArgumentException("TableFormat may not be null");
-        if (tableItemConfigurer == null)
+        }
+        if (tableItemConfigurer == null) {
             throw new IllegalArgumentException("TableItemConfigurer may not be null");
+        }
 
         // lock the source list for reading since we want to prevent writes
         // from occurring until we fully initialize this EventTableViewer
@@ -201,8 +209,9 @@ public class DefaultEventTableViewer<E> implements ListEventListener<E> {
      * @throws IllegalArgumentException if tableFormat is <code>null</code>
      */
     public void setTableFormat(TableFormat<? super E> tableFormat) {
-    	if (tableFormat == null)
-    		throw new IllegalArgumentException("TableFormat may not be null");
+    	if (tableFormat == null) {
+            throw new IllegalArgumentException("TableFormat may not be null");
+        }
         this.tableFormat = tableFormat;
 
         table.setRedraw(false);
@@ -224,13 +233,16 @@ public class DefaultEventTableViewer<E> implements ListEventListener<E> {
      * non-virtual table items will be reconfigured with the specified configurer.
      */
     public void setTableItemConfigurer(TableItemConfigurer<? super E> tableItemConfigurer) {
-        if (tableItemConfigurer == null)
+        if (tableItemConfigurer == null) {
             throw new IllegalArgumentException("TableItemConfigurer may not be null");
+        }
 
         this.tableItemConfigurer = tableItemConfigurer;
         // determine the index of the last, non-virtual table item
         final int maxIndex = tableHandler.getLastIndex();
-        if (maxIndex < 0) return;
+        if (maxIndex < 0) {
+            return;
+        }
         // Disable redraws so that the table is updated in bulk
         table.setRedraw(false);
         source.getReadWriteLock().readLock().lock();
@@ -366,10 +378,13 @@ public class DefaultEventTableViewer<E> implements ListEventListener<E> {
      * When the source list is changed, this forwards the change to the
      * displayed {@link Table}.
      */
+    @Override
     public void listChanged(ListEvent listChanges) {
         // if the table is no longer available, we don't want to do anything as
         // it will result in a "Widget is disposed" exception
-        if (table.isDisposed()) return;
+        if (table.isDisposed()) {
+            return;
+        }
 
         Barcode deletes = new Barcode();
         deletes.addWhite(0, source.size());
@@ -442,11 +457,13 @@ public class DefaultEventTableViewer<E> implements ListEventListener<E> {
         source.getPublisher().clearRelatedListener(selection.getSelectionList(), this);
 
         // if we created the checkFilterList then we must also dispose it
-        if (checkFilterList != null)
+        if (checkFilterList != null) {
             checkFilterList.dispose();
+        }
 
-        if (originalSource != null)
-        	originalSource.dispose();
+        if (originalSource != null) {
+            originalSource.dispose();
+        }
 
         // this encourages exceptions to be thrown if this model is incorrectly accessed again
         checkFilterList = null;
@@ -461,36 +478,43 @@ public class DefaultEventTableViewer<E> implements ListEventListener<E> {
      */
     private final class SelectableTable implements Selectable {
         /** {@inheritDoc} */
+        @Override
         public void addSelectionListener(SelectionListener listener) {
             table.addSelectionListener(listener);
         }
 
         /** {@inheritDoc} */
+        @Override
         public void removeSelectionListener(SelectionListener listener) {
             table.removeSelectionListener(listener);
         }
 
         /** {@inheritDoc} */
+        @Override
         public int getSelectionIndex() {
             return table.getSelectionIndex();
         }
 
         /** {@inheritDoc} */
+        @Override
         public int[] getSelectionIndices() {
             return table.getSelectionIndices();
         }
 
         /** {@inheritDoc} */
+        @Override
         public int getStyle() {
             return table.getStyle();
         }
 
         /** {@inheritDoc} */
+        @Override
         public void select(int index) {
             table.select(index);
         }
 
         /** {@inheritDoc} */
+        @Override
         public void deselect(int index) {
             table.deselect(index);
         }
@@ -545,6 +569,7 @@ public class DefaultEventTableViewer<E> implements ListEventListener<E> {
         /**
          * Populate the Table with initial data.
          */
+        @Override
         public void populateTable() {
             for(int i = 0, n = source.size(); i < n; i++) {
                 addRow(i, source.get(i));
@@ -554,6 +579,7 @@ public class DefaultEventTableViewer<E> implements ListEventListener<E> {
         /**
          * Adds a row with the given value.
          */
+        @Override
         public void addRow(int row, E value) {
             TableItem item = new TableItem(table, 0, row);
             renderTableItem(item, value, row);
@@ -562,6 +588,7 @@ public class DefaultEventTableViewer<E> implements ListEventListener<E> {
         /**
          * Updates a row with the given value.
          */
+        @Override
         public void updateRow(int row, E value) {
             TableItem item = table.getItem(row);
             renderTableItem(item, value, row);
@@ -570,6 +597,7 @@ public class DefaultEventTableViewer<E> implements ListEventListener<E> {
         /**
          * Removes a set of rows in a single call
          */
+        @Override
         public void removeAll(int[] rows) {
             table.remove(rows);
         }
@@ -577,16 +605,19 @@ public class DefaultEventTableViewer<E> implements ListEventListener<E> {
         /**
          * Disposes of this TableHandler.
          */
+        @Override
         public void dispose() {
             // no-op for default Tables
         }
 
         /** {@inheritedDoc} */
+        @Override
         public int getLastIndex() {
             return table.getItemCount() - 1;
         }
 
         /** {@inheritedDoc} */
+        @Override
         public void redraw() {
 			for (int i=0; i<source.size(); i++) {
 				renderTableItem(table.getItem(i), source.get(i), i);
@@ -615,6 +646,7 @@ public class DefaultEventTableViewer<E> implements ListEventListener<E> {
         /**
          * Populate the Table with initial data.
          */
+        @Override
         public void populateTable() {
             table.setItemCount(source.size());
         }
@@ -622,6 +654,7 @@ public class DefaultEventTableViewer<E> implements ListEventListener<E> {
         /**
          * Adds a row with the given value.
          */
+        @Override
         public void addRow(int row, E value) {
             // Adding before the last non-Virtual value
             if(row <= getLastIndex()) {
@@ -639,6 +672,7 @@ public class DefaultEventTableViewer<E> implements ListEventListener<E> {
         /**
          * Updates a row with the given value.
          */
+        @Override
         public void updateRow(int row, E value) {
             // Only set a row if it is NOT Virtual
             if(!isVirtual(row)) {
@@ -651,6 +685,7 @@ public class DefaultEventTableViewer<E> implements ListEventListener<E> {
         /**
          * Removes a set of rows in a single call
          */
+        @Override
         public void removeAll(int[] rows) {
             // Sync the requested barcode to clear values that have been removed
             for(int i = 0; i < rows.length; i++) {
@@ -663,12 +698,14 @@ public class DefaultEventTableViewer<E> implements ListEventListener<E> {
          * Returns the highest index that has been requested or -1 if the
          * Table is entirely Virtual.
          */
+        @Override
         public int getLastIndex() {
             // Everything is Virtual
-            if(requested.blackSize() == 0) return -1;
-
-            // Return the last index
-            else return requested.getIndex(requested.blackSize() - 1, Barcode.BLACK);
+            if(requested.blackSize() == 0) {
+                return -1;
+            } else {
+                return requested.getIndex(requested.blackSize() - 1, Barcode.BLACK);
+            }
         }
 
         /**
@@ -681,6 +718,7 @@ public class DefaultEventTableViewer<E> implements ListEventListener<E> {
         /**
          * Respond to requests for values to fill Virtual rows.
          */
+        @Override
         public void handleEvent(Event e) {
             // Get the TableItem from the Table
             TableItem item = (TableItem)e.item;
@@ -699,11 +737,13 @@ public class DefaultEventTableViewer<E> implements ListEventListener<E> {
         /**
          * Allows this handler to clean up after itself.
          */
+        @Override
         public void dispose() {
             table.removeListener(SWT.SetData, this);
         }
 
         /** {@inheritedDoc} */
+        @Override
         public void redraw() {
 			this.requested.clear();
 			table.setItemCount(0);

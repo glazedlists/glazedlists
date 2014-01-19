@@ -5,6 +5,7 @@
 package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.gui.TableFormat;
 
@@ -40,8 +41,30 @@ import javax.swing.event.TableModelEvent;
 public class EventJXTableModel<E> extends EventTableModel<E> {
 
     /**
-     * {@inheritDoc}
+     * Creates a new table that renders the specified list with an automatically
+     * generated {@link TableFormat}. It uses JavaBeans and reflection to create
+     * a {@link TableFormat} as specified.
+     *
+     * <p>Note that the classes which will be obfuscated may not work with
+     * reflection. In this case, implement a {@link TableFormat} manually.
+     *
+     * @param source the EventList that provides the row objects
+     * @param propertyNames an array of property names in the JavaBeans format.
+     *      For example, if your list contains Objects with the methods getFirstName(),
+     *      setFirstName(String), getAge(), setAge(Integer), then this array should
+     *      contain the two strings "firstName" and "age". This format is specified
+     *      by the JavaBeans {@link java.beans.PropertyDescriptor}.
+     * @param columnLabels the corresponding column names for the listed property
+     *      names. For example, if your columns are "firstName" and "age", then
+     *      your labels might be "First Name" and "Age".
+     * @param writable an array of booleans specifying which of the columns in
+     *      your table are writable.
+     *
+     * @deprecated Use {@link GlazedLists#tableFormat(String[], String[], boolean[])}
+     * and {@link GlazedListsSwing#eventTableModelWithThreadProxyList(EventList, TableFormat, ca.odell.glazedlists.swing.TableModelEventAdapter.Factory)}
+     * instead
      */
+    @Deprecated
     public EventJXTableModel(EventList<E> source, String[] propertyNames, String[] columnLabels,
             boolean[] writable) {
         super(source, propertyNames, columnLabels, writable);
@@ -49,8 +72,15 @@ public class EventJXTableModel<E> extends EventTableModel<E> {
     }
 
     /**
-     * {@inheritDoc}
+     * Creates a new table model that extracts column data from the given <code>source</code>
+     * using the the given <code>tableFormat</code>.
+     *
+     * @param source the EventList that provides the row objects
+     * @param tableFormat the object responsible for extracting column data from the row objects
+     *
+     * @deprecated Use {@link GlazedListsSwing#eventTableModelWithThreadProxyList(EventList, TableFormat, ca.odell.glazedlists.swing.TableModelEventAdapter.Factory)} instead
      */
+    @Deprecated
     public EventJXTableModel(EventList<E> source, TableFormat<? super E> tableFormat) {
         super(source, tableFormat);
         setEventAdapter(GlazedListsSwing.<E>manyToOneEventAdapterFactory().create(this));

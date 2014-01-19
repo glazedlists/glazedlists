@@ -174,7 +174,7 @@
 		<!-- document all the source -->
         <mkdir dir="${docs.dir}"/>
 		<javadoc
-			destdir="${docs.dir}/api" author="true" use="true" windowtitle="Glazed Lists" source="${java.target.version}">
+			destdir="${docs.dir}/api" author="true" use="true" windowtitle="Glazed Lists" source="${java.target.version}" Encoding="${java.encoding}">
 			<packageset dir="source"><exclude name="**/impl/**"/><exclude name="**/migrationkit/**"/></packageset>
 			<packageset dir="extensions/calculation/source"><exclude name="**/impl/**"/></packageset>
 			<packageset dir="extensions/swt/source"><exclude name="**/impl/**"/><exclude name="**/migrationkit/**"/></packageset>

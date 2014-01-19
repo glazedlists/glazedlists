@@ -9,19 +9,50 @@ import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.gui.AdvancedTableFormat;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.gui.WritableTableFormat;
-import ca.odell.glazedlists.impl.*;
-import ca.odell.glazedlists.impl.beans.*;
+import ca.odell.glazedlists.impl.Diff;
+import ca.odell.glazedlists.impl.FunctionListMap;
+import ca.odell.glazedlists.impl.GlazedListsImpl;
+import ca.odell.glazedlists.impl.GroupingListMultiMap;
+import ca.odell.glazedlists.impl.ListCollectionListModel;
+import ca.odell.glazedlists.impl.ObservableConnector;
+import ca.odell.glazedlists.impl.ReadOnlyList;
+import ca.odell.glazedlists.impl.SimpleFunctionList;
+import ca.odell.glazedlists.impl.SyncListener;
+import ca.odell.glazedlists.impl.ThreadSafeList;
+import ca.odell.glazedlists.impl.TypeSafetyListener;
+import ca.odell.glazedlists.impl.WeakReferenceProxy;
+import ca.odell.glazedlists.impl.beans.BeanConnector;
+import ca.odell.glazedlists.impl.beans.BeanFunction;
+import ca.odell.glazedlists.impl.beans.BeanTableFormat;
+import ca.odell.glazedlists.impl.beans.BeanTextFilterator;
+import ca.odell.glazedlists.impl.beans.BeanThresholdEvaluator;
+import ca.odell.glazedlists.impl.beans.StringBeanFunction;
 import ca.odell.glazedlists.impl.filter.StringTextFilterator;
 import ca.odell.glazedlists.impl.functions.ConstantFunction;
 import ca.odell.glazedlists.impl.matchers.FixedMatcherEditor;
-import ca.odell.glazedlists.impl.sort.*;
+import ca.odell.glazedlists.impl.sort.BeanPropertyComparator;
+import ca.odell.glazedlists.impl.sort.BooleanComparator;
+import ca.odell.glazedlists.impl.sort.ComparableComparator;
+import ca.odell.glazedlists.impl.sort.ComparatorChain;
+import ca.odell.glazedlists.impl.sort.ReverseComparator;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.Matchers;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 import java.beans.PropertyChangeEvent;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Observable;
+import java.util.Set;
+import java.util.SortedSet;
 
 /**
  * A factory for creating all sorts of objects to be used with Glazed Lists.
@@ -161,14 +192,17 @@ public final class GlazedLists {
         Comparator<T> firstComparator = beanPropertyComparator(clazz, property, comparableComparator());
 
         // if only one Comparator is specified, return it immediately
-        if (properties.length == 0) return firstComparator;
+        if (properties.length == 0) {
+            return firstComparator;
+        }
 
         // build the remaining Comparators
         final List<Comparator<T>> comparators = new ArrayList<Comparator<T>>(properties.length+1);
         comparators.add(firstComparator);
 
-        for (int i = 0; i < properties.length; i++)
+        for (int i = 0; i < properties.length; i++) {
             comparators.add(beanPropertyComparator(clazz, properties[i], comparableComparator()));
+        }
 
         // chain all Comparators together
         return chainComparators(comparators);
@@ -187,7 +221,9 @@ public final class GlazedLists {
      * Creates a {@link Comparator} for use with {@link Boolean} objects.
      */
     public static Comparator<Boolean> booleanComparator() {
-        if(booleanComparator == null) booleanComparator = new BooleanComparator();
+        if(booleanComparator == null) {
+            booleanComparator = new BooleanComparator();
+        }
         return booleanComparator;
     }
 
@@ -223,7 +259,9 @@ public final class GlazedLists {
      */
     @SuppressWarnings("unchecked")
     public static <T extends Comparable> Comparator<T> comparableComparator() {
-        if(comparableComparator == null) comparableComparator = new ComparableComparator();
+        if(comparableComparator == null) {
+            comparableComparator = new ComparableComparator();
+        }
         return (Comparator<T>)comparableComparator;
     }
 
@@ -232,7 +270,9 @@ public final class GlazedLists {
      */
     @SuppressWarnings("unchecked")
     public static <T extends Comparable> Comparator<T> reverseComparator() {
-        if(reversedComparable == null) reversedComparable = reverseComparator(comparableComparator());
+        if(reversedComparable == null) {
+            reversedComparable = reverseComparator(comparableComparator());
+        }
         return (Comparator<T>)reversedComparable;
     }
 
@@ -334,7 +374,9 @@ public final class GlazedLists {
      */
     @SuppressWarnings("unchecked")
     public static <E> TextFilterator<E> toStringTextFilterator() {
-        if(stringTextFilterator == null) stringTextFilterator = new StringTextFilterator<Object>();
+        if(stringTextFilterator == null) {
+            stringTextFilterator = new StringTextFilterator<Object>();
+        }
         return (TextFilterator<E>) stringTextFilterator;
     }
 
@@ -383,7 +425,9 @@ public final class GlazedLists {
      */
     public static <E> EventList<E> eventList(Collection<? extends E> contents) {
         final EventList<E> result = new BasicEventList<E>(contents == null ? 0 : contents.size());
-        if(contents != null) result.addAll(contents);
+        if(contents != null) {
+            result.addAll(contents);
+        }
         return result;
     }
 
@@ -417,7 +461,9 @@ public final class GlazedLists {
             Collection<? extends E> contents) {
         final EventList<E> result = new BasicEventList<E>(
                 contents == null ? 0 : contents.size(), publisher, lock);
-        if (contents != null) result.addAll(contents);
+        if (contents != null) {
+            result.addAll(contents);
+        }
         return result;
     }
 
@@ -661,6 +707,7 @@ public final class GlazedLists {
      *      the permanent factory class which creates all basic Matcher
      *      implementations.
      */
+    @Deprecated
     public static <E> Matcher<E> beanPropertyMatcher(Class<E> beanClass, String propertyName, Object value) {
         return Matchers.beanPropertyMatcher(beanClass, propertyName, value);
     }
@@ -818,7 +865,7 @@ public final class GlazedLists {
      *   <li>the mutating methods of {@link Map#keySet()} and its {@link Iterator}
      *   <li>the mutating methods of {@link Map#values()} and its {@link Iterator}
      *   <li>the mutating methods of {@link Map#entrySet()} and its {@link Iterator}
-     *   <li>the {@link Map.Entry#setValue} method
+     *   <li>the {@link java.util.Map.Entry#setValue} method
      *   <li>the mutating methods of {@link Map} itself, including {@link Map#put},
      *       {@link Map#putAll}, {@link Map#remove}, and {@link Map#clear}
      * </ul>
@@ -882,7 +929,7 @@ public final class GlazedLists {
      *   <li>the mutating methods of {@link Map#keySet()} and its {@link Iterator}
      *   <li>the mutating methods of {@link Map#values()} and its {@link Iterator}
      *   <li>the mutating methods of {@link Map#entrySet()} and its {@link Iterator}
-     *   <li>the {@link Map.Entry#setValue} method
+     *   <li>the {@link java.util.Map.Entry#setValue} method
      *   <li>the mutating methods of {@link Map} itself, including {@link Map#put},
      *       {@link Map#putAll}, {@link Map#remove}, and {@link Map#clear}
      * </ul>
@@ -947,7 +994,7 @@ public final class GlazedLists {
      *   <li>the mutating methods of {@link Map#keySet()} and its {@link Iterator}
      *   <li>the mutating methods of {@link Map#values()} and its {@link Iterator}
      *   <li>the mutating methods of {@link Map#entrySet()} and its {@link Iterator}
-     *   <li>the {@link Map.Entry#setValue} method
+     *   <li>the {@link java.util.Map.Entry#setValue} method
      * </ul>
      *
      * @param source the {@link EventList} which provides the values of the map.

@@ -48,7 +48,7 @@ import javax.swing.event.ListSelectionListener;
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=108">Bug 108</a>
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=110">Bug 110</a>
  * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=112">Bug 112</a>
- * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=222">Bug 222</a> *
+ * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=222">Bug 222</a>
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
@@ -99,7 +99,7 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
      * @param source the {@link EventList} whose selection will be managed. This should be the
      *            same {@link EventList} passed to the constructor of your
      *            {@link DefaultEventTableModel} or {@link DefaultEventListModel}.
-     * @param diposeSource <code>true</code> if the source list should be disposed when disposing
+     * @param disposeSource <code>true</code> if the source list should be disposed when disposing
      *            this model, <code>false</code> otherwise
      */
     protected DefaultEventSelectionModel(EventList<E> source, boolean disposeSource) {
@@ -122,6 +122,7 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
     /**
      * {@inheritDoc}
      */
+    @Override
     public EventList<E> getSelected() {
         source.getReadWriteLock().readLock().lock();
         try {
@@ -134,6 +135,7 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
     /**
      * {@inheritDoc}
      */
+    @Override
     public EventList<E> getTogglingSelected() {
         source.getReadWriteLock().readLock().lock();
         try {
@@ -146,6 +148,7 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
     /**
      * {@inheritDoc}
      */
+    @Override
     public EventList<E> getDeselected() {
         source.getReadWriteLock().readLock().lock();
         try {
@@ -158,6 +161,7 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
     /**
      * {@inheritDoc}
      */
+    @Override
     public EventList<E> getTogglingDeselected() {
         source.getReadWriteLock().readLock().lock();
         try {
@@ -170,6 +174,7 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
@@ -177,6 +182,7 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean getEnabled() {
         return enabled;
     }
@@ -187,6 +193,7 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
      */
     private class SwingSelectionListener implements ListSelection.Listener {
         /** {@inheritDoc} */
+        @Override
         public void selectionChanged(int changeStart, int changeEnd) {
             fireSelectionChanged(changeStart, changeEnd);
         }
@@ -201,19 +208,25 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
     private void fireSelectionChanged(int changeStart, int changeFinish) {
         // if this is a change in a series, save the bounds of this change
         if(valueIsAdjusting) {
-            if(fullChangeStart == -1 || changeStart < fullChangeStart) fullChangeStart = changeStart;
-            if(fullChangeFinish == -1 || changeFinish > fullChangeFinish) fullChangeFinish = changeFinish;
+            if(fullChangeStart == -1 || changeStart < fullChangeStart) {
+                fullChangeStart = changeStart;
+            }
+            if(fullChangeFinish == -1 || changeFinish > fullChangeFinish) {
+                fullChangeFinish = changeFinish;
+            }
         }
 
         // fire the change
         final ListSelectionEvent event = new ListSelectionEvent(this, changeStart, changeFinish, valueIsAdjusting);
-        for (int i = 0, n = listeners.size(); i < n; i++)
+        for (int i = 0, n = listeners.size(); i < n; i++) {
             listeners.get(i).valueChanged(event);
+        }
     }
 
     /**
      * {@inheritDoc}
      */
+    @Override
     public void invertSelection() {
         source.getReadWriteLock().writeLock().lock();
         try {
@@ -235,8 +248,11 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
      *
      * <p>If the selection does not change, this will not fire any events.
      */
+    @Override
     public void setSelectionInterval(int index0, int index1) {
-        if(!enabled) return;
+        if(!enabled) {
+            return;
+        }
         source.getReadWriteLock().writeLock().lock();
         try {
             listSelection.setSelection(index0, index1);
@@ -248,8 +264,11 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
     /**
      * Change the selection to be the set union of the current selection  and the indices between index0 and index1 inclusive
      */
+    @Override
     public void addSelectionInterval(int index0, int index1) {
-        if(!enabled) return;
+        if(!enabled) {
+            return;
+        }
         source.getReadWriteLock().writeLock().lock();
         try {
             listSelection.select(index0, index1);
@@ -260,9 +279,15 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
     /**
      * Change the selection to be the set difference of the current selection  and the indices between index0 and index1 inclusive.
      */
+    @Override
     public void removeSelectionInterval(int index0, int index1) {
-        if(!enabled) return;
-        if(index0 == 0 && index1 == 0 && source.isEmpty()) return; // hack for Java 5 compatibility
+        if(!enabled) {
+            return;
+        }
+        if(index0 == 0 && index1 == 0 && source.isEmpty())
+         {
+            return; // hack for Java 5 compatibility
+        }
         source.getReadWriteLock().writeLock().lock();
         try {
             listSelection.deselect(index0, index1);
@@ -279,6 +304,7 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
      * in the event queue that notifies this model of the change
      * in table size.
      */
+    @Override
     public boolean isSelectedIndex(int index) {
         return (listSelection.isSelected(index));
     }
@@ -286,14 +312,18 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
     /**
      * Return the first index argument from the most recent call to setSelectionInterval(), addSelectionInterval() or removeSelectionInterval().
      */
+    @Override
     public int getAnchorSelectionIndex() {
         return listSelection.getAnchorSelectionIndex();
     }
     /**
      * Set the anchor selection index.
      */
+    @Override
     public void setAnchorSelectionIndex(int anchorSelectionIndex) {
-        if(!enabled) return;
+        if(!enabled) {
+            return;
+        }
         source.getReadWriteLock().writeLock().lock();
         try {
             listSelection.setAnchorSelectionIndex(anchorSelectionIndex);
@@ -304,14 +334,18 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
     /**
      * Return the second index argument from the most recent call to setSelectionInterval(), addSelectionInterval() or removeSelectionInterval().
      */
+    @Override
     public int getLeadSelectionIndex() {
         return listSelection.getLeadSelectionIndex();
     }
     /**
      * Set the lead selection index.
      */
+    @Override
     public void setLeadSelectionIndex(int leadSelectionIndex) {
-        if(!enabled) return;
+        if(!enabled) {
+            return;
+        }
         source.getReadWriteLock().writeLock().lock();
         try {
             listSelection.setLeadSelectionIndex(leadSelectionIndex);
@@ -323,6 +357,7 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
     /**
      * Gets the index of the first selected element.
      */
+    @Override
     public int getMinSelectionIndex() {
         return listSelection.getMinSelectionIndex();
     }
@@ -330,6 +365,7 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
     /**
      * Gets the index of the last selected element.
      */
+    @Override
     public int getMaxSelectionIndex() {
         return listSelection.getMaxSelectionIndex();
     }
@@ -337,8 +373,11 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
     /**
      * Change the selection to the empty set.
      */
+    @Override
     public void clearSelection() {
-        if(!enabled) return;
+        if(!enabled) {
+            return;
+        }
         source.getReadWriteLock().writeLock().lock();
         try {
             listSelection.deselectAll();
@@ -349,6 +388,7 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
     /**
      * Returns true if no indices are selected.
      */
+    @Override
     public boolean isSelectionEmpty() {
         source.getReadWriteLock().readLock().lock();
         try {
@@ -361,12 +401,14 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
     /**
      * Insert length indices beginning before/after index.
      */
+    @Override
     public void insertIndexInterval(int index, int length, boolean before) {
         // these changes are handled by the ListSelection
     }
     /**
      * Remove the indices in the interval index0,index1 (inclusive) from  the selection model.
      */
+    @Override
     public void removeIndexInterval(int index0, int index1) {
         // these changes are handled by the ListSelection
     }
@@ -374,6 +416,7 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
     /**
      * This property is true if upcoming changes to the value  of the model should be considered a single event.
      */
+    @Override
     public void setValueIsAdjusting(boolean valueIsAdjusting) {
         this.valueIsAdjusting = valueIsAdjusting;
 
@@ -395,6 +438,7 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
     /**
      * Returns true if the value is undergoing a series of changes.
      */
+    @Override
     public boolean getValueIsAdjusting() {
         return valueIsAdjusting;
     }
@@ -402,6 +446,7 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
     /**
      * Set the selection mode.
      */
+    @Override
     public void setSelectionMode(int selectionMode) {
         source.getReadWriteLock().writeLock().lock();
         try {
@@ -414,6 +459,7 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
     /**
      * Returns the current selection mode.
      */
+    @Override
     public int getSelectionMode() {
         return listSelection.getSelectionMode();
     }
@@ -421,6 +467,7 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
     /**
      * {@inheritDoc}
      */
+    @Override
     public void addValidSelectionMatcher(Matcher<E> validSelectionMatcher) {
         listSelection.addValidSelectionMatcher(validSelectionMatcher);
     }
@@ -428,6 +475,7 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
     /**
      * {@inheritDoc}
      */
+    @Override
     public void removeValidSelectionMatcher(Matcher<E> validSelectionMatcher) {
         listSelection.removeValidSelectionMatcher(validSelectionMatcher);
     }
@@ -441,12 +489,14 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
      * advised not to <code>for()</code> through the changed range without
      * also verifying that each row is still in the table.
      */
+    @Override
     public void addListSelectionListener(ListSelectionListener listener) {
         listeners.add(listener);
     }
     /**
      * Remove a listener from the list that's notified each time a change to the selection occurs.
      */
+    @Override
     public void removeListSelectionListener(ListSelectionListener listener) {
         listeners.remove(listener);
     }
@@ -454,8 +504,11 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
     /**
      * {@inheritDoc}
      */
+    @Override
     public void dispose() {
         listSelection.dispose();
-        if (disposeSource) source.dispose();
+        if (disposeSource) {
+            source.dispose();
+        }
     }
 }

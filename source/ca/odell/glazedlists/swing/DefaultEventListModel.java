@@ -68,7 +68,7 @@ public class DefaultEventListModel<E> implements ListEventListener<E>, ListModel
      * <code>source</code>.
      *
      * @param source the EventList that provides the elements
-     * @param diposeSource <code>true</code> if the source list should be disposed when disposing
+     * @param disposeSource <code>true</code> if the source list should be disposed when disposing
      *            this model, <code>false</code> otherwise
      */
     protected DefaultEventListModel(EventList<E> source, boolean disposeSource) {
@@ -87,9 +87,11 @@ public class DefaultEventListModel<E> implements ListEventListener<E>, ListModel
      * of changes are grouped together as a single change. This is how the
      * ListTable accepts large change events.
      */
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
-        if (!EventQueue.isDispatchThread())
+        if (!EventQueue.isDispatchThread()) {
             throw new IllegalStateException("Events to " + this.getClass().getSimpleName() + " must arrive on the EDT - consider adding GlazedListsSwing.swingThreadProxyList(source) somewhere in your list pipeline");
+        }
 
         // build an "optimized" ListDataEvent describing the precise range of rows in the first block
         listChanges.nextBlock();
@@ -119,6 +121,7 @@ public class DefaultEventListModel<E> implements ListEventListener<E>, ListModel
      * @param index the requested index
      * @return the value at <code>index</code>
      */
+    @Override
     public Object getElementAt(int index) {
         source.getReadWriteLock().readLock().lock();
         try {
@@ -131,6 +134,7 @@ public class DefaultEventListModel<E> implements ListEventListener<E>, ListModel
     /**
      * Gets the size of the list.
      */
+    @Override
     public int getSize() {
         source.getReadWriteLock().readLock().lock();
         try {
@@ -149,6 +153,7 @@ public class DefaultEventListModel<E> implements ListEventListener<E>, ListModel
      * method. This is because the ListDataEvent is re-used to increase
      * the performance of this implementation.
      */
+    @Override
     public void addListDataListener(ListDataListener listDataListener) {
         listeners.add(listDataListener);
     }
@@ -156,6 +161,7 @@ public class DefaultEventListModel<E> implements ListEventListener<E>, ListModel
      * Deregisters the specified ListDataListener from receiving updates
      * whenever this list changes.
      */
+    @Override
     public void removeListDataListener(ListDataListener listDataListener) {
         listeners.remove(listDataListener);
     }
@@ -193,7 +199,9 @@ public class DefaultEventListModel<E> implements ListEventListener<E>, ListModel
      */
     public void dispose() {
         source.removeListEventListener(this);
-        if (disposeSource) source.dispose();
+        if (disposeSource) {
+            source.dispose();
+        }
         // this encourages exceptions to be thrown if this model is incorrectly accessed again
         source = null;
     }

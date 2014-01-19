@@ -70,7 +70,7 @@ public class DefaultEventListViewer<E> implements ListEventListener<E> {
      * @param source the EventList that provides the elements
      * @param list the list
      * @param itemFormat an optional {@link ItemFormat} for formatting the displayed values
-     * @param diposeSource <code>true</code> if the source list should be disposed when disposing
+     * @param disposeSource <code>true</code> if the source list should be disposed when disposing
      *            this model, <code>false</code> otherwise
      *
      * @see ItemFormat
@@ -200,6 +200,7 @@ public class DefaultEventListViewer<E> implements ListEventListener<E> {
      * When the source list is changed, this forwards the change to the
      * displayed List.
      */
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
         int firstModified = source.size();
         // Apply the list changes
@@ -235,36 +236,43 @@ public class DefaultEventListViewer<E> implements ListEventListener<E> {
      */
     private final class SelectableList implements Selectable {
         /** {@inheritDoc} */
+        @Override
         public void addSelectionListener(SelectionListener listener) {
             list.addSelectionListener(listener);
         }
 
         /** {@inheritDoc} */
+        @Override
         public void removeSelectionListener(SelectionListener listener) {
             list.removeSelectionListener(listener);
         }
 
         /** {@inheritDoc} */
+        @Override
         public int getSelectionIndex() {
             return list.getSelectionIndex();
         }
 
         /** {@inheritDoc} */
+        @Override
         public int[] getSelectionIndices() {
             return list.getSelectionIndices();
         }
 
         /** {@inheritDoc} */
+        @Override
         public int getStyle() {
             return list.getStyle();
         }
 
         /** {@inheritDoc} */
+        @Override
         public void select(int index) {
             list.select(index);
         }
 
         /** {@inheritDoc} */
+        @Override
         public void deselect(int index) {
             list.deselect(index);
         }
@@ -288,6 +296,8 @@ public class DefaultEventListViewer<E> implements ListEventListener<E> {
         selection.dispose();
 
         source.removeListEventListener(this);
-        if (disposeSource) source.dispose();
+        if (disposeSource) {
+            source.dispose();
+        }
     }
 }

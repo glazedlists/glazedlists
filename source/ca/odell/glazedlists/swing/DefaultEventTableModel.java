@@ -38,7 +38,7 @@ import javax.swing.table.TableModel;
  */
 public class DefaultEventTableModel<E> extends AbstractTableModel implements AdvancedTableModel<E>, ListEventListener<E> {
 
-    /** the source of data for this TableModel, which may or may not be {@link #swingThreadSource} */
+    /** the source of data for this TableModel. */
     protected EventList<E> source;
 
     /** indicator to dispose source list */
@@ -67,7 +67,7 @@ public class DefaultEventTableModel<E> extends AbstractTableModel implements Adv
      * <code>source</code> using the the given <code>tableFormat</code>.
      *
      * @param source the EventList that provides the row objects
-     * @param diposeSource <code>true</code> if the source list should be disposed when disposing
+     * @param disposeSource <code>true</code> if the source list should be disposed when disposing
      *            this model, <code>false</code> otherwise
      * @param tableFormat the object responsible for extracting column data
      *      from the row objects

@@ -3,13 +3,13 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import javax.swing.SwingUtilities;
-import javax.swing.table.TableModel;
-
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.gui.TableFormat;
+
+import javax.swing.SwingUtilities;
+import javax.swing.table.TableModel;
 
 /**
  * A {@link DefaultEventTableModel} that silently wraps it's source list in a
@@ -35,6 +35,7 @@ import ca.odell.glazedlists.gui.TableFormat;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
+@Deprecated
 public class EventTableModel<E> extends DefaultEventTableModel<E> {
 
     /** the proxy moves events to the Swing Event Dispatch thread */
@@ -50,6 +51,7 @@ public class EventTableModel<E> extends DefaultEventTableModel<E> {
      * @deprecated Use {@link DefaultEventTableModel} and
      *             {@link GlazedListsSwing#swingThreadProxyList(EventList)} instead
      */
+    @Deprecated
     public EventTableModel(EventList<E> source, TableFormat<? super E> tableFormat) {
         super(source, tableFormat);
         // lock the source list for reading since we want to prevent writes
@@ -97,9 +99,10 @@ public class EventTableModel<E> extends DefaultEventTableModel<E> {
      * @param writable an array of booleans specifying which of the columns in
      *      your table are writable.
      *
-     * @deprecated Use {@link GlazedListsSwing#createEventTableModel(EventList, String[], String[], boolean[])}
+     * @deprecated Use {@link GlazedListsSwing#eventTableModel(EventList, String[], String[], boolean[])}
      * and {@link GlazedListsSwing#swingThreadProxyList(EventList)} instead
      */
+    @Deprecated
     public EventTableModel(EventList<E> source, String[] propertyNames, String[] columnLabels, boolean[] writable) {
         this(source, GlazedLists.tableFormat(propertyNames, columnLabels, writable));
     }
@@ -144,8 +147,9 @@ public class EventTableModel<E> extends DefaultEventTableModel<E> {
     @Override
     public void dispose() {
         // if we created the swingThreadSource then we must also dispose it
-        if (swingThreadSource != null)
+        if (swingThreadSource != null) {
             swingThreadSource.dispose();
+        }
 
         swingThreadSource = null;
         super.dispose();

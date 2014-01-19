@@ -74,7 +74,7 @@ public class DefaultEventComboViewer<E> implements ListEventListener<E> {
      * @param source the EventList that provides the elements
      * @param combo the combo box
      * @param itemFormat an optional {@link ItemFormat} for formatting the displayed values
-     * @param diposeSource <code>true</code> if the source list should be disposed when disposing
+     * @param disposeSource <code>true</code> if the source list should be disposed when disposing
      *            this model, <code>false</code> otherwise
      *
      * @see ItemFormat
@@ -104,7 +104,7 @@ public class DefaultEventComboViewer<E> implements ListEventListener<E> {
     }
 
     /**
-     * Gets the Combo being managed by this {@link DefaulEventComboViewer}.
+     * Gets the Combo being managed by this {@link DefaultEventComboViewer}.
      */
     public Combo getCombo() {
         return combo;
@@ -142,18 +142,20 @@ public class DefaultEventComboViewer<E> implements ListEventListener<E> {
      * When the source combo is changed, this forwards the change to the
      * displayed combo.
      */
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
         // apply the combo changes
         while (listChanges.next()) {
             int changeIndex = listChanges.getIndex();
             int changeType = listChanges.getType();
 
-            if (changeType == ListEvent.INSERT)
+            if (changeType == ListEvent.INSERT) {
                 addRow(changeIndex, source.get(changeIndex));
-            else if (changeType == ListEvent.UPDATE)
+            } else if (changeType == ListEvent.UPDATE) {
                 updateRow(changeIndex, source.get(changeIndex));
-            else if (changeType == ListEvent.DELETE)
+            } else if (changeType == ListEvent.DELETE) {
                 deleteRow(changeIndex);
+            }
         }
     }
 
@@ -173,6 +175,8 @@ public class DefaultEventComboViewer<E> implements ListEventListener<E> {
      */
     public void dispose() {
         source.removeListEventListener(this);
-        if (disposeSource) source.dispose();
+        if (disposeSource) {
+            source.dispose();
+        }
     }
 }

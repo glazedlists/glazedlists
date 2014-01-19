@@ -46,7 +46,7 @@ public class DefaultEventComboBoxModel<E> extends DefaultEventListModel<E> imple
      * <code>source</code> and tracks further changes made to it.
      *
      * @param source the EventList that provides the elements
-     * @param diposeSource <code>true</code> if the source list should be disposed when disposing
+     * @param disposeSource <code>true</code> if the source list should be disposed when disposing
      *            this model, <code>false</code> otherwise
      */
     protected DefaultEventComboBoxModel(EventList<E> source, boolean disposeSource) {
@@ -56,6 +56,7 @@ public class DefaultEventComboBoxModel<E> extends DefaultEventListModel<E> imple
     /**
      * Gets the currently selected item.
      */
+    @Override
     public Object getSelectedItem() {
         return selected;
     }
@@ -67,10 +68,12 @@ public class DefaultEventComboBoxModel<E> extends DefaultEventListModel<E> imple
      * a ListDataEvent where the range is between -1 and -1. This is identical
      * to the notification process used by the {@link DefaultComboBoxModel}.
      */
+    @Override
     public void setSelectedItem(Object selected) {
         // if the selected item isn't actually changing values, avoid the work
-        if (this.selected == selected)
+        if (this.selected == selected) {
             return;
+        }
 
         this.selected = selected;
         listDataEvent.setRange(-1, -1);
