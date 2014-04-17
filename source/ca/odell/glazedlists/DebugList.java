@@ -454,8 +454,8 @@ public class DebugList<E> extends AbstractEventList<E> {
         public DebugReadWriteLock() {
             // decorate normaly read/write locks with Thread recording
             final ReadWriteLock decorated = LockFactory.DEFAULT.createReadWriteLock();
-            this.readLock = new DebugLock(decorated.readLock());
-            this.writeLock = new DebugLock(decorated.writeLock());
+            this.readLock = new DebugLock(decorated.readLock(), null);
+            this.writeLock = new DebugLock(decorated.writeLock(), this.readLock);
         }
 
         @Override
@@ -469,6 +469,14 @@ public class DebugList<E> extends AbstractEventList<E> {
          */
         public boolean isThreadHoldingWriteLock() {
             return writeLock.getThreadsHoldingLock().contains(Thread.currentThread());
+        }
+
+        /**
+         * Returns <tt>true</tt> if and only if the current Thread holds the
+         * write lock.
+         */
+        public boolean isThreadHoldingReadLock() {
+            return readLock.getThreadsHoldingLock().contains(Thread.currentThread());
         }
 
         /**
@@ -486,14 +494,19 @@ public class DebugList<E> extends AbstractEventList<E> {
          */
         private static class DebugLock implements Lock {
             private final Lock delegate;
-            private final List<Thread> threadsHoldingLock = new ArrayList<Thread>();
+            private final DebugLock readLock;
+            private final List<Thread> threadsHoldingLock = Collections.synchronizedList(new ArrayList<Thread>());
 
-            public DebugLock(Lock delegate) {
+            public DebugLock(Lock delegate, DebugLock readLock) {
                 this.delegate = delegate;
+                this.readLock = readLock;
             }
 
             @Override
             public void lock() {
+            	if (this.readLock!=null && this.readLock.getThreadsHoldingLock().contains(Thread.currentThread())) {
+                    throw new IllegalStateException("DebugList detected an attempt to acquire a writeLock from a thread already owning a readLock (deadlock)");
+            	}
                 delegate.lock();
 
                 // record the current Thread as a lock holder
@@ -502,7 +515,11 @@ public class DebugList<E> extends AbstractEventList<E> {
 
             @Override
             public boolean tryLock() {
-                final boolean success = delegate.tryLock();
+            	if (this.readLock!=null && this.readLock.getThreadsHoldingLock().contains(Thread.currentThread())) {
+                    throw new IllegalStateException("DebugList detected an attempt to acquire a writeLock from a thread already owning a readLock (deadlock)");
+            	}
+
+            	final boolean success = delegate.tryLock();
 
                 // if the lock was successfully acquired, record the current Thread as a lock holder
                 if (success) threadsHoldingLock.add(Thread.currentThread());

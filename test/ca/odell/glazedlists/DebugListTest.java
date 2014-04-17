@@ -4,16 +4,15 @@
 package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 
 import static org.junit.Assert.*;
 
@@ -221,6 +220,24 @@ public class DebugListTest {
         assertEquals(1, list1.size());
         assertEquals(0, list2.size());
     }
+
+
+	@Test
+	public void testLockUpgradeAttempt() {
+        DebugList<String> list = new DebugList<String>();
+
+		list.getReadWriteLock().readLock().lock();
+
+		try {
+			// Try to upgrade
+			list.getReadWriteLock().writeLock().lock();
+		}
+		catch( IllegalStateException ex ) {
+			assertEquals( "DebugList detected an attempt to acquire a writeLock from " +
+				"a thread already owning a readLock (deadlock)", ex.getMessage() );
+		}
+	}
+
 
     private void runReadLockFailure(Runnable r) {
         try {
