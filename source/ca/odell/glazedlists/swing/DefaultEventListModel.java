@@ -71,7 +71,7 @@ public class DefaultEventListModel<E> implements ListEventListener<E>, ListModel
      * @param disposeSource <code>true</code> if the source list should be disposed when disposing
      *            this model, <code>false</code> otherwise
      */
-    protected DefaultEventListModel(EventList<E> source, boolean disposeSource) {
+    public DefaultEventListModel(EventList<E> source, boolean disposeSource) {
         this.source = source;
         this.disposeSource = disposeSource;
         this.source.addListEventListener(this);

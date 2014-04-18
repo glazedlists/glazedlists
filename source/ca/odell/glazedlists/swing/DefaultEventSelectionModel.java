@@ -102,7 +102,7 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
      * @param disposeSource <code>true</code> if the source list should be disposed when disposing
      *            this model, <code>false</code> otherwise
      */
-    protected DefaultEventSelectionModel(EventList<E> source, boolean disposeSource) {
+    public DefaultEventSelectionModel(EventList<E> source, boolean disposeSource) {
         // lock the source list for reading since we want to prevent writes
         // from occurring until we fully initialize this EventSelectionModel
         source.getReadWriteLock().readLock().lock();

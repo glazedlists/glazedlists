@@ -49,7 +49,7 @@ public class DefaultEventComboBoxModel<E> extends DefaultEventListModel<E> imple
      * @param disposeSource <code>true</code> if the source list should be disposed when disposing
      *            this model, <code>false</code> otherwise
      */
-    protected DefaultEventComboBoxModel(EventList<E> source, boolean disposeSource) {
+    public DefaultEventComboBoxModel(EventList<E> source, boolean disposeSource) {
         super(source, disposeSource);
     }
 
