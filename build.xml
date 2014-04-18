@@ -562,7 +562,7 @@
         </java>
     </target>
 
-    <target name="issuesbrowser" depends="core,swing,swt,jfreechart,jgoodiesforms,nachocalendar,treetable">
+    <target name="issuesbrowser" depends="core,swing,swt,jfreechart,jgoodiesforms,nachocalendar,treetable,javafx">
         <mkdir dir="extensions/issuesbrowser/lib"/>
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
@@ -575,7 +575,8 @@
                 <fileset dir="extensions/jfreechart/lib/" includes="*.jar"/>
                 <fileset dir="extensions/jgoodiesforms/lib/" includes="*.jar"/>
                 <fileset dir="extensions/nachocalendar/lib/" includes="*.jar"/>
-                <fileset dir="extensions/issuesbrowser/lib/" includes="*.jar"/>
+                <fileset dir="extensions/javafx/lib/" includes="*.jar"/>
+            	<fileset dir="extensions/issuesbrowser/lib/" includes="*.jar"/>
             </classpath>
         </javac>
     </target>

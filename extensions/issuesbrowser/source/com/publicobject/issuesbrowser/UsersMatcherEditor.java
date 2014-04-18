@@ -94,11 +94,17 @@ public class UsersMatcherEditor extends AbstractMatcherEditor<Issue> {
             // extra elements by knowing how the new matcher relates to its predecessor
             boolean relaxed = newUserMatcher.isRelaxationOf(previousMatcher);
             boolean constrained = previousUserMatcher.isRelaxationOf(newUserMatcher);
-            if(relaxed && constrained) return;
+            if(relaxed && constrained) {
+                return;
+            }
 
-            if(relaxed) fireRelaxed(newUserMatcher);
-            else if(constrained) fireConstrained(newUserMatcher);
-            else fireChanged(newUserMatcher);
+            if(relaxed) {
+                fireRelaxed(newUserMatcher);
+            } else if(constrained) {
+                fireConstrained(newUserMatcher);
+            } else {
+                fireChanged(newUserMatcher);
+            }
         }
     }
 
@@ -106,7 +112,7 @@ public class UsersMatcherEditor extends AbstractMatcherEditor<Issue> {
      * If the set of users for this matcher contains any of an
      * issue's users, that issue matches.
      */
-    private static class UserMatcher implements Matcher<Issue> {
+    public static class UserMatcher implements Matcher<Issue> {
         private final Set<String> users;
 
         /**
@@ -122,7 +128,9 @@ public class UsersMatcherEditor extends AbstractMatcherEditor<Issue> {
          * @return true if this matches every {@link Issue} the other matches.
          */
         public boolean isRelaxationOf(Matcher other) {
-            if(!(other instanceof UserMatcher)) return false;
+            if(!(other instanceof UserMatcher)) {
+                return false;
+            }
             UserMatcher otherUserMatcher = (UserMatcher)other;
             return users.containsAll(otherUserMatcher.users);
         }
@@ -134,7 +142,9 @@ public class UsersMatcherEditor extends AbstractMatcherEditor<Issue> {
         @Override
         public boolean matches(Issue issue) {
             for (Iterator<String> i = issue.getAllUsers().iterator(); i.hasNext(); ) {
-                if(this.users.contains(i.next())) return true;
+                if(this.users.contains(i.next())) {
+                    return true;
+                }
             }
             return false;
         }

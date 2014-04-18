@@ -1,4 +1,4 @@
-/* Glazed Lists                                                 (c) 2003-2006 */
+/* Glazed Lists                                                 (c) 2003-2014 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.matchers;
@@ -92,8 +92,9 @@ public class RangeMatcherEditor<D extends Comparable, E> extends AbstractMatcher
         try {
             // detect the special case of no range, (which matches all elements)
             if (newStart == null && newEnd == null) {
-                if (currentRangeStart != null || currentRangeEnd != null)
+                if (currentRangeStart != null || currentRangeEnd != null) {
                     fireMatchAll();
+                }
                 return;
             }
 
@@ -116,12 +117,13 @@ public class RangeMatcherEditor<D extends Comparable, E> extends AbstractMatcher
             final Matcher<E> matcher = Matchers.rangeMatcher(newStart, newEnd, filterator);
 
             // fire the appropriate matcher event
-            if (isRelaxed && isConstrained)
+            if (isRelaxed && isConstrained) {
                 fireChanged(matcher);
-            else if (isRelaxed)
+            } else if (isRelaxed) {
                 fireRelaxed(matcher);
-            else if (isConstrained)
+            } else if (isConstrained) {
                 fireConstrained(matcher);
+            }
 
         } finally {
             currentRangeStart = newStart;
@@ -134,9 +136,14 @@ public class RangeMatcherEditor<D extends Comparable, E> extends AbstractMatcher
      * all other values or after all other values.
      */
     private static int compare(Comparable a, Comparable b, boolean nullsBeforeAll) {
-        if(a == null && b == null) return 0;
-        else if(a == null) return nullsBeforeAll ? -1 : 1;
-        else if(b == null) return nullsBeforeAll ? 1 : -1;
-        else return a.compareTo(b);
+        if(a == null && b == null) {
+            return 0;
+        } else if(a == null) {
+            return nullsBeforeAll ? -1 : 1;
+        } else if(b == null) {
+            return nullsBeforeAll ? 1 : -1;
+        } else {
+            return a.compareTo(b);
+        }
     }
 }
