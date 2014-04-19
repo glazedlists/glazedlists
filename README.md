@@ -3,6 +3,7 @@
 ### Project sites
 
 Home page: 		http://www.glazedlists.com/
+
 java.net site:  https://java.net/projects/glazedlists
 
 ### Documentation
@@ -15,11 +16,11 @@ See documentation at [www.glazedlists.com] (http://www.glazedlists.com/documenta
 
 ### Releases
 
-[Release Notes] (http://www.glazedlists.com/releases)
+Browse [Release Notes] (http://www.glazedlists.com/releases)
 
-[Latest Release] (https://java.net/projects/glazedlists/downloads/directory/glazedlists-1.9.0)
+Download [Latest Release] (https://java.net/projects/glazedlists/downloads/directory/glazedlists-1.9.0)
 
-[Maven] (http://www.glazedlists.com/Home/maven)
+Configure [Maven] (http://www.glazedlists.com/Home/maven)
 
 ### Mailing lists
 
