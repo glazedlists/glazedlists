@@ -710,6 +710,8 @@
        This task depends on JUnit, available free at http://www.junit.org
      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <target name="downloadJUnit">
+        <mkdir dir="tools"/>
+
         <java classname="ca.odell.glazedlists.impl.HttpClient">
             <classpath path="${classes.dir}"/>
             <arg value="${download.tools.url}/junit/4.11/junit.jar"/>
