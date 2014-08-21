@@ -492,7 +492,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 nodeAttacher.nodesToAttach.queueNewNodeForInserting(inserted);
 
             } else if(type == ListEvent.UPDATE) {
-                deleteAndDetachNode(sourceIndex, nodesToVerify);
+                replaceAndDetachNode( sourceIndex, nodesToVerify );
                 Node<E> updated = finderInserter.findOrInsertNode(sourceIndex);
                 nodeAttacher.nodesToAttach.queueNewNodeForInserting(updated);
 
@@ -1000,6 +1000,18 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                 return aPathLength - bPathLength;
             }
         }
+    }
+
+  /**
+   * Replaces the node at the specified index, firing all the required
+   * notifications.
+   */
+    private void replaceAndDetachNode(int sourceIndex, List<Node<E>> nodesToVerify) {
+      Node<E> node = data.get(sourceIndex, REAL_NODES).get();
+      Node<E> replacement = new Node<E>(node.virtual, new ArrayList<E>(node.path()));
+      replaceNode(node, replacement, true);
+
+      nodesToVerify.add(replacement);
     }
 
     /**
