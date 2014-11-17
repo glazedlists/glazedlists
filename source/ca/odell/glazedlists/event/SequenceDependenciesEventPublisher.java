@@ -28,6 +28,21 @@ import java.util.*;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 final class SequenceDependenciesEventPublisher implements ListEventPublisher, Serializable {
+    // Determines whether or not checks are performed for attempting to remove a
+    // non-existent listener. See https://java.net/jira/browse/GLAZEDLISTS-419
+    // Default behavior is NOT to check.
+    private static final boolean DO_NONEXISTENT_LISTENER_CHECK;
+    static {
+        boolean do_check = false;
+        try {
+            do_check = System.getProperty(
+                "glazedlists.compat.nonexistent_listener_check") != null;
+        }
+        catch(SecurityException ex) { // probably running in an applet
+            // ignore
+        }
+        DO_NONEXISTENT_LISTENER_CHECK = do_check;
+    }
 
     /** For versioning as a {@link Serializable} */
     private static final long serialVersionUID = -8228256898169043019L;
@@ -219,7 +234,7 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher, Se
         }
 
         // sanity check to ensure we found the listener we were asked to remove, if any
-        if(listenerToRemove != null) {
+        if(DO_NONEXISTENT_LISTENER_CHECK && listenerToRemove != null) {
             throw new IllegalArgumentException("Cannot remove nonexistent listener " + listenerToRemove);
         }
 

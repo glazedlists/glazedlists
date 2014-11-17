@@ -3,21 +3,17 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.event;
 
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.CompositeList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Make sure that the {@link SequenceDependenciesEventPublisher} class fires events properly.
@@ -413,7 +409,11 @@ public class SequenceDependenciesEventPublisherTest {
      * not a listener.
      */
     @Test
-    public void testUnknownRemoveThrowsException() {
+    public void testUnknownRemoveThrowsNoException() {
+        // NOTE: as a result of https://java.net/jira/browse/GLAZEDLISTS-419,
+        // the exception is only thrown when the system property
+        // "glazedlists.compat.nonexistent_listener_check" is set.
+
         SequenceDependenciesEventPublisher publisher = new SequenceDependenciesEventPublisher();
         SimpleSubjectListener a = new SimpleSubjectListener("A", publisher);
         SimpleSubjectListener b = new SimpleSubjectListener("B", publisher);
@@ -421,11 +421,16 @@ public class SequenceDependenciesEventPublisherTest {
 
         // add a listener
         a.addListener(b);
+
+//        assertNull(
+//            "The system property \"glazedlists.compat.nonexistent_listener_check\" " +
+//            "must not be set for this test.",
+//            System.getProperty( "glazedlists.compat.nonexistent_listener_check" ) );
         try {
-            a.removeListener(c);
-            fail("No exception thrown when removing a non-existent listener");
-        } catch(IllegalArgumentException e) {
-            // expected
+            a.removeListener( c );
+        }
+        catch(IllegalArgumentException e ) {
+            fail( "Exception was unexpected with system property unset" );
         }
 
         // remove the other listener, this shouldn't throw
