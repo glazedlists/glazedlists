@@ -102,13 +102,13 @@ public class BoyerMooreCaseInsensitiveTextSearchStrategy extends AbstractTextSea
                       (this.subtextCharsLower[subtextPosition] == textChar ||
                        this.subtextCharsUpper[subtextPosition] == textChar)) {
                     // the text char and subtext char matched, so shift both positions left and recompare
-                    subtextPosition--;
                     textPosition--;
 
                     // calculate the next character of the text to compare
                     if(textPosition != -1) {
                         textChar = map(text.charAt(textPosition));
                     }
+                    subtextPosition--;
                 }
             }
 
