@@ -104,13 +104,16 @@ public class BoyerMooreCaseInsensitiveTextSearchStrategy extends AbstractTextSea
                       (this.subtextCharsLower[subtextPosition] == textChar ||
                        this.subtextCharsUpper[subtextPosition] == textChar)) {
                     // the text char and subtext char matched, so shift both positions left and recompare
-                    subtextPosition--;
+					// subtextPosition--;
                     textPosition--;
 
                     // calculate the next character of the text to compare
                     if(textPosition != -1) {
                         textChar = map(text.charAt(textPosition));
                     }
+					// workaround
+					// https://bugs.openjdk.java.net/browse/JDK-8054478
+					subtextPosition--;
                 }
             }
 
@@ -128,4 +131,5 @@ public class BoyerMooreCaseInsensitiveTextSearchStrategy extends AbstractTextSea
         // if we fall out of the search loop then we couldn't find the subtext
         return -1;
     }
+    
 }
