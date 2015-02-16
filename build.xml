@@ -21,7 +21,7 @@
 	<!--
     <property name="version" value="${next.release.version}-SNAPSHOT"/>
     -->
-	<property name="version" value="1.9.1"/>
+	<property name="version" value="1.9.2-SNAPSHOT"/>
     <property name="artifactId" value="glazedlists_${java.target.version.fileFriendlyName}" />
 	<property name="groupId" value="net.java.dev.glazedlists" />
 
