@@ -162,17 +162,21 @@ public class CompositeMatcherEditor<E> extends AbstractMatcherEditor<E> {
         int oldMode = this.mode;
         this.mode = mode;
 
-        // don't fire events if there's no filters
-        if(matcherEditors.isEmpty()) {
-            return;
-
         // requiring all to requiring any is a relax
-        } else if(oldMode == AND && mode == OR) {
-            fireRelaxed(rebuildMatcher());
+        if(oldMode == AND && mode == OR) {
+            if(matcherEditors.isEmpty()) {
+                fireMatchNone();
+            } else if(matcherEditors.size() > 1) {
+                fireRelaxed(rebuildMatcher());
+            }
 
         // requiring any to requiring all is a constrain
         } else if(oldMode == OR && mode == AND) {
-            fireConstrained(rebuildMatcher());
+            if(matcherEditors.isEmpty()) {
+                fireMatchAll();
+            } else if(matcherEditors.size() > 1) {
+                fireConstrained(rebuildMatcher());
+            }
 
         // we don't support this mode
         } else {

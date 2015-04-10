@@ -3,13 +3,16 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.matchers;
 
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test the {@link CompositeMatcherEditor}.
@@ -83,15 +86,15 @@ public class CompositeMatcherEditorTest {
 
     /**
      * Test that the {@link CompositeMatcherEditor} matches only if either
-     * matchers match in OR mode.
+     * matcher matches in OR mode.
      */
     @Test
     public void testCompositeMatcherEditorMatchesOr() {
         compositeMatcherEditor.setMode(CompositeMatcherEditor.OR);
 
-        assertEquals(true, compositeMatcherEditor.getMatcher().matches(null));
-        assertEquals(true, compositeMatcherEditor.getMatcher().matches("Football"));
-        assertEquals(true, compositeMatcherEditor.getMatcher().matches("Inked"));
+        assertEquals(false, compositeMatcherEditor.getMatcher().matches(null));
+        assertEquals(false, compositeMatcherEditor.getMatcher().matches("Football"));
+        assertEquals(false, compositeMatcherEditor.getMatcher().matches("Inked"));
 
         compositeMatcherEditor.getMatcherEditors().add(textMatcherEditor);
         assertEquals(true, compositeMatcherEditor.getMatcher().matches("Kryptonite"));
@@ -167,30 +170,174 @@ public class CompositeMatcherEditorTest {
         compositeMatcherEditor.addMatcherEditorListener(listener);
         compositeMatcherEditor.setMode(CompositeMatcherEditor.OR);
 
-        listener.assertNoEvents(0);
+        listener.assertMatchNone(1);
         compositeMatcherEditor.getMatcherEditors().add(textMatcherEditor);
         textMatcherEditor.setFilterText(new String[] { "and" });
         textMatcherEditor.setFilterText(new String[] { "Band" });
         textMatcherEditor.setFilterText(new String[] { "Bandaid" });
-        listener.assertConstrained(4);
+        listener.assertConstrained(5);
         textMatcherEditor.setFilterText(new String[] { "aid" });
         textMatcherEditor.setFilterText(new String[] { "id" });
-        listener.assertRelaxed(6);
+        listener.assertRelaxed(7);
 
         compositeMatcherEditor.getMatcherEditors().add(anotherTextMatcherEditor);
-        listener.assertRelaxed(7);
+        listener.assertRelaxed(8);
         anotherTextMatcherEditor.setFilterText(new String[] { "EarthQuake" });
-        listener.assertConstrained(8);
+        listener.assertConstrained(9);
         anotherTextMatcherEditor.setFilterText(new String[] { "Earth" , "Quake" });
         anotherTextMatcherEditor.setFilterText(new String[] { "Quake" });
-        listener.assertRelaxed(10);
-
-        anotherTextMatcherEditor.setFilterText(new String[0]);
         listener.assertRelaxed(11);
 
+        anotherTextMatcherEditor.setFilterText(new String[0]);
+        listener.assertRelaxed(12);
+
         compositeMatcherEditor.getMatcherEditors().remove(1);
-        listener.assertConstrained(12);
+        listener.assertConstrained(13);
         compositeMatcherEditor.getMatcherEditors().remove(0);
-        listener.assertMatchAll(13);
+        listener.assertMatchAll(14);
+    }
+
+    /**
+     * Test that the {@link CompositeMatcherEditor} fires the right event when switching modes.
+     */
+    @Test
+    public void testCompositeMatcherEditorChangeModeWithNoMatcherEditors() {
+        SimpleMatcherEditorListener listener = new SimpleMatcherEditorListener();
+        compositeMatcherEditor.addMatcherEditorListener(listener);
+
+        final EventList<String> strings = GlazedLists.eventListOf("horse", "cow", "pig", "sheep", "chicken", "duck");
+        final FilterList<String> filtered = new FilterList<String>(strings, compositeMatcherEditor);
+
+        // AND is the default mode
+        assertEquals(CompositeMatcherEditor.AND, compositeMatcherEditor.getMode());
+        // no MatcherEditors have been added to the composite yet
+        assertEquals(0, compositeMatcherEditor.getMatcherEditors().size());
+        // no items have been filtered out
+        assertEquals(strings.size(), filtered.size());
+        // no events have been fired from the composite
+        listener.assertNoEvents(0);
+
+        // change the mode to OR
+        compositeMatcherEditor.setMode(CompositeMatcherEditor.OR);
+
+        // OR is now the mode
+        assertEquals(CompositeMatcherEditor.OR, compositeMatcherEditor.getMode());
+        // no MatcherEditors have been added to the composite yet
+        assertEquals(0, compositeMatcherEditor.getMatcherEditors().size());
+        // all items have been filtered out
+        assertEquals(0, filtered.size());
+        // one event has been fired from the composite
+        listener.assertMatchNone(1);
+
+        // change the mode back to AND
+        compositeMatcherEditor.setMode(CompositeMatcherEditor.AND);
+
+        // AND is now the mode
+        assertEquals(CompositeMatcherEditor.AND, compositeMatcherEditor.getMode());
+        // no MatcherEditors have been added to the composite yet
+        assertEquals(0, compositeMatcherEditor.getMatcherEditors().size());
+        // no items have been filtered out
+        assertEquals(strings.size(), filtered.size());
+        // one event has been fired from the composite
+        listener.assertMatchAll(2);
+    }
+
+    /**
+     * Test that the {@link CompositeMatcherEditor} fires the right event when switching modes.
+     */
+    @Test
+    public void testCompositeMatcherEditorChangeModeWithOneMatcherEditor() {
+        SimpleMatcherEditorListener listener = new SimpleMatcherEditorListener();
+        compositeMatcherEditor.addMatcherEditorListener(listener);
+
+        final EventList<String> strings = GlazedLists.eventListOf("horse", "cow", "pig", "sheep", "chicken", "duck");
+        final FilterList<String> filtered = new FilterList<String>(strings, compositeMatcherEditor);
+        textMatcherEditor.setMode(TextMatcherEditor.CONTAINS);
+        textMatcherEditor.setFilterText(new String[] {"e"});
+        compositeMatcherEditor.getMatcherEditors().add(textMatcherEditor);
+
+        // AND is the default mode
+        assertEquals(CompositeMatcherEditor.AND, compositeMatcherEditor.getMode());
+        // one MatcherEditor has been added to the composite
+        assertEquals(1, compositeMatcherEditor.getMatcherEditors().size());
+        // three items have been filtered out
+        assertEquals(Arrays.asList("horse", "sheep", "chicken") , filtered);
+        // one constrain event has been fired from the composite
+        listener.assertConstrained(1);
+
+        // change the mode to OR
+        compositeMatcherEditor.setMode(CompositeMatcherEditor.OR);
+
+        // OR is now the mode
+        assertEquals(CompositeMatcherEditor.OR, compositeMatcherEditor.getMode());
+        // one MatcherEditor has been added to the composite
+        assertEquals(1, compositeMatcherEditor.getMatcherEditors().size());
+        // same three items are filtered out
+        assertEquals(Arrays.asList("horse", "sheep", "chicken") , filtered);
+        // no further events have been fired from the composite
+        listener.assertNoEvents(1);
+
+        // change the mode back to AND
+        compositeMatcherEditor.setMode(CompositeMatcherEditor.AND);
+
+        // AND is now the mode
+        assertEquals(CompositeMatcherEditor.AND, compositeMatcherEditor.getMode());
+        // one MatcherEditor has been added to the composite
+        assertEquals(1, compositeMatcherEditor.getMatcherEditors().size());
+        // same three items are filtered out
+        assertEquals(Arrays.asList("horse", "sheep", "chicken") , filtered);
+        // no further events have been fired from the composite
+        listener.assertNoEvents(1);
+    }
+
+    /**
+     * Test that the {@link CompositeMatcherEditor} fires the right event when switching modes.
+     */
+    @Test
+    public void testCompositeMatcherEditorChangeModeWithMoreThanOneMatcherEditor() {
+        SimpleMatcherEditorListener listener = new SimpleMatcherEditorListener();
+        compositeMatcherEditor.addMatcherEditorListener(listener);
+
+        final EventList<String> strings = GlazedLists.eventListOf("horse", "cow", "pig", "sheep", "chicken", "duck");
+        final FilterList<String> filtered = new FilterList<String>(strings, compositeMatcherEditor);
+        textMatcherEditor.setMode(TextMatcherEditor.CONTAINS);
+        textMatcherEditor.setFilterText(new String[] {"e"});
+        anotherTextMatcherEditor.setMode(TextMatcherEditor.CONTAINS);
+        anotherTextMatcherEditor.setFilterText(new String[] {"s"});
+        compositeMatcherEditor.getMatcherEditors().add(textMatcherEditor);
+        compositeMatcherEditor.getMatcherEditors().add(anotherTextMatcherEditor);
+
+        // AND is the default mode
+        assertEquals(CompositeMatcherEditor.AND, compositeMatcherEditor.getMode());
+        // two MatcherEditors have been added to the composite
+        assertEquals(2, compositeMatcherEditor.getMatcherEditors().size());
+        // four items have been filtered out
+        assertEquals(Arrays.asList("horse", "sheep") , filtered);
+        // two constrain events have been fired from the composite
+        listener.assertConstrained(2);
+
+        // change the mode to OR
+        compositeMatcherEditor.setMode(CompositeMatcherEditor.OR);
+
+        // OR is now the mode
+        assertEquals(CompositeMatcherEditor.OR, compositeMatcherEditor.getMode());
+        // two MatcherEditors have been added to the composite
+        assertEquals(2, compositeMatcherEditor.getMatcherEditors().size());
+        // three items are filtered out
+        assertEquals(Arrays.asList("horse", "sheep", "chicken") , filtered);
+        // one relax event has been fired from the composite
+        listener.assertRelaxed(3);
+
+        // change the mode back to AND
+        compositeMatcherEditor.setMode(CompositeMatcherEditor.AND);
+
+        // AND is now the mode
+        assertEquals(CompositeMatcherEditor.AND, compositeMatcherEditor.getMode());
+        // two MatcherEditors have been added to the composite
+        assertEquals(2, compositeMatcherEditor.getMatcherEditors().size());
+        // back to four items filtered out
+        assertEquals(Arrays.asList("horse", "sheep") , filtered);
+        // a constrain event has been fired from the composite
+        listener.assertConstrained(4);
     }
 }
