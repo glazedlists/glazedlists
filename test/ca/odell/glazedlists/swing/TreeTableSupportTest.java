@@ -181,34 +181,34 @@ public class TreeTableSupportTest extends SwingTestCase {
         assertEquals(IllegalStateException.class, r.getRuntimeException().getClass());
     }
 
-  @Test
-  public void testKeepSelectionWhenUpdaingElements() throws InterruptedException {
-    // build a TreeList
-    final EventList<String> source = new BasicEventList<String>();
-    final TreeList<String> treeList = new TreeList<String>(source, TreeListTest.UNCOMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartExpanded());
-    final EventList<String> proxyList = GlazedListsSwing.swingThreadProxyList(treeList);
+	@Test
+	public void testKeepSelectionWhenUpdatingElements()	throws InterruptedException {
+		// build a TreeList
+		final EventList<String> source = new BasicEventList<String>();
+		final TreeList<String> treeList = new TreeList<String>(source, TreeListTest.UNCOMPRESSED_CHARACTER_TREE_FORMAT,	TreeList.<String> nodesStartExpanded());
+		final EventList<String> proxyList = GlazedListsSwing.swingThreadProxyList(treeList);
 
-    // build a regular JTable around the TreeList
-    final TableFormat<String> itemTableFormat = GlazedLists.tableFormat(new String[] {""}, new String[] {"Column 1"});
-    final DefaultEventTableModel<String> model = new DefaultEventTableModel<String>(proxyList, itemTableFormat);
-    final JTable table = new JTable(model);
+		// build a regular JTable around the TreeList
+		final TableFormat<String> itemTableFormat = GlazedLists.tableFormat(new String[] { "" }, new String[] { "Column 1" });
+		final DefaultEventTableModel<String> model = new DefaultEventTableModel<String>(proxyList, itemTableFormat);
+		final JTable table = new JTable(model);
 
-    // install TreeTableSupport
-    TreeTableSupport.install(table, treeList, 0);
+		// install TreeTableSupport
+		TreeTableSupport.install(table, treeList, 0);
 
-    source.add(0, "A");
-    source.add(1, "B");
-    source.add( 2, "C" );
-    source.add( 3, "D" );
+		source.add(0, "A");
+		source.add(1, "B");
+		source.add(2, "C");
+		source.add(3, "D");
 
-    table.setSelectionMode( ListSelectionModel.SINGLE_SELECTION );
-    table.setRowSelectionAllowed( true );
-    table.setRowSelectionInterval( 0, 0 );
+		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		table.setRowSelectionAllowed(true);
+		table.setRowSelectionInterval(0, 0);
 
-    assertEquals( 0, table.getSelectedRow() );
-    source.set( 0, "A" );
-    assertEquals( 0, table.getSelectedRow() );
-  }
+		assertEquals(0, table.getSelectedRow());
+		source.set(0, "A");
+		assertEquals(0, table.getSelectedRow());
+	}
 
     /**
      * A Runnable that tries to execute an operation on an EventList and records

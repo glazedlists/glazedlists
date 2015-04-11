@@ -439,9 +439,8 @@ public class DefaultEventSelectionModelTest extends SwingTestCase {
      * Tests, that a selection is preserved when the source is a TreeList and an update event
      * happens for the selected element.
      */
-    @Ignore("Fix me")
     @Test
-    public void testSelectionOnTreeListUpdate_FixMe() {
+    public void testSelectionOnTreeListUpdate() {
         final EventList<String> source = GlazedLists.eventListOf("zero", "one", "two", "three");
 
         final EventList<String> sourceProxy = GlazedListsSwing.swingThreadProxyList(source);
