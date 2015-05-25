@@ -212,7 +212,6 @@ public class JXTableSupport<E> {
         private TableModel oldTableModel;
         private ListSelectionModel oldSelectionModel;
         private boolean oldSortable;
-        private TableCellRenderer oldDefaultRenderer;
 
         /**
          * Gets the current state from the given JXTable and stores it for later restore.
@@ -221,7 +220,6 @@ public class JXTableSupport<E> {
             oldTableModel = table.getModel();
             oldSelectionModel = table.getSelectionModel();
             oldSortable = table.isSortable();
-            oldDefaultRenderer = table.getTableHeader().getDefaultRenderer();
         }
 
         /**
@@ -231,7 +229,6 @@ public class JXTableSupport<E> {
             table.setModel(oldTableModel);
             table.setSelectionModel(oldSelectionModel);
             table.setSortable(oldSortable);
-            table.getTableHeader().setDefaultRenderer(oldDefaultRenderer);
         }
 
         /**
@@ -239,7 +236,6 @@ public class JXTableSupport<E> {
          */
         public void configureStateForGlazedLists(JXTable table) {
             table.setSortable(false);
-            table.getTableHeader().setDefaultRenderer(new JTableHeader().getDefaultRenderer());
         }
 
         /**
