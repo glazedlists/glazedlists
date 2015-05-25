@@ -3,6 +3,12 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
+import javax.swing.table.TableModel;
+
+import org.jdesktop.swingx.JXTable;
+
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.gui.TableFormat;
@@ -11,19 +17,8 @@ import ca.odell.glazedlists.impl.beans.BeanProperty;
 import ca.odell.glazedlists.impl.gui.SortingStrategy;
 import ca.odell.glazedlists.swing.TableModelEventAdapter.Factory;
 
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableModel;
-
-import org.jdesktop.swingx.JXTable;
-
 /**
- * <b>Developer Preview:</b>
- * <code>JXTableSupport</code> prototype
- * <p>
- * Integrates a {@link JXTable} with Glazed Lists by
+ * <code>JXTableSupport</code> integrates a {@link JXTable} with Glazed Lists by
  * <ul>
  * <li>installing a {@link DefaultEventTableModel} as table model</li>
  * <li>installing a {@link DefaultEventSelectionModel} as table selection model</li>
@@ -75,7 +70,8 @@ public class JXTableSupport<E> {
      *
      * @param <E> element type of {@link EventList}
      * @param table the JXTable to integrate with
-     * @param eventList the {@link EventList} with data for the table model
+     * @param eventList the {@link EventList} acting as data source for the table model, must be *at least* as high as the <code>sortedList</code> within the list pipeline.
+     * 		  It's possible to layer further transforms *above* the SortedList and pass one of those in as the data source
      * @param tableFormat the {@link TableFormat} to use
      * @param sortedList the {@link SortedList} to use with the {@link TableComparatorChooser}
      * @param sortingStrategy the {@link SortingStrategy} to use with the
@@ -84,6 +80,7 @@ public class JXTableSupport<E> {
      *
      * @throws IllegalStateException if this method is called from any Thread
      *      other than the Swing Event Dispatch Thread
+     * @see TableComparatorChooser#install(javax.swing.JTable, SortedList, Object, TableFormat)
      */
     public static <E> JXTableSupport<E> install(JXTable table, EventList<E> eventList,
             TableFormat<? super E> tableFormat, SortedList<E> sortedList, Object sortingStrategy) {
