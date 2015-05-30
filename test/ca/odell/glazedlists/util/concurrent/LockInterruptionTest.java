@@ -4,9 +4,10 @@
 /*                                                          StarLight Systems */
 package ca.odell.glazedlists.util.concurrent;
 
-import org.junit.Test;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
 
 import com.publicobject.misc.util.concurrent.JobQueue;
 
@@ -21,11 +22,6 @@ public class LockInterruptionTest {
     @Test
     public void testDefaultLockInterrupt() {
         testLockInterrupt(LockFactory.DEFAULT.createReadWriteLock());
-    }
-
-    @Test
-    public void testJava14LockInterrupt() {
-        testLockInterrupt(new J2SE14LockFactory().createReadWriteLock());
     }
 
     /**
