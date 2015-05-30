@@ -3,8 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.util.concurrent;
 
-import ca.odell.glazedlists.impl.SerializedReadWriteLock;
-
 import java.io.ObjectStreamException;
 import java.util.HashMap;
 
