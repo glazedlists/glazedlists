@@ -26,7 +26,7 @@ public final class Diff {
      * equality.
      */
     public static <E> void replaceAll(EventList<E> target, List<E> source, boolean updates) {
-        replaceAll(target, source, updates, (Comparator)GlazedListsImpl.equalsComparator());
+        replaceAll(target, source, updates, GlazedListsImpl.<E>equalsComparator());
     }
 
     /**

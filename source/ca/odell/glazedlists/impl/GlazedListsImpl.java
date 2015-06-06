@@ -173,14 +173,13 @@ public final class GlazedListsImpl {
      * Returns a non-symmetric Comparator that returns 0 if two Objects are
      * equal as specified by {@link Object#equals(Object)}, or 1 otherwise.
      */
-    public static Comparator<? extends Object> equalsComparator() {
-        return new EqualsComparator<Object>();
+    public static <T> Comparator<T> equalsComparator() {
+        return new EqualsComparator<T>();
     }
     private static class EqualsComparator<T> implements Comparator<T> {
         @Override
         public int compare(T alpha, T beta) {
-            boolean equal = alpha == null ? beta == null : alpha.equals(beta);
-            return equal ? 0 : 1;
+            return equal(alpha, beta) ? 0 : 1;
         }
     }
 

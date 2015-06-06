@@ -454,7 +454,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
         }
 
         // if the lists are empty, we're done
-        if(source.size() == 0) return;
+        if(source.isEmpty()) return;
 
         // rebuild the sorted tree to reflect the new Comparator
         for(SimpleTreeIterator<Element> i = new SimpleTreeIterator<Element>(unsorted); i.hasNext(); ) {
