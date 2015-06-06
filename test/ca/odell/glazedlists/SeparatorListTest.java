@@ -3,6 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
+import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.impl.filter.StringLengthComparator;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
@@ -655,8 +656,6 @@ public class SeparatorListTest {
         assertEqualsIgnoreSeparators(source, separatorList, GlazedLists.comparableComparator());
     }
 
-
-
     @Test
     public void testSeparatorIsThreadSafe() throws InterruptedException {
         final BasicEventList<String> source = new BasicEventList<String>();
@@ -1085,5 +1084,24 @@ public class SeparatorListTest {
         } catch (IllegalArgumentException e) {
             // expected
         }
+    }
+
+    /**
+     * Make sure that SeparatorInjectorList.Group.Comparator stays in sync with SortedList.Comparator when the EventList
+     * contains no objects.
+     */
+    @Test
+    public void testSetComparatorTwice() {
+        final EventList<Object> source = new BasicEventList<Object>();
+        final SeparatorList<Object> separated = new SeparatorList<Object>(source, GlazedListsImpl.equalsComparator(), 0, 0);
+        separated.setComparator(GlazedListsImpl.equalsComparator());
+
+        final Object o = new Object();
+        source.add(o);
+        source.add(o);
+
+        assertEquals(2, source.size());
+        assertEquals(1, separated.size());
+        assertEquals(2, ((SeparatorList.Separator) separated.get(0)).size());
     }
 }

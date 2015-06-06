@@ -151,6 +151,8 @@ public class SeparatorList<E> extends TransformedList<E, E> {
             // insert all again
             updates.addInsert(0, size() - 1);
             updates.commitEvent();
+        } else {
+            separatorSource.grouper.setComparator(comparator);
         }
     }
 
