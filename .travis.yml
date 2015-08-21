@@ -1,4 +1,4 @@
-install: ant test
+script: ant test
 language: java
 jdk:
   - oraclejdk7
