@@ -7,10 +7,7 @@ import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.TableFormat;
 import org.junit.Test;
 
-import javax.swing.DefaultCellEditor;
-import javax.swing.JComboBox;
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -58,7 +55,8 @@ public class TreeTableSupportTest extends SwingTestCase {
         // assert that the JTable's state changed in all the ways we expect
         assertSame(originalRenderer, newRenderer.getDelegate());
         assertSame(originalEditor, newEditor.getDelegate());
-        assertEquals(2, table.getKeyListeners().length);        // arrow key KeyListener and space bar KeyListener
+        assertEquals(originalKeyListenerCount + 2,
+            table.getKeyListeners().length);        // arrow key KeyListener and space bar KeyListener
         assertEquals(1, newMouseListeners.size());              // this is the wrapped MouseListener from the UI Delegate
 
         // uninstall TreeTableSupport
@@ -180,35 +178,6 @@ public class TreeTableSupportTest extends SwingTestCase {
 
         assertEquals(IllegalStateException.class, r.getRuntimeException().getClass());
     }
-
-	@Test
-	public void testKeepSelectionWhenUpdatingElements()	throws InterruptedException {
-		// build a TreeList
-		final EventList<String> source = new BasicEventList<String>();
-		final TreeList<String> treeList = new TreeList<String>(source, TreeListTest.UNCOMPRESSED_CHARACTER_TREE_FORMAT,	TreeList.<String> nodesStartExpanded());
-		final EventList<String> proxyList = GlazedListsSwing.swingThreadProxyList(treeList);
-
-		// build a regular JTable around the TreeList
-		final TableFormat<String> itemTableFormat = GlazedLists.tableFormat(new String[] { "" }, new String[] { "Column 1" });
-		final DefaultEventTableModel<String> model = new DefaultEventTableModel<String>(proxyList, itemTableFormat);
-		final JTable table = new JTable(model);
-
-		// install TreeTableSupport
-		TreeTableSupport.install(table, treeList, 0);
-
-		source.add(0, "A");
-		source.add(1, "B");
-		source.add(2, "C");
-		source.add(3, "D");
-
-		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		table.setRowSelectionAllowed(true);
-		table.setRowSelectionInterval(0, 0);
-
-		assertEquals(0, table.getSelectedRow());
-		source.set(0, "A");
-		assertEquals(0, table.getSelectedRow());
-	}
 
     /**
      * A Runnable that tries to execute an operation on an EventList and records
