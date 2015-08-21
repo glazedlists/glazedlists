@@ -3,27 +3,19 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import ca.odell.glazedlists.BasicEventList;
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.TreeList;
-import ca.odell.glazedlists.TreeListTest;
+import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.TableFormat;
+import org.junit.Test;
 
-import java.awt.event.MouseListener;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.swing.DefaultCellEditor;
-import javax.swing.JComboBox;
-import javax.swing.JTable;
+import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
-
-import org.junit.Test;
+import java.awt.event.MouseListener;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -63,7 +55,8 @@ public class TreeTableSupportTest extends SwingTestCase {
         // assert that the JTable's state changed in all the ways we expect
         assertSame(originalRenderer, newRenderer.getDelegate());
         assertSame(originalEditor, newEditor.getDelegate());
-        assertEquals(2, table.getKeyListeners().length);        // arrow key KeyListener and space bar KeyListener
+        assertEquals(originalKeyListenerCount + 2,
+            table.getKeyListeners().length);        // arrow key KeyListener and space bar KeyListener
         assertEquals(1, newMouseListeners.size());              // this is the wrapped MouseListener from the UI Delegate
 
         // uninstall TreeTableSupport
