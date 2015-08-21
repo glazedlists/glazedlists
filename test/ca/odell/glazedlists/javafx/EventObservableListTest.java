@@ -7,28 +7,18 @@ import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.SortedList;
-
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.collections.ListChangeListener;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
-import javafx.collections.ListChangeListener;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
-
-import static java.util.Arrays.*;
 
 /**
  * Tests the behaviour of {@link EventObservableList}.
@@ -115,7 +105,7 @@ public class EventObservableListTest {
                         }
 
                         List<? extends String> added = null;
-                        if (type != ChangeType.DELETE) {
+                        if (type == ChangeType.INSERT) {
                             added = change.getAddedSubList();
                         }
 
@@ -124,7 +114,8 @@ public class EventObservableListTest {
                             removed = change.getRemoved();
                         }
 
-                        change_list.add(new ChangeInfo(type, change.getFrom(), change.getTo(),
+                        change_list.add(
+                            new ChangeInfo(type, change.getFrom(), change.getTo(),
                                 added, removed));
                     }
                 }
@@ -418,7 +409,7 @@ public class EventObservableListTest {
         assertEquals("Apple", wrapper.get(0));
         assertEquals("Apple", root.get(0));
         root.set(0, "Acai");
-        expectEvent(expectation(ChangeType.REPLACE, 0, 1, asList("Acai"), asList("Apple")));
+        expectEvent(expectation(ChangeType.REPLACE, 0, 1, null, asList("Apple")));
         assertEquals("Acai", wrapper.get(0));
         assertEquals("Acai", root.get(0));
 
@@ -663,23 +654,24 @@ public class EventObservableListTest {
 
     private void expectEvent(ChangeExpectation... expectations) {
         List<ChangeInfo> changes = change_queue.poll();
-        assertNotNull(changes);
-
-        assertEquals("Expected: " + Arrays.toString(expectations) + "  Got: " + changes,
-                expectations.length, changes.size());
+        assertNotNull( changes );
 
         for (int i = 0; i < changes.size(); i++) {
             expectations[i].check(changes.get(i), changes);
         }
+
+        assertEquals("Expected: " + Arrays.toString(expectations) + "  Got: " + changes,
+            expectations.length, changes.size());
     }
 
-    private <E> ChangeExpectation<E> expectation(ChangeType type, int from, int to, List<E> added,
-            List<E> removed) {
+    private <E> ChangeExpectation<E> expectation(ChangeType type, int from, int to,
+        List<E> added, List<E> removed) {
 
         return new ChangeExpectation<E>(type, from, to, added, removed);
     }
 
-    private <E> ChangeExpectation<E> expectationOfReorder(int from, int to, int... reorder_map) {
+    private <E> ChangeExpectation<E> expectationOfReorder(int from, int to,
+        int... reorder_map) {
 
         return new ChangeExpectation<E>(ChangeType.REORDER, from, to, reorder_map);
     }
