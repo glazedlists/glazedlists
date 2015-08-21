@@ -3,14 +3,15 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swt;
 
-import java.util.concurrent.CountDownLatch;
-
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.junit.Assume;
 import org.junit.ClassRule;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
+
+import java.util.concurrent.CountDownLatch;
 
 /**
  * A {@link TestRule} that initializes the SWT environment (display and shell)
@@ -43,6 +44,10 @@ public class SwtClassRule implements TestRule {
     }
 
     private void init() throws InterruptedException {
+        // TODO: SWT tests only work reliably on Windows
+        Assume.assumeTrue( "Test is only reliable on Windows",
+            System.getProperty( "os.name" ).contains( "Windows" ) );
+
         final CountDownLatch latch = new CountDownLatch(1);
         guiThread = new SwtThread(latch);
         guiThread.start();

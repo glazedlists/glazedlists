@@ -6,14 +6,10 @@ import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.gui.AbstractTableComparatorChooser;
 import ca.odell.glazedlists.gui.TableFormat;
-
-import javax.swing.JLabel;
-import javax.swing.JTable;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.table.TableCellRenderer;
-
 import org.junit.Test;
+
+import javax.swing.*;
+import javax.swing.table.TableCellRenderer;
 
 public class TableComparatorChooserTest extends SwingTestCase {
 
@@ -29,12 +25,12 @@ public class TableComparatorChooserTest extends SwingTestCase {
         SortedList<JLabel> sorted = new SortedList<JLabel>(source);
         TableComparatorChooser.install(table, sorted, AbstractTableComparatorChooser.SINGLE_COLUMN);
 
-        // install the Windows LnF
-        UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+        // install the System LnF
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         SwingUtilities.updateComponentTreeUI(table);
 
-        // install the Windows LnF
-        UIManager.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
+        // install the Cross-platform LnF
+        UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
         SwingUtilities.updateComponentTreeUI(table);
 
         // this line throws an NPE without a fix from GL
