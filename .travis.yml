@@ -1,5 +1,7 @@
-install: ant test
+script: ant test
 language: java
 jdk:
   - oraclejdk7
   - oraclejdk8
+sudo: false
+install: true

@@ -7,10 +7,7 @@ import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.gui.TableFormat;
 import org.junit.Test;
 
-import javax.swing.DefaultCellEditor;
-import javax.swing.JComboBox;
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -58,7 +55,8 @@ public class TreeTableSupportTest extends SwingTestCase {
         // assert that the JTable's state changed in all the ways we expect
         assertSame(originalRenderer, newRenderer.getDelegate());
         assertSame(originalEditor, newEditor.getDelegate());
-        assertEquals(2, table.getKeyListeners().length);        // arrow key KeyListener and space bar KeyListener
+        assertEquals(originalKeyListenerCount + 2,
+            table.getKeyListeners().length);        // arrow key KeyListener and space bar KeyListener
         assertEquals(1, newMouseListeners.size());              // this is the wrapped MouseListener from the UI Delegate
 
         // uninstall TreeTableSupport

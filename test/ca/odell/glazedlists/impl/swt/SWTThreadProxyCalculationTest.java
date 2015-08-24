@@ -18,10 +18,7 @@ import java.util.Arrays;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 
 import static org.junit.Assert.*;
 
@@ -45,6 +42,10 @@ public class SWTThreadProxyCalculationTest {
 
     @Before
     public void setUp() {
+        // TODO: SWT tests only work reliably on Windows
+        Assume.assumeTrue( "Test is only reliable on Windows",
+            System.getProperty( "os.name" ).contains( "Windows" ) );
+
         source = new BasicEventList<String>();
         countCalc = Calculations.count(source);
         countProxyCalc = CalculationsSWT.swtThreadProxyCalculation(countCalc, swtClassRule.getDisplay());
