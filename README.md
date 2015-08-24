@@ -1,5 +1,7 @@
 ## Glazed Lists - List transformations in Java
 
+[![Build Status](https://travis-ci.org/glazedlists/glazedlists.svg?branch=master)](https://travis-ci.org/glazedlists/glazedlists)
+
 ### Project sites
 
 Home page: 		http://www.glazedlists.com/
