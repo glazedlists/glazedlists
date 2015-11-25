@@ -1,0 +1,10 @@
+target/
+.project
+.classpath
+.settings/
+.idea/
+*.iml
+*.ipr
+*.iws
+extensions/*/lib/
+tools/
