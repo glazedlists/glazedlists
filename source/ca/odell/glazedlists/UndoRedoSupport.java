@@ -6,7 +6,6 @@ package ca.odell.glazedlists;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
-import javax.swing.event.EventListenerList;
 import java.util.*;
 
 /**
@@ -46,7 +45,7 @@ public final class UndoRedoSupport<E> {
     private ListEventListener<E> txSourceListener = new TXSourceListener();
 
     /** A data structure storing all registered {@link Listener}s. */
-    private final EventListenerList listenerList = new EventListenerList();
+    private final List<Listener> listenerList = new ArrayList<Listener>();
 
     /**
      * A count which, when greater than 0, indicates a ListEvent must be
@@ -80,7 +79,7 @@ public final class UndoRedoSupport<E> {
      * edit occurs on the given source {@link EventList}.
      */
     public void addUndoSupportListener(Listener l) {
-	    listenerList.add(Listener.class, l);
+	    listenerList.add(l);
     }
 
     /**
@@ -88,19 +87,19 @@ public final class UndoRedoSupport<E> {
      * edit occurs on the given source {@link EventList}.
      */
     public void removeUndoSupportListener(Listener l) {
-	    listenerList.remove(Listener.class, l);
+	    listenerList.remove(l);
     }
 
     /**
      * Notifies all registered {@link Listener}s of the given <code>edit</code>.
      */
     private void fireUndoableEditHappened(Edit edit) {
-        Object[] listeners = listenerList.getListenerList();
-
-        for (int i = listeners.length-2; i>=0; i-=2) {
-            if (listeners[i]== Listener.class)
-                ((Listener) listeners[i+1]).undoableEditHappened(edit);
-        }
+    	// To prevent ConcurrentModificationExceptions cause by listeners de-registering
+	    // (for example) during events, make a copy prior to iteration.
+	    List<Listener> listenerListCopy = new ArrayList<Listener>(this.listenerList);
+	    for (int i = listenerListCopy.size() - 1; i >= 0; i--) {
+	    	listenerListCopy.get(i).undoableEditHappened(edit);
+	    }
     }
 
     /**
