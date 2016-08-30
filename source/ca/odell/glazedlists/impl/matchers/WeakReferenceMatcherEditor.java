@@ -6,8 +6,11 @@ package ca.odell.glazedlists.impl.matchers;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 
-import javax.swing.event.EventListenerList;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 
 /**
  * This {@link MatcherEditor} exists to aid with garbage collection of
@@ -36,7 +39,7 @@ import java.lang.ref.WeakReference;
 public final class WeakReferenceMatcherEditor<E> implements MatcherEditor<E>, MatcherEditor.Listener<E> {
 
     /** The Listeners for this MatcherEditor. */
-    private final EventListenerList listenerList = new EventListenerList();
+    private final List<Listener<E>> listenerList = new ArrayList<Listener<E>>();
 
     /** The last Matcher that was broadcast from this MatcherEditor. */
     private MatcherEditor<E> source;
@@ -77,29 +80,30 @@ public final class WeakReferenceMatcherEditor<E> implements MatcherEditor<E>, Ma
      */
     @Override
     public void addMatcherEditorListener(Listener<E> listener) {
-        this.listenerList.add(Listener.class, new WeakMatcherEditorListener<E>(this, listener));
+        this.listenerList.add(new WeakMatcherEditorListener<E>(this, listener));
     }
 
     /** {@inheritDoc} */
     @Override
     public void removeMatcherEditorListener(Listener<E> listener) {
-        final Object[] listeners = this.listenerList.getListenerList();
+	    final Iterator<Listener<E>> it = this.listenerList.iterator();
+	    while (it.hasNext()) {
+		    final Listener<E> currentListener = it.next();
 
-        // we remove the given listener by identity
-        for (int i = listeners.length - 2; i >= 0; i -= 2) {
-            final Object currentObject = listeners[i+1];
-            if (currentObject == listener)
-                this.listenerList.remove(MatcherEditor.Listener.class, listener);
-
+            // we remove the given listener by identity
+		    if (currentListener == listener) {
+		    	it.remove();
+		    }
             // if the given listener is a WeakMatcherEditorListener, check if
             // the currentObject is actually its referent
-            if (currentObject instanceof WeakMatcherEditorListener) {
-                final WeakMatcherEditorListener<E> weakMatcherEditorListener = (WeakMatcherEditorListener<E>) currentObject;
-                final Listener<E> currentListener = weakMatcherEditorListener.getDecoratedListener();
-                if (currentListener == listener)
-                    this.listenerList.remove(MatcherEditor.Listener.class, weakMatcherEditorListener);
+            else if (currentListener instanceof WeakMatcherEditorListener) {
+                final WeakMatcherEditorListener<E> weakMatcherEditorListener = (WeakMatcherEditorListener<E>) currentListener;
+                final Listener<E> referent = weakMatcherEditorListener.getDecoratedListener();
+                if (referent == listener) {
+                	it.remove();
+                }
             }
-        }
+	    }
     }
 
     /**
@@ -111,9 +115,12 @@ public final class WeakReferenceMatcherEditor<E> implements MatcherEditor<E>, Ma
      */
     @Override
     public void changedMatcher(Event<E> matcherEvent) {
-        final Object[] listeners = this.listenerList.getListenerList();
-        for (int i = listeners.length - 2; i >= 0; i -= 2)
-            ((Listener<E>) listeners[i+1]).changedMatcher(matcherEvent);
+    	// To prevent ConcurrentModificationExceptions cause by listeners de-registering
+	    // (for example) during events, make a copy prior to iteration.
+	    List<Listener<E>> listenerListCopy = new ArrayList<Listener<E>>(this.listenerList);
+	    for (int i = listenerListCopy.size() - 1; i >= 0; i--) {
+	    	listenerListCopy.get(i).changedMatcher(matcherEvent);
+	    }
     }
 
     /**
