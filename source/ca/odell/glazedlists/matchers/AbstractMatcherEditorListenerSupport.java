@@ -3,9 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.matchers;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import javax.swing.event.EventListenerList;
 
 /**
  * Basic building block for {@link MatcherEditor} implementations that handles
@@ -18,27 +16,31 @@ public abstract class AbstractMatcherEditorListenerSupport<E> implements
 		MatcherEditor<E> {
 
 	/** listeners for this Editor */
-	private List<Listener<E>> listenerList = new ArrayList<Listener<E>>();
+	private EventListenerList listenerList = new EventListenerList();
 
 	/** {@inheritDoc} */
 	@Override
     public final void addMatcherEditorListener(
 			MatcherEditor.Listener<E> listener) {
-		listenerList.add(listener);
+		listenerList.add(MatcherEditor.Listener.class, listener);
 	}
 
 	/** {@inheritDoc} */
 	@Override
     public final void removeMatcherEditorListener(
 			MatcherEditor.Listener<E> listener) {
-		listenerList.remove(listener);
+		listenerList.remove(Listener.class, listener);
 	}
 
 	/** delivers the given matcher event to all registered listeners. */
 	protected final void fireChangedMatcher(MatcherEditor.Event<E> event) {
-		for (int i = listenerList.size() - 1; i >= 0; i--) {
-			listenerList.get(i).changedMatcher(event);
-		}
+		// Guaranteed to return a non-null array
+		final Object[] listeners = this.listenerList.getListenerList();
+
+		// Process the listenerList last to first, notifying
+		// those that are interested in this event
+		for (int i = listeners.length - 2; i >= 0; i -= 2)
+			((Listener<E>) listeners[i + 1]).changedMatcher(event);
 	}
 
 	/** creates a changed event. */
