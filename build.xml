@@ -729,6 +729,7 @@
            <!-- Execute JUnit tests -->
             <junit printsummary="true" showoutput="false" fork="true"
                     errorProperty="test.failed" failureProperty="test.failed">
+                    <sysproperty key="apple.awt.UIElement" value="true" />
                     <assertions>
                     	<enable/>
                     </assertions>
