@@ -5,6 +5,10 @@ jdk:
   - oraclejdk8
 sudo: false
 install: true
+
+# This line installs more modern Java 8 versions than Travis supports as of this writing
+# (8/2016). The version supported by Travis (8u31) was way out of date and crashing builds.
+# Source: https://github.com/travis-ci/travis-ci/issues/3259#issuecomment-130860338
 addons:
   apt:
     packages:
