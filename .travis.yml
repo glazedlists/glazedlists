@@ -5,3 +5,7 @@ jdk:
   - oraclejdk8
 sudo: false
 install: true
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer
