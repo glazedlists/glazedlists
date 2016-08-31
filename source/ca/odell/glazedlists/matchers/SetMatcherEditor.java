@@ -17,11 +17,11 @@ public final class SetMatcherEditor<E, O> extends AbstractMatcherEditor<E> {
     // ~ Static methods --------------------------------------------------------------------------------------------
 
     public static <E, O> SetMatcherEditor<E, O> create(final Function<E, O> fn) {
-        return create(fn, Mode.EMPTY_MATCHES_NONE);
+        return new SetMatcherEditor<E, O>(fn);
     }
 
-    public static <E, O> SetMatcherEditor<E, O> create(final Function<E, O> fn, final Mode mode) {
-        return new SetMatcherEditor<E, O>(fn, mode);
+    public static <E, O> SetMatcherEditor<E, O> create(final Mode mode, final Function<E, O> fn) {
+        return new SetMatcherEditor<E, O>(mode, fn);
     }
 
     // ~ Instance fields -------------------------------------------------------------------------------------------
@@ -32,21 +32,24 @@ public final class SetMatcherEditor<E, O> extends AbstractMatcherEditor<E> {
 
     // ~ Constructors ----------------------------------------------------------------------------------------------
 
-    private SetMatcherEditor(final Function<E, O> function, final Mode mode) {
+    public SetMatcherEditor(final Mode mode, final Function<E, O> function) {
         this.function = checkNotNull(function);
-        this.mode = checkNotNull(mode);
+        this.setMode(mode);
+    }
 
-        if (this.mode == Mode.EMPTY_MATCHES_ALL) {
-            this.fireMatchAll();
-        } else {
-            this.fireMatchNone();
-        }
+    public SetMatcherEditor(final Function<E, O> function) {
+        this(Mode.EMPTY_MATCHES_NONE, function);
     }
 
     // ~ Methods ---------------------------------------------------------------------------------------------------
 
     public void setMode(Mode mode) {
         this.mode = checkNotNull(mode);
+        if (this.mode == Mode.EMPTY_MATCHES_ALL) {
+            this.fireMatchAll();
+        } else {
+            this.fireMatchNone();
+        }
     }
 
     public void setMatchSet(final Set<O> newSet) {
