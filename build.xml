@@ -727,7 +727,7 @@
     <target name="test" depends="compiletests"
             description="Compile unit tests and run them using JUnit.">
            <!-- Execute JUnit tests -->
-            <junit printsummary="true" showoutput="false" fork="true"
+            <junit printsummary="true" showoutput="false" fork="true" maxmemory="512m"
                     errorProperty="test.failed" failureProperty="test.failed">
                     <assertions>
                     	<enable/>
