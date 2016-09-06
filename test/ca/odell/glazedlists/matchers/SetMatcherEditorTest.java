@@ -51,10 +51,10 @@ public class SetMatcherEditorTest {
         // all (no values with Mode.EMPTY_MATCHES_ALL)
         matcherEditor.setMode(Mode.EMPTY_MATCHES_ALL);
         matcherEditor.setMatchSet(new HashSet<Integer>());
-        counter.assertCounterState(1, 1, 3, 1, 1);
+        counter.assertCounterState(2, 1, 3, 1, 1);
 
         // test changing nothing
         matcherEditor.setMatchSet(new HashSet<Integer>());
-        counter.assertCounterState(1, 1, 3, 1, 1);
+        counter.assertCounterState(2, 1, 3, 1, 1);
     }
 }
