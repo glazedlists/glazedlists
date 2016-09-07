@@ -5,5 +5,11 @@ repositories {
 
 allprojects {
     apply plugin: 'java'
-
 }
+
+configure(allprojects.findAll {it.name != 'core'}) {
+    dependencies {
+        compile project(':core')
+    }
+}
+
