@@ -1,12 +1,23 @@
-target/
-out/
-.DS_Store
-.project
-.classpath
-.settings/
+# gradle
+.gradle
+build/
+
+# IDEA
+out
 .idea/
 *.iml
 *.ipr
 *.iws
+
+# Junk
+.DS_Store
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# Ant
+target/
 extensions/*/lib/
 tools/

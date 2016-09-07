@@ -1,0 +1,9 @@
+
+repositories {
+    jcenter()
+}
+
+allprojects {
+    apply plugin: 'java'
+
+}
