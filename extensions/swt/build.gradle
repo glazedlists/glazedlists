@@ -1,0 +1,7 @@
+
+
+dependencies {
+    compile project(':extensions:calculation')
+    compile 'org.eclipse.swt:org.eclipse.swt.cocoa.macosx.x86_64:4.6'
+}
+

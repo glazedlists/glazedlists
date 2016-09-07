@@ -1,15 +1,27 @@
-
-repositories {
-    jcenter()
-}
-
 allprojects {
     apply plugin: 'java'
+
+    repositories {
+        jcenter()
+
+        // for SWT
+        maven {
+            url "http://maven-eclipse.github.io/maven"
+        }
+    }
+
+    dependencies {
+        testCompile 'junit:junit:4.11'
+    }
 }
 
-configure(allprojects.findAll {it.name != 'core'}) {
+configure(allprojects.findAll { it.name != 'core' }) {
     dependencies {
+        /* all projects except core depends on core */
         compile project(':core')
+
+        /* tests depend on test */
+        testCompile project(':core').sourceSets.test.output
     }
 }
 

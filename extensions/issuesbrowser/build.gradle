@@ -1,0 +1,9 @@
+dependencies {
+    compile project(':extensions:swt')
+    compile project(':extensions:treetable')
+    compile project(':extensions:jfreechart')
+    compile project(':extensions:javafx')
+    compile project(':extensions:nachocalendar')
+    compile project(':extensions:jgoodiesforms')
+    compile files('lib/http.jar')
+}

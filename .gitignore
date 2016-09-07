@@ -19,5 +19,4 @@ out
 
 # Ant
 target/
-extensions/*/lib/
 tools/
