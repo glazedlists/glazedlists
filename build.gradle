@@ -13,15 +13,36 @@ allprojects {
     dependencies {
         testCompile 'junit:junit:4.11'
     }
+
+    /* prefix "glazedlists-" to jar filename and output in root instead of <project>/build/libs */
+    jar.baseName = "glazedlists-${project.name}"
+    jar.destinationDir = rootDir
 }
 
+/* all project except core */
 configure(allprojects.findAll { it.name != 'core' }) {
-    dependencies {
-        /* all projects except core depends on core */
-        compile project(':core')
 
-        /* tests depend on test */
+    /* source depends on core-source, tests depend on core-tests */
+    dependencies {
+        compile project(':core')
         testCompile project(':core').sourceSets.test.output
     }
+
+    /* generate a file called "build.timestamp" in resources */
+    def generatedResources = "$buildDir/resources/main"
+    task generateMyResources {
+        doLast {
+            new File(generatedResources).mkdirs()
+            new File(generatedResources, "build.timestamp").text = System.currentTimeMillis()
+        }
+    }
+    processResources.dependsOn(generateMyResources)
 }
 
+/* jar of core with calculation */
+task calcJar(type: Jar, dependsOn: [":core:compileJava", ":extensions:calculation:compileJava"]) {
+    destinationDir = rootDir
+    archiveName = "glazedlists-withcalc.jar"
+
+    from files([":core", ":extensions:calculation"].collect{ project(it).sourceSets.main.output })
+}
