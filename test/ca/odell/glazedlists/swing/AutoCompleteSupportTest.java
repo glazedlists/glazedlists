@@ -5,7 +5,7 @@ package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.ExecuteOnMainThread;
+import ca.odell.glazedlists.ExecuteOnNonUiThread;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.IntegerTableFormat;
 import ca.odell.glazedlists.matchers.GlazedListsICU4J;
@@ -985,7 +985,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
      * verifies that the invariant is maintained while data changes underneath.
      */
     @Test
-    @ExecuteOnMainThread
+    @ExecuteOnNonUiThread
     public void testOnMainThreadChangingComboBoxDataRetainsStrictModeInvariant() throws Exception {
         final JComboBox combo = new JComboBox();
 

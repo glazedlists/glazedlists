@@ -139,6 +139,13 @@
 	<!-- use windows files as default if nothing matches -->
 	<property name="swt.jar.file" value="org.eclipse.swt.win32.win32.x86.jar"/>
 		
+	<!-- needed for SWT on MacOS. -->
+    <condition property="junit.jvmargs" value="-XstartOnFirstThread">
+        <os family="mac"/>
+    </condition>
+	<!-- just to have some default JVM ARG, see test target -->
+	<property name="junit.jvmargs" value="-Xmixed"/>
+	
    <target name="ant_version_check">
         <antversion property="ant.version.running" />
         <fail message="FATAL ERROR:  The running Ant version, ${ant.version.running}, is too old.">
@@ -729,13 +736,15 @@
            <!-- Execute JUnit tests -->
             <junit printsummary="true" showoutput="false" fork="true" maxmemory="512m"
                     errorProperty="test.failed" failureProperty="test.failed">
+            	    <jvmarg value="${junit.jvmargs}"/>
                     <assertions>
                     	<enable/>
                     </assertions>
                     <classpath>
                         <pathelement location="${classes.dir}"/>
                         <pathelement location="${testclasses.dir}"/>
-                        <fileset dir="extensions" includes="**/*.jar"/>
+                    	<!-- japex seems to bundle ant somehow, this could cause problems running tests with junit -->
+                        <fileset dir="extensions" includes="**/*.jar" excludes="japex/lib/*.jar"/>
                         <fileset file="tools/junit.jar"/>
                     	<fileset file="tools/hamcrest-core.jar"/>
                     	<pathelement location="extensions/hibernate/etc"/>

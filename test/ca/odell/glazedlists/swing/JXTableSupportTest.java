@@ -2,7 +2,7 @@ package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.ExecuteOnMainThread;
+import ca.odell.glazedlists.ExecuteOnNonUiThread;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.gui.TableFormat;
@@ -85,7 +85,7 @@ public class JXTableSupportTest extends SwingTestCase {
     }
 
     @Test
-    @ExecuteOnMainThread
+    @ExecuteOnNonUiThread
     public void testOnMainThreadInstallEDTViolation() {
         try {
             JXTableSupport.install(table, colors, colorTableFormat, sortedColors, TableComparatorChooser.SINGLE_COLUMN);
@@ -96,7 +96,7 @@ public class JXTableSupportTest extends SwingTestCase {
     }
 
     @Test
-    @ExecuteOnMainThread
+    @ExecuteOnNonUiThread
     public void testOnMainThreadUninstallEDTViolation() throws Exception {
         final InstallRunnable runnable = new InstallRunnable();
         EventQueue.invokeAndWait(runnable);

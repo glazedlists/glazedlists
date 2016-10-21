@@ -3,24 +3,31 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.swt;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.ExecuteOnMainThread;
+import ca.odell.glazedlists.ExecuteOnNonUiThread;
 import ca.odell.glazedlists.calculation.Calculation;
 import ca.odell.glazedlists.calculation.Calculations;
 import ca.odell.glazedlists.swt.CalculationsSWT;
 import ca.odell.glazedlists.swt.SwtClassRule;
 import ca.odell.glazedlists.swt.SwtTestRule;
 
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.junit.Assume;
+import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.Rule;
+import org.junit.Test;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Arrays;
-
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-import org.junit.*;
-
-import static org.junit.Assert.*;
 
 /**
  * <code>SWTThreadProxyCalculationTest</code> tests the bahaviour of
@@ -30,22 +37,20 @@ import static org.junit.Assert.*;
  */
 public class SWTThreadProxyCalculationTest {
 
-    private EventList<String> source;
-    private Calculation<Integer> countCalc;
-    private Calculation<Integer> countProxyCalc;
-
     @ClassRule
     public static SwtClassRule swtClassRule = new SwtClassRule();
 
     @Rule
     public SwtTestRule swtTestRule = new SwtTestRule(swtClassRule);
 
+    private EventList<String> source;
+
+    private Calculation<Integer> countCalc;
+
+    private Calculation<Integer> countProxyCalc;
+
     @Before
     public void setUp() {
-        // TODO: SWT tests only work reliably on Windows
-        Assume.assumeTrue( "Test is only reliable on Windows",
-            System.getProperty( "os.name" ).contains( "Windows" ) );
-
         source = new BasicEventList<String>();
         countCalc = Calculations.count(source);
         countProxyCalc = CalculationsSWT.swtThreadProxyCalculation(countCalc, swtClassRule.getDisplay());
@@ -77,12 +82,15 @@ public class SWTThreadProxyCalculationTest {
     }
 
     /**
-     * This tests creates the SWT display and runs an event loop in a different thread than the
-     * main thread to test the thread proxy behaviour.
+     * This tests creates the SWT display and runs an event loop in a different thread than the main UI thread to test the thread proxy
+     * behaviour.
      */
     @Test
-    @ExecuteOnMainThread
+    @ExecuteOnNonUiThread
     public void testOnMainThreadPropertyChangeListener() {
+        // TODO: SWT tests only work reliably on Windows
+        Assume.assumeTrue("Test is only reliable on Windows", System.getProperty("os.name").contains("Windows"));
+
         final DisplayRunner displayInit = new DisplayRunner();
         // start the background task to init the display
         final Thread background = new Thread(displayInit);

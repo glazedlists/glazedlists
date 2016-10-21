@@ -3,7 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import ca.odell.glazedlists.ExecuteOnMainThread;
+import ca.odell.glazedlists.ExecuteOnNonUiThread;
 
 import java.awt.EventQueue;
 
@@ -25,7 +25,7 @@ public class SwingTestRuleTest extends SwingTestCase {
 	}
 
 	@Test
-	@ExecuteOnMainThread
+	@ExecuteOnNonUiThread
 	public void executeOnMainThread() {
 		System.out.println(Thread.currentThread() + "SwingTestRuleTest.executeOnMainThread()");
 		assertFalse("Expected Main thread but was " + Thread.currentThread(), EventQueue.isDispatchThread());

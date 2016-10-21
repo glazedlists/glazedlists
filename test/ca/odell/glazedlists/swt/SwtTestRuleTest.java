@@ -3,11 +3,12 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swt;
 
-import ca.odell.glazedlists.ExecuteOnMainThread;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+
+import ca.odell.glazedlists.ExecuteOnNonUiThread;
 
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 /**
  * Test for {@link SwtTestRule}.
@@ -23,7 +24,7 @@ public class SwtTestRuleTest extends SwtTestCase {
 	}
 
 	@Test
-	@ExecuteOnMainThread
+	@ExecuteOnNonUiThread
 	public void executeOnMainThread() {
 		System.out.println(Thread.currentThread() + "SwtTestRuleTest.executeOnMainThread()");
 		assertNotSame("Expected Main thread but was " + Thread.currentThread(), swtClassRule.getDisplay().getThread(), Thread.currentThread());

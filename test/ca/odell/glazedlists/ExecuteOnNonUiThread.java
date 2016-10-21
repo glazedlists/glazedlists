@@ -9,13 +9,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marker annotation for executing a test method of a GUI test class on the main
- * thread instead of the GUI thread.
+ * Marker annotation for executing a test method of a GUI test class on an other thread instead of the GUI thread.
  *
  * @author Holger Brands
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
-public @interface ExecuteOnMainThread {
+public @interface ExecuteOnNonUiThread {
 
 }

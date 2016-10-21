@@ -5,7 +5,7 @@ package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.ExecuteOnMainThread;
+import ca.odell.glazedlists.ExecuteOnNonUiThread;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList;
@@ -50,7 +50,7 @@ public class DefaultEventTableModelTest extends SwingTestCase {
      * arrives on a non-EDT thread
      */
     @Test
-    @ExecuteOnMainThread
+    @ExecuteOnNonUiThread
     public void testOnMainThreadEDTViolation() {
         EventList<Color> colors = new BasicEventList<Color>();
         colors.add(Color.RED);
@@ -71,7 +71,7 @@ public class DefaultEventTableModelTest extends SwingTestCase {
      * Verifies that factory method for creating table with thread proxy list works.
      */
     @Test
-    @ExecuteOnMainThread
+    @ExecuteOnNonUiThread
     public void testOnMainThreadNoEDTViolation() {
         EventList<Color> colors = new BasicEventList<Color>();
         colors.add(Color.RED);

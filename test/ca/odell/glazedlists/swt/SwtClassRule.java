@@ -5,24 +5,20 @@ package ca.odell.glazedlists.swt;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.junit.Assume;
 import org.junit.ClassRule;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
-import java.util.concurrent.CountDownLatch;
-
 /**
- * A {@link TestRule} that initializes the SWT environment (display and shell)
- * in a separate thread. Intended to be used as {@link ClassRule} to perform the
- * initialization once per test class.
+ * A {@link TestRule} that initializes the SWT environment (display and shell) on the main thread. Intended to be used as {@link ClassRule}
+ * to perform the initialization once per test class.
  *
  * @author Holger Brands
  */
 public class SwtClassRule implements TestRule {
 
-    private SwtThread guiThread;
+    private final SwtHelper swtHelper = new SwtHelper();
 
     /**
      * {@inheritDoc}
@@ -32,51 +28,43 @@ public class SwtClassRule implements TestRule {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                init();
+                swtHelper.init();
                 try {
                     base.evaluate();
                 } finally {
-                    dispose();
+                    swtHelper.dispose();
                 }
             }
 
         };
     }
 
-    private void init() throws InterruptedException {
-        // TODO: SWT tests only work reliably on Windows
-        Assume.assumeTrue( "Test is only reliable on Windows",
-            System.getProperty( "os.name" ).contains( "Windows" ) );
-
-        final CountDownLatch latch = new CountDownLatch(1);
-        guiThread = new SwtThread(latch);
-        guiThread.start();
-        latch.await();
-    }
-
-    private void dispose() throws InterruptedException {
-        guiThread.terminate();
-        guiThread.join();
-    }
-
     public final Display getDisplay() {
-        return guiThread.getDisplay();
+        return swtHelper.getDisplay();
     }
 
     public final Shell getShell() {
-        return guiThread.getShell();
+        return swtHelper.getShell();
     }
 
-    private static class SwtThread extends Thread {
+    /**
+     * <code>SwtHelper</code> initializes a display and a shell. On MacOS they are created on the main thread. On any other OS they are
+     * created in a separate thread.
+     */
+    static class SwtHelper {
+
         private Display display;
+
+        private boolean displayOwner;
+
         private Shell shell;
-        private CountDownLatch latch;
 
-        private volatile boolean stopped;
-
-        public SwtThread(CountDownLatch latch) {
-            super("SWT-Thread");
-            this.latch = latch;
+        public void init() throws InterruptedException {
+            if (display == null) {
+                displayOwner = Display.getCurrent() == null;
+                display = Display.getDefault();
+            }
+            shell = new Shell(display);
         }
 
         public Display getDisplay() {
@@ -87,22 +75,15 @@ public class SwtClassRule implements TestRule {
             return shell;
         }
 
-        @Override
-        public void run() {
-            display = new Display();
-            shell = new Shell(display);
-            latch.countDown();
-            while (!stopped) {
-                if (!display.readAndDispatch()) {
-                    display.sleep();
-                }
+        public void dispose() throws InterruptedException {
+            if (shell != null) {
+                shell.dispose();
+                shell = null;
             }
-            display.dispose();
-        }
-
-        public void terminate() {
-            stopped = true;
-            display.wake();
+            if (display != null && displayOwner) {
+                display.dispose();
+            }
+            display = null;
         }
     }
 }

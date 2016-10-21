@@ -5,7 +5,7 @@ package ca.odell.glazedlists.swing;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.ExecuteOnMainThread;
+import ca.odell.glazedlists.ExecuteOnNonUiThread;
 
 import java.awt.Color;
 
@@ -26,7 +26,7 @@ public class DefaultEventComboBoxModelTest extends SwingTestCase {
      * arrives on a non-EDT thread
      */
     @Test
-    @ExecuteOnMainThread
+    @ExecuteOnNonUiThread
     public void testOnMainThreadEDTViolation() {
         EventList<Color> colors = new BasicEventList<Color>();
         colors.add(Color.RED);
@@ -46,7 +46,7 @@ public class DefaultEventComboBoxModelTest extends SwingTestCase {
      * Verifies that factory method for creating model with thread proxy list works.
      */
     @Test
-    @ExecuteOnMainThread
+    @ExecuteOnNonUiThread
     public void testOnMainThreadNoEDTViolation() {
         EventList<Color> colors = new BasicEventList<Color>();
         colors.add(Color.RED);

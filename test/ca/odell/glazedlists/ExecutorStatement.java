@@ -3,9 +3,9 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import java.util.concurrent.Executor;
-
 import org.junit.runners.model.Statement;
+
+import java.util.concurrent.Executor;
 
 /**
  * A statement implementation that executes a given {@link Statement} with a

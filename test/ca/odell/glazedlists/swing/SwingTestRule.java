@@ -3,7 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
-import ca.odell.glazedlists.ExecuteOnMainThread;
+import ca.odell.glazedlists.ExecuteOnNonUiThread;
 import ca.odell.glazedlists.ExecutorStatement;
 
 import java.awt.EventQueue;
@@ -18,7 +18,7 @@ import org.junit.runners.model.Statement;
 /**
  * A {@link TestRule} implementation for use as {@link Rule}, that performs all
  * test methods on the Swing EDT thread. An exception to this are test methods
- * which are annotated with {@link ExecuteOnMainThread}.
+ * which are annotated with {@link ExecuteOnNonUiThread}.
  *
  * @author Holger Brands
  */
@@ -31,7 +31,7 @@ public class SwingTestRule implements TestRule {
      */
 	@Override
 	public Statement apply(Statement statement, Description description) {
-		if (description.getAnnotation(ExecuteOnMainThread.class) != null) {
+		if (description.getAnnotation(ExecuteOnNonUiThread.class) != null) {
 			return statement;
 		} else {
 		    return new ExecutorStatement(swingExecutor, statement);
