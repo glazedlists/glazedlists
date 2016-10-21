@@ -4,12 +4,24 @@ jdk:
   - oraclejdk7
   - oraclejdk8
 sudo: false
+
+env: DISPLAY=:99.0
+
 install: true
 
 # This line installs more modern Java 8 versions than Travis supports as of this writing
 # (8/2016). The version supported by Travis (8u31) was way out of date and crashing builds.
 # Source: https://github.com/travis-ci/travis-ci/issues/3259#issuecomment-130860338
+
+# also install a window manager, needed for SWT-based tests
 addons:
   apt:
     packages:
       - oracle-java8-installer
+      - metacity
+
+# start metacity window manager before running tests
+before_script:
+ - sh -e /etc/init.d/xvfb start
+ - sleep 5
+ - metacity --sm-disable --replace 2> metacity.err &
