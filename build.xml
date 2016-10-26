@@ -736,6 +736,7 @@
            <!-- Execute JUnit tests -->
             <junit printsummary="true" showoutput="false" fork="true" maxmemory="512m"
                     errorProperty="test.failed" failureProperty="test.failed">
+            	    <sysproperty key="java.awt.headless" value="true"/>
             	    <jvmarg value="${junit.jvmargs}"/>
                     <assertions>
                     	<enable/>

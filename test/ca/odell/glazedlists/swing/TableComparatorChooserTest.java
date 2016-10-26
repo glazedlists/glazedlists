@@ -6,15 +6,23 @@ import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.gui.AbstractTableComparatorChooser;
 import ca.odell.glazedlists.gui.TableFormat;
+
+import org.junit.Assume;
 import org.junit.Test;
 
-import javax.swing.*;
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.table.TableCellRenderer;
 
 public class TableComparatorChooserTest extends SwingTestCase {
 
     @Test
     public void testChangingUIDelegate() throws Exception {
+        // test crashes on Windows with Java 7u60 and Java 7u80 with java.awt.headless=true
+        Assume.assumeFalse(Boolean.getBoolean("java.awt.headless"));
+
         String[] properties = {"text"};
         String[] labels = {"Text"};
         TableFormat<JLabel> tableFormat = GlazedLists.tableFormat(properties, labels);
