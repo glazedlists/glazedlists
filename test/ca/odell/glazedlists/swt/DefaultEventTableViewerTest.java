@@ -3,6 +3,13 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swt;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
@@ -11,26 +18,54 @@ import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+import org.junit.Assume;
+import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.Rule;
+import org.junit.Test;
+
 import java.awt.Color;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 /**
  * Tests for the {@link DefaultEventTableViewer}.
  *
  * @author Holger Brands
  */
-public class DefaultEventTableViewerTest extends SwtTestCase {
+public class DefaultEventTableViewerTest {
 
+    @ClassRule
+    public static SwtClassRule swtClassRule = applySwtRules() ? new SwtClassRule() : null;
+
+    @Rule
+    public SwtTestRule swtTestRule = applySwtRules() ? new SwtTestRule(swtClassRule) : null;
+
+    protected Display getDisplay() {
+        return swtClassRule.getDisplay();
+    }
+
+    protected Shell getShell() {
+        return swtClassRule.getShell();
+    }
+
+    // Test works not reliable on Mac
+    private static boolean applySwtRules() {
+        return !System.getProperty("os.name").toLowerCase().contains("mac");
+    }
+    
+    @Before
+    public void setup() {
+        Assume.assumeTrue("Test works not reliable on Mac", applySwtRules());
+    }
+    
     private static final List<Color> RGB = Arrays.asList(Color.RED, Color.GREEN, Color.BLUE);
     private static final List<Color> RGBNull = Arrays.asList(Color.RED, Color.GREEN, Color.BLUE, null);
 
