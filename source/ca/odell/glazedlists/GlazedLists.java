@@ -17,7 +17,6 @@ import ca.odell.glazedlists.impl.ListCollectionListModel;
 import ca.odell.glazedlists.impl.ObservableConnector;
 import ca.odell.glazedlists.impl.ReadOnlyList;
 import ca.odell.glazedlists.impl.SimpleFunctionList;
-import ca.odell.glazedlists.impl.SyncListener;
 import ca.odell.glazedlists.impl.ThreadSafeList;
 import ca.odell.glazedlists.impl.TypeSafetyListener;
 import ca.odell.glazedlists.impl.WeakReferenceProxy;
@@ -750,14 +749,14 @@ public final class GlazedLists {
     // ListEventListeners // // // // // // // // // // // // // // // // // //
 
     /**
-     * Synchronize the specified {@link EventList} to the specified {@link List}.
-     * Each time the {@link EventList} is changed, the changes are applied to the
-     * {@link List} as well, so that the two lists are always equal.
-     *
-     * <p>This is useful when a you need to support a {@link List} datamodel
-     * but would prefer to manipulate that {@link List} with the convenience
-     * of {@link EventList}s:
-     * <pre><code>List someList = ...
+     * Synchronize the specified {@link EventList} to the specified {@link List}. Each time the {@link EventList} is
+     * changed, the changes are applied to the {@link List} as well, so that the two lists are always equal.
+     * <p>
+     * This is useful when a you need to support a {@link List} datamodel but would prefer to manipulate that
+     * {@link List} with the convenience of {@link EventList}s:
+     * 
+     * <pre>
+     * <code>List someList = ...
      *
      * // create an EventList with the contents of someList
      * EventList eventList = GlazedLists.eventList(someList);
@@ -773,23 +772,45 @@ public final class GlazedLists {
      * eventList.remove("bostom creme");
      * System.out.println(eventList.equals(someList));
      * eventList.clear();
-     * System.out.println(eventList.equals(someList));</code></pre>
+     * System.out.println(eventList.equals(someList));</code>
+     * </pre>
      *
-     * @param source the {@link EventList} which provides the master view.
-     *      Each change to this {@link EventList} will be applied to the
-     *      {@link List}.
-     * @param target the {@link List} to host a copy of the {@link EventList}.
-     *      This {@link List} should not be changed after the lists have been
-     *      synchronized. Otherwise a {@link RuntimeException} will be thrown
-     *      when the drift is detected. This class must support all mutating
-     *      {@link List} operations.
-     * @return the {@link ListEventListener} providing the link from the
-     *      source {@link EventList} to the target {@link List}. To stop the
-     *      synchronization, use
-     *      {@link EventList#removeListEventListener(ListEventListener)}.
+     * @param source the {@link EventList} which provides the master view. Each change to this {@link EventList} will be
+     *            applied to the {@link List}.
+     * @param target the {@link List} to host a copy of the {@link EventList}. This {@link List} should not be changed
+     *            after the lists have been synchronized. Otherwise a {@link RuntimeException} will be thrown when the
+     *            drift is detected. This class must support all mutating {@link List} operations.
+     * @return the {@link ListEventListener} providing the link from the source {@link EventList} to the target
+     *         {@link List}. To stop the synchronization, use
+     *         {@link EventList#removeListEventListener(ListEventListener)} or just call {@link SyncListener#dispose()}.
      */
-    public static <E> ListEventListener<E> syncEventListToList(EventList<E> source, List<E> target) {
+    public static <E> SyncListener<E> syncEventListToList(EventList<E> source, List<E> target) {
         return new SyncListener<E>(source, target);
+    }
+
+    /**
+     * Offers the same functionality as {@link GlazedLists#syncEventListToList(EventList, List)}, only that the target
+     * list is also an {@link EventList}. This is useful in case you have to synchronize two event lists in different
+     * list pipelines using different publisher and locks. Mutating the target {@link EventList} is guarded by holding
+     * its WriteLock.
+     * 
+     * @param source the {@link EventList} which provides the master view. Each change to this {@link EventList} will be
+     *            applied to the target {@link EventList}.
+     * @param target the {@link EventList} to host a copy of the {@link EventList}. This {@link EventList} should not be
+     *            changed after the lists have been synchronized. Otherwise a {@link RuntimeException} will be thrown
+     *            when the drift is detected.
+     * @return the {@link ListEventListener} providing the link from the source {@link EventList} to the target
+     *         {@link EventList}. To stop the synchronization, use
+     *         {@link EventList#removeListEventListener(ListEventListener)} or just call
+     *         {@link LockbasedSyncListener#dispose()}.
+     */
+    public static <E> LockbasedSyncListener<E> syncEventListToEventList(EventList<E> source, EventList<E> target) {
+        target.getReadWriteLock().writeLock().lock();
+        try {
+            return new LockbasedSyncListener<E>(source, target);
+        } finally {
+            target.getReadWriteLock().writeLock().unlock();
+        }
     }
 
 	/**

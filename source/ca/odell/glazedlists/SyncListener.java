@@ -1,9 +1,8 @@
 /* Glazed Lists                                                 (c) 2003-2006 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-package ca.odell.glazedlists.impl;
+package ca.odell.glazedlists;
 
-import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
@@ -17,10 +16,13 @@ import java.util.List;
  */
 public class SyncListener<E> implements ListEventListener<E> {
 
+    /** the EventList to sync from. */
+    private EventList<E> source;
+
     /** the list to sync against the {@link EventList}. */
     private List<E> target;
 
-    /** remember sync list size to attempt to detect drifts */
+    /** remember sync list size to attempt to detect drifts. */
     private int targetSize;
 
     /**
@@ -29,6 +31,7 @@ public class SyncListener<E> implements ListEventListener<E> {
      * specified target {@link List}.
      */
     public SyncListener(EventList<E> source, List<E> target) {
+        this.source = source;
         this.target = target;
         target.clear();
         target.addAll(source);
@@ -44,7 +47,8 @@ public class SyncListener<E> implements ListEventListener<E> {
     /** {@inheritDoc} */
     @Override
     public void listChanged(ListEvent<E> listChanges) {
-        EventList<E> source = listChanges.getSourceList();
+        EventList<E> sourceList = listChanges.getSourceList();
+        System.out.println("SYNCER: " + listChanges + ", size: " + sourceList.size() + ", sourceList: " + sourceList);
 
         // if the list sizes don't match, we have a problem
         if(target.size() != targetSize) {
@@ -57,14 +61,26 @@ public class SyncListener<E> implements ListEventListener<E> {
             int type = listChanges.getType();
 
             if(type == ListEvent.INSERT) {
-                target.add(index, source.get(index));
+                target.add(index, sourceList.get(index));
                 targetSize++;
             } else if(type == ListEvent.UPDATE) {
-                target.set(index, source.get(index));
+                target.set(index, sourceList.get(index));
             } else if(type == ListEvent.DELETE) {
                 target.remove(index);
                 targetSize--;
             }
+        }
+    }
+
+    /**
+     * Stops the synchronization between the two lists by removing the {@link ListEventListener} from the source list.
+     * After disposing this listener is non-functional and should be discarded.
+     */
+    public void dispose() {
+        if (source != null) {
+            source.removeListEventListener(this);
+            source = null;
+            target = null;
         }
     }
 }

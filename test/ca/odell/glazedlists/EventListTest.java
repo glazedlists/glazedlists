@@ -3,6 +3,11 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventListener;
@@ -13,6 +18,8 @@ import ca.odell.glazedlists.matchers.Matchers;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
+import org.junit.Test;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,10 +28,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
-import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 /**
  * Verifies that EventList matches the List API.
@@ -433,18 +436,17 @@ public class EventListTest {
     }
 
     /**
-     * Tests the {@link GlazedLists#syncEventListToList(EventList, List)}
-     * factory method.
+     * Tests the {@link GlazedLists#syncEventListToList(EventList, List)} factory method.
      */
     @Test
-    public void testGlazedListsSync() {
+    public void testGlazedListsSyncToList() {
         EventList<String> source = new BasicEventList<String>();
         source.add("McCallum");
         source.add("Keith");
         List<String> target = new ArrayList<String>();
         target.add("Greene");
 
-        ListEventListener<String> listener = GlazedLists.syncEventListToList(source, target);
+        SyncListener<String> listener = GlazedLists.syncEventListToList(source, target);
         assertEquals(source, target);
 
         source.add("Szakra");
@@ -462,12 +464,61 @@ public class EventListTest {
         Collections.sort(source);
         assertEquals(source, target);
 
+        source.removeAll(Arrays.asList("Holmes", "Keith", "Szakra"));
+        assertEquals(source, target);
+
         source.clear();
         assertEquals(source, target);
 
-        source.removeListEventListener(listener);
+        listener.dispose();
         source.add("Davis");
         assertFalse(source.equals(target));
+        
+        // ensure double dispose is doing no harm
+        listener.dispose();
+    }
+    
+    /**
+     * Tests the {@link GlazedLists#syncEventListToEventList(EventList, EventList)} factory method.
+     */
+    @Test
+    public void testGlazedListsSyncToEventList() {
+        EventList<String> source = new BasicEventList<String>();
+        source.add("McCallum");
+        source.add("Keith");
+        EventList<String> target = new BasicEventList<String>();
+        target.add("Greene");
+
+        LockbasedSyncListener<String> listener = GlazedLists.syncEventListToEventList(source, target);
+        assertEquals(source, target);
+
+        source.add("Szakra");
+        assertEquals(source, target);
+
+        source.addAll(Arrays.asList("Moore", "Holmes"));
+        assertEquals(source, target);
+
+        source.add(1, "Burris");
+        assertEquals(source, target);
+
+        source.set(1, "Crandell");
+        assertEquals(source, target);
+
+        Collections.sort(source);
+        assertEquals(source, target);
+
+        source.removeAll(Arrays.asList("Holmes", "Keith", "Szakra"));
+        assertEquals(source, target);
+
+        source.clear();
+        assertEquals(source, target);
+
+        listener.dispose();
+        source.add("Davis");
+        assertFalse(source.equals(target));
+        
+        // ensure double dispose is doing no harm
+        listener.dispose();
     }
 
     @Test
