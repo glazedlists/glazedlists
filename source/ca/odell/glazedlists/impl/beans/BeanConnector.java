@@ -3,6 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.beans;
 
+import ca.odell.glazedlists.ObservableElementChangeHandler;
 import ca.odell.glazedlists.ObservableElementList;
 import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.matchers.Matchers;
@@ -29,7 +30,7 @@ public class BeanConnector<E> implements ObservableElementList.Connector<E> {
     private Method removeListenerMethod;
 
     /** The list which contains the elements being observed via this {@link ObservableElementList.Connector}. */
-    private ObservableElementList<? extends E> list;
+    private ObservableElementChangeHandler<? extends E> list;
 
     /** The PropertyChangeListener to install on each list element. */
     protected PropertyChangeListener propertyChangeListener = this.createPropertyChangeListener();
@@ -197,7 +198,7 @@ public class BeanConnector<E> implements ObservableElementList.Connector<E> {
 
     /** {@inheritDoc} */
     @Override
-    public void setObservableElementList(ObservableElementList<? extends E> list) {
+    public void setObservableElementList(ObservableElementChangeHandler<? extends E> list) {
         this.list = list;
     }
 

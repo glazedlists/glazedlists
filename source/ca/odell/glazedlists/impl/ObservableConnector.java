@@ -3,6 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl;
 
+import ca.odell.glazedlists.ObservableElementChangeHandler;
 import ca.odell.glazedlists.ObservableElementList;
 
 import java.util.EventListener;
@@ -20,7 +21,7 @@ import java.util.Observer;
 public class ObservableConnector<E extends Observable> implements ObservableElementList.Connector<E>, Observer, EventListener {
 
     /** The list which contains the elements being observed via this {@link ObservableElementList.Connector}. */
-    private ObservableElementList<? extends E> list;
+    private ObservableElementChangeHandler<? extends E> list;
 
     /**
      * This method is called whenever the observed object is changed. It
@@ -62,7 +63,7 @@ public class ObservableConnector<E extends Observable> implements ObservableElem
 
     /** {@inheritDoc} */
     @Override
-    public void setObservableElementList(ObservableElementList<? extends E> list) {
+    public void setObservableElementList(ObservableElementChangeHandler<? extends E> list) {
         this.list = list;
     }
 }

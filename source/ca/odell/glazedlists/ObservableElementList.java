@@ -19,6 +19,8 @@ import java.util.List;
  * must specify an implementation of a {@link Connector} in the constructor
  * which contains the necessary logic for registering and unregistering a
  * listener capable of detecting modifications to an observable list element.
+ * The contract between a Connector and an ObservableElementList is defined
+ * in interface {@link ObservableElementChangeHandler}.
  *
  * <p><strong><font color="#FF0000">Warning:</font></strong> This class is
  * thread ready but not thread safe. See {@link EventList} for an example
@@ -41,7 +43,7 @@ import java.util.List;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  * @author James Lemieux
  */
-public class ObservableElementList<E> extends TransformedList<E, E> {
+public class ObservableElementList<E> extends TransformedList<E, E> implements ObservableElementChangeHandler<E> {
 
     /**
      * A list of the observed elements. It is necessary to track the observed
@@ -410,6 +412,7 @@ public class ObservableElementList<E> extends TransformedList<E, E> {
      *
      * @param listElement the list element which has been modified
      */
+    @Override
     public void elementChanged(Object listElement) {
         if (this.observedElements == null)
             throw new IllegalStateException("This list has been disposed and can no longer be used.");
@@ -435,12 +438,13 @@ public class ObservableElementList<E> extends TransformedList<E, E> {
 
     /**
      * An interface defining the methods required for registering and
-     * unregistering change listeners on list elements within an
-     * {@link ObservableElementList}. Implementations typically install a
-     * single listener, such as a {@link java.beans.PropertyChangeListener} on
-     * list elements to detect changes in the state of the element. The
-     * installed listener implementation in turn calls
-     * {@link ObservableElementList#elementChanged(Object)} in order to have
+     * unregistering change listeners on list elements within an {@link ObservableElementList}.
+     * The ObservableElementList implementation needs to implement {@link ObservableElementChangeHandler}.
+     * Connector implementations typically install a single listener,
+     * such as a {@link java.beans.PropertyChangeListener} on list elements to detect changes 
+     * in the state of the element.
+     * The installed listener implementation in turn calls
+     * {@link ObservableElementChangeHandler#elementChanged(Object)} in order to have
      * the list broadcast an update at the index of the object.
      */
     public interface Connector<E> {
@@ -469,12 +473,11 @@ public class ObservableElementList<E> extends TransformedList<E, E> {
         public void uninstallListener(E element, EventListener listener);
 
         /**
-         * Sets the {@link ObservableElementList} to notify when changes occur
-         * on elements.
+         * Sets the {@link ObservableElementChangeHandler} to notify when changes occur on elements.
          *
-         * @param list the ObservableElementList containing the elements to
-         *      observe
+         * @param list the ObservableElementList implementing {@link ObservableElementChangeHandler} containing the
+         *            elements to observe
          */
-        public void setObservableElementList(ObservableElementList<? extends E> list);
+        public void setObservableElementList(ObservableElementChangeHandler<? extends E> list);
     }
 }
