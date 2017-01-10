@@ -3,18 +3,18 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import ca.odell.glazedlists.impl.testing.GlazedListsTests;
-import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import ca.odell.glazedlists.matchers.Matcher;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import ca.odell.glazedlists.impl.testing.GlazedListsTests;
+import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+import ca.odell.glazedlists.matchers.Matcher;
 
 public class GroupingListTest {
 
@@ -748,9 +748,8 @@ public class GroupingListTest {
         assertEquals("[[A], [B], [C], [D, DD, DDD, DDDD], [E]]", grouped.toString());
     }
 
-    @Ignore("Fix me")
-	@Test
-	public void testIssue499_FixMe() {
+    @Test
+	public void testIssue499() {
 		TransactionList<String> source = new TransactionList<String>(
 				new BasicEventList<String>());
 
@@ -779,9 +778,8 @@ public class GroupingListTest {
 		assertEquals("[[C, C, C], [IBM, IBM, IBM], [MSFT, MSFT, MSFT, MSFT]]", grouped.toString());
 	}
 
-    @Ignore("Fix me")
     @Test
-    public void testSplitFirstGroup_FixMe() {
+    public void testSplitFirstGroup() {
         TransactionList<String> source = new TransactionList<String>(
                 new BasicEventList<String>());
 
@@ -804,9 +802,42 @@ public class GroupingListTest {
         assertEquals("[[A], [B], [CCC]]", grouped.toString());
     }
 
-    @Ignore("Fix me")
     @Test
-    public void testJoinToFirstGroup_FixMe() {
+    public void testSplitFirstGroupLonger() {
+        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
+
+        GroupingList<String> grouped = new GroupingList<String>(source,  GlazedListsTests.getFirstLetterComparator());
+        ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
+        listener.setPreviousElementTracked(false);
+
+        source.add("C1");
+        source.add("C2");
+        source.add("C3");
+        source.add("C4");
+        source.add("D");
+
+        assertEquals("[[C1, C2, C3, C4], [D]]", grouped.toString());
+
+        source.beginEvent();
+        source.set(0, "A");
+        source.set(1, "B");
+        source.commitEvent();
+
+        assertEquals("[[A], [B], [C3, C4], [D]]", grouped.toString());
+
+        source.beginEvent();
+        source.set(0, "A");
+        source.set(1, "B1");
+        source.set(2, "B2");
+        source.set(3, "B3");
+        source.set(4, "B4");
+        source.commitEvent();
+
+        assertEquals("[[A], [B1, B2, B3, B4]]", grouped.toString());
+    }
+
+    @Test
+    public void testJoinToFirstGroup() {
         TransactionList<String> source = new TransactionList<String>(
                 new BasicEventList<String>());
 
@@ -828,4 +859,220 @@ public class GroupingListTest {
         assertEquals("[[C, CC, CCC]]", grouped.toString());
     }
 
+    @Test
+    public void testTwoGroupsToOne() {
+        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
+
+        GroupingList<String> grouped = new GroupingList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
+        listener.setPreviousElementTracked(false);
+
+        source.beginEvent();
+        source.add("A");
+        source.add("A");
+        source.add("B");
+        source.commitEvent();
+
+        assertEquals("[[A, A], [B]]", grouped.toString());
+
+        source.beginEvent();
+        source.set(0, "B");
+        source.set(1, "B");
+        source.commitEvent();
+        assertEquals("[[B, B, B]]", grouped.toString());
+    }
+
+    @Test
+    public void testFourGroupsToOne() {
+        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
+        ListConsistencyListener<String> listener2 = ListConsistencyListener.<String>install(source, "SOURCE:", true);
+
+        GroupingList<String> grouped = new GroupingList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
+        listener.setPreviousElementTracked(false);
+
+        source.beginEvent();
+        source.add("A");
+        source.add("B");
+        source.add("C");
+        source.add("D");
+        source.commitEvent();
+
+        assertEquals("[[A], [B], [C], [D]]", grouped.toString());
+
+        source.beginEvent();
+        source.set(0, "D");
+        source.set(1, "D");
+        source.set(2, "D");
+        source.commitEvent();
+
+        assertEquals("[[D, D, D, D]]", grouped.toString());
+    }
+
+    @Test
+    public void testTakeLastElementFromPrevious() {
+        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
+
+        GroupingList<String> grouped = new GroupingList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
+        listener.setPreviousElementTracked(false);
+
+        source.beginEvent();
+        source.add("B");
+        source.add("B");
+        source.add("B");
+        source.add("B");
+        source.add("C");
+        source.commitEvent();
+
+        assertEquals("[[B, B, B, B], [C]]", grouped.toString());
+
+        source.beginEvent();
+        source.set(3, "C");
+        source.commitEvent();
+
+        assertEquals("[[B, B, B], [C, C]]", grouped.toString());
+    }
+
+    @Test
+    public void testTakeDuplicatesFromPrevious() {
+        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
+
+        GroupingList<String> grouped = new GroupingList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
+        listener.setPreviousElementTracked(false);
+
+        source.beginEvent();
+        source.add("B");
+        source.add("B");
+        source.add("B");
+        source.add("B");
+        source.add("C");
+        source.commitEvent();
+
+        assertEquals("[[B, B, B, B], [C]]", grouped.toString());
+
+        source.beginEvent();
+        source.set(1, "C");
+        source.set(2, "C");
+        source.set(3, "C");
+        source.commitEvent();
+
+        assertEquals("[[B], [C, C, C, C]]", grouped.toString());
+    }
+
+    @Test
+    public void testTakeDuplicatesFromPreviousInnerGroups() {
+        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
+
+        GroupingList<String> grouped = new GroupingList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
+        listener.setPreviousElementTracked(false);
+
+        source.beginEvent();
+        source.add("A");
+        source.add("B");
+        source.add("B");
+        source.add("B");
+        source.add("C");
+        source.add("C");
+        source.add("C");
+        source.add("D");
+        source.commitEvent();
+
+        assertEquals("[[A], [B, B, B], [C, C, C], [D]]", grouped.toString());
+
+        source.beginEvent();
+        source.set(2, "C");
+        source.set(3, "C");
+        source.commitEvent();
+
+        assertEquals("[[A], [B], [C, C, C, C, C], [D]]", grouped.toString());
+    }
+
+    @Test
+    public void testMultipleUpdatesTakeAllFromPrevious() {
+        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
+
+        GroupingList<String> grouped = new GroupingList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
+        listener.setPreviousElementTracked(false);
+
+        source.beginEvent();
+        source.add("A");
+        source.add("B");
+        source.add("B");
+        source.add("B");
+        source.add("C");
+        source.add("C");
+        source.add("C");
+        source.add("D");
+        source.commitEvent();
+
+        assertEquals("[[A], [B, B, B], [C, C, C], [D]]", grouped.toString());
+
+        source.beginEvent();
+        source.set(1, "C");
+        source.set(2, "C");
+        source.set(3, "C");
+        source.commitEvent();
+
+        assertEquals("[[A], [C, C, C, C, C, C], [D]]", grouped.toString());
+    }
+
+    @Test
+    public void testMultipleUpdatesCreateGroupOnStartOfPrev() {
+        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
+
+        GroupingList<String> grouped = new GroupingList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
+        listener.setPreviousElementTracked(false);
+
+        source.beginEvent();
+        source.add("A");
+        source.add("C");
+        source.add("C");
+        source.add("C");
+        source.add("D");
+        source.add("D");
+        source.add("D");
+        source.add("E");
+        source.commitEvent();
+
+        assertEquals("[[A], [C, C, C], [D, D, D], [E]]", grouped.toString());
+
+        source.beginEvent();
+        source.set(1, "B");
+        source.commitEvent();
+
+        assertEquals("[[A], [B], [C, C], [D, D, D], [E]]", grouped.toString());
+    }
+
+    @Test
+    public void testMultipleUpdatesCreateGroupOnDuplicateOfPrev() {
+        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
+
+        GroupingList<String> grouped = new GroupingList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
+        listener.setPreviousElementTracked(false);
+
+        source.add("A");
+        source.add("C");
+        source.add("C");
+        source.add("C");
+        source.add("C");
+        source.add("D");
+        source.add("D");
+        source.add("D");
+        source.add("E");
+
+        assertEquals("[[A], [C, C, C, C], [D, D, D], [E]]", grouped.toString());
+
+        source.beginEvent();
+        source.set(2, "B");
+        source.set(3, "B");
+        source.commitEvent();
+
+        assertEquals("[[A], [B, B], [C, C], [D, D, D], [E]]", grouped.toString());
+    }
 }
