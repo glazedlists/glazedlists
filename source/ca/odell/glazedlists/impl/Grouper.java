@@ -238,6 +238,29 @@ public class Grouper<E> {
                 // get the new group location
                 tryJoinExistingGroup(changeIndex, toDoList, tryJoinResult);
 
+                int successor = changeIndex + 1;
+                if (tryJoinResult.group == LEFT_GROUP) {
+                    // This fixes case like ABCD -> D___
+                    // Without this, the group would change from ABCD to D__D instead.
+                    // . Check whether a left group was joined, but there's an element on the right side, that belongs in this group
+                    //   and is marked UNIQUE.
+                    //   If that is the case, we found the previous starting position of the entire group that moved to the left.
+                    // . Set that to DUPLICATE and the oldGroup to NO_GROUP
+                    if (successor < barcode.size() && barcode.get(successor) == UNIQUE && toDoList.get(successor) == DONE && groupTogether(changeIndex, successor)) {
+                        barcode.set(successor, DUPLICATE, 1);
+                        oldGroup = NO_GROUP;
+                    }
+                } else if (tryJoinResult.group == NO_GROUP) {
+                    // This fixes case like C__ -> ABC
+                    // Without this, the group would change from C__ to AB_ instead.
+                    // . Check whether the next element doesn't belong in this group, but it marked as DUPLICATE
+                    // . Set it to UNIQUE and the oldGroup to RIGHT_GROUP
+                    if (successor < barcode.size() && barcode.get(successor) == DUPLICATE) {
+                        barcode.set(successor, UNIQUE, 1);
+                        oldGroup = RIGHT_GROUP;
+                    }
+                }
+
                 // the index of the GroupList being updated (it may or may not exist yet)
                 int groupIndex = tryJoinResult.groupIndex;
 
@@ -378,7 +401,7 @@ public class Grouper<E> {
             // we have found a successor that belongs in the same group
             if (groupTogether(changeIndex, successorIndex)) {
                 // if the successor is OLD, have changeIndex join the existing group
-                if (toDoList.get(successorIndex) == DONE) {
+                if (toDoList.get(successorIndex) == DONE && barcode.get(successorIndex) == UNIQUE) {
                     barcode.set(changeIndex, UNIQUE, 1);
                     barcode.set(successorIndex, DUPLICATE, 1);
                     int groupIndex = barcode.getColourIndex(changeIndex, UNIQUE);
