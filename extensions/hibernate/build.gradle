@@ -1,0 +1,4 @@
+dependencies {
+    compile 'org.hibernate:hibernate-core:5.0.11.Final'
+    testCompile 'org.hsqldb:hsqldb:2.3.4'
+}

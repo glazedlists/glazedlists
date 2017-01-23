@@ -1,0 +1,16 @@
+rootProject.name = "glazedlists_${javaTargetVersionArtifact}"
+
+include 'core'
+include 'extensions:calculation'
+include 'extensions:hibernate'
+include 'extensions:icu4j'
+include 'extensions:issuesbrowser'
+include 'extensions:japex'
+include 'extensions:javafx'
+include 'extensions:jfreechart'
+include 'extensions:jgoodiesforms'
+include 'extensions:ktable'
+include 'extensions:nachocalendar'
+include 'extensions:swinglabs'
+include 'extensions:swt'
+include 'extensions:treetable'

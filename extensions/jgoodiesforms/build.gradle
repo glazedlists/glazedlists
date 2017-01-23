@@ -1,0 +1,3 @@
+dependencies {
+    compile 'jgoodies:forms:1.0.5'
+}
