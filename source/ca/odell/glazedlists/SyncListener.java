@@ -48,7 +48,6 @@ public class SyncListener<E> implements ListEventListener<E> {
     @Override
     public void listChanged(ListEvent<E> listChanges) {
         EventList<E> sourceList = listChanges.getSourceList();
-        System.out.println("SYNCER: " + listChanges + ", size: " + sourceList.size() + ", sourceList: " + sourceList);
 
         // if the list sizes don't match, we have a problem
         if(target.size() != targetSize) {
