@@ -6,15 +6,16 @@ package ca.odell.glazedlists;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-
-import org.junit.Test;
-
+import ca.odell.glazedlists.FunctionList.Function;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import ca.odell.glazedlists.matchers.Matcher;
+
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
 public class GroupingListTest {
 
@@ -1075,4 +1076,115 @@ public class GroupingListTest {
 
         assertEquals("[[A], [B, B], [C, C], [D, D, D], [E]]", grouped.toString());
     }
+
+    @Test
+    public void testIssue599() {
+        BasicEventList<String> base = new BasicEventList<String>();
+        base.add("A");
+        base.add("A");
+        TransactionList<String> source = new TransactionList<String>(base);
+        GroupingList<String> grouped = new GroupingList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
+        listener.setPreviousElementTracked(false);
+        source.beginEvent(true);
+        source.add(0, "A");
+        source.set(1, "A");
+        source.add(3, "A");
+        source.commitEvent();
+        assertEquals("[[A, A, A, A]]", grouped.toString());
+    }
+
+    @Test
+    public void testIssue599_Variant1() {
+        BasicEventList<String> base = new BasicEventList<String>();
+        base.add("B");
+        base.add("B");
+        TransactionList<String> source = new TransactionList<String>(base);
+        GroupingList<String> grouped = new GroupingList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
+        listener.setPreviousElementTracked(false);
+        source.beginEvent(true);
+        source.add(0, "A");
+        source.add(1, "B");
+        source.set(2, "B");
+        source.add(4, "B");
+        source.commitEvent();
+        assertEquals("[[A], [B, B, B, B]]", grouped.toString());
+    }
+
+    @Test
+    public void testIssue599_Variant2() {
+        BasicEventList<String> base = new BasicEventList<String>();
+        base.add("B");
+        base.add("B");
+        TransactionList<String> source = new TransactionList<String>(base);
+        GroupingList<String> grouped = new GroupingList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
+        listener.setPreviousElementTracked(false);
+        source.beginEvent(true);
+        source.add(0, "B");
+        source.set(1, "A");
+        source.add(3, "B");
+        source.commitEvent();
+        assertEquals("[[A], [B, B, B]]", grouped.toString());
+    }
+
+    @Test
+    public void testIssue599ExpandedWithFunctionList() {
+        BasicEventList<Element> base = new BasicEventList<Element>();
+        base.add(new Element(State.OFF, 70012));
+        base.add(new Element(State.OFF, 70027));
+
+        TransactionList<Element> trigger = new TransactionList<Element>(base);
+        GroupingList<Element> groupingList = new GroupingList<Element>(trigger, new Comparator<Element>() {
+            @Override
+            public int compare(Element o1, Element o2) {
+                return o1.getState().compareTo(o2.getState());
+            }
+        });
+
+        FunctionList<List<Element>, State> functionList = new FunctionList<List<Element>, State>(groupingList,
+                new Function<List<Element>, State>() {
+                    @Override
+                    public State evaluate(List<Element> sourceValues) {
+                        return sourceValues.get(0).getState();
+                    }
+                });
+
+        trigger.beginEvent(true);
+        trigger.add(0, new Element(State.OFF, 70001));
+        trigger.set(1, new Element(State.OFF, 70012));
+        trigger.add(3, new Element(State.OFF, 70056));
+
+        trigger.commitEvent();
+    }
+
+    class Element {
+        private final State state;
+
+        private final int nummer;
+
+        public State getState() {
+            return state;
+        }
+
+        public int getNummer() {
+            return nummer;
+        }
+
+        public Element(State state, int nummer) {
+            this.state = state;
+            this.nummer = nummer;
+        }
+
+        @Override
+        public String toString() {
+            return state + "-" + nummer;
+        }
+    }
+
+    enum State {
+        ON, OFF;
+    }
+    
 }
