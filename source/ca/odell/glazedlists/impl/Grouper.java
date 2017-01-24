@@ -154,10 +154,13 @@ public class Grouper<E> {
                 // case: AACCC -> AABCC
                 // if the updated index is a UNIQUE index, we MAY have just created a
                 // new group (by modifying an element in place). Consequently, we must
-                // mark the NEXT element as UNIQUE and revisit it later to determine
-                // if it really is
+                // mark the NEXT element as UNIQUE and revisit it later to determine if it really is
+                //
+                // GLAZEDLISTS-599: apply this marking only, if there is no UNIQUE element added to the immediate 
+                // left that would belong to the same group
                 if (barcode.get(changeIndex) == UNIQUE) {
-                    if (changeIndex+1 < barcode.size() && barcode.get(changeIndex+1) == DUPLICATE) {
+                    if (changeIndex+1 < barcode.size() && barcode.get(changeIndex+1) == DUPLICATE 
+                            && (changeIndex == 0 || !uniqueElementAddedToLeftInSameGroup(toDoList, changeIndex))) {
                         // however, we need to make sure that the barcode UNIQUE entry we are looking at
                         // was part of the barcode state before we started this iteration of listChanges.
                         // Specifically, we are concerned about the case where an update on the first element
@@ -356,6 +359,13 @@ public class Grouper<E> {
                 }
             }
         }
+    }
+
+    /**
+     * Helper method to determine a specific condition for a workaround. That's a hack needed for GLAZEDLISTS-599.
+     */
+    private boolean uniqueElementAddedToLeftInSameGroup(final Barcode toDoList, final int changeIndex) {
+        return barcode.get(changeIndex-1) == UNIQUE && toDoList.get(changeIndex-1) == TODO && groupTogether(changeIndex-1, changeIndex);
     }
 
     /**
