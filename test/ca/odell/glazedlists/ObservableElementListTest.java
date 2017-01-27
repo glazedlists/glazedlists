@@ -16,8 +16,11 @@ import java.util.Set;
 
 import javax.swing.JLabel;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
+import junit.framework.TestCase;
+import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.impl.beans.BeanConnector;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 import ca.odell.glazedlists.matchers.Matcher;
@@ -353,6 +356,46 @@ public class ObservableElementListTest extends TestCase {
             assertEquals(list.get(0).getPropertyChangeListeners().length, i.next().getPropertyChangeListeners().length);
     }
 
+	@Test
+	public void testUpdateFromListEvent() {
+		// should be correctly handling updates from previous listEventListeners
+		// inital list contains two elements
+        final EventList<JLabel> sourceList = new BasicEventList<JLabel>();
+        
+        // this is the bean we'll update in the listener.
+        final JLabel updatingLabel = new JLabel("Initial");
+        sourceList.add(updatingLabel);
+        // element modifying listener
+        ListEventListener<JLabel> sourceListModifier = new ListEventListener<JLabel>() {
+            @Override
+            public void listChanged(ListEvent<JLabel> listChanges) {
+                // perform the modification
+                updatingLabel.setText("Changed!");
+            }
+        };
+        sourceList.addListEventListener(sourceListModifier);
+
+        // the actual element observer
+        ObservableElementList<JLabel> observingList = new ObservableElementList<JLabel>(sourceList, GlazedLists.beanConnector(JLabel.class));
+        
+        observingList.addListEventListener(new ListEventListener<JLabel>() {
+            @Override
+            public void listChanged(ListEvent<JLabel> listChanges) {
+                // the change we trigger later will insert one element at position 0, and the listener will update the last element (which now is at index 2)
+                while(listChanges.next()) {
+                    if(listChanges.getType() == ListEvent.UPDATE) {
+                        // the changed element should now be at index 2
+                        assertEquals(1, listChanges.getIndex());
+                    }
+                }
+            }
+        });
+        
+        // we insert an element at position 0
+        // this will trigger a change in the updating element, and also shift that element by one
+        sourceList.add(0, new JLabel());
+	}
+	
     /**
      * This connector installs a common JavaBean listener on every element
      * until bloomCount has been reached, when it begins installing unique
