@@ -376,7 +376,10 @@ public class ObservableElementList<E> extends TransformedList<E, E> implements O
      */
     @Override
     public void dispose() {
-        // remove all listeners from all list elements
+    	// first, remove listener from source list to stop list events coming in
+        super.dispose();
+
+        // then remove all listeners from all list elements
         for (int i = 0, n = this.observedElements.size(); i < n; i++) {
             final E element = this.observedElements.get(i);
             final EventListener listener = this.getListener(i);
@@ -392,8 +395,6 @@ public class ObservableElementList<E> extends TransformedList<E, E> implements O
         this.singleEventListener = null;
         this.singleEventListenerRegistry = null;
         this.elementConnector = null;
-
-        super.dispose();
     }
 
     /**
@@ -441,7 +442,7 @@ public class ObservableElementList<E> extends TransformedList<E, E> implements O
      * unregistering change listeners on list elements within an {@link ObservableElementList}.
      * The ObservableElementList implementation needs to implement {@link ObservableElementChangeHandler}.
      * Connector implementations typically install a single listener,
-     * such as a {@link java.beans.PropertyChangeListener} on list elements to detect changes 
+     * such as a {@link java.beans.PropertyChangeListener} on list elements to detect changes
      * in the state of the element.
      * The installed listener implementation in turn calls
      * {@link ObservableElementChangeHandler#elementChanged(Object)} in order to have

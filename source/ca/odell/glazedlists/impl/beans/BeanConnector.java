@@ -235,8 +235,9 @@ public class BeanConnector<E> implements ObservableElementList.Connector<E> {
     public class PropertyChangeHandler implements PropertyChangeListener {
         @Override
         public void propertyChange(PropertyChangeEvent event) {
-            if (getEventMatcher().matches(event)) {
-            	list.elementChanged(event.getSource());
+        	final ObservableElementChangeHandler<? extends E> handler = list;
+            if ((handler != null) && getEventMatcher().matches(event)) {
+            	handler.elementChanged(event.getSource());
             }
         }
     }
