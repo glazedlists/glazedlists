@@ -6,7 +6,12 @@ package ca.odell.glazedlists;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.EventListener;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * UndoRedoSupport, as the name suggests, will provide generic support for
@@ -45,7 +50,7 @@ public final class UndoRedoSupport<E> {
     private ListEventListener<E> txSourceListener = new TXSourceListener();
 
     /** A data structure storing all registered {@link Listener}s. */
-    private final List<Listener> listenerList = new ArrayList<Listener>();
+    private final CopyOnWriteArrayList<Listener> listenerList = new CopyOnWriteArrayList<Listener>();
 
     /**
      * A count which, when greater than 0, indicates a ListEvent must be
@@ -79,7 +84,9 @@ public final class UndoRedoSupport<E> {
      * edit occurs on the given source {@link EventList}.
      */
     public void addUndoSupportListener(Listener l) {
-	    listenerList.add(l);
+    	if (l != null) {
+    		listenerList.add(l);
+    	}
     }
 
     /**
@@ -87,19 +94,22 @@ public final class UndoRedoSupport<E> {
      * edit occurs on the given source {@link EventList}.
      */
     public void removeUndoSupportListener(Listener l) {
-	    listenerList.remove(l);
+    	if (l != null) {
+    		listenerList.remove(l);
+    	}
     }
 
     /**
      * Notifies all registered {@link Listener}s of the given <code>edit</code>.
      */
     private void fireUndoableEditHappened(Edit edit) {
-    	// To prevent ConcurrentModificationExceptions cause by listeners de-registering
-	    // (for example) during events, make a copy prior to iteration.
-	    List<Listener> listenerListCopy = new ArrayList<Listener>(this.listenerList);
-	    for (int i = listenerListCopy.size() - 1; i >= 0; i--) {
-	    	listenerListCopy.get(i).undoableEditHappened(edit);
-	    }
+		// NOTE: We are intentionally dispatching in LIFO order with an iterator
+		// we need to clone before reverse iteration to be thread-safe, see http://stackoverflow.com/a/42046731/336169
+		List<Listener> listenerListCopy = (List<Listener>) listenerList.clone();
+	    ListIterator<Listener> li = listenerListCopy.listIterator(listenerListCopy.size());
+		while (li.hasPrevious()) {
+			li.previous().undoableEditHappened(edit);
+		}
     }
 
     /**

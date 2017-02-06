@@ -3,8 +3,9 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.matchers;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 /**
@@ -14,36 +15,36 @@ import java.util.List;
  *
  * @author Holger Brands
  */
-public abstract class AbstractMatcherEditorListenerSupport<E> implements
-		MatcherEditor<E> {
+public abstract class AbstractMatcherEditorListenerSupport<E> implements MatcherEditor<E> {
 
 	/** listeners for this Editor */
-	private List<Listener<E>> listenerList = new ArrayList<Listener<E>>();
+	private CopyOnWriteArrayList<Listener<E>> listenerList = new CopyOnWriteArrayList<Listener<E>>();
 
 	/** {@inheritDoc} */
 	@Override
-    public final void addMatcherEditorListener(
-			MatcherEditor.Listener<E> listener) {
-		listenerList.add(listener);
+    public final void addMatcherEditorListener(MatcherEditor.Listener<E> listener) {
+		if (listener != null) {
+			listenerList.add(listener);
+		}
 	}
 
 	/** {@inheritDoc} */
 	@Override
-    public final void removeMatcherEditorListener(
-			MatcherEditor.Listener<E> listener) {
-		listenerList.remove(listener);
+    public final void removeMatcherEditorListener(MatcherEditor.Listener<E> listener) {
+		if (listener != null) {
+			listenerList.remove(listener);
+		}
 	}
 
 	/** delivers the given matcher event to all registered listeners. */
 	protected final void fireChangedMatcher(MatcherEditor.Event<E> event) {
-    	// To prevent ConcurrentModificationExceptions cause by listeners de-registering
-	    // (for example) during events, make a copy prior to iteration.
-		//
-		// NOTE: We are intentionally dispatching in LIFO order.
-	    List<Listener<E>> listenerListCopy = new ArrayList<Listener<E>>(this.listenerList);
-	    for (int i = listenerListCopy.size() - 1; i >= 0; i--) {
-	    	listenerListCopy.get(i).changedMatcher(event);
-	    }
+		// NOTE: We are intentionally dispatching in LIFO order with an iterator
+		// we need to clone before reverse iteration to be thread-safe, see http://stackoverflow.com/a/42046731/336169
+		List<Listener<E>> listenerListCopy = (List<Listener<E>>) listenerList.clone();
+	    ListIterator<Listener<E>> li = listenerListCopy.listIterator(listenerListCopy.size());
+		while (li.hasPrevious()) {
+			li.previous().changedMatcher(event);
+		}
 	}
 
 	/** creates a changed event. */

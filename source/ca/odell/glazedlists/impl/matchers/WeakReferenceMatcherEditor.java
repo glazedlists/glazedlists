@@ -79,13 +79,13 @@ public final class WeakReferenceMatcherEditor<E> implements MatcherEditor<E>, Ma
      * {@link MatcherEditor.Event} is fired.
      */
     @Override
-    public void addMatcherEditorListener(Listener<E> listener) {
+    public synchronized void addMatcherEditorListener(Listener<E> listener) {
         this.listenerList.add(new WeakMatcherEditorListener<E>(this, listener));
     }
 
     /** {@inheritDoc} */
     @Override
-    public void removeMatcherEditorListener(Listener<E> listener) {
+    public synchronized void removeMatcherEditorListener(Listener<E> listener) {
 	    final Iterator<Listener<E>> it = this.listenerList.iterator();
 	    while (it.hasNext()) {
 		    final Listener<E> currentListener = it.next();
@@ -114,12 +114,9 @@ public final class WeakReferenceMatcherEditor<E> implements MatcherEditor<E>, Ma
      *      delegate Matcher produced by the MatcherEditor
      */
     @Override
-    public void changedMatcher(Event<E> matcherEvent) {
-    	// To prevent ConcurrentModificationExceptions cause by listeners de-registering
-	    // (for example) during events, make a copy prior to iteration.
-	    List<Listener<E>> listenerListCopy = new ArrayList<Listener<E>>(this.listenerList);
-	    for (int i = listenerListCopy.size() - 1; i >= 0; i--) {
-	    	listenerListCopy.get(i).changedMatcher(matcherEvent);
+    public synchronized void changedMatcher(Event<E> matcherEvent) {
+	    for (int i = this.listenerList.size() - 1; i >= 0; i--) {
+	    	this.listenerList.get(i).changedMatcher(matcherEvent);
 	    }
     }
 
