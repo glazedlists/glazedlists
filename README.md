@@ -14,7 +14,7 @@ See documentation at [www.glazedlists.com] (http://www.glazedlists.com/documenta
 
 ### Issue tracker
 
-[JIRA] (https://java.net/jira/browse/GLAZEDLISTS)
+[GitHub Issues] (https://github.com/glazedlists/glazedlists/issues)
 
 ### Releases
 
