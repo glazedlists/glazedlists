@@ -10,19 +10,19 @@ java.net site:  https://java.net/projects/glazedlists
 
 ### Documentation
 
-See documentation at [www.glazedlists.com] (http://www.glazedlists.com/documentation)
+See documentation at [www.glazedlists.com](http://www.glazedlists.com/documentation)
 
 ### Issue tracker
 
-[GitHub Issues] (https://github.com/glazedlists/glazedlists/issues)
+[GitHub Issues](https://github.com/glazedlists/glazedlists/issues)
 
 ### Releases
 
-Browse [Release Notes] (http://www.glazedlists.com/releases)
+Browse [Release Notes](http://www.glazedlists.com/releases)
 
-Download [Latest Release] (https://java.net/projects/glazedlists/downloads/directory/glazedlists-1.9.0)
+Download [Latest Release](http://repo1.maven.org/maven2/net/java/dev/glazedlists/glazedlists_java16/1.10.0/)
 
-Configure [Maven] (http://www.glazedlists.com/Home/maven)
+Configure [Maven](http://www.glazedlists.com/Home/maven)
 
 ### Mailing lists
 
@@ -43,5 +43,5 @@ It does not allow you to
 
 It is made available under two licenses:
 
-  * [LGPL] (http://creativecommons.org/licenses/LGPL/2.1/)
-  * [MPL] (http://www.mozilla.org/MPL/)
+  * [LGPL](http://creativecommons.org/licenses/LGPL/2.1/)
+  * [MPL](http://www.mozilla.org/MPL/)
