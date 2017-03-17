@@ -95,6 +95,33 @@ public class FilterListTest {
         assertEquals(GlazedListsTests.stringToList("LPBZKT"), filtered);
     }
 
+	@Test
+	public void testAvoidChanges() {
+		EventList<String> original = new BasicEventList<String>();
+		original.addAll(GlazedListsTests.stringToList("looking"));
+
+		CollectionMatcherEditor<String> editor = new CollectionMatcherEditor<String>();
+		editor.setCollection(GlazedListsTests.stringToList("oi"));
+
+		FilterList<String> filtered = new FilterList<String>(original, editor);
+		filtered.setMode(FilterList.AVOID_CHANGES);
+		assertEquals(GlazedListsTests.stringToList("ooi"), filtered);
+
+		// New elements are added
+		original.add(0, "b");
+		assertEquals(GlazedListsTests.stringToList("booi"), filtered);
+
+		// Changed filtered elements stay out
+		original.set(4, "t");
+		assertEquals(GlazedListsTests.stringToList("booi"), filtered);
+
+		// Changed visible elements stay in
+		original.set(5, "s");
+		assertEquals(GlazedListsTests.stringToList("boos"), filtered);
+
+		original.set(3, "i");
+		assertEquals(GlazedListsTests.stringToList("bois"), filtered);
+	}
 
     @Test
     public void testReplacedValueInListEvent() {
