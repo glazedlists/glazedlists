@@ -21,15 +21,18 @@ public interface Lock extends java.util.concurrent.locks.Lock {
     /**
      * Acquires the lock.
      */
+    @Override
     public void lock();
 
     /**
      * Acquires the lock only if it is free at the time of invocation.
      */
+    @Override
     public boolean tryLock();
 
     /**
      * Releases the lock.
      */
+    @Override
     public void unlock();
 }
