@@ -16,7 +16,7 @@ package ca.odell.glazedlists.util.concurrent;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public interface Lock {
+public interface Lock extends java.util.concurrent.locks.Lock {
 
     /**
      * Acquires the lock.

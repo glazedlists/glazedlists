@@ -5,6 +5,8 @@ package ca.odell.glazedlists.util.concurrent;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -93,5 +95,20 @@ final class LockAdapter implements Lock {
     @Override
     public void unlock() {
         delegateLock.unlock();
+    }
+
+    @Override
+    public void lockInterruptibly() throws InterruptedException {
+        delegateLock.lockInterruptibly();
+    }
+
+    @Override
+    public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
+        return delegateLock.tryLock(time, unit);
+    }
+
+    @Override
+    public Condition newCondition() {
+        return delegateLock.newCondition();
     }
 }
