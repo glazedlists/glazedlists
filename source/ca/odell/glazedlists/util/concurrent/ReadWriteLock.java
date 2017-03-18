@@ -18,7 +18,7 @@ package ca.odell.glazedlists.util.concurrent;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public interface ReadWriteLock {
+public interface ReadWriteLock extends java.util.concurrent.locks.ReadWriteLock {
 
     /**
      * Return the lock used for reading.

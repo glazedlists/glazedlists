@@ -11,6 +11,8 @@ import ca.odell.glazedlists.util.concurrent.LockFactory;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
 
 /**
  * DebugList is meant to be used as a drop-in replacement for
@@ -513,6 +515,19 @@ public class DebugList<E> extends AbstractEventList<E> {
                 threadsHoldingLock.add(Thread.currentThread());
             }
 
+            public boolean tryLock(long time, TimeUnit unit) throws InterruptedException {
+                if (this.readLock!=null && this.readLock.getThreadsHoldingLock().contains(Thread.currentThread())) {
+                       throw new IllegalStateException("DebugList detected an attempt to acquire a writeLock from a thread already owning a readLock (deadlock)");
+               	}
+
+                final boolean success = delegate.tryLock(time,unit);
+
+                // if the lock was successfully acquired, record the current Thread as a lock holder
+                if (success) threadsHoldingLock.add(Thread.currentThread());
+
+                return success;
+            }
+
             @Override
             public boolean tryLock() {
             	if (this.readLock!=null && this.readLock.getThreadsHoldingLock().contains(Thread.currentThread())) {
@@ -525,6 +540,22 @@ public class DebugList<E> extends AbstractEventList<E> {
                 if (success) threadsHoldingLock.add(Thread.currentThread());
 
                 return success;
+            }
+
+            @Override
+            public void lockInterruptibly() throws InterruptedException {
+                if (this.readLock!=null && this.readLock.getThreadsHoldingLock().contains(Thread.currentThread())) {
+                       throw new IllegalStateException("DebugList detected an attempt to acquire a writeLock from a thread already owning a readLock (deadlock)");
+               	}
+
+               	delegate.lockInterruptibly();;
+                // record the current Thread as a lock holder
+                threadsHoldingLock.add(Thread.currentThread());
+            }
+
+            @Override
+            public Condition newCondition() {
+                return delegate.newCondition();
             }
 
             @Override
