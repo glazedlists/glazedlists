@@ -1104,4 +1104,97 @@ public class SeparatorListTest {
         assertEquals(1, separated.size());
         assertEquals(2, ((SeparatorList.Separator) separated.get(0)).size());
     }
+
+    @Test
+    public void testInsertBugFix() {
+        TransactionList<Element> source = createElementSource();
+        SeparatorList<Element> separatorList = new SeparatorList<Element>(source, elementComparator(), 0, Integer.MAX_VALUE);
+
+        source.beginEvent();
+        source.set(3, new Element(1, 4));
+        source.set(7, new Element(1, 8));
+        source.commitEvent();
+        assertSeparatorEquals(separatorList.get(0), 5, new Element(1, 1));
+        assertSeparatorEquals(separatorList.get(6), 3, new Element(2, 2));
+        assertSeparatorEquals(separatorList.get(10), 4, new Element(3, 3));
+    }
+
+    @Test
+    public void testDeleteBugFix() {
+        TransactionList<Element> source = createElementSource();
+        SeparatorList<Element> separatorList = new SeparatorList<Element>(source, elementComparator(), 0, Integer.MAX_VALUE);
+
+        source.beginEvent();
+        source.set(3, new Element(1, 4));
+        source.set(9, new Element(3, 10));
+        source.commitEvent();
+        assertSeparatorEquals(separatorList.get(0), 3, new Element(1, 1));
+        assertSeparatorEquals(separatorList.get(4), 4, new Element(2, 2));
+        assertSeparatorEquals(separatorList.get(9), 5, new Element(3, 3));
+    }
+
+    private TransactionList<Element> createElementSource() {
+        TransactionList<Element> source = new TransactionList<Element>(new BasicEventList<Element>());
+        source.add(new Element(1, 1));
+        source.add(new Element(2, 2));
+        source.add(new Element(3, 3));
+        source.add(new Element(1, 4));
+        source.add(new Element(2, 5));
+        source.add(new Element(3, 6));
+        source.add(new Element(1, 7));
+        source.add(new Element(2, 8));
+        source.add(new Element(3, 9));
+        source.add(new Element(1, 10));
+        source.add(new Element(2, 11));
+        source.add(new Element(3, 12));
+        return source;
+    }
+
+    private Comparator<Element> elementComparator() {
+        return new Comparator<Element>() {
+            @Override
+            public int compare(Element o1, Element o2) {
+                int x = o1.getGroup();
+                int y = o2.getGroup();
+                return (x < y) ? -1 : ((x == y) ? 0 : 1);
+            }
+        };
+    }
+
+    private class Element {
+        private final int group;
+        private final int id;
+
+        public Element(int group, int id) {
+            this.group = group;
+            this.id = id;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Element that = (Element) o;
+
+            return id == that.id;
+        }
+
+        @Override
+        public String toString() {
+            return "Element{" +
+                    "group=" + group +
+                    ", id=" + id +
+                    '}';
+        }
+
+        @Override
+        public int hashCode() {
+            return id;
+        }
+
+        public int getGroup() {
+            return group;
+        }
+    }
 }

@@ -637,7 +637,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
          */
         private class GrouperClient implements Grouper.Client<E> {
             @Override
-            public void groupChanged(int index, int groupIndex, int groupChangeType, boolean primary, int elementChangeType, E oldValue, E newValue) {
+            public void groupChanged(int index, int groupIndex, int groupChangeType, boolean primary, int elementChangeType, E oldValue, E newValue, boolean updateNextSeparator) {
                 boolean fixSeparatorForInsertGroupUpdateElement = false;
                 // handle the group change first
                 if(groupChangeType == ListEvent.INSERT) {
@@ -738,7 +738,8 @@ public class SeparatorList<E> extends TransformedList<E, E> {
                 // separator positions accordingly
                 if (groupChangeType == ListEvent.UPDATE && elementChangeType == ListEvent.UPDATE
                         && shiftGroupIndex < insertedSeparators.colourSize(SEPARATOR)
-                        && shiftGroupIndex < grouper.getBarcode().colourSize(Grouper.UNIQUE)) {
+                        && shiftGroupIndex < grouper.getBarcode().colourSize(Grouper.UNIQUE)
+                        && updateNextSeparator) {
                     // when we have an element update and a group update we check and synchronize
                     // the separator position of the next group with the help of the grouper barcode unique index
                     int collapsedGroupStartIndex = grouper.getBarcode().getIndex(shiftGroupIndex, Grouper.UNIQUE);
