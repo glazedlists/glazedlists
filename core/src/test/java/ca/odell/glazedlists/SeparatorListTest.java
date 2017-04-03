@@ -1133,6 +1133,36 @@ public class SeparatorListTest {
         assertSeparatorEquals(separatorList.get(9), 5, new Element(3, 3));
     }
 
+    @Test
+    public void testSortingBug() {
+        TransactionList<Element> source = createElementSource();
+        SeparatorList<Element> separatorList = new SeparatorList<Element>(source, elementComparator(), 0, Integer.MAX_VALUE);
+
+        source.beginEvent();
+        source.set(10, new Element(1, 11));
+        source.set(1, new Element(3, 2));
+        source.commitEvent();
+        assertSeparatorEquals(separatorList.get(0), 5, new Element(1, 1));
+        assertSeparatorEquals(separatorList.get(6), 2, new Element(2, 5));
+        assertSeparatorEquals(separatorList.get(9), 5, new Element(3, 2));
+    }
+
+    @Test
+    public void testSortingBug2() {
+        TransactionList<Element> source = createElementSource();
+        source.set(2, new Element(2, 3));
+        SeparatorList<Element> separatorList = new SeparatorList<Element>(source, elementComparator(), 0, Integer.MAX_VALUE);
+
+        source.beginEvent();
+        source.set(10, new Element(1, 11));
+        source.set(1, new Element(3, 2));
+        source.set(2, new Element(3, 3));
+        source.commitEvent();
+        assertSeparatorEquals(separatorList.get(0), 5, new Element(1, 1));
+        assertSeparatorEquals(separatorList.get(6), 2, new Element(2, 5));
+        assertSeparatorEquals(separatorList.get(9), 5, new Element(3, 2));
+    }
+
     private TransactionList<Element> createElementSource() {
         TransactionList<Element> source = new TransactionList<Element>(new BasicEventList<Element>());
         source.add(new Element(1, 1));

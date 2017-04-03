@@ -689,6 +689,10 @@ public class SeparatorList<E> extends TransformedList<E, E> {
                     updates.addUpdate(expandedIndex);
                 } else if(elementChangeType == ListEvent.DELETE) {
                     int expandedIndex = index + groupIndex + 1;
+                    // separator in wrong position due to order of events when sorting
+                    if (insertedSeparators.get(expandedIndex) == SEPARATOR) {
+                        shiftSeparator(groupIndex);
+                    }
                     insertedSeparators.remove(expandedIndex, 1);
                     updates.addDelete(expandedIndex);
                 }
@@ -742,22 +746,26 @@ public class SeparatorList<E> extends TransformedList<E, E> {
                         && updateNextSeparator) {
                     // when we have an element update and a group update we check and synchronize
                     // the separator position of the next group with the help of the grouper barcode unique index
-                    int collapsedGroupStartIndex = grouper.getBarcode().getIndex(shiftGroupIndex, Grouper.UNIQUE);
-                    int separatorsIndex = insertedSeparators.getIndex(shiftGroupIndex , SEPARATOR);
-                    int calculatedSeparatorPos = collapsedGroupStartIndex + shiftGroupIndex;
+                    shiftSeparator(shiftGroupIndex);
+                }
+            }
+
+            private void shiftSeparator(int shiftGroupIndex) {
+                int collapsedGroupStartIndex = grouper.getBarcode().getIndex(shiftGroupIndex, Grouper.UNIQUE);
+                int separatorsIndex = insertedSeparators.getIndex(shiftGroupIndex , SEPARATOR);
+                int calculatedSeparatorPos = collapsedGroupStartIndex + shiftGroupIndex;
 //                    String was = insertedSeparators.toString();
-                    if (calculatedSeparatorPos != separatorsIndex) {
-                        // the separator position does not match the grouper barcode -> adjust it
-                        insertedSeparators.remove(separatorsIndex, 1);
-                        updates.addDelete(separatorsIndex);
-                        insertedSeparators.add(calculatedSeparatorPos, SEPARATOR, 1);
-                        // for the update event we have to account for the previous delete
-                        final int insertPos = (calculatedSeparatorPos < separatorsIndex) ? calculatedSeparatorPos
-                                : calculatedSeparatorPos - 1;
-                        updates.addInsert(insertPos);
+                if (calculatedSeparatorPos != separatorsIndex) {
+                    // the separator position does not match the grouper barcode -> adjust it
+                    insertedSeparators.remove(separatorsIndex, 1);
+                    updates.addDelete(separatorsIndex);
+                    insertedSeparators.add(calculatedSeparatorPos, SEPARATOR, 1);
+                    // for the update event we have to account for the previous delete
+                    final int insertPos = (calculatedSeparatorPos < separatorsIndex) ? calculatedSeparatorPos
+                            : calculatedSeparatorPos - 1;
+                    updates.addInsert(insertPos);
 //                        String now = insertedSeparators.toString();
 //                        System.out.println("Changed from " + was + " to " + now);
-                    }
                 }
             }
         }
