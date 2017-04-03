@@ -1106,6 +1106,281 @@ public class SeparatorListTest {
     }
 
     @Test
+    public void testIssue499()
+   {
+        TransactionList<String> source = new TransactionList<String>(
+                new BasicEventList<String>());
+
+        Comparator<String> comparator = GlazedListsTests.getFirstLetterComparator();
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, comparator, 0, Integer.MAX_VALUE);
+        ListConsistencyListener<String> listener = ListConsistencyListener.install(separatorList, "GROUPED:", true);
+        listener.setPreviousElementTracked(false);
+
+        String[] s = new String[] { "MSFT", "MSFT", "IBM", "C", "IBM", "C",
+                "C", "IBM", "IBM", "C" };
+        String[] upd = new String[] { "MSFT", "MSFT", "MSFT", "C", "C", "IBM",
+                "IBM", "IBM", "C", "MSFT" };
+
+        for (int i = 0; i < s.length; i++) {
+            source.add(s[i]);
+        }
+
+        assertSeparatorEquals(separatorList.get(0), 4, "C");
+        assertSeparatorEquals(separatorList.get(5), 4, "IBM");
+        assertSeparatorEquals(separatorList.get(10), 2, "MSFT");
+
+        source.beginEvent();
+        for (int i = 0; i < upd.length; i++) {
+            source.set(i, upd[i]);
+        }
+        source.commitEvent();
+
+        assertSeparatorEquals(separatorList.get(0), 3, "C");
+        assertSeparatorEquals(separatorList.get(4), 3, "IBM");
+        assertSeparatorEquals(separatorList.get(8), 4, "MSFT");
+    }
+
+    @Test
+    public void testSplitFirstGroup() {
+        TransactionList<String> source = new TransactionList<String>(
+                new BasicEventList<String>());
+
+        Comparator<String> comparator = GlazedListsTests.getFirstLetterComparator();
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, comparator, 0, Integer.MAX_VALUE);
+        ListConsistencyListener<String> listener = ListConsistencyListener.install(separatorList, "GROUPED:", true);
+        listener.setPreviousElementTracked(false);
+
+        source.add("C");
+        source.add("CC");
+        source.add("CCC");
+
+        assertSeparatorEquals(separatorList.get(0), 3, "C");
+
+        source.beginEvent();
+        source.set(0, "A");
+        source.set(1, "B");
+        source.commitEvent();
+
+        assertSeparatorEquals(separatorList.get(0), 1, "A");
+        assertSeparatorEquals(separatorList.get(2), 1, "B");
+        assertSeparatorEquals(separatorList.get(4), 1, "CCC");
+    }
+
+    @Test
+    public void testJoinToFirstGroup() {
+        TransactionList<String> source = new TransactionList<String>(
+                new BasicEventList<String>());
+
+        Comparator<String> comparator = GlazedListsTests.getFirstLetterComparator();
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, comparator, 0, Integer.MAX_VALUE);
+        ListConsistencyListener<String> listener = ListConsistencyListener.install(separatorList, "GROUPED:", true);
+        listener.setPreviousElementTracked(false);
+
+        source.add("A");
+        source.add("B");
+        source.add("CCC");
+
+        assertSeparatorEquals(separatorList.get(0), 1, "A");
+        assertSeparatorEquals(separatorList.get(2), 1, "B");
+        assertSeparatorEquals(separatorList.get(4), 1, "CCC");
+
+        source.beginEvent();
+        source.set(0, "C");
+        source.set(1, "CC");
+        source.commitEvent();
+
+        assertSeparatorEquals(separatorList.get(0), 3, "C");
+    }
+
+    @Test
+    public void testMultipleUpdateDeleteSeparatorList() {
+        TransactionList<String> source = new TransactionList<String>(
+                new BasicEventList<String>());
+
+        Comparator<String> comparator = GlazedListsTests.getFirstLetterComparator();
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, comparator, 0, Integer.MAX_VALUE);
+        ListConsistencyListener<String> listener = ListConsistencyListener.install(separatorList, "GROUPED:", true);
+        listener.setPreviousElementTracked(false);
+
+        String[] s = new String[] {"C", "CC", "D", "DD", "E", "EE"};
+
+        for (int i = 0; i < s.length; i++) {
+            source.add(s[i]);
+        }
+
+        assertSeparatorEquals(separatorList.get(0), 2, "C");
+        assertSeparatorEquals(separatorList.get(3), 2, "D");
+        assertSeparatorEquals(separatorList.get(6), 2, "E");
+
+        source.beginEvent();
+        source.set(0, "C");
+        source.remove(1);
+        source.set(1, "D");
+        source.remove(2);
+        source.set(2, "E");
+        source.remove(3);
+        source.commitEvent();
+
+        assertSeparatorEquals(separatorList.get(0), 1, "C");
+        assertSeparatorEquals(separatorList.get(2), 1, "D");
+        assertSeparatorEquals(separatorList.get(4), 1, "E");
+    }
+
+    @Test
+    public void testIssue522() {
+        TransactionList<String> source = new TransactionList<String>(
+                new BasicEventList<String>());
+
+        Comparator<String> comparator = GlazedListsTests.getFirstLetterComparator();
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, comparator, 0, Integer.MAX_VALUE);
+        ListConsistencyListener<String> listener = ListConsistencyListener.install(separatorList, "GROUPED:", true);
+        listener.setPreviousElementTracked(false);
+
+        String[] s = new String[] {"A", "B", "C", "D", "DD", "DDD", "E", "F", "FF"};
+
+        for (int i = 0; i < s.length; i++) {
+            source.add(s[i]);
+        }
+        assertSeparatorEquals(separatorList.get(0), 1, "A");
+        assertSeparatorEquals(separatorList.get(2), 1, "B");
+        assertSeparatorEquals(separatorList.get(4), 1, "C");
+        assertSeparatorEquals(separatorList.get(6), 3, "D");
+        assertSeparatorEquals(separatorList.get(10), 1, "E");
+        assertSeparatorEquals(separatorList.get(12), 2, "F");
+
+        source.beginEvent();
+        source.set(7, "F");
+        source.remove(8);
+        source.commitEvent();
+        assertSeparatorEquals(separatorList.get(0), 1, "A");
+        assertSeparatorEquals(separatorList.get(2), 1, "B");
+        assertSeparatorEquals(separatorList.get(4), 1, "C");
+        assertSeparatorEquals(separatorList.get(6), 3, "D");
+        assertSeparatorEquals(separatorList.get(10), 1, "E");
+        assertSeparatorEquals(separatorList.get(12), 1, "F");
+    }
+
+    @Test
+    public void testTwoGroupsToOne() {
+        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 0, Integer.MAX_VALUE);
+        ListConsistencyListener<String> listener = ListConsistencyListener.install(separatorList, "GROUPED:", true);
+        listener.setPreviousElementTracked(false);
+
+        source.beginEvent();
+        source.add("A");
+        source.add("A");
+        source.add("B");
+        source.commitEvent();
+
+        assertSeparatorEquals(separatorList.get(0), 2, "A");
+        assertSeparatorEquals(separatorList.get(3), 1, "B");
+
+        source.beginEvent();
+        source.set(0, "B");
+        source.set(1, "B");
+        source.commitEvent();
+        assertSeparatorEquals(separatorList.get(0), 3, "B");
+    }
+
+    @Test
+    public void testFourGroupsToOne() {
+        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 0, Integer.MAX_VALUE);
+        ListConsistencyListener<String> listener = ListConsistencyListener.install(separatorList, "GROUPED:", true);
+        listener.setPreviousElementTracked(false);
+
+        source.beginEvent();
+        source.add("A");
+        source.add("B");
+        source.add("C");
+        source.add("D");
+        source.commitEvent();
+
+        assertSeparatorEquals(separatorList.get(0), 1, "A");
+        assertSeparatorEquals(separatorList.get(2), 1, "B");
+        assertSeparatorEquals(separatorList.get(4), 1, "C");
+        assertSeparatorEquals(separatorList.get(6), 1, "D");
+
+        source.beginEvent();
+        source.set(0, "D");
+        source.set(1, "D");
+        source.set(2, "D");
+        source.commitEvent();
+
+        assertSeparatorEquals(separatorList.get(0), 4, "D");
+    }
+
+    @Test
+    public void testMultipleUpdatesCreateGroupOnStartOfPrev() {
+        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 0, Integer.MAX_VALUE);
+        ListConsistencyListener<String> listener = ListConsistencyListener.install(separatorList, "GROUPED:", true);
+        listener.setPreviousElementTracked(false);
+
+        source.beginEvent();
+        source.add("A");
+        source.add("C");
+        source.add("C");
+        source.add("C");
+        source.add("D");
+        source.add("D");
+        source.add("D");
+        source.add("E");
+        source.commitEvent();
+
+        assertSeparatorEquals(separatorList.get(0), 1, "A");
+        assertSeparatorEquals(separatorList.get(2), 3, "C");
+        assertSeparatorEquals(separatorList.get(6), 3, "D");
+        assertSeparatorEquals(separatorList.get(10), 1, "E");
+
+        source.beginEvent();
+        source.set(1, "B");
+        source.commitEvent();
+
+        assertSeparatorEquals(separatorList.get(0), 1, "A");
+        assertSeparatorEquals(separatorList.get(2), 1, "B");
+        assertSeparatorEquals(separatorList.get(4), 2, "C");
+        assertSeparatorEquals(separatorList.get(7), 3, "D");
+        assertSeparatorEquals(separatorList.get(11), 1, "E");
+    }
+
+    @Test
+    public void testMultipleUpdatesCreateGroupOnDuplicateOfPrev() {
+        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
+        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 0, Integer.MAX_VALUE);
+        ListConsistencyListener<String> listener = ListConsistencyListener.install(separatorList, "GROUPED:", true);
+        listener.setPreviousElementTracked(false);
+
+        source.add("A");
+        source.add("C");
+        source.add("C");
+        source.add("C");
+        source.add("C");
+        source.add("D");
+        source.add("D");
+        source.add("D");
+        source.add("E");
+
+        assertSeparatorEquals(separatorList.get(0), 1, "A");
+        assertSeparatorEquals(separatorList.get(2), 4, "C");
+        assertSeparatorEquals(separatorList.get(7), 3, "D");
+        assertSeparatorEquals(separatorList.get(11), 1, "E");
+
+
+        source.beginEvent();
+        source.set(2, "B");
+        source.set(3, "B");
+        source.commitEvent();
+
+        assertSeparatorEquals(separatorList.get(0), 1, "A");
+        assertSeparatorEquals(separatorList.get(2), 2, "B");
+        assertSeparatorEquals(separatorList.get(5), 2, "C");
+        assertSeparatorEquals(separatorList.get(8), 3, "D");
+        assertSeparatorEquals(separatorList.get(12), 1, "E");
+    }
+
+    @Test
     public void testInsertBugFix() {
         TransactionList<Element> source = createElementSource();
         SeparatorList<Element> separatorList = new SeparatorList<Element>(source, elementComparator(), 0, Integer.MAX_VALUE);
@@ -1163,6 +1438,36 @@ public class SeparatorListTest {
         assertSeparatorEquals(separatorList.get(9), 5, new Element(3, 2));
     }
 
+    @Test
+    public void testUpdateDeleteBug() {
+        TransactionList<Element> source = createUpdateDeleteElementSource();
+        SeparatorList<Element> separatorList = new SeparatorList<Element>(source, elementComparator(), 0, Integer.MAX_VALUE);
+
+        source.beginEvent();
+        source.set(3, new Element(2, 4));
+        source.remove(4);
+        source.commitEvent();
+        assertSeparatorEquals(separatorList.get(0), 3, new Element(1, 1));
+        assertSeparatorEquals(separatorList.get(4), 1, new Element(2, 4));
+        assertSeparatorEquals(separatorList.get(6), 2, new Element(3, 6));
+    }
+
+    @Test
+    public void testUpdateDeleteBug2() {
+        TransactionList<Element> source = createUpdateDeleteElementSource();
+        source.add(new Element(2, 6));
+        SeparatorList<Element> separatorList = new SeparatorList<Element>(source, elementComparator(), 0, Integer.MAX_VALUE);
+
+        source.beginEvent();
+        source.set(3, new Element(2, 4));
+        source.remove(5);
+        source.remove(4);
+        source.commitEvent();
+        assertSeparatorEquals(separatorList.get(0), 3, new Element(1, 1));
+        assertSeparatorEquals(separatorList.get(4), 2, new Element(2, 4));
+        assertSeparatorEquals(separatorList.get(7), 1, new Element(3, 7));
+    }
+
     private TransactionList<Element> createElementSource() {
         TransactionList<Element> source = new TransactionList<Element>(new BasicEventList<Element>());
         source.add(new Element(1, 1));
@@ -1177,6 +1482,18 @@ public class SeparatorListTest {
         source.add(new Element(1, 10));
         source.add(new Element(2, 11));
         source.add(new Element(3, 12));
+        return source;
+    }
+
+    private TransactionList<Element> createUpdateDeleteElementSource() {
+        TransactionList<Element> source = new TransactionList<Element>(new BasicEventList<Element>());
+        source.add(new Element(1, 1));
+        source.add(new Element(1, 2));
+        source.add(new Element(1, 3));
+        source.add(new Element(2, 4));
+        source.add(new Element(2, 5));
+        source.add(new Element(3, 6));
+        source.add(new Element(3, 7));
         return source;
     }
 

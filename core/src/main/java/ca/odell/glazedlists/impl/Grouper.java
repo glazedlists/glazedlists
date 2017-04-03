@@ -327,12 +327,14 @@ public class Grouper<E> {
 
                 // fire the change event
                 if(deleted == UNIQUE) {
-                	if (changeIndex == lastFakedUniqueChangeIndex) {
+                	if (changeIndex >= barcode.size() && changeIndex == lastFakedUniqueChangeIndex) {
                 		// case: AACC -> AAC (list change __UX)
                 		// in the last group we have deleted a duplicate element that was marked as UNIQUE
                 		// because of an update event of the preceding UNIQUE element in the first iteration.
                 		// Duplicate deletion is a group update, but it was already triggered by the UNIQUE element update,
-                		// so nothing to do here
+                        // so nothing to do here.
+                        // For SeparatorList, node still needs to be deleted
+                        client.groupChanged(changeIndex, groupDeletedIndex - 1, ListEvent.UPDATE, true, changeType, oldValue, ListEvent.<E>unknownValue(), false);
                 	} else {
                 		// if we removed a UNIQUE element then it was the last one and we must remove the group
                 		client.groupChanged(changeIndex, groupDeletedIndex, ListEvent.DELETE, true, changeType, oldValue, ListEvent.<E>unknownValue(), false);
