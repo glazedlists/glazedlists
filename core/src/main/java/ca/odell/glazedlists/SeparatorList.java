@@ -638,30 +638,32 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         private class GrouperClient implements Grouper.Client<E> {
             @Override
             public void groupChanged(int index, int groupIndex, int groupChangeType, boolean primary, int elementChangeType, E oldValue, E newValue, boolean updateNextSeparator) {
-                boolean fixSeparatorForInsertGroupUpdateElement = false;
-                // handle the group change first
-                if(groupChangeType == ListEvent.INSERT) {
-                    int expandedIndex = index + groupIndex;
-                    insertedSeparators.add(expandedIndex, SEPARATOR, 1);
-                    updates.addInsert(expandedIndex);
-                    // add the separator and link the separator to its node
-                    Element<GroupSeparator> node = separators.add(groupIndex, new GroupSeparator(), 1);
-                    node.get().setNode(node);
-                    node.get().setLimit(defaultLimit);
-                } else if(groupChangeType == ListEvent.UPDATE) {
-                    int expandedIndex = insertedSeparators.getIndex(groupIndex, SEPARATOR);
-                    updates.addUpdate(expandedIndex);
-                } else if(groupChangeType == ListEvent.DELETE) {
-                    int expandedIndex = insertedSeparators.getIndex(groupIndex, SEPARATOR);
-                    insertedSeparators.remove(expandedIndex, 1);
-                    updates.addDelete(expandedIndex);
-                    // invalidate the node
-                    Element<GroupSeparator> node = separators.get(groupIndex);
-                    separators.remove(node);
-                    node.get().setNode(null);
-                    node.get().updateCachedValues();
-                    groupIndex--;
-                }
+
+                    boolean fixSeparatorForInsertGroupUpdateElement = false;
+                    // handle the group change first
+                    if (groupChangeType == ListEvent.INSERT) {
+                        int expandedIndex = index + groupIndex;
+                        insertedSeparators.add(expandedIndex, SEPARATOR, 1);
+                        updates.addInsert(expandedIndex);
+                        // add the separator and link the separator to its node
+                        Element<GroupSeparator> node = separators.add(groupIndex, new GroupSeparator(), 1);
+                        node.get().setNode(node);
+                        node.get().setLimit(defaultLimit);
+                    } else if (groupChangeType == ListEvent.UPDATE) {
+                        groupIndex = Math.min(groupIndex, insertedSeparators.blackSize() - 1);
+                        int expandedIndex = insertedSeparators.getIndex(groupIndex, SEPARATOR);
+                        updates.addUpdate(expandedIndex);
+                    } else if (groupChangeType == ListEvent.DELETE) {
+                        int expandedIndex = insertedSeparators.getIndex(groupIndex, SEPARATOR);
+                        insertedSeparators.remove(expandedIndex, 1);
+                        updates.addDelete(expandedIndex);
+                        // invalidate the node
+                        Element<GroupSeparator> node = separators.get(groupIndex);
+                        separators.remove(node);
+                        node.get().setNode(null);
+                        node.get().updateCachedValues();
+                        groupIndex--;
+                    }
 
                 // then handle the element change
                 if(elementChangeType == ListEvent.INSERT) {
