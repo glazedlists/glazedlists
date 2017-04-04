@@ -1484,6 +1484,21 @@ public class SeparatorListTest {
         assertSeparatorEquals(separatorList.get(4), 1, new Element(2, 4));
     }
 
+    @Test
+    public void testUpdateDeleteBug4() {
+        TransactionList<Element> source = createUpdateDeleteElementSource();
+        source.remove(6);
+        SeparatorList<Element> separatorList = new SeparatorList<Element>(source, elementComparator(), 0, Integer.MAX_VALUE);
+
+        source.beginEvent();
+        source.set(3, new Element(2, 4));
+        source.remove(5);
+        source.remove(4);
+        source.commitEvent();
+        assertSeparatorEquals(separatorList.get(0), 3, new Element(1, 1));
+        assertSeparatorEquals(separatorList.get(4), 1, new Element(2, 4));
+    }
+
     private TransactionList<Element> createElementSource() {
         TransactionList<Element> source = new TransactionList<Element>(new BasicEventList<Element>());
         source.add(new Element(1, 1));

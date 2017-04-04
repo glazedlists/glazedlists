@@ -335,6 +335,7 @@ public class Grouper<E> {
                         // so nothing to do here.
                         // For SeparatorList, node still needs to be deleted
                         client.groupChanged(changeIndex, groupDeletedIndex - 1, ListEvent.UPDATE, true, changeType, oldValue, ListEvent.<E>unknownValue(), false);
+                        lastFakedUniqueChangeIndex = -1;
                 	} else {
                 		// if we removed a UNIQUE element then it was the last one and we must remove the group
                 		client.groupChanged(changeIndex, groupDeletedIndex, ListEvent.DELETE, true, changeType, oldValue, ListEvent.<E>unknownValue(), false);
