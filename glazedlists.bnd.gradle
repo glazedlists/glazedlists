@@ -1,0 +1,37 @@
+ext.makeBNDFile = {  ->
+    def implementationVersion
+    if (isSnapshot == "true") {
+        implementationVersion = "${nextReleaseVersion}.alpha${buildTime.format("yyyyMMdd")}"
+    } else {
+        implementationVersion = nextReleaseVersion
+    }
+
+    def bndfile = File.createTempFile("glazedlists", '.bnd')
+    bndfile << """
+Manifest-Version: 1.0
+Main-Class: ca.odell.glazedlists.impl.Main
+Sealed: true
+Built-By: ${user}
+Built-At: ${buildTime.format("yyyy-MM-dd H:mm")}
+Implementation-Version: ${implementationVersion}
+Implementation-Title: Glazed Lists
+Implementation-URL: http://publicobject.com/glazedlists/
+Contributors: Jesse Wilson, Kevin Maltby, James Lemieux, Rob Eden, Holger Brands
+Source-Version: JDK ${sourceCompatibility}
+
+# OSGi bundle information
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: glazedlists_java15
+Bundle-Name: Glazed Lists
+Bundle-SymbolicName: ca.odell.glazedlists
+Bundle-Version: ${implementationVersion}
+Bundle-ClassPath: .
+
+# Define all .impl packages to be private to this OSGi bundle
+Include-Resource: resources=core/src/main/resources/resources
+Private-Package: ca.odell.glazedlists.impl.*
+Export-Package: !ca.odell.glazedlists.impl.*,*
+Import-Package: *;resolution:=optional
+"""
+    return bndfile
+}

@@ -1,0 +1,43 @@
+apply plugin: 'us.kirchmeier.capsule'
+
+dependencies {
+    compile project(':extensions:swt')
+    compile project(':extensions:treetable')
+    compile project(':extensions:jfreechart')
+    compile project(':extensions:javafx')
+    compile project(':extensions:nachocalendar')
+    compile project(':extensions:jgoodiesforms')
+    compile files('lib/http.jar')
+}
+
+/**
+ * Issues-Browser
+ */
+task issuesbrowserjar(type: FatCapsule) {
+    destinationDir = file("$rootDir/$targetDir")
+    archiveName = "glazedlists-demo.jar"
+
+    applicationClass 'com.publicobject.issuesbrowser.swing.IssuesBrowser'
+
+    capsuleManifest {
+        applicationId = 'com.publicobject.issuesbrowser.swing.IssuesBrowser'
+        applicationName = 'IssuesBrowser'
+        minJavaVersion = '1.6.0'
+    }
+}
+
+/**
+ * XML-Browser
+ */
+task xmlbrowserjar(type: FatCapsule) {
+    destinationDir = file("$rootDir/$targetDir")
+    archiveName = "xmlbrowser.jar"
+
+    applicationClass 'com.publicobject.xmlbrowser.XmlBrowser'
+
+    capsuleManifest {
+        applicationId = 'com.publicobject.xmlbrowser.XmlBrowser'
+        applicationName = 'XmlBrowser'
+        minJavaVersion = '1.6.0'
+    }
+}

@@ -1,0 +1,27 @@
+String amd64 = System.getProperty('os.name').contains("64")
+String swtJar;
+switch(System.getProperty('os.name').toLowerCase().split()[0]) {
+  case 'windows':
+    swtJar = 'win32.win32.x86'
+    if (amd64) {
+        swtJar += "_64"
+    }
+    break
+  case 'linux':
+    swtJar = 'gtk.linux.x86'
+    if (amd64) {
+        swtJar += "_64"
+    }
+    break
+  case 'mac':
+    swtJar = 'cocoa.macosx.x86_64'
+    break
+  default:
+    throw new Exception('Unknown OS')
+}
+
+dependencies {
+    compile project(':extensions:calculation')
+    compile "org.eclipse.swt:org.eclipse.swt.${swtJar}:4.6"
+}
+

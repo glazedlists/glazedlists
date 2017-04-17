@@ -1,0 +1,224 @@
+/**
+ * settings and plugins for build
+ */
+plugins {
+    id "base"
+    id "maven-publish"
+    id "signing"
+    id "us.kirchmeier.capsule" version "1.0.2"
+    id "biz.aQute.bnd.builder" version "3.3.0"
+}
+
+/**
+ * group and version (artifact is set from rootProject.name in settings.gradle
+ */
+group "net.java.dev.glazedlists"
+version "$nextReleaseVersion${isSnapshot == "true" ? "-SNAPSHOT" : ""}"
+
+/**
+ * variables
+ */
+ext.targetDir = "target/"
+ext.user = System.getProperty("user.name")
+ext.buildTime = new Date()
+def exportedProjects = subprojects.findAll { it.name != 'issuesbrowser' && it.name != 'japex' }
+
+/**
+ * settings for all modules including root-module
+ */
+allprojects {
+    sourceCompatibility = javaTargetVersion
+    targetCompatibility = javaTargetVersion
+}
+
+/**
+ * settings for subprojects = everything except the root-project
+ */
+subprojects {
+    apply plugin: 'java'
+
+    repositories {
+        jcenter()
+
+        // for SWT
+        maven {
+            url "http://maven-eclipse.github.io/maven"
+        }
+    }
+
+    /* dependencies for test */
+    dependencies {
+        testCompile 'junit:junit:4.11'
+    }
+    test {
+        systemProperties 'java.awt.headless': 'true'
+        maxHeapSize = "512m"
+    }
+
+    jar.archiveName = "glazedlists-${name}.jar"
+}
+
+/**
+ * settings for subprojects except core
+ */
+configure(subprojects.findAll { it.name != 'core' }) {
+    /* everything depends on core */
+    dependencies {
+        compile project(':core')
+        testCompile project(':core').sourceSets.test.output
+    }
+}
+
+/**
+ * add directories to clean of root-project
+ */
+clean.doLast {
+    file(targetDir).deleteDir()
+}
+
+/**
+ * JavaDoc
+ */
+task docs(type: Javadoc) {
+    options.addStringOption('Xdoclint:none', '-quiet')
+    classpath = files(exportedProjects.collect { it.sourceSets.main.compileClasspath })
+    source = exportedProjects.collect { it.sourceSets.main.allJava }
+    destinationDir = file("$targetDir/docs/api")
+    exclude '**/impl/**'
+    exclude '**/migrationkit/**'
+
+    options {
+        windowTitle "Glazed Lists $version"
+        author true
+        use = true
+        docTitle "<h1>Glazed Lists $version</h1>"
+        bottom """<a href="http://www.glazedlists.com" target="_top">Glazed Lists</a>, Copyright &#169; 2003 publicobject.com, O&apos;Dell Engineering.<br>Documentation build by $user at $buildTime"""
+
+        links(
+            "http://docs.oracle.com/javase/6/docs/api/",
+            "http://help.eclipse.org/neon/topic/org.eclipse.platform.doc.isv/reference/api/",
+            "http://doc.formdev.com/jgoodies-forms/",
+            "http://nachocalendar.sourceforge.net/doc/",
+            "http://www.jfree.org/jfreechart/api/javadoc/",
+            "http://javadoc.geotoolkit.org/external/swingx/",
+            "https://docs.jboss.org/hibernate/orm/current/javadocs/"
+        )
+    }
+}
+
+/**
+ * JavaDoc-Jar
+ */
+task javadocjar(type: Jar, dependsOn: "docs") {
+    destinationDir = file(targetDir)
+    archiveName = "${rootProject.name}-${version}-javadoc.jar"
+    from fileTree("$targetDir/docs/api")
+}
+
+/**
+ * Source-Jar
+ */
+task sourcejar(type: Jar) {
+    destinationDir = file(targetDir)
+    archiveName = "${rootProject.name}-$version-sources.jar"
+    includeEmptyDirs = false
+    from files(
+        subprojects.collect { it.sourceSets.main.allSource }
+    )
+}
+
+/**
+ * Jar (osgi compatible)
+ */
+jar {
+    destinationDir = file(targetDir)
+    archiveName = "${rootProject.name}-${version}.jar"
+
+    apply from: 'glazedlists.bnd.gradle'
+    bndfile = makeBNDFile()
+
+    from files(
+        exportedProjects.collect { it.sourceSets.main.output }
+    )
+}
+
+/**
+ * Dist
+ */
+task dist(type: Zip) {
+    destinationDir = file(targetDir)
+    archiveName = "${rootProject.name}-$version-dist.zip"
+    includeEmptyDirs = false
+
+    from fileTree(".") {
+        exclude ".git"
+        exclude "www"
+        file(".gitignore").eachLine {
+            exclude it
+        }
+    }
+}
+
+/**
+ * Build
+ */
+build.dependsOn(["jar", "sourcejar", "javadocjar", "dist"])
+
+/**
+ * Signing
+ */
+signing {
+    required { !isSnapshot }
+    sign jar
+    sign javadocjar
+    sign sourcejar
+    sign dist
+}
+
+/**
+ * Deploy
+ */
+publishing {
+    repositories {
+        maven {
+            url isSnapshot ? mavenSnapshotsRepositoryUrl : mavenStagingRepositoryUrl
+        }
+    }
+
+    publications {
+        javaNet(MavenPublication) {
+            from components.java
+
+            artifact sourcejar {
+                classifier "sources"
+            }
+
+            artifact javadocjar {
+                classifier "javadoc"
+            }
+
+            artifact dist {
+                classifier "dist"
+            }
+
+            /* customize pom */
+            apply from: 'pom.xml.gradle'
+            addInfoToPomXML(pom)
+        }
+    }
+}
+
+/*
+ * enables command to show generated pom.xml:
+ *   $ ./gradlew generatePomFileForJavaNetPublication && head build/generated-pom.xml
+ */
+model {
+    tasks.generatePomFileForJavaNetPublication {
+        destination = file("$buildDir/generated-pom.xml")
+    }
+}
+
+/**
+ * import build.xml for the m4 task
+ */
+ant.importBuild 'build.xml'
