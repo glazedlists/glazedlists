@@ -1,0 +1,3 @@
+dependencies {
+    compile 'com.sun.japex:japex:1.2.4'
+}

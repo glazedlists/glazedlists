@@ -1,0 +1,5 @@
+if (JavaVersion.current().isJava7()) {
+    dependencies {
+        compile files(System.getProperty("java.home") + "/lib/jfxrt.jar")
+    }
+}
