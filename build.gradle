@@ -80,7 +80,11 @@ clean.doLast {
  * JavaDoc
  */
 task docs(type: Javadoc) {
-    options.addStringOption('Xdoclint:none', '-quiet')
+	if (JavaVersion.current().isJava7()) {
+		options.addStringOption('-quiet')
+	} else {
+    	options.addStringOption('Xdoclint:none', '-quiet')
+    }
     classpath = files(exportedProjects.collect { it.sourceSets.main.compileClasspath })
     source = exportedProjects.collect { it.sourceSets.main.allJava }
     destinationDir = file("$targetDir/docs/api")
@@ -95,7 +99,7 @@ task docs(type: Javadoc) {
         bottom """<a href="http://www.glazedlists.com" target="_top">Glazed Lists</a>, Copyright &#169; 2003 publicobject.com, O&apos;Dell Engineering.<br>Documentation build by $user at $buildTime"""
 
         links(
-            "http://docs.oracle.com/javase/6/docs/api/",
+            "http://docs.oracle.com/javase/7/docs/api/",
             "http://help.eclipse.org/neon/topic/org.eclipse.platform.doc.isv/reference/api/",
             "http://doc.formdev.com/jgoodies-forms/",
             "http://nachocalendar.sourceforge.net/doc/",

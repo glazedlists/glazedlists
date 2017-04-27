@@ -21,7 +21,7 @@ Source-Version: JDK ${sourceCompatibility}
 
 # OSGi bundle information
 Bundle-ManifestVersion: 2
-Bundle-SymbolicName: glazedlists_java15
+Bundle-SymbolicName: glazedlists
 Bundle-Name: Glazed Lists
 Bundle-SymbolicName: ca.odell.glazedlists
 Bundle-Version: ${implementationVersion}

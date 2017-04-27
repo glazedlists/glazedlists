@@ -1,4 +1,4 @@
-rootProject.name = "glazedlists_${javaTargetVersionArtifact}"
+rootProject.name = "glazedlists"
 
 include 'core'
 include 'extensions:calculation'
