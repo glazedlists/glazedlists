@@ -88,14 +88,13 @@ task docs(type: Javadoc) {
     classpath = files(exportedProjects.collect { it.sourceSets.main.compileClasspath })
     source = exportedProjects.collect { it.sourceSets.main.allJava }
     destinationDir = file("$targetDir/docs/api")
+    title = "Glazed Lists $version"
     exclude '**/impl/**'
     exclude '**/migrationkit/**'
 
     options {
-        windowTitle "Glazed Lists $version"
         author true
         use = true
-        docTitle "<h1>Glazed Lists $version</h1>"
         bottom """<a href="http://www.glazedlists.com" target="_top">Glazed Lists</a>, Copyright &#169; 2003 publicobject.com, O&apos;Dell Engineering.<br>Documentation build by $user at $buildTime"""
 
         links(
