@@ -157,6 +157,9 @@ task dist(type: Zip) {
     from fileTree(".") {
         exclude ".git"
         exclude "www"
+        exclude "**/.classpath"
+        exclude "**/.project"
+        exclude "**/.settings/*"
         file(".gitignore").eachLine {
             exclude it
         }
