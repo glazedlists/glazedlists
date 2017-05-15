@@ -1543,6 +1543,42 @@ public class SeparatorListTest {
         assertSeparatorEquals(separatorList.get(26), 8, new Element(5, 23));
     }
 
+    @Test
+    public void testLinearNewGroupCreation() {
+        TransactionList<Element> source = createLinearElementSource2();
+        SeparatorList<Element> separatorList = new SeparatorList<Element>(source, elementComparator(), 0, Integer.MAX_VALUE);
+
+        source.beginEvent();
+        source.set(1, new Element(2, 2));
+        source.set(2, new Element(2, 3));
+        source.set(3, new Element(2, 4));
+        source.set(4, new Element(2, 5));
+        source.set(5, new Element(2, 6));
+        source.set(6, new Element(2, 7));
+        source.commitEvent();
+        assertSeparatorEquals(separatorList.get(0), 1, new Element(1, 1));
+        assertSeparatorEquals(separatorList.get(2), 6, new Element(2, 2));
+        assertSeparatorEquals(separatorList.get(9), 10, new Element(3, 8));
+        assertSeparatorEquals(separatorList.get(20), 1, new Element(4, 18));
+    }
+
+    @Test
+    public void testLinearNewGroupCreation2() {
+        TransactionList<Element> source = createLinearElementSource2();
+        SeparatorList<Element> separatorList = new SeparatorList<Element>(source, elementComparator(), 0, Integer.MAX_VALUE);
+
+        source.beginEvent();
+        source.set(0, new Element(1, 1));
+        source.remove(1);
+        source.set(1, new Element(2, 3));
+        source.set(2, new Element(2, 4));
+        source.commitEvent();
+        assertSeparatorEquals(separatorList.get(0), 4, new Element(1, 1));
+        assertSeparatorEquals(separatorList.get(5), 2, new Element(2, 3));
+        assertSeparatorEquals(separatorList.get(8), 10, new Element(3, 8));
+        assertSeparatorEquals(separatorList.get(19), 1, new Element(4, 18));
+    }
+
     private TransactionList<Element> createElementSource() {
         TransactionList<Element> source = new TransactionList<Element>(new BasicEventList<Element>());
         source.add(new Element(1, 1));
@@ -1605,6 +1641,29 @@ public class SeparatorListTest {
         source.add(new Element(5, 28));
         source.add(new Element(5, 29));
         source.add(new Element(5, 30));
+        return source;
+    }
+
+    private TransactionList<Element> createLinearElementSource2() {
+        TransactionList<Element> source = new TransactionList<Element>(new BasicEventList<Element>());
+        source.add(new Element(1, 1));
+        source.add(new Element(1, 2));
+        source.add(new Element(1, 3));
+        source.add(new Element(1, 4));
+        source.add(new Element(1, 5));
+        source.add(new Element(1, 6));
+        source.add(new Element(1, 7));
+        source.add(new Element(3, 8));
+        source.add(new Element(3, 9));
+        source.add(new Element(3, 10));
+        source.add(new Element(3, 11));
+        source.add(new Element(3, 12));
+        source.add(new Element(3, 13));
+        source.add(new Element(3, 14));
+        source.add(new Element(3, 15));
+        source.add(new Element(3, 16));
+        source.add(new Element(3, 17));
+        source.add(new Element(4, 18));
         return source;
     }
 

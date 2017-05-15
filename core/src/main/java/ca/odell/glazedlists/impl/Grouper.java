@@ -258,12 +258,11 @@ public class Grouper<E> {
                     // Without this, the group would change from C__ to AB_ instead.
                     // . Check whether the next element doesn't belong in this group, but it marked as DUPLICATE
                     // . Set it to UNIQUE and the oldGroup to RIGHT_GROUP
-                    if (successor < barcode.size() && barcode.get(successor) == DUPLICATE) {
+                    if (successor < barcode.size() && barcode.get(successor) == DUPLICATE && !groupTogether(changeIndex, successor)) {
                         barcode.set(successor, UNIQUE, 1);
                         oldGroup = RIGHT_GROUP;
                     }
                 }
-
                 // the index of the GroupList being updated (it may or may not exist yet)
                 int groupIndex = tryJoinResult.groupIndex;
 
