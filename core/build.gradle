@@ -1,0 +1,96 @@
+/**
+ * M4 generation
+ */
+task m4 {
+
+    def extension = ["Node", "Tree", "TreeAsList", "TreeIterator"]
+    def dir = "$rootDir/core/src/main/java/ca/odell/glazedlists/impl/adt/barcode2"
+
+    extension.each { ext ->
+        exec {
+            workingDir dir
+            commandLine 'm4', '--prefix-builtins',
+                '-DVAR_COLOUR_COUNT=4',
+                '-DVAR_WIDE_NODES=true',
+                '-DVAR_TYPE_COUNT=1',
+                "Bcii${ext}.java"
+
+            standardOutput = new FileOutputStream("$dir/FourColor${ext}.java_intermediate")
+        }
+    }
+
+    extension.each { ext ->
+        exec {
+            workingDir dir
+            commandLine 'm4', '--prefix-builtins',
+                '-DBciiTree=FourColorTree',
+                '-DBciiNode=FourColorNode',
+                '-DBciiTreeAsList=FourColorTreeAsList',
+                '-DBciiTreeIterator=FourColorTreeIterator',
+                '-DCOMMAPLACEHOLDER=,',
+                "FourColor${ext}.java_intermediate"
+
+            standardOutput = new FileOutputStream("$dir/FourColor${ext}.java")
+        }
+    }
+
+    extension.each { ext ->
+        exec {
+            workingDir dir
+            commandLine 'm4', '--prefix-builtins',
+                '-DVAR_COLOUR_COUNT=4',
+                '-DVAR_WIDE_NODES=true',
+                '-DVAR_TYPE_COUNT=2',
+                "Bcii${ext}.java"
+
+            standardOutput = new FileOutputStream("$dir/FourColorTwoValue${ext}.java_intermediate")
+        }
+    }
+
+    extension.each { ext ->
+        exec {
+            workingDir dir
+            commandLine 'm4', '--prefix-builtins',
+                '-DBciiTree=FourColorTwoValueTree',
+                '-DBciiNode=FourColorTwoValueNode',
+                '-DBciiTreeAsList=FourColorTwoValueTreeAsList',
+                '-DBciiTreeIterator=FourColorTwoValueTreeIterator',
+                '-DCOMMAPLACEHOLDER=,',
+                "FourColorTwoValue${ext}.java_intermediate"
+
+            standardOutput = new FileOutputStream("$dir/FourColorTwoValue${ext}.java")
+        }
+    }
+
+    extension.each { ext ->
+        exec {
+            workingDir dir
+            commandLine 'm4', '--prefix-builtins',
+                '-DVAR_COLOUR_COUNT=1',
+                '-DVAR_WIDE_NODES=false',
+                '-DVAR_TYPE_COUNT=1',
+                "Bcii${ext}.java"
+
+            standardOutput = new FileOutputStream("$dir/Simple${ext}.java_intermediate")
+        }
+    }
+
+    extension.each { ext ->
+        exec {
+            workingDir dir
+            commandLine 'm4', '--prefix-builtins',
+                '-DBciiTree=SimpleTree',
+                '-DBciiNode=SimpleNode',
+                '-DBciiTreeAsList=SimpleTreeAsList',
+                '-DBciiTreeIterator=SimpleTreeIterator',
+                '-DCOMMAPLACEHOLDER=,',
+                "FourColorTwoValue${ext}.java_intermediate"
+
+            standardOutput = new FileOutputStream("$dir/Simple${ext}.java")
+        }
+    }
+
+    delete fileTree(dir) {
+        include '**/*_intermediate'
+    }
+}

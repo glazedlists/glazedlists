@@ -3,15 +3,15 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.adt.barcode2;
 
-import ca.odell.glazedlists.GlazedLists;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import ca.odell.glazedlists.GlazedLists;
+
 /*
- m4_include(core/src/main/java/ca/odell/glazedlists/impl/adt/barcode2/JavaMacros.m4)
- m4_include(core/src/main/java/ca/odell/glazedlists/impl/adt/barcode2/TreeMacros.m4)
+ m4_include(JavaMacros.m4)
+ m4_include(TreeMacros.m4)
 */
 /*[ BEGIN_M4_JAVA ]*/
 
