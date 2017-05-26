@@ -1,7 +1,7 @@
 /**
  * M4 generation
  */
-task m4 {
+task m4 << {
 
     def extension = ["Node", "Tree", "TreeAsList", "TreeIterator"]
     def dir = "$rootDir/core/src/main/java/ca/odell/glazedlists/impl/adt/barcode2"
@@ -84,7 +84,7 @@ task m4 {
                 '-DBciiTreeAsList=SimpleTreeAsList',
                 '-DBciiTreeIterator=SimpleTreeIterator',
                 '-DCOMMAPLACEHOLDER=,',
-                "FourColorTwoValue${ext}.java_intermediate"
+                "Simple${ext}.java_intermediate"
 
             standardOutput = new FileOutputStream("$dir/Simple${ext}.java")
         }
