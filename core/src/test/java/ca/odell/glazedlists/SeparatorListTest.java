@@ -933,6 +933,23 @@ public class SeparatorListTest {
         assertEqualsIgnoreSeparators(source, separated, GlazedLists.comparableComparator());
     }
 
+    @Test
+    public void testIssue599() {
+        BasicEventList<String> base = new BasicEventList<String>();
+        base.add("A");
+        base.add("A");
+        TransactionList<String> source = new TransactionList<String>(base);
+        SeparatorList<String> grouped = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        ListConsistencyListener<String> listener = ListConsistencyListener.install(grouped, "GROUPED:", true);
+        listener.setPreviousElementTracked(false);
+        source.beginEvent(true);
+        source.add(0, "A");
+        source.set(1, "A");
+        source.add(3, "A");
+        source.commitEvent();
+        assertSeparatorEquals(grouped.get(0), 4, "A");
+    }
+
     /**
      * Match strings that are a substring of the specified String.
      */
@@ -1499,6 +1516,33 @@ public class SeparatorListTest {
         assertSeparatorEquals(separatorList.get(4), 1, new Element(2, 4));
     }
 
+    @Test
+    public void testSeparatorNotShifted()
+    {
+        TransactionList<Element> source = createLinearElementSource();
+        SeparatorList<Element> separatorList = new SeparatorList<Element>(source, elementComparator(), 0, Integer.MAX_VALUE);
+//        GroupingList<Element> separatorList = new GroupingList<Element>(source, elementComparator());
+
+        source.beginEvent();
+        source.set(0, new Element(3, 1));
+        source.set(1, new Element(1, 2));
+        source.set(2, new Element(1, 3));
+        source.set(3, new Element(1, 4));
+        source.set(4, new Element(1, 5));
+        source.set(5, new Element(1, 6));
+        source.set(6, new Element(3, 7));
+        source.set(7, new Element(1, 8));
+        source.set(8, new Element(1, 9));
+        source.set(9, new Element(3, 10));
+        source.set(10, new Element(1, 11));
+        source.set(11, new Element(1, 12));
+        source.commitEvent();
+        assertSeparatorEquals(separatorList.get(0), 9, new Element(1, 2));
+        assertSeparatorEquals(separatorList.get(10), 9, new Element(3, 1));
+        assertSeparatorEquals(separatorList.get(20), 5, new Element(4, 19));
+        assertSeparatorEquals(separatorList.get(26), 8, new Element(5, 23));
+    }
+
     private TransactionList<Element> createElementSource() {
         TransactionList<Element> source = new TransactionList<Element>(new BasicEventList<Element>());
         source.add(new Element(1, 1));
@@ -1525,6 +1569,42 @@ public class SeparatorListTest {
         source.add(new Element(2, 5));
         source.add(new Element(3, 6));
         source.add(new Element(3, 7));
+        return source;
+    }
+
+    private TransactionList<Element> createLinearElementSource() {
+        TransactionList<Element> source = new TransactionList<Element>(new BasicEventList<Element>());
+        source.add(new Element(0, 1));
+        source.add(new Element(2, 2));
+        source.add(new Element(2, 3));
+        source.add(new Element(2, 4));
+        source.add(new Element(2, 5));
+        source.add(new Element(2, 6));
+        source.add(new Element(2, 7));
+        source.add(new Element(2, 8));
+        source.add(new Element(2, 9));
+        source.add(new Element(2, 10));
+        source.add(new Element(2, 11));
+        source.add(new Element(2, 12));
+        source.add(new Element(3, 13));
+        source.add(new Element(3, 14));
+        source.add(new Element(3, 15));
+        source.add(new Element(3, 16));
+        source.add(new Element(3, 17));
+        source.add(new Element(3, 18));
+        source.add(new Element(4, 19));
+        source.add(new Element(4, 19));
+        source.add(new Element(4, 20));
+        source.add(new Element(4, 21));
+        source.add(new Element(4, 22));
+        source.add(new Element(5, 23));
+        source.add(new Element(5, 24));
+        source.add(new Element(5, 25));
+        source.add(new Element(5, 26));
+        source.add(new Element(5, 27));
+        source.add(new Element(5, 28));
+        source.add(new Element(5, 29));
+        source.add(new Element(5, 30));
         return source;
     }
 

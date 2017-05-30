@@ -637,7 +637,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
          */
         private class GrouperClient implements Grouper.Client<E> {
             @Override
-            public void groupChanged(int index, int groupIndex, int groupChangeType, boolean primary, int elementChangeType, E oldValue, E newValue, boolean updateNextSeparator) {
+            public void groupChanged(int index, int groupIndex, int groupChangeType, boolean primary, int elementChangeType, E oldValue, E newValue, boolean updateNextSeparator, boolean joinRight) {
 
                     boolean fixSeparatorForInsertGroupUpdateElement = false;
                     // handle the group change first
@@ -692,8 +692,9 @@ public class SeparatorList<E> extends TransformedList<E, E> {
                 } else if(elementChangeType == ListEvent.DELETE) {
                     int expandedIndex = index + groupIndex + 1;
                     // separator in wrong position due to order of events when sorting
-                    if (insertedSeparators.get(expandedIndex) == SEPARATOR) {
-                        shiftSeparator(groupIndex);
+                    int groupToShift = groupIndex;
+                    while (insertedSeparators.get(expandedIndex) == SEPARATOR) {
+                        shiftSeparator(groupToShift++);
                     }
                     insertedSeparators.remove(expandedIndex, 1);
                     updates.addDelete(expandedIndex);
@@ -722,27 +723,28 @@ public class SeparatorList<E> extends TransformedList<E, E> {
                 final int shiftGroupIndex = groupIndex + 1;
                 if(groupChangeType == ListEvent.DELETE && elementChangeType != ListEvent.INSERT
                         && shiftGroupIndex < insertedSeparators.colourSize(SEPARATOR)
-                        && shiftGroupIndex < grouper.getBarcode().colourSize(Grouper.UNIQUE)) {
-                    int collapsedGroupStartIndex = grouper.getBarcode().getIndex(shiftGroupIndex, Grouper.UNIQUE);
-                    int separatorsIndex = insertedSeparators.getIndex(shiftGroupIndex , SEPARATOR);
-                    //String was = insertedSeparators.toString();
-                     if(collapsedGroupStartIndex + shiftGroupIndex < separatorsIndex) {
-                        insertedSeparators.remove(separatorsIndex, 1);
-                        updates.addDelete(separatorsIndex);
-                        insertedSeparators.add(collapsedGroupStartIndex + shiftGroupIndex, SEPARATOR, 1);
-                        updates.addInsert(collapsedGroupStartIndex + shiftGroupIndex);
-                        //String now = insertedSeparators.toString();
-                        //System.out.println("Changed from " + was + " to " + now);
+                        && shiftGroupIndex < grouper.getBarcode().colourSize(Grouper.UNIQUE)
+                        && joinRight) {
+                        int collapsedGroupStartIndex = grouper.getBarcode().getIndex(shiftGroupIndex, Grouper.UNIQUE);
+                        int separatorsIndex = insertedSeparators.getIndex(shiftGroupIndex, SEPARATOR);
+                        //String was = insertedSeparators.toString();
+                        if (collapsedGroupStartIndex + shiftGroupIndex < separatorsIndex) {
+                            insertedSeparators.remove(separatorsIndex, 1);
+                            updates.addDelete(separatorsIndex);
+                            insertedSeparators.add(collapsedGroupStartIndex + shiftGroupIndex, SEPARATOR, 1);
+                            updates.addInsert(collapsedGroupStartIndex + shiftGroupIndex);
+                            //String now = insertedSeparators.toString();
+                            //System.out.println("Changed from " + was + " to " + now);
+                        }
                     }
-                }
-                // handle separator shifts for source list changes like AACCC -> AAACC or AAACC
-                // -> AACCC:
-                // an element at the beginning or end of an existing group is changed such that
-                // it now should belong to the neighbour group, but the element doesn't change
-                // its position in the SortedList
-                // the grouper barcode adjusts correctly, but here we have to adjust the
-                // separator positions accordingly
-                if (groupChangeType == ListEvent.UPDATE && elementChangeType == ListEvent.UPDATE
+                    // handle separator shifts for source list changes like AACCC -> AAACC or AAACC
+                    // -> AACCC:
+                    // an element at the beginning or end of an existing group is changed such that
+                    // it now should belong to the neighbour group, but the element doesn't change
+                    // its position in the SortedList
+                    // the grouper barcode adjusts correctly, but here we have to adjust the
+                    // separator positions accordingly
+                    if (groupChangeType == ListEvent.UPDATE && elementChangeType == ListEvent.UPDATE
                         && shiftGroupIndex < insertedSeparators.colourSize(SEPARATOR)
                         && shiftGroupIndex < grouper.getBarcode().colourSize(Grouper.UNIQUE)
                         && updateNextSeparator) {

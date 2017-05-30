@@ -156,10 +156,10 @@ public class Grouper<E> {
                 // new group (by modifying an element in place). Consequently, we must
                 // mark the NEXT element as UNIQUE and revisit it later to determine if it really is
                 //
-                // GLAZEDLISTS-599: apply this marking only, if there is no UNIQUE element added to the immediate 
+                // GLAZEDLISTS-599: apply this marking only, if there is no UNIQUE element added to the immediate
                 // left that would belong to the same group
                 if (barcode.get(changeIndex) == UNIQUE) {
-                    if (changeIndex+1 < barcode.size() && barcode.get(changeIndex+1) == DUPLICATE 
+                    if (changeIndex+1 < barcode.size() && barcode.get(changeIndex+1) == DUPLICATE
                             && (changeIndex == 0 || !uniqueElementAddedToLeftInSameGroup(toDoList, changeIndex))) {
                         // however, we need to make sure that the barcode UNIQUE entry we are looking at
                         // was part of the barcode state before we started this iteration of listChanges.
@@ -213,9 +213,9 @@ public class Grouper<E> {
                 // if no group already exists to join, create a new group
                 tryJoinExistingGroup(changeIndex, toDoList, tryJoinResult);
                 if(tryJoinResult.group == NO_GROUP) {
-                    client.groupChanged(changeIndex, tryJoinResult.groupIndex, ListEvent.INSERT, true, changeType, ListEvent.<E>unknownValue(), tryJoinResult.newFirstInGroup, false);
+                    client.groupChanged(changeIndex, tryJoinResult.groupIndex, ListEvent.INSERT, true, changeType, ListEvent.<E>unknownValue(), tryJoinResult.newFirstInGroup, false, false);
                 } else {
-                    client.groupChanged(changeIndex, tryJoinResult.groupIndex, ListEvent.UPDATE, true, changeType, tryJoinResult.oldFirstInGroup, tryJoinResult.newFirstInGroup, false);
+                    client.groupChanged(changeIndex, tryJoinResult.groupIndex, ListEvent.UPDATE, true, changeType, tryJoinResult.oldFirstInGroup, tryJoinResult.newFirstInGroup, false, false);
                 }
 
             // updates can result in INSERT, UPDATE and DELETE events
@@ -270,47 +270,47 @@ public class Grouper<E> {
                 // we're the first element in a new group
                 if(tryJoinResult.group == NO_GROUP) {
                     if(oldGroup == NO_GROUP) {
-                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE, true, changeType, oldValue, tryJoinResult.newFirstInGroup, false);
+                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE, true, changeType, oldValue, tryJoinResult.newFirstInGroup, false, false);
                     } else if(oldGroup == LEFT_GROUP) {
                         E firstFromPreviousGroup = sortedList.get(barcode.getIndex(groupIndex - 1, UNIQUE));
-                        client.groupChanged(changeIndex, groupIndex - 1, ListEvent.UPDATE, false, changeType, firstFromPreviousGroup, firstFromPreviousGroup, false);
-                        client.groupChanged(changeIndex, groupIndex, ListEvent.INSERT, true, changeType, ListEvent.<E>unknownValue(), tryJoinResult.newFirstInGroup, false);
+                        client.groupChanged(changeIndex, groupIndex - 1, ListEvent.UPDATE, false, changeType, firstFromPreviousGroup, firstFromPreviousGroup, false, false);
+                        client.groupChanged(changeIndex, groupIndex, ListEvent.INSERT, true, changeType, ListEvent.<E>unknownValue(), tryJoinResult.newFirstInGroup, false, false);
                     } else if(oldGroup == RIGHT_GROUP) {
                         E firstFromNextGroup = sortedList.get(barcode.getIndex(groupIndex + 1, UNIQUE));
-                        client.groupChanged(changeIndex, groupIndex, ListEvent.INSERT, true, changeType, ListEvent.<E>unknownValue(), tryJoinResult.newFirstInGroup, false);
-                        client.groupChanged(changeIndex, groupIndex + 1, ListEvent.UPDATE, false, changeType, oldValue, firstFromNextGroup, false);
+                        client.groupChanged(changeIndex, groupIndex, ListEvent.INSERT, true, changeType, ListEvent.<E>unknownValue(), tryJoinResult.newFirstInGroup, false, false);
+                        client.groupChanged(changeIndex, groupIndex + 1, ListEvent.UPDATE, false, changeType, oldValue, firstFromNextGroup, false, false);
                     }
 
                 // we are joining an existing group to our left
                 } else if(tryJoinResult.group == LEFT_GROUP) {
                     if(oldGroup == NO_GROUP) {
-                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE, true, changeType, tryJoinResult.oldFirstInGroup, tryJoinResult.newFirstInGroup, false);
-                        client.groupChanged(changeIndex, groupIndex + 1, ListEvent.DELETE, false, changeType, oldValue, ListEvent.<E>unknownValue(), false);
+                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE, true, changeType, tryJoinResult.oldFirstInGroup, tryJoinResult.newFirstInGroup, false, false);
+                        client.groupChanged(changeIndex, groupIndex + 1, ListEvent.DELETE, false, changeType, oldValue, ListEvent.<E>unknownValue(), false, false);
                     } else if(oldGroup == LEFT_GROUP) {
-                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE, true, changeType, tryJoinResult.oldFirstInGroup, tryJoinResult.newFirstInGroup, false);
+                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE, true, changeType, tryJoinResult.oldFirstInGroup, tryJoinResult.newFirstInGroup, false, false);
                     } else if(oldGroup == RIGHT_GROUP) {
                         //Update next separator due to Bug500: AACCC -> AAACC
-                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE, true, changeType, tryJoinResult.oldFirstInGroup, tryJoinResult.newFirstInGroup, true);
+                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE, true, changeType, tryJoinResult.oldFirstInGroup, tryJoinResult.newFirstInGroup, true, false);
                         if(groupIndex + 1 < barcode.blackSize()) {
                             E firstFromNextGroup = sortedList.get(barcode.getIndex(groupIndex + 1, UNIQUE));
-                            client.groupChanged(changeIndex, groupIndex + 1, ListEvent.UPDATE, false, changeType, oldValue, firstFromNextGroup, false);
+                            client.groupChanged(changeIndex, groupIndex + 1, ListEvent.UPDATE, false, changeType, oldValue, firstFromNextGroup, false, false);
                         }
                     }
 
                 // we are joining an existing group to our right
                 } else if(tryJoinResult.group == RIGHT_GROUP) {
                     if (oldGroup == NO_GROUP) {
-                        client.groupChanged(changeIndex, groupIndex, ListEvent.DELETE, false, changeType, oldValue, ListEvent.<E>unknownValue(), false);
-                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE, true, changeType, tryJoinResult.oldFirstInGroup, tryJoinResult.newFirstInGroup, false);
+                        client.groupChanged(changeIndex, groupIndex, ListEvent.DELETE, false, changeType, oldValue, ListEvent.<E>unknownValue(), false, true);
+                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE, true, changeType, tryJoinResult.oldFirstInGroup, tryJoinResult.newFirstInGroup, false, true);
                     } else if(oldGroup == LEFT_GROUP) {
                         if(groupIndex - 1 >= 0) {
                             //Update next separator due to Bug500: AAACC -> AACCC
                             E firstFromPreviousGroup = sortedList.get(barcode.getIndex(groupIndex - 1, UNIQUE));
-                            client.groupChanged(changeIndex, groupIndex - 1, ListEvent.UPDATE, false, changeType, firstFromPreviousGroup, firstFromPreviousGroup, true);
+                            client.groupChanged(changeIndex, groupIndex - 1, ListEvent.UPDATE, false, changeType, firstFromPreviousGroup, firstFromPreviousGroup, true, true);
                         }
-                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE, true, changeType, tryJoinResult.oldFirstInGroup, tryJoinResult.newFirstInGroup, false);
+                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE, true, changeType, tryJoinResult.oldFirstInGroup, tryJoinResult.newFirstInGroup, false, true);
                     } else if(oldGroup == RIGHT_GROUP) {
-                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE, true, changeType, tryJoinResult.oldFirstInGroup, tryJoinResult.newFirstInGroup, false);
+                        client.groupChanged(changeIndex, groupIndex, ListEvent.UPDATE, true, changeType, tryJoinResult.oldFirstInGroup, tryJoinResult.newFirstInGroup, false, true);
                     }
                 }
 
@@ -334,11 +334,11 @@ public class Grouper<E> {
                 		// Duplicate deletion is a group update, but it was already triggered by the UNIQUE element update,
                         // so nothing to do here.
                         // For SeparatorList, node still needs to be deleted
-                        client.groupChanged(changeIndex, groupDeletedIndex - 1, ListEvent.UPDATE, true, changeType, oldValue, ListEvent.<E>unknownValue(), false);
+                        client.groupChanged(changeIndex, groupDeletedIndex - 1, ListEvent.UPDATE, true, changeType, oldValue, ListEvent.<E>unknownValue(), false, true);
                         lastFakedUniqueChangeIndex = -1;
                 	} else {
                 		// if we removed a UNIQUE element then it was the last one and we must remove the group
-                		client.groupChanged(changeIndex, groupDeletedIndex, ListEvent.DELETE, true, changeType, oldValue, ListEvent.<E>unknownValue(), false);
+                		client.groupChanged(changeIndex, groupDeletedIndex, ListEvent.DELETE, true, changeType, oldValue, ListEvent.<E>unknownValue(), false, true);
                 	}
                 } else {
                     E oldValueInGroup;
@@ -360,7 +360,7 @@ public class Grouper<E> {
                         oldValueInGroup = newValueInGroup;
                     }
 
-                    client.groupChanged(changeIndex, groupDeletedIndex, ListEvent.UPDATE, true, changeType, oldValueInGroup, newValueInGroup, false);
+                    client.groupChanged(changeIndex, groupDeletedIndex, ListEvent.UPDATE, true, changeType, oldValueInGroup, newValueInGroup, false, true);
                 }
             }
         }
@@ -485,7 +485,8 @@ public class Grouper<E> {
          *      inserted or deleted, in which case the elementChangeType
          * @param updateNextSeparator whether or not we need to consider the
          *      separator update that fixes Bug500
+         * @param joinRight flag to indicate if the right group may need to be shifted
          */
-        public void groupChanged(int index, int groupIndex, int groupChangeType, boolean primary, int elementChangeType, E oldValue, E newValue, boolean updateNextSeparator);
+        public void groupChanged(int index, int groupIndex, int groupChangeType, boolean primary, int elementChangeType, E oldValue, E newValue, boolean updateNextSeparator, boolean joinRight);
     }
 }
