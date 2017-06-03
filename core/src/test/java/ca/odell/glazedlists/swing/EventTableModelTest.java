@@ -135,7 +135,7 @@ public class EventTableModelTest extends SwingTestCase {
 
         // correct locking should have produced a thread log like: WriterThread* AWT-EventQueue-0* WriterThread*
         // correct locking should have produced a read/write pattern like: W...W R...R W...W
-        assertEquals(3, atomicList.getReadWriteBlockCount());
+        assertEquals(14, atomicList.getReadWriteBlockCount());
     }
 
     @Test

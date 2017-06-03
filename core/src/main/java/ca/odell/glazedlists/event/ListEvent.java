@@ -3,11 +3,11 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.event;
 
+import java.util.EventObject;
+
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.TransformedList;
-
-import java.util.EventObject;
 
 /**
  * A ListEvent models a sequence of changes to an {@link EventList}. A
@@ -157,53 +157,6 @@ import java.util.EventObject;
  * will observe a deletion of all list elements with a subsequent re-insertion
  * instead.
  *
- * <p>
- * In the future, ListEvent will provide even more information about the list
- * changes to be more self-contained:
- * <ul>
- * <li>for deletes, it will provide the deleted element with
- * {@link #getOldValue()}
- * <li>for inserts, it will provide the inserted element with
- * {@link #getNewValue()}
- * <li>for updates, it will provide the old and new element with
- * {@link #getOldValue()} and {@link #getNewValue()}
- * </ul>
- *
- * The methods are currently marked as deprecated and should not be used yet,
- * because the implementation is a work in progress.
- *
- * <p>
- * Note, that providing the old and new elements has an impact on the
- * granularity of blocks of changes. For example, consider the clear operation
- * on a list:
- *
- * <pre>
- * EventList&lt;String&gt; list = GlazedLists.eventListOf(&quot;A&quot;, &quot;B&quot;, &quot;C&quot;);
- * list.clear();
- * </pre>
- *
- * Without considering the old and new elements, the ListEvent would consist of
- * one block: a deletion from index 0 to 2 ("D0-2"). With the feature of
- * providing the deleted elements, the ListEvent cannot consist of one block
- * anymore, because of the additional requirement, that the old element must
- * have the same value in one block:
- *
- * <pre>
- * ListEvent listChanges = ...
- * while (listChanges.nextBlock()) {
- *     final int type = listChanges.getType());
- *     final int startIndex = listChanges.getBlockStartIndex();
- *     final int endIndex = listChanges.getBlockEndIndex();
- *     final Object oldValue = listChanges.getOldValue();
- *     final Object newValue = listChanges.getNewValue();
- *     // handle insert, update or delete from startIndex to endIndex
- *     ...
- * }
- * </pre>
- *
- * So, a sequence of simple changes can only be grouped as block, when the type, as well
- * as the old and new value are equal.
- *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public abstract class ListEvent<E> extends EventObject {
@@ -333,17 +286,6 @@ public abstract class ListEvent<E> extends EventObject {
      */
     @Deprecated
     public abstract E getOldValue();
-
-    /**
-     * Gets the current value for an inserted or updated element. If that data is
-     * not available, this will return {@link ListEvent#UNKNOWN_VALUE}.
-     *
-     * @deprecated this is a <strong>developer preview</strong> API that is not
-     * yet fit for human consumption. Hopefully the full implementation is
-     * complete for Glazed Lists 2.0.
-     */
-    @Deprecated
-    public abstract E getNewValue();
 
     /**
      * Gets the number of blocks currently remaining in this atomic change.

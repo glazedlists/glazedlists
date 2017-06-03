@@ -483,9 +483,14 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
                 int type = listChanges.getType();
 
                 int overallIndex = index + childOffset;
+
+                E newValue = null;
+                if (index < children.size()) {
+                    newValue = children.get(index);
+                }
                 switch (type) {
-                    case ListEvent.INSERT: updates.elementInserted(overallIndex, listChanges.getNewValue()); break;
-                    case ListEvent.UPDATE: updates.elementUpdated(overallIndex, listChanges.getOldValue(), listChanges.getNewValue()); break;
+                    case ListEvent.INSERT: updates.elementInserted(overallIndex, newValue); break;
+                    case ListEvent.UPDATE: updates.elementUpdated(overallIndex, listChanges.getOldValue(), newValue); break;
                     case ListEvent.DELETE: updates.elementDeleted(overallIndex, listChanges.getOldValue()); break;
                 }
             }

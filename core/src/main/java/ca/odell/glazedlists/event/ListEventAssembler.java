@@ -283,7 +283,11 @@ public final class ListEventAssembler<E> {
                 int type = listChanges.getType();
                 int index = listChanges.getIndex();
                 E oldValue = (E) listChanges.getOldValue();
-                E newValue = (E) listChanges.getNewValue();
+
+                E newValue = null;
+                if (index < sourceList.size()) {
+                    newValue = sourceList.get(index);
+                }
                 addChange(type, index, index, oldValue, newValue);
             }
             listChanges.reset();
