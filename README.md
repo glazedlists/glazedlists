@@ -6,8 +6,6 @@
 
 Home page: 		http://www.glazedlists.com/
 
-java.net site:  https://java.net/projects/glazedlists
-
 ### Documentation
 
 See documentation at [www.glazedlists.com](http://www.glazedlists.com/documentation)
@@ -28,7 +26,7 @@ Configure [Maven](http://www.glazedlists.com/Home/maven)
 
 Please join the appropriate mailing list, if you are interested in using or contributing to Glazed Lists.
 
-[Overview of mailing lists](https://java.net/projects/glazedlists/lists)
+[Overview of mailing lists](http://glazedlists.1045722.n5.nabble.com/GlazedLists-f3416377.subapps.html)
 
 ### License
 
