@@ -76,6 +76,7 @@ clean.doLast {
     file(targetDir).deleteDir()
 }
 
+
 /**
  * JavaDoc
  */
@@ -223,8 +224,3 @@ model {
         destination = file("$buildDir/generated-pom.xml")
     }
 }
-
-/**
- * import build.xml for the m4 task
- */
-ant.importBuild 'build.xml'
