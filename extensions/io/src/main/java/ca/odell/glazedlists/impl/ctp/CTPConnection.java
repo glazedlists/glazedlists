@@ -4,9 +4,6 @@
 package ca.odell.glazedlists.impl.ctp;
 
 // NIO is used for CTP
-import ca.odell.glazedlists.impl.io.Bufferlo;
-import ca.odell.glazedlists.impl.nio.NIOAttachment;
-
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -18,6 +15,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Logger;
+
+import ca.odell.glazedlists.impl.io.Bufferlo;
+import ca.odell.glazedlists.impl.nio.NIOAttachment;
 
 /**
  * The CTPConnection is base class for building a client or server implementation
