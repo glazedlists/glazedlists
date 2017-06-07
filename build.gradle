@@ -97,7 +97,6 @@ task docs(type: Javadoc) {
     destinationDir = file("$targetDir/docs/api")
     title = "Glazed Lists $version"
     exclude '**/impl/**'
-    exclude '**/migrationkit/**'
 
     options {
         author true
