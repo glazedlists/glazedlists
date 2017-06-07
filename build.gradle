@@ -85,7 +85,7 @@ task docs(type: Javadoc) {
 	} else {
     	options.addStringOption('Xdoclint:none', '-quiet')
     }
-    classpath = files(exportedProjects.collect { it.sourceSets.main.compileClasspath })
+    classpath = files(exportedProjects.collect { it.sourceSets.main.compileClasspath + it.sourceSets.main.output })
     source = exportedProjects.collect { it.sourceSets.main.allJava }
     destinationDir = file("$targetDir/docs/api")
     title = "Glazed Lists $version"
