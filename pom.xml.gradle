@@ -16,29 +16,11 @@ ext.addInfoToPomXML = { pom ->
             url "http://www.glazedlists.com"
 
             issueManagement {
-                system "Jira"
-                url "http://java.net/jira/browse/GLAZEDLISTS"
+                system "GitHub Issues"
+                url "https://github.com/glazedlists/glazedlists/issues"
             }
 
             inceptionYear 2003
-
-            mailingLists {
-                mailingList {
-                    name "users@glazedlists.java.net"
-                    post "users@glazedlists.java.net"
-                    archive "http://java.net/projects/glazedlists/lists/users/archive"
-                }
-                mailingList {
-                    name "dev@glazedlists.java.net"
-                    post "dev@glazedlists.java.net"
-                    archive "http://java.net/projects/glazedlists/lists/dev/archive"
-                }
-                mailingList {
-                    name "issues@glazedlists.java.net"
-                    post "issues@glazedlists.java.net"
-                    archive "http://java.net/projects/glazedlists/lists/issues/archive"
-                }
-            }
 
             developers {
                 developer {
@@ -111,9 +93,9 @@ ext.addInfoToPomXML = { pom ->
                 }
             }
             scm {
-                connection "scm:svn:http://svn.java.net/svn/glazedlists~svn/trunk"
-                developerConnection "scm:svn:https://svn.java.net/svn/glazedlists~svn/trunk"
-                url "http://java.net/projects/glazedlists/sources/svn/show/trunk"
+                connection "scm:git:git://github.com/glazedlists/glazedlists"
+                developerConnection "scm:git:git://github.com/glazedlists/glazedlists"
+                url "https://github.com/glazedlists/glazedlists"
             }
             dependencies {
                 dependency {
