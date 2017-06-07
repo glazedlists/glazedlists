@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/glazedlists/glazedlists.svg?branch=master)](https://travis-ci.org/glazedlists/glazedlists)
 
+[![Join the chat at https://gitter.im/glazedlists/glazedlists](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/glazedlists/glazedlists)
+
 ### Project sites
 
 Home page: 		http://www.glazedlists.com/
