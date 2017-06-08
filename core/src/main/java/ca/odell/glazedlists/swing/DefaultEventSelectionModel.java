@@ -65,6 +65,9 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
 
     /** whether the user can modify the selection */
     private boolean enabled = true;
+    
+    /** Selection listener for the internal {@link ListSelection}. */
+    private final ListSelection.Listener selectionListener = new SwingSelectionListener();
 
     /** listeners to notify when the selection changes */
     private final List<ListSelectionListener> listeners = new ArrayList<ListSelectionListener>();
@@ -111,7 +114,7 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
 
             // build a list for reading the selection
             this.listSelection = new ListSelection<E>(source);
-            this.listSelection.addSelectionListener(new SwingSelectionListener());
+            this.listSelection.addSelectionListener(selectionListener);
         } finally {
             source.getReadWriteLock().readLock().unlock();
         }
@@ -506,6 +509,7 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
      */
     @Override
     public void dispose() {
+    	listSelection.removeSelectionListener(selectionListener);
         listSelection.dispose();
         if (disposeSource) {
             source.dispose();
