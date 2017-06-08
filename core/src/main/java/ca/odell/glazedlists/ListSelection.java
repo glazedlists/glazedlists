@@ -11,6 +11,7 @@ import ca.odell.glazedlists.impl.adt.BarcodeIterator;
 import ca.odell.glazedlists.matchers.Matcher;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * A class to provide index-based selection features. This class maintains two
@@ -105,7 +106,7 @@ public class ListSelection<E> implements ListEventListener<E> {
      *   <li>{@link #deselectedToggleList}</li>
      * </ul>
      */
-    private final List<Listener> selectionListeners = new ArrayList<Listener>(1);
+    private final CopyOnWriteArrayList<Listener> selectionListeners = new CopyOnWriteArrayList<Listener>();
 
     /**
      * Creates a new ListSelection that listens to changes on the given source.
@@ -1106,7 +1107,9 @@ public class ListSelection<E> implements ListEventListener<E> {
      * that will be notified when selection is changed.
      */
     public void addSelectionListener(Listener selectionListener) {
-        selectionListeners.add(selectionListener);
+    	if (selectionListener != null) {
+    		selectionListeners.add(selectionListener);
+    	}
     }
 
     /**
@@ -1114,7 +1117,9 @@ public class ListSelection<E> implements ListEventListener<E> {
      * so that it will no longer be notified when selection changes.
      */
     public void removeSelectionListener(Listener selectionListener) {
-        selectionListeners.remove(selectionListener);
+    	if (selectionListener != null) {
+    		selectionListeners.remove(selectionListener);
+    	}
     }
 
     /**
