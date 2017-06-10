@@ -5,12 +5,6 @@ ext.addInfoToPomXML = { pom ->
 
             packaging "jar"
 
-            parent {
-                groupId "net.java"
-                artifactId "jvnet-parent"
-                version 1
-            }
-
             name "Glazed Lists"
             description "Event-driven lists for dynamically filtered and sorted tables"
             url "http://www.glazedlists.com"
