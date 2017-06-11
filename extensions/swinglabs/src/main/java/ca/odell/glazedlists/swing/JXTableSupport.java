@@ -169,6 +169,8 @@ public class JXTableSupport<E> {
         // set state needed to integrate with Glazed Lists
         tableMemento.configureStateForGlazedLists(table);
         // prepare and set TableModel und SelectionModel
+        selectionModel = GlazedListsSwing.eventSelectionModelWithThreadProxyList(eventList);
+        table.setSelectionModel(selectionModel);
         if (table.getFillsViewportHeight()) {
             // workaround the problem of repainting issues when this property is
             // set, because of the known mismatch between ListEvents and TableModelEvents
@@ -180,8 +182,6 @@ public class JXTableSupport<E> {
             tableModel = GlazedListsSwing.eventTableModelWithThreadProxyList(eventList, tableFormat);
         }
         table.setModel(tableModel);
-        selectionModel = GlazedListsSwing.eventSelectionModelWithThreadProxyList(eventList);
-        table.setSelectionModel(selectionModel);
         // finally install TableComparatorChooser
         tableComparatorChooser = TableComparatorChooser.<E>install(table, sortedList,
                 sortingStrategy, tableFormat);
