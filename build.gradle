@@ -3,7 +3,7 @@
  */
 plugins {
     id "base"
-    id "maven-publish"
+    id "maven"
     id "signing"
     id "us.kirchmeier.capsule" version "1.0.2"
     id "biz.aQute.bnd.builder" version "3.3.0"
@@ -36,13 +36,13 @@ allprojects {
  */
 subprojects {
     apply plugin: 'java'
-	tasks.withType(JavaCompile) {
-	  options.encoding = "UTF-8"
-	}
-	tasks.withType(Javadoc) {
-		options.encoding = "UTF-8"
-	}
-	
+    tasks.withType(JavaCompile) {
+        options.encoding = "UTF-8"
+    }
+    tasks.withType(Javadoc) {
+        options.encoding = "UTF-8"
+    }
+
     repositories {
         jcenter()
 
@@ -87,10 +87,10 @@ clean.doLast {
  * JavaDoc
  */
 task docs(type: Javadoc) {
-	if (JavaVersion.current().isJava7()) {
-		options.addStringOption('-quiet')
-	} else {
-    	options.addStringOption('Xdoclint:none', '-quiet')
+    if (JavaVersion.current().isJava7()) {
+        options.addStringOption('-quiet')
+    } else {
+        options.addStringOption('Xdoclint:none', '-quiet')
     }
     classpath = files(exportedProjects.collect { it.sourceSets.main.compileClasspath + it.sourceSets.main.output })
     source = exportedProjects.collect { it.sourceSets.main.allJava }
@@ -119,6 +119,7 @@ task docs(type: Javadoc) {
  * JavaDoc-Jar
  */
 task javadocjar(type: Jar, dependsOn: "docs") {
+	classifier = 'javadoc'
     destinationDir = file(targetDir)
     archiveName = "${rootProject.name}-${version}-javadoc.jar"
     from fileTree("$targetDir/docs/api")
@@ -128,6 +129,7 @@ task javadocjar(type: Jar, dependsOn: "docs") {
  * Source-Jar
  */
 task sourcejar(type: Jar) {
+	classifier = 'sources'
     destinationDir = file(targetDir)
     archiveName = "${rootProject.name}-$version-sources.jar"
     includeEmptyDirs = false
@@ -176,60 +178,138 @@ task dist(type: Zip) {
  */
 build.dependsOn(["jar", "sourcejar", "javadocjar", "dist"])
 
-/**
- * Signing
- */
+artifacts {
+    archives javadocjar, sourcejar, dist
+}
+
 signing {
-    required { !isSnapshot }
-    sign jar
-    sign javadocjar
-    sign sourcejar
-    sign dist
+    sign configurations.archives
 }
 
-/**
- * Deploy
- */
-publishing {
+uploadArchives {
     repositories {
-        maven {
-            credentials {
-                username "$ossrhUsername"
-                password "$ossrhPassword"
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+            
+            repository(url: "${mavenStagingRepositoryUrl}") {
+                authentication(userName: sonatypeUsername, password: sonatypePassword)
             }
-            url isSnapshot ? mavenSnapshotsRepositoryUrl : mavenStagingRepositoryUrl
-        }
-    }
-
-    publications {
-        javaNet(MavenPublication) {
-            from components.java
-
-            artifact sourcejar {
-                classifier "sources"
+            
+            snapshotRepository(url: "${mavenSnapshotsRepositoryUrl}") {
+                authentication(userName: sonatypeUsername, password: sonatypePassword)
             }
+            
+            pom.project {
+                packaging 'jar'
+                name "Glazed Lists"
+                description "Event-driven lists for dynamically filtered and sorted tables"
 
-            artifact javadocjar {
-                classifier "javadoc"
+                url "http://www.glazedlists.com"
+                
+                issueManagement {
+                    system "GitHub Issues"
+                    url "https://github.com/glazedlists/glazedlists/issues"
+                }
+
+                inceptionYear 2003
+
+                scm {
+                    connection "scm:git:git://github.com/glazedlists/glazedlists"
+                    developerConnection "scm:git:git://github.com/glazedlists/glazedlists"
+                    url "https://github.com/glazedlists/glazedlists"
+                }
+
+                licenses {
+                    license {
+                        name "GNU Lesser General Public License"
+                        url "http://www.gnu.org/copyleft/lesser.html"
+                        distribution "repo"
+                    }
+                    license {
+                        name "Mozilla Public License Version 1.1"
+                        url "http://www.mozilla.org/MPL/MPL-1.1.html"
+                        distribution "repo"
+                    }
+                }
+
+                developers {
+                    developer {
+                        id "jessewilson"
+                        name "Jesse Wilson"
+                        email "jesse@swank.ca"
+                        roles {
+                            role "Java developer"
+                        }
+                        timezone "PDT"
+                    }
+                    developer {
+                        id "jplemieux"
+                        name "James Lemieux"
+                        email ""
+                        roles {
+                            role "Java developer"
+                        }
+                        timezone "PDT"
+                    }
+                    developer {
+                        id "kevinmaltby"
+                        name "Kevin Maltby"
+                        email ""
+                        roles {
+                            role "Java developer"
+                        }
+                        timezone "EST"
+                    }
+                    developer {
+                        id "reden"
+                        name "Rob Eden"
+                        email ""
+                        roles {
+                            role "Java developer"
+                        }
+                        timezone ""
+                    }
+                    developer {
+                        id "brands"
+                        name "Holger Brands"
+                        email ""
+                        roles {
+                            role "Java developer"
+                        }
+                        timezone "CET"
+                    }
+                }
+
+                contributors {
+                    contributor {
+                        name "Geoffrey De Smet"
+                        email "ge0ffrey.spam_AT_gmail.com"
+                        roles {
+                            role "Maven2izer"
+                        }
+                        timezone "+1"
+                    }
+                    contributor {
+                        name "Fabian Zeindl"
+                        email ""
+                        roles {
+                            role "Java developer"
+                        }
+                        timezone "CET"
+                    }
+                }
+                dependencies {
+                    dependency {
+                        groupId "junit"
+                        artifactId "junit"
+                        version "4.11"
+                        scope "test"
+                    }
+                }
             }
-
-            artifact dist {
-                classifier "dist"
-            }
-
-            /* customize pom */
-            apply from: 'pom.xml.gradle'
-            addInfoToPomXML(pom)
         }
     }
 }
-
-/*
- * enables command to show generated pom.xml:
- *   $ ./gradlew generatePomFileForJavaNetPublication && head build/generated-pom.xml
- */
-model {
-    tasks.generatePomFileForJavaNetPublication {
-        destination = file("$buildDir/generated-pom.xml")
-    }
-}
+uploadArchives.dependsOn sourcejar
+uploadArchives.dependsOn javadocjar
+uploadArchives.dependsOn dist
