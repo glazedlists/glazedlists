@@ -263,7 +263,7 @@ uploadArchives {
                     developer {
                         id "reden"
                         name "Rob Eden"
-                        email ""
+                        email "robeden1@gmail.com"
                         roles {
                             role "Java developer"
                         }
