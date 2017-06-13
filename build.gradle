@@ -263,13 +263,13 @@ uploadArchives {
                         timezone "EST"
                     }
                     developer {
-                        id "reden"
+                        id "robeden"
                         name "Rob Eden"
-                        email ""
+                        email "robeden1@gmail.com"
                         roles {
                             role "Java developer"
                         }
-                        timezone ""
+                        timezone "CST"
                     }
                     developer {
                         id "brands"
