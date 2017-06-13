@@ -1,23 +1,31 @@
 String amd64 = System.getProperty('os.name').contains("64")
-String swtJar;
-switch(System.getProperty('os.name').toLowerCase().split()[0]) {
-  case 'windows':
-    swtJar = 'win32.win32.x86'
-    if (amd64) {
-        swtJar += "_64"
-    }
-    break
-  case 'linux':
-    swtJar = 'gtk.linux.x86'
-    if (amd64) {
-        swtJar += "_64"
-    }
-    break
-  case 'mac':
-    swtJar = 'cocoa.macosx.x86_64'
-    break
-  default:
-    throw new Exception('Unknown OS')
+String swtJar
+String osJvmArgs
+switch (System.getProperty('os.name').toLowerCase().split()[0]) {
+    case 'windows':
+        swtJar = 'win32.win32.x86'
+        if (amd64) {
+            swtJar += "_64"
+        }
+        osJvmArgs = ''
+        break
+    case 'linux':
+        swtJar = 'gtk.linux.x86'
+        if (amd64) {
+            swtJar += "_64"
+        }
+        osJvmArgs = ''
+        break
+    case 'mac':
+        swtJar = 'cocoa.macosx.x86_64'
+
+        // SWT applications don't work correctly without the following flag controlling
+        // the thread on which the process is started.
+        //   See: https://www.eclipse.org/swt/macosx/
+        osJvmArgs = '-XstartOnFirstThread'
+        break
+    default:
+        throw new Exception('Unknown OS')
 }
 
 dependencies {
@@ -25,3 +33,17 @@ dependencies {
     compile "org.eclipse.swt:org.eclipse.swt.${swtJar}:4.6"
 }
 
+
+test {
+    jvmArgs osJvmArgs
+
+    beforeSuite { descriptor ->
+        // See https://github.com/glazedlists/glazedlists/issues/636
+        if (System.getProperty('os.name').toLowerCase().startsWith("mac")) {
+            throw new Exception(
+                'SWT tests are not currently supported on Mac due to a Gradle bug ' +
+                '(https://github.com/gradle/gradle/issues/864). You can run other tests ' +
+                'by adding "-x :extensions:swt:test" to Gradle arguments (for example: "./gradlew test -x :extensions:swt:test").' )
+        }
+    }
+}
