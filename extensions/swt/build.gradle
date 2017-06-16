@@ -35,7 +35,7 @@ dependencies {
 
 
 test {
-    jvmArgs osJvmArgs
+    if (!osJvmArgs.isEmpty()) jvmArgs osJvmArgs
 
     beforeSuite { descriptor ->
         // See https://github.com/glazedlists/glazedlists/issues/636
