@@ -28,5 +28,5 @@ before_script:
  - sh -e /etc/init.d/xvfb start
  - sleep 5
  - metacity --sm-disable --replace 2> metacity.err &
- - ls -l /usr/lib/jvm/java-7-openjdk-amd64/
+ - ls -l /usr/lib/jvm/java-7-openjdk-amd64/jre/lib/
  - ls -l /usr/lib/jvm/java-7-openjdk-amd64/lib/
