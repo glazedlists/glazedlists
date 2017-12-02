@@ -10,11 +10,11 @@ if (!(System.getenv()['JAVA_HOME'].contains('openjdk') && JavaVersion.current().
 // JavaFx not included in OpenJDK 7
     include 'extensions:issuesbrowser'
     include 'extensions:javafx'
+    include 'extensions:ktable'
+    include 'extensions:swinglabs'
 }
 include 'extensions:jfreechart'
 include 'extensions:jgoodiesforms'
-include 'extensions:ktable'
 include 'extensions:nachocalendar'
-include 'extensions:swinglabs'
 include 'extensions:swt'
 include 'extensions:treetable'
