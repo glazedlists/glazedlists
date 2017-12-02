@@ -184,7 +184,7 @@ artifacts {
 
 signing {
     required { gradle.taskGraph.hasTask("uploadArchives") }
-    
+
     sign configurations.archives
 }
 
@@ -192,22 +192,22 @@ uploadArchives {
     repositories {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-            
+
             repository(url: "${mavenStagingRepositoryUrl}") {
                 authentication(userName: sonatypeUsername, password: sonatypePassword)
             }
-            
+
             snapshotRepository(url: "${mavenSnapshotsRepositoryUrl}") {
                 authentication(userName: sonatypeUsername, password: sonatypePassword)
             }
-            
+
             pom.project {
                 packaging 'jar'
                 name "Glazed Lists"
                 description "Event-driven lists for dynamically filtered and sorted tables"
 
                 url "http://www.glazedlists.com"
-                
+
                 issueManagement {
                     system "GitHub Issues"
                     url "https://github.com/glazedlists/glazedlists/issues"
