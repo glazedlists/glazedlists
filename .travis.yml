@@ -3,7 +3,7 @@ dist: precise
 jdk:
   - openjdk7
   - oraclejdk8
-sudo: required
+sudo: false
 
 env: DISPLAY=:99.0
 
