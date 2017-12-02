@@ -1,6 +1,7 @@
 language: java
+dist: precise
 jdk:
-  - oraclejdk7
+  - openjdk7
   - oraclejdk8
 sudo: false
 
@@ -18,6 +19,9 @@ addons:
     packages:
       - oracle-java8-installer
       - metacity
+  hosts:
+    - glbuild
+  hostname: glbuild
 
 # start metacity window manager before running tests
 before_script:
