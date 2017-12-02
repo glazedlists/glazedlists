@@ -6,6 +6,8 @@ package ca.odell.glazedlists.matchers;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 /**
  * A MatcherEditor which decorates a source MatcherEditor with functionality.
@@ -42,9 +44,17 @@ import java.util.List;
  * </pre>
  *
  * @author James Lemieux
+ * @author Holger Brands
  */
 public class ThreadedMatcherEditor<E> extends AbstractMatcherEditorListenerSupport<E> {
 
+    private static final Executor DEFAULT_EXECUTOR = new Executor() {
+        @Override
+        public void execute(Runnable runnable) {
+            new Thread(runnable, "MatcherQueueThread").start();
+        }
+    };
+    
     /** The underlying MatcherEditor whose MatcherEvents are being queued and fired on an alternate Thread. */
     private final MatcherEditor<E> source;
 
@@ -73,18 +83,45 @@ public class ThreadedMatcherEditor<E> extends AbstractMatcherEditorListenerSuppo
      */
     private Runnable drainMatcherEventQueueRunnable = new DrainMatcherEventQueueRunnable();
 
+    /** Executor to run the {@link #drainMatcherEventQueueRunnable}*/
+    private Executor executor;
+
+	/**
+     * Creates a ThreadedMatcherEditor which wraps the given <code>source</code>.
+     * MatcherEvents fired from the <code>source</code> will be enqueued within
+     * this MatcherEditor until they are processed on an alternate Thread.
+     * The Thread selection strategy is encapsulated by a default executor,
+     * which always starts a new thread (for backward compatibility).
+     * Another constructor is provided for specifying a custom executor.
+     *
+     * @param source the MatcherEditor to wrap with buffering functionality
+     * @throws NullPointerException if <code>source</code> is <code>null</code>
+     * @see #ThreadedMatcherEditor(MatcherEditor, Executor)
+     */
+    public ThreadedMatcherEditor(MatcherEditor<E> source) {
+        this(source, DEFAULT_EXECUTOR);
+    }
+
     /**
      * Creates a ThreadedMatcherEditor which wraps the given <code>source</code>.
      * MatcherEvents fired from the <code>source</code> will be enqueued within
      * this MatcherEditor until they are processed on an alternate Thread.
+     * The Thread selection strategy is encapsulated by the provided executor.
      *
      * @param source the MatcherEditor to wrap with buffering functionality
+     * @param executor strategy for processing the enqueued MatcherEvents, if an {@link ExecutorService} is passed, it has to be shutdown by the provider
      * @throws NullPointerException if <code>source</code> is <code>null</code>
+     * @see #executeMatcherEventQueueRunnable(Runnable)
      */
-    public ThreadedMatcherEditor(MatcherEditor<E> source) {
-        if (source == null)
+    public ThreadedMatcherEditor(MatcherEditor<E> source, Executor executor) {
+        if (source == null) {
             throw new NullPointerException("source may not be null");
+        }
+        if (executor == null) {
+            throw new NullPointerException("executor may not be null");
+        }        
         this.source = source;
+        this.executor = executor;
         this.source.addMatcherEditorListener(this.queuingMatcherEditorListener);
     }
 
@@ -96,6 +133,15 @@ public class ThreadedMatcherEditor<E> extends AbstractMatcherEditorListenerSuppo
     @Override
     public Matcher<E> getMatcher() {
         return this.source.getMatcher();
+    }
+
+    /**
+     * Returns the executor used to process the enqueued MatcherEvents.
+     * If an {@link ExecutorService} was passed in, it has to be shutdown by the provider.
+     * @return  the executor used to process the enqueued MatcherEvents
+     */
+    public Executor getExecutor() {
+        return executor;
     }
 
     /**
@@ -179,17 +225,20 @@ public class ThreadedMatcherEditor<E> extends AbstractMatcherEditorListenerSuppo
     }
 
     /**
-     * This method executes the given <code>runnable</code> on a Thread. The
-     * particular Thread chosen to execute the Runnable is left as an
-     * implementation detail. By default, a new Thread named
-     * <code>MatcherQueueThread</code> is constructed to execute the
-     * <code>runnable</code> each time this method is called. Subclasses may
-     * override this method to use any Thread selection strategy they wish.
+     * This method executes the given <code>runnable</code> on a Thread.
+     * The particular Thread chosen to execute the Runnable is left to the 
+     * executor provided as constructor argument. When no executor is provided,
+     * a default executor will be used, which constructs a new Thread named
+     * <code>MatcherQueueThread</code> to execute the <code>runnable</code>
+     * each time this method is called. Subclasses may override this method
+     * to use any Thread selection strategy they wish, but providing a custom
+     * executor is now the preferred way.
      *
      * @param runnable a Runnable to execute on an alternate Thread
+     * @see #ThreadedMatcherEditor(MatcherEditor, Executor)
      */
     protected void executeMatcherEventQueueRunnable(Runnable runnable) {
-        new Thread(runnable, "MatcherQueueThread").start();
+        this.executor.execute(runnable);
     }
 
     /**
@@ -211,7 +260,7 @@ public class ThreadedMatcherEditor<E> extends AbstractMatcherEditorListenerSuppo
             }
         }
     }
-
+    
     /**
      * This Runnable contains logic which continues to process batches of
      * MatcherEvents from the matcherEventQueue until the queue is empty. Each

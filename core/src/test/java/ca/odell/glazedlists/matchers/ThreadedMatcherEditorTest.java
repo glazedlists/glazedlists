@@ -5,6 +5,8 @@ import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
 
 import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.junit.After;
 import org.junit.Before;
@@ -297,5 +299,13 @@ public class ThreadedMatcherEditorTest {
         // SOMETHING must have been combined, and thus the number of changes
         // should be less than the number of times we changed the filter text
         assertTrue(counter.getChangeCount() < 5);
+    }
+    
+    @Test
+    public void testCustomExecutor() {
+        TextMatcherEditor<String> matcherEditor = new TextMatcherEditor<>(GlazedLists.toStringTextFilterator());
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        ThreadedMatcherEditor<String> threadedMatcherEditor = new ThreadedMatcherEditor<>(matcherEditor, executor);
+        assertEquals(executor, threadedMatcherEditor.getExecutor());
     }
 }
