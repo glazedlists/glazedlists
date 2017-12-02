@@ -23,7 +23,7 @@ import java.awt.*;
 public final class ComboBoxPopupLocationFix {
 
     /** the components being fixed */
-    private final JComboBox comboBox;
+    private final JComboBox<?> comboBox;
     private final JPopupMenu popupMenu;
 
     /** the listener provides callbacks as necessary */
@@ -33,7 +33,7 @@ public final class ComboBoxPopupLocationFix {
      * Private constructor so users use the more action-oriented
      * {@link #install} method.
      */
-    private ComboBoxPopupLocationFix(JComboBox comboBox) {
+    private ComboBoxPopupLocationFix(JComboBox<?> comboBox) {
         this.comboBox = comboBox;
         this.popupMenu = (JPopupMenu)comboBox.getUI().getAccessibleChild(comboBox, 0);
 
@@ -43,7 +43,7 @@ public final class ComboBoxPopupLocationFix {
     /**
      * Install the fix for the specified combo box.
      */
-    public static ComboBoxPopupLocationFix install(JComboBox comboBox) {
+    public static ComboBoxPopupLocationFix install(JComboBox<?> comboBox) {
         if(comboBox == null) throw new IllegalArgumentException();
         return new ComboBoxPopupLocationFix(comboBox);
     }

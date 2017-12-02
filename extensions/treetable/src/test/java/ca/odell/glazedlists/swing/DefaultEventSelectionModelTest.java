@@ -378,10 +378,10 @@ public class DefaultEventSelectionModelTest extends SwingTestCase {
 
         // create two different JLists (one with DefaultEventSelectionModel and one with
         // DefaultListSelectionModel) that share the same data model
-        JList eventList = new JList(model);
+        JList<String> eventList = new JList<String>(model);
         eventList.setSelectionModel(eventSelectionModel);
 
-        JList defaultList = new JList(model);
+        JList<String> defaultList = new JList<String>(model);
         defaultList.setSelectionModel(defaultListSelectionModel);
 
         // select the first element in both selection models

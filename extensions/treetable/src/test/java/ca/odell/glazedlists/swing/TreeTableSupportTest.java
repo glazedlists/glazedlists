@@ -35,7 +35,7 @@ public class TreeTableSupportTest extends SwingTestCase {
         final JTable table = new JTable(model);
         final TableColumn hierarchyColumn = table.getColumnModel().getColumn(0);
         final TableCellRenderer originalRenderer = new DefaultTableCellRenderer();
-        final TableCellEditor originalEditor = new DefaultCellEditor(new JComboBox());
+        final TableCellEditor originalEditor = new DefaultCellEditor(new JComboBox<Object>());
         hierarchyColumn.setCellRenderer(originalRenderer);
         hierarchyColumn.setCellEditor(originalEditor);
 
@@ -89,7 +89,7 @@ public class TreeTableSupportTest extends SwingTestCase {
         final TreeTableCellRenderer renderer = (TreeTableCellRenderer) hierarchyColumn.getCellRenderer();
         final TreeTableCellEditor editor = (TreeTableCellEditor) hierarchyColumn.getCellEditor();
         final TableCellRenderer newDelegateRenderer = new DefaultTableCellRenderer();
-        final TableCellEditor newDelegateEditor = new DefaultCellEditor(new JComboBox());
+        final TableCellEditor newDelegateEditor = new DefaultCellEditor(new JComboBox<Object>());
 
         // installing new delegate renderers and editors should change them behind the TreeTableCellRenderer and TreeTableCellEditor
         assertNotSame(newDelegateRenderer, renderer.getDelegate());

@@ -182,8 +182,8 @@ public class IssuesBrowser implements Runnable {
         EventList<Project> projects = Project.getProjects();
         TransformedList<Project, Project> projectsProxyList = GlazedListsSwing.swingThreadProxyList(projects);
         // project select combobox
-        DefaultEventComboBoxModel projectsComboModel = new DefaultEventComboBoxModel<Project>(projectsProxyList);
-        JComboBox projectsCombo = new JComboBox(projectsComboModel);
+        DefaultEventComboBoxModel<Project> projectsComboModel = new DefaultEventComboBoxModel<>(projectsProxyList);
+        JComboBox<Project> projectsCombo = new JComboBox<>(projectsComboModel);
         projectsCombo.setEditable(false);
         projectsCombo.setOpaque(false);
         projectsCombo.addItemListener(new ProjectChangeListener());

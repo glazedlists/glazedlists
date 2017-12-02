@@ -221,7 +221,7 @@ public final class AutoCompleteSupport<E> {
     //
 
     /** The comboBox being decorated with autocomplete functionality. */
-    private JComboBox comboBox;
+    private JComboBox<E> comboBox;
 
     /** The popup menu of the decorated comboBox. */
     private JPopupMenu popupMenu;
@@ -236,7 +236,7 @@ public final class AutoCompleteSupport<E> {
     private final AutoCompleteComboBoxModel comboBoxModel;
 
     /** The custom renderer installed on the comboBox or <code>null</code> if one is not required. */
-    private final ListCellRenderer renderer;
+    private final ListCellRenderer<Object> renderer;
 
     /** The EventList which holds the items present in the comboBoxModel. */
     private final EventList<E> items;
@@ -388,10 +388,10 @@ public final class AutoCompleteSupport<E> {
     private final boolean originalComboBoxEditable;
 
     /** The original model installed on the comboBox. */
-    private ComboBoxModel originalModel;
+    private ComboBoxModel<E> originalModel;
 
     /** The original ListCellRenderer installed on the comboBox. */
-    private ListCellRenderer originalRenderer;
+    private ListCellRenderer<? super E> originalRenderer;
 
     //
     // Values present before {@link #decorateCurrentUI} executes - and are restored when {@link @undecorateOriginalUI} executes
@@ -420,7 +420,7 @@ public final class AutoCompleteSupport<E> {
      * @param filterator extracts searchable text strings from each item
      * @param format converts combobox elements into strings and vice versa
      */
-    private AutoCompleteSupport(JComboBox comboBox, EventList<E> items, TextFilterator<? super E> filterator, Format format) {
+    private AutoCompleteSupport(JComboBox<E> comboBox, EventList<E> items, TextFilterator<? super E> filterator, Format format) {
         this.comboBox = comboBox;
         this.originalComboBoxEditable = comboBox.isEditable();
         this.originalModel = comboBox.getModel();
@@ -487,7 +487,7 @@ public final class AutoCompleteSupport<E> {
      *
      * This method is the logical inverse of {@link #registerAllActionListeners}.
      */
-    private static ActionListener[] unregisterAllActionListeners(JComboBox comboBox) {
+    private static ActionListener[] unregisterAllActionListeners(JComboBox<?> comboBox) {
         final ActionListener[] listeners = comboBox.getActionListeners();
         for (int i = 0; i < listeners.length; i++)
             comboBox.removeActionListener(listeners[i]);
@@ -501,7 +501,7 @@ public final class AutoCompleteSupport<E> {
      *
      * This method is the logical inverse of {@link #unregisterAllActionListeners}.
      */
-    private static void registerAllActionListeners(JComboBox comboBox, ActionListener[] listeners) {
+    private static void registerAllActionListeners(JComboBox<?> comboBox, ActionListener[] listeners) {
         for (int i = 0; i < listeners.length; i++)
             comboBox.addActionListener(listeners[i]);
     }
@@ -510,7 +510,7 @@ public final class AutoCompleteSupport<E> {
      * A convenience method to search through the given JComboBox for the
      * JButton which toggles the popup up open and closed.
      */
-    private static JButton findArrowButton(JComboBox c) {
+    private static JButton findArrowButton(JComboBox<?> c) {
         for (int i = 0, n = c.getComponentCount(); i < n; i++) {
             final Component comp = c.getComponent(i);
             if (comp instanceof JButton)
@@ -680,7 +680,7 @@ public final class AutoCompleteSupport<E> {
      * @throws IllegalStateException if this method is called from any Thread
      *      other than the Swing Event Dispatch Thread
      */
-    public static <E> AutoCompleteSupport<E> install(JComboBox comboBox, EventList<E> items) {
+    public static <E> AutoCompleteSupport<E> install(JComboBox<E> comboBox, EventList<E> items) {
         return install(comboBox, items, null);
     }
 
@@ -716,7 +716,7 @@ public final class AutoCompleteSupport<E> {
      * @throws IllegalStateException if this method is called from any Thread
      *      other than the Swing Event Dispatch Thread
      */
-    public static <E> AutoCompleteSupport<E> install(JComboBox comboBox, EventList<E> items, TextFilterator<? super E> filterator) {
+    public static <E> AutoCompleteSupport<E> install(JComboBox<E> comboBox, EventList<E> items, TextFilterator<? super E> filterator) {
         return install(comboBox, items, filterator, null);
     }
 
@@ -775,7 +775,7 @@ public final class AutoCompleteSupport<E> {
      * @throws IllegalStateException if this method is called from any Thread
      *      other than the Swing Event Dispatch Thread
      */
-    public static <E> AutoCompleteSupport<E> install(JComboBox comboBox, EventList<E> items, TextFilterator<? super E> filterator, Format format) {
+    public static <E> AutoCompleteSupport<E> install(JComboBox<E> comboBox, EventList<E> items, TextFilterator<? super E> filterator, Format format) {
         checkAccessThread();
 
         final Component editorComponent = comboBox.getEditor().getEditorComponent();
@@ -834,7 +834,7 @@ public final class AutoCompleteSupport<E> {
      * Returns the autocompleting {@link JComboBox} or <code>null</code> if
      * {@link AutoCompleteSupport} has been {@link #uninstall}ed.
      */
-    public JComboBox getComboBox() {
+    public JComboBox<E> getComboBox() {
         return this.comboBox;
     }
 
@@ -1779,7 +1779,7 @@ public final class AutoCompleteSupport<E> {
         @Override
         public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
             // if the combo box does not contain a prototype display value, skip our sizing logic
-            final Object prototypeValue = comboBox.getPrototypeDisplayValue();
+            final E prototypeValue = comboBox.getPrototypeDisplayValue();
             if (prototypeValue == null) return;
 
             final JComponent popupComponent = (JComponent) e.getSource();
@@ -1809,9 +1809,9 @@ public final class AutoCompleteSupport<E> {
             }
         }
 
-        private Dimension getPrototypeSize(Object prototypeValue) {
+        private Dimension getPrototypeSize(E prototypeValue) {
             // get the renderer responsible for drawing the prototype value
-            ListCellRenderer renderer = comboBox.getRenderer();
+            ListCellRenderer<? super E> renderer = comboBox.getRenderer();
             if (renderer == null)
                 renderer = new DefaultListCellRenderer();
 
@@ -2067,7 +2067,7 @@ public final class AutoCompleteSupport<E> {
      */
     private class StringFunctionRenderer extends DefaultListCellRenderer {
         @Override
-        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
             String string = convertToString(value);
 
             // JLabels require some text before they can correctly determine their height, so we convert "" to " "
@@ -2296,7 +2296,7 @@ public final class AutoCompleteSupport<E> {
      */
     public static <E> AutoCompleteCellEditor<E> createTableCellEditor(EventList<E> source) {
         // build a special JComboBox used only in Table Cell Editors
-        final JComboBox comboBox = new TableCellComboBox();
+        final JComboBox<E> comboBox = new TableCellComboBox<>();
         comboBox.putClientProperty("JComboBox.isTableCellEditor", Boolean.TRUE);
 
         // install autocompletion support on the special JComboBox
@@ -2324,7 +2324,7 @@ public final class AutoCompleteSupport<E> {
      *       editing stops
      * </ul>
      */
-    private static final class TableCellComboBox extends JComboBox implements FocusListener {
+    private static final class TableCellComboBox<E> extends JComboBox<E> implements FocusListener {
 
         public TableCellComboBox() {
             // use a customized ComboBoxEditor within this special JComboBox

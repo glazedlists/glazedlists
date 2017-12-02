@@ -172,10 +172,10 @@ public class DefaultEventTableModel<E> extends AbstractTableModel implements Adv
      * customized by implementing the {@link AdvancedTableFormat} interface.
 	 */
 	@Override
-    public Class getColumnClass(int columnIndex) {
+    public Class<?> getColumnClass(int columnIndex) {
 		// See if the TableFormat is specifies a column class
-		if(tableFormat instanceof AdvancedTableFormat) {
-			return ((AdvancedTableFormat)tableFormat).getColumnClass(columnIndex);
+		if (tableFormat instanceof AdvancedTableFormat) {
+			return ((AdvancedTableFormat) tableFormat).getColumnClass(columnIndex);
 		// If not, use the default...
 		} else {
             return super.getColumnClass(columnIndex);

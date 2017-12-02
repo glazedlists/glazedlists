@@ -12,15 +12,15 @@ import java.awt.*;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class NoFocusRenderer implements TableCellRenderer, ListCellRenderer {
+public class NoFocusRenderer<E> implements TableCellRenderer, ListCellRenderer<E> {
 
     private TableCellRenderer delegateTableCellRenderer;
-    private ListCellRenderer delegateListCellRenderer;
+    private ListCellRenderer<? super E> delegateListCellRenderer;
 
     public NoFocusRenderer(TableCellRenderer delegate) {
         this.delegateTableCellRenderer = delegate;
     }
-    public NoFocusRenderer(ListCellRenderer delegate) {
+    public NoFocusRenderer(ListCellRenderer<? super E> delegate) {
         this.delegateListCellRenderer = delegate;
     }
 
@@ -29,7 +29,7 @@ public class NoFocusRenderer implements TableCellRenderer, ListCellRenderer {
         return delegateTableCellRenderer.getTableCellRendererComponent(table, value, isSelected, false, row, column);
     }
     @Override
-    public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean hasFocus) {
+    public Component getListCellRendererComponent(JList<? extends E> list, E value, int index, boolean isSelected, boolean hasFocus) {
         return delegateListCellRenderer.getListCellRendererComponent(list, value, index, isSelected, false);
     }
 }

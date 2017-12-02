@@ -24,7 +24,7 @@ import com.publicobject.misc.swing.NoFocusRenderer;
 class SwingUsersMatcherEditor extends UsersMatcherEditor implements FilterComponent<Issue> {
 
     /** a widget for selecting users */
-    private JList userSelect;
+    private JList<String> userSelect;
 
     /** scroll through users */
     private JScrollPane scrollPane;
@@ -43,11 +43,11 @@ class SwingUsersMatcherEditor extends UsersMatcherEditor implements FilterCompon
         final EventList<String> allUsers = getUsersList();
         allUserProxyList = GlazedListsSwing.swingThreadProxyList(allUsers);
         final DefaultEventListModel<String> usersListModel = new DefaultEventListModel<String>(allUserProxyList);
-        userSelect = new JList(usersListModel);
+        userSelect = new JList<String>(usersListModel);
         userSelect.setPrototypeCellValue("jessewilson");
         userSelect.setVisibleRowCount(10);
         // turn off cell focus painting
-        userSelect.setCellRenderer(new NoFocusRenderer(userSelect.getCellRenderer()));
+        userSelect.setCellRenderer(new NoFocusRenderer<String>(userSelect.getCellRenderer()));
 
         // create an EventList containing the JList's selection
         final AdvancedListSelectionModel<String> userSelectionModel = GlazedListsSwing.eventSelectionModel(allUserProxyList);
@@ -61,7 +61,7 @@ class SwingUsersMatcherEditor extends UsersMatcherEditor implements FilterCompon
     /**
      * Get the widget for selecting users.
      */
-    public JList getUserSelect() {
+    public JList<String> getUserSelect() {
         return userSelect;
     }
 

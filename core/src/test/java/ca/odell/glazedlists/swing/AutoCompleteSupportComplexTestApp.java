@@ -82,13 +82,11 @@ public class AutoCompleteSupportComplexTestApp {
         }
     }
 
-    private static final class UrlListCellRenderer extends JLabel implements ListCellRenderer {
+    private static final class UrlListCellRenderer extends JLabel implements ListCellRenderer<Url> {
         @Override
-        public Component getListCellRendererComponent(JList list, Object value, int index,
+        public Component getListCellRendererComponent(JList<? extends Url> list, Url value, int index,
                 boolean isSelected, boolean cellHasFocus) {
-            if (value instanceof Url) {
-                setText("URL:" + ((Url) value).getLocation());
-            }
+            setText("URL:" + value.getLocation());
             System.out.println("renderer called for " + index);
             return this;
         }
@@ -169,11 +167,11 @@ public class AutoCompleteSupportComplexTestApp {
     private String currentLookAndFeel;
 
     /** The last AutoCompleteSupport object installed. */
-    private AutoCompleteSupport autoCompleteSupport;
+    private AutoCompleteSupport<Url> autoCompleteSupport;
 
     /** The single JComboBox on which AutoCompleteSupport is repeatedly installed and uninstalled. */
-    private final JComboBox autoCompleteComboBox = new JComboBox();
-    private final JComboBox regularComboBox = new JComboBox();
+    private final JComboBox<Url> autoCompleteComboBox = new JComboBox<Url>();
+    private final JComboBox<Url> regularComboBox = new JComboBox<Url>();
 
     /** The test application's frame. */
     private final JFrame frame;
@@ -184,11 +182,11 @@ public class AutoCompleteSupportComplexTestApp {
     private final JPanel autocompleteActionPanel;
     private final JPanel regularActionPanel;
 
-    private final DefaultListModel autocompleteActionListModel = new DefaultListModel();
-    private final DefaultListModel regularActionListModel = new DefaultListModel();
+    private final DefaultListModel<String> autocompleteActionListModel = new DefaultListModel<String>();
+    private final DefaultListModel<String> regularActionListModel = new DefaultListModel<String>();
 
-    private final JList autocompleteActionList = new JList(autocompleteActionListModel);
-    private final JList regularActionList = new JList(regularActionListModel);
+    private final JList<String> autocompleteActionList = new JList<String>(autocompleteActionListModel);
+    private final JList<String> regularActionList = new JList<String>(regularActionListModel);
 
     private final JRadioButton filterModeStartsWith = new JRadioButton("Starts With");
     private final JRadioButton filterModeContains = new JRadioButton("Contains");
@@ -415,16 +413,16 @@ public class AutoCompleteSupportComplexTestApp {
     }
 
     private static class SetValueProgrammaticallyActionHandler extends AbstractAction {
-        private final JComboBox comboBox;
+        private final JComboBox<Url> comboBox;
 
-        public SetValueProgrammaticallyActionHandler(JComboBox comboBox) {
+        public SetValueProgrammaticallyActionHandler(JComboBox<Url> comboBox) {
             super("Set Value Programmatically");
             this.comboBox = comboBox;
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            final ComboBoxModel model = this.comboBox.getModel();
+            final ComboBoxModel<Url> model = this.comboBox.getModel();
             this.comboBox.setSelectedItem(model.getElementAt(model.getSize()-1));
         }
     }
@@ -450,7 +448,7 @@ public class AutoCompleteSupportComplexTestApp {
         return panel;
     }
 
-    private JPanel createActionPanel(String title, JList list) {
+    private JPanel createActionPanel(String title, JList<String> list) {
         final JPanel panel = new JPanel(new GridBagLayout());
 
         panel.add(new JLabel(title),     new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 5, 0, 0), 0, 0));
@@ -459,11 +457,11 @@ public class AutoCompleteSupportComplexTestApp {
         return panel;
     }
 
-    private JPanel createComboBoxModelPanel(String title, ComboBoxModel model) {
+    private JPanel createComboBoxModelPanel(String title, ComboBoxModel<Url> model) {
         final JPanel panel = new JPanel(new GridBagLayout());
 
-        final JList list = new JList(model);
-        list.setPrototypeCellValue("100: http://java.sun.com/j2se/1.5.0/download.jsp");
+        final JList<Url> list = new JList<Url>(model);
+        list.setPrototypeCellValue(new Url("http://java.sun.com/j2se/1.5.0/download.jsp"));
 
         panel.add(new JLabel(title),     new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 5, 0, 0), 0, 0));
         panel.add(new JScrollPane(list), new GridBagConstraints(0, 1, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 5, 5, 5), 0, 0));
@@ -488,9 +486,9 @@ public class AutoCompleteSupportComplexTestApp {
         autoCompleteComboBox.setPrototypeDisplayValue(new AutoCompleteSupportComplexTestApp.Url("http://java.sun.com/j2se/1.5.0/download.jsp"));
         autoCompleteSupport = AutoCompleteSupport.install(autoCompleteComboBox, items, filterator, format);
 
-        final JComboBox plainComboBox = regularComboBox;
+        final JComboBox<Url> plainComboBox = regularComboBox;
         plainComboBox.setEditable(true);
-        plainComboBox.setModel(new DefaultEventComboBoxModel<AutoCompleteSupportComplexTestApp.Url>(itemProxyList));
+        plainComboBox.setModel(new DefaultEventComboBoxModel<Url>(itemProxyList));
 
         final JScrollPane tableScroller = new JScrollPane(table);
         tableScroller.setPreferredSize(new Dimension(1, 200));
@@ -527,15 +525,15 @@ public class AutoCompleteSupportComplexTestApp {
     private static final class RecordActionHandler implements ActionListener {
         private int count = 0;
 
-        private final DefaultListModel model;
+        private final DefaultListModel<String> model;
 
-        public RecordActionHandler(DefaultListModel model) {
+        public RecordActionHandler(DefaultListModel<String> model) {
             this.model = model;
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            final JComboBox comboBox = (JComboBox) e.getSource();
+            final JComboBox<?> comboBox = (JComboBox<?>) e.getSource();
             final String actionSummary = String.valueOf(++count) + ": " + comboBox.getSelectedItem();
             model.add(0, actionSummary);
         }

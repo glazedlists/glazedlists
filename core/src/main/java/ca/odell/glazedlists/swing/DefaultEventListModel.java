@@ -37,7 +37,7 @@ import javax.swing.event.ListDataListener;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  * @author Holger Brands
  */
-public class DefaultEventListModel<E> implements ListEventListener<E>, ListModel {
+public class DefaultEventListModel<E> implements ListEventListener<E>, ListModel<E> {
 
     /** the source EventList */
     protected EventList<E> source;
@@ -122,7 +122,7 @@ public class DefaultEventListModel<E> implements ListEventListener<E>, ListModel
      * @return the value at <code>index</code>
      */
     @Override
-    public Object getElementAt(int index) {
+    public E getElementAt(int index) {
         source.getReadWriteLock().readLock().lock();
         try {
             return source.get(index);

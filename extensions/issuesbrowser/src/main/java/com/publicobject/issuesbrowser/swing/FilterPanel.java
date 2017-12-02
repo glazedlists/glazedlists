@@ -161,14 +161,14 @@ class FilterPanel {
      * A combobox to add a new filter.
      */
     private class AddFilterControl implements ItemListener, ListEventListener<CloseableFilterComponent> {
-        private JComboBox filterSelect;
+        private JComboBox<CloseableFilterComponent> filterSelect;
         private JLabel selectLabel;
         private JComponent panel;
 
         public AddFilterControl() {
             final EventList<CloseableFilterComponent> remainingFilterComponentsProxyList =
                 GlazedListsSwing.swingThreadProxyList(remainingFilterComponents);
-            filterSelect = new JComboBox(new DefaultEventComboBoxModel<CloseableFilterComponent>(remainingFilterComponentsProxyList));
+            filterSelect = new JComboBox<>(new DefaultEventComboBoxModel<CloseableFilterComponent>(remainingFilterComponentsProxyList));
             filterSelect.setFont(filterSelect.getFont().deriveFont(10.0f));
             filterSelect.setOpaque(false);
 

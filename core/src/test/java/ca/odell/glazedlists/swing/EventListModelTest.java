@@ -87,9 +87,9 @@ public class EventListModelTest extends SwingTestCase {
         // setup JList with EventListModel and EventSelectionModel
         final EventList<String> list = new BasicEventList<String>();
         list.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
-        final EventListModel<String> model = new EventListModel<String>(list);
-        final JList jList = new JList(model);
-        final EventSelectionModel selModel = new EventSelectionModel<String>(list);
+        final EventListModel<String> model = new EventListModel<>(list);
+        final JList<String> jList = new JList<String>(model);
+        final EventSelectionModel<String> selModel = new EventSelectionModel<>(list);
         jList.setSelectionModel(selModel);
         // establish a selection
         selModel.setSelectionInterval(1, 1);

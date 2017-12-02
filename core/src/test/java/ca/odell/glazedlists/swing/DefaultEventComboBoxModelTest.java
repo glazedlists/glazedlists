@@ -71,7 +71,7 @@ public class DefaultEventComboBoxModelTest extends SwingTestCase {
         colors.add(Color.RED);
         colors.add(Color.GREEN);
         final DefaultEventComboBoxModel<Color> comboModel = new DefaultEventComboBoxModel<Color>(colors);
-        final JComboBox comboBox = new JComboBox(comboModel);
+        final JComboBox<Color> comboBox = new JComboBox<>(comboModel);
         assertEquals(null, comboBox.getSelectedItem());
         assertEquals(-1, comboBox.getSelectedIndex());
         assertEquals(null, comboModel.getSelectedItem());

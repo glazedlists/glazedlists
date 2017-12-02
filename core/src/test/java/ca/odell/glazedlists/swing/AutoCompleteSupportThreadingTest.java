@@ -15,14 +15,14 @@ public class AutoCompleteSupportThreadingTest {
     @Test
     public void testNonEDTAccess() throws Exception {
         try {
-            AutoCompleteSupport.install(new JComboBox(), new BasicEventList<Object>());
+            AutoCompleteSupport.install(new JComboBox<Object>(), new BasicEventList<Object>());
             fail("failed to receive IllegalStateException installing AutoCompleteSupport from non-EDT");
         } catch (IllegalStateException e) {
             // expected
         }
 
         try {
-            AutoCompleteSupport.install(new JComboBox(), new BasicEventList<Object>(), GlazedLists.toStringTextFilterator());
+            AutoCompleteSupport.install(new JComboBox<Object>(), new BasicEventList<Object>(), GlazedLists.toStringTextFilterator());
             fail("failed to receive IllegalStateException installing AutoCompleteSupport from non-EDT");
         } catch (IllegalStateException e) {
             // expected
@@ -31,7 +31,7 @@ public class AutoCompleteSupportThreadingTest {
         final InstallAutoCompleteSupportRunnable installAutoCompleteSupportRunnable = new InstallAutoCompleteSupportRunnable();
         SwingUtilities.invokeAndWait(installAutoCompleteSupportRunnable);
 
-        final AutoCompleteSupport support = installAutoCompleteSupportRunnable.getSupport();
+        final AutoCompleteSupport<Object> support = installAutoCompleteSupportRunnable.getSupport();
 
         try {
             support.setStrict(true);
@@ -56,13 +56,13 @@ public class AutoCompleteSupportThreadingTest {
     }
 
     private static final class InstallAutoCompleteSupportRunnable implements Runnable {
-        private AutoCompleteSupport support;
+        private AutoCompleteSupport<Object> support;
 
         @Override
         public void run() {
-            support = AutoCompleteSupport.install(new JComboBox(), new BasicEventList<Object>());
+            support = AutoCompleteSupport.install(new JComboBox<Object>(), new BasicEventList<Object>());
         }
-        public AutoCompleteSupport getSupport() {
+        public AutoCompleteSupport<Object> getSupport() {
             return support;
         }
     }

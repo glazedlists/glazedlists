@@ -26,7 +26,7 @@ import javax.swing.event.ListDataEvent;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class DefaultEventComboBoxModel<E> extends DefaultEventListModel<E> implements ComboBoxModel {
+public class DefaultEventComboBoxModel<E> extends DefaultEventListModel<E> implements ComboBoxModel<E> {
 
     /** the currently selected item which typically belong to the source list */
     private Object selected;
