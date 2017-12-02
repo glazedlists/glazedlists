@@ -19,6 +19,9 @@ addons:
     packages:
       - oracle-java8-installer
       - metacity
+  hosts:
+    - glbuild
+  hostname: glbuild
 
 # start metacity window manager before running tests
 before_script:
