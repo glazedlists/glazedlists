@@ -5,9 +5,12 @@ include 'extensions:calculation'
 include 'extensions:hibernate'
 include 'extensions:icu4j'
 include 'extensions:io'
-include 'extensions:issuesbrowser'
 include 'extensions:japex'
-include 'extensions:javafx'
+if (!(System.getenv()['JAVA_HOME'].contains('openjdk') && JavaVersion.current().isJava7())) {
+// JavaFx not included in OpenJDK 7
+    include 'extensions:issuesbrowser'
+    include 'extensions:javafx'
+}
 include 'extensions:jfreechart'
 include 'extensions:jgoodiesforms'
 include 'extensions:ktable'
