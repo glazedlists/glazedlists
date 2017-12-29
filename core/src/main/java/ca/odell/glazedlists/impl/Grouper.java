@@ -204,7 +204,11 @@ public class Grouper<E> {
         while(listChanges.next()) {
             final int changeIndex = listChanges.getIndex();
             final int changeType = listChanges.getType();
-            E newValue = listChanges.getNewValue();
+
+            E newValue = null;
+            if (changeIndex < sortedList.size()) {
+                newValue = sortedList.get(changeIndex);
+            }
             E oldValue = listChanges.getOldValue();
 
             // inserts can result in UPDATE or INSERT events

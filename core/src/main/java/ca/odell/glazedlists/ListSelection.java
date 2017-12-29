@@ -195,6 +195,11 @@ public class ListSelection<E> implements ListEventListener<E> {
                 int previousSelectionIndex = barcode.getColourIndex(index, SELECTED);
                 boolean previouslySelected = previousSelectionIndex != -1;
 
+                E newValue = null;
+                if (index < source.size()) {
+                    newValue = source.get(index);
+                }
+
                 // when an element is deleted, blow it away
                 if(changeType == ListEvent.DELETE) {
 
@@ -230,32 +235,32 @@ public class ListSelection<E> implements ListEventListener<E> {
                         if(selectionMode == SINGLE_INTERVAL_SELECTION
                         || selectionMode == MULTIPLE_INTERVAL_SELECTION) {
                             barcode.add(index, SELECTED, 1);
-                            addSelectedInsert(previousSelectionIndex, listChanges.getNewValue());
+                            addSelectedInsert(previousSelectionIndex, newValue);
 
                         // do not select the inserted for single selection and defensive selection
                         } else {
                             barcode.add(index, DESELECTED, 1);
                             int deselectedIndex = barcode.getColourIndex(index, DESELECTED);
-                            addDeselectedInsert(deselectedIndex, listChanges.getNewValue());
+                            addDeselectedInsert(deselectedIndex, newValue);
                         }
 
                     // add a deselected value
                     } else {
                         barcode.add(index, DESELECTED, 1);
                         int deselectedIndex = barcode.getColourIndex(index, DESELECTED);
-                        addDeselectedInsert(deselectedIndex, listChanges.getNewValue());
+                        addDeselectedInsert(deselectedIndex, newValue);
                     }
 
                 // when an element is changed, assume selection stays the same
                 } else if(changeType == ListEvent.UPDATE) {
                     // update a selected value
                     if(previouslySelected) {
-                        addSelectedUpdate(previousSelectionIndex, listChanges.getOldValue(), listChanges.getNewValue());
+                        addSelectedUpdate(previousSelectionIndex, listChanges.getOldValue(), newValue);
 
                     // update a deselected value
                     } else {
                         int deselectedIndex = barcode.getColourIndex(index, DESELECTED);
-                        addDeselectedUpdate(deselectedIndex, listChanges.getOldValue(), listChanges.getNewValue());
+                        addDeselectedUpdate(deselectedIndex, listChanges.getOldValue(), newValue);
                     }
                 }
 

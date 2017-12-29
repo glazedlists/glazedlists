@@ -180,7 +180,7 @@ public class ListConsistencyListener<E> {
                         E inserted = source.get(changeIndex);
                         expected.add(changeIndex, inserted);
                         if(previousElementTracked) {
-                            Object reportedNew = listChanges.getNewValue();
+                            Object reportedNew = null;
 //                            assertTrue(inserted == reportedNew);
                         }
                     } else if(changeType == ListEvent.DELETE) {

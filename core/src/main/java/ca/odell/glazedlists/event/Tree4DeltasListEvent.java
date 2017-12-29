@@ -118,12 +118,6 @@ class Tree4DeltasListEvent<E> extends ListEvent<E> {
     }
 
     @Override
-    public E getNewValue() {
-        // TODO(jessewilson):
-        return ListEvent.<E>unknownValue();
-    }
-
-    @Override
     public int getBlocksRemaining() {
         throw new UnsupportedOperationException();
     }

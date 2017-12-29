@@ -49,7 +49,11 @@ public class NestableEventsList<E> extends TransformedList<E, E> {
                     final int type = listChanges.getType();
                     final int index = listChanges.getIndex();
                     final E oldValue = listChanges.getOldValue();
-                    final E newValue = listChanges.getNewValue();
+
+                    E newValue = null;
+                    if (index < source.size()) {
+                        newValue = source.get(index);
+                    }
 
                     switch (type) {
                         case ListEvent.INSERT: updates.elementInserted(index, newValue); break;

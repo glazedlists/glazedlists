@@ -72,8 +72,11 @@ public class RangeList<E> extends TransformedList<E, E> {
         while(listChanges.next()) {
             int changeType = listChanges.getType();
             int changeIndex = listChanges.getIndex();
-            E oldValue = listChanges.getOldValue();
-            E newValue = listChanges.getNewValue();
+            E oldValue =listChanges.getOldValue();
+            E newValue = null;
+            if (changeIndex < source.size()) {
+                newValue = source.get(changeIndex);
+            }
 
             if(changeType == ListEvent.DELETE) {
                 if(changeIndex < currentStartIndex) {
