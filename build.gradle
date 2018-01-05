@@ -156,11 +156,16 @@ jar {
 /**
  * Dist
  */
+import org.apache.tools.ant.DirectoryScanner
 task dist(type: Zip) {
+    /* fileTree uses ANT default excludes, but .gitignore should not be excluded */
+    doFirst {
+      DirectoryScanner.removeDefaultExclude "**/.gitignore"
+    }
+    
     destinationDir = file(targetDir)
     archiveName = "${rootProject.name}-$version-dist.zip"
     includeEmptyDirs = false
-
     from fileTree(".") {
         exclude ".git"
         exclude "www"
@@ -171,6 +176,10 @@ task dist(type: Zip) {
             exclude it
         }
     }
+    
+    doLast {
+      DirectoryScanner.resetDefaultExcludes()
+    }    
 }
 
 /**
