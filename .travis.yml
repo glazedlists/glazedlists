@@ -1,7 +1,5 @@
 language: java
-dist: precise
 jdk:
-  - openjdk7
   - oraclejdk8
 sudo: false
 
@@ -19,14 +17,9 @@ addons:
     packages:
       - oracle-java8-installer
       - metacity
-  hosts:
-    - glbuild
-  hostname: glbuild
 
 # start metacity window manager before running tests
 before_script:
  - sh -e /etc/init.d/xvfb start
  - sleep 5
  - metacity --sm-disable --replace 2> metacity.err &
- - ls -l /usr/lib/jvm/java-7-openjdk-amd64/jre/lib/
- - ls -l /usr/lib/jvm/java-7-openjdk-amd64/lib/

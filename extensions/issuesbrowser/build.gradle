@@ -22,7 +22,7 @@ task issuesbrowserjar(type: FatCapsule) {
     capsuleManifest {
         applicationId = 'com.publicobject.issuesbrowser.swing.IssuesBrowser'
         applicationName = 'IssuesBrowser'
-        minJavaVersion = '1.6.0'
+        minJavaVersion = '1.8.0'
     }
 }
 
@@ -38,6 +38,6 @@ task xmlbrowserjar(type: FatCapsule) {
     capsuleManifest {
         applicationId = 'com.publicobject.xmlbrowser.XmlBrowser'
         applicationName = 'XmlBrowser'
-        minJavaVersion = '1.6.0'
+        minJavaVersion = '1.8.0'
     }
 }

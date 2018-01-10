@@ -6,13 +6,10 @@ include 'extensions:hibernate'
 include 'extensions:icu4j'
 include 'extensions:io'
 include 'extensions:japex'
-if (!(System.getenv()['JAVA_HOME'].contains('openjdk') && JavaVersion.current().isJava7())) {
-// JavaFx not included in OpenJDK 7
-    include 'extensions:issuesbrowser'
-    include 'extensions:javafx'
-    include 'extensions:ktable'
-    include 'extensions:swinglabs'
-}
+include 'extensions:issuesbrowser'
+include 'extensions:javafx'
+include 'extensions:ktable'
+include 'extensions:swinglabs'
 include 'extensions:jfreechart'
 include 'extensions:jgoodiesforms'
 include 'extensions:nachocalendar'
