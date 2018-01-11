@@ -20,15 +20,17 @@ See documentation at [www.glazedlists.com](http://www.glazedlists.com/documentat
 
 Browse [Release Notes](http://www.glazedlists.com/releases)
 
-Download [Latest Release](http://repo1.maven.org/maven2/net/java/dev/glazedlists/glazedlists_java16/1.10.0/)
+Download [Latest Release](http://repo1.maven.org/maven2/com/glazedlists/glazedlists/1.11.0/)
 
 Configure [Maven](http://www.glazedlists.com/Home/maven)
 
-### Mailing lists
-
-Please join the appropriate mailing list, if you are interested in using or contributing to Glazed Lists.
+### Mailing list archives
 
 [Overview of mailing lists](http://glazedlists.1045722.n5.nabble.com/GlazedLists-f3416377.subapps.html)
+
+### Stack Overflow
+
+[Ask questions](https://stackoverflow.com/questions/tagged/glazedlists)
 
 ### License
 
