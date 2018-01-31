@@ -10,6 +10,8 @@ import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * An observable {@link List}. {@link ListEventListener}s can register to be
@@ -106,4 +108,75 @@ public interface EventList<E> extends List<E> {
      * to call any method on an {@link EventList} after it has been disposed.
      */
     public void dispose();
+    
+    /**
+     * Executes the block of code represented by the given consumer while holding the read lock of
+     * this EventList.
+     * 
+     * @param consumer the consumer != null
+     * @deprecated this is a <strong>developer preview</strong> API that is experimental and not yet
+     *             finalized
+     */
+    @Deprecated
+    default void acceptWithReadLock(Consumer<EventList<E>> consumer) {
+        getReadWriteLock().readLock().lock();
+        try {
+            consumer.accept(this);
+        } finally {
+            getReadWriteLock().readLock().unlock(); 
+        }
+    }
+    
+    /**
+     * Executes the block of code represented by the given consumer while holding the write lock of
+     * this EventList.
+     *
+     * @param consumer the consumer != null
+     * @deprecated this is a <strong>developer preview</strong> API that is experimental and not yet
+     *             finalized
+     */
+    default void acceptWithWriteLock(Consumer<EventList<E>> consumer) {
+        getReadWriteLock().writeLock().lock();
+        try {
+            consumer.accept(this);
+        } finally {
+            getReadWriteLock().writeLock().unlock();    
+        }
+    }
+
+    /**
+     * Applies the given function while holding the read lock of this EventList.
+     * 
+     * @param function the function != null
+     * @param <R> the result type of the function
+     * @return the result of the function
+     * @deprecated this is a <strong>developer preview</strong> API that is experimental and not yet
+     *             finalized
+     */
+    default <R> R applyWithReadLock(Function<EventList<E>, R> function) {
+        getReadWriteLock().readLock().lock();
+        try {
+            return function.apply(this);
+        } finally {
+            getReadWriteLock().readLock().unlock(); 
+        }
+    }
+    
+    /**
+     * Applies the given function while holding the write lock of this EventList.
+     * 
+     * @param function the function != null
+     * @param <R> the result type of the function
+     * @return the result of the function
+     * @deprecated this is a <strong>developer preview</strong> API that is experimental and not yet
+     *             finalized
+     */
+    default <R> R applyWithWriteLock(Function<EventList<E>, R> function) {
+        getReadWriteLock().writeLock().lock();
+        try {
+            return function.apply(this);
+        } finally {
+            getReadWriteLock().writeLock().unlock();    
+        }
+    }
 }

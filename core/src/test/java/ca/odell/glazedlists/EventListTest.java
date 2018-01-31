@@ -849,7 +849,49 @@ public class EventListTest {
   		assertEquals(1, eventCounter.getCountAndReset());
     }
 
+    @Test
+    public void testAcceptWithReadLock() {
+        final BasicEventList<String> source = new BasicEventList<String>();
+        source.add("ONE");
+        source.add("TWO");
+        source.add("THREE");
+        source.acceptWithReadLock(list -> assertEquals(3, list.size()));
+    }
 
+    @Test
+    public void testApplyWithReadLock() {
+        final BasicEventList<String> source = new BasicEventList<String>();
+        source.add("ONE");
+        source.add("TWO");
+        source.add("THREE");
+        int size = source.applyWithReadLock(list -> list.size());
+        assertEquals(3, size);
+    }
+
+    @Test
+    public void testAcceptWithWriteLock() {
+        final BasicEventList<String> source = new BasicEventList<String>();
+        source.add("ONE");
+        source.add("TWO");
+        source.add("THREE");
+        source.acceptWithWriteLock(list -> list.add("FOUR"));
+        String five = "FIVE";
+        source.acceptWithWriteLock(list -> list.add(five));
+        assertEquals(5, source.size());
+    }
+
+    @Test
+    public void testApplyWithWriteLock() {
+        final BasicEventList<String> source = new BasicEventList<String>();
+        source.add("ONE");
+        source.add("TWO");
+        source.add("THREE");
+        String result = source.applyWithWriteLock(list -> list.remove(1));
+        assertEquals("TWO", result);
+        String three = "THREE";
+        boolean removed = source.applyWithWriteLock(list -> list.remove(three));
+        assertTrue(removed);
+    }
 
     /**
      * Install a consistency listener to the specified list.
