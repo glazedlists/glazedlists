@@ -135,6 +135,7 @@ public interface EventList<E> extends List<E> {
      * @deprecated this is a <strong>developer preview</strong> API that is experimental and not yet
      *             finalized
      */
+    @Deprecated
     default void acceptWithWriteLock(Consumer<EventList<E>> consumer) {
         getReadWriteLock().writeLock().lock();
         try {
@@ -153,6 +154,7 @@ public interface EventList<E> extends List<E> {
      * @deprecated this is a <strong>developer preview</strong> API that is experimental and not yet
      *             finalized
      */
+    @Deprecated
     default <R> R applyWithReadLock(Function<EventList<E>, R> function) {
         getReadWriteLock().readLock().lock();
         try {
@@ -171,6 +173,7 @@ public interface EventList<E> extends List<E> {
      * @deprecated this is a <strong>developer preview</strong> API that is experimental and not yet
      *             finalized
      */
+    @Deprecated
     default <R> R applyWithWriteLock(Function<EventList<E>, R> function) {
         getReadWriteLock().writeLock().lock();
         try {
