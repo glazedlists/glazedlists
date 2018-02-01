@@ -2,3 +2,10 @@ dependencies {
     compile 'org.hibernate:hibernate-core:5.0.11.Final'
     testCompile 'org.hsqldb:hsqldb:2.3.4'
 }
+
+test {
+    // If the version reports a 1.<anything>, this is pre-Java 9.
+    if ( !System.getProperty('java.version').startsWith('1.') ) {
+        jvmArgs '--add-modules', 'java.xml.bind'
+    }
+}
