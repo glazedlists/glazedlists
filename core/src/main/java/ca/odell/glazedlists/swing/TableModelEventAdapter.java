@@ -78,6 +78,7 @@ public interface TableModelEventAdapter<E> extends ListEventListener<E> {
      *
      * @author Holger Brands
      */
+    @FunctionalInterface
     public interface Factory<E> {
 
         /**

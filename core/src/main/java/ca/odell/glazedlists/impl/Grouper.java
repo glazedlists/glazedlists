@@ -461,6 +461,7 @@ public class Grouper<E> {
      * {@link ListEvent}s if desired. The client receives callbacks as groups
      * are created, modified and destroyed.
      */
+    @FunctionalInterface
     public interface Client<E> {
         /**
          * Handle the structure of a group changing.

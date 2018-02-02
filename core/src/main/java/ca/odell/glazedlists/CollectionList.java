@@ -350,6 +350,7 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
      * @see CollectionList
      * @see GlazedLists#listCollectionListModel()
      */
+    @FunctionalInterface
     public interface Model<E,S> {
 
         /**

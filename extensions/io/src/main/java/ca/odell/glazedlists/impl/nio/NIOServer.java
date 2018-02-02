@@ -10,6 +10,7 @@ import java.nio.channels.Selector;
 /**
  * Handles incoming NIO connections.
  */
+@FunctionalInterface
 public interface NIOServer {
 
     /**

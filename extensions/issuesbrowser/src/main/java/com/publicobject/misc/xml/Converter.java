@@ -13,6 +13,7 @@ package com.publicobject.misc.xml;
  *
  * @author James Lemieux
  */
+@FunctionalInterface
 public interface Converter<S,T> {
     /**
      * Convert the given <code>value</code> to a more appropriate, type-safe

@@ -13,6 +13,7 @@ package com.publicobject.misc.xml;
  *
  * @author jessewilson
  */
+@FunctionalInterface
 public interface PopProcessor<B,V> {
 
     void process(B baseObject, V value);

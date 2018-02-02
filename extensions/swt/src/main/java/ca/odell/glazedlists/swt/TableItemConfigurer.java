@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.TableItem;
  *
  * @author hbrands
  */
+@FunctionalInterface
 public interface TableItemConfigurer<E> {
 
     /**

@@ -53,6 +53,7 @@ public class StartsWithCaseInsensitiveTextSearchStrategy extends AbstractTextSea
      * Implementations of this interface are used to provide the return value
      * for {@link StartsWithCaseInsensitiveTextSearchStrategy#indexOf}.
      */
+    @FunctionalInterface
     private interface IndexOfStrategy {
         public int indexOf(String text);
     }

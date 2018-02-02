@@ -262,6 +262,7 @@ class TowingCompany {
     }
 }
 
+@FunctionalInterface
 interface Passenger {
     public int getNumLegs();
 }

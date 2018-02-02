@@ -20,6 +20,7 @@ package ca.odell.glazedlists.matchers;
  * @see ca.odell.glazedlists.FilterList
  * @see ca.odell.glazedlists.matchers.MatcherEditor
  */
+@FunctionalInterface
 public interface Matcher<E> {
 
     /**

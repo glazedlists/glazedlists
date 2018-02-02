@@ -209,6 +209,7 @@ public final class UndoRedoSupport<E> {
      * UndoRedoSupport object via {@link UndoRedoSupport#addUndoSupportListener}. They
      * will be notified of each undoable edit that occurs to the given EventList.
      */
+    @FunctionalInterface
     public interface Listener extends EventListener {
         /**
          * Notified of each undoable edit applied to the given EventList.

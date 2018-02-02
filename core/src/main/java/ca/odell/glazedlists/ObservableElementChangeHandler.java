@@ -11,6 +11,7 @@ import ca.odell.glazedlists.ObservableElementList.Connector;
  * 
  * @author Holger Brands
  */
+@FunctionalInterface
 public interface ObservableElementChangeHandler<E> {
 
     /**

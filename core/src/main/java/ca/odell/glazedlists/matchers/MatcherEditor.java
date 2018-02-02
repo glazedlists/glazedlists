@@ -47,6 +47,7 @@ public interface MatcherEditor<E> {
      * The most notable implementation will be {@link ca.odell.glazedlists.FilterList FilterList}
      * which uses these events to update its state.
      */
+	@FunctionalInterface
     public interface Listener<E> extends EventListener {
 
        /**

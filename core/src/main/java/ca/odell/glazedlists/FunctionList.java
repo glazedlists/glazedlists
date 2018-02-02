@@ -324,6 +324,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
      * new objects, though it is permissible to return the original value
      * unchanged (i.e. the Identity Function).
      */
+    @FunctionalInterface
     public interface Function<A,B> {
 
         /**

@@ -10,6 +10,7 @@ package ca.odell.glazedlists.swt;
  *
  * @author Holger Brands
  */
+@FunctionalInterface
 public interface ItemFormat<E> {
 
 	/**

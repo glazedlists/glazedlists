@@ -17,6 +17,7 @@ package ca.odell.glazedlists.impl.gui;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
+@FunctionalInterface
 public interface SortingStrategy {
 
     /**

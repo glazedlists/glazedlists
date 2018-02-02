@@ -23,6 +23,7 @@ import java.util.EventListener;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
+@FunctionalInterface
 public interface ListEventListener<E> extends EventListener {
 
     /**

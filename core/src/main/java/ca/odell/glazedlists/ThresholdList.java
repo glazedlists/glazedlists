@@ -276,6 +276,7 @@ public final class ThresholdList<E> extends RangeList<E> {
      * Provide an integer value for a given {@link Object} in a
      * {@link ThresholdList}.
      */
+    @FunctionalInterface
     public interface Evaluator<E> {
         /**
          * Returns an integer value for an {@link Object} to be used to

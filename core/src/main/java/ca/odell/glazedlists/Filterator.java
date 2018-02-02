@@ -8,6 +8,7 @@ import java.util.List;
  *
  * @author James Lemieux
  */
+@FunctionalInterface
 public interface Filterator<C,E> {
 
     /**

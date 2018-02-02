@@ -8,6 +8,7 @@ package com.publicobject.misc.xml;
  *
  * @author jessewilson
  */
+@FunctionalInterface
 public interface PushProcessor<E> {
 
     public E evaluate();

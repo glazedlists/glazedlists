@@ -15,6 +15,7 @@ import org.eclipse.swt.widgets.TableColumn;
  *
  * @author hbrands
  */
+@FunctionalInterface
 public interface TableColumnConfigurer {
 
     /**

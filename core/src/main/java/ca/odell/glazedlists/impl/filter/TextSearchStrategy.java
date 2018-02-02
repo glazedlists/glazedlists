@@ -52,6 +52,7 @@ public interface TextSearchStrategy {
      * The factory for building implementations of {@link TextSearchStrategy}
      * which is used as an identifier for the strategy itself.
      */
+    @FunctionalInterface
     public interface Factory {
 
         /**

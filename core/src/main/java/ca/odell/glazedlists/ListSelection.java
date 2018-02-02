@@ -1152,6 +1152,7 @@ public class ListSelection<E> implements ListEventListener<E> {
      * A generic interface to respond to changes in selection that doesn't
      * require including a particular GUI toolkit.
      */
+    @FunctionalInterface
     public interface Listener {
 
         /**

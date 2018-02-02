@@ -14,6 +14,7 @@ import java.util.List;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
+@FunctionalInterface
 public interface TextFilterator<E> {
 
     /**

@@ -14,6 +14,7 @@ import javax.swing.*;
  *
  * @author James Lemieux
  */
+@FunctionalInterface
 public interface SortableRenderer {
 
     /**

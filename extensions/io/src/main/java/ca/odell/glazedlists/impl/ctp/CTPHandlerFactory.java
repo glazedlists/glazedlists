@@ -8,6 +8,7 @@ package ca.odell.glazedlists.impl.ctp;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
+@FunctionalInterface
 public interface CTPHandlerFactory {
 
     /**
