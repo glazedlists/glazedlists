@@ -3,14 +3,14 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.matchers;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
+
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.FilterList;
 import ca.odell.glazedlists.GlazedLists;
-
-import org.junit.Ignore;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 public class UnicodeTextMatcherEditorTest {
 
@@ -70,9 +70,8 @@ public class UnicodeTextMatcherEditorTest {
         assertEquals("\u00c6nima", list.get(0));
     }
 
-    @Ignore("Fix me")
     @Test
-    public void testUnicodeStrategy_StartsWith_FixMe() {
+    public void testUnicodeStrategy_StartsWith() {
         TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
         textMatcherEditor.setStrategy(GlazedListsICU4J.UNICODE_TEXT_SEARCH_STRATEGY);
         textMatcherEditor.setMode(TextMatcherEditor.STARTS_WITH);
@@ -96,9 +95,6 @@ public class UnicodeTextMatcherEditorTest {
         textMatcherEditor.setMode(TextMatcherEditor.STARTS_WITH);
         assertTrue(list.isEmpty());
 
-        // todo this highlights a bug in ICU4J, not Glazed Lists. We should update our
-        // icu4j.jar on glazedlists.dev.java.net once this bug has been fixed:
-        // http://bugs.icu-project.org/trac/ticket/5420
         textMatcherEditor.setFilterText(new String[0]);
         textMatcherEditor.setFilterText(new String[] {"Russland"});
         assertEquals(1, list.size());
