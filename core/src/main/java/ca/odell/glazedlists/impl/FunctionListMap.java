@@ -31,7 +31,7 @@ import java.util.*;
  * "C" -> "Cherry"
  * "O" -> "Orange"
  * "A" -> "Apple"
- * "P" -> "Pinapple"
+ * "P" -> "Pineapple"
  * "B" -> "Banana"
  * </pre>
  *
@@ -202,7 +202,7 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
             return null;
 
         final V value = get(key);
-        GlazedListsImpl.identityRemove(valueList, value);
+        valueList.removeIf( v -> v == value );  // identity comparison
         return value;
     }
 
