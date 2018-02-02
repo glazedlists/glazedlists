@@ -14,8 +14,7 @@ import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 import java.io.IOException;
 import java.io.ObjectStreamClass;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import org.junit.Test;
 
@@ -197,4 +196,42 @@ public class BasicEventListTest {
             compositeList.addMemberList(eventList);
         }
     }
+
+
+    @Test
+	public void testRemoveIf() {
+    	EventList<String> list = new BasicEventList<>();
+    	list.add( "One" );
+    	list.add( "Two" );
+    	list.add( "Three" );
+    	list.removeIf( s -> s.startsWith( "T" ) );
+
+    	assertEquals( Collections.singletonList( "One" ), list );
+    }
+
+    @Test
+	public void testRemoveAll_list() {
+	    EventList<String> list = new BasicEventList<>();
+	    list.add( "One" );
+	    list.add( "Two" );
+	    list.add( "Three" );
+
+	    // This hits a different logic path than removals based on Sets
+	    list.removeAll( Arrays.asList( "Three", "Two" ) );
+
+	    assertEquals( Collections.singletonList( "One" ), list );
+    }
+
+	@Test
+	public void testRemoveAll_set() {
+		EventList<String> list = new BasicEventList<>();
+		list.add( "One" );
+		list.add( "Two" );
+		list.add( "Three" );
+
+		// This hits a different logic path than removals based on non-Sets
+		list.removeAll( new HashSet<>( Arrays.asList( "Three", "Two" ) ) );
+
+		assertEquals( Collections.singletonList( "One" ), list );
+	}
 }
