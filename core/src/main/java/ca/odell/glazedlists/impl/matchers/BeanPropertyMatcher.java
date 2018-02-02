@@ -7,6 +7,8 @@ import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.impl.beans.BeanProperty;
 import ca.odell.glazedlists.matchers.Matcher;
 
+import java.util.Objects;
+
 /**
  * A {@link Matcher} which uses a {@link BeanProperty} to read a bean property
  * from a given bean and check it for equality with a given value.
@@ -35,6 +37,6 @@ public final class BeanPropertyMatcher<E> implements Matcher<E> {
     @Override
     public boolean matches(E item) {
         if (item == null) return false;
-        return GlazedListsImpl.equal(this.beanProperty.get(item), this.value);
+        return Objects.equals(this.beanProperty.get(item), this.value);
     }
 }

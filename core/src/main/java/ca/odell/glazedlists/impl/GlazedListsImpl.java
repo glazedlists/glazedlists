@@ -28,16 +28,7 @@ public final class GlazedListsImpl {
 
     // Utility Methods // // // // // // // // // // // // // // // // // // //
 
-    /**
-     * Compare the specified objects for equality.
-     */
-    public static boolean equal(Object a, Object b) {
-        if(a == b) return true;
-        if(a == null || b == null) return false;
-        return a.equals(b);
-    }
-
-    /**
+	/**
      * Concatenate two lists to create a third list.
      */
     public static <E> List<E> concatenate(List<E> a, List<E> b) {
@@ -179,7 +170,7 @@ public final class GlazedListsImpl {
     private static class EqualsComparator<T> implements Comparator<T> {
         @Override
         public int compare(T alpha, T beta) {
-            return equal(alpha, beta) ? 0 : 1;
+            return Objects.equals(alpha, beta) ? 0 : 1;
         }
     }
 

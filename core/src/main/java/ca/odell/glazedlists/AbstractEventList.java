@@ -121,7 +121,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
     public boolean contains(Object object) {
         // for through this, looking for the lucky object
         for(Iterator i = iterator(); i.hasNext(); ) {
-            if(GlazedListsImpl.equal(object, i.next())) return true;
+            if(Objects.equals(object, i.next())) return true;
         }
         // not found
         return false;
@@ -471,7 +471,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
         Iterator iterA = iterator();
         Iterator iterB = otherList.iterator();
         while(iterA.hasNext() && iterB.hasNext()) {
-            if(!GlazedListsImpl.equal(iterA.next(), iterB.next())) return false;
+            if(!Objects.equals(iterA.next(), iterB.next())) return false;
         }
 
         // if we haven't failed yet, they match
@@ -609,7 +609,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
         // for through this, looking for the lucky object
         int index = 0;
         for(Iterator<E> i = iterator(); i.hasNext(); ) {
-            if(GlazedListsImpl.equal(object, i.next())) return index;
+            if(Objects.equals(object, i.next())) return index;
             else index++;
         }
         // not found
@@ -635,7 +635,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
     public int lastIndexOf(Object object) {
         // for through this, looking for the lucky object
         for(int i = size() - 1; i >= 0; i--) {
-            if(GlazedListsImpl.equal(object, get(i))) return i;
+            if(Objects.equals(object, get(i))) return i;
         }
         // not found
         return -1;

@@ -7,6 +7,7 @@ import ca.odell.glazedlists.impl.GlazedListsImpl;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.Objects;
 
 /**
  * Eases the burdens of implementing any type of Calculation. It stores the
@@ -53,7 +54,7 @@ public abstract class AbstractCalculation<N> implements Calculation<N> {
     /** @inheritDoc */
     @Override
     public void setName(String name) {
-        if (!GlazedListsImpl.equal(this.name, name)) {
+        if (!Objects.equals( this.name, name )) {
             final String oldName = this.name;
             this.name = name;
             support.firePropertyChange("name", oldName, name);

@@ -197,7 +197,7 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
     private void checkKeyValueAgreement(K key, V value) {
         final K k = key(value);
 
-        if (!GlazedListsImpl.equal(key, k))
+        if (!Objects.equals(key, k))
             throw new IllegalArgumentException("The calculated key for the given value (" + k + ") does not match the given key (" + key + ")");
     }
 
@@ -334,7 +334,7 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
 
             final List<V> mapValue = GroupingListMultiMap.this.get(key);
 
-            return GlazedListsImpl.equal(value, mapValue);
+            return Objects.equals(value, mapValue);
         }
 
         /** {@inheritDoc} */
@@ -479,8 +479,8 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
                 return false;
             Map.Entry e = (Map.Entry) o;
 
-            final boolean keysEqual = GlazedListsImpl.equal(getKey(), e.getKey());
-            return keysEqual && GlazedListsImpl.equal(getValue(), e.getValue());
+            final boolean keysEqual = Objects.equals(getKey(), e.getKey());
+            return keysEqual && Objects.equals(getValue(), e.getValue());
         }
 
         /** {@inheritDoc} */
