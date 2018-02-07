@@ -8,7 +8,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEventPublisher;
@@ -47,19 +46,19 @@ public class EventListTest {
         List<String> wilson = GlazedListsTests.stringToList("WILSON");
 
         // create the reference list
-        List<String> jesseArrayList = new ArrayList<String>();
+        List<String> jesseArrayList = new ArrayList<>();
         jesseArrayList.addAll(jesse);
         jesseArrayList.removeAll(wilson);
 
         // test the BasicEventList list
-        List<String> jesseBasicEventList = new BasicEventList<String>();
+        List<String> jesseBasicEventList = new BasicEventList<>();
         installConsistencyListener(jesseBasicEventList);
         jesseBasicEventList.addAll(jesse);
         jesseBasicEventList.removeAll(wilson);
         assertEquals(jesseArrayList, jesseBasicEventList);
 
         // test the SortedList list
-        List<String> jesseSortedList = new SortedList<String>(new BasicEventList<String>(), null);
+        List<String> jesseSortedList = new SortedList<>(new BasicEventList<>(), null);
         jesseSortedList.addAll(jesse);
         jesseSortedList.removeAll(wilson);
         assertEquals(jesseArrayList, jesseSortedList);
@@ -78,19 +77,19 @@ public class EventListTest {
         List<String> wilson = GlazedListsTests.stringToList("WILSON");
 
         // create the reference list
-        List<String> jesseArrayList = new ArrayList<String>();
+        List<String> jesseArrayList = new ArrayList<>();
         jesseArrayList.addAll(jesse);
         jesseArrayList.retainAll(wilson);
 
         // test the BasicEventList list
-        List<String> jesseBasicEventList = new BasicEventList<String>();
+        List<String> jesseBasicEventList = new BasicEventList<>();
         installConsistencyListener(jesseBasicEventList);
         jesseBasicEventList.addAll(jesse);
         jesseBasicEventList.retainAll(wilson);
         assertEquals(jesseArrayList, jesseBasicEventList);
 
         // test the SortedList list
-        List<String> jesseSortedList = new SortedList<String>(new BasicEventList<String>(), null);
+        List<String> jesseSortedList = new SortedList<>(new BasicEventList<>(), null);
         jesseSortedList.addAll(jesse);
         jesseSortedList.retainAll(wilson);
         assertEquals(jesseArrayList, jesseSortedList);
@@ -102,20 +101,18 @@ public class EventListTest {
     @Test
     public void testContainsNull() {
         // get all different list types
-        List<List<String>> listTypes = new ArrayList<List<String>>();
-        listTypes.add(new ArrayList<String>());
-        listTypes.add(new BasicEventList<String>());
-        listTypes.add(SortedList.create(new BasicEventList<String>()));
+        List<List<String>> listTypes = new ArrayList<>();
+        listTypes.add(new ArrayList<>());
+        listTypes.add(new BasicEventList<>());
+        listTypes.add(SortedList.create(new BasicEventList<>()));
 
         // test all different list types
-        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext();) {
-            List<String> list = i.next();
-
+        for (List<String> list : listTypes) {
             // test a list that doesn't contain nulls
             list.clear();
             list.addAll(Arrays.asList("Molson", "Sleeman", "Labatts", "Western"));
             assertEquals(false, list.contains(null));
-            assertEquals(true,  list.contains("Western"));
+            assertEquals(true, list.contains("Western"));
 
             // test a list that does contain nulls
             list.clear();
@@ -132,15 +129,13 @@ public class EventListTest {
     @Test
     public void testContainsAllNull() {
         // get all different list types
-        List<List<String>> listTypes = new ArrayList<List<String>>();
-        listTypes.add(new ArrayList<String>());
-        listTypes.add(new BasicEventList<String>());
-        listTypes.add(SortedList.create(new BasicEventList<String>()));
+        List<List<String>> listTypes = new ArrayList<>();
+        listTypes.add(new ArrayList<>());
+        listTypes.add(new BasicEventList<>());
+        listTypes.add(SortedList.create(new BasicEventList<>()));
 
         // test all different list types
-        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext();) {
-            List<String> list = i.next();
-
+        for (List<String> list : listTypes) {
             // test a list that doesn't contain nulls
             list.clear();
             list.addAll(Arrays.asList("Molson", "Sleeman", "Labatts", "Western"));
@@ -164,15 +159,13 @@ public class EventListTest {
     @Test
     public void testIndexOfNull() {
         // get all different list types
-        List<List<String>> listTypes = new ArrayList<List<String>>();
-        listTypes.add(new ArrayList<String>());
-        listTypes.add(new BasicEventList<String>());
-        listTypes.add(SortedList.create(new BasicEventList<String>()));
+        List<List<String>> listTypes = new ArrayList<>();
+        listTypes.add(new ArrayList<>());
+        listTypes.add(new BasicEventList<>());
+        listTypes.add(SortedList.create(new BasicEventList<>()));
 
         // test all different list types
-        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext();) {
-            List<String> list = i.next();
-
+        for (List<String> list : listTypes) {
             // test a list that doesn't contain nulls
             list.clear();
             list.addAll(Arrays.asList("Molson", "Sleeman", "Labatts", "Western"));
@@ -194,15 +187,13 @@ public class EventListTest {
     @Test
     public void testLastIndexOfNull() {
         // get all different list types
-        List<List<String>> listTypes = new ArrayList<List<String>>();
-        listTypes.add(new ArrayList<String>());
-        listTypes.add(new BasicEventList<String>());
-        listTypes.add(SortedList.create(new BasicEventList<String>()));
+        List<List<String>> listTypes = new ArrayList<>();
+        listTypes.add(new ArrayList<>());
+        listTypes.add(new BasicEventList<>());
+        listTypes.add(SortedList.create(new BasicEventList<>()));
 
         // test all different list types
-        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext();) {
-            List<String> list = i.next();
-
+        for (List<String> list : listTypes) {
             // test a list that doesn't contain nulls
             list.clear();
             list.addAll(Arrays.asList("Molson", "Sleeman", "Labatts", "Western"));
@@ -224,21 +215,20 @@ public class EventListTest {
     @Test
     public void testRemoveNull() {
         // get all different list types
-        List<List<String>> listTypes = new ArrayList<List<String>>();
-        listTypes.add(new ArrayList<String>());
-        listTypes.add(new BasicEventList<String>());
-        listTypes.add(SortedList.create(new BasicEventList<String>()));
+        List<List<String>> listTypes = new ArrayList<>();
+        listTypes.add(new ArrayList<>());
+        listTypes.add(new BasicEventList<>());
+        listTypes.add(SortedList.create(new BasicEventList<>()));
 
         // test all different list types
-        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext();) {
-            List<String> list = i.next();
+        for (List<String> list : listTypes) {
             installConsistencyListener(list);
 
             // test a list that doesn't contain nulls
             list.clear();
             list.addAll(Arrays.asList("Molson", "Sleeman", "Labatts", "Western"));
             assertEquals(false, list.remove(null));
-            assertEquals(true,  list.remove("Sleeman"));
+            assertEquals(true, list.remove("Sleeman"));
 
             // test a list that does contain nulls
             list.clear();
@@ -255,20 +245,18 @@ public class EventListTest {
     @Test
     public void testRemoveAllNull() {
         // get all different list types
-        List<List<String>> listTypes = new ArrayList<List<String>>();
-        listTypes.add(new ArrayList<String>());
-        listTypes.add(new BasicEventList<String>());
-        listTypes.add(SortedList.create(new BasicEventList<String>()));
+        List<List<String>> listTypes = new ArrayList<>();
+        listTypes.add(new ArrayList<>());
+        listTypes.add(new BasicEventList<>());
+        listTypes.add(SortedList.create(new BasicEventList<>()));
 
         // test all different list types
-        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext();) {
-            List<String> list = i.next();
-
+        for (List<String> list : listTypes) {
             // test a list that doesn't contain nulls
             list.clear();
             list.addAll(Arrays.asList("Molson", "Sleeman", "Labatts", "Western"));
             assertEquals(true, list.removeAll(Arrays.asList("Western", null)));
-            assertEquals(false,  list.removeAll(Arrays.asList(null, "Busch")));
+            assertEquals(false, list.removeAll(Arrays.asList(null, "Busch")));
 
             // test a list that does contain nulls
             list.clear();
@@ -285,25 +273,23 @@ public class EventListTest {
     @Test
     public void testRetainAllNull() {
         // get all different list types
-        List<List<String>> listTypes = new ArrayList<List<String>>();
-        listTypes.add(new ArrayList<String>());
-        listTypes.add(new BasicEventList<String>());
-        listTypes.add(SortedList.create(new BasicEventList<String>()));
+        List<List<String>> listTypes = new ArrayList<>();
+        listTypes.add(new ArrayList<>());
+        listTypes.add(new BasicEventList<>());
+        listTypes.add(SortedList.create(new BasicEventList<>()));
 
         // test all different list types
-        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext();) {
-            List<String> list = i.next();
-
+        for (List<String> list : listTypes) {
             // test a list that doesn't contain nulls
             list.clear();
             list.addAll(Arrays.asList("Molson", "Sleeman", "Labatts", "Western"));
-            assertEquals(true,  list.retainAll(Arrays.asList("Western", null)));
+            assertEquals(true, list.retainAll(Arrays.asList("Western", null)));
             assertEquals(true, list.retainAll(Arrays.asList("Moslon", null)));
 
             // test a list that does contain nulls
             list.clear();
             list.addAll(Arrays.asList(null, "Sleeman", null, "Western"));
-            assertEquals(true,  list.retainAll(Arrays.asList("Western", null)));
+            assertEquals(true, list.retainAll(Arrays.asList("Western", null)));
             assertEquals(true, list.retainAll(Arrays.asList("Moslon", null)));
         }
     }
@@ -314,15 +300,14 @@ public class EventListTest {
     @Test
     public void testHashCodeNull() {
         // get all different list types
-        List<List<String>> listTypes = new ArrayList<List<String>>();
-        listTypes.add(new ArrayList<String>());
-        listTypes.add(new BasicEventList<String>());
-        listTypes.add(SortedList.create(new BasicEventList<String>()));
+        List<List<String>> listTypes = new ArrayList<>();
+        listTypes.add(new ArrayList<>());
+        listTypes.add(new BasicEventList<>());
+        listTypes.add(SortedList.create(new BasicEventList<>()));
 
         // test all different list types
-        for(Iterator<List<String>> i = listTypes.iterator(); i.hasNext();) {
-            List<String> list = i.next();
-            List<String> copy = new ArrayList<String>();
+        for (List<String> list : listTypes) {
+            List<String> copy = new ArrayList<>();
 
             // test a list that doesn't contain nulls
             list.clear();
@@ -370,7 +355,7 @@ public class EventListTest {
     @Test
     public void testGlazedListsEventList() {
         // make sure they have different backing stores
-        final List<String> list = new ArrayList<String>();
+        final List<String> list = new ArrayList<>();
         EventList<String> eventList = GlazedLists.eventList(list);
         assertEquals(list, eventList);
 
@@ -381,7 +366,7 @@ public class EventListTest {
         assertTrue(!list.equals(eventList));
 
         // make sure null is supported
-        final EventList<String> empty = GlazedLists.eventList((Collection<String>) null);
+        final EventList<String> empty = GlazedLists.eventList(null);
         assertEquals(Collections.EMPTY_LIST, empty);
     }
 
@@ -414,7 +399,7 @@ public class EventListTest {
     @Test
     public void testGlazedListsEventListUsingPublisherLock() {
         // make sure they have different backing stores
-        final List<String> list = new ArrayList<String>();
+        final List<String> list = new ArrayList<>();
         final ListEventPublisher publisher = ListEventAssembler.createListEventPublisher();
         final ReadWriteLock lock = LockFactory.DEFAULT.createReadWriteLock();
         final EventList<String> eventList = GlazedLists.eventList(publisher, lock, list);
@@ -429,7 +414,7 @@ public class EventListTest {
         assertTrue(!list.equals(eventList));
 
         // make sure null is supported
-        final EventList<String> empty = GlazedLists.eventList(publisher, lock, (Collection<String>) null);
+        final EventList<String> empty = GlazedLists.eventList(publisher, lock, null);
         assertEquals(Collections.EMPTY_LIST, empty);
         assertEquals(publisher, empty.getPublisher());
         assertEquals(lock, empty.getReadWriteLock());
@@ -440,10 +425,10 @@ public class EventListTest {
      */
     @Test
     public void testGlazedListsSyncToList() {
-        EventList<String> source = new BasicEventList<String>();
+        EventList<String> source = new BasicEventList<>();
         source.add("McCallum");
         source.add("Keith");
-        List<String> target = new ArrayList<String>();
+        List<String> target = new ArrayList<>();
         target.add("Greene");
 
         SyncListener<String> listener = GlazedLists.syncEventListToList(source, target);
@@ -483,10 +468,10 @@ public class EventListTest {
      */
     @Test
     public void testGlazedListsSyncToEventList() {
-        EventList<String> source = new BasicEventList<String>();
+        EventList<String> source = new BasicEventList<>();
         source.add("McCallum");
         source.add("Keith");
-        EventList<String> target = new BasicEventList<String>();
+        EventList<String> target = new BasicEventList<>();
         target.add("Greene");
 
         LockbasedSyncListener<String> listener = GlazedLists.syncEventListToEventList(source, target);
@@ -523,8 +508,8 @@ public class EventListTest {
 
     @Test
     public void testEventListTypeSafety() {
-        EventList<Object> source = new BasicEventList<Object>();
-        final Set<Class> acceptedTypes = new HashSet<Class>();
+        EventList<Object> source = new BasicEventList<>();
+        final Set<Class> acceptedTypes = new HashSet<>();
         acceptedTypes.add(null);
         acceptedTypes.add(Integer.class);
         acceptedTypes.add(String.class);
@@ -542,7 +527,7 @@ public class EventListTest {
         }
 
         // the source list is in an inconsistent state so we rebuild the list
-        source = new BasicEventList<Object>();
+        source = new BasicEventList<>();
         typeSafetyListener = GlazedLists.typeSafetyListener(source, acceptedTypes);
         source.add(null);
 
@@ -565,7 +550,7 @@ public class EventListTest {
 
     @Test
     public void testEventListLock() {
-        final EventList<String> source = new BasicEventList<String>();
+        final EventList<String> source = new BasicEventList<>();
 
         // asymmetric unlocking of the readlock should fail-fast
         try {
@@ -590,16 +575,16 @@ public class EventListTest {
 
     @Test
     public void testRemoveAllOnView() {
-        EventList<String> original = new BasicEventList<String>();
+        EventList<String> original = new BasicEventList<>();
         original.addAll(GlazedListsTests.stringToList("ABCDE"));
-        FilterList<String> filtered = new FilterList<String>(original, Matchers.trueMatcher());
+        FilterList<String> filtered = new FilterList<>(original, Matchers.trueMatcher());
         filtered.removeAll(filtered);
         assertEquals(Collections.EMPTY_LIST, original);
     }
 
     @Test
     public void testRetainAllOnSelf() {
-        EventList<String> original = new BasicEventList<String>();
+        EventList<String> original = new BasicEventList<>();
         original.addAll(GlazedListsTests.stringToList("ABCDE"));
         original.retainAll(original);
         assertEquals(GlazedListsTests.stringToList("ABCDE"), original);
@@ -607,7 +592,7 @@ public class EventListTest {
 
     @Test
     public void testSublistClear() {
-        EventList<String> original = new BasicEventList<String>();
+        EventList<String> original = new BasicEventList<>();
         original.addAll(GlazedListsTests.stringToList("ABCDE"));
 
         Iterator<String> iterator = original.subList(2, 4).iterator();
@@ -621,18 +606,18 @@ public class EventListTest {
 
     @Test
     public void testAddAllFromView() {
-        EventList<Integer> original = new BasicEventList<Integer>();
+        EventList<Integer> original = new BasicEventList<>();
         original.addAll(Arrays.asList(0, 10, 20, 30, 40));
-        FilterList<Integer> filtered = new FilterList<Integer>(original, GlazedListsTests.matchAtLeast(20));
+        FilterList<Integer> filtered = new FilterList<>(original, GlazedListsTests.matchAtLeast(20));
         original.addAll(filtered);
         assertEquals(Arrays.asList(0, 10, 20, 30, 40, 20, 30, 40), original);
     }
 
     @Test
     public void testSimpleAddAll() {
-        EventList<String> source = new BasicEventList<String>();
+        EventList<String> source = new BasicEventList<>();
         installConsistencyListener(source);
-        FilterList<String> filterList = new FilterList<String>(source, Matchers.trueMatcher());
+        FilterList<String> filterList = new FilterList<>(source, Matchers.trueMatcher());
 
         filterList.addAll(GlazedListsTests.stringToList("JESSE"));
         assertEquals(GlazedListsTests.stringToList("JESSE"), source);
@@ -641,7 +626,7 @@ public class EventListTest {
 
     @Test
     public void testReplace() {
-        EventList<String> source = new BasicEventList<String>();
+        EventList<String> source = new BasicEventList<>();
         installConsistencyListener(source);
         source.addAll(GlazedListsTests.stringToList("ROUGHRIDERS"));
         source.set(2, "G");
@@ -661,7 +646,7 @@ public class EventListTest {
      */
     @Test
     public void testCombineEvents() {
-        TransactionList<Object> list = new TransactionList<Object>(new BasicEventList<Object>(), true);
+        TransactionList<Object> list = new TransactionList<>(new BasicEventList<>(), true);
         for (int i = 0; i < 16; i++) {
             list.add(new Integer(0));
         }
@@ -780,22 +765,16 @@ public class EventListTest {
     @Test
     public void testGenericsOfListEvent() {
         final EventList<? extends String> source = GlazedLists.eventListOf((String[]) null);
-        source.addListEventListener(new ListEventListener<Object>() {
-            @Override
-            public void listChanged(ListEvent<Object> listChanges) {
-                listChanges.next();
-                Object o = listChanges.getSourceList().get(listChanges.getIndex());
-                assertEquals(String.class, o.getClass());
-            }
+        source.addListEventListener((ListEventListener<Object>) listChanges -> {
+            listChanges.next();
+            Object o = listChanges.getSourceList().get(listChanges.getIndex());
+            assertEquals(String.class, o.getClass());
         });
 
-        source.addListEventListener(new ListEventListener<String>() {
-            @Override
-            public void listChanged(ListEvent<String> listChanges) {
-                listChanges.next();
-                String s = listChanges.getSourceList().get(listChanges.getIndex());
-                assertEquals(String.class, s.getClass());
-            }
+        source.addListEventListener((ListEventListener<String>) listChanges -> {
+            listChanges.next();
+            String s = listChanges.getSourceList().get(listChanges.getIndex());
+            assertEquals(String.class, s.getClass());
         });
 
         ((EventList)source).add("Test");
@@ -827,7 +806,7 @@ public class EventListTest {
     public void testRemoveInvalidListener() {
     	final EventList<String> source = GlazedLists.eventListOf("TEST");
     	final GlazedListsTests.ListEventCounter<String> eventCounter =
-            new GlazedListsTests.ListEventCounter<String>();
+                new GlazedListsTests.ListEventCounter<>();
     	try {
       		source.removeListEventListener(eventCounter);
     		fail("expected IllegalArgumentException");
@@ -838,9 +817,9 @@ public class EventListTest {
 
     @Test
     public void testAddRemoveListener() {
-    	final BasicEventList<String> source = new BasicEventList<String>();
+    	final BasicEventList<String> source = new BasicEventList<>();
     	final GlazedListsTests.ListEventCounter<String> eventCounter =
-            new GlazedListsTests.ListEventCounter<String>();
+                new GlazedListsTests.ListEventCounter<>();
   		source.addListEventListener(eventCounter);
   		assertTrue(source.updates.getListEventListeners().contains(eventCounter));
   		source.add("Test");
@@ -851,7 +830,7 @@ public class EventListTest {
 
     @Test
     public void testAcceptWithReadLock() {
-        final BasicEventList<String> source = new BasicEventList<String>();
+        final BasicEventList<String> source = new BasicEventList<>();
         source.add("ONE");
         source.add("TWO");
         source.add("THREE");
@@ -860,7 +839,7 @@ public class EventListTest {
 
     @Test
     public void testApplyWithReadLock() {
-        final BasicEventList<String> source = new BasicEventList<String>();
+        final BasicEventList<String> source = new BasicEventList<>();
         source.add("ONE");
         source.add("TWO");
         source.add("THREE");
@@ -870,7 +849,7 @@ public class EventListTest {
 
     @Test
     public void testAcceptWithWriteLock() {
-        final BasicEventList<String> source = new BasicEventList<String>();
+        final BasicEventList<String> source = new BasicEventList<>();
         source.add("ONE");
         source.add("TWO");
         source.add("THREE");
@@ -882,7 +861,7 @@ public class EventListTest {
 
     @Test
     public void testApplyWithWriteLock() {
-        final BasicEventList<String> source = new BasicEventList<String>();
+        final BasicEventList<String> source = new BasicEventList<>();
         source.add("ONE");
         source.add("TWO");
         source.add("THREE");
