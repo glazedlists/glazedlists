@@ -14,6 +14,7 @@ import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.function.UnaryOperator;
 
 /**
  * A convenience class that implements common functionality for all {@link EventList}s.
@@ -380,14 +381,9 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      */
     @Override
     public boolean removeAll(Collection<?> values) {
-        boolean changed = false;
-        for(Iterator i = iterator(); i.hasNext(); ) {
-            if(values.contains(i.next())) {
-                i.remove();
-                changed = true;
-            }
-        }
-        return changed;
+        if (isEmpty()) return false;
+
+        return removeIf(values::contains);
     }
 
 
@@ -416,14 +412,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      */
     @Override
     public boolean retainAll(Collection<?> values) {
-        boolean changed = false;
-        for(Iterator i = iterator(); i.hasNext();) {
-            if(!values.contains(i.next())) {
-                i.remove();
-                changed = true;
-            }
-        }
-        return changed;
+        return removeIf(v -> !values.contains(v));
     }
 
     /**
@@ -436,10 +425,35 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      */
     @Override
     public void clear() {
-        for(Iterator i = iterator(); i.hasNext();) {
-            i.next();
-            i.remove();
+        if(isEmpty()) return;
+
+        removeIf(v -> true);
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void replaceAll(UnaryOperator<E> operator) {
+        updates.beginEvent(true);                           // nested due to set below
+        for (int i = size() - 1; i >= 0; i--) {
+            E old_value = get(i);
+            E new_value = operator.apply(old_value);
+            if (old_value != new_value) {                   // instance check
+                try {
+                    set(i, new_value);
+                }
+                catch(UnsupportedOperationException ex) {
+                    // Since the default implementation doesn't implement set(),
+                    // deal with that error to ensure the event isn't left dangling.
+                    updates.discardEvent();
+                    throw ex;
+                }
+                updates.elementUpdated(i, old_value, new_value);
+            }
         }
+        updates.commitEvent();
     }
 
     /**

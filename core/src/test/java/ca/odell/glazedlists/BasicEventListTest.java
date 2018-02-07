@@ -234,4 +234,16 @@ public class BasicEventListTest {
 
 		assertEquals( Collections.singletonList( "One" ), list );
 	}
+
+	@Test
+    public void testRetainAll() {
+        EventList<String> list = new BasicEventList<>();
+        list.add( "One" );
+        list.add( "Two" );
+        list.add( "Three" );
+
+        list.retainAll( Arrays.asList( "Four", "Three", "Two" ) );
+
+        assertEquals( Arrays.asList( "Two", "Three" ), list );
+    }
 }

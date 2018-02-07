@@ -16,7 +16,10 @@ import java.io.ObjectOutputStream;
 import java.io.OptionalDataException;
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
 /**
  * An {@link EventList} that wraps any simple {@link List}, such as {@link ArrayList}
@@ -192,9 +195,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
         if(isEmpty()) return;
         // create the change event
         updates.beginEvent();
-        for(int i = 0, size = size(); i < size; i++) {
-            updates.elementDeleted(0, get(i));
-        }
+        data.forEach(e -> updates.elementDeleted(0, e));
         // do the actual clear
         data.clear();
         // fire the event
@@ -209,7 +210,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
         // do the actual set
         E previous = data.set(index, element);
         // fire the event
-        updates.elementUpdated(index, previous);
+        updates.elementUpdated(index, previous, element);
         updates.commitEvent();
         return previous;
     }
@@ -226,35 +227,14 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
         return data.size();
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean removeAll(Collection<?> collection) {
-
-	    // If the collection being matched against is a Set, assume that searching it
-	    // will be faster than searching this list.
-	    if (collection instanceof Set) {
-	    	return removeIf(collection::contains);
-	    }
-
-        boolean changed = false;
-        updates.beginEvent();
-	    for ( Object value : collection ) {
-		    int index;
-		    while ( ( index = indexOf( value ) ) != -1 ) {
-			    E removed = data.remove( index );
-			    updates.elementDeleted( index, removed );
-			    changed = true;
-		    }
-	    }
-        updates.commitEvent();
-        return changed;
-    }
-
 	/** {@inheritDoc} */
 	@Override
 	public boolean removeIf( Predicate<? super E> filter ) {
+	    if (isEmpty()) return false;
+
 		boolean changed = false;
 		updates.beginEvent();
+        // Work backwards to prevent index changes
 		for(int i = data.size() - 1; i >= 0; i--) {
 			if (filter.test(data.get(i))) {
 				E removed = data.remove(i);
@@ -266,23 +246,53 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
 		return changed;
 	}
 
-	/** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public boolean retainAll(Collection<?> collection) {
-        boolean changed = false;
+    public void replaceAll(UnaryOperator<E> operator) {
         updates.beginEvent();
-        int index = 0;
-        while(index < data.size()) {
-            if(collection.contains(data.get(index))) {
-                index++;
-            } else {
-                E removed = data.remove(index);
-                updates.elementDeleted(index, removed);
-                changed = true;
+        for (int i = size() - 1; i >= 0; i--) {
+            E old_value = data.get(i);
+            E new_value = operator.apply(old_value);
+            if (old_value != new_value) {               // instance check
+                data.set(i, new_value);
+                updates.elementUpdated(i, old_value, new_value);
             }
         }
         updates.commitEvent();
-        return changed;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void forEach(Consumer<? super E> action) {
+        data.forEach(action);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Stream<E> stream() {
+        return data.stream();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Stream<E> parallelStream() {
+        return data.parallelStream();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Spliterator<E> spliterator() {
+        return data.spliterator();
     }
 
     /**
