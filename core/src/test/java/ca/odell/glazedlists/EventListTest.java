@@ -104,7 +104,7 @@ public class EventListTest {
         List<List<String>> listTypes = new ArrayList<>();
         listTypes.add(new ArrayList<>());
         listTypes.add(new BasicEventList<>());
-        listTypes.add(SortedList.create(new BasicEventList<>()));
+        listTypes.add(SortedList.create(new BasicEventList<String>()));
 
         // test all different list types
         for (List<String> list : listTypes) {
@@ -132,7 +132,7 @@ public class EventListTest {
         List<List<String>> listTypes = new ArrayList<>();
         listTypes.add(new ArrayList<>());
         listTypes.add(new BasicEventList<>());
-        listTypes.add(SortedList.create(new BasicEventList<>()));
+        listTypes.add(SortedList.create(new BasicEventList<String>()));
 
         // test all different list types
         for (List<String> list : listTypes) {
@@ -162,7 +162,7 @@ public class EventListTest {
         List<List<String>> listTypes = new ArrayList<>();
         listTypes.add(new ArrayList<>());
         listTypes.add(new BasicEventList<>());
-        listTypes.add(SortedList.create(new BasicEventList<>()));
+        listTypes.add(SortedList.create(new BasicEventList<String>()));
 
         // test all different list types
         for (List<String> list : listTypes) {
@@ -190,7 +190,7 @@ public class EventListTest {
         List<List<String>> listTypes = new ArrayList<>();
         listTypes.add(new ArrayList<>());
         listTypes.add(new BasicEventList<>());
-        listTypes.add(SortedList.create(new BasicEventList<>()));
+        listTypes.add(SortedList.create(new BasicEventList<String>()));
 
         // test all different list types
         for (List<String> list : listTypes) {
@@ -218,7 +218,7 @@ public class EventListTest {
         List<List<String>> listTypes = new ArrayList<>();
         listTypes.add(new ArrayList<>());
         listTypes.add(new BasicEventList<>());
-        listTypes.add(SortedList.create(new BasicEventList<>()));
+        listTypes.add(SortedList.create(new BasicEventList<String>()));
 
         // test all different list types
         for (List<String> list : listTypes) {
@@ -248,7 +248,7 @@ public class EventListTest {
         List<List<String>> listTypes = new ArrayList<>();
         listTypes.add(new ArrayList<>());
         listTypes.add(new BasicEventList<>());
-        listTypes.add(SortedList.create(new BasicEventList<>()));
+        listTypes.add(SortedList.create(new BasicEventList<String>()));
 
         // test all different list types
         for (List<String> list : listTypes) {
@@ -276,7 +276,7 @@ public class EventListTest {
         List<List<String>> listTypes = new ArrayList<>();
         listTypes.add(new ArrayList<>());
         listTypes.add(new BasicEventList<>());
-        listTypes.add(SortedList.create(new BasicEventList<>()));
+        listTypes.add(SortedList.create(new BasicEventList<String>()));
 
         // test all different list types
         for (List<String> list : listTypes) {
@@ -303,7 +303,7 @@ public class EventListTest {
         List<List<String>> listTypes = new ArrayList<>();
         listTypes.add(new ArrayList<>());
         listTypes.add(new BasicEventList<>());
-        listTypes.add(SortedList.create(new BasicEventList<>()));
+        listTypes.add(SortedList.create(new BasicEventList<String>()));
 
         // test all different list types
         for (List<String> list : listTypes) {
