@@ -112,13 +112,11 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
         setReverseFunction(reverse);
 
         // save a reference to the source elements
-        this.sourceElements = new ArrayList<S>(source);
+        this.sourceElements = new ArrayList<>(source);
 
         // map all of the elements within source
-        this.mappedElements = new ArrayList<E>(source.size());
-        for (int i = 0, n = source.size(); i < n; i++) {
-            this.mappedElements.add(forward(source.get(i)));
-        }
+        this.mappedElements = new ArrayList<>(source.size());
+        source.forEach(s -> mappedElements.add(forward(s)));
 
         source.addListEventListener(this);
     }
@@ -176,8 +174,9 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
 
         // remap all of the elements within source
         for (int i = 0, n = source.size(); i < n; i++) {
-            final E oldValue = this.mappedElements.set(i, forward(source.get(i)));
-            updates.elementUpdated(i, oldValue);
+            final E newValue = forward(source.get(i));
+            final E oldValue = this.mappedElements.set(i, newValue);
+            updates.elementUpdated(i, oldValue, newValue);
         }
 
         updates.commitEvent();
@@ -196,7 +195,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
         if (forward instanceof AdvancedFunction)
             this.forward = (AdvancedFunction<S,E>) forward;
         else
-            this.forward = new AdvancedFunctionAdapter<S,E>(forward);
+            this.forward = new AdvancedFunctionAdapter<>(forward);
     }
 
     /**
@@ -207,7 +206,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
     public Function<S,E> getForwardFunction() {
         // unwrap the forward function from an AdvancedFunctionAdapter if necessary
         if (forward instanceof AdvancedFunctionAdapter)
-            return ((AdvancedFunctionAdapter) forward).getDelegate();
+            return ((AdvancedFunctionAdapter<S,E>) forward).getDelegate();
         else
             return forward;
     }
@@ -252,7 +251,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
 
         if (listChanges.isReordering()) {
             final int[] reorderMap = listChanges.getReorderMap();
-            final List<E> originalMappedElements = new ArrayList<E>(mappedElements);
+            final List<E> originalMappedElements = new ArrayList<>(mappedElements);
             for (int i = 0; i < reorderMap.length; i++) {
                 final int sourceIndex = reorderMap[i];
                 mappedElements.set(i, originalMappedElements.get(sourceIndex));
@@ -333,7 +332,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
          * @param sourceValue the Object to transform
          * @return the transformed version of the object
          */
-        public B evaluate(A sourceValue);
+        B evaluate(A sourceValue);
     }
 
     /**
@@ -371,7 +370,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
          *      last time it evaluated <code>sourceValue</code>
          * @return the transformed version of the sourceValue
          */
-        public B reevaluate(A sourceValue, B transformedValue);
+        B reevaluate(A sourceValue, B transformedValue);
 
         /**
          * Perform any necessary resource cleanup on the given
@@ -382,7 +381,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
          * @param transformedValue the Object that resulted from the last
          *      transformation
          */
-        public void dispose(A sourceValue, B transformedValue);
+        void dispose(A sourceValue, B transformedValue);
     }
 
     /**
@@ -398,7 +397,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
          * Adapt the given <code>delegate</code> to the
          * {@link AdvancedFunction} interface.
          */
-        public AdvancedFunctionAdapter(Function<A,B> delegate) {
+        AdvancedFunctionAdapter(Function<A, B> delegate) {
             this.delegate = delegate;
         }
 
@@ -423,7 +422,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
             // do nothing
         }
 
-        public Function getDelegate() {
+        public Function<A,B> getDelegate() {
             return delegate;
         }
     }

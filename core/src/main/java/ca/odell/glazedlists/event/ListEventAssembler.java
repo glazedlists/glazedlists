@@ -68,6 +68,13 @@ public final class ListEventAssembler<E> {
     }
 
     /**
+     * Indicate whether or not an event is in progress. Intended for testing purposes.
+     */
+    public boolean isEventInProgress() {
+        return eventLevel != 0;
+    }
+
+    /**
      * Starts a new atomic change to this list change queue.
      *
      * <p>This simple change event does not support change events nested within.

@@ -502,7 +502,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
             if (comparator.compare((E)object, objectAtIndex) != 0) return -1;
 
             // if the objectAtIndex and object are equal, return the index
-            if (GlazedListsImpl.equal(object, objectAtIndex))
+            if (Objects.equals(object, objectAtIndex))
                 return index;
         }
 
@@ -531,7 +531,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
             if(comparator.compare((E)object, objectAtIndex) != 0) return -1;
 
             // if the objectAtIndex and object are equal, return the index
-            if(GlazedListsImpl.equal(object, objectAtIndex))
+            if(Objects.equals(object, objectAtIndex))
                 return index;
         }
 

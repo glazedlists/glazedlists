@@ -1245,7 +1245,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         if (comparator != null) {
             return comparator.compare(a, b) == 0;
         } else {
-            return GlazedListsImpl.equal(a, b);
+            return Objects.equals(a, b);
         }
     }
 

@@ -25,6 +25,7 @@ import java.text.Format;
 import java.text.ParsePosition;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -914,14 +915,14 @@ public final class AutoCompleteSupport<E> {
             Object currentItem = findAutoCompleteTerm(currentText);
             String currentItemText = convertToString(currentItem);
             boolean itemMatches = currentItem == comboBox.getSelectedItem();
-            boolean textMatches = GlazedListsImpl.equal(currentItemText, currentText);
+            boolean textMatches = Objects.equals(currentItemText, currentText);
 
             // select the first element if no autocompletion term could be found
             if (currentItem == NOT_FOUND && !allItemsUnfiltered.isEmpty()) {
                 currentItem = allItemsUnfiltered.get(0);
                 currentItemText = convertToString(currentItem);
                 itemMatches = currentItem == comboBox.getSelectedItem();
-                textMatches = GlazedListsImpl.equal(currentItemText, currentText);
+                textMatches = Objects.equals(currentItemText, currentText);
             }
 
             // return all elements to the ComboBoxModel
@@ -1533,7 +1534,7 @@ public final class AutoCompleteSupport<E> {
                 }
 
                 // select the autocompletion term
-                final boolean silently = isTableCellEditor || GlazedListsImpl.equal(selectedItemBeforeEdit, matchString);
+                final boolean silently = isTableCellEditor || Objects.equals(selectedItemBeforeEdit, matchString);
                 selectItem(matchIndex, silently);
 
                 if (autoCompleteTermIsExactMatch) {
@@ -1562,7 +1563,7 @@ public final class AutoCompleteSupport<E> {
             final Object valueToSelect = index == -1 ? null : comboBoxModel.getElementAt(index);
 
             // if nothing is changing about the selection, return immediately
-            if (GlazedListsImpl.equal(comboBoxModel.getSelectedItem(), valueToSelect))
+            if (Objects.equals(comboBoxModel.getSelectedItem(), valueToSelect))
                 return;
 
             doNotChangeDocument = true;
@@ -2131,7 +2132,7 @@ public final class AutoCompleteSupport<E> {
 
             // if the String value in the editor matches the String version of
             // the last item that was set in the editor, return the item
-            if (GlazedListsImpl.equal(oldValueString, currentString))
+            if (Objects.equals(oldValueString, currentString))
                 return oldValue;
 
             // if the user specified a Format, use it

@@ -28,20 +28,11 @@ public final class GlazedListsImpl {
 
     // Utility Methods // // // // // // // // // // // // // // // // // // //
 
-    /**
-     * Compare the specified objects for equality.
-     */
-    public static boolean equal(Object a, Object b) {
-        if(a == b) return true;
-        if(a == null || b == null) return false;
-        return a.equals(b);
-    }
-
-    /**
+	/**
      * Concatenate two lists to create a third list.
      */
     public static <E> List<E> concatenate(List<E> a, List<E> b) {
-        List<E> aAndB = new ArrayList<E>(a.size() + b.size());
+        List<E> aAndB = new ArrayList<>(a.size() + b.size());
         aAndB.addAll(a);
         aAndB.addAll(b);
         return aAndB;
@@ -174,12 +165,12 @@ public final class GlazedListsImpl {
      * equal as specified by {@link Object#equals(Object)}, or 1 otherwise.
      */
     public static <T> Comparator<T> equalsComparator() {
-        return new EqualsComparator<T>();
+        return new EqualsComparator<>();
     }
     private static class EqualsComparator<T> implements Comparator<T> {
         @Override
         public int compare(T alpha, T beta) {
-            return equal(alpha, beta) ? 0 : 1;
+            return Objects.equals(alpha, beta) ? 0 : 1;
         }
     }
 
@@ -188,7 +179,7 @@ public final class GlazedListsImpl {
      * function's argument as its result.
      */
     public static <E> FunctionList.Function<E,E> identityFunction() {
-        return new IdentityFunction<E>();
+        return new IdentityFunction<>();
     }
     private static class IdentityFunction<E> implements FunctionList.Function<E,E> {
         @Override
@@ -207,7 +198,8 @@ public final class GlazedListsImpl {
      *      compared
      */
     public static <P, V> KeyedCollection<P, V> keyedCollection(Comparator<P> positionComparator, Comparator<V> valueComparator) {
-        return new KeyedCollection<P, V>(positionComparator, new TreeMap<V, Object>(valueComparator));
+        return new KeyedCollection<>( positionComparator,
+	        new TreeMap<>( valueComparator ) );
     }
 
     /**
@@ -219,27 +211,6 @@ public final class GlazedListsImpl {
      *      compared
      */
     public static <P, V> KeyedCollection<P, V> keyedCollection(Comparator<P> positionComparator) {
-        return new KeyedCollection<P, V>(positionComparator, new HashMap<V, Object>());
-    }
-
-    /**
-     * Removes the given <code>value</code> from <code>c</code> if it can be
-     * located by identity. This method is thus faster than standard removes
-     * from a Collection and conveys a stronger meaning than normal Collection
-     * removes (namely that the exact item must be found in order to be removed)
-     *
-     * @param c the Collection from which to remove
-     * @param value the value to be removed
-     * @return <tt>true</tt> if <code>c</code> was altered as a result of this call
-     */
-    public static <V> boolean identityRemove(Collection<V> c, V value) {
-        for (Iterator<V> i = c.iterator(); i.hasNext();) {
-            if (i.next() == value) {
-                i.remove();
-                return true;
-            }
-        }
-
-        return false;
+        return new KeyedCollection<>(positionComparator, new HashMap<>());
     }
 }

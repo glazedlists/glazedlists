@@ -8,13 +8,13 @@ import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.impl.EventListIterator;
-import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.impl.SimpleIterator;
 import ca.odell.glazedlists.impl.SubEventList;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.function.UnaryOperator;
 
 /**
  * A convenience class that implements common functionality for all {@link EventList}s.
@@ -48,7 +48,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
     protected AbstractEventList(ListEventPublisher publisher) {
         if(publisher == null) publisher = ListEventAssembler.createListEventPublisher();
         this.publisher = publisher;
-        updates = new ListEventAssembler<E>(this, publisher);
+        updates = new ListEventAssembler<>(this, publisher);
     }
 
     /**
@@ -120,9 +120,9 @@ public abstract class AbstractEventList<E> implements EventList<E> {
     @Override
     public boolean contains(Object object) {
         // for through this, looking for the lucky object
-        for(Iterator i = iterator(); i.hasNext(); ) {
-            if(GlazedListsImpl.equal(object, i.next())) return true;
-        }
+	    for ( E e : this ) {
+		    if ( Objects.equals( object, e ) ) return true;
+	    }
         // not found
         return false;
     }
@@ -140,7 +140,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      */
     @Override
     public Iterator<E> iterator() {
-        return new SimpleIterator<E>(this);
+        return new SimpleIterator<>(this);
     }
 
     /**
@@ -157,10 +157,10 @@ public abstract class AbstractEventList<E> implements EventList<E> {
         // copy values into the array
         Object[] array = new Object[size()];
         int index = 0;
-        for(Iterator i = iterator(); i.hasNext(); ) {
-            array[index] = i.next();
-            index++;
-        }
+	    for ( E e : this ) {
+		    array[ index ] = e;
+		    index++;
+	    }
         return array;
     }
 
@@ -191,10 +191,10 @@ public abstract class AbstractEventList<E> implements EventList<E> {
 
         // copy values into the array
         int index = 0;
-        for(Iterator<E> i = iterator(); i.hasNext(); ) {
-            array[index] = (T) i.next();
-            index++;
-        }
+	    for ( E e : this ) {
+		    array[ index ] = ( T ) e;
+		    index++;
+	    }
         return array;
     }
 
@@ -273,10 +273,9 @@ public abstract class AbstractEventList<E> implements EventList<E> {
     @Override
     public boolean containsAll(Collection<?> values) {
         // look for something that is missing
-        for(Iterator i = values.iterator(); i.hasNext(); ) {
-            Object a = i.next();
-            if(!contains(a)) return false;
-        }
+	    for ( Object value : values ) {
+		    if ( !contains( value ) ) return false;
+	    }
         // contained everything we looked for
         return true;
     }
@@ -347,13 +346,14 @@ public abstract class AbstractEventList<E> implements EventList<E> {
 
         final int initializeSize = this.size();
 
-        for (Iterator<? extends E> iter = values.iterator(); iter.hasNext();) {
-            this.add(index, iter.next());
+	    for ( E value : values ) {
+		    this.add( index, value );
 
-            // advance the insertion location if its within the size of the list
-            if (index < this.size())
-                index++;
-        }
+		    // advance the insertion location if its within the size of the list
+		    if ( index < this.size() ) {
+			    index++;
+		    }
+	    }
 
         return this.size() != initializeSize;
     }
@@ -381,14 +381,9 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      */
     @Override
     public boolean removeAll(Collection<?> values) {
-        boolean changed = false;
-        for(Iterator i = iterator(); i.hasNext(); ) {
-            if(values.contains(i.next())) {
-                i.remove();
-                changed = true;
-            }
-        }
-        return changed;
+        if (isEmpty()) return false;
+
+        return removeIf(values::contains);
     }
 
 
@@ -417,14 +412,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      */
     @Override
     public boolean retainAll(Collection<?> values) {
-        boolean changed = false;
-        for(Iterator i = iterator(); i.hasNext();) {
-            if(!values.contains(i.next())) {
-                i.remove();
-                changed = true;
-            }
-        }
-        return changed;
+        return removeIf(v -> !values.contains(v));
     }
 
     /**
@@ -437,10 +425,35 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      */
     @Override
     public void clear() {
-        for(Iterator i = iterator(); i.hasNext();) {
-            i.next();
-            i.remove();
+        if(isEmpty()) return;
+
+        removeIf(v -> true);
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void replaceAll(UnaryOperator<E> operator) {
+        updates.beginEvent(true);                           // nested due to set below
+        for (int i = size() - 1; i >= 0; i--) {
+            E old_value = get(i);
+            E new_value = operator.apply(old_value);
+            if (old_value != new_value) {                   // instance check
+                try {
+                    set(i, new_value);
+                }
+                catch(UnsupportedOperationException ex) {
+                    // Since the default implementation doesn't implement set(),
+                    // deal with that error to ensure the event isn't left dangling.
+                    updates.discardEvent();
+                    throw ex;
+                }
+                updates.elementUpdated(i, old_value, new_value);
+            }
         }
+        updates.commitEvent();
     }
 
     /**
@@ -471,7 +484,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
         Iterator iterA = iterator();
         Iterator iterB = otherList.iterator();
         while(iterA.hasNext() && iterB.hasNext()) {
-            if(!GlazedListsImpl.equal(iterA.next(), iterB.next())) return false;
+            if(!Objects.equals(iterA.next(), iterB.next())) return false;
         }
 
         // if we haven't failed yet, they match
@@ -502,10 +515,9 @@ public abstract class AbstractEventList<E> implements EventList<E> {
     @Override
     public int hashCode() {
         int hashCode = 1;
-        for(Iterator<E> i = iterator(); i.hasNext(); ) {
-            E a = i.next();
-            hashCode = 31 * hashCode + (a == null ? 0 : a.hashCode());
-        }
+	    for ( E a : this ) {
+		    hashCode = 31 * hashCode + ( a == null ? 0 : a.hashCode() );
+	    }
         return hashCode;
     }
 
@@ -608,10 +620,14 @@ public abstract class AbstractEventList<E> implements EventList<E> {
     public int indexOf(Object object) {
         // for through this, looking for the lucky object
         int index = 0;
-        for(Iterator<E> i = iterator(); i.hasNext(); ) {
-            if(GlazedListsImpl.equal(object, i.next())) return index;
-            else index++;
-        }
+	    for (E e : this) {
+		    if (Objects.equals(object, e)) {
+			    return index;
+		    }
+		    else {
+			    index++;
+		    }
+	    }
         // not found
         return -1;
     }
@@ -635,7 +651,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
     public int lastIndexOf(Object object) {
         // for through this, looking for the lucky object
         for(int i = size() - 1; i >= 0; i--) {
-            if(GlazedListsImpl.equal(object, get(i))) return i;
+            if(Objects.equals(object, get(i))) return i;
         }
         // not found
         return -1;
@@ -682,7 +698,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      */
     @Override
     public ListIterator<E> listIterator(int index) {
-        return new EventListIterator<E>(this, index);
+        return new EventListIterator<>(this, index);
     }
 
     /**
@@ -720,7 +736,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      */
     @Override
     public List<E> subList(int fromIndex, int toIndex) {
-        return new SubEventList<E>(this, fromIndex, toIndex, true);
+        return new SubEventList<>(this, fromIndex, toIndex, true);
     }
 
     /**
@@ -742,7 +758,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
      */
     @Override
     public String toString() {
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         result.append("[");
         for(Iterator i = iterator(); i.hasNext(); ) {
             result.append(String.valueOf(i.next()));
