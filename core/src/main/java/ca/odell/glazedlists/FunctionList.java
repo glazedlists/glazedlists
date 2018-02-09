@@ -63,7 +63,12 @@ import java.util.RandomAccess;
  */
 public final class FunctionList<S, E> extends TransformedList<S, E> implements RandomAccess {
 
-    private final List<S> sourceElements;
+    private final ArrayList<S> sourceElements;
+
+    /** The sourceElements copy is needed for the dispose method of AdvancedFunctions.
+     *  This can be omitted when using a normal function so this indicates whether or not
+     *  the source copy is in use. */
+    private boolean needDispose = false;
 
     /** A list of the Objects produced by running the source elements through the {@link #forward} Function. */
     private final List<E> mappedElements;
@@ -108,11 +113,10 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
     public FunctionList(EventList<S> source, Function<S,E> forward, Function<E,S> reverse) {
         super(source);
 
+        this.sourceElements = new ArrayList<>();
+
         updateForwardFunction(forward);
         setReverseFunction(reverse);
-
-        // save a reference to the source elements
-        this.sourceElements = new ArrayList<>(source);
 
         // map all of the elements within source
         this.mappedElements = new ArrayList<>(source.size());
@@ -192,10 +196,25 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
             throw new IllegalArgumentException("forward Function may not be null");
 
         // wrap the forward function in an adapter to the AdvancedFunction interface if necessary
-        if (forward instanceof AdvancedFunction)
-            this.forward = (AdvancedFunction<S,E>) forward;
-        else
+        if (forward instanceof AdvancedFunction) {
+            this.forward = (AdvancedFunction<S, E>) forward;
+
+            // If we didn't previously need disposals, the source copy will need to
+            // be rebuilt.
+            if (!needDispose) {
+                needDispose = true;
+                sourceElements.ensureCapacity(source.size());
+                sourceElements.clear();
+                sourceElements.addAll(source);
+            }
+        }
+        else {
             this.forward = new AdvancedFunctionAdapter<>(forward);
+
+            needDispose = false;
+            sourceElements.clear();
+            sourceElements.trimToSize();
+        }
     }
 
     /**
@@ -266,7 +285,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
                 if (changeType == ListEvent.INSERT) {
                     final S newValue = source.get(changeIndex);
                     final E newValueTransformed = forward(newValue);
-                    sourceElements.add(changeIndex, newValue);
+                    if (needDispose) sourceElements.add(changeIndex, newValue);
                     mappedElements.add(changeIndex, newValueTransformed);
                     updates.elementInserted(changeIndex, newValueTransformed);
 
@@ -274,14 +293,19 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
                     final E oldValueTransformed = get(changeIndex);
                     final S newValue = source.get(changeIndex);
                     final E newValueTransformed = forward(oldValueTransformed, newValue);
-                    sourceElements.set(changeIndex, newValue);
+                    if (needDispose) sourceElements.set(changeIndex, newValue);
                     mappedElements.set(changeIndex, newValueTransformed);
                     updates.elementUpdated(changeIndex, oldValueTransformed, newValueTransformed);
 
                 } else if (changeType == ListEvent.DELETE) {
-                    final S oldValue = sourceElements.remove(changeIndex);
+                    // NOTE: The `listChanges.getOldValue()` method could potentially be
+                    //       used here, but holding off on that for now until the
+                    //       ListEvent API is solidified.
                     final E oldValueTransformed = mappedElements.remove(changeIndex);
-                    forward.dispose(oldValue, oldValueTransformed);
+                    if (needDispose) {
+                        final S oldValue = sourceElements.remove(changeIndex);
+                        forward.dispose(oldValue, oldValueTransformed);
+                    }
                     updates.elementDeleted(changeIndex, oldValueTransformed);
                 }
             }
