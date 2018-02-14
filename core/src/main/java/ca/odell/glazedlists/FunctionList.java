@@ -4,10 +4,12 @@
 package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventAssembler;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.RandomAccess;
+import java.util.function.Predicate;
 
 /**
  * This List is meant to simplify the task of transforming each element of a
@@ -62,7 +64,9 @@ import java.util.RandomAccess;
  * </table>
  */
 public final class FunctionList<S, E> extends TransformedList<S, E> implements RandomAccess {
-
+    /** A sometimes-used copy of the source list. This is needed to provide proper
+     *  disposal when an {@link AdvancedFunction} is used. When not needed, this list
+     *  is truncated. */
     private final ArrayList<S> sourceElements;
 
     /** The sourceElements copy is needed for the dispose method of AdvancedFunctions.
@@ -339,6 +343,36 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
     @Override
     public void add(int index, E value) {
         source.add(index, reverse(value));
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean removeIf(Predicate<? super E> filter) {
+        // Ideally this remove would be processed as a single transaction. The only real
+        // way that can happen (efficiently) is to get access to the source
+        // ListEventAssembler, which we can if the list extends AbstractEventList.
+        // Otherwise, things will work fine, but there will be multiple events dispatched
+        // for a single remove operation.
+        ListEventAssembler<?> sourceUpdates;
+        if (source instanceof AbstractEventList) {
+            sourceUpdates = ((AbstractEventList) source).updates;
+        }
+        else sourceUpdates = null;
+
+        boolean foundMatch = false;
+        for(int i = size() - 1; i >= 0; i--) {
+            if (filter.test(mappedElements.get(i))) {
+                if (sourceUpdates != null && !foundMatch) {
+                    sourceUpdates.beginEvent(true);
+                }
+                foundMatch = true;
+                remove(i);
+            }
+        }
+        if (sourceUpdates != null && foundMatch) {
+            sourceUpdates.commitEvent();
+        }
+        return foundMatch;
     }
 
     /**

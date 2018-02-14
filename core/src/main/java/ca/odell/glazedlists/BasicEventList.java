@@ -152,7 +152,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
     @Override
     public boolean addAll(int index, Collection<? extends E> collection) {
         // don't do an add of an empty set
-        if(collection.size() == 0) return false;
+		if (collection.isEmpty()) return false;
 
         // create the change event
         updates.beginEvent();

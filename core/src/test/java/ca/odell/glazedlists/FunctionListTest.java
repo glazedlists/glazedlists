@@ -1,8 +1,11 @@
 package ca.odell.glazedlists;
 
+import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
@@ -315,5 +318,34 @@ public class FunctionListTest {
         } catch (IllegalStateException e) {
             // expected
         }
+    }
+
+
+    // Tests basic removeIf operation as well as the fact that a single event should
+    // be published for removal of multiple items
+    // (note: requires source that extends AbstractEventList)
+    @Test
+    public void testRemoveIf() {
+        EventList<Integer> source = new BasicEventList<Integer>();
+        source.add(ZERO);
+        source.add(ONE);
+        source.add(TWO);
+
+        List<ListEvent<Integer>> events = new ArrayList<>();
+        source.addListEventListener(events::add);
+
+        FunctionList<Integer, String> intsToStrings =
+            new FunctionList<Integer, String>(source, new IntegerToString(), new StringToInteger());
+        ListConsistencyListener.install(intsToStrings);
+
+        assertEquals(Arrays.asList("0", "1", "2"), intsToStrings);
+
+        intsToStrings.removeIf(s -> !s.equals("0"));
+
+        assertEquals(Collections.singletonList("0"), intsToStrings);
+        assertEquals(Collections.singletonList(ZERO), source);
+
+        // Should only dispatch one event
+        assertEquals(1, events.size());
     }
 }
