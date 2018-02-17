@@ -4,10 +4,12 @@
 package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ListEventAssembler;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.RandomAccess;
+import java.util.function.Predicate;
 
 /**
  * This List is meant to simplify the task of transforming each element of a
@@ -62,8 +64,15 @@ import java.util.RandomAccess;
  * </table>
  */
 public final class FunctionList<S, E> extends TransformedList<S, E> implements RandomAccess {
+    /** A sometimes-used copy of the source list. This is needed to provide proper
+     *  disposal when an {@link AdvancedFunction} is used. When not needed, this list
+     *  is truncated. */
+    private final ArrayList<S> sourceElements;
 
-    private final List<S> sourceElements;
+    /** The sourceElements copy is needed for the dispose method of AdvancedFunctions.
+     *  This can be omitted when using a normal function so this indicates whether or not
+     *  the source copy is in use. */
+    private boolean needDispose = false;
 
     /** A list of the Objects produced by running the source elements through the {@link #forward} Function. */
     private final List<E> mappedElements;
@@ -108,17 +117,14 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
     public FunctionList(EventList<S> source, Function<S,E> forward, Function<E,S> reverse) {
         super(source);
 
+        this.sourceElements = new ArrayList<>();
+
         updateForwardFunction(forward);
         setReverseFunction(reverse);
 
-        // save a reference to the source elements
-        this.sourceElements = new ArrayList<S>(source);
-
         // map all of the elements within source
-        this.mappedElements = new ArrayList<E>(source.size());
-        for (int i = 0, n = source.size(); i < n; i++) {
-            this.mappedElements.add(forward(source.get(i)));
-        }
+        this.mappedElements = new ArrayList<>(source.size());
+        source.forEach(s -> mappedElements.add(forward(s)));
 
         source.addListEventListener(this);
     }
@@ -176,8 +182,9 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
 
         // remap all of the elements within source
         for (int i = 0, n = source.size(); i < n; i++) {
-            final E oldValue = this.mappedElements.set(i, forward(source.get(i)));
-            updates.elementUpdated(i, oldValue);
+            final E newValue = forward(source.get(i));
+            final E oldValue = this.mappedElements.set(i, newValue);
+            updates.elementUpdated(i, oldValue, newValue);
         }
 
         updates.commitEvent();
@@ -193,10 +200,25 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
             throw new IllegalArgumentException("forward Function may not be null");
 
         // wrap the forward function in an adapter to the AdvancedFunction interface if necessary
-        if (forward instanceof AdvancedFunction)
-            this.forward = (AdvancedFunction<S,E>) forward;
-        else
-            this.forward = new AdvancedFunctionAdapter<S,E>(forward);
+        if (forward instanceof AdvancedFunction) {
+            this.forward = (AdvancedFunction<S, E>) forward;
+
+            // If we didn't previously need disposals, the source copy will need to
+            // be rebuilt.
+            if (!needDispose) {
+                needDispose = true;
+                sourceElements.ensureCapacity(source.size());
+                sourceElements.clear();
+                sourceElements.addAll(source);
+            }
+        }
+        else {
+            this.forward = new AdvancedFunctionAdapter<>(forward);
+
+            needDispose = false;
+            sourceElements.clear();
+            sourceElements.trimToSize();
+        }
     }
 
     /**
@@ -207,7 +229,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
     public Function<S,E> getForwardFunction() {
         // unwrap the forward function from an AdvancedFunctionAdapter if necessary
         if (forward instanceof AdvancedFunctionAdapter)
-            return ((AdvancedFunctionAdapter) forward).getDelegate();
+            return ((AdvancedFunctionAdapter<S,E>) forward).getDelegate();
         else
             return forward;
     }
@@ -252,7 +274,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
 
         if (listChanges.isReordering()) {
             final int[] reorderMap = listChanges.getReorderMap();
-            final List<E> originalMappedElements = new ArrayList<E>(mappedElements);
+            final List<E> originalMappedElements = new ArrayList<>(mappedElements);
             for (int i = 0; i < reorderMap.length; i++) {
                 final int sourceIndex = reorderMap[i];
                 mappedElements.set(i, originalMappedElements.get(sourceIndex));
@@ -267,7 +289,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
                 if (changeType == ListEvent.INSERT) {
                     final S newValue = source.get(changeIndex);
                     final E newValueTransformed = forward(newValue);
-                    sourceElements.add(changeIndex, newValue);
+                    if (needDispose) sourceElements.add(changeIndex, newValue);
                     mappedElements.add(changeIndex, newValueTransformed);
                     updates.elementInserted(changeIndex, newValueTransformed);
 
@@ -275,14 +297,19 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
                     final E oldValueTransformed = get(changeIndex);
                     final S newValue = source.get(changeIndex);
                     final E newValueTransformed = forward(oldValueTransformed, newValue);
-                    sourceElements.set(changeIndex, newValue);
+                    if (needDispose) sourceElements.set(changeIndex, newValue);
                     mappedElements.set(changeIndex, newValueTransformed);
                     updates.elementUpdated(changeIndex, oldValueTransformed, newValueTransformed);
 
                 } else if (changeType == ListEvent.DELETE) {
-                    final S oldValue = sourceElements.remove(changeIndex);
+                    // NOTE: The `listChanges.getOldValue()` method could potentially be
+                    //       used here, but holding off on that for now until the
+                    //       ListEvent API is solidified.
                     final E oldValueTransformed = mappedElements.remove(changeIndex);
-                    forward.dispose(oldValue, oldValueTransformed);
+                    if (needDispose) {
+                        final S oldValue = sourceElements.remove(changeIndex);
+                        forward.dispose(oldValue, oldValueTransformed);
+                    }
                     updates.elementDeleted(changeIndex, oldValueTransformed);
                 }
             }
@@ -318,6 +345,36 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
         source.add(index, reverse(value));
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public boolean removeIf(Predicate<? super E> filter) {
+        // Ideally this remove would be processed as a single transaction. The only real
+        // way that can happen (efficiently) is to get access to the source
+        // ListEventAssembler, which we can if the list extends AbstractEventList.
+        // Otherwise, things will work fine, but there will be multiple events dispatched
+        // for a single remove operation.
+        ListEventAssembler<?> sourceUpdates;
+        if (source instanceof AbstractEventList) {
+            sourceUpdates = ((AbstractEventList) source).updates;
+        }
+        else sourceUpdates = null;
+
+        boolean foundMatch = false;
+        for(int i = size() - 1; i >= 0; i--) {
+            if (filter.test(mappedElements.get(i))) {
+                if (sourceUpdates != null && !foundMatch) {
+                    sourceUpdates.beginEvent(true);
+                }
+                foundMatch = true;
+                remove(i);
+            }
+        }
+        if (sourceUpdates != null && foundMatch) {
+            sourceUpdates.commitEvent();
+        }
+        return foundMatch;
+    }
+
     /**
      * A Function encapsulates the logic for transforming a list element into
      * any kind of Object. Implementations should typically create and return
@@ -336,7 +393,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
          * @param sourceValue the Object to transform
          * @return the transformed version of the object
          */
-        public B evaluate(A sourceValue);
+        B evaluate(A sourceValue);
         
         @Override
         default B apply(A sourceValue) {
@@ -379,7 +436,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
          *      last time it evaluated <code>sourceValue</code>
          * @return the transformed version of the sourceValue
          */
-        public B reevaluate(A sourceValue, B transformedValue);
+        B reevaluate(A sourceValue, B transformedValue);
 
         /**
          * Perform any necessary resource cleanup on the given
@@ -390,7 +447,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
          * @param transformedValue the Object that resulted from the last
          *      transformation
          */
-        public void dispose(A sourceValue, B transformedValue);
+        void dispose(A sourceValue, B transformedValue);
     }
 
     /**
@@ -406,7 +463,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
          * Adapt the given <code>delegate</code> to the
          * {@link AdvancedFunction} interface.
          */
-        public AdvancedFunctionAdapter(Function<A,B> delegate) {
+        AdvancedFunctionAdapter(Function<A, B> delegate) {
             this.delegate = delegate;
         }
 
@@ -431,7 +488,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
             // do nothing
         }
 
-        public Function getDelegate() {
+        public Function<A,B> getDelegate() {
             return delegate;
         }
     }

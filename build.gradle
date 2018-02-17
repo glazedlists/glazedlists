@@ -59,6 +59,11 @@ subprojects {
     test {
         systemProperties 'java.awt.headless': 'true'
         maxHeapSize = "512m"
+
+        testLogging {
+            events "failed"
+            exceptionFormat "short"
+        }
     }
 
     jar.archiveName = "glazedlists-${name}.jar"

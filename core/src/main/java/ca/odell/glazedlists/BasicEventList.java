@@ -15,13 +15,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OptionalDataException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.RandomAccess;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
 /**
  * An {@link EventList} that wraps any simple {@link List}, such as {@link ArrayList}
@@ -94,7 +92,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
      */
     public BasicEventList(int initialCapacity, ListEventPublisher publisher, ReadWriteLock readWriteLock) {
         super(publisher);
-        this.data = new ArrayList<E>(initialCapacity);
+        this.data = new ArrayList<>(initialCapacity);
         this.readWriteLock = (readWriteLock == null) ? LockFactory.DEFAULT.createReadWriteLock() : readWriteLock;
     }
 
@@ -154,12 +152,11 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
     @Override
     public boolean addAll(int index, Collection<? extends E> collection) {
         // don't do an add of an empty set
-        if(collection.size() == 0) return false;
+        if (collection.isEmpty()) return false;
 
         // create the change event
         updates.beginEvent();
-        for(Iterator<? extends E> i = collection.iterator(); i.hasNext(); ) {
-            E value = i.next();
+        for (E value : collection) {
             updates.elementInserted(index, value);
             data.add(index, value);
             index++;
@@ -198,9 +195,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
         if(isEmpty()) return;
         // create the change event
         updates.beginEvent();
-        for(int i = 0, size = size(); i < size; i++) {
-            updates.elementDeleted(0, get(i));
-        }
+        data.forEach(e -> updates.elementDeleted(0, e));
         // do the actual clear
         data.clear();
         // fire the event
@@ -215,7 +210,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
         // do the actual set
         E previous = data.set(index, element);
         // fire the event
-        updates.elementUpdated(index, previous);
+        updates.elementUpdated(index, previous, element);
         updates.commitEvent();
         return previous;
     }
@@ -232,17 +227,18 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
         return data.size();
     }
 
-    /** {@inheritDoc} */
+	/** {@inheritDoc} */
     @Override
-    public boolean removeAll(Collection<?> collection) {
+    public boolean removeIf(Predicate<? super E> filter) {
+        if (isEmpty()) return false;
+
         boolean changed = false;
         updates.beginEvent();
-        for(Iterator i = collection.iterator(); i.hasNext(); ) {
-            Object value = i.next();
-            int index = -1;
-            while((index = indexOf(value)) != -1) {
-                E removed = data.remove(index);
-                updates.elementDeleted(index, removed);
+        // Work backwards to prevent index changes
+        for (int i = data.size() - 1; i >= 0; i--) {
+            if (filter.test(data.get(i))) {
+                E removed = data.remove(i);
+                updates.elementDeleted(i, removed);
                 changed = true;
             }
         }
@@ -250,23 +246,53 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
         return changed;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public boolean retainAll(Collection<?> collection) {
-        boolean changed = false;
+    public void replaceAll(UnaryOperator<E> operator) {
         updates.beginEvent();
-        int index = 0;
-        while(index < data.size()) {
-            if(collection.contains(data.get(index))) {
-                index++;
-            } else {
-                E removed = data.remove(index);
-                updates.elementDeleted(index, removed);
-                changed = true;
+        for (int i = size() - 1; i >= 0; i--) {
+            E old_value = data.get(i);
+            E new_value = operator.apply(old_value);
+            if (old_value != new_value) {               // instance check
+                data.set(i, new_value);
+                updates.elementUpdated(i, old_value, new_value);
             }
         }
         updates.commitEvent();
-        return changed;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void forEach(Consumer<? super E> action) {
+        data.forEach(action);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Stream<E> stream() {
+        return data.stream();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Stream<E> parallelStream() {
+        return data.parallelStream();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Spliterator<E> spliterator() {
+        return data.spliterator();
     }
 
     /**
@@ -305,9 +331,8 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
 
         // 2. The Listeners to write
         List<ListEventListener<E>> serializableListeners = new ArrayList<ListEventListener<E>>(1);
-        for(Iterator<ListEventListener<E>> i = updates.getListEventListeners().iterator(); i.hasNext(); ) {
-            ListEventListener<E> listener = i.next();
-            if(!(listener instanceof Serializable)) continue;
+        for (ListEventListener<E> listener : updates.getListEventListeners()) {
+            if (!(listener instanceof Serializable)) continue;
             serializableListeners.add(listener);
         }
         ListEventListener[] listeners = serializableListeners.toArray(new ListEventListener[serializableListeners.size()]);
@@ -346,8 +371,8 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
         this.data.addAll(Arrays.asList(elements));
 
         // 5. Populate the listeners
-        for(int i = 0; i < listeners.length; i++) {
-            this.updates.addListEventListener(listeners[i]);
+        for (ListEventListener<E> listener : listeners) {
+            this.updates.addListEventListener(listener);
         }
     }
 }

@@ -11,6 +11,8 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiConsumer;
 
 /**
  * This map implementation sits atop an {@link EventList} and makes it
@@ -31,7 +33,7 @@ import java.util.*;
  * "C" -> "Cherry"
  * "O" -> "Orange"
  * "A" -> "Apple"
- * "P" -> "Pinapple"
+ * "P" -> "Pineapple"
  * "B" -> "Banana"
  * </pre>
  *
@@ -42,13 +44,13 @@ import java.util.*;
  *
  * @author James Lemieux
  */
-public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventListener<V> {
+public class FunctionListMap<K, V> implements DisposableMap<K, V> {
 
     /** The keys of this Map (used to remove entries from the {@link #delegate}) */
     private List<K> keyList;
 
     /** The keyList of this Map made to look like a Set (it is build lazily in {@link #keySet()}) */
-    private Set<K> keySet;
+    private KeySet keySet;
 
     /** The values of this Map in an {@link EventList}. */
     private final EventList<V> valueList;
@@ -61,6 +63,9 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
 
     /** The delegate Map which is kept in synch with changes. */
     private final Map<K, V> delegate;
+
+    private ListEventListener<V> eventListener;
+
 
     /**
      * Construct a map which maps the keys produced by the
@@ -77,13 +82,14 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
 
         // the source is the list of values
         this.valueList = source;
-        this.valueList.addListEventListener(this);
+        eventListener = this::processListChanges;
+        this.valueList.addListEventListener(eventListener);
         this.keyFunction = keyFunction;
 
         // it is important that the keyList is a BasicEventList since we use its ListIterator, which remains
         // consistent with changes to its underlying data (any other Iterator would throw a ConcurrentModificationException)
-        this.keyList = new BasicEventList<K>(source.size());
-        this.delegate = new HashMap<K, V>(source.size());
+        this.keyList = new BasicEventList<>(source.size());
+        this.delegate = new HashMap<>(source.size());
 
         // populate the keyList and the delegate Map
         for (int i = 0, n = source.size(); i < n; i++)
@@ -93,7 +99,7 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
     /** @inheritDoc */
     @Override
     public void dispose() {
-        valueList.removeListEventListener(this);
+        valueList.removeListEventListener(eventListener);
 
         keySet = null;
         entrySet = null;
@@ -135,42 +141,70 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
     @Override
     public V put(K key, V value) {
         checkKeyValueAgreement(key, value);
+        return putNoAgreementCheck(key, value);
+    }
+
+    private V putNoAgreementCheck(K key, V value) {
+        final V toReplace = get(key);
 
         // if no prior value exists for this key, simply add it
-        if (!containsKey(key)) {
+        if (toReplace == null) {
             valueList.add(value);
             return null;
         }
 
-        // otherwise try to replace the old value in place
-        final V toReplace = get(key);
-
-        // try to find the old value by identity in the valueList and replace it
-        for (ListIterator<V> i = valueList.listIterator(); i.hasNext();) {
-            if (i.next() == toReplace) {
-                i.set(value);
-                return toReplace;
-            }
+        if (!replaceValue(toReplace, value)) {
+            // something terrible has happened if a value exists in the delegate Map but
+            // not in the valueList
+            throw new IllegalStateException( "Found key: " + key +
+                " in delegate map but could not find corresponding value in valueList: " +
+                toReplace );
         }
 
-        // something terrible has happened if a value exists in the delegate Map but not in the valueList
-        throw new IllegalStateException("Found key: " + key + " in delegate map but could not find corresponding value in valueList: " + toReplace);
+        return toReplace;
+    }
+
+    private boolean replaceValue(V replaceInstance, V newValue) {
+        // Try to work sequentially since there is no cost to this approach.
+        if (valueList instanceof RandomAccess) {
+            for (int i = valueList.size() - 1; i >= 0; i--) {
+                V index_value = valueList.get(i);
+                //noinspection ObjectEquality
+                if (index_value == replaceInstance) {
+                    valueList.set(i, newValue);
+                    return true;
+                }
+            }
+            return false;
+        }
+        else {
+            // Implementation note: The previous implementation used a ListIterator.
+            //    However, they are very expensive due to their listeners.
+
+            final AtomicBoolean foundMatch = new AtomicBoolean(false);
+            valueList.replaceAll(v -> {
+                if (foundMatch.get()) return v;
+
+                if (v == replaceInstance) {
+                    foundMatch.set(true);
+                    return newValue;
+                }
+                else return v;
+            });
+            return foundMatch.get();
+        }
     }
 
     /** @inheritDoc */
     @Override
     public void putAll(Map<? extends K, ? extends V> m) {
-        // verify the contents of the given Map and ensure all key/value pairs agree with the keyFunction
-        for (Iterator<? extends Entry<? extends K, ? extends V>> i = m.entrySet().iterator(); i.hasNext();) {
-            final Entry<? extends K, ? extends V> entry = i.next();
-            checkKeyValueAgreement(entry.getKey(), entry.getValue());
-        }
+        // verify the contents of the given Map and ensure all key/value pairs agree with
+        // the keyFunction. Do this ahead of time so we don't do a partial update which
+        // would leave things in an unknown state.
+        m.forEach(this::checkKeyValueAgreement);
 
         // add each of the elements from m into this Map
-        for (Iterator<? extends Entry<? extends K, ? extends V>> i = m.entrySet().iterator(); i.hasNext();) {
-            final Entry<? extends K, ? extends V> entry = i.next();
-            put(entry.getKey(), entry.getValue());
-        }
+        m.forEach(this::putNoAgreementCheck);
     }
 
     /**
@@ -185,7 +219,7 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
     private void checkKeyValueAgreement(K key, V value) {
         final K k = key(value);
 
-        if (!GlazedListsImpl.equal(key, k))
+        if (!Objects.equals(key, k))
             throw new IllegalArgumentException("The calculated key for the given value (" + k + ") does not match the given key (" + key + ")");
     }
 
@@ -202,7 +236,7 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
             return null;
 
         final V value = get(key);
-        GlazedListsImpl.identityRemove(valueList, value);
+        valueList.removeIf( v -> v == value );  // identity comparison
         return value;
     }
 
@@ -228,6 +262,11 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
             this.entrySet = new EntrySet();
 
         return this.entrySet;
+    }
+
+    @Override
+    public void forEach(BiConsumer<? super K, ? super V> action) {
+        delegate.forEach(action);
     }
 
     /** @inheritDoc */
@@ -263,8 +302,7 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
      *
      * @param listChanges an event describing the changes in the FunctionList
      */
-    @Override
-    public void listChanged(ListEvent<V> listChanges) {
+    private void processListChanges(ListEvent<V> listChanges) {
         int offset = 0;
 
         // pass 1: do all remove work (this includes deletes and the front half of updates)
@@ -361,7 +399,7 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
 
             final V mapValue = FunctionListMap.this.get(key);
 
-            return GlazedListsImpl.equal(value, mapValue);
+            return Objects.equals(value, mapValue);
         }
 
         /** {@inheritDoc} */
@@ -487,8 +525,8 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V>, ListEventList
                 return false;
             Map.Entry e = (Map.Entry) o;
 
-            final boolean keysEqual = GlazedListsImpl.equal(getKey(), e.getKey());
-            return keysEqual && GlazedListsImpl.equal(getValue(), e.getValue());
+            final boolean keysEqual = Objects.equals(getKey(), e.getKey());
+            return keysEqual && Objects.equals(getValue(), e.getValue());
         }
 
         /** {@inheritDoc} */

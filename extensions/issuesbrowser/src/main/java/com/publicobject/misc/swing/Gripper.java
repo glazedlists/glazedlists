@@ -10,6 +10,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.IndexColorModel;
+import java.util.Objects;
 
 /**
  * Implements a bumpy gripper like the one found in the Metal Look and Feel.
@@ -102,7 +103,7 @@ class GripperBuffer {
     }
 
     public boolean hasSameConfiguration(GraphicsConfiguration gc, Color top, Color shadow, Color back) {
-        if (!GlazedListsImpl.equal(this.gc, gc)) return false;
+        if (!Objects.equals(this.gc, gc)) return false;
 
 	    return topColor.equals(top) && shadowColor.equals(shadow) && backColor.equals(back);
     }

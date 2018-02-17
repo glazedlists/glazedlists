@@ -75,7 +75,7 @@ public interface EventList<E> extends List<E> {
      * @param listChangeListener event listener != null
      * @throws NullPointerException if the specified listener is null
      */
-    public void addListEventListener(ListEventListener<? super E> listChangeListener);
+    void addListEventListener(ListEventListener<? super E> listChangeListener);
 
     /**
      * Removes the specified listener from receiving change updates for this list.
@@ -84,7 +84,7 @@ public interface EventList<E> extends List<E> {
      * @throws NullPointerException if the specified listener is null
      * @throws IllegalArgumentException if the specified listener wasn't added before
      */
-    public void removeListEventListener(ListEventListener<? super E> listChangeListener);
+    void removeListEventListener(ListEventListener<? super E> listChangeListener);
 
     /**
      * Gets the lock required to share this list between multiple threads. It's always defined.
@@ -92,12 +92,12 @@ public interface EventList<E> extends List<E> {
      * @return a re-entrant {@link ReadWriteLock} that guarantees thread safe
      *      access to this list.
      */
-    public ReadWriteLock getReadWriteLock();
+    ReadWriteLock getReadWriteLock();
 
     /**
      * Get the publisher used to distribute {@link ListEvent}s. It's always defined.
      */
-    public ListEventPublisher getPublisher();
+    ListEventPublisher getPublisher();
 
     /**
      * Disposing an EventList will make it eligible for garbage collection.
@@ -107,7 +107,7 @@ public interface EventList<E> extends List<E> {
      * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error
      * to call any method on an {@link EventList} after it has been disposed.
      */
-    public void dispose();
+    void dispose();
     
     /**
      * Executes the block of code represented by the given consumer while holding the read lock of

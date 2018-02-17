@@ -9,6 +9,7 @@ import ca.odell.glazedlists.matchers.SearchEngineTextMatcherEditor;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A SearchTerm object stores metadata around a single piece of text to be
@@ -143,7 +144,7 @@ public final class SearchTerm<E> implements Serializable {
         if (isNegated() != term.isNegated()) return false;
 
         // if they have a field that doesn't match then we cannot really compare these search terms
-        if (!GlazedListsImpl.equal(getField(), term.getField())) return false;
+        if (!Objects.equals(getField(), term.getField())) return false;
 
         // if the text is equal then no strict constrainment exists
         if (getText().equals(term.getText())) return false;
