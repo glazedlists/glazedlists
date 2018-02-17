@@ -323,9 +323,12 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
      * any kind of Object. Implementations should typically create and return
      * new objects, though it is permissible to return the original value
      * unchanged (i.e. the Identity Function).
+     * 
+     * <p>As of Glazed Lists 1.12 this interface extends {@link java.util.function.Function}.
+     * This way an existing FunctionList.Function can be used everywhere a standard function is expected.
      */
     @FunctionalInterface
-    public interface Function<A,B> {
+    public interface Function<A, B> extends java.util.function.Function<A, B>{
 
         /**
          * Transform the given <code>sourceValue</code> into any kind of Object.
@@ -334,6 +337,11 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
          * @return the transformed version of the object
          */
         public B evaluate(A sourceValue);
+        
+        @Override
+        default B apply(A sourceValue) {
+            return evaluate(sourceValue);
+        }
     }
 
     /**

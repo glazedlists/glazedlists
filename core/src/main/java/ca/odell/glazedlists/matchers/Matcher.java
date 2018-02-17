@@ -3,6 +3,8 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.matchers;
 
+import java.util.function.Predicate;
+
 /**
  * Determines which values should be filtered.
  *
@@ -11,6 +13,9 @@ package ca.odell.glazedlists.matchers;
  * guarantees that {@link ca.odell.glazedlists.FilterList}s can safely call
  * {@link #matches(Object) matches()} without synchronization.
  *
+ * <p>As of Glazed Lists 1.12 Matcher was adapted to extend the {@link Predicate} interface.
+ * This way you can use an existing Matcher everywhere a predicate is expected.
+ *  
  * <p>In order to create dynamic filtering, use a
  * {@link ca.odell.glazedlists.matchers.MatcherEditor}, which
  * can create immutable {@link Matcher} Objects each time the matching constraints
@@ -21,7 +26,7 @@ package ca.odell.glazedlists.matchers;
  * @see ca.odell.glazedlists.matchers.MatcherEditor
  */
 @FunctionalInterface
-public interface Matcher<E> {
+public interface Matcher<E> extends Predicate<E> {
 
     /**
      * Return true if an item matches a filter.
@@ -29,4 +34,9 @@ public interface Matcher<E> {
      * @param item The item possibly being filtered.
      */
     public boolean matches(E item);
+    
+    @Override
+    default boolean test(E item) {
+        return matches(item);
+    }
 }
