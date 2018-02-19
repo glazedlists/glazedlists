@@ -168,9 +168,9 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V> {
         // Try to work sequentially since there is no cost to this approach.
         if (valueList instanceof RandomAccess) {
             for (int i = valueList.size() - 1; i >= 0; i--) {
-                V index_value = valueList.get(i);
+                V indexValue = valueList.get(i);
                 //noinspection ObjectEquality
-                if (index_value == replaceInstance) {
+                if (indexValue == replaceInstance) {
                     valueList.set(i, newValue);
                     return true;
                 }

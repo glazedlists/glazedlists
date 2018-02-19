@@ -487,11 +487,11 @@ public abstract class AbstractEventList<E> implements EventList<E> {
     public void replaceAll(UnaryOperator<E> operator) {
         updates.beginEvent(true);                           // nested due to set below
         for (int i = size() - 1; i >= 0; i--) {
-            E old_value = get(i);
-            E new_value = operator.apply(old_value);
-            if (old_value != new_value) {                   // instance check
+            E oldValue = get(i);
+            E newValue = operator.apply(oldValue);
+            if (oldValue != newValue) {                   // instance check
                 try {
-                    set(i, new_value);
+                    set(i, newValue);
                 }
                 catch(UnsupportedOperationException ex) {
                     // Since the default implementation doesn't implement set(),
@@ -499,7 +499,7 @@ public abstract class AbstractEventList<E> implements EventList<E> {
                     updates.discardEvent();
                     throw ex;
                 }
-                updates.elementUpdated(i, old_value, new_value);
+                updates.elementUpdated(i, oldValue, newValue);
             }
         }
         updates.commitEvent();
