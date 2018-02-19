@@ -350,7 +350,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
     public boolean removeIf(Predicate<? super E> filter) {
         // Ideally this remove would be processed as a single transaction. The only real
         // way that can happen (efficiently) is to get access to the source
-        // ListEventAssembler, which we can if the list extends AbstractEventList.
+        // ListEventAssembler, which is available if the list extends AbstractEventList.
         // Otherwise, things will work fine, but there will be multiple events dispatched
         // for a single remove operation.
         ListEventAssembler<?> sourceUpdates;
@@ -360,7 +360,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
         else sourceUpdates = null;
 
         boolean foundMatch = false;
-        for(int i = size() - 1; i >= 0; i--) {
+        for (int i = size() - 1; i >= 0; i--) {
             if (filter.test(mappedElements.get(i))) {
                 if (sourceUpdates != null && !foundMatch) {
                     sourceUpdates.beginEvent(true);
