@@ -349,7 +349,15 @@ public abstract class AbstractEventList<E> implements EventList<E> {
 
         updates.beginEvent(true);
         for (E value : values) {
-            this.add(index, value);
+            try {
+                this.add(index, value);
+            }
+            catch(UnsupportedOperationException ex) {
+                // Since the default implementation doesn't implement add(),
+                // deal with that error to ensure the event isn't left dangling.
+                updates.discardEvent();
+                throw ex;
+            }
 
             // advance the insertion location if its within the size of the list
             if (index < this.size()) {
