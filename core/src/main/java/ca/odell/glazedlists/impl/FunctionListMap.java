@@ -145,13 +145,14 @@ public class FunctionListMap<K, V> implements DisposableMap<K, V> {
     }
 
     private V putNoAgreementCheck(K key, V value) {
-        final V toReplace = get(key);
 
         // if no prior value exists for this key, simply add it
-        if (toReplace == null) {
+        if (!containsKey(key)) {
             valueList.add(value);
             return null;
         }
+
+        final V toReplace = get(key);
 
         if (!replaceValue(toReplace, value)) {
             // something terrible has happened if a value exists in the delegate Map but
