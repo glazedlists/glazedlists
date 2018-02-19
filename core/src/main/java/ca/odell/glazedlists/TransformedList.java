@@ -90,18 +90,6 @@ public abstract class TransformedList<S, E> extends AbstractEventList<E> impleme
 
     /** {@inheritDoc} */
     @Override
-    public void clear() {
-        // nest changes and let the other methods compose the event
-        updates.beginEvent(true);
-        try {
-            super.clear();
-        } finally {
-            updates.commitEvent();
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public E get(int index) {
         if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot get at " + index + " on list of size " + size());
         return (E) source.get(getSourceIndex(index));

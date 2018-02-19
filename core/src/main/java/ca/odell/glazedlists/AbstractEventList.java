@@ -14,6 +14,7 @@ import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
 /**
@@ -346,14 +347,16 @@ public abstract class AbstractEventList<E> implements EventList<E> {
 
         final int initializeSize = this.size();
 
-	    for ( E value : values ) {
-		    this.add( index, value );
+        updates.beginEvent(true);
+        for (E value : values) {
+            this.add(index, value);
 
-		    // advance the insertion location if its within the size of the list
-		    if ( index < this.size() ) {
-			    index++;
-		    }
-	    }
+            // advance the insertion location if its within the size of the list
+            if (index < this.size()) {
+                index++;
+            }
+        }
+        updates.commitEvent();
 
         return this.size() != initializeSize;
     }
@@ -428,6 +431,44 @@ public abstract class AbstractEventList<E> implements EventList<E> {
         if(isEmpty()) return;
 
         removeIf(v -> true);
+    }
+
+    /**
+     * Removes all of the elements of this collection that satisfy the given
+     * predicate.
+     *
+     * @implSpec
+     * The default implementation traverses all elements of the collection using
+     * its {@link #iterator}.  Each matching element is removed using
+     * {@link Iterator#remove()}.  If the collection's iterator does not
+     * support removal then an {@code UnsupportedOperationException} will be
+     * thrown on the first matching element.
+     *
+     * @param filter a predicate which returns {@code true} for elements to be
+     *        removed
+     * @return {@code true} if any elements were removed
+     * @throws NullPointerException if the specified filter is null
+     * @throws UnsupportedOperationException if elements cannot be removed
+     *         from this collection.  Implementations may throw this exception if a
+     *         matching element cannot be removed or if, in general, removal is not
+     *         supported.
+     */
+    @Override
+    public boolean removeIf(Predicate<? super E> filter) {
+        if (isEmpty()) return false;
+
+        Objects.requireNonNull(filter);
+        updates.beginEvent(true);
+        boolean removed = false;
+        final Iterator<E> each = iterator();
+        while (each.hasNext()) {
+            if (filter.test(each.next())) {
+                each.remove();
+                removed = true;
+            }
+        }
+        updates.commitEvent();
+        return removed;
     }
 
 
