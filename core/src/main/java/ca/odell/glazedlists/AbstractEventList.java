@@ -121,9 +121,9 @@ public abstract class AbstractEventList<E> implements EventList<E> {
     @Override
     public boolean contains(Object object) {
         // for through this, looking for the lucky object
-	    for ( E e : this ) {
-		    if ( Objects.equals( object, e ) ) return true;
-	    }
+        for (E e : this) {
+            if (Objects.equals(object, e)) return true;
+        }
         // not found
         return false;
     }
@@ -158,10 +158,10 @@ public abstract class AbstractEventList<E> implements EventList<E> {
         // copy values into the array
         Object[] array = new Object[size()];
         int index = 0;
-	    for ( E e : this ) {
-		    array[ index ] = e;
-		    index++;
-	    }
+        for (E e : this) {
+            array[index] = e;
+            index++;
+        }
         return array;
     }
 
@@ -192,10 +192,10 @@ public abstract class AbstractEventList<E> implements EventList<E> {
 
         // copy values into the array
         int index = 0;
-	    for ( E e : this ) {
-		    array[ index ] = ( T ) e;
-		    index++;
-	    }
+        for (E e : this) {
+            array[index] = (T) e;
+            index++;
+        }
         return array;
     }
 
@@ -274,9 +274,9 @@ public abstract class AbstractEventList<E> implements EventList<E> {
     @Override
     public boolean containsAll(Collection<?> values) {
         // look for something that is missing
-	    for ( Object value : values ) {
-		    if ( !contains( value ) ) return false;
-	    }
+        for (Object value : values) {
+            if (!contains(value)) return false;
+        }
         // contained everything we looked for
         return true;
     }
@@ -564,9 +564,9 @@ public abstract class AbstractEventList<E> implements EventList<E> {
     @Override
     public int hashCode() {
         int hashCode = 1;
-	    for ( E a : this ) {
-		    hashCode = 31 * hashCode + ( a == null ? 0 : a.hashCode() );
-	    }
+        for (E a : this) {
+            hashCode = 31 * hashCode + (a == null ? 0 : a.hashCode());
+        }
         return hashCode;
     }
 
@@ -669,14 +669,13 @@ public abstract class AbstractEventList<E> implements EventList<E> {
     public int indexOf(Object object) {
         // for through this, looking for the lucky object
         int index = 0;
-	    for (E e : this) {
-		    if (Objects.equals(object, e)) {
-			    return index;
-		    }
-		    else {
-			    index++;
-		    }
-	    }
+        for (E e : this) {
+            if (Objects.equals(object, e)) {
+                return index;
+            } else {
+                index++;
+            }
+        }
         // not found
         return -1;
     }
