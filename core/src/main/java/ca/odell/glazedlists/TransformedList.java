@@ -78,18 +78,6 @@ public abstract class TransformedList<S, E> extends AbstractEventList<E> impleme
 
     /** {@inheritDoc} */
     @Override
-    public boolean addAll(int index, Collection<? extends E> values) {
-        // nest changes and let the other methods compose the event
-        updates.beginEvent(true);
-        try {
-            return super.addAll(index, values);
-        } finally {
-            updates.commitEvent();
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public E get(int index) {
         if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot get at " + index + " on list of size " + size());
         return (E) source.get(getSourceIndex(index));
@@ -101,30 +89,6 @@ public abstract class TransformedList<S, E> extends AbstractEventList<E> impleme
         if(!isWritable()) throw new IllegalStateException("Non-writable List cannot be modified");
         if(index < 0 || index >= size()) throw new IndexOutOfBoundsException("Cannot remove at " + index + " on list of size " + size());
         return (E) source.remove(getSourceIndex(index));
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean removeAll(Collection<?> collection) {
-        // nest changes and let the other methods compose the event
-        updates.beginEvent(true);
-        try {
-            return super.removeAll(collection);
-        } finally {
-            updates.commitEvent();
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean retainAll(Collection<?> values) {
-        // nest changes and let the other methods compose the event
-        updates.beginEvent(true);
-        try {
-            return super.retainAll(values);
-        } finally {
-            updates.commitEvent();
-        }
     }
 
     /** {@inheritDoc} */
