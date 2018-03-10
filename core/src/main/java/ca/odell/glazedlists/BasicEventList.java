@@ -253,11 +253,11 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
     public void replaceAll(UnaryOperator<E> operator) {
         updates.beginEvent();
         for (int i = size() - 1; i >= 0; i--) {
-            E old_value = data.get(i);
-            E new_value = operator.apply(old_value);
-            if (old_value != new_value) {               // instance check
-                data.set(i, new_value);
-                updates.elementUpdated(i, old_value, new_value);
+            E oldValue = data.get(i);
+            E newValue = operator.apply(oldValue);
+            if (oldValue != newValue) {               // instance check
+                data.set(i, newValue);
+                updates.elementUpdated(i, oldValue, newValue);
             }
         }
         updates.commitEvent();

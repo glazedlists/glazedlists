@@ -829,6 +829,32 @@ public class FunctionListMapTest {
         eventMap.dispose();
     }
 
+    @Test
+    public void testPutNull() {
+        final EventList<String> source = new BasicEventList<String>();
+        source.add("Jesse");
+        source.add(null);
+        source.add("Katie");
+        final Map<String, String> eventMap = GlazedLists.syncEventListToMap(source, new FirstLetterOrNullFunction());
+        assertEquals(3, eventMap.size());
+        assertEquals("Jesse", eventMap.get("J"));
+        assertEquals("Katie", eventMap.get("K"));
+        assertEquals(null, eventMap.get("UNKNOWN"));
+        assertEquals(null, eventMap.put("UNKNOWN", null));
+        assertEquals(3, eventMap.size());
+        assertEquals("Jesse", eventMap.get("J"));
+        assertEquals("Katie", eventMap.get("K"));
+        assertEquals(null, eventMap.get("UNKNOWN"));
+    }
+
+    private static final class FirstLetterOrNullFunction implements FunctionList.Function<String, String> {
+        @Override
+        public String evaluate(String sourceValue) {
+            return sourceValue == null ? "UNKNOWN" : String.valueOf(sourceValue.charAt(0));
+        }
+    }
+
+
     private static final class FirstLetterComparator implements Comparator<String> {
         @Override
         public int compare(String o1, String o2) {
