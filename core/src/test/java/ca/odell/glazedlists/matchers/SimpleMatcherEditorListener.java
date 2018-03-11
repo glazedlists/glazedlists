@@ -1,6 +1,6 @@
 package ca.odell.glazedlists.matchers;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 /**
  * A MatcherEditorListener that simply remembers how the filter has been changed.

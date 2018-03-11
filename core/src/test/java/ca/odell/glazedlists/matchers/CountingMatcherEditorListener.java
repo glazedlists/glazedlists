@@ -3,7 +3,7 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.matchers;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 /**
  * Count matcher events, inserting a delay if requested to test multithreaded
