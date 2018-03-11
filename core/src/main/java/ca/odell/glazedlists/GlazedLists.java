@@ -249,6 +249,7 @@ public final class GlazedLists {
      * {@link Comparator}s in the sequence specified until differences or
      * absolute equality is determined.
      */
+    @SafeVarargs
     public static <T> Comparator<T> chainComparators(Comparator<T>... comparators) {
         return chainComparators(Arrays.asList(comparators));
     }
@@ -410,6 +411,7 @@ public final class GlazedLists {
      * @param contents the list elements, if <code>null</code> the result will be an empty list
      * @return the new {@link EventList}
      */
+    @SafeVarargs
     public static <E> EventList<E> eventListOf(E... contents) {
         return eventList(contents == null ? Collections.<E>emptyList() : Arrays.asList(contents));
     }
@@ -439,6 +441,7 @@ public final class GlazedLists {
      * @param contents the list elements, if <code>null</code> the result will be an empty list
      * @return the new {@link EventList}
      */
+    @SafeVarargs
     public static <E> EventList<E> eventListOf(ListEventPublisher publisher, ReadWriteLock lock,
             E... contents) {
         return eventList(publisher, lock, contents == null ? Collections.<E>emptyList() : Arrays

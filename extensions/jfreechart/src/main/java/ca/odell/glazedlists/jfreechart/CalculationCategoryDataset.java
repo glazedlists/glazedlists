@@ -82,6 +82,7 @@ public class CalculationCategoryDataset extends AbstractDataset implements Categ
      *
      * @param calculations the calculations of the dataset
      */
+    @SafeVarargs
     public CalculationCategoryDataset(Calculation<? extends Number>... calculations) {
         this();
         getCalculations().addAll(Arrays.asList(calculations));

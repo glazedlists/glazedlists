@@ -13,6 +13,7 @@ public class OrMatcher<E> implements Matcher<E> {
     /** The Matchers being combined with an "or" operator. */
     private final Matcher<? super E>[] matchers;
 
+    @SafeVarargs
     public OrMatcher(Matcher<? super E>... matchers) {
         this.matchers = matchers;
     }

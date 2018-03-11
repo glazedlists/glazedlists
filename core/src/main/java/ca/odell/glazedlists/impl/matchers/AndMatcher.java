@@ -13,6 +13,7 @@ public class AndMatcher<E> implements Matcher<E> {
     /** The Matchers being combined with an "and" operator. */
     private final Matcher<? super E>[] matchers;
 
+    @SafeVarargs
     public AndMatcher(Matcher<? super E>... matchers) {
         this.matchers = matchers;
     }

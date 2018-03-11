@@ -28,6 +28,7 @@ public abstract class AbstractCompositeCalculation<N extends Number> extends Abs
      *
      * @param inputs smaller Calculations to combine to produce this Calculation
      */
+    @SafeVarargs
     protected AbstractCompositeCalculation(Calculation<? extends Number>... inputs) {
         super(null);
         this.inputs = inputs;
