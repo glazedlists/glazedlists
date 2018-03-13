@@ -1817,7 +1817,7 @@ public final class AutoCompleteSupport<E> {
 
             // get the component from the renderer
             final Component comp = renderer.getListCellRendererComponent(
-	            popup.getList(), prototypeValue, -1, false, false);
+                    (JList<E>) popup.getList(), prototypeValue, -1, false, false);
 
             // determine the preferred size of the component
             comp.setFont(comboBox.getFont());
