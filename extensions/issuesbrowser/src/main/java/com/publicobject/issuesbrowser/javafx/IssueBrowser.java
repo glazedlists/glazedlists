@@ -48,14 +48,14 @@ public final class IssueBrowser extends Application {
 
     private JavaFxUsersMatcherEditor usersMatcherEditor = new JavaFxUsersMatcherEditor(issuesEventList);
 
-    private FilterList<Issue> issuesUserFiltered = new FilterList<Issue>(issuesEventList, usersMatcherEditor);
+    private FilterList<Issue> issuesUserFiltered = new FilterList<>(issuesEventList, usersMatcherEditor);
 
-    private FilterList<Issue> issuesTextFiltered = new FilterList<Issue>(issuesUserFiltered, Matchers.trueMatcher());
+    private FilterList<Issue> issuesTextFiltered = new FilterList<>(issuesUserFiltered, Matchers.trueMatcher());
 
-    private FilterList<Issue> issuesPriorityFiltered = new FilterList<Issue>(issuesTextFiltered);
+    private FilterList<Issue> issuesPriorityFiltered = new FilterList<>(issuesTextFiltered);
 
     /** Adapter for EventList, input for issue table. */
-    private EventObservableList<Issue> issuesObservableList = new EventObservableList<Issue>(issuesPriorityFiltered);
+    private EventObservableList<Issue> issuesObservableList = new EventObservableList<>(issuesPriorityFiltered);
 
     public static void main(String[] args) {
         Application.launch(IssueBrowser.class, args);

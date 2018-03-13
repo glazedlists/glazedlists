@@ -22,7 +22,7 @@ public class StringBeanFunction<E> implements FunctionList.Function<E,String> {
      * {@link ca.odell.glazedlists.GlazedLists GlazedLists} tool factory.
      */
     public StringBeanFunction(Class<E> beanClass, String propertyName) {
-        this.property = new BeanProperty<E>(beanClass, propertyName, true, false);
+        this.property = new BeanProperty<>(beanClass, propertyName, true, false);
     }
 
     /** @inheritDoc */

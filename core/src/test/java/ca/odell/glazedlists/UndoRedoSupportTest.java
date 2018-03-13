@@ -25,8 +25,8 @@ public class UndoRedoSupportTest {
 
     @Before
     public void setUp() {
-        source = new BasicEventList<String>();
-        nestedSource = new TransactionList<String>(source, true);
+        source = new BasicEventList<>();
+        nestedSource = new TransactionList<>(source, true);
         undoRedoSupport = UndoRedoSupport.install(nestedSource);
         undoSupportWatcher = new UndoSupportWatcher();
 
@@ -134,7 +134,7 @@ public class UndoRedoSupportTest {
         source.add("Fourth");
         source.add("Fifth");
 
-        final List<String> beforeSnapshot = new ArrayList<String>(source);
+        final List<String> beforeSnapshot = new ArrayList<>(source);
         undoSupportWatcher.getEditStack().clear();
         assertEquals(0, undoSupportWatcher.getEditStack().size());
 
@@ -144,7 +144,7 @@ public class UndoRedoSupportTest {
         nestedSource.set(3, "Updated");
         nestedSource.commitEvent();
 
-        final List<String> afterSnapshot = new ArrayList<String>(source);
+        final List<String> afterSnapshot = new ArrayList<>(source);
 
         assertEquals(1, undoSupportWatcher.getEditStack().size());
         UndoRedoSupport.Edit lastEdit = undoSupportWatcher.getEditStack().remove(0);
@@ -194,7 +194,7 @@ public class UndoRedoSupportTest {
         }
 
         // take a snapshot of the List after 500 random edits
-        final List<String> snapshot = new ArrayList<String>(nestedSource);
+        final List<String> snapshot = new ArrayList<>(nestedSource);
         assertEquals(500, undoSupportWatcher.getEditStack().size());
 
         // undo all edits (should result in an empty list)
@@ -214,7 +214,7 @@ public class UndoRedoSupportTest {
     }
 
     private static class UndoSupportWatcher implements UndoRedoSupport.Listener {
-        private List<UndoRedoSupport.Edit> editStack = new ArrayList<UndoRedoSupport.Edit>();
+        private List<UndoRedoSupport.Edit> editStack = new ArrayList<>();
 
         @Override
         public void undoableEditHappened(UndoRedoSupport.Edit edit) {

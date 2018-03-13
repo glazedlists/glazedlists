@@ -21,7 +21,7 @@ public class SwingThreadProxyEventListTest {
     @Test
     @Ignore
     public void testExceptionInListenerCausesNextListEventToBeDeliveredOnWrongThread() throws Exception {
-        final EventList<String> source = new BasicEventList<String>();
+        final EventList<String> source = new BasicEventList<>();
         final EventList<String> threadProxy = GlazedListsSwing.swingThreadProxyList(source);
 
         final ListEventRecorder recorder = new ListEventRecorder();

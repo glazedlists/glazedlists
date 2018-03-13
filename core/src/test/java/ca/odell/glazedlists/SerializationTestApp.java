@@ -57,7 +57,7 @@ public class SerializationTestApp {
         final ListEventPublisher publisher = serializedCopy.get(0).names.getPublisher();
         final ReadWriteLock lock = serializedCopy.get(0).names.getReadWriteLock();
 
-        final CompositeList<String> compositeList = new CompositeList<String>(publisher, lock);
+        final CompositeList<String> compositeList = new CompositeList<>(publisher, lock);
 
         for (Iterator<ListHolder> iter = serializedCopy.iterator(); iter.hasNext();) {
             compositeList.addMemberList(iter.next().names);
@@ -72,9 +72,9 @@ public class SerializationTestApp {
     private static Object createTestData() {
         final ReadWriteLock sharedLock = LockFactory.DEFAULT.createReadWriteLock();
         final ListEventPublisher sharedPublisher = ListEventAssembler.createListEventPublisher();
-        final List<ListHolder> rootList = new ArrayList<ListHolder>();
+        final List<ListHolder> rootList = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
-            final BasicEventList<String> eventList = new BasicEventList<String>(sharedPublisher, sharedLock);
+            final BasicEventList<String> eventList = new BasicEventList<>(sharedPublisher, sharedLock);
             eventList.add("Test " + i);
             final ListHolder elem = new ListHolder(eventList);
             rootList.add(elem);

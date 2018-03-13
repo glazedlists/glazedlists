@@ -53,7 +53,7 @@ public class DebugListTest {
 
     @Before
     public void setUp() {
-        list = new DebugList<String>();
+        list = new DebugList<>();
         list.addAll(Arrays.asList("one", "two", "three", "four", "five"));
         ListConsistencyListener.install(list);
     }
@@ -207,7 +207,7 @@ public class DebugListTest {
 
     @Test
     public void testCreateNewDebugList() {
-        DebugList<String> list1 = new DebugList<String>();
+        DebugList<String> list1 = new DebugList<>();
         DebugList<Integer> list2 = list1.createNewDebugList();
 
         assertSame(list1.getPublisher(), list2.getPublisher());
@@ -224,7 +224,7 @@ public class DebugListTest {
 
 	@Test
 	public void testLockUpgradeAttempt() {
-        DebugList<String> list = new DebugList<String>();
+        DebugList<String> list = new DebugList<>();
 
 		list.getReadWriteLock().readLock().lock();
 

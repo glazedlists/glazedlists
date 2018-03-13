@@ -29,7 +29,7 @@ public class SimpleFunctionListTest {
             fail("failed to receive an NullPointerException with null Function");
         } catch (NullPointerException e) {}
 
-        BasicEventList<String> source = new BasicEventList<String>();
+        BasicEventList<String> source = new BasicEventList<>();
         EventList<String> firstLetters = GlazedLists.transformByFunction(source, GlazedListsTests.getFirstLetterFunction());
 
         assertEquals(0, firstLetters.size());
@@ -51,7 +51,7 @@ public class SimpleFunctionListTest {
 
     @Test
     public void testAdd() {
-        BasicEventList<String> source = new BasicEventList<String>();
+        BasicEventList<String> source = new BasicEventList<>();
         EventList<String> firstLetters = GlazedLists.transformByFunction(source, GlazedListsTests.getFirstLetterFunction());
 
         source.add(ZERO);
@@ -71,7 +71,7 @@ public class SimpleFunctionListTest {
 
     @Test
     public void testSet() {
-        BasicEventList<String> source = new BasicEventList<String>();
+        BasicEventList<String> source = new BasicEventList<>();
         EventList<String> firstLetters = GlazedLists.transformByFunction(source, GlazedListsTests.getFirstLetterFunction());
 
         source.add(ZERO);
@@ -90,7 +90,7 @@ public class SimpleFunctionListTest {
 
     @Test
     public void testRemove() {
-        BasicEventList<String> source = new BasicEventList<String>();
+        BasicEventList<String> source = new BasicEventList<>();
         EventList<String> firstLetters = GlazedLists.transformByFunction(source, GlazedListsTests.getFirstLetterFunction());
 
         source.add(ZERO);
@@ -111,7 +111,7 @@ public class SimpleFunctionListTest {
     @Test
     public void testReorder() {
         // establish a control for this test case with the normal Function
-        SortedList<String> source = new SortedList<String>(new BasicEventList<String>(), null);
+        SortedList<String> source = new SortedList<>(new BasicEventList<String>(), null);
         EventList<String> firstLetters = GlazedLists.transformByFunction(source, GlazedListsTests.getFirstLetterFunction());
 
         source.add(ZERO);

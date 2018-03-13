@@ -37,7 +37,7 @@ public class Icons {
     }
 
     /** all icons are drawn in high quality */
-    public static final Map<RenderingHints.Key,Object> RENDERING_HINTS = new HashMap<RenderingHints.Key,Object>();
+    public static final Map<RenderingHints.Key,Object> RENDERING_HINTS = new HashMap<>();
     static {
         RENDERING_HINTS.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     }

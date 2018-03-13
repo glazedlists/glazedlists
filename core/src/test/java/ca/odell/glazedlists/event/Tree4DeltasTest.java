@@ -19,7 +19,7 @@ public class Tree4DeltasTest {
      */
     @Test
     public void testIterateByBlocks() {
-        Tree4Deltas<Object> deltas = new Tree4Deltas<Object>();
+        Tree4Deltas<Object> deltas = new Tree4Deltas<>();
         deltas.reset(10);
         deltas.targetInsert(3, 6, null);
         deltas.targetDelete(8, 10, ListEvent.UNKNOWN_VALUE);
@@ -42,7 +42,7 @@ public class Tree4DeltasTest {
 
     @Test
     public void testTargetChanges() {
-        Tree4Deltas<Object> deltas = new Tree4Deltas<Object>();
+        Tree4Deltas<Object> deltas = new Tree4Deltas<>();
         deltas.reset(10);
         assertEquals("__________", deltas.toString());
 
@@ -73,7 +73,7 @@ public class Tree4DeltasTest {
 
     @Test
     public void testTargetValues() {
-        Tree4Deltas<String> deltas = new Tree4Deltas<String>();
+        Tree4Deltas<String> deltas = new Tree4Deltas<>();
         deltas.reset(10);
         assertEquals("__________", deltas.toString());
 

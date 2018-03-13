@@ -20,7 +20,7 @@ public final class SortIconFactory {
     /** a map of look and feels to resource paths for icons */
     private static final String resourceRoot = "resources";
     private static final String defaultResourcePath = "aqua";
-    private static final Map<String,String> lookAndFeelResourcePathMap = new HashMap<String,String>();
+    private static final Map<String,String> lookAndFeelResourcePathMap = new HashMap<>();
     static {
         lookAndFeelResourcePathMap.put("Mac OS X Aqua", "aqua");
         lookAndFeelResourcePathMap.put("Metal/Steel", "metal");

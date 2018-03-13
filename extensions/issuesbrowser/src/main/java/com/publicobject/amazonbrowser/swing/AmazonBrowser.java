@@ -43,7 +43,7 @@ public class AmazonBrowser implements Runnable {
     public static final Icon GO = loadIcon("resources/go.gif");
 
     /** an event list to host the items */
-    private EventList<Item> itemEventList = new BasicEventList<Item>();
+    private EventList<Item> itemEventList = new BasicEventList<>();
 
     /** the TreeList backing the EventTableModel that models the treetable data. */
     private TreeList<Item> treeList;
@@ -120,16 +120,16 @@ public class AmazonBrowser implements Runnable {
         filterFieldLabel.setForeground(Color.WHITE);
 
         filterField = new JTextField(10);
-        final SearchEngineTextFieldMatcherEditor<Item> filterFieldMatcherEditor = new SearchEngineTextFieldMatcherEditor<Item>(filterField, new ItemTextFilterator());
+        final SearchEngineTextFieldMatcherEditor<Item> filterFieldMatcherEditor = new SearchEngineTextFieldMatcherEditor<>(filterField, new ItemTextFilterator());
 
-        final Set<SearchEngineTextMatcherEditor.Field<Item>> filterFields = new HashSet<SearchEngineTextMatcherEditor.Field<Item>>();
-        filterFields.add(new SearchEngineTextMatcherEditor.Field<Item>("title", new TitleTextFilterator()));
-        filterFields.add(new SearchEngineTextMatcherEditor.Field<Item>("director", new DirectorTextFilterator()));
+        final Set<SearchEngineTextMatcherEditor.Field<Item>> filterFields = new HashSet<>();
+        filterFields.add(new SearchEngineTextMatcherEditor.Field<>("title", new TitleTextFilterator()));
+        filterFields.add(new SearchEngineTextMatcherEditor.Field<>("director", new DirectorTextFilterator()));
         filterFieldMatcherEditor.setFields(filterFields);
 
         // sort the original items list
-        final SortedList<Item> sortedItemsList = new SortedList<Item>(itemEventList, null);
-        final FilterList<Item> filteredItemsList = new FilterList<Item>(sortedItemsList, filterFieldMatcherEditor);
+        final SortedList<Item> sortedItemsList = new SortedList<>(itemEventList, null);
+        final FilterList<Item> filteredItemsList = new FilterList<>(sortedItemsList, filterFieldMatcherEditor);
 
         final StartNewSearchActionListener startNewSearch = new StartNewSearchActionListener();
 
@@ -171,7 +171,7 @@ public class AmazonBrowser implements Runnable {
         searchPanel.add(Box.createVerticalStrut(65),  new GridBagConstraints(6, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
         final EventList<Item> swingFilteredItemsList = GlazedListsSwing.swingThreadProxyList(filteredItemsList);
-        treeList = new TreeList<Item>(swingFilteredItemsList, new ItemTreeFormat(treeCriteriaEditor.getActiveCriteria()), TreeList.<Item>nodesStartExpanded());
+        treeList = new TreeList<>(swingFilteredItemsList, new ItemTreeFormat(treeCriteriaEditor.getActiveCriteria()), TreeList.<Item>nodesStartExpanded());
 
         // create a JTable to display the items
         itemTableModel = GlazedListsSwing.eventTableModel(treeList, new ItemTableFormat());

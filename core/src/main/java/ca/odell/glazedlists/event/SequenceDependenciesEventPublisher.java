@@ -51,10 +51,10 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher, Se
     private transient int reentrantFireEventCount;
 
     /** subject to cleanup when this event is completely distributed */
-    private transient final Map<Object,EventFormat> subjectsToCleanUp = new IdentityHashMap<Object,EventFormat>();
+    private transient final Map<Object,EventFormat> subjectsToCleanUp = new IdentityHashMap<>();
 
     /** for proper dependency management, when a listener and subject aren't the same identity */
-    private transient final Map<Object,Object> listenersToRelatedSubjects = new IdentityHashMap<Object,Object>();
+    private transient final Map<Object,Object> listenersToRelatedSubjects = new IdentityHashMap<>();
 
     /** the last listener notified, the next one will be beyond it in the list */
     private transient int nextToNotify;
@@ -95,16 +95,16 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher, Se
     private List<SubjectAndListener> orderSubjectsAndListeners(List<SubjectAndListener> subjectsAndListeners) {
 
         // since we're regenerating the subjectAndListeners list, clear it and re-add the elements
-        List<SubjectAndListener> result = new ArrayList<SubjectAndListener>();
+        List<SubjectAndListener> result = new ArrayList<>();
 
         // HashMaps of unprocessed elements, keyed by both source and target
-        IdentityMultimap<Object,SubjectAndListener> sourceToPairs = new IdentityMultimap<Object,SubjectAndListener>();
-        IdentityMultimap<Object,SubjectAndListener> targetToPairs = new IdentityMultimap<Object,SubjectAndListener>();
+        IdentityMultimap<Object,SubjectAndListener> sourceToPairs = new IdentityMultimap<>();
+        IdentityMultimap<Object,SubjectAndListener> targetToPairs = new IdentityMultimap<>();
 
         // everything that has all of its listeners already notified in subjectAndListeners
-        Map<Object,Boolean> satisfied = new IdentityHashMap<Object,Boolean>();
+        Map<Object,Boolean> satisfied = new IdentityHashMap<>();
         // everything that has a listener already notified
-        List<Object> satisfiedToDo = new ArrayList<Object>();
+        List<Object> satisfiedToDo = new ArrayList<>();
 
         // prepare the initial collections: maps that show how each element is
         // used as source and target in directed edges, plus a list of nodes
@@ -211,7 +211,7 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher, Se
     private <Subject,Listener,Event> List<SubjectAndListener> updateListEventListeners(Subject subject, Listener listenerToAdd, Listener listenerToRemove, EventFormat<Subject,Listener,Event> eventFormat) {
         // we'll want to output a copy of all the listeners
         int anticipatedSize = this.subjectAndListeners.size() + (listenerToAdd == null ? - 1 : 1);
-        List<SubjectAndListener> result = new ArrayList<SubjectAndListener>(anticipatedSize);
+        List<SubjectAndListener> result = new ArrayList<>(anticipatedSize);
 
         // walk through, adding all the old listeners to the new listeners list,
         // unless a particular listener is slated for removal for some reaosn
@@ -293,7 +293,7 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher, Se
      * Get all listeners of the specified object.
      */
     public synchronized <Listener> List<Listener> getListeners(Object subject) {
-        List<Listener> result = new ArrayList<Listener>();
+        List<Listener> result = new ArrayList<>();
         for(int i = 0, size = subjectAndListeners.size(); i < size; i++) {
             SubjectAndListener<?,Listener,?> subjectAndListener = subjectAndListeners.get(i);
             if(subjectAndListener.subject != subject) continue;

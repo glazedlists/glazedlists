@@ -36,7 +36,7 @@ class SelectionManager<E> {
      * via the {@link ListSelection#getDeselected()} method.
      */
     SelectionManager(EventList<E> source, Selectable selectable) {
-        selection = new ListSelection<E>(source);
+        selection = new ListSelection<>(source);
         this.selectable = selectable;
         selection.addSelectionListener(new SelectionListListener());
 

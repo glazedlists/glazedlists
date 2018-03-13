@@ -330,7 +330,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
         E[] elements = (E[])data.toArray(new Object[data.size()]);
 
         // 2. The Listeners to write
-        List<ListEventListener<E>> serializableListeners = new ArrayList<ListEventListener<E>>(1);
+        List<ListEventListener<E>> serializableListeners = new ArrayList<>(1);
         for (ListEventListener<E> listener : updates.getListEventListeners()) {
             if (!(listener instanceof Serializable)) continue;
             serializableListeners.add(listener);
@@ -358,7 +358,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
         // 3. Try to read the ListEventPublisher and ReadWriteLock according to the new wire format
         try {
             this.publisher = (ListEventPublisher) in.readObject();
-            this.updates = new ListEventAssembler<E>(this, publisher);
+            this.updates = new ListEventAssembler<>(this, publisher);
             this.readWriteLock = (ReadWriteLock) in.readObject();
         } catch (OptionalDataException e) {
             if (e.eof)
@@ -367,7 +367,7 @@ public final class BasicEventList<E> extends AbstractEventList<E> implements Ser
             else throw e;
         }
         // 4. Populate the EventList data
-        this.data = new ArrayList<E>(elements.length);
+        this.data = new ArrayList<>(elements.length);
         this.data.addAll(Arrays.asList(elements));
 
         // 5. Populate the listeners

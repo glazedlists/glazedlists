@@ -14,7 +14,7 @@ import java.util.List;
 public abstract class AbstractKTableFormat implements KTableFormat {
 
     /** keep track of column widths, in pixels */
-    private final List<Integer> columnWidths = new ArrayList<Integer>();
+    private final List<Integer> columnWidths = new ArrayList<>();
 
     /** {@inheritDoc} */
     @Override

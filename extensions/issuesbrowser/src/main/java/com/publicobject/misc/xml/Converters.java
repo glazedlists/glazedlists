@@ -22,7 +22,7 @@ public final class Converters {
      * allows us to use the "Null Object Pattern" with converters.
      */
     public static <T> Converter<T,T> identityConverter() {
-        return new IdentityConverter<T>();
+        return new IdentityConverter<>();
     }
 
     /**

@@ -38,7 +38,7 @@ import org.eclipse.swt.widgets.TableItem;
 final class TableCheckFilterList<S, E> extends TransformedList<S, E> implements SelectionListener {
 
     /** filter out unchecked elements */
-    private final CheckMatcherEditor<S> checkMatcherEditor = new CheckMatcherEditor<S>();
+    private final CheckMatcherEditor<S> checkMatcherEditor = new CheckMatcherEditor<>();
 
     /** the table that checkboxes are displayed in */
     private final Table table;
@@ -78,7 +78,7 @@ final class TableCheckFilterList<S, E> extends TransformedList<S, E> implements 
      * @param filterListSource the source of the FilterList that backs this TableCheckFilterList
      */
     private TableCheckFilterList(Table table, TableFormat tableFormat, EventList<S> filterListSource) {
-        this(new FilterList<S>(filterListSource, Matchers.trueMatcher()), table, tableFormat);
+        this(new FilterList<>(filterListSource, Matchers.trueMatcher()), table, tableFormat);
 
         // if a CheckableWrapperList was created, store a reference so it can be disposed later
         if (filterListSource instanceof CheckableWrapperList)
@@ -178,7 +178,7 @@ final class TableCheckFilterList<S, E> extends TransformedList<S, E> implements 
      * Gets a static snapshot of the checked Objects in this list.
      */
     public List<E> getAllChecked() {
-        final List<E> result = new ArrayList<E>();
+        final List<E> result = new ArrayList<>();
         for(int i = 0, n = size(); i < n; i++) {
             if(getChecked(i)) {
                 result.add(get(i));
@@ -335,7 +335,7 @@ final class TableCheckFilterList<S, E> extends TransformedList<S, E> implements 
 class CheckableWrapperList<S> extends TransformedList<S, CheckWrapped<S>> {
 
     /** wrapped list contains CheckWrapped elements only */
-    private List<CheckWrapped<S>> wrappedSource = new ArrayList<CheckWrapped<S>>();
+    private List<CheckWrapped<S>> wrappedSource = new ArrayList<>();
 
     public CheckableWrapperList(EventList<S> source) {
         super(source);
@@ -366,7 +366,7 @@ class CheckableWrapperList<S> extends TransformedList<S, CheckWrapped<S>> {
 
     private void prepareElements() {
         for(int i = 0, n = source.size(); i < n; i++) {
-            wrappedSource.add(i, new CheckWrapped<S>(source.get(i)));
+            wrappedSource.add(i, new CheckWrapped<>(source.get(i)));
         }
     }
 
@@ -383,7 +383,7 @@ class CheckableWrapperList<S> extends TransformedList<S, CheckWrapped<S>> {
             final int changeType = listChanges.getType();
 
             switch (changeType) {
-                case ListEvent.INSERT: wrappedSource.add(changeIndex, new CheckWrapped<S>(source.get(changeIndex))); break;
+                case ListEvent.INSERT: wrappedSource.add(changeIndex, new CheckWrapped<>(source.get(changeIndex))); break;
                 case ListEvent.UPDATE: wrappedSource.get(changeIndex).setWrapped(source.get(changeIndex)); break;
                 case ListEvent.DELETE: wrappedSource.remove(changeIndex); break;
             }

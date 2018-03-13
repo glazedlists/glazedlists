@@ -36,7 +36,7 @@ public class XmlBrowser {
             args = new String[] { "pom.xml" };
         }
         // create an EventList to share data between main and the Swing EDT
-        EventList<Tag> eventList = new BasicEventList<Tag>();
+        EventList<Tag> eventList = new BasicEventList<>();
 
         // start the UI on the EDT
         SwingUtilities.invokeAndWait(new StartUIRunnable(eventList));
@@ -72,17 +72,17 @@ public class XmlBrowser {
             // prepare the table filters
             JTextField filterEdit = new JTextField(15);
             TextFilterator<Tag> filterator = GlazedLists.textFilterator("qName", "text");
-            TextComponentMatcherEditor<Tag> matcherEditor = new TextComponentMatcherEditor<Tag>(filterEdit, filterator);
+            TextComponentMatcherEditor<Tag> matcherEditor = new TextComponentMatcherEditor<>(filterEdit, filterator);
             JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
             filterPanel.add(new JLabel("Filter:"));
             filterPanel.add(filterEdit);
 
             // convert the XML into an EventList, then a TreeList
-            SortedList<Tag> sortedList = new SortedList<Tag>(eventList, null);
-            FilterList<Tag> filteredList = new FilterList<Tag>(sortedList, matcherEditor);
+            SortedList<Tag> sortedList = new SortedList<>(eventList, null);
+            FilterList<Tag> filteredList = new FilterList<>(sortedList, matcherEditor);
 
-            DefaultExternalExpansionModel<Tag> expansionProvider = new DefaultExternalExpansionModel<Tag>(TreeList.<Tag>nodesStartCollapsed());
-            TreeList<Tag> treeList = new TreeList<Tag>(filteredList, new TagTreeFormat(), expansionProvider);
+            DefaultExternalExpansionModel<Tag> expansionProvider = new DefaultExternalExpansionModel<>(TreeList.<Tag>nodesStartCollapsed());
+            TreeList<Tag> treeList = new TreeList<>(filteredList, new TagTreeFormat(), expansionProvider);
 
             // display the XML in a tree table
             String[] columnFields = new String[] { "qName", "text" };
@@ -99,7 +99,7 @@ public class XmlBrowser {
             tableScrollPane.getViewport().setBackground(UIManager.getColor("EditorPane.background"));
 
             // display the XML in a tree
-            EventTreeModel<Tag> treeModel = new EventTreeModel<Tag>(treeList);
+            EventTreeModel<Tag> treeModel = new EventTreeModel<>(treeList);
             JTree tree = new JTree(treeModel);
             tree.setRootVisible(false);
             tree.setCellRenderer(new TreeListNodeRenderer());

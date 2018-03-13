@@ -57,16 +57,16 @@ public class BeanComparatorTest {
     @Test
     public void testSort() {
         // prepare the sample list
-        List<Position> unsorted = new ArrayList<Position>();
+        List<Position> unsorted = new ArrayList<>();
         unsorted.add(new Position(4));
         unsorted.add(new Position(1));
         unsorted.add(new Position(3));
 
-        List<Position> sorted1 = new ArrayList<Position>();
+        List<Position> sorted1 = new ArrayList<>();
         sorted1.addAll(unsorted);
         Collections.sort(sorted1);
 
-        List<Position> sorted2 = new ArrayList<Position>();
+        List<Position> sorted2 = new ArrayList<>();
         sorted2.addAll(unsorted);
         Collections.sort(sorted2, GlazedLists.beanPropertyComparator(Position.class, "position"));
 

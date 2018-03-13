@@ -22,21 +22,23 @@ public class DependenciesDriver extends JapexDriverBase {
 
     private EventList<String> base;
 
+    @Override
     public void initializeDriver() {
         // do nothing
     }
 
+    @Override
     public void prepare(TestCase testCase) {
         String listEventPublisher = getParam("GlazedLists.ListEventPublisher");
         System.setProperty("GlazedLists.ListEventPublisher", listEventPublisher);
 
-        base = new BasicEventList<String>();
+        base = new BasicEventList<>();
         EventList<String> lastTransformed = base;
 
         // transform the list N times
         int transformations = testCase.getIntParam("transformations");
         for(int i = 0; i < transformations; i++) {
-            lastTransformed = new FilterList<String>(base);
+            lastTransformed = new FilterList<>(base);
         }
 
         // listen to the furtherst transformation N times
@@ -49,6 +51,7 @@ public class DependenciesDriver extends JapexDriverBase {
     /**
      * Warmup is exactly the same as the run method.
      */
+    @Override
     public void warmup(TestCase testCase) {
         executeTestCase(testCase);
     }
@@ -56,6 +59,7 @@ public class DependenciesDriver extends JapexDriverBase {
     /**
      * Execute the specified testcase one time.
      */
+    @Override
     public void run(TestCase testCase) {
         executeTestCase(testCase);
     }
@@ -65,15 +69,18 @@ public class DependenciesDriver extends JapexDriverBase {
         base.remove(0);
     }
 
+    @Override
     public void finish(TestCase testCase) {
         // do nothing
     }
 
+    @Override
     public void terminateDriver() {
         // do nothing
     }
 
     private static class NoOpListEventListener implements ListEventListener {
+        @Override
         public void listChanged(ListEvent listChanges) {
             // do nothing
         }

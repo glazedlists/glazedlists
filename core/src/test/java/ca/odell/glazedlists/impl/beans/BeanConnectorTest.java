@@ -17,20 +17,20 @@ public class BeanConnectorTest {
     @Test
     public void testBeanClassConstructor() {
         try {
-            new BeanConnector<Object>(null);
+            new BeanConnector<>(null);
             fail("Failed to receive NullPointerException with null beanClass");
         } catch (NullPointerException npe) { }
 
         try {
-            new BeanConnector<Object>(Object.class);
+            new BeanConnector<>(Object.class);
             fail("Failed to receive RuntimeException for beanClass without add/remove PropertyChangeListener methods");
         } catch (IllegalArgumentException iae) { }
         try {
-            new BeanConnector<JLabel>(JLabel.class, null);
+            new BeanConnector<>(JLabel.class, null);
             fail("Failed to receive IllegalArgumentException for null event matcher");
         } catch (IllegalArgumentException iae) { }
 
-        new BeanConnector<JComponent>(JComponent.class);
+        new BeanConnector<>(JComponent.class);
     }
 
     @Test
@@ -41,41 +41,41 @@ public class BeanConnectorTest {
         } catch (NullPointerException npe) { }
 
         try {
-            new BeanConnector<JComponent>(JComponent.class, null, "removePropertyChangeListener");
+            new BeanConnector<>(JComponent.class, null, "removePropertyChangeListener");
             fail("Failed to receive NullPointerException with null add method name");
         } catch (NullPointerException npe) { }
 
         try {
-            new BeanConnector<JComponent>(JComponent.class, "addPropertyChangeListener", null);
+            new BeanConnector<>(JComponent.class, "addPropertyChangeListener", null);
             fail("Failed to receive NullPointerException with null remove method name");
         } catch (NullPointerException npe) { }
 
         try {
-            new BeanConnector<Object>(Object.class, "addPropertyChangeListener", "removePropertyChangeListener");
+            new BeanConnector<>(Object.class, "addPropertyChangeListener", "removePropertyChangeListener");
             fail("Failed to receive IllegalArgumentException with invalid beanClass");
         } catch (IllegalArgumentException iae) { }
 
         try {
-            new BeanConnector<JComponent>(JComponent.class, "addBOOBLAH", "removePropertyChangeListener");
+            new BeanConnector<>(JComponent.class, "addBOOBLAH", "removePropertyChangeListener");
             fail("Failed to receive IllegalArgumentException with invalid add method name");
         } catch (IllegalArgumentException iae) { }
 
         try {
-            new BeanConnector<JComponent>(JComponent.class, "addPropertyChangeListener", "removeBOOLBLAH");
+            new BeanConnector<>(JComponent.class, "addPropertyChangeListener", "removeBOOLBLAH");
             fail("Failed to receive IllegalArgumentException with invalid remove method name");
         } catch (IllegalArgumentException iae) { }
 
         try {
-            new BeanConnector<JComponent>(JComponent.class, "addPropertyChangeListener", "removePropertyChangeListener", null);
+            new BeanConnector<>(JComponent.class, "addPropertyChangeListener", "removePropertyChangeListener", null);
             fail("Failed to receive IllegalArgumentException for null event matcher");
         } catch (IllegalArgumentException iae) { }
 
-        new BeanConnector<JComponent>(JComponent.class, "addPropertyChangeListener", "removePropertyChangeListener");
+        new BeanConnector<>(JComponent.class, "addPropertyChangeListener", "removePropertyChangeListener");
     }
 
     @Test
     public void testListenerCascade() {
-        final CountingObservableElementList<JComponent> list = new CountingObservableElementList<JComponent>(new BasicEventList<JComponent>(), GlazedLists.beanConnector(JComponent.class));
+        final CountingObservableElementList<JComponent> list = new CountingObservableElementList<>(new BasicEventList<JComponent>(), GlazedLists.beanConnector(JComponent.class));
         final JLabel listElement = new JLabel();
         list.add(listElement);
         assertEquals(0, list.elementChangeCount);

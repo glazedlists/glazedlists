@@ -77,7 +77,7 @@ public class PluggableList<E> extends TransformedList<E, E> {
      *      {@link #setSource(EventList) source} of this PluggableList
      */
     public EventList<E> createSourceList() {
-        return new BasicEventList<E>(getPublisher(), getReadWriteLock());
+        return new BasicEventList<>(getPublisher(), getReadWriteLock());
     }
 
     /**

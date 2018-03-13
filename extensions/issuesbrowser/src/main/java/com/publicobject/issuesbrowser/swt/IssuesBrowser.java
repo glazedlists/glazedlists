@@ -48,9 +48,9 @@ public class IssuesBrowser {
     private IssuesBrowser(Shell shell, String[] args) {
         // Various Layered List Transformations
         usersMatcherEditor = new UsersMatcherEditor(issuesEventList);
-        FilterList<Issue> issuesUserFiltered = new FilterList<Issue>(issuesEventList, usersMatcherEditor);
-        FilterList<Issue> issuesTextFiltered = new FilterList<Issue>(issuesUserFiltered, Matchers.trueMatcher());
-        ThresholdList<Issue> priorityList = new ThresholdList<Issue>(issuesTextFiltered, "priority.rating");
+        FilterList<Issue> issuesUserFiltered = new FilterList<>(issuesEventList, usersMatcherEditor);
+        FilterList<Issue> issuesTextFiltered = new FilterList<>(issuesUserFiltered, Matchers.trueMatcher());
+        ThresholdList<Issue> priorityList = new ThresholdList<>(issuesTextFiltered, "priority.rating");
         SortedList<Issue> issuesSortedList = SortedList.create(priorityList);
 
         // This is the outer component for the demo
@@ -90,8 +90,8 @@ public class IssuesBrowser {
 
         // Add the various filters
         Text filterText = createFilterText(filterPanel);
-        final MatcherEditor<Issue> matcherEditor = new TextWidgetMatcherEditor<Issue>(filterText, new IssueTextFilterator());
-        issuesTextFiltered.setMatcherEditor(new ThreadedMatcherEditor<Issue>(matcherEditor));
+        final MatcherEditor<Issue> matcherEditor = new TextWidgetMatcherEditor<>(filterText, new IssueTextFilterator());
+        issuesTextFiltered.setMatcherEditor(new ThreadedMatcherEditor<>(matcherEditor));
         createPrioritySlider(filterPanel, priorityList);
         createUsersList(shell, filterPanel);
 

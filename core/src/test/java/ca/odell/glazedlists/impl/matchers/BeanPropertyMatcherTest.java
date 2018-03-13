@@ -13,8 +13,8 @@ public class BeanPropertyMatcherTest {
 
     @Test
     public void testConstructor() {
-        new BeanPropertyMatcher<Dog>(Dog.class, "legs", new Integer(4));
-        new BeanPropertyMatcher<Dog>(Dog.class, "name", null);
+        new BeanPropertyMatcher<>(Dog.class, "legs", new Integer(4));
+        new BeanPropertyMatcher<>(Dog.class, "name", null);
 
         try {
             new BeanPropertyMatcher<Dog>(null, "name", "should fail");
@@ -22,14 +22,14 @@ public class BeanPropertyMatcherTest {
         } catch (IllegalArgumentException iae) { }
 
         try {
-            new BeanPropertyMatcher<Dog>(Dog.class, null, "should fail");
+            new BeanPropertyMatcher<>(Dog.class, null, "should fail");
             fail("failed to receive IllegalArgumentException on null BeanProperty");
         } catch (IllegalArgumentException iae) { }
     }
 
     @Test
     public void testMatching() {
-        final EventList<Dog> dogs = new FilterList<Dog>(new BasicEventList<Dog>(), Matchers.beanPropertyMatcher(Dog.class, "name", "Fido"));
+        final EventList<Dog> dogs = new FilterList<>(new BasicEventList<Dog>(), Matchers.beanPropertyMatcher(Dog.class, "name", "Fido"));
 
         assertEquals(0, dogs.size());
 

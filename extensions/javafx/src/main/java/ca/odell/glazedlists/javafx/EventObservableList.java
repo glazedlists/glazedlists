@@ -38,8 +38,8 @@ public class EventObservableList<E> extends AbstractList<E> implements Observabl
 
     private final EventList<E> source;
 
-    private final List<InvalidationListener> invalidation_listeners = new ArrayList<InvalidationListener>();
-    private final List<ListChangeListener> list_listeners = new ArrayList<ListChangeListener>();
+    private final List<InvalidationListener> invalidation_listeners = new ArrayList<>();
+    private final List<ListChangeListener> list_listeners = new ArrayList<>();
 
     private boolean disposed = false;
 

@@ -18,7 +18,7 @@ public final class SumTest {
 
     @Test
     public void testSumFloat() {
-        final EventList<Float> source = new BasicEventList<Float>();
+        final EventList<Float> source = new BasicEventList<>();
         source.add(new Float(1));
 
         final PropertyChangeCounter counter = new PropertyChangeCounter();
@@ -52,7 +52,7 @@ public final class SumTest {
 
     @Test
     public void testSumDouble() {
-        final EventList<Double> source = new BasicEventList<Double>();
+        final EventList<Double> source = new BasicEventList<>();
         source.add(new Double(1));
 
         final PropertyChangeCounter counter = new PropertyChangeCounter();
@@ -86,7 +86,7 @@ public final class SumTest {
 
     @Test
     public void testSumInteger() {
-        final EventList<Integer> source = new BasicEventList<Integer>();
+        final EventList<Integer> source = new BasicEventList<>();
         source.add(new Integer(1));
 
         final PropertyChangeCounter counter = new PropertyChangeCounter();
@@ -120,7 +120,7 @@ public final class SumTest {
 
     @Test
     public void testSumLong() {
-        final EventList<Long> source = new BasicEventList<Long>();
+        final EventList<Long> source = new BasicEventList<>();
         source.add(new Long(1));
 
         final PropertyChangeCounter counter = new PropertyChangeCounter();
@@ -154,8 +154,8 @@ public final class SumTest {
 
     @Test
     public void testReorderEvents() {
-        final EventList<Long> source = new BasicEventList<Long>();
-        final SortedList<Long> sortedSource = new SortedList<Long>(source);
+        final EventList<Long> source = new BasicEventList<>();
+        final SortedList<Long> sortedSource = new SortedList<>(source);
         source.add(new Long(1));
         source.add(new Long(2));
         source.add(new Long(3));

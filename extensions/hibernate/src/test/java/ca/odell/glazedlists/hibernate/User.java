@@ -21,13 +21,13 @@ public class User implements Serializable {
     private String userName;
 
     /** List of nicknames. */
-    private EventList<String> nickNames = new BasicEventList<String>();
+    private EventList<String> nickNames = new BasicEventList<>();
 
     /** List of email addresses. */
-    private EventList<Email> emailAddresses = new BasicEventList<Email>();
+    private EventList<Email> emailAddresses = new BasicEventList<>();
 
     /** List of roles. */
-    private EventList<Role> roles = new BasicEventList<Role>();
+    private EventList<Role> roles = new BasicEventList<>();
 
     /**
      * Default constructor for hibernate.

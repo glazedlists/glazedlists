@@ -59,7 +59,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     private ExpansionModel<E> expansionModel;
 
     /** node colors define where it is in the source and where it is here */
-    private static final ListToByteCoder<String> BYTE_CODER = new ListToByteCoder<String>(Arrays.asList("R", "V", "r", "v"));
+    private static final ListToByteCoder<String> BYTE_CODER = new ListToByteCoder<>(Arrays.asList("R", "V", "r", "v"));
     private static final byte VISIBLE_REAL = BYTE_CODER.colorToByte("R");
     private static final byte VISIBLE_VIRTUAL = BYTE_CODER.colorToByte("V");
     private static final byte HIDDEN_REAL = BYTE_CODER.colorToByte("r");
@@ -89,7 +89,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * <p>Children of collapsed nodes are {@link #VISIBLE_NODES}, everything
      * else is {@link #HIDDEN_NODES}.
      */
-    private FourColorTree<Node<E>> data = new FourColorTree<Node<E>>(BYTE_CODER);
+    private FourColorTree<Node<E>> data = new FourColorTree<>(BYTE_CODER);
 
     /**
      * The format is used to obtain path information from list elements.
@@ -101,7 +101,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * This constructor does not sort the elements.
      */
     public TreeList(EventList<E> source, Format<E> format, ExpansionModel<E> expansionModel) {
-        this(new InitializationData<E>(source, format, expansionModel));
+        this(new InitializationData<>(source, format, expansionModel));
     }
 
     /** master Constructor */
@@ -131,7 +131,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
     /** @deprecated use the constructor that takes an {@link ExpansionModel} */
     @Deprecated
     public TreeList(EventList<E> source, Format<E> format) {
-        this(new InitializationData<E>(source, format, TreeList.<E>nodesStartExpanded()));
+        this(new InitializationData<>(source, format, TreeList.<E>nodesStartExpanded()));
     }
 
     /**
@@ -150,9 +150,9 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             this.format = format;
             this.expansionModel = expansionModel;
 
-            this.sourceNodes = new FunctionList<E,Node<E>>(sourceElements, new ElementToTreeNodeFunction<E>(format, expansionModel), NO_OP_FUNCTION);
+            this.sourceNodes = new FunctionList<E,Node<E>>(sourceElements, new ElementToTreeNodeFunction<>(format, expansionModel), NO_OP_FUNCTION);
             this.nodeComparator = comparatorToNodeComparator(format);
-            this.sortedList = new SortedList<Node<E>>(sourceNodes, nodeComparator);
+            this.sortedList = new SortedList<>(sourceNodes, nodeComparator);
         }
 
         /**
@@ -332,7 +332,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      */
     public List<Node<E>> getRoots() {
         // todo: make this fast
-        List<Node<E>> result = new ArrayList<Node<E>>();
+        List<Node<E>> result = new ArrayList<>();
         for(int i = 0; i < size(); i++) {
             Node<E> possibleRoot = getTreeNode(i);
             if(possibleRoot.pathLength() == 1) {
@@ -479,7 +479,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         // first pass: apply changes to the trees structure, marking all new
         // nodes as hidden. In the next pass we'll figure out parents, siblings
         // and fire events for nodes that shouldn't be hidden
-        List<Node<E>> nodesToVerify = new ArrayList<Node<E>>();
+        List<Node<E>> nodesToVerify = new ArrayList<>();
         NodeAttacher nodeAttacher = new NodeAttacher(true);
         FinderInserter finderInserter = new FinderInserter();
 
@@ -540,7 +540,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         private Node<E> predecessorAtOurHeight;
 
         /** the path from the changed node to the root, used to fire events in the second phase */
-        private List<Node<E>> pathToRoot = new ArrayList<Node<E>>();
+        private List<Node<E>> pathToRoot = new ArrayList<>();
 
         /** the index of the changed node, which is where parent nodes shall be inserted */
         private int index;
@@ -549,7 +549,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         private ExpansionModel<E> expansionModel;
 
         /** expand newly-inserted parent nodes when we discover a visible child */
-        private List<Node<E>> nodesToExpand = new ArrayList<Node<E>>();
+        private List<Node<E>> nodesToExpand = new ArrayList<>();
 
         public NodeAttacher(boolean fireEvents) {
             this.fireEvents = fireEvents;
@@ -591,7 +591,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             if(newlyInserted) {
                 expansionModel = TreeList.this.expansionModel;
             } else {
-                expansionModel = new CloneStateNewNodeStateModel<E>(current);
+                expansionModel = new CloneStateNewNodeStateModel<>(current);
             }
 
             // prepare state for attaching the node
@@ -775,7 +775,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * order but must process them in increasing order.
      */
     private final class NodesToAttach {
-        private final List<Node<E>> nodes = new CircularArrayList<Node<E>>();
+        private final List<Node<E>> nodes = new CircularArrayList<>();
         private final NodeIndexComparator nodeIndexComparator = new NodeIndexComparator();
 
         /**
@@ -1008,7 +1008,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
    */
     private void replaceAndDetachNode(int sourceIndex, List<Node<E>> nodesToVerify) {
       Node<E> node = data.get(sourceIndex, REAL_NODES).get();
-      Node<E> replacement = new Node<E>(node.virtual, new ArrayList<E>(node.path()));
+      Node<E> replacement = new Node<>(node.virtual, new ArrayList<>(node.path()));
       replaceNode(node, replacement, true);
 
       nodesToVerify.add(replacement);
@@ -1023,7 +1023,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
 
         // if it has children, replace it with a virtual copy and schedule that for verification
         if(!node.isLeaf()) {
-            Node<E> replacement = new Node<E>(node.virtual, new ArrayList<E>(node.path()));
+            Node<E> replacement = new Node<>(node.virtual, new ArrayList<>(node.path()));
             replaceNode(node, replacement, true);
 
             nodesToVerify.add(replacement);
@@ -1381,7 +1381,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
      * nodes of type E.
      */
     private static <E> NodeComparator<E> comparatorToNodeComparator(Format<E> format) {
-        return new NodeComparator<E>(format);
+        return new NodeComparator<>(format);
     }
 
     static class NodeComparator<E> implements Comparator<Node<E>> {
@@ -1429,9 +1429,9 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         @Override
         public Node<E> evaluate(E sourceValue) {
             // populate the path using the working path as a temporary variable
-            List<E> path = new ArrayList<E>();
+            List<E> path = new ArrayList<>();
             format.getPath(path, sourceValue);
-            Node<E> result = new Node<E>(false, path);
+            Node<E> result = new Node<>(false, path);
             result.expanded = expansionModel.isExpanded(sourceValue, path);
             return result;
         }
@@ -1543,7 +1543,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             // this is a root node, it has no parent
             if(pathLength == 1) return null;
             // return a node describing the parent path
-            return new Node<E>(true, new ArrayList<E>(path.subList(0, pathLength - 1)));
+            return new Node<>(true, new ArrayList<>(path.subList(0, pathLength - 1)));
         }
 
         /** {@inheritDoc} */
@@ -1620,7 +1620,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
          * List all children of this node.
          */
         public List<Node<E>> getChildren() {
-            List<Node<E>> result = new ArrayList<Node<E>>();
+            List<Node<E>> result = new ArrayList<>();
             for(Node<E> child = firstChild(); child != null; child = child.siblingAfter) {
                 result.add(child);
             }

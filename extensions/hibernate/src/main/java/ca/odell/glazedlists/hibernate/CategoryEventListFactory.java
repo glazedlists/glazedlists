@@ -24,7 +24,7 @@ import java.util.Map;
 public final class CategoryEventListFactory implements EventListFactory {
 
     /** Map holding {@link ListInfo} per unique category. */
-    private static final Map<String, ListInfo> CATEGORY_MAP = new HashMap<String, ListInfo>();
+    private static final Map<String, ListInfo> CATEGORY_MAP = new HashMap<>();
 
     /** List category used by this factory instance. */
     private final String category;

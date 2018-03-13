@@ -89,7 +89,7 @@ public final class IndexedTree<V> {
      * values use the node's {@link IndexedTreeNode#getValue()} method.
      */
     public IndexedTreeIterator<V> iterator(int index) {
-        return new IndexedTreeIterator<V>(this, index);
+        return new IndexedTreeIterator<>(this, index);
     }
 
     /**
@@ -120,7 +120,7 @@ public final class IndexedTree<V> {
     public IndexedTreeNode<V> addByNode(V value) {
         try {
             if(root == null) {
-                root = new IndexedTreeNode<V>(null, value);
+                root = new IndexedTreeNode<>(null, value);
                 return root;
             } else {
                 return root.insert(this, value);
@@ -143,7 +143,7 @@ public final class IndexedTree<V> {
             if(value == null) throw new NullPointerException("cannot insert a value that is null");
 
             if(root == null) {
-                root = new IndexedTreeNode<V>(null, value);
+                root = new IndexedTreeNode<>(null, value);
                 return root;
             } else {
                 return root.insert(this, index, value);
@@ -165,7 +165,7 @@ public final class IndexedTree<V> {
         if(shallowestNodeWithValue == null) return -1;
 
         // iterate to the first node with this value
-        IndexedTreeIterator<V> iterator = new IndexedTreeIterator<V>(this, shallowestNodeWithValue);
+        IndexedTreeIterator<V> iterator = new IndexedTreeIterator<>(this, shallowestNodeWithValue);
         while(iterator.hasPrevious()) {
             IndexedTreeNode<V> node = iterator.previous();
             if(comparator.compare(node.getValue(), object) == 0) continue;
@@ -191,7 +191,7 @@ public final class IndexedTree<V> {
 
         // the result is before our target, increment until that result changes
         if(compareResult < 0) {
-            IndexedTreeIterator<V> iterator = new IndexedTreeIterator<V>(this, shallowestNodeWithValue);
+            IndexedTreeIterator<V> iterator = new IndexedTreeIterator<>(this, shallowestNodeWithValue);
             while(iterator.hasNext()) {
                 IndexedTreeNode<V> node = iterator.next();
                 if(comparator.compare(node.getValue(), object) < 0) continue;
@@ -202,7 +202,7 @@ public final class IndexedTree<V> {
 
         // the result is equal to or after our value, decrement until that result changes
         } else {
-            IndexedTreeIterator<V> iterator = new IndexedTreeIterator<V>(this, shallowestNodeWithValue);
+            IndexedTreeIterator<V> iterator = new IndexedTreeIterator<>(this, shallowestNodeWithValue);
             while(iterator.hasPrevious()) {
                 IndexedTreeNode<V> node = iterator.previous();
                 if(comparator.compare(node.getValue(), object) >= 0) continue;
@@ -225,7 +225,7 @@ public final class IndexedTree<V> {
         if(shallowestNodeWithValue == null) return -1;
 
         // iterate to the last node with this value
-        IndexedTreeIterator<V> iterator = new IndexedTreeIterator<V>(this, shallowestNodeWithValue);
+        IndexedTreeIterator<V> iterator = new IndexedTreeIterator<>(this, shallowestNodeWithValue);
         while(iterator.hasNext()) {
             IndexedTreeNode<V> node = iterator.next();
             if(comparator.compare(node.getValue(), object) == 0) continue;
@@ -250,6 +250,7 @@ public final class IndexedTree<V> {
     /**
      * Print the tree by its contents
      */
+    @Override
     public String toString() {
         StringBuffer result = new StringBuffer();
         for(IndexedTreeIterator i = iterator(0); i.hasNext(); ) {
@@ -288,12 +289,12 @@ public final class IndexedTree<V> {
         long start = System.currentTimeMillis();
 
         for(int r = 0; r < repetitions; r++) {
-            IndexedTree<Integer> tree = new IndexedTree<Integer>(GlazedLists.comparableComparator());
+            IndexedTree<Integer> tree = new IndexedTree<>(GlazedLists.comparableComparator());
             for(int i = 0; i < operations; i++) {
                 int operation = random.nextInt(3);
 
                 if(operation <= 1 || tree.size() == 0) {
-                    Integer value = new Integer((int)(random.nextDouble() * (double)Integer.MAX_VALUE));
+                    Integer value = new Integer((int)(random.nextDouble() * Integer.MAX_VALUE));
                     tree.addByNode(value);
                 } else {
                     int index = random.nextInt(tree.size());

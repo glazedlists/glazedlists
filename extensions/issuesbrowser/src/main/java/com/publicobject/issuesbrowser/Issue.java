@@ -54,16 +54,16 @@ public class Issue implements Comparable {
     private String shortDescription;
     private PeerIssue isDuplicate;
     // optional fields
-    private List<String> keywords = new ArrayList<String>();
-    private List<PeerIssue> blocks = new ArrayList<PeerIssue>();
-    private List<String> cc = new ArrayList<String>();
+    private List<String> keywords = new ArrayList<>();
+    private List<PeerIssue> blocks = new ArrayList<>();
+    private List<String> cc = new ArrayList<>();
     // issue rich fields
-    private List<Description> descriptions = new ArrayList<Description>();
-    private List<Attachment> attachments = new ArrayList<Attachment>();
-    private List<Activity> activities = new ArrayList<Activity>();
-    private List<ValueSegment<Date,String>> stateChanges = new ArrayList<ValueSegment<Date,String>>();
-    private List<PeerIssue> duplicates = new ArrayList<PeerIssue>();
-    private List<PeerIssue> dependsOn = new ArrayList<PeerIssue>();
+    private List<Description> descriptions = new ArrayList<>();
+    private List<Attachment> attachments = new ArrayList<>();
+    private List<Activity> activities = new ArrayList<>();
+    private List<ValueSegment<Date,String>> stateChanges = new ArrayList<>();
+    private List<PeerIssue> duplicates = new ArrayList<>();
+    private List<PeerIssue> dependsOn = new ArrayList<>();
 
     private List<String> allUsers;
 
@@ -124,7 +124,7 @@ public class Issue implements Comparable {
      */
     public static List<ValueSegment<Date,String>> computeStateChanges(Issue issue, Date lastDate) {
         // this stores the sequence of state changes in chronological order, like a timeline
-        final List<ValueSegment<Date,String>> timeline = new ArrayList<ValueSegment<Date,String>>();
+        final List<ValueSegment<Date,String>> timeline = new ArrayList<>();
 
         final IssueTrackingSystem issueTracker = issue.getProject().getOwner();
         String state = issueTracker.getSupportedStati()[0].getName();
@@ -140,7 +140,7 @@ public class Issue implements Comparable {
             if ("issue_status" == activity.getField()) {
                 // create an entry in the timeline
                 Date when = activity.getWhen();
-                timeline.add(new DefaultValueSegment<Date,String>(last, when, state));
+                timeline.add(new DefaultValueSegment<>(last, when, state));
 
                 last = when;
                 state = activity.getNewValue();
@@ -148,7 +148,7 @@ public class Issue implements Comparable {
         }
 
         // create one last entry in the time timeline that ends at the given lastDate
-        timeline.add(new DefaultValueSegment<Date,String>(last, lastDate, state));
+        timeline.add(new DefaultValueSegment<>(last, lastDate, state));
 
         return timeline;
     }
@@ -159,7 +159,7 @@ public class Issue implements Comparable {
     public List<String> getAllUsers() {
         // init the users list if necessary
         if(allUsers == null) {
-            allUsers = new ArrayList<String>();
+            allUsers = new ArrayList<>();
             if(assignedTo != null) allUsers.add(assignedTo);
             if(reporter != null) allUsers.add(reporter);
             if(qaContact != null) allUsers.add(qaContact);

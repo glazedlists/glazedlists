@@ -224,7 +224,7 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      *      mouse clicks on the table header into sorting actions on the sortedList.
      */
     public static <E> TableComparatorChooser<E> install(JTable table, SortedList<E> sortedList, Object strategy, TableFormat<? super E> tableFormat) {
-        return new TableComparatorChooser<E>(table, sortedList, strategy, tableFormat);
+        return new TableComparatorChooser<>(table, sortedList, strategy, tableFormat);
     }
 
     /**

@@ -68,13 +68,13 @@ import java.util.RandomAccess;
 public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> implements RandomAccess {
 
     /** a local cache of the source list */
-    private List<E> localCache = new ArrayList<E>();
+    private List<E> localCache = new ArrayList<>();
 
     /** propagates events on the proxy thread */
     private UpdateRunner updateRunner = new UpdateRunner();
 
     /** propagates events immediately. The source events might be fired later */
-    private final ListEventAssembler<E> cacheUpdates = new ListEventAssembler<E>(this, ListEventAssembler.createListEventPublisher());
+    private final ListEventAssembler<E> cacheUpdates = new ListEventAssembler<>(this, ListEventAssembler.createListEventPublisher());
 
     /** whether the proxy thread has been scheduled */
     private volatile boolean scheduled = false;
@@ -155,7 +155,7 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> impl
      * @return a new List to serve as the up-to-date local cache
      */
     private List<E> applyChangeToCache(EventList<E> source, ListEvent<E> listChanges, List<E> localCache) {
-        List<E> result = new ArrayList<E>(source.size());
+        List<E> result = new ArrayList<>(source.size());
 
         // cacheOffset is the running index delta between localCache and result
         int resultIndex = 0;

@@ -138,7 +138,7 @@ public final class PersistentEventList extends PersistentList implements EventLi
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
         // write out all serializable listeners
-        List<ListEventListener> serializableListeners = new ArrayList<ListEventListener>();
+        List<ListEventListener> serializableListeners = new ArrayList<>();
         for(Iterator<ListEventListener> i = updates.getListEventListeners().iterator(); i.hasNext(); ) {
             ListEventListener listener = i.next();
             if(!(listener instanceof Serializable)) {

@@ -51,7 +51,7 @@ import javax.swing.UIManager;
 
 public class AutoCompleteSupportComplexTestApp {
 
-    private static final List<String> LOOK_AND_FEEL_SELECTIONS = new ArrayList<String>(Arrays.asList(
+    private static final List<String> LOOK_AND_FEEL_SELECTIONS = new ArrayList<>(Arrays.asList(
         "javax.swing.plaf.metal.MetalLookAndFeel",
         "apple.laf.AquaLookAndFeel",
         "com.sun.java.swing.plaf.motif.MotifLookAndFeel",
@@ -170,8 +170,8 @@ public class AutoCompleteSupportComplexTestApp {
     private AutoCompleteSupport<Url> autoCompleteSupport;
 
     /** The single JComboBox on which AutoCompleteSupport is repeatedly installed and uninstalled. */
-    private final JComboBox<Url> autoCompleteComboBox = new JComboBox<Url>();
-    private final JComboBox<Url> regularComboBox = new JComboBox<Url>();
+    private final JComboBox<Url> autoCompleteComboBox = new JComboBox<>();
+    private final JComboBox<Url> regularComboBox = new JComboBox<>();
 
     /** The test application's frame. */
     private final JFrame frame;
@@ -182,11 +182,11 @@ public class AutoCompleteSupportComplexTestApp {
     private final JPanel autocompleteActionPanel;
     private final JPanel regularActionPanel;
 
-    private final DefaultListModel<String> autocompleteActionListModel = new DefaultListModel<String>();
-    private final DefaultListModel<String> regularActionListModel = new DefaultListModel<String>();
+    private final DefaultListModel<String> autocompleteActionListModel = new DefaultListModel<>();
+    private final DefaultListModel<String> regularActionListModel = new DefaultListModel<>();
 
-    private final JList<String> autocompleteActionList = new JList<String>(autocompleteActionListModel);
-    private final JList<String> regularActionList = new JList<String>(regularActionListModel);
+    private final JList<String> autocompleteActionList = new JList<>(autocompleteActionListModel);
+    private final JList<String> regularActionList = new JList<>(regularActionListModel);
 
     private final JRadioButton filterModeStartsWith = new JRadioButton("Starts With");
     private final JRadioButton filterModeContains = new JRadioButton("Contains");
@@ -223,14 +223,14 @@ public class AutoCompleteSupportComplexTestApp {
     private final ButtonGroup lafMenuGroup = new ButtonGroup();
 
     public AutoCompleteSupportComplexTestApp() {
-        final EventList<Location> locations = new BasicEventList<Location>();
+        final EventList<Location> locations = new BasicEventList<>();
         locations.addAll(Arrays.asList(AutoCompleteSupportComplexTestApp.STATE_CAPITALS_DATA));
         final EventList<Location> locationProxyList = GlazedListsSwing.swingThreadProxyList(locations);
         final String[] propertyNames = {"country", "state", "city"};
         final String[] columnLabels = {"Country", "State", "City"};
         final boolean[] writable = {true, true, true};
         final TableFormat<Location> tableFormat = GlazedLists.tableFormat(propertyNames, columnLabels, writable);
-        table.setModel(new DefaultEventTableModel<AutoCompleteSupportComplexTestApp.Location>(locationProxyList, tableFormat));
+        table.setModel(new DefaultEventTableModel<>(locationProxyList, tableFormat));
 
         // install a DefaultCellEditor with autocompleting support in each column
         for (int i = 0; i < propertyNames.length; i++) {
@@ -460,7 +460,7 @@ public class AutoCompleteSupportComplexTestApp {
     private JPanel createComboBoxModelPanel(String title, ComboBoxModel<Url> model) {
         final JPanel panel = new JPanel(new GridBagLayout());
 
-        final JList<Url> list = new JList<Url>(model);
+        final JList<Url> list = new JList<>(model);
         list.setPrototypeCellValue(new Url("http://java.sun.com/j2se/1.5.0/download.jsp"));
 
         panel.add(new JLabel(title),     new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 5, 0, 0), 0, 0));
@@ -472,7 +472,7 @@ public class AutoCompleteSupportComplexTestApp {
     private JPanel createMainPanel() {
         final TextFilterator<Url> filterator = new AutoCompleteSupportComplexTestApp.URLTextFilterator();
         final UrlFormat format = new UrlFormat();
-        final EventList<AutoCompleteSupportComplexTestApp.Url> items = new BasicEventList<AutoCompleteSupportComplexTestApp.Url>();
+        final EventList<AutoCompleteSupportComplexTestApp.Url> items = new BasicEventList<>();
         items.addAll(Arrays.asList(AutoCompleteSupportComplexTestApp.URL_SAMPLE_DATA));
         final EventList<AutoCompleteSupportComplexTestApp.Url> itemProxyList = GlazedListsSwing.swingThreadProxyList(items);
 
@@ -488,7 +488,7 @@ public class AutoCompleteSupportComplexTestApp {
 
         final JComboBox<Url> plainComboBox = regularComboBox;
         plainComboBox.setEditable(true);
-        plainComboBox.setModel(new DefaultEventComboBoxModel<Url>(itemProxyList));
+        plainComboBox.setModel(new DefaultEventComboBoxModel<>(itemProxyList));
 
         final JScrollPane tableScroller = new JScrollPane(table);
         tableScroller.setPreferredSize(new Dimension(1, 200));

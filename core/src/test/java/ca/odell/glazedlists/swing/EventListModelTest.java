@@ -30,12 +30,12 @@ public class EventListModelTest extends SwingTestCase {
      */
     @Test
     public void testGetElementAt() {
-        EventList<Color> colors = new BasicEventList<Color>();
+        EventList<Color> colors = new BasicEventList<>();
         colors.add(Color.RED);
         colors.add(Color.GREEN);
         colors.add(Color.BLUE);
 
-        EventListModel<Color> listModel = new EventListModel<Color>(colors);
+        EventListModel<Color> listModel = new EventListModel<>(colors);
 
         assertEquals(Color.RED, listModel.getElementAt(0));
         assertEquals(Color.GREEN, listModel.getElementAt(1));
@@ -55,7 +55,7 @@ public class EventListModelTest extends SwingTestCase {
     @Test
     public void testConstructorLocking() throws InterruptedException {
         // create a list which will record our multithreaded interactions with a list
-        final ThreadRecorderEventList<Integer> atomicList = new ThreadRecorderEventList<Integer>(new BasicEventList<Integer>());
+        final ThreadRecorderEventList<Integer> atomicList = new ThreadRecorderEventList<>(new BasicEventList<Integer>());
 
         // start a thread which adds new Integers every 50 ms
         final Thread writerThread = new Thread(GlazedListsTests.createJerkyAddRunnable(atomicList, null, 2000, 50), "WriterThread");
@@ -65,10 +65,10 @@ public class EventListModelTest extends SwingTestCase {
         Thread.sleep(200);
 
         // create a list whose get() method pauses for 50 ms before returning the value
-        final EventList<Integer> delayList = new DelayList<Integer>(atomicList, 50);
+        final EventList<Integer> delayList = new DelayList<>(atomicList, 50);
 
         // the test: creating the EventListModel should be atomic and pause the writerThread while it initializes its internal state
-        new EventListModel<Integer>(delayList);
+        new EventListModel<>(delayList);
 
         // wait until the writerThread finishes before asserting the recorded state
         writerThread.join();
@@ -85,10 +85,10 @@ public class EventListModelTest extends SwingTestCase {
     @Test
     public void testRemoveWithBlocksInListEvent() {
         // setup JList with EventListModel and EventSelectionModel
-        final EventList<String> list = new BasicEventList<String>();
+        final EventList<String> list = new BasicEventList<>();
         list.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
         final EventListModel<String> model = new EventListModel<>(list);
-        final JList<String> jList = new JList<String>(model);
+        final JList<String> jList = new JList<>(model);
         final EventSelectionModel<String> selModel = new EventSelectionModel<>(list);
         jList.setSelectionModel(selModel);
         // establish a selection

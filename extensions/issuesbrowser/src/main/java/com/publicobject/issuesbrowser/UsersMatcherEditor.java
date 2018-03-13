@@ -38,7 +38,7 @@ public class UsersMatcherEditor extends AbstractMatcherEditor<Issue> {
      */
     public UsersMatcherEditor(EventList<Issue> source) {
         // create a unique users list from the source issues list
-        usersForIssues = new CollectionList<Issue, String>(source, new IssueUserator());
+        usersForIssues = new CollectionList<>(source, new IssueUserator());
         allUsers = UniqueList.create(usersForIssues);
     }
 
@@ -121,7 +121,7 @@ public class UsersMatcherEditor extends AbstractMatcherEditor<Issue> {
          * copy is made because {@link Matcher}s must be immutable.
          */
         public UserMatcher(Collection<String> users) {
-            this.users = new HashSet<String>(users);
+            this.users = new HashSet<>(users);
         }
 
         /**

@@ -57,7 +57,7 @@ public final class Matchers {
      * @see java.lang.ref.WeakReference
      */
     public static <E> MatcherEditor<E> weakReferenceProxy(MatcherEditor<E> matcherEditor) {
-        return new WeakReferenceMatcherEditor<E>(matcherEditor);
+        return new WeakReferenceMatcherEditor<>(matcherEditor);
     }
 
     // Matchers // // // // // // // // // // // // // // // // // // // // //
@@ -80,7 +80,7 @@ public final class Matchers {
      * Get a {@link Matcher} that returns the opposite of the specified {@link Matcher}.
      */
     public static <E> Matcher<E> invert(Matcher<E> original) {
-        return new NotMatcher<E>(original);
+        return new NotMatcher<>(original);
     }
 
     /**
@@ -112,7 +112,7 @@ public final class Matchers {
      * of the specified property of an object to the <code>expectedValue</code>.
      */
     public static <E> Matcher<E> beanPropertyMatcher(Class<E> beanClass, String propertyName, Object expectedValue) {
-        return new BeanPropertyMatcher<E>(beanClass, propertyName, expectedValue);
+        return new BeanPropertyMatcher<>(beanClass, propertyName, expectedValue);
     }
 
     /**
@@ -121,7 +121,7 @@ public final class Matchers {
      * and <code>end</code>.
      */
     public static <D extends Comparable, E> Matcher<E> rangeMatcher(D start, D end) {
-        return new RangeMatcher<D, E>(start, end);
+        return new RangeMatcher<>(start, end);
     }
 
     /**
@@ -142,7 +142,7 @@ public final class Matchers {
      *                   from filtered objects
      */
     public static <D extends Comparable, E> Matcher<E> rangeMatcher(D start, D end, Filterator<D, E> filterator) {
-        return new RangeMatcher<D, E>(start, end, filterator);
+        return new RangeMatcher<>(start, end, filterator);
     }
 
     /**
@@ -294,7 +294,7 @@ public final class Matchers {
      */
     @SafeVarargs
     public static <E> Matcher<E> or(Matcher<? super E>... matchers) {
-        return new OrMatcher<E>(matchers);
+        return new OrMatcher<>(matchers);
     }
 
     /**
@@ -306,7 +306,7 @@ public final class Matchers {
      */
     @SafeVarargs
     public static <E> Matcher<E> and(Matcher<? super E>... matchers) {
-        return new AndMatcher<E>(matchers);
+        return new AndMatcher<>(matchers);
     }
 
     /**
@@ -319,6 +319,6 @@ public final class Matchers {
      *         type
      */
     public static <E> Matcher<E> types(Class... classes) {
-        return new TypeMatcher<E>(classes);
+        return new TypeMatcher<>(classes);
     }
 }

@@ -268,7 +268,7 @@ public class DiffTest {
     public static class ListEventCounter<E> implements ListEventListener<E> {
 
         /** count the number of changes per event */
-        private List<Integer> changeCounts = new ArrayList<Integer>();
+        private List<Integer> changeCounts = new ArrayList<>();
 
         /**
          * When an event occurs, count that.

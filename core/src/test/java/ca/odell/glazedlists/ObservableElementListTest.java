@@ -37,7 +37,7 @@ public class ObservableElementListTest {
 
     @Before
     public void setUp() {
-        labels = new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), GlazedLists.beanConnector(JLabel.class));
+        labels = new ObservableElementList<>(new BasicEventList<JLabel>(), GlazedLists.beanConnector(JLabel.class));
         counter = ListConsistencyListener.install(labels);
         assertEquals(0, counter.getEventCount());
     }
@@ -108,27 +108,27 @@ public class ObservableElementListTest {
     @Test
     public void testConstructor() {
         try {
-            new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), null);
+            new ObservableElementList<>(new BasicEventList<JLabel>(), null);
             fail("Failed to receive a NullPointerException on null connector argument");
         } catch (NullPointerException npe) {}
 
         try {
-            new ObservableElementList<JLabel>(null, GlazedLists.beanConnector(JLabel.class));
+            new ObservableElementList<>(null, GlazedLists.beanConnector(JLabel.class));
             fail("Failed to receive a NullPointerException on null source list");
         } catch (NullPointerException npe) {}
 
-        new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), GlazedLists.beanConnector(JLabel.class));
+        new ObservableElementList<>(new BasicEventList<JLabel>(), GlazedLists.beanConnector(JLabel.class));
 
         // if source already has elements, listeners should be installed on them after the
         // ObservableElementList constructor has been called
         final JLabel listElement1 = new JLabel();
         final int initialListenerCount = listElement1.getPropertyChangeListeners().length;
 
-        final BasicEventList<JLabel> source = new BasicEventList<JLabel>();
+        final BasicEventList<JLabel> source = new BasicEventList<>();
         source.add(listElement1);
         assertEquals(initialListenerCount, listElement1.getPropertyChangeListeners().length);
 
-        ObservableElementList<JLabel> list = new ObservableElementList<JLabel>(source, GlazedLists.beanConnector(JLabel.class));
+        ObservableElementList<JLabel> list = new ObservableElementList<>(source, GlazedLists.beanConnector(JLabel.class));
         assertEquals(initialListenerCount + 1, listElement1.getPropertyChangeListeners().length);
 
         list.remove(listElement1);
@@ -138,7 +138,7 @@ public class ObservableElementListTest {
     @Test
     public void testDisposeSingleEventList() {
         this.runTestDispose(this.labels);
-        this.runTestDispose(new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), new MultiEventListJLabelConnector(false)));
+        this.runTestDispose(new ObservableElementList<>(new BasicEventList<JLabel>(), new MultiEventListJLabelConnector(false)));
     }
 
     private void runTestDispose(ObservableElementList<JLabel> labels) {
@@ -161,7 +161,7 @@ public class ObservableElementListTest {
         // match no property change event
         final Matcher<PropertyChangeEvent> falseMatcher = Matchers.falseMatcher();
         ObservableElementList<JLabel> labelList =
-            new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), GlazedLists.beanConnector(JLabel.class, falseMatcher));
+            new ObservableElementList<>(new BasicEventList<JLabel>(), GlazedLists.beanConnector(JLabel.class, falseMatcher));
         final JLabel listElement1 = new JLabel();
         final JLabel listElement2 = new JLabel();
         labelList.add(listElement1);
@@ -176,7 +176,7 @@ public class ObservableElementListTest {
 
         // match only property change events for properties 'text and 'enabled'
         Matcher<PropertyChangeEvent> byNameMatcher = Matchers.propertyEventNameMatcher(true, "text", "enabled");
-        labelList = new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), GlazedLists
+        labelList = new ObservableElementList<>(new BasicEventList<JLabel>(), GlazedLists
                 .beanConnector(JLabel.class, byNameMatcher));
         labelList.add(listElement1);
         labelList.add(listElement2);
@@ -194,7 +194,7 @@ public class ObservableElementListTest {
         assertEquals(3, listener.getEventCount());
 
         // match only property change events for properties 'text and 'enabled'
-        labelList = new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), GlazedLists
+        labelList = new ObservableElementList<>(new BasicEventList<JLabel>(), GlazedLists
                 .beanConnector(JLabel.class, true, "text", "enabled"));
         labelList.add(listElement1);
         labelList.add(listElement2);
@@ -212,7 +212,7 @@ public class ObservableElementListTest {
         assertEquals(3, listener.getEventCount());
 
         // match all property change events excluding properties 'text' and 'enabled'
-        labelList = new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), GlazedLists
+        labelList = new ObservableElementList<>(new BasicEventList<JLabel>(), GlazedLists
                 .beanConnector(JLabel.class, false, "text", "enabled"));
         labelList.add(listElement1);
         labelList.add(listElement2);
@@ -232,8 +232,8 @@ public class ObservableElementListTest {
 
     @Test
     public void testPickyConnector() {
-        this.runTestPickyConnector(new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), new PickyJLabelConnector()));
-        this.runTestPickyConnector(new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), new MultiEventListJLabelConnector(true)));
+        this.runTestPickyConnector(new ObservableElementList<>(new BasicEventList<JLabel>(), new PickyJLabelConnector()));
+        this.runTestPickyConnector(new ObservableElementList<>(new BasicEventList<JLabel>(), new MultiEventListJLabelConnector(true)));
     }
 
     private void runTestPickyConnector(ObservableElementList<JLabel> list) {
@@ -257,7 +257,7 @@ public class ObservableElementListTest {
     @Test
     public void testLateBloomingMultiEventListConnector() {
         final int bloomCount = 5;
-        final ObservableElementList<JLabel> list = new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), new LateBloomingMultiEventListJLabelConnector(bloomCount));
+        final ObservableElementList<JLabel> list = new ObservableElementList<>(new BasicEventList<JLabel>(), new LateBloomingMultiEventListJLabelConnector(bloomCount));
 
         final JLabel listElement1 = new JLabel();
         final int initialListenerCount1 = listElement1.getPropertyChangeListeners().length;
@@ -277,8 +277,8 @@ public class ObservableElementListTest {
         final PropertyChangeListener[] propertyChangeListeners = listElement1.getPropertyChangeListeners();
 
         // verify we have 2xbloomcount listeners
-        List<EventListener> listeners = new ArrayList<EventListener>();
-        Set<EventListener> uniqueListeners = new HashSet<EventListener>();
+        List<EventListener> listeners = new ArrayList<>();
+        Set<EventListener> uniqueListeners = new HashSet<>();
         for (int i = 0; i < propertyChangeListeners.length; i++) {
             if(!(propertyChangeListeners[i] instanceof BeanConnector.PropertyChangeHandler)) {
                 continue;
@@ -307,7 +307,7 @@ public class ObservableElementListTest {
     @Test
     public void testMultithreadedUpdate() throws InterruptedException {
         final LazyThreadedConnector connector = new LazyThreadedConnector();
-        final ObservableElementList<JLabel> list = new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), connector);
+        final ObservableElementList<JLabel> list = new ObservableElementList<>(new BasicEventList<JLabel>(), connector);
 
         final JLabel listElement1 = new JLabel();
         list.add(listElement1);
@@ -334,12 +334,12 @@ public class ObservableElementListTest {
     @Test
     public void testGenerics() {
         // should be able to use an EventList<JLabel> and a Connector<Component>, for example
-        new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), new ComponentConnector());
+        new ObservableElementList<>(new BasicEventList<JLabel>(), new ComponentConnector());
     }
 
 	@Test
 	public void testSwitchToMultiListenerMode() {
-        final ObservableElementList<JLabel> list = new ObservableElementList<JLabel>(new BasicEventList<JLabel>(), new BurstOfThreeJLabelConnector());
+        final ObservableElementList<JLabel> list = new ObservableElementList<>(new BasicEventList<JLabel>(), new BurstOfThreeJLabelConnector());
 
         // pattern of installed PropertyChangeListeners: _ _ _ A A A _ _ _ B B B
         for (int i = 0; i < 12; i++) {

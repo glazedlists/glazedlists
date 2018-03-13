@@ -16,7 +16,7 @@ public class ConditionalCountTest {
 
     @Test
     public void testPropertyChanges() {
-        final EventList<String> source = new BasicEventList<String>();
+        final EventList<String> source = new BasicEventList<>();
         final Matcher<String> aMatcher = Matchers.beanPropertyMatcher(String.class, "this", "a");
         source.add("a");
         source.add("b");

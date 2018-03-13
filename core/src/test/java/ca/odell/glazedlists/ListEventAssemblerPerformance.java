@@ -18,7 +18,7 @@ public class ListEventAssemblerPerformance {
      * Validates that the ListEventAssember cleans up its own garbage.
      */
     public void testMemoryUsage() {
-        BasicEventList<Long> list = new BasicEventList<Long>();
+        BasicEventList<Long> list = new BasicEventList<>();
         SortedList<Long> sorted = SortedList.create(list);
         for(long i = 0; i < 100000000; i++) {
             if(i % 10000 == 0) {

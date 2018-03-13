@@ -26,11 +26,11 @@ public class FunctionListTest {
             fail("failed to receive an IllegalArgumentException with null forward Function");
         } catch (IllegalArgumentException e) {}
 
-        new FunctionList<Integer,String>(new BasicEventList<Integer>(), new IntegerToString());
-        new FunctionList<Integer,String>(new BasicEventList<Integer>(), new IntegerToString(), null);
+        new FunctionList<>(new BasicEventList<Integer>(), new IntegerToString());
+        new FunctionList<>(new BasicEventList<Integer>(), new IntegerToString(), null);
 
-        BasicEventList<Integer> source = new BasicEventList<Integer>();
-        FunctionList<Integer, String> intsToStrings = new FunctionList<Integer, String>(source, new IntegerToString(), new StringToInteger());
+        BasicEventList<Integer> source = new BasicEventList<>();
+        FunctionList<Integer, String> intsToStrings = new FunctionList<>(source, new IntegerToString(), new StringToInteger());
         ListConsistencyListener.install(intsToStrings);
 
         source.add(ZERO);
@@ -43,7 +43,7 @@ public class FunctionListTest {
         assertEquals("2", intsToStrings.get(2));
 
         // build a FunctionList with a source that is already populated
-        intsToStrings = new FunctionList<Integer, String>(source, new IntegerToString(), new StringToInteger());
+        intsToStrings = new FunctionList<>(source, new IntegerToString(), new StringToInteger());
         assertEquals(3, intsToStrings.size());
         assertEquals("0", intsToStrings.get(0));
         assertEquals("1", intsToStrings.get(1));
@@ -52,8 +52,8 @@ public class FunctionListTest {
 
     @Test
     public void testAdd() {
-        EventList<Integer> source = new BasicEventList<Integer>();
-        FunctionList<Integer, String> intsToStrings = new FunctionList<Integer, String>(source, new IntegerToString(), new StringToInteger());
+        EventList<Integer> source = new BasicEventList<>();
+        FunctionList<Integer, String> intsToStrings = new FunctionList<>(source, new IntegerToString(), new StringToInteger());
         ListConsistencyListener.install(intsToStrings);
 
         source.add(ZERO);
@@ -75,8 +75,8 @@ public class FunctionListTest {
         intsToStrings.add(0, "8");
         assertEquals("8", intsToStrings.get(0));
 
-        source = new BasicEventList<Integer>();
-        intsToStrings = new FunctionList<Integer, String>(source, new IntegerToString());
+        source = new BasicEventList<>();
+        intsToStrings = new FunctionList<>(source, new IntegerToString());
         source.add(ZERO);
 
         assertEquals("0", intsToStrings.get(0));
@@ -94,11 +94,11 @@ public class FunctionListTest {
 
     @Test
     public void testAddAll() {
-        EventList<Integer> source = new BasicEventList<Integer>();
-        FunctionList<Integer, String> intsToStrings = new FunctionList<Integer, String>(source, new IntegerToString(), new StringToInteger());
+        EventList<Integer> source = new BasicEventList<>();
+        FunctionList<Integer, String> intsToStrings = new FunctionList<>(source, new IntegerToString(), new StringToInteger());
         ListConsistencyListener.install(intsToStrings);
 
-        List<Integer> toAdd = new ArrayList<Integer>();
+        List<Integer> toAdd = new ArrayList<>();
         toAdd.add(ZERO);
         toAdd.add(ONE);
         toAdd.add(TWO);
@@ -112,8 +112,8 @@ public class FunctionListTest {
 
     @Test
     public void testSet() {
-        EventList<Integer> source = new BasicEventList<Integer>();
-        FunctionList<Integer, String> intsToStrings = new FunctionList<Integer, String>(source, new IntegerToString(), new StringToInteger());
+        EventList<Integer> source = new BasicEventList<>();
+        FunctionList<Integer, String> intsToStrings = new FunctionList<>(source, new IntegerToString(), new StringToInteger());
         ListConsistencyListener.install(intsToStrings);
 
         source.add(ZERO);
@@ -123,8 +123,8 @@ public class FunctionListTest {
         intsToStrings.set(0, "8");
         assertEquals("8", intsToStrings.get(0));
 
-        source = new BasicEventList<Integer>();
-        intsToStrings = new FunctionList<Integer, String>(source, new IntegerToString());
+        source = new BasicEventList<>();
+        intsToStrings = new FunctionList<>(source, new IntegerToString());
         source.add(ZERO);
 
         try {
@@ -138,8 +138,8 @@ public class FunctionListTest {
 
     @Test
     public void testRemove() {
-        EventList<Integer> source = new BasicEventList<Integer>();
-        FunctionList<Integer, String> intsToStrings = new FunctionList<Integer, String>(source, new IntegerToString(), new StringToInteger());
+        EventList<Integer> source = new BasicEventList<>();
+        FunctionList<Integer, String> intsToStrings = new FunctionList<>(source, new IntegerToString(), new StringToInteger());
         ListConsistencyListener.install(intsToStrings);
 
         source.add(ZERO);
@@ -157,8 +157,8 @@ public class FunctionListTest {
     @Test
     public void testAdvancedFunction() {
         // establish a control for this test case with the normal Function
-        EventList<Integer> source = new BasicEventList<Integer>();
-        FunctionList<Integer, String> intsToStrings = new FunctionList<Integer, String>(source, new AdvancedIntegerToString(), new StringToInteger());
+        EventList<Integer> source = new BasicEventList<>();
+        FunctionList<Integer, String> intsToStrings = new FunctionList<>(source, new AdvancedIntegerToString(), new StringToInteger());
         ListConsistencyListener.install(intsToStrings);
 
         source.add(ZERO);
@@ -245,8 +245,8 @@ public class FunctionListTest {
     @Test
     public void testReorder() {
         // establish a control for this test case with the normal Function
-        SortedList<Integer> source = new SortedList<Integer>(new BasicEventList<Integer>(), null);
-        FunctionList<Integer, String> intsToStrings = new FunctionList<Integer, String>(source, new AdvancedIntegerToString(), new StringToInteger());
+        SortedList<Integer> source = new SortedList<>(new BasicEventList<Integer>(), null);
+        FunctionList<Integer, String> intsToStrings = new FunctionList<>(source, new AdvancedIntegerToString(), new StringToInteger());
         ListConsistencyListener consistencyListener = ListConsistencyListener.install(intsToStrings);
 
         source.add(ONE);
@@ -261,8 +261,8 @@ public class FunctionListTest {
     @Test
     public void testSetForwardFunction() {
         // establish a control for this test case with the normal Function
-        EventList<Integer> source = new BasicEventList<Integer>();
-        FunctionList<Integer, String> intsToStrings = new FunctionList<Integer, String>(source, new IntegerToString());
+        EventList<Integer> source = new BasicEventList<>();
+        FunctionList<Integer, String> intsToStrings = new FunctionList<>(source, new IntegerToString());
         ListConsistencyListener.install(intsToStrings);
 
         source.add(ZERO);
@@ -289,8 +289,8 @@ public class FunctionListTest {
     @Test
     public void testSetReverseFunction() {
         // establish a control for this test case with the normal Function
-        EventList<Integer> source = new BasicEventList<Integer>();
-        FunctionList<Integer, String> intsToStrings = new FunctionList<Integer, String>(source, new IntegerToString(), new StringToInteger());
+        EventList<Integer> source = new BasicEventList<>();
+        FunctionList<Integer, String> intsToStrings = new FunctionList<>(source, new IntegerToString(), new StringToInteger());
         ListConsistencyListener.install(intsToStrings);
 
         source.add(ZERO);
@@ -326,7 +326,7 @@ public class FunctionListTest {
     // (note: requires source that extends AbstractEventList)
     @Test
     public void testRemoveIf() {
-        EventList<Integer> source = new BasicEventList<Integer>();
+        EventList<Integer> source = new BasicEventList<>();
         source.add(ZERO);
         source.add(ONE);
         source.add(TWO);
@@ -335,7 +335,7 @@ public class FunctionListTest {
         source.addListEventListener(events::add);
 
         FunctionList<Integer, String> intsToStrings =
-            new FunctionList<Integer, String>(source, new IntegerToString(), new StringToInteger());
+            new FunctionList<>(source, new IntegerToString(), new StringToInteger());
         ListConsistencyListener.install(intsToStrings);
 
         assertEquals(Arrays.asList("0", "1", "2"), intsToStrings);

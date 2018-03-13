@@ -33,7 +33,7 @@ public class SearchEngineTextMatcherEditor<E> extends TextMatcherEditor<E> {
      * the Set of Fields recognized by this TextMatcherEditor when the input
      * text is parsed into SearchTerms.
      */
-    private final Set<Field<E>> fields = new HashSet<Field<E>>();
+    private final Set<Field<E>> fields = new HashSet<>();
 
     /**
      * Creates a SearchEngineTextMatcherEditor whose Matchers can test only
@@ -72,7 +72,7 @@ public class SearchEngineTextMatcherEditor<E> extends TextMatcherEditor<E> {
      * @return a copy of the defined search fields
      */
     public Set<Field<E>> getFields() {
-        return new HashSet<Field<E>>(fields);
+        return new HashSet<>(fields);
     }
 
     /**

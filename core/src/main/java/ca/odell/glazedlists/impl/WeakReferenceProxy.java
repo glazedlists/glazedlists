@@ -65,7 +65,7 @@ public final class WeakReferenceProxy<E> implements ListEventListener<E> {
             throw new IllegalArgumentException("proxyTarget may not be null");
 
         this.source = source;
-        this.proxyTargetReference = new WeakReference<ListEventListener<E>>(proxyTarget);
+        this.proxyTargetReference = new WeakReference<>(proxyTarget);
     }
 
     /**

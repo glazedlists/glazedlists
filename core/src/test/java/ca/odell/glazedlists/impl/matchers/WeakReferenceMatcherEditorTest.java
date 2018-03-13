@@ -16,10 +16,10 @@ public class WeakReferenceMatcherEditorTest {
 
     @Test
     public void testAddRemoveListener() {
-        final TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>();
+        final TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<>();
         MatcherEditor<String> weakMatcherEditor = Matchers.weakReferenceProxy(textMatcherEditor);
 
-        final CountingMatcherEditorListener<String> counter = new CountingMatcherEditorListener<String>();
+        final CountingMatcherEditorListener<String> counter = new CountingMatcherEditorListener<>();
         weakMatcherEditor.addMatcherEditorListener(counter);
         counter.assertCounterState(0, 0, 0, 0, 0);
 
@@ -33,11 +33,11 @@ public class WeakReferenceMatcherEditorTest {
 
     @Test
     public void testGarbageCollectWeakListener() {
-        final TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>();
+        final TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<>();
         MatcherEditor<String> weakMatcherEditor = Matchers.weakReferenceProxy(textMatcherEditor);
 
-        CountingMatcherEditorListener<String> counter = new CountingMatcherEditorListener<String>();
-        final WeakReference<CountingMatcherEditorListener> weakRef = new WeakReference<CountingMatcherEditorListener>(counter);
+        CountingMatcherEditorListener<String> counter = new CountingMatcherEditorListener<>();
+        final WeakReference<CountingMatcherEditorListener> weakRef = new WeakReference<>(counter);
 
         weakMatcherEditor.addMatcherEditorListener(counter);
         counter.assertCounterState(0, 0, 0, 0, 0);
@@ -56,10 +56,10 @@ public class WeakReferenceMatcherEditorTest {
     @Ignore("Fix me")
     @Test
     public void testGarbageCollectWeakReferenceProxy() {
-        final TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>();
+        final TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<>();
         MatcherEditor<String> weakMatcherEditor = Matchers.weakReferenceProxy(textMatcherEditor);
 
-        final CountingMatcherEditorListener<String> counter = new CountingMatcherEditorListener<String>();
+        final CountingMatcherEditorListener<String> counter = new CountingMatcherEditorListener<>();
         weakMatcherEditor.addMatcherEditorListener(counter);
         counter.assertCounterState(0, 0, 0, 0, 0);
 

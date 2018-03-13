@@ -18,7 +18,7 @@ public final class Calculations {
     public static Calculation<Integer> count(EventList elements) { return new Count(elements); }
 
     /** A Calculation that reports the number of <code>elements</code> that satisfy the given <code>matcher</code> as an Integer. */
-    public static <E> Calculation<Integer> count(EventList<E> elements, Matcher<E> matcher) { return new ConditionalCount<E>(elements, matcher); }
+    public static <E> Calculation<Integer> count(EventList<E> elements, Matcher<E> matcher) { return new ConditionalCount<>(elements, matcher); }
 
     /** A Calculation that reports <tt>true</tt> when the number of <code>elements</code> is <code>0</code>; <tt>false</tt> otherwise. */
     public static Calculation<Boolean> zeroElements(EventList elements) { return new SizeInRange(elements, 0, 0); }

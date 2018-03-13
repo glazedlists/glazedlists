@@ -30,36 +30,36 @@ public class BasicEventListTest {
 
 	@Test
 	public void testConstructors() {
-		BasicEventList<String> list = new BasicEventList<String>();
+		BasicEventList<String> list = new BasicEventList<>();
 		assertNotNull(list.getPublisher());
 		assertNotNull(list.getReadWriteLock());
 
-		list = new BasicEventList<String>(15);
+		list = new BasicEventList<>(15);
 		assertNotNull(list.getPublisher());
 		assertNotNull(list.getReadWriteLock());
 
-		list = new BasicEventList<String>((ReadWriteLock) null);
+		list = new BasicEventList<>((ReadWriteLock) null);
 		assertNotNull(list.getPublisher());
 		assertNotNull(list.getReadWriteLock());
 
 		final ReadWriteLock lock = LockFactory.DEFAULT.createReadWriteLock();
-		list = new BasicEventList<String>(lock);
+		list = new BasicEventList<>(lock);
 		assertNotNull(list.getPublisher());
 		assertEquals(lock, list.getReadWriteLock());
 
-		list = new BasicEventList<String>(null, null);
+		list = new BasicEventList<>(null, null);
 		assertNotNull(list.getPublisher());
 		assertNotNull(list.getReadWriteLock());
 		final ListEventPublisher publisher = ListEventAssembler.createListEventPublisher();
-		list = new BasicEventList<String>(publisher, lock);
+		list = new BasicEventList<>(publisher, lock);
 		assertEquals(lock, list.getReadWriteLock());
 		assertEquals(publisher, list.getPublisher());
 
-		list = new BasicEventList<String>(15, null, null);
+		list = new BasicEventList<>(15, null, null);
 		assertNotNull(list.getPublisher());
 		assertNotNull(list.getReadWriteLock());
 
-		list = new BasicEventList<String>(15, publisher, lock);
+		list = new BasicEventList<>(15, publisher, lock);
 		assertEquals(lock, list.getReadWriteLock());
 		assertEquals(publisher, list.getPublisher());
 	}
@@ -67,7 +67,7 @@ public class BasicEventListTest {
 
     @Test
     public void testSimpleSerialization() throws IOException, ClassNotFoundException {
-        EventList<String> serializableList = new BasicEventList<String>();
+        EventList<String> serializableList = new BasicEventList<>();
         serializableList.addAll(GlazedListsTests.stringToList("Saskatchewan Roughriders"));
         EventList<String> serializedCopy = GlazedListsTests.serialize(serializableList);
         assertEquals(serializableList, serializedCopy);
@@ -85,7 +85,7 @@ public class BasicEventListTest {
 
     @Test
     public void testSerializableListeners() throws IOException, ClassNotFoundException {
-        EventList<String> serializableList = new BasicEventList<String>();
+        EventList<String> serializableList = new BasicEventList<>();
         SerializableListener listener = new SerializableListener();
         serializableList.addListEventListener(listener);
 
@@ -102,7 +102,7 @@ public class BasicEventListTest {
 
     @Test
     public void testUnserializableListeners() throws IOException, ClassNotFoundException {
-        EventList<String> serializableList = new BasicEventList<String>();
+        EventList<String> serializableList = new BasicEventList<>();
         UnserializableListener listener = new UnserializableListener();
         serializableList.addListEventListener(listener);
 
@@ -148,7 +148,7 @@ public class BasicEventListTest {
              0x62, -0x52,  0x4f,  0x32,  0x0d,  0x02,  0x00,  0x00,  0x78,  0x70,  0x00,  0x00,  0x00,  0x00,  0x78,
         };
 
-        List<String> expected = new ArrayList<String>();
+        List<String> expected = new ArrayList<>();
         expected.addAll(GlazedListsTests.stringToList("October 10, 2005"));
 
         Object deserialized = GlazedListsTests.fromBytes(serializedBytes);
@@ -171,9 +171,9 @@ public class BasicEventListTest {
         final ListEventPublisher sharedPublisher = ListEventAssembler.createListEventPublisher();
 
         // 2. add 4 BasicEventLists to a container, each of which shares a common Publisher and ReadWriteLocks
-        final List<EventList<String>> serializationContainer = new ArrayList<EventList<String>>();
+        final List<EventList<String>> serializationContainer = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
-            final EventList<String> eventList = new BasicEventList<String>(sharedPublisher, sharedLock);
+            final EventList<String> eventList = new BasicEventList<>(sharedPublisher, sharedLock);
             eventList.add("Test " + i);
             serializationContainer.add(eventList);
         }
@@ -185,7 +185,7 @@ public class BasicEventListTest {
         // 4. ensure deserialized lists still share the lock and publisher
         final ListEventPublisher publisher = serializedCopy.get(0).getPublisher();
         final ReadWriteLock lock = serializedCopy.get(0).getReadWriteLock();
-        final CompositeList<String> compositeList = new CompositeList<String>(publisher, lock);
+        final CompositeList<String> compositeList = new CompositeList<>(publisher, lock);
         for (int i = 0; i < 4; i++) {
             // explicitly check the identity of the publisher and lock
             final EventList<String> eventList = serializedCopy.get(i);

@@ -1,6 +1,5 @@
 package ca.odell.glazedlists;
 
-import ca.odell.glazedlists.event.ListEventAssembler;
 import org.junit.Test;
 
 import java.util.Arrays;

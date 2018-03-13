@@ -47,7 +47,7 @@ import java.util.List;
 public final class GroupingList<E> extends TransformedList<E, List<E>> {
 
     /** The GroupLists defined by the comparator. They are stored in an SimpleTree so their indices can be quickly updated. */
-    private SimpleTree<GroupList> groupLists = new SimpleTree<GroupList>();
+    private SimpleTree<GroupList> groupLists = new SimpleTree<>();
 
     /** The Grouper manages creating and deleting groups. */
     private final Grouper<E> grouper;
@@ -58,7 +58,7 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
      * are assumed to implement.
      */
     public static <E extends Comparable<? super E>> GroupingList<E> create(EventList<E> source) {
-        return new GroupingList<E>(source);
+        return new GroupingList<>(source);
     }
 
     /**
@@ -79,7 +79,7 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
      * @param comparator the {@link Comparator} used to determine groupings
      */
     public GroupingList(EventList<E> source, Comparator<? super E> comparator) {
-        this(new SortedList<E>(source, comparator), comparator, null);
+        this(new SortedList<>(source, comparator), comparator, null);
     }
 
     /**
@@ -95,7 +95,7 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
         super(source);
 
         // the grouper handles changes to the SortedList
-        this.grouper = new Grouper<E>(source, new GrouperClient());
+        this.grouper = new Grouper<>(source, new GrouperClient());
 
         // initialize the tree of GroupLists
         rebuildGroupListTreeFromBarcode();
@@ -261,7 +261,7 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
         final List<E> removed = get(index);
 
         // make a copy of the list to return
-        final List<E> result = new ArrayList<E>(removed);
+        final List<E> result = new ArrayList<>(removed);
 
         removed.clear();
 

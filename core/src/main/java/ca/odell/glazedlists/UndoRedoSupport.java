@@ -50,7 +50,7 @@ public final class UndoRedoSupport<E> {
     private ListEventListener<E> txSourceListener = new TXSourceListener();
 
     /** A data structure storing all registered {@link Listener}s. */
-    private final CopyOnWriteArrayList<Listener> listenerList = new CopyOnWriteArrayList<Listener>();
+    private final CopyOnWriteArrayList<Listener> listenerList = new CopyOnWriteArrayList<>();
 
     /**
      * A count which, when greater than 0, indicates a ListEvent must be
@@ -73,10 +73,10 @@ public final class UndoRedoSupport<E> {
     private UndoRedoSupport(EventList<E> source) {
         // build a TransactionList that does NOT support rollback - we don't
         // need it and it relies on UndoRedoSupport, so we would have
-        this.txSource = new TransactionList<E>(source, false);
+        this.txSource = new TransactionList<>(source, false);
         this.txSource.addListEventListener(txSourceListener);
 
-        this.priorElements = new ArrayList<E>(source);
+        this.priorElements = new ArrayList<>(source);
     }
 
     /**
@@ -125,7 +125,7 @@ public final class UndoRedoSupport<E> {
      *      can be customized
      */
     public static <E> UndoRedoSupport install(EventList<E> source) {
-        return new UndoRedoSupport<E>(source);
+        return new UndoRedoSupport<>(source);
     }
 
     /**
@@ -166,7 +166,7 @@ public final class UndoRedoSupport<E> {
                 if (changeType == ListEvent.INSERT) {
                     final E inserted = txSource.get(changeIndex);
                     priorElements.add(changeIndex, inserted);
-                    edit.add(new AddEdit<E>(txSource, changeIndex, inserted));
+                    edit.add(new AddEdit<>(txSource, changeIndex, inserted));
 
                 // provide a RemoveEdit to the CompositeEdit
                 } else if (changeType == ListEvent.DELETE) {
@@ -178,7 +178,7 @@ public final class UndoRedoSupport<E> {
                     if (deleted == ListEvent.UNKNOWN_VALUE)
                         deleted = deletedElementFromPrivateCopy;
 
-                    edit.add(new RemoveEdit<E>(txSource, changeIndex, deleted));
+                    edit.add(new RemoveEdit<>(txSource, changeIndex, deleted));
 
                 // provide an UpdateEdit to the CompositeEdit
                 } else if (changeType == ListEvent.UPDATE) {
@@ -193,7 +193,7 @@ public final class UndoRedoSupport<E> {
                     // if a different object is present at the index
                     if (newValue != previousValue) {
                         priorElements.set(changeIndex, newValue);
-                        edit.add(new UpdateEdit<E>(txSource, changeIndex, newValue, previousValue));
+                        edit.add(new UpdateEdit<>(txSource, changeIndex, newValue, previousValue));
                     }
                 }
             }
@@ -288,7 +288,7 @@ public final class UndoRedoSupport<E> {
     final class CompositeEdit extends AbstractEdit {
 
         /** The edits in the order they were made. */
-        private final List<Edit> edits = new ArrayList<Edit>();
+        private final List<Edit> edits = new ArrayList<>();
 
         /** Adds a single Edit to this container of Edits. */
         void add(Edit edit) { edits.add(edit); }

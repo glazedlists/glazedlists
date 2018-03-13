@@ -36,8 +36,8 @@ import javax.swing.border.Border;
 class FilterPanel {
 
     /** the currently applied filters */
-    private final EventList<CloseableFilterComponent> selectedFilterComponents = new BasicEventList<CloseableFilterComponent>();
-    private final EventList<CloseableFilterComponent> remainingFilterComponents = new BasicEventList<CloseableFilterComponent>();
+    private final EventList<CloseableFilterComponent> selectedFilterComponents = new BasicEventList<>();
+    private final EventList<CloseableFilterComponent> remainingFilterComponents = new BasicEventList<>();
 
     private final CompositeMatcherEditor<Issue> matcherEditor;
 
@@ -57,11 +57,11 @@ class FilterPanel {
         this.remainingFilterComponents.add(new CloseableFilterComponent(new CreationDateMatcherEditor()));
         this.remainingFilterComponents.add(new CloseableFilterComponent(new ModificationDateMatcherEditor()));
         // make 'em into matcher editors
-        EventList<MatcherEditor<Issue>> matcherEditors = new FunctionList<CloseableFilterComponent,MatcherEditor<Issue>>(selectedFilterComponents, new CloseableFilterComponentToMatcherEditor<Issue>());
-        this.matcherEditor = new CompositeMatcherEditor<Issue>(matcherEditors);
+        EventList<MatcherEditor<Issue>> matcherEditors = new FunctionList<>(selectedFilterComponents, new CloseableFilterComponentToMatcherEditor<Issue>());
+        this.matcherEditor = new CompositeMatcherEditor<>(matcherEditors);
 
         // create the filters panel
-        this.filtersPanel = new JEventListPanel<CloseableFilterComponent>(selectedFilterComponents, new CloseableFilterComponentPanelFormat<Issue>());
+        this.filtersPanel = new JEventListPanel<>(selectedFilterComponents, new CloseableFilterComponentPanelFormat<Issue>());
         this.filtersPanel.setBackground(IssuesBrowser.GLAZED_LISTS_MEDIUM_LIGHT_BROWN);
         this.filtersPanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
         // create a wrapped panel that adds the 'add' button
@@ -168,7 +168,7 @@ class FilterPanel {
         public AddFilterControl() {
             final EventList<CloseableFilterComponent> remainingFilterComponentsProxyList =
                 GlazedListsSwing.swingThreadProxyList(remainingFilterComponents);
-            filterSelect = new JComboBox<>(new DefaultEventComboBoxModel<CloseableFilterComponent>(remainingFilterComponentsProxyList));
+            filterSelect = new JComboBox<>(new DefaultEventComboBoxModel<>(remainingFilterComponentsProxyList));
             filterSelect.setFont(filterSelect.getFont().deriveFont(10.0f));
             filterSelect.setOpaque(false);
 

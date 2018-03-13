@@ -196,7 +196,7 @@ public final class GlazedLists {
         }
 
         // build the remaining Comparators
-        final List<Comparator<T>> comparators = new ArrayList<Comparator<T>>(properties.length+1);
+        final List<Comparator<T>> comparators = new ArrayList<>(properties.length+1);
         comparators.add(firstComparator);
 
         for (int i = 0; i < properties.length; i++) {
@@ -213,7 +213,7 @@ public final class GlazedLists {
      * property is compared using the provided {@link Comparator}.
      */
     public static <T> Comparator<T> beanPropertyComparator(Class<T> className, String property, Comparator propertyComparator) {
-        return new BeanPropertyComparator<T>(className, property, propertyComparator);
+        return new BeanPropertyComparator<>(className, property, propertyComparator);
     }
 
     /**
@@ -241,7 +241,7 @@ public final class GlazedLists {
      * absolute equality is determined.
      */
     public static <T> Comparator<T> chainComparators(List<Comparator<T>> comparators) {
-        return new ComparatorChain<T>(comparators);
+        return new ComparatorChain<>(comparators);
     }
 
     /**
@@ -280,7 +280,7 @@ public final class GlazedLists {
      * Creates a reverse {@link Comparator} that inverts the given {@link Comparator}.
      */
     public static <T> Comparator<T> reverseComparator(Comparator<T> forward) {
-        return new ReverseComparator<T>(forward);
+        return new ReverseComparator<>(forward);
     }
 
     // TableFormats // // // // // // // // // // // // // // // // // // // //
@@ -290,7 +290,7 @@ public final class GlazedLists {
      * table columns via Reflection.
      */
     public static <T> TableFormat<T> tableFormat(String[] propertyNames, String[] columnLabels) {
-        return new BeanTableFormat<T>(null, propertyNames, columnLabels);
+        return new BeanTableFormat<>(null, propertyNames, columnLabels);
     }
 
     /**
@@ -304,7 +304,7 @@ public final class GlazedLists {
      *      classes of the column value.
      */
     public static <T> TableFormat<T> tableFormat(Class<T> baseClass, String[] propertyNames, String[] columnLabels) {
-        return new BeanTableFormat<T>(baseClass, propertyNames, columnLabels);
+        return new BeanTableFormat<>(baseClass, propertyNames, columnLabels);
     }
 
     /**
@@ -313,7 +313,7 @@ public final class GlazedLists {
      * {@link WritableTableFormat} and may be used for an editable table.
      */
     public static <T> TableFormat<T> tableFormat(String[] propertyNames, String[] columnLabels, boolean[] editable) {
-        return new BeanTableFormat<T>(null, propertyNames, columnLabels, editable);
+        return new BeanTableFormat<>(null, propertyNames, columnLabels, editable);
     }
 
     /**
@@ -328,7 +328,7 @@ public final class GlazedLists {
      *      classes of the column value.
      */
     public static <T> TableFormat<T> tableFormat(Class<T> baseClass, String[] propertyNames, String[] columnLabels, boolean[] editable) {
-        return new BeanTableFormat<T>(baseClass, propertyNames, columnLabels, editable);
+        return new BeanTableFormat<>(baseClass, propertyNames, columnLabels, editable);
     }
 
 
@@ -341,7 +341,7 @@ public final class GlazedLists {
      * properties.
      */
     public static <E> TextFilterator<E> textFilterator(String... propertyNames) {
-        return new BeanTextFilterator<Object,E>(propertyNames);
+        return new BeanTextFilterator<>(propertyNames);
     }
 
     /**
@@ -349,7 +349,7 @@ public final class GlazedLists {
      * properties.
      */
     public static <E> TextFilterator<E> textFilterator(Class<E> beanClass, String... propertyNames) {
-        return new BeanTextFilterator<Object,E>(beanClass, propertyNames);
+        return new BeanTextFilterator<>(beanClass, propertyNames);
     }
 
     /**
@@ -357,7 +357,7 @@ public final class GlazedLists {
      * properties.
      */
     public static <D,E> Filterator<D,E> filterator(String... propertyNames) {
-        return new BeanTextFilterator<D,E>(propertyNames);
+        return new BeanTextFilterator<>(propertyNames);
     }
 
     /**
@@ -365,7 +365,7 @@ public final class GlazedLists {
      * properties of the specified class.
      */
     public static <D,E> Filterator<D,E> filterator(Class<E> beanClass, String... propertyNames) {
-        return new BeanTextFilterator<D,E>(beanClass, propertyNames);
+        return new BeanTextFilterator<>(beanClass, propertyNames);
     }
 
     /**
@@ -375,7 +375,7 @@ public final class GlazedLists {
     @SuppressWarnings("unchecked")
     public static <E> TextFilterator<E> toStringTextFilterator() {
         if(stringTextFilterator == null) {
-            stringTextFilterator = new StringTextFilterator<Object>();
+            stringTextFilterator = new StringTextFilterator<>();
         }
         return (TextFilterator<E>) stringTextFilterator;
     }
@@ -388,7 +388,7 @@ public final class GlazedLists {
      * integer JavaBean property as the threshold evaluation.
      */
     public static <E> ThresholdList.Evaluator<E> thresholdEvaluator(String propertyName) {
-        return new BeanThresholdEvaluator<E>(propertyName);
+        return new BeanThresholdEvaluator<>(propertyName);
     }
 
     // CollectionListModels   // // // // // // // // // // // // // // // // //
@@ -399,7 +399,7 @@ public final class GlazedLists {
      * {@link EventList}s from other {@link EventList}s.
      */
     public static <E> CollectionList.Model<List<E>,E> listCollectionListModel() {
-        return new ListCollectionListModel<E>();
+        return new ListCollectionListModel<>();
     }
 
 
@@ -425,7 +425,7 @@ public final class GlazedLists {
      *            an empty list
      */
     public static <E> EventList<E> eventList(Collection<? extends E> contents) {
-        final EventList<E> result = new BasicEventList<E>(contents == null ? 0 : contents.size());
+        final EventList<E> result = new BasicEventList<>(contents == null ? 0 : contents.size());
         if(contents != null) {
             result.addAll(contents);
         }
@@ -461,7 +461,7 @@ public final class GlazedLists {
      */
     public static <E> EventList<E> eventList(ListEventPublisher publisher, ReadWriteLock lock,
             Collection<? extends E> contents) {
-        final EventList<E> result = new BasicEventList<E>(
+        final EventList<E> result = new BasicEventList<>(
                 contents == null ? 0 : contents.size(), publisher, lock);
         if (contents != null) {
             result.addAll(contents);
@@ -486,7 +486,7 @@ public final class GlazedLists {
      * of thread safe code.
      */
     public static <E> TransformedList<E, E> readOnlyList(EventList<? extends E> source) {
-        return new ReadOnlyList<E>((EventList<E>) source);
+        return new ReadOnlyList<>((EventList<E>) source);
     }
 
     /**
@@ -519,7 +519,7 @@ public final class GlazedLists {
      * @see ca.odell.glazedlists.util.concurrent
      */
     public static <E> TransformedList<E, E> threadSafeList(EventList<? extends E> source) {
-        return new ThreadSafeList<E>((EventList<E>) source);
+        return new ThreadSafeList<>((EventList<E>) source);
     }
 
     /**
@@ -539,7 +539,7 @@ public final class GlazedLists {
      * @return a {@link TransformedList} that needs to be disposed after use
      */
     public static <S, E> TransformedList<S, E> transformByFunction(EventList<S> source, Function<S, E> function) {
-        return new SimpleFunctionList<S, E>(source, function);
+        return new SimpleFunctionList<>(source, function);
     }
 
     /**
@@ -566,7 +566,7 @@ public final class GlazedLists {
      * @see java.lang.ref.WeakReference
      */
     public static <E> ListEventListener<E> weakReferenceProxy(EventList<E> source, ListEventListener<E> target) {
-        return new WeakReferenceProxy<E>(source, target);
+        return new WeakReferenceProxy<>(source, target);
     }
 
     // ObservableElementList Connectors // // // // // // // // // // // // //
@@ -585,7 +585,7 @@ public final class GlazedLists {
      * @return an ObservableElementList.Connector for the specified class
      */
     public static <E> ObservableElementList.Connector<E> beanConnector(Class<E> beanClass) {
-        return new BeanConnector<E>(beanClass);
+        return new BeanConnector<>(beanClass);
     }
 
     /**
@@ -639,7 +639,7 @@ public final class GlazedLists {
      */
     public static <E> ObservableElementList.Connector<E> beanConnector(Class<E> beanClass,
             Matcher<PropertyChangeEvent> eventMatcher) {
-        return new BeanConnector<E>(beanClass, eventMatcher);
+        return new BeanConnector<>(beanClass, eventMatcher);
     }
 
     /**
@@ -654,7 +654,7 @@ public final class GlazedLists {
      * @return an ObservableElementList.Connector for the specified class
      */
     public static <E> ObservableElementList.Connector<E> beanConnector(Class<E> beanClass, String addListener, String removeListener) {
-        return new BeanConnector<E>(beanClass, addListener, removeListener);
+        return new BeanConnector<>(beanClass, addListener, removeListener);
     }
 
     /**
@@ -677,7 +677,7 @@ public final class GlazedLists {
      */
     public static <E> ObservableElementList.Connector<E> beanConnector(Class<E> beanClass,
             String addListener, String removeListener, Matcher<PropertyChangeEvent> eventMatcher) {
-        return new BeanConnector<E>(beanClass, addListener, removeListener, eventMatcher);
+        return new BeanConnector<>(beanClass, addListener, removeListener, eventMatcher);
     }
 
     /**
@@ -689,7 +689,7 @@ public final class GlazedLists {
      * @return an ObservableElementList.Connector for objects that extend {@link Observable}
      */
     public static <E extends Observable> ObservableElementList.Connector<E> observableConnector() {
-        return new ObservableConnector<E>();
+        return new ObservableConnector<>();
     }
 
     // Matchers // // // // // // // // // // // // // // // // // // // // //
@@ -718,7 +718,7 @@ public final class GlazedLists {
      * Get a {@link MatcherEditor} that is fixed on the specified {@link Matcher}.
      */
     public static <E> MatcherEditor<E> fixedMatcherEditor(Matcher<E> matcher) {
-        return new FixedMatcherEditor<E>(matcher);
+        return new FixedMatcherEditor<>(matcher);
     }
 
     // Functions // // // // // // // // // // // // // // // // // // // // //
@@ -728,7 +728,7 @@ public final class GlazedLists {
      * <code>value</code>, regardless of its input.
      */
     public static <E,V> FunctionList.Function<E,V> constantFunction(V value) {
-        return new ConstantFunction<E,V>(value);
+        return new ConstantFunction<>(value);
     }
 
     /**
@@ -737,7 +737,7 @@ public final class GlazedLists {
      * <code>beanClass</code> and then formats the return value as a String.
      */
     public static <E> FunctionList.Function<E,String> toStringFunction(Class<E> beanClass, String propertyName) {
-        return new StringBeanFunction<E>(beanClass, propertyName);
+        return new StringBeanFunction<>(beanClass, propertyName);
     }
 
     /**
@@ -746,7 +746,7 @@ public final class GlazedLists {
      * <code>beanClass</code>.
      */
     public static <E,V> FunctionList.Function<E,V> beanFunction(Class<E> beanClass, String propertyName) {
-        return new BeanFunction<E,V>(beanClass, propertyName);
+        return new BeanFunction<>(beanClass, propertyName);
     }
 
     // ListEventListeners // // // // // // // // // // // // // // // // // //
@@ -788,7 +788,7 @@ public final class GlazedLists {
      *         {@link EventList#removeListEventListener(ListEventListener)} or just call {@link SyncListener#dispose()}.
      */
     public static <E> SyncListener<E> syncEventListToList(EventList<E> source, List<E> target) {
-        return new SyncListener<E>(source, target);
+        return new SyncListener<>(source, target);
     }
 
     /**
@@ -810,7 +810,7 @@ public final class GlazedLists {
     public static <E> LockbasedSyncListener<E> syncEventListToEventList(EventList<E> source, EventList<E> target) {
         target.getReadWriteLock().writeLock().lock();
         try {
-            return new LockbasedSyncListener<E>(source, target);
+            return new LockbasedSyncListener<>(source, target);
         } finally {
             target.getReadWriteLock().writeLock().unlock();
         }
@@ -840,7 +840,7 @@ public final class GlazedLists {
 	 *         use {@link EventList#removeListEventListener(ListEventListener)}.
 	 */
     public static <E> ListEventListener<E> typeSafetyListener(EventList<E> source, Set<Class> types) {
-        return new TypeSafetyListener<E>(source, types);
+        return new TypeSafetyListener<>(source, types);
     }
 
     /**
@@ -972,7 +972,7 @@ public final class GlazedLists {
      *      underlying <code>source</code> {@link EventList}
      */
     public static <K, V> DisposableMap<K, List<V>> syncEventListToMultiMap(EventList<V> source, FunctionList.Function<V, ? extends K> keyMaker, Comparator<? super K> keyGrouper) {
-        return new GroupingListMultiMap<K, V>(source, keyMaker, keyGrouper);
+        return new GroupingListMultiMap<>(source, keyMaker, keyGrouper);
     }
 
     /**
@@ -1030,6 +1030,6 @@ public final class GlazedLists {
      *      underlying <code>source</code> {@link EventList}
      */
     public static <K, V> DisposableMap<K, V> syncEventListToMap(EventList<V> source, FunctionList.Function<V, K> keyMaker) {
-        return new FunctionListMap<K, V>(source, keyMaker);
+        return new FunctionListMap<>(source, keyMaker);
     }
 }

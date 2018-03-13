@@ -38,7 +38,7 @@ public final class TableComparatorChooser<E> extends AbstractTableComparatorChoo
     private Table table;
 
     /** listeners to sort change events */
-    private List<Listener> sortListeners = new ArrayList<Listener>();
+    private List<Listener> sortListeners = new ArrayList<>();
 
     /** listeners for column headers */
     private ColumnListener columnListener = new ColumnListener();
@@ -78,7 +78,7 @@ public final class TableComparatorChooser<E> extends AbstractTableComparatorChoo
      *      not as simple and this strategy should only be used where necessary.
      */
     public static <E> TableComparatorChooser<E> install(DefaultEventTableViewer<E> eventTableViewer, SortedList<E> sortedList, boolean multipleColumnSort) {
-        return new TableComparatorChooser<E>(eventTableViewer, sortedList,  multipleColumnSort);
+        return new TableComparatorChooser<>(eventTableViewer, sortedList,  multipleColumnSort);
     }
 
     /**

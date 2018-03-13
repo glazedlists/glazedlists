@@ -16,9 +16,9 @@ public class UnicodeTextMatcherEditorTest {
 
     @Test
     public void testUnicodeStrategy() {
-        TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
+        TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<>(GlazedLists.toStringTextFilterator());
         textMatcherEditor.setStrategy(GlazedListsICU4J.UNICODE_TEXT_SEARCH_STRATEGY);
-        FilterList<String> list = new FilterList<String>(new BasicEventList<String>(), textMatcherEditor);
+        FilterList<String> list = new FilterList<>(new BasicEventList<String>(), textMatcherEditor);
 
         list.add(null);
         list.add("");
@@ -73,10 +73,10 @@ public class UnicodeTextMatcherEditorTest {
     @Ignore("Fix me")
     @Test
     public void testUnicodeStrategy_StartsWith_FixMe() {
-        TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
+        TextMatcherEditor<String> textMatcherEditor = new TextMatcherEditor<>(GlazedLists.toStringTextFilterator());
         textMatcherEditor.setStrategy(GlazedListsICU4J.UNICODE_TEXT_SEARCH_STRATEGY);
         textMatcherEditor.setMode(TextMatcherEditor.STARTS_WITH);
-        FilterList<String> list = new FilterList<String>(new BasicEventList<String>(), textMatcherEditor);
+        FilterList<String> list = new FilterList<>(new BasicEventList<String>(), textMatcherEditor);
 
         list.add("Ru\u00dfland");
 

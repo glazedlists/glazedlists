@@ -23,7 +23,7 @@ public class ListToByteCoderTest {
     @Test
     public void testSymmetry() {
         List<String> values = GlazedListsTests.stringToList("ABCDEFG");
-        ListToByteCoder<String> coder = new ListToByteCoder<String>(values);
+        ListToByteCoder<String> coder = new ListToByteCoder<>(values);
 
         // color to byte
         byte a = coder.colorToByte("A");
@@ -35,7 +35,7 @@ public class ListToByteCoderTest {
         byte g = coder.colorToByte("G");
 
         // make sure all values are distinct
-        Set<Byte> distinctValues = new HashSet<Byte>();
+        Set<Byte> distinctValues = new HashSet<>();
         assertTrue(distinctValues.add(new Byte(a)));
         assertTrue(distinctValues.add(new Byte(b)));
         assertTrue(distinctValues.add(new Byte(c)));

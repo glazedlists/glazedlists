@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.matchers;
 
-import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.impl.beans.BeanProperty;
 import ca.odell.glazedlists.matchers.Matcher;
 
@@ -29,7 +28,7 @@ public final class BeanPropertyMatcher<E> implements Matcher<E> {
      * equals the given <code>value</code>.
      */
     public BeanPropertyMatcher(Class<E> beanClass, String propertyName, Object value) {
-        this.beanProperty = new BeanProperty<E>(beanClass, propertyName, true, false);
+        this.beanProperty = new BeanProperty<>(beanClass, propertyName, true, false);
         this.value = value;
     }
 

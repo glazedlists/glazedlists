@@ -19,7 +19,7 @@ import java.util.ArrayList;
 public class JobQueue implements Runnable {
 
     /** the tasks to invoke, in order of invocation */
-    private List<Job> jobs = new ArrayList<Job>();
+    private List<Job> jobs = new ArrayList<>();
 
     @Override
     public void run() {

@@ -38,8 +38,8 @@ public class ForwardEventTest {
      */
     @Before
     public void setUp() {
-        source = new BasicEventList<String>();
-        forwarding = new ForwardingList<String>(source);
+        source = new BasicEventList<>();
+        forwarding = new ForwardingList<>(source);
         test = ListConsistencyListener.install(forwarding);
         test.setPreviousElementTracked(false);
     }

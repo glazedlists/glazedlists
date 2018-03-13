@@ -14,7 +14,7 @@ public class OneElementTest {
 
     @Test
     public void testPropertyChanges() {
-        final EventList<String> source = new BasicEventList<String>();
+        final EventList<String> source = new BasicEventList<>();
 
         final PropertyChangeCounter counter = new PropertyChangeCounter();
         final Calculation<Boolean> oneCount = Calculations.oneElement(source);

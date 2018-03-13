@@ -70,7 +70,7 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
     private final ListSelection.Listener selectionListener = new SwingSelectionListener();
 
     /** listeners to notify when the selection changes */
-    private final List<ListSelectionListener> listeners = new ArrayList<ListSelectionListener>();
+    private final List<ListSelectionListener> listeners = new ArrayList<>();
 
     /** whether there are a series of changes on the way */
     private boolean valueIsAdjusting = false;
@@ -113,7 +113,7 @@ public final class DefaultEventSelectionModel<E> implements AdvancedListSelectio
             this.source = source;
 
             // build a list for reading the selection
-            this.listSelection = new ListSelection<E>(source);
+            this.listSelection = new ListSelection<>(source);
             this.listSelection.addSelectionListener(selectionListener);
         } finally {
             source.getReadWriteLock().readLock().unlock();

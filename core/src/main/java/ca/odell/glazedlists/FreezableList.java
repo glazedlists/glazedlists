@@ -43,7 +43,7 @@ public final class FreezableList<E> extends TransformedList<E, E> {
     private boolean frozen = false;
 
     /** the frozen objects */
-    private List<E> frozenData = new ArrayList<E>();
+    private List<E> frozenData = new ArrayList<>();
 
     /**
      * Creates a {@link FreezableList} that can freeze the view of the specified

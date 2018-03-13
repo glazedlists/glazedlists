@@ -23,7 +23,7 @@ public final class CalculationsSwing {
      * events from the Swing event dispatch thread.
      */
     public static <E> Calculation<E> swingThreadProxyCalculation(Calculation<? extends E> source) {
-        return new SwingThreadProxyCalculation<E>(source);
+        return new SwingThreadProxyCalculation<>(source);
     }
 
     /**

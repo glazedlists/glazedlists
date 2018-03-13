@@ -11,10 +11,10 @@ public class EventTreeModelTest extends SwingTestCase {
 
     @Test
     public void testDispose() {
-        EventList<String> treeNodeList = new BasicEventList<String>();
+        EventList<String> treeNodeList = new BasicEventList<>();
 
-        TreeList<String> glazedTreeList = new TreeList<String>(treeNodeList, TreeListTest.COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartCollapsed());
-        EventTreeModel<String> eventTreeModel = new EventTreeModel<String>(glazedTreeList);
+        TreeList<String> glazedTreeList = new TreeList<>(treeNodeList, TreeListTest.COMPRESSED_CHARACTER_TREE_FORMAT, TreeList.<String>nodesStartCollapsed());
+        EventTreeModel<String> eventTreeModel = new EventTreeModel<>(glazedTreeList);
         eventTreeModel.dispose();
         glazedTreeList.dispose();
     }

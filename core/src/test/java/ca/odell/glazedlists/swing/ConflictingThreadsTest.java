@@ -31,7 +31,7 @@ public class ConflictingThreadsTest extends SwingTestCase {
     @Ignore("Fix me")
     @Test
     public void testConflictingThreads_FixMe() {
-        EventList<JLabel> labelsList = new BasicEventList<JLabel>();
+        EventList<JLabel> labelsList = new BasicEventList<>();
         labelsList.add(new JLabel("7-up"));
         labelsList.add(new JLabel("Pepsi"));
         labelsList.add(new JLabel("Dr. Pepper"));
@@ -42,7 +42,7 @@ public class ConflictingThreadsTest extends SwingTestCase {
         boolean[] editable = new boolean[] { true, true };
         TableFormat<JLabel> labelsTableFormat = GlazedLists.tableFormat(JLabel.class, properties, headers, editable);
 
-        DefaultEventTableModel<JLabel> labelsTable = new DefaultEventTableModel<JLabel>(labelsProxyList, labelsTableFormat);
+        DefaultEventTableModel<JLabel> labelsTable = new DefaultEventTableModel<>(labelsProxyList, labelsTableFormat);
 
         doBackgroundTask(new ClearListRunnable(labelsList), true);
 

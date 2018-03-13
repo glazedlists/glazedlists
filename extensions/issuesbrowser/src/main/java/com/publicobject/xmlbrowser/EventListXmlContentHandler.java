@@ -28,7 +28,7 @@ import com.publicobject.misc.xml.SaxParserSidekick;
 class EventListXmlContentHandler extends DefaultHandler {
 
     private final EventList<Tag> target;
-    private final List<Tag> stack = new ArrayList<Tag>();
+    private final List<Tag> stack = new ArrayList<>();
 
     public EventListXmlContentHandler(EventList<Tag> target) {
         this.target = GlazedLists.threadSafeList(target);

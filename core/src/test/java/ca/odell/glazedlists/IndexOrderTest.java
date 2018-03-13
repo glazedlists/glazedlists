@@ -38,15 +38,15 @@ public class IndexOrderTest {
      */
     @Test
     public void testIncreasingOrder() {
-        EventList<int[]> unsorted = new BasicEventList<int[]>();
+        EventList<int[]> unsorted = new BasicEventList<>();
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 50);
-        FilterList<int[]> filteredOnce = new FilterList<int[]>(unsorted, matcherEditor);
+        FilterList<int[]> filteredOnce = new FilterList<>(unsorted, matcherEditor);
 
         // add a block of new elements one hundred times
         for(int a = 0; a < 100; a++) {
 
             // create a block of ten elements
-            List<int[]> currentChange = new ArrayList<int[]>();
+            List<int[]> currentChange = new ArrayList<>();
             for(int b = 0; b < 10; b++) {
                 currentChange.add(new int[] { random.nextInt(100), random.nextInt(100) });
             }
@@ -71,24 +71,24 @@ public class IndexOrderTest {
      */
     @Test
     public void testIndexOutOfOrder() {
-        EventList<int[]> unsorted = new BasicEventList<int[]>();
-        SortedList<int[]> sortedOnce = new SortedList<int[]>(unsorted, GlazedListsTests.intArrayComparator(0));
+        EventList<int[]> unsorted = new BasicEventList<>();
+        SortedList<int[]> sortedOnce = new SortedList<>(unsorted, GlazedListsTests.intArrayComparator(0));
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 50);
-        FilterList<int[]> filteredOnce = new FilterList<int[]>(sortedOnce, matcherEditor);
-        SortedList<int[]> sortedTwice = new SortedList<int[]>(filteredOnce, GlazedListsTests.intArrayComparator(0));
+        FilterList<int[]> filteredOnce = new FilterList<>(sortedOnce, matcherEditor);
+        SortedList<int[]> sortedTwice = new SortedList<>(filteredOnce, GlazedListsTests.intArrayComparator(0));
 
         ListConsistencyListener.install(unsorted);
         ListConsistencyListener.install(sortedOnce);
         ListConsistencyListener.install(filteredOnce);
         ListConsistencyListener.install(sortedTwice);
 
-        ArrayList<int[]> controlList = new ArrayList<int[]>();
+        ArrayList<int[]> controlList = new ArrayList<>();
 
         // add a block of new elements one hundred times
         for(int a = 0; a < 15; a++) {
 
             // create a block of ten elements
-            List<int[]> currentChange = new ArrayList<int[]>();
+            List<int[]> currentChange = new ArrayList<>();
             for(int b = 0; b < controlList.size() || b < 10; b++) {
                 currentChange.add(new int[] { random.nextInt(100), random.nextInt(100) });
             }

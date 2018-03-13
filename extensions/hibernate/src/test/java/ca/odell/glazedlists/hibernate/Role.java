@@ -23,7 +23,7 @@ public class Role implements Serializable {
     private String name;
 
     /** Users who are in this role. */
-    private Collection<User> users = new ArrayList<User>();
+    private Collection<User> users = new ArrayList<>();
 
     /**
      * Default constructor for hibernate.

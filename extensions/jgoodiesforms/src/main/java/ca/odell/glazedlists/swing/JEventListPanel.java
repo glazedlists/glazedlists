@@ -52,7 +52,7 @@ public final class JEventListPanel<E> extends JPanel {
     private TransformedList<E,E> swingSource;
 
     /** the components of the panel */
-    private List<JComponent[]> components = new ArrayList<JComponent[]>();
+    private List<JComponent[]> components = new ArrayList<>();
 
     /** the layout supports a forms layout under the hood */
     private final ListLayout listLayout;

@@ -28,11 +28,11 @@ public class DefaultEventComboBoxModelTest extends SwingTestCase {
     @Test
     @ExecuteOnNonUiThread
     public void testOnMainThreadEDTViolation() {
-        EventList<Color> colors = new BasicEventList<Color>();
+        EventList<Color> colors = new BasicEventList<>();
         colors.add(Color.RED);
         colors.add(Color.GREEN);
 
-        final DefaultEventComboBoxModel<Color> comboModel = new DefaultEventComboBoxModel<Color>(colors);
+        final DefaultEventComboBoxModel<Color> comboModel = new DefaultEventComboBoxModel<>(colors);
         assertEquals(2, comboModel.getSize());
         try {
             colors.add(Color.BLUE);
@@ -48,7 +48,7 @@ public class DefaultEventComboBoxModelTest extends SwingTestCase {
     @Test
     @ExecuteOnNonUiThread
     public void testOnMainThreadNoEDTViolation() {
-        EventList<Color> colors = new BasicEventList<Color>();
+        EventList<Color> colors = new BasicEventList<>();
         colors.add(Color.RED);
         colors.add(Color.GREEN);
 
@@ -67,10 +67,10 @@ public class DefaultEventComboBoxModelTest extends SwingTestCase {
      */
     @Test
     public void testSelectedItem() {
-        EventList<Color> colors = new BasicEventList<Color>();
+        EventList<Color> colors = new BasicEventList<>();
         colors.add(Color.RED);
         colors.add(Color.GREEN);
-        final DefaultEventComboBoxModel<Color> comboModel = new DefaultEventComboBoxModel<Color>(colors);
+        final DefaultEventComboBoxModel<Color> comboModel = new DefaultEventComboBoxModel<>(colors);
         final JComboBox<Color> comboBox = new JComboBox<>(comboModel);
         assertEquals(null, comboBox.getSelectedItem());
         assertEquals(-1, comboBox.getSelectedIndex());

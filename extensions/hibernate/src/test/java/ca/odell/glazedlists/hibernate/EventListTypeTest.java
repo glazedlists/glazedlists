@@ -64,7 +64,7 @@ public class EventListTypeTest extends HibernateTestCase {
 
         assertNotNull(u);
 
-        final GlazedListsTests.ListEventCounter<String> listener = new GlazedListsTests.ListEventCounter<String>();
+        final GlazedListsTests.ListEventCounter<String> listener = new GlazedListsTests.ListEventCounter<>();
 
         if (lazy) {
             // lazy collection still uninitialized
@@ -159,7 +159,7 @@ public class EventListTypeTest extends HibernateTestCase {
         u = loadUser(s, lazy);
         assertNotNull(u);
 
-        final GlazedListsTests.ListEventCounter<Email> listener = new GlazedListsTests.ListEventCounter<Email>();
+        final GlazedListsTests.ListEventCounter<Email> listener = new GlazedListsTests.ListEventCounter<>();
 
         if (lazy) {
             // lazy collection still uninitialized
@@ -262,7 +262,7 @@ public class EventListTypeTest extends HibernateTestCase {
         u = loadUser(s, lazy);
         assertNotNull(u);
 
-        final GlazedListsTests.ListEventCounter<Role> listener = new GlazedListsTests.ListEventCounter<Role>();
+        final GlazedListsTests.ListEventCounter<Role> listener = new GlazedListsTests.ListEventCounter<>();
 
         if (lazy) {
             // lazy collection still uninitialized

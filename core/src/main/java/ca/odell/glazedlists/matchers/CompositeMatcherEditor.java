@@ -33,7 +33,7 @@ public class CompositeMatcherEditor<E> extends AbstractMatcherEditor<E> {
     private int mode = AND;
 
     /** listeners for each delegate */
-    private List<DelegateMatcherEditorListener> matcherEditorListeners = new ArrayList<DelegateMatcherEditorListener>();
+    private List<DelegateMatcherEditorListener> matcherEditorListeners = new ArrayList<>();
 
     /**
      * Create a {@link CompositeMatcherEditor} that creates Matchers from the union

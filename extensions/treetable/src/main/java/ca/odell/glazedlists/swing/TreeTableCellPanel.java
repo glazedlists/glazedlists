@@ -40,7 +40,7 @@ public class TreeTableCellPanel extends JPanel {
     private static final Border NO_FOCUS_BORDER = BorderFactory.createEmptyBorder(0, 0, 0, 0);
 
     /** A cache of appropriate indenter/spacer components for each unique width in the tree. */
-    private final Map<Integer, Component> spacerComponentsCache = new HashMap<Integer, Component>();
+    private final Map<Integer, Component> spacerComponentsCache = new HashMap<>();
 
     /** The button to toggle the expanded/collapsed state of the tree node. */
     private final JButton expanderButton = new JButton();

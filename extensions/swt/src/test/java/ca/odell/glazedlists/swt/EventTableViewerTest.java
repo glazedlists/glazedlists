@@ -71,7 +71,7 @@ public class EventTableViewerTest {
     /** Tests creation of EventTableViewer with checkable table. */
     @Test
     public void testConstructorWithCheckableTable() {
-        EventTableViewer<Integer> viewer = new EventTableViewer<Integer>(new BasicEventList<Integer>(), new Table(getShell(), SWT.CHECK), new IntegerTableFormat());
+        EventTableViewer<Integer> viewer = new EventTableViewer<>(new BasicEventList<Integer>(), new Table(getShell(), SWT.CHECK), new IntegerTableFormat());
         viewer.dispose();
     }
 
@@ -79,11 +79,11 @@ public class EventTableViewerTest {
     @Test
     public void testSingleColumnSort() {
         final EventList<Color> source = GlazedLists.eventList(RGB);
-        final SortedList<Color> sorted = new SortedList<Color>(source, null);
+        final SortedList<Color> sorted = new SortedList<>(source, null);
         final TableFormat<Color> tableFormat = GlazedLists.tableFormat(new String[] { "red",
                 "green", "blue" }, new String[] { "Red", "Green", "Blue" });
         final Table table = new Table(getShell(), SWT.VIRTUAL | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-        final EventTableViewer<Color> viewer = new EventTableViewer<Color>(sorted, table, tableFormat);
+        final EventTableViewer<Color> viewer = new EventTableViewer<>(sorted, table, tableFormat);
         final TableComparatorChooser<Color> chooser = TableComparatorChooser.install(viewer, sorted, false);
         assertNull(table.getSortColumn());
         assertEquals(SWT.NONE, table.getSortDirection());
@@ -119,11 +119,11 @@ public class EventTableViewerTest {
     @Test
     public void testMultiColumnSort() {
         final EventList<Color> source = GlazedLists.eventList(RGB);
-        final SortedList<Color> sorted = new SortedList<Color>(source, null);
+        final SortedList<Color> sorted = new SortedList<>(source, null);
         final TableFormat<Color> tableFormat = GlazedLists.tableFormat(new String[] { "red",
                 "green", "blue" }, new String[] { "Red", "Green", "Blue" });
         final Table table = new Table(getShell(), SWT.VIRTUAL | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-        final EventTableViewer<Color> viewer = new EventTableViewer<Color>(sorted, table, tableFormat);
+        final EventTableViewer<Color> viewer = new EventTableViewer<>(sorted, table, tableFormat);
         final TableComparatorChooser<Color> chooser = TableComparatorChooser.install(viewer, sorted, true);
         assertNull(table.getSortColumn());
         assertEquals(SWT.NONE, table.getSortDirection());
@@ -164,7 +164,7 @@ public class EventTableViewerTest {
         final TableFormat<Color> tableFormat = GlazedLists.tableFormat(new String[] { "red",
                 "green", "blue" }, new String[] { "Red", "Green", "Blue" });
         final Table table = new Table(getShell(), SWT.CHECK | SWT.VIRTUAL);
-        EventTableViewer<Color> viewer = new EventTableViewer<Color>(source, table, tableFormat);
+        EventTableViewer<Color> viewer = new EventTableViewer<>(source, table, tableFormat);
         doTestDefaultConfigurer(table, viewer);
         // setting custom configurer
         viewer.setTableItemConfigurer(new ColorTableItemConfigurer());
@@ -229,7 +229,7 @@ public class EventTableViewerTest {
         final EventList<Color> source = GlazedLists.eventList(RGBNull);
         final TableFormat<Color> tableFormat = new ColorTableFormat();
         final Table table = new Table(getShell(), SWT.CHECK);
-        EventTableViewer<Color> viewer = new EventTableViewer<Color>(source, table, tableFormat);
+        EventTableViewer<Color> viewer = new EventTableViewer<>(source, table, tableFormat);
         assertEquals(3, table.getColumnCount());
         assertEquals("Red", table.getColumn(0).getText());
         assertEquals(SWT.LEFT, table.getColumn(0).getAlignment());
@@ -257,9 +257,9 @@ public class EventTableViewerTest {
      */
     @Test
     public void testToggleSelection() {
-        final BasicEventList<String> list = new BasicEventList<String>();
+        final BasicEventList<String> list = new BasicEventList<>();
         final Table table = new Table(getShell(), SWT.VIRTUAL | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-        final EventTableViewer<String> viewer = new EventTableViewer<String>(list, table, new SimpleTableFormat());
+        final EventTableViewer<String> viewer = new EventTableViewer<>(list, table, new SimpleTableFormat());
 
         // populate the list
         list.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
@@ -350,12 +350,12 @@ public class EventTableViewerTest {
 
     @Test
     public void testBug413() {
-        final BasicEventList<String> source = new BasicEventList<String>();
+        final BasicEventList<String> source = new BasicEventList<>();
         for (int i = 0; i < 3; i++) {
             source.add("Str" + i);
         }
         final Table table = new Table(getShell(), SWT.VIRTUAL | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-        final EventTableViewer<String> viewer = new EventTableViewer<String>(source, table, new SimpleTableFormat());
+        final EventTableViewer<String> viewer = new EventTableViewer<>(source, table, new SimpleTableFormat());
         // BUG:If comment the following line. The table will show Str0, Str1, Str2.
         // If donot comment the following line. The table will show Str1, Str2, Str0.
         // The item order is different.
@@ -388,9 +388,9 @@ public class EventTableViewerTest {
      */
     @Test
     public void testClearOnThreadProxy_FixMe() {
-        final BasicEventList<String> list = new BasicEventList<String>();
+        final BasicEventList<String> list = new BasicEventList<>();
         final Table table = new Table(getShell(), SWT.VIRTUAL | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-        final EventTableViewer<String> viewer = new EventTableViewer<String>(list, table, new SimpleTableFormat());
+        final EventTableViewer<String> viewer = new EventTableViewer<>(list, table, new SimpleTableFormat());
         assertEquals(list, viewer.getSourceList());
         // populate the list
         list.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));

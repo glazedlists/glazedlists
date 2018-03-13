@@ -14,7 +14,7 @@ public class ElementAtTest {
 
     @Test
     public void testPropertyChanges() throws Exception {
-        final EventList<String> source = new BasicEventList<String>();
+        final EventList<String> source = new BasicEventList<>();
 
         final PropertyChangeCounter counter = new PropertyChangeCounter();
         final Calculation<String> elementAt = Calculations.elementAt(source, 0, "default");

@@ -227,7 +227,7 @@ public class ThresholdMatcherEditor<E, T> extends AbstractMatcherEditor<E> {
          * as this {@link MatchOperation}.
          */
         private MatchOperation<E, T> instance(Comparator<T> comparator, T threshold, FunctionList.Function<E,T> function) {
-            return new MatchOperation<E, T>(comparator, threshold, polarity, inclusive, function);
+            return new MatchOperation<>(comparator, threshold, polarity, inclusive, function);
         }
 
         /**

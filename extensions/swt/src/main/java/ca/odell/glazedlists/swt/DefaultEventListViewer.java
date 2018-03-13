@@ -87,7 +87,7 @@ public class DefaultEventListViewer<E> implements ListEventListener<E> {
             this.itemFormat = itemFormat;
 
             // Enable the selection lists
-            selection = new SelectionManager<E>(this.source, new SelectableList());
+            selection = new SelectionManager<>(this.source, new SelectableList());
 
             // setup initial values
             for(int i = 0, n = this.source.size(); i < n; i++) {

@@ -99,7 +99,7 @@ public final class SimpleEventCategoryDataset<R extends Comparable, C extends Co
         this.rowKeys = rowKeys;
         this.columnKeys = columnKeys;
         this.valueMaker = valueMaker;
-        this.context = new Context<R, C>(rowKeys, columnKeys);
+        this.context = new Context<>(rowKeys, columnKeys);
 
         // listen for changes in the rows or columns and broadcast our own change events
         this.rowKeys.addListEventListener(this);

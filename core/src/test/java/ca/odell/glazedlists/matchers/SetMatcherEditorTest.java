@@ -39,29 +39,29 @@ public class SetMatcherEditorTest {
                 return date.getYear() + 1900;
             }
         });
-        EventList<Date> filterList = new FilterList<Date>(source, matcherEditor);
-        final CountingMatcherEditorListener<Date> counter = new CountingMatcherEditorListener<Date>();
+        EventList<Date> filterList = new FilterList<>(source, matcherEditor);
+        final CountingMatcherEditorListener<Date> counter = new CountingMatcherEditorListener<>();
         matcherEditor.addMatcherEditorListener(counter);
         counter.assertCounterState(0, 0, 0, 0, 0);
         assertEquals(Arrays.asList(), filterList);
 
         // give some initial range (changed)
-        matcherEditor.setMatchSet(new HashSet<Integer>(Arrays.asList(2006, 2007)));
+        matcherEditor.setMatchSet(new HashSet<>(Arrays.asList(2006, 2007)));
         counter.assertCounterState(0, 0, 1, 0, 0);
         assertEquals(Arrays.asList(july2007), filterList);
 
         // relax (more values)
-        matcherEditor.setMatchSet(new HashSet<Integer>(Arrays.asList(2006, 2007, 2008)));
+        matcherEditor.setMatchSet(new HashSet<>(Arrays.asList(2006, 2007, 2008)));
         counter.assertCounterState(0, 0, 1, 0, 1);
         assertEquals(Arrays.asList(july2007, july2008), filterList);
 
         // constrain (less values)
-        matcherEditor.setMatchSet(new HashSet<Integer>(Arrays.asList(2006, 2007)));
+        matcherEditor.setMatchSet(new HashSet<>(Arrays.asList(2006, 2007)));
         counter.assertCounterState(0, 0, 1, 1, 1);
         assertEquals(Arrays.asList(july2007), filterList);
 
         // changed (different values)
-        matcherEditor.setMatchSet(new HashSet<Integer>(Arrays.asList(2007, 2008)));
+        matcherEditor.setMatchSet(new HashSet<>(Arrays.asList(2007, 2008)));
         counter.assertCounterState(0, 0, 2, 1, 1);
         assertEquals(Arrays.asList(july2007, july2008), filterList);
 
@@ -71,12 +71,12 @@ public class SetMatcherEditorTest {
         assertEquals(Arrays.asList(), filterList);
 
         // changed (different values)
-        matcherEditor.setMatchSet(new HashSet<Integer>(Arrays.asList(2007, 2008)));
+        matcherEditor.setMatchSet(new HashSet<>(Arrays.asList(2007, 2008)));
         counter.assertCounterState(0, 1, 3, 1, 1);
         assertEquals(Arrays.asList(july2007, july2008), filterList);
 
         // test changing nothing
-        matcherEditor.setMatchSet(new HashSet<Integer>(Arrays.asList(2007, 2008)));
+        matcherEditor.setMatchSet(new HashSet<>(Arrays.asList(2007, 2008)));
         counter.assertCounterState(0, 1, 3, 1, 1);
         assertEquals(Arrays.asList(july2007, july2008), filterList);
     }
@@ -89,29 +89,29 @@ public class SetMatcherEditorTest {
                 return date.getYear() + 1900;
             }
         });
-        EventList<Date> filterList = new FilterList<Date>(source, matcherEditor);
-        final CountingMatcherEditorListener<Date> counter = new CountingMatcherEditorListener<Date>();
+        EventList<Date> filterList = new FilterList<>(source, matcherEditor);
+        final CountingMatcherEditorListener<Date> counter = new CountingMatcherEditorListener<>();
         matcherEditor.addMatcherEditorListener(counter);
         counter.assertCounterState(0, 0, 0, 0, 0);
         assertEquals(Arrays.asList(july2007, july2008, july2009), filterList);
 
         // give some initial range (changed)
-        matcherEditor.setMatchSet(new HashSet<Integer>(Arrays.asList(2006, 2007)));
+        matcherEditor.setMatchSet(new HashSet<>(Arrays.asList(2006, 2007)));
         counter.assertCounterState(0, 0, 1, 0, 0);
         assertEquals(Arrays.asList(july2007), filterList);
 
         // relax (more values)
-        matcherEditor.setMatchSet(new HashSet<Integer>(Arrays.asList(2006, 2007, 2008)));
+        matcherEditor.setMatchSet(new HashSet<>(Arrays.asList(2006, 2007, 2008)));
         counter.assertCounterState(0, 0, 1, 0, 1);
         assertEquals(Arrays.asList(july2007, july2008), filterList);
 
         // constrain (less values)
-        matcherEditor.setMatchSet(new HashSet<Integer>(Arrays.asList(2006, 2007)));
+        matcherEditor.setMatchSet(new HashSet<>(Arrays.asList(2006, 2007)));
         counter.assertCounterState(0, 0, 1, 1, 1);
         assertEquals(Arrays.asList(july2007), filterList);
 
         // changed (different values)
-        matcherEditor.setMatchSet(new HashSet<Integer>(Arrays.asList(2007, 2008)));
+        matcherEditor.setMatchSet(new HashSet<>(Arrays.asList(2007, 2008)));
         counter.assertCounterState(0, 0, 2, 1, 1);
         assertEquals(Arrays.asList(july2007, july2008), filterList);
 
@@ -121,12 +121,12 @@ public class SetMatcherEditorTest {
         assertEquals(Arrays.asList(july2007, july2008, july2009), filterList);
 
         // changed (different values)
-        matcherEditor.setMatchSet(new HashSet<Integer>(Arrays.asList(2007, 2008)));
+        matcherEditor.setMatchSet(new HashSet<>(Arrays.asList(2007, 2008)));
         counter.assertCounterState(1, 0, 3, 1, 1);
         assertEquals(Arrays.asList(july2007, july2008), filterList);
 
         // test changing nothing
-        matcherEditor.setMatchSet(new HashSet<Integer>(Arrays.asList(2007, 2008)));
+        matcherEditor.setMatchSet(new HashSet<>(Arrays.asList(2007, 2008)));
         counter.assertCounterState(1, 0, 3, 1, 1);
         assertEquals(Arrays.asList(july2007, july2008), filterList);
     }
@@ -139,29 +139,29 @@ public class SetMatcherEditorTest {
                 return date.getYear() + 1900;
             }
         });
-        EventList<Date> filterList = new FilterList<Date>(source, matcherEditor);
-        final CountingMatcherEditorListener<Date> counter = new CountingMatcherEditorListener<Date>();
+        EventList<Date> filterList = new FilterList<>(source, matcherEditor);
+        final CountingMatcherEditorListener<Date> counter = new CountingMatcherEditorListener<>();
         matcherEditor.addMatcherEditorListener(counter);
         counter.assertCounterState(0, 0, 0, 0, 0);
         assertEquals(Arrays.asList(july2007, july2008, july2009), filterList);
 
         // give some initial range (changed)
-        matcherEditor.setMatchSet(new HashSet<Integer>(Arrays.asList(2006, 2007)));
+        matcherEditor.setMatchSet(new HashSet<>(Arrays.asList(2006, 2007)));
         counter.assertCounterState(0, 0, 1, 0, 0);
         assertEquals(Arrays.asList(july2008, july2009), filterList);
 
         // constrain (more values)
-        matcherEditor.setMatchSet(new HashSet<Integer>(Arrays.asList(2006, 2007, 2008)));
+        matcherEditor.setMatchSet(new HashSet<>(Arrays.asList(2006, 2007, 2008)));
         counter.assertCounterState(0, 0, 1, 1, 0);
         assertEquals(Arrays.asList(july2009), filterList);
 
         // relax (less values)
-        matcherEditor.setMatchSet(new HashSet<Integer>(Arrays.asList(2006, 2007)));
+        matcherEditor.setMatchSet(new HashSet<>(Arrays.asList(2006, 2007)));
         counter.assertCounterState(0, 0, 1, 1, 1);
         assertEquals(Arrays.asList(july2008, july2009), filterList);
 
         // changed (different values)
-        matcherEditor.setMatchSet(new HashSet<Integer>(Arrays.asList(2007, 2008)));
+        matcherEditor.setMatchSet(new HashSet<>(Arrays.asList(2007, 2008)));
         counter.assertCounterState(0, 0, 2, 1, 1);
         assertEquals(Arrays.asList(july2009), filterList);
 
@@ -171,12 +171,12 @@ public class SetMatcherEditorTest {
         assertEquals(Arrays.asList(july2007, july2008, july2009), filterList);
 
         // changed (different values)
-        matcherEditor.setMatchSet(new HashSet<Integer>(Arrays.asList(2007, 2008)));
+        matcherEditor.setMatchSet(new HashSet<>(Arrays.asList(2007, 2008)));
         counter.assertCounterState(1, 0, 3, 1, 1);
         assertEquals(Arrays.asList(july2009), filterList);
 
         // test changing nothing
-        matcherEditor.setMatchSet(new HashSet<Integer>(Arrays.asList(2007, 2008)));
+        matcherEditor.setMatchSet(new HashSet<>(Arrays.asList(2007, 2008)));
         counter.assertCounterState(1, 0, 3, 1, 1);
         assertEquals(Arrays.asList(july2009), filterList);
     }

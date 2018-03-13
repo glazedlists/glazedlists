@@ -28,35 +28,35 @@ public class SequenceListTest {
     @Test
     public void testConstructor() {
         try {
-            new SequenceList<Date>(new BasicEventList<Date>(), null);
+            new SequenceList<>(new BasicEventList<Date>(), null);
             fail();
         } catch (IllegalArgumentException e) {
             // expected
         }
 
         try {
-            new SequenceList<Date>(new BasicEventList<Date>(), null, GlazedLists.comparableComparator());
+            new SequenceList<>(new BasicEventList<Date>(), null, GlazedLists.comparableComparator());
             fail();
         } catch (IllegalArgumentException e) {
             // expected
         }
 
         try {
-            new SequenceList<Date>(new BasicEventList<Date>(), Sequencers.monthSequencer(), null);
+            new SequenceList<>(new BasicEventList<Date>(), Sequencers.monthSequencer(), null);
             fail();
         } catch (IllegalArgumentException e) {
             // expected
         }
 
         // valid constructor arguments
-        new SequenceList<Date>(new BasicEventList<Date>(), Sequencers.monthSequencer());
-        new SequenceList<Date>(new BasicEventList<Date>(), Sequencers.monthSequencer(), GlazedLists.comparableComparator());
+        new SequenceList<>(new BasicEventList<Date>(), Sequencers.monthSequencer());
+        new SequenceList<>(new BasicEventList<Date>(), Sequencers.monthSequencer(), GlazedLists.comparableComparator());
 
         // construct a SequenceList with a populated source list
-        final EventList<Date> source = new BasicEventList<Date>();
+        final EventList<Date> source = new BasicEventList<>();
         source.add(apr);
         source.add(aug);
-        final SequenceList<Date> sequence = new SequenceList<Date>(source, Sequencers.monthSequencer());
+        final SequenceList<Date> sequence = new SequenceList<>(source, Sequencers.monthSequencer());
         assertEquals(6, sequence.size());
         assertEquals(GlazedListsImpl.getMonthBegin(apr), sequence.get(0));
         assertEquals(GlazedListsImpl.getMonthBegin(may), sequence.get(1));
@@ -68,8 +68,8 @@ public class SequenceListTest {
 
     @Test
     public void testAdd() {
-        final EventList<Date> source = new BasicEventList<Date>();
-        final SequenceList<Date> sequence = new SequenceList<Date>(source, Sequencers.monthSequencer());
+        final EventList<Date> source = new BasicEventList<>();
+        final SequenceList<Date> sequence = new SequenceList<>(source, Sequencers.monthSequencer());
         ListConsistencyListener.install(sequence);
 
         source.add(jun);
@@ -106,8 +106,8 @@ public class SequenceListTest {
 
     @Test
     public void testRemove() {
-        final EventList<Date> source = new BasicEventList<Date>();
-        final SequenceList<Date> sequence = new SequenceList<Date>(source, Sequencers.monthSequencer());
+        final EventList<Date> source = new BasicEventList<>();
+        final SequenceList<Date> sequence = new SequenceList<>(source, Sequencers.monthSequencer());
         ListConsistencyListener.install(sequence);
 
         source.add(apr);
@@ -155,8 +155,8 @@ public class SequenceListTest {
 
     @Test
     public void testSet() {
-        final EventList<Date> source = new BasicEventList<Date>();
-        final SequenceList<Date> sequence = new SequenceList<Date>(source, Sequencers.monthSequencer());
+        final EventList<Date> source = new BasicEventList<>();
+        final SequenceList<Date> sequence = new SequenceList<>(source, Sequencers.monthSequencer());
         ListConsistencyListener.install(sequence);
 
         source.add(apr);
@@ -222,11 +222,11 @@ public class SequenceListTest {
     @Ignore("Fix me")
     @Test
     public void testIssue482_FixMe() {
-        EventList<Integer> src = new BasicEventList<Integer>();
+        EventList<Integer> src = new BasicEventList<>();
         src.add(1);
         src.add(3);
 
-        SequenceList<Integer> integers = new SequenceList<Integer>(src,
+        SequenceList<Integer> integers = new SequenceList<>(src,
                 new Sequencer<Integer>() {
                     @Override
                     public Integer next(Integer value) {

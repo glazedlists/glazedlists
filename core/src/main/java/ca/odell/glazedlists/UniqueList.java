@@ -60,7 +60,7 @@ public final class UniqueList<E> extends TransformedList<E, E> {
      * @param source the {@link EventList} containing duplicates to remove
      */
     public static <E extends Comparable<? super E>> UniqueList<E> create(EventList<E> source) {
-        return new UniqueList<E>(source);
+        return new UniqueList<>(source);
     }
 
     /**
@@ -83,7 +83,7 @@ public final class UniqueList<E> extends TransformedList<E, E> {
      * @param comparator the {@link Comparator} used to determine equality
      */
     public UniqueList(EventList<E> source, Comparator<? super E> comparator) {
-        this(new SortedList<E>(source, comparator), (Void) null);
+        this(new SortedList<>(source, comparator), (Void) null);
     }
 
     /**
@@ -107,7 +107,7 @@ public final class UniqueList<E> extends TransformedList<E, E> {
         super(source);
 
         // the grouper handles changes to the SortedList
-        this.grouper = new Grouper<E>(source, new GrouperClient());
+        this.grouper = new Grouper<>(source, new GrouperClient());
 
         source.addListEventListener(this);
     }
@@ -308,7 +308,7 @@ public final class UniqueList<E> extends TransformedList<E, E> {
     public List<E> getAll(int index) {
         int startIndex = getSourceIndex(index);
         int endIndex = getEndIndex(index);
-        return new ArrayList<E>(source.subList(startIndex, endIndex));
+        return new ArrayList<>(source.subList(startIndex, endIndex));
     }
 
     /**

@@ -36,11 +36,11 @@ public class JXTableSupportTest extends SwingTestCase {
 
     @Before
     public void setUp() {
-        colors = new BasicEventList<Color>();
+        colors = new BasicEventList<>();
         colors.add(Color.GRAY);
         colors.add(Color.WHITE);
         colors.add(Color.BLACK);
-        sortedColors = new SortedList<Color>(colors, redComparator);
+        sortedColors = new SortedList<>(colors, redComparator);
         table = new JXTable();
         System.out.println(Thread.currentThread() + " JXTableSupportTest.setUp()");
     }

@@ -25,7 +25,7 @@ public class UniqueListPerformance {
     private static List<MozillaEntry> loadIssues(String file) throws IOException {
         System.out.println("Reading issues...");
 
-        List<MozillaEntry> issues = new ArrayList<MozillaEntry>();
+        List<MozillaEntry> issues = new ArrayList<>();
         BufferedReader in = new BufferedReader(new FileReader(file));
 
         // trim the first few lines of the file to remove filter related items
@@ -73,13 +73,13 @@ public class UniqueListPerformance {
 
         List<MozillaEntry> issues = loadIssues(args[0]);
 
-        EventList<MozillaEntry> issuesEventList = new BasicEventList<MozillaEntry>();
-        UniqueList<MozillaEntry> uniqueByEmail    = new UniqueList<MozillaEntry>(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "email"));
-        UniqueList<MozillaEntry> uniqueBySeverity = new UniqueList<MozillaEntry>(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "severity"));
-        UniqueList<MozillaEntry> uniqueByPriority = new UniqueList<MozillaEntry>(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "priority"));
-        UniqueList<MozillaEntry> uniqueByOs       = new UniqueList<MozillaEntry>(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "os"));
-        UniqueList<MozillaEntry> uniqueByResult   = new UniqueList<MozillaEntry>(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "result"));
-        UniqueList<MozillaEntry> uniqueByStatus   = new UniqueList<MozillaEntry>(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "status"));
+        EventList<MozillaEntry> issuesEventList = new BasicEventList<>();
+        UniqueList<MozillaEntry> uniqueByEmail    = new UniqueList<>(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "email"));
+        UniqueList<MozillaEntry> uniqueBySeverity = new UniqueList<>(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "severity"));
+        UniqueList<MozillaEntry> uniqueByPriority = new UniqueList<>(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "priority"));
+        UniqueList<MozillaEntry> uniqueByOs       = new UniqueList<>(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "os"));
+        UniqueList<MozillaEntry> uniqueByResult   = new UniqueList<>(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "result"));
+        UniqueList<MozillaEntry> uniqueByStatus   = new UniqueList<>(issuesEventList, GlazedLists.beanPropertyComparator(MozillaEntry.class, "status"));
 
         // populate
         System.out.print("Populating issues list...");

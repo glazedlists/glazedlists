@@ -32,8 +32,8 @@ public class SubListTest {
     @Test
     public void testSubList() {
         // create a source list of values
-        BasicEventList<Integer> eventList = new BasicEventList<Integer>();
-        List<Integer> controlList = new ArrayList<Integer>();
+        BasicEventList<Integer> eventList = new BasicEventList<>();
+        List<Integer> controlList = new ArrayList<>();
         for(int i = 0; i < 26; i++) {
             eventList.add(new Integer(i));
             controlList.add(new Integer(i));
@@ -102,7 +102,7 @@ public class SubListTest {
      */
     @Test
     public void testSingleIndexSorting() {
-        EventList<String> eventList = new BasicEventList<String>();
+        EventList<String> eventList = new BasicEventList<>();
         SortedList<String> sortedList = SortedList.create(eventList);
         sortedList.setComparator(null);
 
@@ -118,7 +118,7 @@ public class SubListTest {
         assertEquals(eventList, sortedList);
 
         List riders = sortedList.subList(3, 4);
-        List<String> expectedRiders = new ArrayList<String>();
+        List<String> expectedRiders = new ArrayList<>();
         expectedRiders.add("Roughriders");
         assertEquals(expectedRiders, riders);
 
@@ -154,13 +154,13 @@ public class SubListTest {
      */
     @Test
     public void testSingleIndexListChanges() {
-        EventList<String> eventList = new BasicEventList<String>();
+        EventList<String> eventList = new BasicEventList<>();
         eventList.add("Viper");
         eventList.add("Mustang");
         eventList.add("Camaro");
 
         List mustang = eventList.subList(1, 2);
-        List<String> expectedMustang = new ArrayList<String>();
+        List<String> expectedMustang = new ArrayList<>();
         expectedMustang.add("Mustang");
         assertEquals(expectedMustang, mustang);
 

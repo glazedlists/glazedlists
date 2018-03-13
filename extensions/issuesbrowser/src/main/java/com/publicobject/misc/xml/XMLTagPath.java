@@ -107,7 +107,7 @@ public final class XMLTagPath {
      * this XMLTagPath. The attribute is kept the same.
      */
     public XMLTagPath child(String tag) {
-        final List<String> newParts = new ArrayList<String>(path.size() + 1);
+        final List<String> newParts = new ArrayList<>(path.size() + 1);
         newParts.addAll(path);
         newParts.add(tag);
         return new XMLTagPath(newParts, attribute);

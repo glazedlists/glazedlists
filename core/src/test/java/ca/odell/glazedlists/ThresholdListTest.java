@@ -40,9 +40,9 @@ public class ThresholdListTest {
      */
     @Before
     public void setUp() {
-        source = new BasicEventList<Integer>();
+        source = new BasicEventList<>();
         evaluator = new IntegerEvaluator();
-        thresholdList = new ThresholdList<Integer>(source, evaluator);
+        thresholdList = new ThresholdList<>(source, evaluator);
         // monitor the fired events
         ListConsistencyListener.install(thresholdList);
     }
@@ -130,7 +130,7 @@ public class ThresholdListTest {
     public void testListSimple() {
         // Use two seperate lists for testing upper and lower thresholds
         ThresholdList lowerThresholdList = thresholdList;
-        ThresholdList<Integer> upperThresholdList = new ThresholdList<Integer>(source, evaluator);
+        ThresholdList<Integer> upperThresholdList = new ThresholdList<>(source, evaluator);
 
         // Fill the source list with test data such that
         // every element is equal to its index
@@ -158,7 +158,7 @@ public class ThresholdListTest {
     public void testListWithMissingElements() {
         // Use two seperate lists for testing upper and lower thresholds
         ThresholdList lowerThresholdList = thresholdList;
-        ThresholdList<Integer> upperThresholdList = new ThresholdList<Integer>(source, evaluator);
+        ThresholdList<Integer> upperThresholdList = new ThresholdList<>(source, evaluator);
 
         // Fill the source list with test data such that
         // every fifth element is equal to every fourth element
@@ -898,7 +898,7 @@ public class ThresholdListTest {
     public void testSizeZeroing() {
         // Use two seperate lists for testing upper and lower thresholds
         ThresholdList lowerThresholdList = thresholdList;
-        ThresholdList<Integer> upperThresholdList = new ThresholdList<Integer>(source, evaluator);
+        ThresholdList<Integer> upperThresholdList = new ThresholdList<>(source, evaluator);
 
         assertEquals(0, lowerThresholdList.size());
         assertEquals(0, upperThresholdList.size());
@@ -931,7 +931,7 @@ public class ThresholdListTest {
     public void testThresholdSettingEvents() {
         // Use two seperate lists for testing upper and lower thresholds
         ThresholdList<Integer> lowerThresholdList = thresholdList;
-        ThresholdList<Integer> upperThresholdList = new ThresholdList<Integer>(source, evaluator);
+        ThresholdList<Integer> upperThresholdList = new ThresholdList<>(source, evaluator);
 
         // Fill the source list with test data such that
         // every element is equal to its index
@@ -940,8 +940,8 @@ public class ThresholdListTest {
         }
 
         // Wrap the lists in SortedLists whose internal data representation will break if the events are in error
-        SortedList<Integer> sortedIncreasing = new SortedList<Integer>(lowerThresholdList, new ThresholdList.ThresholdComparator<Integer>(new IntegerEvaluator()));
-        SortedList<Integer> sortedDecreasing = new SortedList<Integer>(upperThresholdList, new ThresholdList.ThresholdComparator<Integer>(new IntegerEvaluator()));
+        SortedList<Integer> sortedIncreasing = new SortedList<>(lowerThresholdList, new ThresholdList.ThresholdComparator<>(new IntegerEvaluator()));
+        SortedList<Integer> sortedDecreasing = new SortedList<>(upperThresholdList, new ThresholdList.ThresholdComparator<>(new IntegerEvaluator()));
 
         // validate that the lists are equal to start with
         validateListsEquals(lowerThresholdList, sortedIncreasing);
@@ -983,17 +983,17 @@ public class ThresholdListTest {
     @Test
     public void testInitialization() {
         // Prime a sorted source list with data
-        SortedList<Integer> sortedBase = new SortedList<Integer>(source, new ThresholdList.ThresholdComparator<Integer>(new IntegerEvaluator()));
+        SortedList<Integer> sortedBase = new SortedList<>(source, new ThresholdList.ThresholdComparator<>(new IntegerEvaluator()));
         for(int i = 0; i < 500; i++) {
             sortedBase.add(i, new Integer(i));
         }
 
         // Wrap that preconstructed list with a ThresholdList but do not change the default thresholds
         thresholdList.dispose();
-        thresholdList = new ThresholdList<Integer>(sortedBase, new IntegerEvaluator());
+        thresholdList = new ThresholdList<>(sortedBase, new IntegerEvaluator());
 
         // Wrap the threshold list in another sorted list and see if it is all the same
-        SortedList<Integer> sortedCover = new SortedList<Integer>(thresholdList, new ThresholdList.ThresholdComparator<Integer>(new IntegerEvaluator()));
+        SortedList<Integer> sortedCover = new SortedList<>(thresholdList, new ThresholdList.ThresholdComparator<>(new IntegerEvaluator()));
         validateListsEquals(sortedBase, sortedCover);
     }
 
@@ -1004,10 +1004,10 @@ public class ThresholdListTest {
     @Test
     public void testEventsOnNewThresholdList() {
         // Layer a new threshold list between two sorted lists and do not change defaults
-        SortedList<Integer> sortedBase = new SortedList<Integer>(source, new ThresholdList.ThresholdComparator<Integer>(new IntegerEvaluator()));
+        SortedList<Integer> sortedBase = new SortedList<>(source, new ThresholdList.ThresholdComparator<>(new IntegerEvaluator()));
         thresholdList.dispose();
-        thresholdList = new ThresholdList<Integer>(sortedBase, new IntegerEvaluator());
-        SortedList<Integer> sortedCover = new SortedList<Integer>(thresholdList, new ThresholdList.ThresholdComparator<Integer>(new IntegerEvaluator()));
+        thresholdList = new ThresholdList<>(sortedBase, new IntegerEvaluator());
+        SortedList<Integer> sortedCover = new SortedList<>(thresholdList, new ThresholdList.ThresholdComparator<>(new IntegerEvaluator()));
 
         // Now add values before a threshold is set and validate sortedBase equals sortedCover
         for(int i = 0; i < 500; i++) {
@@ -1167,8 +1167,8 @@ public class ThresholdListTest {
      */
     @Test
     public void testJavaBeanConstructor() {
-        final BasicEventList<SimpleJavaBeanObject> beanSource = new BasicEventList<SimpleJavaBeanObject>();
-        final ThresholdList<SimpleJavaBeanObject> beanThresholdList = new ThresholdList<SimpleJavaBeanObject>(beanSource, "value");
+        final BasicEventList<SimpleJavaBeanObject> beanSource = new BasicEventList<>();
+        final ThresholdList<SimpleJavaBeanObject> beanThresholdList = new ThresholdList<>(beanSource, "value");
 
         for(int i = 0;i < 1000;i++) {
             beanSource.add(new SimpleJavaBeanObject(i));
@@ -1183,8 +1183,8 @@ public class ThresholdListTest {
 
     @Test
     public void testNonIntegers() {
-        final BasicEventList<String> stringSource = new BasicEventList<String>();
-        final ThresholdList<String> stringThresholdList = new ThresholdList<String>(stringSource, new IntegerAsStringEvaluator());
+        final BasicEventList<String> stringSource = new BasicEventList<>();
+        final ThresholdList<String> stringThresholdList = new ThresholdList<>(stringSource, new IntegerAsStringEvaluator());
 
         stringSource.add("0");
         stringSource.add("25");

@@ -22,8 +22,8 @@ public class PluggableListTest {
 
     @Before
     public void setUp() throws Exception {
-        source = new BasicEventList<String>();
-        pl = new PluggableList<String>(source);
+        source = new BasicEventList<>();
+        pl = new PluggableList<>(source);
         ListConsistencyListener.install(pl);
     }
 
@@ -56,7 +56,7 @@ public class PluggableListTest {
         }
 
         try {
-            final EventList<String> badLockList = new BasicEventList<String>(pl.getPublisher(), LockFactory.DEFAULT.createReadWriteLock());
+            final EventList<String> badLockList = new BasicEventList<>(pl.getPublisher(), LockFactory.DEFAULT.createReadWriteLock());
             pl.setSource(badLockList);
             fail("failed to throw exception on source with mismatching lock");
         } catch (IllegalArgumentException e) {
@@ -64,14 +64,14 @@ public class PluggableListTest {
         }
 
         try {
-            final EventList<String> badPublisherList = new BasicEventList<String>(ListEventAssembler.createListEventPublisher(), pl.getReadWriteLock());
+            final EventList<String> badPublisherList = new BasicEventList<>(ListEventAssembler.createListEventPublisher(), pl.getReadWriteLock());
             pl.setSource(badPublisherList);
             fail("failed to throw exception on source with mismatching publisher");
         } catch (IllegalArgumentException e) {
             // expected
         }
 
-        final EventList<String> goodSourceList = new BasicEventList<String>(pl.getPublisher(), pl.getReadWriteLock());
+        final EventList<String> goodSourceList = new BasicEventList<>(pl.getPublisher(), pl.getReadWriteLock());
         pl.setSource(goodSourceList);
 
         try {

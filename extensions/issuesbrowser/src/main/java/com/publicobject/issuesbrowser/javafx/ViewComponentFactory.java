@@ -43,7 +43,7 @@ public class ViewComponentFactory {
     }
 
     public static TextInputControlMatcherEditor<Issue> newTextMatcherEditor() {
-        return new TextInputControlMatcherEditor<Issue>(new TextField(), new IssueTextFilterator());
+        return new TextInputControlMatcherEditor<>(new TextField(), new IssueTextFilterator());
     }
 
     public static Text newUsersText() {
@@ -75,49 +75,49 @@ public class ViewComponentFactory {
     }
 
     public static TableView<Issue> newIssueTable() {
-        final TableView<Issue> result = new TableView<Issue>();
+        final TableView<Issue> result = new TableView<>();
 
-        TableColumn<Issue, String> idCol = new TableColumn<Issue, String>();
+        TableColumn<Issue, String> idCol = new TableColumn<>();
         idCol.setText("ID");
         idCol.setMinWidth(80);
         idCol.setResizable(false);
 //        idCol.setSortable(false);
         idCol.setCellValueFactory(new PropertyValueFactory<Issue, String>("id"));
 
-        TableColumn<Issue, String> typeCol = new TableColumn<Issue, String>();
+        TableColumn<Issue, String> typeCol = new TableColumn<>();
         typeCol.setText("Type");
         typeCol.setMinWidth(100);
         typeCol.setCellValueFactory(new PropertyValueFactory<Issue, String>("issueType"));
 
-        TableColumn<Issue, Date> createdCol = new TableColumn<Issue, Date>();
+        TableColumn<Issue, Date> createdCol = new TableColumn<>();
         createdCol.setText("Created");
         createdCol.setMinWidth(80);
         createdCol.setCellValueFactory(new PropertyValueFactory<Issue, Date>("creationTimestamp"));
         createdCol.setCellFactory(newDateCellFactory(createdCol));
 
-        TableColumn<Issue, Date> modifiedCol = new TableColumn<Issue, Date>();
+        TableColumn<Issue, Date> modifiedCol = new TableColumn<>();
         modifiedCol.setText("Modified");
         modifiedCol.setMinWidth(80);
         modifiedCol.setCellValueFactory(new PropertyValueFactory<Issue, Date>("deltaTimestamp"));
         modifiedCol.setCellFactory(newDateCellFactory(modifiedCol));
 
-        TableColumn<Issue, Priority> prioCol = new TableColumn<Issue, Priority>();
+        TableColumn<Issue, Priority> prioCol = new TableColumn<>();
         prioCol.setText("Priority");
         prioCol.setMinWidth(50);
         prioCol.setResizable(false);
         prioCol.setCellValueFactory(new PropertyValueFactory<Issue, Priority>("priority"));
 
-        TableColumn<Issue, Status> statusCol = new TableColumn<Issue, Status>();
+        TableColumn<Issue, Status> statusCol = new TableColumn<>();
         statusCol.setText("Status");
         statusCol.setMinWidth(80);
         statusCol.setCellValueFactory(new PropertyValueFactory<Issue, Status>("status"));
 
-        TableColumn<Issue, String> resolutionCol = new TableColumn<Issue, String>();
+        TableColumn<Issue, String> resolutionCol = new TableColumn<>();
         resolutionCol.setText("Result");
         resolutionCol.setMinWidth(90);
         resolutionCol.setCellValueFactory(new PropertyValueFactory<Issue, String>("resolution"));
 
-        TableColumn<Issue, String> summaryCol = new TableColumn<Issue, String>();
+        TableColumn<Issue, String> summaryCol = new TableColumn<>();
         summaryCol.setText("Summary");
         summaryCol.setMinWidth(600);
         summaryCol.setCellValueFactory(new PropertyValueFactory<Issue, String>("shortDescription"));

@@ -24,8 +24,8 @@ public class BlockSequence<E> {
     /** the change types */
     private IntArrayList types = new IntArrayList();
     /** the impacted values */
-    private List<E> oldValues = new ArrayList<E>();
-    private List<E> newValues = new ArrayList<E>();
+    private List<E> oldValues = new ArrayList<>();
+    private List<E> newValues = new ArrayList<>();
 
     /**
      * @param startIndex the first updated element, inclusive

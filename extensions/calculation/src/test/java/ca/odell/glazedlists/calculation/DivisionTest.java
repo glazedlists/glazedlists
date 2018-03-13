@@ -14,7 +14,7 @@ public class DivisionTest {
 
     @Test
     public void testMeanFloat() {
-        final EventList<Float> source = new BasicEventList<Float>();
+        final EventList<Float> source = new BasicEventList<>();
         source.add(new Float(1));
 
         final PropertyChangeCounter counter = new PropertyChangeCounter();
@@ -55,7 +55,7 @@ public class DivisionTest {
 
     @Test
     public void testMeanDouble() {
-        final EventList<Double> source = new BasicEventList<Double>();
+        final EventList<Double> source = new BasicEventList<>();
         source.add(new Double(1));
 
         final PropertyChangeCounter counter = new PropertyChangeCounter();

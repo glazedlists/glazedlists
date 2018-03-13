@@ -31,7 +31,7 @@ public class ListModificationTest {
      */
     @Test
     public void testSubListClear() {
-        List<String> alphabet = new BasicEventList<String>();
+        List<String> alphabet = new BasicEventList<>();
         alphabet.add("A");
         alphabet.add("B");
         alphabet.add("C");
@@ -39,7 +39,7 @@ public class ListModificationTest {
         alphabet.add("E");
         alphabet.add("F");
 
-        List<String> controlList = new ArrayList<String>();
+        List<String> controlList = new ArrayList<>();
         controlList.addAll(alphabet);
 
         alphabet.subList(1, 3).clear();
@@ -59,7 +59,7 @@ public class ListModificationTest {
      */
     @Test
     public void testFilterListClear() {
-        EventList<String> alphabet = new BasicEventList<String>();
+        EventList<String> alphabet = new BasicEventList<>();
         alphabet.add("A");
         alphabet.add("B");
         alphabet.add("C");
@@ -67,10 +67,10 @@ public class ListModificationTest {
         alphabet.add("E");
         alphabet.add("F");
 
-        List<String> controlList = new ArrayList<String>();
+        List<String> controlList = new ArrayList<>();
         controlList.addAll(alphabet);
 
-        List<String> vowels = new FilterList<String>(alphabet, new VowelMatcher());
+        List<String> vowels = new FilterList<>(alphabet, new VowelMatcher());
         vowels.clear();
         controlList.remove(0);
         controlList.remove(3);
@@ -84,7 +84,7 @@ public class ListModificationTest {
      */
     @Test
     public void testRemove() {
-        EventList<String> alphabet = new BasicEventList<String>();
+        EventList<String> alphabet = new BasicEventList<>();
         alphabet.add("A");
         alphabet.add("B");
         alphabet.add("C");
@@ -92,10 +92,10 @@ public class ListModificationTest {
         alphabet.add("E");
         alphabet.add("F");
 
-        List<String> controlList = new ArrayList<String>();
+        List<String> controlList = new ArrayList<>();
         controlList.addAll(alphabet);
 
-        List<String> vowels = new FilterList<String>(alphabet, new VowelMatcher());
+        List<String> vowels = new FilterList<>(alphabet, new VowelMatcher());
         vowels.remove("C");
         vowels.remove("A");
         controlList.remove("A");
@@ -109,7 +109,7 @@ public class ListModificationTest {
      */
     @Test
     public void testRemoveAll() {
-        EventList<String> alphabet = new BasicEventList<String>();
+        EventList<String> alphabet = new BasicEventList<>();
         alphabet.add("A");
         alphabet.add("B");
         alphabet.add("C");
@@ -117,12 +117,12 @@ public class ListModificationTest {
         alphabet.add("E");
         alphabet.add("F");
 
-        List<String> controlList = new ArrayList<String>();
+        List<String> controlList = new ArrayList<>();
         controlList.addAll(alphabet);
 
-        List<String> vowels = new FilterList<String>(alphabet, new VowelMatcher());
+        List<String> vowels = new FilterList<>(alphabet, new VowelMatcher());
 
-        List<String> toRemove = new ArrayList<String>();
+        List<String> toRemove = new ArrayList<>();
         toRemove.add("C");
         toRemove.add("A");
         vowels.removeAll(toRemove);
@@ -137,7 +137,7 @@ public class ListModificationTest {
      */
     @Test
     public void testRetainAll() {
-        EventList<String> alphabet = new BasicEventList<String>();
+        EventList<String> alphabet = new BasicEventList<>();
         alphabet.add("A");
         alphabet.add("B");
         alphabet.add("C");
@@ -145,12 +145,12 @@ public class ListModificationTest {
         alphabet.add("E");
         alphabet.add("F");
 
-        List<String> controlList = new ArrayList<String>();
+        List<String> controlList = new ArrayList<>();
         controlList.addAll(alphabet);
 
-        List<String> vowels = new FilterList<String>(alphabet, new VowelMatcher());
+        List<String> vowels = new FilterList<>(alphabet, new VowelMatcher());
 
-        List<String> toRetain = new ArrayList<String>();
+        List<String> toRetain = new ArrayList<>();
         toRetain.add("C");
         toRetain.add("E");
         vowels.retainAll(toRetain);

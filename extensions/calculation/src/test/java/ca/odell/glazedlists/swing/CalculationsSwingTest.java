@@ -22,7 +22,7 @@ public class CalculationsSwingTest {
 
     @Test
     public void testCalculationLabel() {
-        final EventList<Float> source = new BasicEventList<Float>();
+        final EventList<Float> source = new BasicEventList<>();
         source.add(new Float(1));
 
         final Calculation<Float> mean = Calculations.meanFloats(source);

@@ -29,7 +29,7 @@ public class CompositeListTest {
      */
     @Test
     public void testSingleSource() {
-        CompositeList<String> fastFood = new CompositeList<String>();
+        CompositeList<String> fastFood = new CompositeList<>();
         ListConsistencyListener.install(fastFood);
 
         EventList<String> wendys = fastFood.createMemberList();
@@ -59,10 +59,10 @@ public class CompositeListTest {
      */
     @Test
     public void testMultipleSources() {
-        CompositeList<String> fastFood = new CompositeList<String>();
+        CompositeList<String> fastFood = new CompositeList<>();
         ListConsistencyListener.install(fastFood);
 
-        List<String> fastFoodVerify = new ArrayList<String>();
+        List<String> fastFoodVerify = new ArrayList<>();
 
         EventList<String> wendys = fastFood.createMemberList();
         wendys.add("Classic Single");
@@ -129,7 +129,7 @@ public class CompositeListTest {
      */
     @Test
     public void testRemoveByReference() {
-        CompositeList<String> fastFood = new CompositeList<String>();
+        CompositeList<String> fastFood = new CompositeList<>();
         ListConsistencyListener.install(fastFood);
 
         EventList<String> wendys = fastFood.createMemberList();
@@ -154,8 +154,8 @@ public class CompositeListTest {
      */
     @Test
     public void testMultipleCopies() {
-        List<String> fastFoodVerify = new ArrayList<String>();
-        CompositeList<String> fastFood = new CompositeList<String>();
+        List<String> fastFoodVerify = new ArrayList<>();
+        CompositeList<String> fastFood = new CompositeList<>();
 
         EventList<String> wendys = fastFood.createMemberList();
         wendys.add("Spicy Chicken Sandwich");
@@ -196,7 +196,7 @@ public class CompositeListTest {
      */
     @Test
     public void testSingleElements() {
-        CompositeList<String> aToB = new CompositeList<String>();
+        CompositeList<String> aToB = new CompositeList<>();
         ListConsistencyListener.install(aToB);
 
         EventList<String> alpha = aToB.createMemberList();
@@ -218,10 +218,10 @@ public class CompositeListTest {
         final ReadWriteLock sharedLock = LockFactory.DEFAULT.createReadWriteLock();
         final ListEventPublisher sharedPublisher = ListEventAssembler.createListEventPublisher();
 
-        final EventList<Object> alpha = new BasicEventList<Object>(sharedPublisher, sharedLock);
-        final EventList<Object> beta = new BasicEventList<Object>(sharedPublisher, sharedLock);
+        final EventList<Object> alpha = new BasicEventList<>(sharedPublisher, sharedLock);
+        final EventList<Object> beta = new BasicEventList<>(sharedPublisher, sharedLock);
 
-        final CompositeList<Object> uber = new CompositeList<Object>(sharedPublisher, sharedLock);
+        final CompositeList<Object> uber = new CompositeList<>(sharedPublisher, sharedLock);
         uber.addMemberList(alpha);
         uber.addMemberList(beta);
 
@@ -247,10 +247,10 @@ public class CompositeListTest {
         final ReadWriteLock sharedLock = LockFactory.DEFAULT.createReadWriteLock();
         final ListEventPublisher sharedPublisher = ListEventAssembler.createListEventPublisher();
 
-        final CompositeList<Object> uber = new CompositeList<Object>(sharedPublisher, sharedLock);
-        final EventList<Object> alpha = new BasicEventList<Object>();
-        final EventList<Object> beta = new BasicEventList<Object>(sharedLock);
-        final EventList<Object> gamma = new BasicEventList<Object>(sharedPublisher, sharedLock);
+        final CompositeList<Object> uber = new CompositeList<>(sharedPublisher, sharedLock);
+        final EventList<Object> alpha = new BasicEventList<>();
+        final EventList<Object> beta = new BasicEventList<>(sharedLock);
+        final EventList<Object> gamma = new BasicEventList<>(sharedPublisher, sharedLock);
         try {
             uber.addMemberList(alpha);
             fail("Expected IllegalArgumentException for addMemberList");
@@ -276,7 +276,7 @@ public class CompositeListTest {
      */
     @Test
     public void testDispose() {
-        final CompositeList<String> composite = new CompositeList<String>();
+        final CompositeList<String> composite = new CompositeList<>();
 
         final EventList<String> memberListOne = composite.createMemberList();
         memberListOne.addAll(GlazedListsTests.stringToList("ABC"));
@@ -284,7 +284,7 @@ public class CompositeListTest {
         memberListTwo.addAll(GlazedListsTests.stringToList("DEF"));
         composite.addMemberList(memberListOne);
         composite.addMemberList(memberListTwo);
-        final GlazedListsTests.ListEventCounter<String> eventCounter = new GlazedListsTests.ListEventCounter<String>();
+        final GlazedListsTests.ListEventCounter<String> eventCounter = new GlazedListsTests.ListEventCounter<>();
         composite.addListEventListener(eventCounter);
 
         // modify member lists
@@ -310,7 +310,7 @@ public class CompositeListTest {
      */
     @Test
     public void testCreateMemberListGenerics() {
-        CompositeList<String> strings = new CompositeList<String>();
+        CompositeList<String> strings = new CompositeList<>();
 
         EventList<String> moreStrings = strings.createMemberList();
         EventList<Integer> integers = strings.createMemberList();

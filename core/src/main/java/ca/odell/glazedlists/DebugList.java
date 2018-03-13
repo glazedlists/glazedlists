@@ -48,9 +48,9 @@ public class DebugList<E> extends AbstractEventList<E> {
     private boolean lockCheckingEnabled;
 
     /** The Set of Threads that are allowed to read from this DebugList; empty Set indicates all Threads may read. */
-    private final Set<Thread> sanctionedReaderThreads = new HashSet<Thread>();
+    private final Set<Thread> sanctionedReaderThreads = new HashSet<>();
     /** The Set of Threads that are allowed to write to this DebugList; empty Set indicates all Threads may write. */
-    private final Set<Thread> sanctionedWriterThreads = new HashSet<Thread>();
+    private final Set<Thread> sanctionedWriterThreads = new HashSet<>();
 
     /** A delegate EventList that implements the actual List operations. */
     private EventList<E> delegate;
@@ -80,7 +80,7 @@ public class DebugList<E> extends AbstractEventList<E> {
         this.debugReadWriteLock = debugReadWriteLock;
 
         // use a normal BasicEventList as the delegate implementation
-        this.delegate = new BasicEventList<E>(publisher, this.debugReadWriteLock);
+        this.delegate = new BasicEventList<>(publisher, this.debugReadWriteLock);
         this.delegate.addListEventListener(delegateWatcher);
     }
 
@@ -139,7 +139,7 @@ public class DebugList<E> extends AbstractEventList<E> {
      * publisher and locks in order to participate in the CompositeList.
      */
     public <E> DebugList<E> createNewDebugList() {
-        return new DebugList<E>(getPublisher(), debugReadWriteLock);
+        return new DebugList<>(getPublisher(), debugReadWriteLock);
     }
 
     /**

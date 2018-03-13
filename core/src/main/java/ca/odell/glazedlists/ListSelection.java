@@ -93,7 +93,7 @@ public class ListSelection<E> implements ListEventListener<E> {
     private int selectionMode = MULTIPLE_INTERVAL_SELECTION_DEFENSIVE;
 
     /** the Matchers, if any, which decide whether a source element can be selected or not */
-    private final Collection<Matcher<E>> validSelectionMatchers = new ArrayList<Matcher<E>>();
+    private final Collection<Matcher<E>> validSelectionMatchers = new ArrayList<>();
 
     /**
      * the registered SelectionListeners; also used as a mutex to ensure we
@@ -106,7 +106,7 @@ public class ListSelection<E> implements ListEventListener<E> {
      *   <li>{@link #deselectedToggleList}</li>
      * </ul>
      */
-    private final CopyOnWriteArrayList<Listener> selectionListeners = new CopyOnWriteArrayList<Listener>();
+    private final CopyOnWriteArrayList<Listener> selectionListeners = new CopyOnWriteArrayList<>();
 
     /**
      * Creates a new ListSelection that listens to changes on the given source.
@@ -336,7 +336,7 @@ public class ListSelection<E> implements ListEventListener<E> {
     public EventList<E> getSelected() {
         synchronized (selectionListeners) {
             if(selectedList == null){
-                selectedList = new SelectedList<E>(source);
+                selectedList = new SelectedList<>(source);
                 source.getPublisher().setRelatedListener(selectedList, this);
             }
         }
@@ -355,7 +355,7 @@ public class ListSelection<E> implements ListEventListener<E> {
     public EventList<E> getTogglingSelected() {
         synchronized (selectionListeners) {
             if(selectedToggleList == null) {
-                selectedToggleList = new SelectionToggleList<E>(source);
+                selectedToggleList = new SelectionToggleList<>(source);
                 source.getPublisher().setRelatedListener(selectedToggleList, this);
             }
         }
@@ -372,7 +372,7 @@ public class ListSelection<E> implements ListEventListener<E> {
     public EventList<E> getDeselected() {
         synchronized (selectionListeners) {
             if(deselectedList == null) {
-                deselectedList = new DeselectedList<E>(source);
+                deselectedList = new DeselectedList<>(source);
                 source.getPublisher().setRelatedListener(deselectedList, this);
             }
         }
@@ -391,7 +391,7 @@ public class ListSelection<E> implements ListEventListener<E> {
     public EventList<E> getTogglingDeselected() {
         synchronized (selectionListeners) {
             if(deselectedToggleList == null) {
-                deselectedToggleList = new DeselectionToggleList<E>(source);
+                deselectedToggleList = new DeselectionToggleList<>(source);
                 source.getPublisher().setRelatedListener(deselectedToggleList, this);
             }
         }
@@ -666,7 +666,7 @@ public class ListSelection<E> implements ListEventListener<E> {
         // we don't need to worry as much about the deselection list.
 
         // 1. Convert our Collection of values into a SortedSet of indices
-        SortedSet<Integer> indicesToSelect = new TreeSet<Integer>();
+        SortedSet<Integer> indicesToSelect = new TreeSet<>();
         for(Iterator<E> v = values.iterator(); v.hasNext(); ) {
             E value = v.next();
             int index = source.indexOf(value);

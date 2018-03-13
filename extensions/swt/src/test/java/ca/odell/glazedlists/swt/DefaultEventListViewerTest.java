@@ -28,9 +28,9 @@ public class DefaultEventListViewerTest extends SwtTestCase {
 	 */
     @Test
 	public void testEmptyConstruction() {
-        final BasicEventList<String> source = new BasicEventList<String>();
+        final BasicEventList<String> source = new BasicEventList<>();
         final List list = new List(getShell(), SWT.MULTI);
-        final DefaultEventListViewer<String> viewer = new DefaultEventListViewer<String>(source, list);
+        final DefaultEventListViewer<String> viewer = new DefaultEventListViewer<>(source, list);
         assertSame(list, viewer.getList());
         assertEquals(0, list.getItemCount());
         assertTrue(Arrays.equals(new String[0], list.getItems()));
@@ -41,10 +41,10 @@ public class DefaultEventListViewerTest extends SwtTestCase {
 	 */
     @Test
 	public void testPrefilledConstruction() {
-		final BasicEventList<String> source = new BasicEventList<String>();
+		final BasicEventList<String> source = new BasicEventList<>();
         source.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
         final List list = new List(getShell(), SWT.MULTI);
-        final DefaultEventListViewer<String> viewer = new DefaultEventListViewer<String>(source, list);
+        final DefaultEventListViewer<String> viewer = new DefaultEventListViewer<>(source, list);
         assertSame(list, viewer.getList());
         assertEquals(source.size(), list.getItemCount());
         assertTrue(Arrays.equals(source.toArray(new String[source.size()]), list.getItems()));
@@ -61,9 +61,9 @@ public class DefaultEventListViewerTest extends SwtTestCase {
 	 */
     @Test
 	public void testChangeList() {
-        final BasicEventList<String> source = new BasicEventList<String>();
+        final BasicEventList<String> source = new BasicEventList<>();
         final List list = new List(getShell(), SWT.MULTI);
-        final DefaultEventListViewer<String> viewer = new DefaultEventListViewer<String>(source, list);
+        final DefaultEventListViewer<String> viewer = new DefaultEventListViewer<>(source, list);
         source.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
         assertSame(list, viewer.getList());
         assertEquals(source.size(), list.getItemCount());
@@ -95,10 +95,10 @@ public class DefaultEventListViewerTest extends SwtTestCase {
 	 */
     @Test
 	public void testLabelProvider() {
-		final BasicEventList<String> source = new BasicEventList<String>();
+		final BasicEventList<String> source = new BasicEventList<>();
         source.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
         final List list = new List(getShell(), SWT.MULTI);
-        final DefaultEventListViewer<String> viewer = new DefaultEventListViewer<String>(source, list, new TestItemFormat());
+        final DefaultEventListViewer<String> viewer = new DefaultEventListViewer<>(source, list, new TestItemFormat());
         assertSame(list, viewer.getList());
         assertEquals(source.size(), list.getItemCount());
         assertEquals("AA", list.getItem(0));
@@ -115,9 +115,9 @@ public class DefaultEventListViewerTest extends SwtTestCase {
      */
     @Test
     public void testToggleSelection() {
-        final BasicEventList<String> source = new BasicEventList<String>();
+        final BasicEventList<String> source = new BasicEventList<>();
         final List list = new List(getShell(), SWT.MULTI);
-        final DefaultEventListViewer<String> viewer = new DefaultEventListViewer<String>(source, list);
+        final DefaultEventListViewer<String> viewer = new DefaultEventListViewer<>(source, list);
         // populate the list
         source.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
         assertEquals(Collections.EMPTY_LIST, viewer.getSelected());

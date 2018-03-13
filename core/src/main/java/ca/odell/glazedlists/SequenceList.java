@@ -48,7 +48,7 @@ import java.util.RandomAccess;
 public final class SequenceList<E> extends TransformedList<E,E> implements RandomAccess {
 
     /** The values participating in the sequence. */
-    private final List<E> sequence = new ArrayList<E>();
+    private final List<E> sequence = new ArrayList<>();
 
     /** The comparator that defines the order of the source and sequence values. */
     private final Comparator<? super E> comparator;
@@ -82,7 +82,7 @@ public final class SequenceList<E> extends TransformedList<E,E> implements Rando
      * @param comparator determines the order of the sequence values
      */
     public SequenceList(EventList<E> source, Sequencer<E> sequencer, Comparator<? super E> comparator) {
-        this(new SortedList<E>(source, comparator), sequencer, comparator);
+        this(new SortedList<>(source, comparator), sequencer, comparator);
     }
 
     private SequenceList(SortedList<E> source, Sequencer<E> sequencer, Comparator<? super E> comparator) {

@@ -91,7 +91,7 @@ public class SequenceDependenciesEventPublisherTest {
         private String value = null;
 
         /** a log of events received */
-        private List<String> receivedEvents = new ArrayList<String>();
+        private List<String> receivedEvents = new ArrayList<>();
 
         /** an arbitrary runnable to run when the next event is received */
         public Runnable runOnceRunnable;
@@ -285,9 +285,9 @@ public class SequenceDependenciesEventPublisherTest {
         /** useful for debugging */
         private final String name;
         /** objects I depend on, must all be consistent for this to be consistent */
-        List<DependentSubjectListener> upstreamSubjects = new ArrayList<DependentSubjectListener>();
+        List<DependentSubjectListener> upstreamSubjects = new ArrayList<>();
         /** objects that depend on me */
-        List<DependentSubjectListener> downstreamListeners = new ArrayList<DependentSubjectListener>();
+        List<DependentSubjectListener> downstreamListeners = new ArrayList<>();
         public DependentSubjectListener(String name, SequenceDependenciesEventPublisher publisher) {
             this.publisher = publisher;
             this.name = name;
@@ -475,7 +475,7 @@ public class SequenceDependenciesEventPublisherTest {
      */
     @Test
     public void testMergingListEvents() {
-        CompositeList<String> compositeList = new CompositeList<String>();
+        CompositeList<String> compositeList = new CompositeList<>();
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(compositeList);
         listConsistencyListener.setPreviousElementTracked(false);
         EventList<String> source = compositeList.createMemberList();
@@ -484,7 +484,7 @@ public class SequenceDependenciesEventPublisherTest {
         source.add("B");
 
         SortedList<String> forwardSource = SortedList.create(source);
-        SortedList<String> reverseSource = new SortedList<String>(source, GlazedLists.reverseComparator());
+        SortedList<String> reverseSource = new SortedList<>(source, GlazedLists.reverseComparator());
         compositeList.addMemberList(forwardSource);
         compositeList.addMemberList(source);
         compositeList.addMemberList(reverseSource);
@@ -543,7 +543,7 @@ public class SequenceDependenciesEventPublisherTest {
         private SequenceDependenciesEventPublisher publisher;
         private String name;
         private int latestRevision = 0;
-        private List<DetachedSubject> upstreamSubjects = new ArrayList<DetachedSubject>();
+        private List<DetachedSubject> upstreamSubjects = new ArrayList<>();
 
         public DetachedSubject(String name, SequenceDependenciesEventPublisher publisher) {
             this.name = name;
@@ -619,7 +619,7 @@ public class SequenceDependenciesEventPublisherTest {
      */
     @Test
     public void testEventStateAfterForwardEvent() {
-        EventList<String> source = new BasicEventList<String>();
+        EventList<String> source = new BasicEventList<>();
         ListConsistencyListener lcl = ListConsistencyListener.install(source);
 
         source.add("Hello");

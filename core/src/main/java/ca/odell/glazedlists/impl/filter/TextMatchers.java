@@ -155,7 +155,7 @@ public final class TextMatchers {
      *      the order of longest to shortest
      */
     private static List<SearchTerm> normalizeSearchTerms(List<SearchTerm> searchTerms, boolean negated) {
-        List<SearchTerm> result = new ArrayList<SearchTerm>(searchTerms);
+        List<SearchTerm> result = new ArrayList<>(searchTerms);
 
         // filter out null and 0-length SearchTerms - they have no filtering value
         for(Iterator<SearchTerm> i = result.iterator(); i.hasNext();) {
@@ -236,7 +236,7 @@ public final class TextMatchers {
         final List<SearchTerm> nonNegatedUnrequiredSearchTerms = Arrays.asList(Matchers.select(nullFieldSearchTerms, NON_NEGATED_MATCHER));
 
         // reassemble a super List of all normalized (necessary) SearchTerms
-        final Collection<SearchTerm> allSearchTerms = new ArrayList<SearchTerm>(filters.length);
+        final Collection<SearchTerm> allSearchTerms = new ArrayList<>(filters.length);
         allSearchTerms.addAll(Arrays.asList(nonNullFieldSearchTerms));
         allSearchTerms.addAll(normalizeSearchTerms(negatedUnrequiredSearchTerms, true));
         allSearchTerms.addAll(normalizeSearchTerms(nonNegatedUnrequiredSearchTerms, false));
@@ -272,10 +272,10 @@ public final class TextMatchers {
      *      well as metadata related to the use of the SearchTerm
      */
     public static <E> SearchTerm<E>[] parse(String text, Set<SearchEngineTextMatcherEditor.Field<E>> fields) {
-        final List<SearchTerm<E>> searchTerms = new ArrayList<SearchTerm<E>>();
+        final List<SearchTerm<E>> searchTerms = new ArrayList<>();
 
         // map each field name to the corresponding field
-        final Map<String, SearchEngineTextMatcherEditor.Field<E>> fieldMap = new HashMap<String, SearchEngineTextMatcherEditor.Field<E>>();
+        final Map<String, SearchEngineTextMatcherEditor.Field<E>> fieldMap = new HashMap<>();
         for (Iterator<SearchEngineTextMatcherEditor.Field<E>> f = fields.iterator(); f.hasNext();) {
             SearchEngineTextMatcherEditor.Field<E> field = f.next();
             fieldMap.put(field.getName(), field);
@@ -296,7 +296,7 @@ public final class TextMatchers {
                 if (endOfTerm) {
                     if (searchTermText.length() > 0) {
                         // record the current SearchTerm
-                        searchTerms.add(new SearchTerm<E>(searchTermText.toString(), negated, required, field));
+                        searchTerms.add(new SearchTerm<>(searchTermText.toString(), negated, required, field));
                     }
 
                     // reset the state for collecting the next SearchTerm
@@ -347,7 +347,7 @@ public final class TextMatchers {
 
         // if a SearchTerm is left hanging, use it as well
         if (searchTermText.length() > 0)
-            searchTerms.add(new SearchTerm<E>(searchTermText.toString(), negated, required, field));
+            searchTerms.add(new SearchTerm<>(searchTermText.toString(), negated, required, field));
 
         return searchTerms.toArray(new SearchTerm[searchTerms.size()]);
     }

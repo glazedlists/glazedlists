@@ -53,13 +53,13 @@ public class EventTableModelTest extends SwingTestCase {
      */
     @Test
     public void testGetElementAt() {
-        EventList<Color> colors = new BasicEventList<Color>();
+        EventList<Color> colors = new BasicEventList<>();
         colors.add(Color.RED);
         colors.add(Color.GREEN);
         colors.add(Color.BLUE);
 
         TableFormat<Color> colorTableFormat = GlazedLists.tableFormat(new String[] { "red", "green", "blue" }, new String[] { "Red", "Green", "Blue" });
-        EventTableModel tableModel = new EventTableModel<Color>(colors, colorTableFormat);
+        EventTableModel tableModel = new EventTableModel<>(colors, colorTableFormat);
 
         assertEquals(Color.RED, tableModel.getElementAt(0));
         assertEquals(Color.GREEN, tableModel.getElementAt(1));
@@ -85,13 +85,13 @@ public class EventTableModelTest extends SwingTestCase {
      */
     @Test
     public void testGetValueAt() {
-        EventList<Color> colors = new BasicEventList<Color>();
+        EventList<Color> colors = new BasicEventList<>();
         colors.add(Color.RED);
         colors.add(Color.GREEN);
         colors.add(Color.BLUE);
 
         TableFormat<Color> colorTableFormat = GlazedLists.tableFormat(new String[] { "red", "green", "blue" }, new String[] { "Red", "Green", "Blue" });
-        EventTableModel tableModel = new EventTableModel<Color>(colors, colorTableFormat);
+        EventTableModel tableModel = new EventTableModel<>(colors, colorTableFormat);
 
         assertEquals(new Integer(Color.RED.getRed()), tableModel.getValueAt(0, 0));
         assertEquals(new Integer(Color.GREEN.getGreen()), tableModel.getValueAt(1, 1));
@@ -115,7 +115,7 @@ public class EventTableModelTest extends SwingTestCase {
     @Test
     public void testConstructorLocking() throws InterruptedException {
         // create a list which will record our multithreaded interactions with a list
-        final ThreadRecorderEventList<Integer> atomicList = new ThreadRecorderEventList<Integer>(new BasicEventList<Integer>());
+        final ThreadRecorderEventList<Integer> atomicList = new ThreadRecorderEventList<>(new BasicEventList<Integer>());
 
         // start a thread which adds new Integers every 50 ms
         final Thread writerThread = new Thread(GlazedListsTests.createJerkyAddRunnable(atomicList, null, 2000, 50), "WriterThread");
@@ -125,10 +125,10 @@ public class EventTableModelTest extends SwingTestCase {
         Thread.sleep(200);
 
         // create a list whose get() method pauses for 50 ms before returning the value
-        final EventList<Integer> delayList = new DelayList<Integer>(atomicList, 50);
+        final EventList<Integer> delayList = new DelayList<>(atomicList, 50);
 
         // the test: creating the EventTableModel should be atomic and pause the writerThread while it initializes its internal state
-        new EventTableModel<Integer>(delayList, GlazedLists.tableFormat(new String[0], new String[0]));
+        new EventTableModel<>(delayList, GlazedLists.tableFormat(new String[0], new String[0]));
 
         // wait until the writerThread finishes before asserting the recorded state
         writerThread.join();
@@ -140,16 +140,16 @@ public class EventTableModelTest extends SwingTestCase {
 
     @Test
     public void testSetValueAt_FilterList() {
-        final EventList<JLabel> labels = new BasicEventList<JLabel>();
+        final EventList<JLabel> labels = new BasicEventList<>();
         labels.add(new JLabel("saskatchewan"));
         labels.add(new JLabel("saskwatch"));
         labels.add(new JLabel("sasky"));
 
-        final ObservableElementList<JLabel> observedLabels = new ObservableElementList<JLabel>(labels, GlazedLists.beanConnector(JLabel.class));
+        final ObservableElementList<JLabel> observedLabels = new ObservableElementList<>(labels, GlazedLists.beanConnector(JLabel.class));
 
-        final FilterList<JLabel> saskLabels = new FilterList<JLabel>(observedLabels, new SaskLabelMatcher());
+        final FilterList<JLabel> saskLabels = new FilterList<>(observedLabels, new SaskLabelMatcher());
 
-        final EventTableModel tableModel = new EventTableModel<JLabel>(saskLabels, new LabelTableFormat());
+        final EventTableModel tableModel = new EventTableModel<>(saskLabels, new LabelTableFormat());
 
         assertEquals(3, tableModel.getRowCount());
         assertEquals("saskatchewan", tableModel.getValueAt(0, 0));
@@ -168,16 +168,16 @@ public class EventTableModelTest extends SwingTestCase {
 
     @Test
     public void testSetValueAtWithCopyingTableFormat_FilterList() {
-        final EventList<JLabel> labels = new BasicEventList<JLabel>();
+        final EventList<JLabel> labels = new BasicEventList<>();
         labels.add(new JLabel("saskatchewan"));
         labels.add(new JLabel("saskwatch"));
         labels.add(new JLabel("sasky"));
 
-        final ObservableElementList<JLabel> observedLabels = new ObservableElementList<JLabel>(labels, GlazedLists.beanConnector(JLabel.class));
+        final ObservableElementList<JLabel> observedLabels = new ObservableElementList<>(labels, GlazedLists.beanConnector(JLabel.class));
 
-        final FilterList<JLabel> saskLabels = new FilterList<JLabel>(observedLabels, new SaskLabelMatcher());
+        final FilterList<JLabel> saskLabels = new FilterList<>(observedLabels, new SaskLabelMatcher());
 
-        final EventTableModel tableModel = new EventTableModel<JLabel>(saskLabels, new CopyingLabelTableFormat());
+        final EventTableModel tableModel = new EventTableModel<>(saskLabels, new CopyingLabelTableFormat());
 
         assertEquals(3, tableModel.getRowCount());
         assertEquals("saskatchewan", tableModel.getValueAt(0, 0));
@@ -196,16 +196,16 @@ public class EventTableModelTest extends SwingTestCase {
 
     @Test
     public void testSetValueAt_SortedList() {
-        final EventList<JLabel> labels = new BasicEventList<JLabel>();
+        final EventList<JLabel> labels = new BasicEventList<>();
         labels.add(new JLabel("banana"));
         labels.add(new JLabel("cherry"));
         labels.add(new JLabel("apple"));
 
-        final ObservableElementList<JLabel> observedLabels = new ObservableElementList<JLabel>(labels, GlazedLists.beanConnector(JLabel.class));
+        final ObservableElementList<JLabel> observedLabels = new ObservableElementList<>(labels, GlazedLists.beanConnector(JLabel.class));
 
-        final SortedList<JLabel> sortedLabels = new SortedList<JLabel>(observedLabels, GlazedLists.beanPropertyComparator(JLabel.class, "text"));
+        final SortedList<JLabel> sortedLabels = new SortedList<>(observedLabels, GlazedLists.beanPropertyComparator(JLabel.class, "text"));
 
-        final EventTableModel<JLabel> tableModel = new EventTableModel<JLabel>(sortedLabels, new LabelTableFormat());
+        final EventTableModel<JLabel> tableModel = new EventTableModel<>(sortedLabels, new LabelTableFormat());
 
         assertEquals(3, tableModel.getRowCount());
         assertEquals("apple", tableModel.getValueAt(0, 0));
@@ -225,9 +225,9 @@ public class EventTableModelTest extends SwingTestCase {
      */
     @Test
     public void testGenericTypeRelationships() {
-        final EventList<DefaultListCellRenderer> source = new BasicEventList<DefaultListCellRenderer>();
+        final EventList<DefaultListCellRenderer> source = new BasicEventList<>();
         final TableFormat<JLabel> tableFormat = new LabelTableFormat();
-        new EventTableModel<DefaultListCellRenderer>(source, tableFormat);
+        new EventTableModel<>(source, tableFormat);
     }
 
     /**
@@ -238,12 +238,12 @@ public class EventTableModelTest extends SwingTestCase {
     @Test
     public void testNoThreadProxyingDesired() {
         final JLabel jamesLabel = new JLabel("James");
-        final EventList<JLabel> source = new BasicEventList<JLabel>();
+        final EventList<JLabel> source = new BasicEventList<>();
         source.add(jamesLabel);
         final TableFormat<JLabel> tableFormat = new LabelTableFormat();
 
         // 1. test reading and writing with a thread proxy
-        final EventTableModel<JLabel> labelModelWithProxy = new EventTableModel<JLabel>(source, tableFormat);
+        final EventTableModel<JLabel> labelModelWithProxy = new EventTableModel<>(source, tableFormat);
         assertNotNull(labelModelWithProxy.swingThreadSource);
         assertSame(labelModelWithProxy.source, labelModelWithProxy.swingThreadSource);
         assertEquals(1, labelModelWithProxy.getRowCount());
@@ -261,7 +261,7 @@ public class EventTableModelTest extends SwingTestCase {
         jamesLabel.setText("James");
 
         // 2. test reading and writing without a thread proxy
-        final NoProxyingEventTableModel<JLabel> labelModelNoProxy = new NoProxyingEventTableModel<JLabel>(source, tableFormat);
+        final NoProxyingEventTableModel<JLabel> labelModelNoProxy = new NoProxyingEventTableModel<>(source, tableFormat);
         assertNull(labelModelNoProxy.swingThreadSource);
         assertSame(labelModelNoProxy.source, source);
         assertEquals(1, labelModelNoProxy.getRowCount());
@@ -337,11 +337,11 @@ public class EventTableModelTest extends SwingTestCase {
     public void testTableComparatorChooser() {
         // build the data
         EventList<Color> colors = GlazedLists.eventList(rgb);
-        SortedList<Color> sortedColors = new SortedList<Color>(colors, null);
+        SortedList<Color> sortedColors = new SortedList<>(colors, null);
 
         // build a sorted table and model
         TableFormat<Color> greenBlueTableFormat = GlazedLists.tableFormat(new String[] { "green", "blue" }, new String[] { "Green", "Blue" });
-        EventTableModel<Color> tableModel = new EventTableModel<Color>(colors, greenBlueTableFormat);
+        EventTableModel<Color> tableModel = new EventTableModel<>(colors, greenBlueTableFormat);
 
         // prepare the table for sorting and rendering its header
         JTable table = new JTable(tableModel);
@@ -401,12 +401,12 @@ public class EventTableModelTest extends SwingTestCase {
      */
     @Test
     public void testLocking1() {
-        final BasicEventList<String> list = new BasicEventList<String>();
+        final BasicEventList<String> list = new BasicEventList<>();
         list.add("Member_one");
         final TableFormat<String> tableFormat = GlazedLists.tableFormat(new String[] {"bytes"}, new String[] {"Test"});
-        final EventTableModel model = new EventTableModel<String>(list, tableFormat);
+        final EventTableModel model = new EventTableModel<>(list, tableFormat);
         final JTable table = new JTable(model);
-        final EventSelectionModel selectionModel = new EventSelectionModel<String>(list);
+        final EventSelectionModel selectionModel = new EventSelectionModel<>(list);
         selectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.setSelectionModel(selectionModel);
         list.add("Member_two");
@@ -418,12 +418,12 @@ public class EventTableModelTest extends SwingTestCase {
      */
     @Test
     public void testLocking2() {
-        final BasicEventList<String> list = new BasicEventList<String>();
+        final BasicEventList<String> list = new BasicEventList<>();
         list.add("Member_one");
         final TableFormat<String> tableFormat = GlazedLists.tableFormat(new String[] {"bytes"}, new String[] {"Test"});
-        final EventTableModel model = new EventTableModel<String>(list, tableFormat);
+        final EventTableModel model = new EventTableModel<>(list, tableFormat);
         final JTable table = new JTable(model);
-        final EventSelectionModel selectionModel = new EventSelectionModel<String>(list);
+        final EventSelectionModel selectionModel = new EventSelectionModel<>(list);
         selectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.setSelectionModel(selectionModel);
         selectionModel.setSelectionInterval(0, 0);
@@ -436,14 +436,14 @@ public class EventTableModelTest extends SwingTestCase {
     @Test
     public void testRemoveWithBlocksInListEvent() {
         // setup JTable with EventTableModel and EventSelectionModel
-        final EventList<String> list = new BasicEventList<String>();
+        final EventList<String> list = new BasicEventList<>();
         list.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
-        final EventTableModel<String> model = new EventTableModel<String>(list,
+        final EventTableModel<String> model = new EventTableModel<>(list,
                 GlazedLists.tableFormat(new String[] {"bytes"}, new String [] {"Bytes"}));
         final TableModelChangeCounter counter = new TableModelChangeCounter();
         model.addTableModelListener(counter);
         final JTable table = new JTable(model);
-        final EventSelectionModel selModel = new EventSelectionModel<String>(list);
+        final EventSelectionModel selModel = new EventSelectionModel<>(list);
         table.setSelectionModel(selModel);
         // establish a selection
         selModel.setSelectionInterval(1, 1);
@@ -464,14 +464,14 @@ public class EventTableModelTest extends SwingTestCase {
     @Test
     public void testChangeSelectionByKeysInSortedState_FixMe() {
         // build the data
-        final EventList<JLabel> labels = new BasicEventList<JLabel>();
+        final EventList<JLabel> labels = new BasicEventList<>();
         labels.add(new JLabel("def"));
         labels.add(new JLabel("ghi"));
         labels.add(new JLabel("abc"));
-        final SortedList<JLabel> sortedLabels = new SortedList<JLabel>(labels, null);
+        final SortedList<JLabel> sortedLabels = new SortedList<>(labels, null);
         // build a sorted table and model
-        final EventTableModel<JLabel> tableModel = new EventTableModel<JLabel>(sortedLabels, new LabelTableFormat());
-        final EventSelectionModel<JLabel> selectionModel = new EventSelectionModel<JLabel>(sortedLabels);
+        final EventTableModel<JLabel> tableModel = new EventTableModel<>(sortedLabels, new LabelTableFormat());
+        final EventSelectionModel<JLabel> selectionModel = new EventSelectionModel<>(sortedLabels);
         final JTable table = new JTable(tableModel);
         table.setSelectionModel(selectionModel);
         // set an initial selection

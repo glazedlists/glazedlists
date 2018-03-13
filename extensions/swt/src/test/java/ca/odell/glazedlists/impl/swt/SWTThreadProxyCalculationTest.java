@@ -51,7 +51,7 @@ public class SWTThreadProxyCalculationTest {
 
     @Before
     public void setUp() {
-        source = new BasicEventList<String>();
+        source = new BasicEventList<>();
         countCalc = Calculations.count(source);
         countProxyCalc = CalculationsSWT.swtThreadProxyCalculation(countCalc, swtClassRule.getDisplay());
     }
@@ -97,7 +97,7 @@ public class SWTThreadProxyCalculationTest {
         background.start();
         sleep(1000);
         final PropertyChangeEventRecorder recorder = new PropertyChangeEventRecorder(displayInit.getDisplay());
-        source = new BasicEventList<String>();
+        source = new BasicEventList<>();
         countCalc = Calculations.count(source);
         countProxyCalc = CalculationsSWT.swtThreadProxyCalculation(countCalc, displayInit.getDisplay());
         countProxyCalc.addPropertyChangeListener(recorder);

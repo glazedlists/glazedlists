@@ -58,7 +58,7 @@ public class EventTableColumnModelTest extends SwingTestCase {
         watcher.assertFiredEventsAgreeAndClear();
 
         // test models with data
-        EventList<TableColumn> columns = new BasicEventList<TableColumn>();
+        EventList<TableColumn> columns = new BasicEventList<>();
         columns.add(createColumn("name"));
         columns.add(createColumn("age"));
         defaultModel = watcher.createDefaultModel(columns);
@@ -78,7 +78,7 @@ public class EventTableColumnModelTest extends SwingTestCase {
     @Test
     public void testAddColumn() {
         // create 3 models with the same TableColumns
-        EventList<TableColumn> columns = new BasicEventList<TableColumn>();
+        EventList<TableColumn> columns = new BasicEventList<>();
         columns.add(createColumn("name"));
         columns.add(createColumn("age"));
 
@@ -112,7 +112,7 @@ public class EventTableColumnModelTest extends SwingTestCase {
     @Test
     public void testRemoveColumn() {
         final TableColumn nameColumn = createColumn("name");
-        EventList<TableColumn> columns = new BasicEventList<TableColumn>();
+        EventList<TableColumn> columns = new BasicEventList<>();
         columns.add(nameColumn);
         columns.add(createColumn("age"));
         DefaultTableColumnModel defaultModel = watcher.createDefaultModel(columns);
@@ -143,7 +143,7 @@ public class EventTableColumnModelTest extends SwingTestCase {
     @Test
     public void testMoveColumn() {
         final TableColumn nameColumn = createColumn("name");
-        EventList<TableColumn> columns = new BasicEventList<TableColumn>();
+        EventList<TableColumn> columns = new BasicEventList<>();
         columns.add(nameColumn);
         columns.add(createColumn("age"));
         DefaultTableColumnModel defaultModel = watcher.createDefaultModel(columns);
@@ -176,7 +176,7 @@ public class EventTableColumnModelTest extends SwingTestCase {
     @Test
     public void testMoveSelectedColumn() {
         final TableColumn nameColumn = createColumn("name");
-        EventList<TableColumn> columns = new BasicEventList<TableColumn>();
+        EventList<TableColumn> columns = new BasicEventList<>();
         columns.add(nameColumn);
         columns.add(createColumn("age"));
 
@@ -202,7 +202,7 @@ public class EventTableColumnModelTest extends SwingTestCase {
 
     @Test
     public void testGetColumnIndex() {
-        EventList<TableColumn> columns = new BasicEventList<TableColumn>();
+        EventList<TableColumn> columns = new BasicEventList<>();
         columns.add(createColumn("name"));
         columns.add(createColumn("age"));
         DefaultTableColumnModel defaultModel = watcher.createDefaultModel(columns);
@@ -329,8 +329,8 @@ public class EventTableColumnModelTest extends SwingTestCase {
      * identical events in identical orders.
      */
     private static class TableColumnEventWatcher implements TableColumnModelListener {
-        private Map<TableColumnModel, List<EventObject>> eventMap = new HashMap<TableColumnModel, List<EventObject>>();
-        private Map<Object, TableColumnModel> objectToTableColumnModelMap = new HashMap<Object, TableColumnModel>();
+        private Map<TableColumnModel, List<EventObject>> eventMap = new HashMap<>();
+        private Map<Object, TableColumnModel> objectToTableColumnModelMap = new HashMap<>();
 
         private EventTableColumnModel createEventModel(EventList<TableColumn> columns) {
             EventTableColumnModel model = new EventTableColumnModel(columns);
@@ -433,7 +433,7 @@ public class EventTableColumnModelTest extends SwingTestCase {
 
             List<EventObject> eventList = eventMap.get(model);
             if (eventList == null) {
-                eventList = new ArrayList<EventObject>();
+                eventList = new ArrayList<>();
                 eventMap.put(model, eventList);
             }
         }

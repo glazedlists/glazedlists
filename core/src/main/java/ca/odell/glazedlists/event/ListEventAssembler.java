@@ -39,10 +39,10 @@ public final class ListEventAssembler<E> {
     /** the current reordering array if this change is a reorder */
     protected int[] reorderMap = null;
     /** prefer to use the linear blocks, which are more performant but handle only a subset of all cases */
-    private BlockSequence<E> blockSequence = new BlockSequence<E>();
+    private BlockSequence<E> blockSequence = new BlockSequence<>();
     private boolean useListBlocksLinear = false;
     /** fall back to list tree4deltas, which are capable of all list changes */
-    private Tree4Deltas<E> listDeltas = new Tree4Deltas<E>();
+    private Tree4Deltas<E> listDeltas = new Tree4Deltas<>();
 
     private final SequenceDependenciesEventPublisher publisher;
     private final ListEvent<E> listEvent;
@@ -64,7 +64,7 @@ public final class ListEventAssembler<E> {
     public ListEventAssembler(EventList<E> sourceList, ListEventPublisher publisher) {
         this.sourceList = sourceList;
         this.publisher = (SequenceDependenciesEventPublisher) publisher;
-        this.listEvent = new Tree4DeltasListEvent<E>(this, sourceList);
+        this.listEvent = new Tree4DeltasListEvent<>(this, sourceList);
     }
 
     /**

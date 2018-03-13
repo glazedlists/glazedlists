@@ -6,7 +6,6 @@ package ca.odell.glazedlists.swing;
 import ca.odell.glazedlists.*;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.gui.TableFormat;
-import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.impl.filter.SearchTerm;
 import ca.odell.glazedlists.impl.filter.TextMatcher;
 import ca.odell.glazedlists.impl.swing.ComboBoxPopupLocationFix;
@@ -443,17 +442,17 @@ public final class AutoCompleteSupport<E> {
             // build the ComboBoxModel capable of filtering its values
             this.filterMatcherEditor = new TextMatcherEditor(filterator == null ? new DefaultTextFilterator() : filterator);
             this.filterMatcherEditor.setMode(TextMatcherEditor.STARTS_WITH);
-            this.filteredItems = new FilterList<E>(items, this.filterMatcherEditor);
-            this.firstItem = new BasicEventList<E>(items.getPublisher(), items.getReadWriteLock());
+            this.filteredItems = new FilterList<>(items, this.filterMatcherEditor);
+            this.firstItem = new BasicEventList<>(items.getPublisher(), items.getReadWriteLock());
 
             // the ComboBoxModel always contains the firstItem and a filtered view of all other items
-            this.allItemsFiltered = new CompositeList<E>(items.getPublisher(), items.getReadWriteLock());
+            this.allItemsFiltered = new CompositeList<>(items.getPublisher(), items.getReadWriteLock());
             this.allItemsFiltered.addMemberList(this.firstItem);
             this.allItemsFiltered.addMemberList(this.filteredItems);
             this.comboBoxModel = new AutoCompleteComboBoxModel(this.allItemsFiltered);
 
             // we need an unfiltered view in order to try to locate autocompletion terms
-            this.allItemsUnfiltered = new CompositeList<E>(items.getPublisher(), items.getReadWriteLock());
+            this.allItemsUnfiltered = new CompositeList<>(items.getPublisher(), items.getReadWriteLock());
             this.allItemsUnfiltered.addMemberList(this.firstItem);
             this.allItemsUnfiltered.addMemberList(this.items);
         } finally {
@@ -789,7 +788,7 @@ public final class AutoCompleteSupport<E> {
         if (comboBox.getModel().getClass() == AutoCompleteSupport.AutoCompleteComboBoxModel.class)
             throw new IllegalArgumentException("comboBox is already configured for autocompletion");
 
-        return new AutoCompleteSupport<E>(comboBox, items, filterator, format);
+        return new AutoCompleteSupport<>(comboBox, items, filterator, format);
     }
 
     /**
@@ -1255,7 +1254,7 @@ public final class AutoCompleteSupport<E> {
         if (prefix.length() == 0)
             filterMatcher = Matchers.trueMatcher();
         else
-            filterMatcher = new TextMatcher<String>(new SearchTerm[] {new SearchTerm(prefix)}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH, getTextMatchingStrategy());
+            filterMatcher = new TextMatcher<>(new SearchTerm[] {new SearchTerm(prefix)}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH, getTextMatchingStrategy());
     }
 
     /**
@@ -1286,7 +1285,7 @@ public final class AutoCompleteSupport<E> {
         // determine if our value is empty
         final boolean prefixIsEmpty = "".equals(value);
 
-        final Matcher<String> valueMatcher = new TextMatcher<String>(new SearchTerm[] {new SearchTerm(value)}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH, getTextMatchingStrategy());
+        final Matcher<String> valueMatcher = new TextMatcher<>(new SearchTerm[] {new SearchTerm(value)}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH, getTextMatchingStrategy());
 
         Object partialMatchItem = NOT_FOUND;
 
@@ -1818,7 +1817,7 @@ public final class AutoCompleteSupport<E> {
 
             // get the component from the renderer
             final Component comp = renderer.getListCellRendererComponent(
-	            ( JList<E> ) popup.getList(), prototypeValue, -1, false, false);
+	            popup.getList(), prototypeValue, -1, false, false);
 
             // determine the preferred size of the component
             comp.setFont(comboBox.getFont());
@@ -2273,8 +2272,8 @@ public final class AutoCompleteSupport<E> {
      */
     public static <E> AutoCompleteCellEditor<E> createTableCellEditor(Comparator uniqueComparator, TableFormat<E> tableFormat, EventList<E> tableData, int columnIndex) {
         // use a function to extract all values for the column
-        final FunctionList.Function<E, Object> columnValueFunction = new TableColumnValueFunction<E>(tableFormat, columnIndex);
-        final FunctionList allColumnValues = new FunctionList<E, Object>(tableData, columnValueFunction);
+        final FunctionList.Function<E, Object> columnValueFunction = new TableColumnValueFunction<>(tableFormat, columnIndex);
+        final FunctionList allColumnValues = new FunctionList<>(tableData, columnValueFunction);
 
         // narrow the list to just unique values within the column
         final EventList<E> uniqueColumnValues = new UniqueList<E>(allColumnValues, uniqueComparator);
@@ -2306,7 +2305,7 @@ public final class AutoCompleteSupport<E> {
         autoCompleteSupport.setSelectsTextOnFocusGain(false);
 
         // create an AutoCompleteCellEditor using the AutoCompleteSupport object
-        final AutoCompleteCellEditor<E> cellEditor = new AutoCompleteCellEditor<E>(autoCompleteSupport);
+        final AutoCompleteCellEditor<E> cellEditor = new AutoCompleteCellEditor<>(autoCompleteSupport);
         cellEditor.setClickCountToStart(2);
 
         return cellEditor;

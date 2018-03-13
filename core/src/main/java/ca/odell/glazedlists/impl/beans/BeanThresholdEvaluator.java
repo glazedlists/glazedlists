@@ -39,6 +39,6 @@ public final class BeanThresholdEvaluator<E> implements ThresholdList.Evaluator<
      */
     private void loadPropertyDescriptors(Object beanObject) {
         Class<E> beanClass = (Class<E>) beanObject.getClass();
-        beanProperty = new BeanProperty<E>(beanClass, propertyName, true, false);
+        beanProperty = new BeanProperty<>(beanClass, propertyName, true, false);
     }
 }

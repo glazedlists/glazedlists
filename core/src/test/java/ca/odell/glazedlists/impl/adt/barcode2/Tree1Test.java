@@ -30,7 +30,7 @@ public class Tree1Test {
      */
     @Test
     public void testUnsortedElementInSortedTree() {
-        SimpleTree<String> tree = new SimpleTree<String>();
+        SimpleTree<String> tree = new SimpleTree<>();
         Element<String> e = tree.addInSortedOrder(Tree1Test.allColors, "E", 1);
         Element<String> g = tree.addInSortedOrder(Tree1Test.allColors, "G", 1);
         Element<String> i = tree.addInSortedOrder(Tree1Test.allColors, "I", 1);
@@ -44,7 +44,7 @@ public class Tree1Test {
         Element<String> h = tree.addInSortedOrder(Tree1Test.allColors, "H", 1);
         Element<String> n = tree.addInSortedOrder(Tree1Test.allColors, "N", 1);
 
-        List<String> asList = new SimpleTreeAsList<String>(tree);
+        List<String> asList = new SimpleTreeAsList<>(tree);
 
         assertEquals(GlazedListsTests.stringToList("EGHIAMNO"), asList);
     }
@@ -158,12 +158,12 @@ public class Tree1Test {
 
     @Test
     public void testIterators() {
-        SimpleTree<String> tree = new SimpleTree<String>();
+        SimpleTree<String> tree = new SimpleTree<>();
         tree.add(0, "A", 1);
         tree.add(1, "B", 1);
         tree.add(2, "C", 1);
 
-        SimpleTreeIterator<String> iterator = new SimpleTreeIterator<String>(tree, 0, (byte)1);
+        SimpleTreeIterator<String> iterator = new SimpleTreeIterator<>(tree, 0, (byte)1);
 
         assertEquals(true, iterator.hasNext());
         iterator.next();
@@ -209,7 +209,7 @@ public class Tree1Test {
 
     @Test
     public void testIndexOfEtc() {
-        SimpleTree<String> tree = new SimpleTree<String>(GlazedLists.comparableComparator());
+        SimpleTree<String> tree = new SimpleTree<>(GlazedLists.comparableComparator());
         tree.addInSortedOrder((byte)1, "B", 1);
         tree.addInSortedOrder((byte)1, "B", 1);
         tree.addInSortedOrder((byte)1, "B", 1);

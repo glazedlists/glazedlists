@@ -90,7 +90,7 @@ public class JXTableSupport<E> {
         Preconditions.checkNotNull(sortedList, "SortedList must be defined.");
         Preconditions.checkNotNull(sortingStrategy, "SortingStrategy must be defined.");
         checkAccessThread();
-        return new JXTableSupport<E>(table, eventList, tableFormat, sortedList, sortingStrategy);
+        return new JXTableSupport<>(table, eventList, tableFormat, sortedList, sortingStrategy);
     }
 
     /**

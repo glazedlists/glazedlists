@@ -51,7 +51,7 @@ public final class Exceptions {
     /**
      * A list of handlers which handle Exceptions of a global nature.
      */
-    private final List<Handler> handlers = new ArrayList<Handler>();
+    private final List<Handler> handlers = new ArrayList<>();
 
     /**
      * Add <code>h</code> to the collection of {@link Handler}s consulted when

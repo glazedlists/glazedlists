@@ -75,10 +75,10 @@ import java.util.List;
 public final class NetworkList<E> extends TransformedList<E, E> {
 
     /** listeners to resource changes */
-    private List<ResourceListener> resourceListeners = new ArrayList<ResourceListener>();
+    private List<ResourceListener> resourceListeners = new ArrayList<>();
 
     /** listeners to status changes */
-    private List<NetworkListStatusListener> statusListeners = new ArrayList<NetworkListStatusListener>();
+    private List<NetworkListStatusListener> statusListeners = new ArrayList<>();
 
     /** how bytes are encoded and decoded */
     private ByteCoder byteCoder;

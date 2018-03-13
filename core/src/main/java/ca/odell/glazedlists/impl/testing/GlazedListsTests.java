@@ -37,7 +37,7 @@ public class GlazedListsTests {
     public static List<String> delimitedStringToList(String delimited) {
         final String[] strings = delimited.split("\\s");
 
-        List<String> result = new ArrayList<String>(strings.length);
+        List<String> result = new ArrayList<>(strings.length);
         for (int i = 0; i < strings.length; i++) {
             result.add(strings[i]);
         }
@@ -48,7 +48,7 @@ public class GlazedListsTests {
      * Convert the characters of the specified String to a list.
      */
     public static List<String> stringToList(CharSequence chars) {
-        List<String> result = new ArrayList<String>(chars.length());
+        List<String> result = new ArrayList<>(chars.length());
         for (int i = 0; i < chars.length(); i++) {
             result.add(chars.subSequence(i, i+1).toString());
         }
@@ -60,7 +60,7 @@ public class GlazedListsTests {
      * { [ A A ], [ B B ], [ C D E ] }
      */
     public static List<List<String>> stringToLists(CharSequence chars) {
-        List<List<String>> result = new ArrayList<List<String>>();
+        List<List<String>> result = new ArrayList<>();
         String[] strings = chars.toString().split(",");
         for (int i = 0; i < strings.length; i++)
             result.add(stringToList(strings[i]));
@@ -72,7 +72,7 @@ public class GlazedListsTests {
      * Convert an array of Strings into a List of characters.
      */
     public static List<String> stringsToList(CharSequence[] data) {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         for (int i = 0; i < data.length; i++)
             result.addAll(stringToList(data[i]));
 
@@ -83,7 +83,7 @@ public class GlazedListsTests {
      * Convert the specified int[] array to a List of Integers.
      */
     public static List<Integer> intArrayToIntegerCollection(int[] values) {
-        List<Integer> result = new ArrayList<Integer>();
+        List<Integer> result = new ArrayList<>();
         for (int i = 0; i < values.length; i++)
             result.add(new Integer(values[i]));
 

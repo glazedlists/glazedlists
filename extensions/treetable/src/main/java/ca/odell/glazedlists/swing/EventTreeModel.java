@@ -45,7 +45,7 @@ public class EventTreeModel<E> implements TreeModel, ListEventListener<E> {
     private final Object treeRoot = new Object();
 
     /** Listeners. */
-    protected List<TreeModelListener> listenerList = new ArrayList<TreeModelListener>();
+    protected List<TreeModelListener> listenerList = new ArrayList<>();
 
     /**
      * Creates a new tree model that extracts the tree data from the given

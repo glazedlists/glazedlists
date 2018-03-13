@@ -32,8 +32,8 @@ public class NestedEventsTest {
      */
     @Before
     public void setUp() {
-        source  = new BasicEventList<String>();
-        nestableSource = new NestableEventsList<String>(source);
+        source  = new BasicEventList<>();
+        nestableSource = new NestableEventsList<>(source);
         counter = ListConsistencyListener.install(nestableSource);
     }
 

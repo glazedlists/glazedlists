@@ -30,7 +30,7 @@ class Tree4DeltasListEvent<E> extends ListEvent<E> {
      */
     @Override
     public ListEvent<E> copy() {
-        Tree4DeltasListEvent<E> result = new Tree4DeltasListEvent<E>(deltasAssembler, sourceList);
+        Tree4DeltasListEvent<E> result = new Tree4DeltasListEvent<>(deltasAssembler, sourceList);
         result.deltasIterator = deltasIterator != null ? deltasIterator.copy() : null;
         result.linearIterator = linearIterator != null ? linearIterator.copy() : null;
         result.deltasAssembler = deltasAssembler;

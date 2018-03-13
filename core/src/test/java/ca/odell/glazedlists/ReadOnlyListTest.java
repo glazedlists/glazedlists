@@ -36,7 +36,7 @@ public class ReadOnlyListTest {
     @Before
     public void setUp() {
         // create a list of data
-        readOnlyData = new BasicEventList<String>();
+        readOnlyData = new BasicEventList<>();
         readOnlyData.add("A");
         readOnlyData.add("B");
         readOnlyData.add("C");
@@ -182,9 +182,9 @@ public class ReadOnlyListTest {
     @SuppressWarnings("unused")
     @Test
     public void testGenericsFactoryMethod() {
-    	final EventList<AbstractBase> baseList = new BasicEventList<AbstractBase>();
-    	final EventList<Derived> derivedList = new BasicEventList<Derived>();
-    	final EventList<Concrete> concreteList = new BasicEventList<Concrete>();
+    	final EventList<AbstractBase> baseList = new BasicEventList<>();
+    	final EventList<Derived> derivedList = new BasicEventList<>();
+    	final EventList<Concrete> concreteList = new BasicEventList<>();
 
     	final EventList<AbstractBase> readOnlyBaseList = GlazedLists.readOnlyList(baseList);
     	final TransformedList<AbstractBase, AbstractBase> treadOnlyBaseList = GlazedLists.readOnlyList(baseList);

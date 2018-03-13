@@ -29,7 +29,7 @@ public class PopularityListTest {
      */
     @Test
     public void testSimpleData() {
-        EventList<String> source = new BasicEventList<String>();
+        EventList<String> source = new BasicEventList<>();
         PopularityList popularityList = PopularityList.create(source);
 
         source.add("Mike");
@@ -72,7 +72,7 @@ public class PopularityListTest {
     public void testRandom() {
         Random dice = new Random(0);
 
-        EventList<Integer> source = new BasicEventList<Integer>();
+        EventList<Integer> source = new BasicEventList<>();
         SortedList<Integer> sortedSource = SortedList.create(source);
         PopularityList<Integer> popularityList = PopularityList.create(source);
         new PopularityListValidator(popularityList, sortedSource);
@@ -101,7 +101,7 @@ public class PopularityListTest {
      */
     @Test
     public void testMultipleEvents() {
-        EventList<int[]> source = new BasicEventList<int[]>();
+        EventList<int[]> source = new BasicEventList<>();
         source.add(new int[] { 86, 1, 1, 1, 1, 0, 0 });
         source.add(new int[] { 86, 1, 0, 1, 1, 1, 0 });
         source.add(new int[] { 86, 1, 0, 0, 0, 0, 0 });
@@ -113,9 +113,9 @@ public class PopularityListTest {
         source.add(new int[] { 98, 1, 0, 0, 1, 1, 1 });
 
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
-        FilterList<int[]> filterList = new FilterList<int[]>(source, matcherEditor);
-        SortedList<int[]> sortedList = new SortedList<int[]>(source, GlazedListsTests.intArrayComparator(0));
-        PopularityList<int[]> popularityList = new PopularityList<int[]>(filterList, GlazedListsTests.intArrayComparator(0));
+        FilterList<int[]> filterList = new FilterList<>(source, matcherEditor);
+        SortedList<int[]> sortedList = new SortedList<>(source, GlazedListsTests.intArrayComparator(0));
+        PopularityList<int[]> popularityList = new PopularityList<>(filterList, GlazedListsTests.intArrayComparator(0));
         new PopularityListValidator(popularityList, sortedList);
 
         matcherEditor.setFilter(1, 1);
@@ -131,7 +131,7 @@ public class PopularityListTest {
      */
     @Test
     public void testEdgeSets() {
-        EventList<String> source = new BasicEventList<String>();
+        EventList<String> source = new BasicEventList<>();
         source.add("Audi");      // A
         source.add("Audi");      // A A
         source.add("Audi");      // A A A
@@ -174,7 +174,7 @@ public class PopularityListTest {
      */
     @Test
     public void testLeftEdgeSet() {
-        EventList<String> source = new BasicEventList<String>();
+        EventList<String> source = new BasicEventList<>();
         SortedList<String> sortedList = SortedList.create(source);
         PopularityList<String> popularityList = PopularityList.create(source);
         new PopularityListValidator(popularityList, sortedList);
@@ -193,7 +193,7 @@ public class PopularityListTest {
      */
     @Test
     public void testEqualPopularityOrdering() {
-        EventList<String> source = new BasicEventList<String>();
+        EventList<String> source = new BasicEventList<>();
         PopularityList<String> popularityList = PopularityList.create(source);
 
         // in sorted order changes
@@ -205,7 +205,7 @@ public class PopularityListTest {
         source.add(5, "hippo"); // b c d f g h
         source.add(0, "album"); // a b c d f g h
         source.add(4, "eerie"); // a b c d e f g h
-        List<String> sortedSingleCopy = new ArrayList<String>();
+        List<String> sortedSingleCopy = new ArrayList<>();
         sortedSingleCopy.addAll(source);
         Collections.sort(sortedSingleCopy);
         assertEquals(sortedSingleCopy, popularityList);
@@ -237,7 +237,7 @@ public class PopularityListTest {
         source.set(2, "hippo"); // g b h d e f g h a b c d e f g h c f g b d h a e
         source.set(4, "dingo"); // g b h d d f g h a b c d e f g h c f g b d h a e
         source.set(5, "banjo"); // g b h d d b g h a b c d e f g h c f g b d h a e
-        List<String> expectedTwoClasses = new ArrayList<String>();
+        List<String> expectedTwoClasses = new ArrayList<>();
         expectedTwoClasses.add("banjo");
         expectedTwoClasses.add("dingo");
         expectedTwoClasses.add("gecko");
@@ -282,7 +282,7 @@ public class PopularityListTest {
          */
         @Override
         public void listChanged(ListEvent listEvent) {
-            List<Integer> changedIndices = new ArrayList<Integer>();
+            List<Integer> changedIndices = new ArrayList<>();
 
             // apply the changes
             while(listEvent.next()) {

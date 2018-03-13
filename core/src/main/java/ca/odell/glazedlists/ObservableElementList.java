@@ -118,7 +118,7 @@ public class ObservableElementList<E> extends TransformedList<E, E> implements O
         this.elementConnector.setObservableElementList(this);
 
         // for speed, we add all source elements together, rather than individually
-        this.observedElements = new ArrayList<E>(source);
+        this.observedElements = new ArrayList<>(source);
 
         // we initialize the single EventListener registry, as we optimistically
         // assume we'll be using a single listener for all observed elements
@@ -330,7 +330,7 @@ public class ObservableElementList<E> extends TransformedList<E, E> implements O
 
         // build a new data structure appropriate for storing individual
         // listeners for each observed element
-        this.multiEventListenerRegistry = new ArrayList<EventListener>(this.source.size());
+        this.multiEventListenerRegistry = new ArrayList<>(this.source.size());
         for (int i = 0; i < source.size(); i++)
             this.multiEventListenerRegistry.add(null);
 

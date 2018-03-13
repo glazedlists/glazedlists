@@ -21,8 +21,8 @@ public class RangeListTest {
 
     @Test
     public void testAddAll() {
-        EventList<String> source = new BasicEventList<String>();
-        RangeList<String> rangeList = new RangeList<String>(source);
+        EventList<String> source = new BasicEventList<>();
+        RangeList<String> rangeList = new RangeList<>(source);
         ListConsistencyListener.install(rangeList);
 
         assertEquals(0, rangeList.size());
@@ -33,8 +33,8 @@ public class RangeListTest {
 
     @Test
     public void testChangeSource() {
-        EventList<String> source = new BasicEventList<String>();
-        RangeList<String> rangeList = new RangeList<String>(source);
+        EventList<String> source = new BasicEventList<>();
+        RangeList<String> rangeList = new RangeList<>(source);
         ListConsistencyListener.install(rangeList);
 
         rangeList.setHeadRange(2, 4);
@@ -104,10 +104,10 @@ public class RangeListTest {
 
     @Test
     public void testTailRange() {
-        EventList<String> source = new BasicEventList<String>();
+        EventList<String> source = new BasicEventList<>();
         source.addAll(GlazedListsTests.stringToList("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
 
-        RangeList<String> rangeList = new RangeList<String>(source);
+        RangeList<String> rangeList = new RangeList<>(source);
 
         ListConsistencyListener.install(rangeList);
 
@@ -122,10 +122,10 @@ public class RangeListTest {
 
     @Test
     public void testRangeAdjust() {
-        EventList<String> source = new BasicEventList<String>();
+        EventList<String> source = new BasicEventList<>();
         source.addAll(GlazedListsTests.stringToList("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
 
-        RangeList<String> rangeList = new RangeList<String>(source);
+        RangeList<String> rangeList = new RangeList<>(source);
         ListConsistencyListener.install(rangeList);
 
         assertEquals(source, rangeList);
@@ -184,10 +184,10 @@ public class RangeListTest {
 
     @Test
     public void testMiddleRange() {
-        EventList<String> source = new BasicEventList<String>();
+        EventList<String> source = new BasicEventList<>();
         source.addAll(GlazedListsTests.stringToList("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
 
-        RangeList<String> rangeList = new RangeList<String>(source);
+        RangeList<String> rangeList = new RangeList<>(source);
         ListConsistencyListener.install(rangeList);
 
         assertEquals(source, rangeList);
@@ -254,10 +254,10 @@ public class RangeListTest {
 
     @Test
     public void testMiddleRangeZeros() {
-        EventList<String> source = new BasicEventList<String>();
+        EventList<String> source = new BasicEventList<>();
         source.addAll(GlazedListsTests.stringToList("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
 
-        RangeList<String> rangeList = new RangeList<String>(source);
+        RangeList<String> rangeList = new RangeList<>(source);
         ListConsistencyListener.install(rangeList);
 
         assertEquals(source, rangeList);

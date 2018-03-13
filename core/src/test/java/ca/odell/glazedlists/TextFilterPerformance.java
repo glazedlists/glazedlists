@@ -45,20 +45,20 @@ public class TextFilterPerformance {
         String line = "";
 
         // read the filter strings
-        List<String> testFilters = new ArrayList<String>();
-        List<Integer> testHitCounts = new ArrayList<Integer>();
+        List<String> testFilters = new ArrayList<>();
+        List<Integer> testHitCounts = new ArrayList<>();
         while(!(line = in.readLine()).equals("")) {
             testFilters.add(line);
             testHitCounts.add(new Integer(in.readLine()));
         }
 
         // read the input texts
-        List<Collection<String>> elements = new ArrayList<Collection<String>>();
-        List<String> currentElement = new ArrayList<String>();
+        List<Collection<String>> elements = new ArrayList<>();
+        List<String> currentElement = new ArrayList<>();
         elements.add(currentElement);
         while((line = in.readLine()) != null) {
             if(line.equals("")) {
-                currentElement = new ArrayList<String>();
+                currentElement = new ArrayList<>();
                 elements.add(currentElement);
             } else {
                 currentElement.add(line);
@@ -75,10 +75,10 @@ public class TextFilterPerformance {
         }
 
         // prepare the filter list
-        BasicEventList<Collection<String>> unfiltered = new BasicEventList<Collection<String>>();
+        BasicEventList<Collection<String>> unfiltered = new BasicEventList<>();
         unfiltered.addAll(elements);
-        TextMatcherEditor<Collection<String>> textMatcherEditor = new TextMatcherEditor<Collection<String>>(new CollectionTextFilterator());
-        FilterList<Collection<String>> filtered = new FilterList<Collection<String>>(unfiltered, textMatcherEditor);
+        TextMatcherEditor<Collection<String>> textMatcherEditor = new TextMatcherEditor<>(new CollectionTextFilterator());
+        FilterList<Collection<String>> filtered = new FilterList<>(unfiltered, textMatcherEditor);
 
         // track time
         long startTime = 0;
@@ -214,9 +214,9 @@ public class TextFilterPerformance {
 
 
         // attach a ThreadedMatcherEditor to the FilterList rather than a regular TextMatcherEditor
-        textMatcherEditor = new TextMatcherEditor<Collection<String>>(new CollectionTextFilterator());
-        MatcherEditor<Collection<String>> bufferedMatcherEditor = new ThreadedMatcherEditor<Collection<String>>(textMatcherEditor);
-        filtered = new FilterList<Collection<String>>(unfiltered, bufferedMatcherEditor);
+        textMatcherEditor = new TextMatcherEditor<>(new CollectionTextFilterator());
+        MatcherEditor<Collection<String>> bufferedMatcherEditor = new ThreadedMatcherEditor<>(textMatcherEditor);
+        filtered = new FilterList<>(unfiltered, bufferedMatcherEditor);
 
         System.out.println("");
         System.out.println("Simulated Typing Character-by-character Filter (delays with ThreadedMatcherEditor)");

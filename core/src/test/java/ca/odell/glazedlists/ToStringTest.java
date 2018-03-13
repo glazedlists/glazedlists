@@ -25,9 +25,9 @@ public class ToStringTest {
      */
     @Test
     public void testToStringConsistency() {
-        ArrayList<String> controlList = new ArrayList<String>();
-        BasicEventList<String> basicEventList = new BasicEventList<String>();
-        FilterList<String> filterList = new FilterList<String>(basicEventList, Matchers.trueMatcher());
+        ArrayList<String> controlList = new ArrayList<>();
+        BasicEventList<String> basicEventList = new BasicEventList<>();
+        FilterList<String> filterList = new FilterList<>(basicEventList, Matchers.trueMatcher());
         SortedList<String> sortedList = SortedList.create(basicEventList);
 
         // Test On Empty Lists

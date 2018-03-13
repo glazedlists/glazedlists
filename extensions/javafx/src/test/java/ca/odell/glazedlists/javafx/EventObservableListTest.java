@@ -35,17 +35,17 @@ public class EventObservableListTest {
 
     @Before
     public void setUp() {
-        root = new BasicEventList<String>();
+        root = new BasicEventList<>();
         root.add("Apple");
         root.add("Banana");
         root.add("Cantaloupe");
         root.add("Dragon fruit");
 
-        sorter = new SortedList<String>(root, null);
+        sorter = new SortedList<>(root, null);
 
-        wrapper = new EventObservableList<String>(sorter);
+        wrapper = new EventObservableList<>(sorter);
 
-        change_queue = new LinkedList<List<ChangeInfo>>();
+        change_queue = new LinkedList<>();
 
         wrapper.addListener(new ListChangeListener<String>() {
             @Override
@@ -60,7 +60,7 @@ public class EventObservableListTest {
             }
 
             private List<ChangeInfo> buildChangeInfo(Change<? extends String> change) {
-                List<ChangeInfo> change_list = new LinkedList<ChangeInfo>();
+                List<ChangeInfo> change_list = new LinkedList<>();
 
                 // For now, just making sure the toString doesn't explode
                 assertNotNull(change.toString());
@@ -172,7 +172,7 @@ public class EventObservableListTest {
         assertFalse(wrapper.contains("Elderberry"));
 
         // containsAll
-        Set<String> fruits = new HashSet<String>();
+        Set<String> fruits = new HashSet<>();
         fruits.add("Apple");
         fruits.add("Banana");
         fruits.add("Cantaloupe");
@@ -414,7 +414,7 @@ public class EventObservableListTest {
         assertEquals("Acai", root.get(0));
 
         // retainAll
-        Set<String> fruits = new HashSet<String>();
+        Set<String> fruits = new HashSet<>();
         fruits.add("Apple");
         fruits.add("Banana");
         fruits.add("Cantaloupe");
@@ -667,13 +667,13 @@ public class EventObservableListTest {
     private <E> ChangeExpectation<E> expectation(ChangeType type, int from, int to,
         List<E> added, List<E> removed) {
 
-        return new ChangeExpectation<E>(type, from, to, added, removed);
+        return new ChangeExpectation<>(type, from, to, added, removed);
     }
 
     private <E> ChangeExpectation<E> expectationOfReorder(int from, int to,
         int... reorder_map) {
 
-        return new ChangeExpectation<E>(ChangeType.REORDER, from, to, reorder_map);
+        return new ChangeExpectation<>(ChangeType.REORDER, from, to, reorder_map);
     }
 
     private enum ChangeType {

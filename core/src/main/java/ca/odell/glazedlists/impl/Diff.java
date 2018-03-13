@@ -42,7 +42,7 @@ public final class Diff {
      */
     public static <E> void replaceAll(EventList<E> target, List<E> source,
                                       boolean updates, Comparator<E> comparator) {
-        DiffMatcher listDiffMatcher = new ListDiffMatcher<E>(target, source, comparator);
+        DiffMatcher listDiffMatcher = new ListDiffMatcher<>(target, source, comparator);
         List<Point> editScript = shortestEditScript(listDiffMatcher);
 
         // target is x axis. Changes in X mean advance target index
@@ -109,7 +109,7 @@ public final class Diff {
 
         // use previous round furthest reaching D-path to determine the
         // new furthest reaching (D+1)-path
-        Map<Integer,Point> furthestReachingPoints = new HashMap<Integer,Point>();
+        Map<Integer,Point> furthestReachingPoints = new HashMap<>();
 
         // walk through in stages, each stage adding one non-diagonal.
         // D == count of non-diagonals in current stage
@@ -237,7 +237,7 @@ public final class Diff {
          * calls.
          */
         public List<Point> trail() {
-            List<Point> reverse = new ArrayList<Point>();
+            List<Point> reverse = new ArrayList<>();
             Point current = this;
             while (current != null) {
                 reverse.add(current);

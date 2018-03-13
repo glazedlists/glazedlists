@@ -14,7 +14,7 @@ public class CountTest {
 
     @Test
     public void testPropertyChanges() {
-        final EventList<String> source = new BasicEventList<String>();
+        final EventList<String> source = new BasicEventList<>();
         source.add("a");
 
         final PropertyChangeCounter counter = new PropertyChangeCounter();

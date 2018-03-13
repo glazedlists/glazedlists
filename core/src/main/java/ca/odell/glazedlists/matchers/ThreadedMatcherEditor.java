@@ -63,7 +63,7 @@ public class ThreadedMatcherEditor<E> extends AbstractMatcherEditorListenerSuppo
      * from {@link #source}. We take great care to ensure that the queue's monitor is held before it
      * is queried or mutated.
      */
-    private final List<MatcherEditor.Event<E>> matcherEventQueue = new LinkedList<MatcherEditor.Event<E>>();
+    private final List<MatcherEditor.Event<E>> matcherEventQueue = new LinkedList<>();
 
     /**
      * The MatcherEditorListener which reacts to MatcherEvents from the {@link #source}
@@ -221,7 +221,7 @@ public class ThreadedMatcherEditor<E> extends AbstractMatcherEditorListenerSuppo
 
         // if both constraining and relaxing MatcherEvents exist, ensure we must return a CHANGED MatcherEvent
         // otherwise the last MatcherEvent must represent the coalesced MatcherEvent
-        return new MatcherEditor.Event<E>(this, changeType ? Event.CHANGED : lastMatcherEventType, lastMatcherEvent.getMatcher());
+        return new MatcherEditor.Event<>(this, changeType ? Event.CHANGED : lastMatcherEventType, lastMatcherEvent.getMatcher());
     }
 
     /**

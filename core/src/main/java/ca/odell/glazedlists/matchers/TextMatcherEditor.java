@@ -309,7 +309,7 @@ public class TextMatcherEditor<E> extends AbstractMatcherEditor<E> {
         // wrap the filter Strings with SearchTerm objects
         final SearchTerm<E>[] searchTerms = new SearchTerm[newFilters.length];
         for (int i = 0; i < searchTerms.length; i++) {
-            searchTerms[i] = new SearchTerm<E>(newFilters[i]);
+            searchTerms[i] = new SearchTerm<>(newFilters[i]);
         }
 
         // adjust the TextMatcher

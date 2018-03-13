@@ -51,7 +51,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
     @Test
     public void testUninstall() {
         final JComboBox<Object> combo = new JComboBox<>();
-        final EventList<Object> items = new BasicEventList<Object>();
+        final EventList<Object> items = new BasicEventList<>();
         items.add("First");
         items.add("Second");
 
@@ -147,7 +147,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         JComboBox<Object> combo = new JComboBox<>();
         combo.setEditor(new NoopComboBoxEditor());
         try {
-            AutoCompleteSupport.install(combo, new BasicEventList<Object>());
+            AutoCompleteSupport.install(combo, new BasicEventList<>());
             fail("failed to throw an IllegalArgumentException on bad ComboBoxEditor");
         } catch (IllegalArgumentException e) {
             // expected
@@ -157,14 +157,14 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         final JTextField editor = (JTextField) combo.getEditor().getEditorComponent();
         editor.setDocument(new NoopDocument());
         try {
-            AutoCompleteSupport.install(combo, new BasicEventList<Object>());
+            AutoCompleteSupport.install(combo, new BasicEventList<>());
             fail("failed to throw an IllegalArgumentException on bad ComboBoxEditor");
         } catch (IllegalArgumentException e) {
             // expected
         }
 
         try {
-            AutoCompleteSupport.install(combo, new BasicEventList<Object>());
+            AutoCompleteSupport.install(combo, new BasicEventList<>());
             fail("failed to throw an IllegalArgumentException on double installation of AutoCompleteSupport");
         } catch (IllegalArgumentException e) {
             // expected
@@ -179,7 +179,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         final JComboBox<Object> combo = new JComboBox<>();
         final ListCellRenderer<Object> renderer = new NoopListCellRenderer();
         combo.setRenderer(renderer);
-        final EventList<Object> items = new BasicEventList<Object>();
+        final EventList<Object> items = new BasicEventList<>();
         items.add("First");
         items.add("Second");
         final AutoCompleteSupport<Object> support = AutoCompleteSupport.install(combo, items, null, new Format() {
@@ -203,10 +203,10 @@ public class AutoCompleteSupportTest extends SwingTestCase {
     @Test
     public void testChangeModel() {
         final JComboBox<Object> combo = new JComboBox<>();
-        AutoCompleteSupport.install(combo, new BasicEventList<Object>());
+        AutoCompleteSupport.install(combo, new BasicEventList<>());
 
         try {
-            combo.setModel(new DefaultComboBoxModel<Object>());
+            combo.setModel(new DefaultComboBoxModel<>());
             fail("Expected to trigger environmental invariant violation");
         } catch (IllegalStateException e) {
             // expected
@@ -216,7 +216,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
     @Test
     public void testChangeEditorDocumentToNonAbstractDocument() {
         final JComboBox<Object> combo = new JComboBox<>();
-        AutoCompleteSupport.install(combo, new BasicEventList<Object>());
+        AutoCompleteSupport.install(combo, new BasicEventList<>());
 
         try {
             final JTextField editor = (JTextField) combo.getEditor().getEditorComponent();
@@ -230,7 +230,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
     @Test
     public void testNullElements() {
         final JComboBox<String> combo = new JComboBox<>();
-        final EventList<String> items = new BasicEventList<String>();
+        final EventList<String> items = new BasicEventList<>();
         items.add(null);
         items.add("New Brunswick");
         items.add("Nova Scotia");
@@ -262,7 +262,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         final JComboBox<String> combo = new JComboBox<>();
         combo.addActionListener(listener);
 
-        final EventList<String> items = new BasicEventList<String>();
+        final EventList<String> items = new BasicEventList<>();
         items.add(null);
         items.add("New Brunswick");
         items.add("Nova Scotia");
@@ -339,7 +339,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         final JComboBox<String> combo = new JComboBox<>();
         combo.addActionListener(listener);
 
-        final EventList<String> items = new BasicEventList<String>();
+        final EventList<String> items = new BasicEventList<>();
         items.add(null);
         items.add("New Brunswick");
         items.add("Nova Scotia");
@@ -392,7 +392,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         final JComboBox<String> combo = new JComboBox<>();
         combo.addActionListener(listener);
 
-        final EventList<String> items = new BasicEventList<String>();
+        final EventList<String> items = new BasicEventList<>();
         items.add("New Brunswick");
         items.add("Nova Scotia");
         items.add("Newfoundland");
@@ -440,7 +440,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
     @Test
     public void testStrictModeWithNull() throws BadLocationException {
         final JComboBox<String> combo = new JComboBox<>();
-        final EventList<String> items = new BasicEventList<String>();
+        final EventList<String> items = new BasicEventList<>();
         items.add("New Brunswick");
         items.add(null);
         items.add("Nova Scotia");
@@ -477,7 +477,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
     public void testStrictModeAndFirstItem() throws BadLocationException {
         final JComboBox<String> combo = new JComboBox<>();
 
-        final EventList<String> items = new BasicEventList<String>();
+        final EventList<String> items = new BasicEventList<>();
         items.add("New Brunswick");
         items.add("Nova Scotia");
         items.add("Newfoundland");
@@ -521,7 +521,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         final JComboBox<String> combo = new JComboBox<>();
         combo.addActionListener(listener);
 
-        final EventList<String> items = new BasicEventList<String>();
+        final EventList<String> items = new BasicEventList<>();
         items.add("New Brunswick");
         items.add("Nova Scotia");
         items.add("Newfoundland");
@@ -563,7 +563,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
         final AbstractDocument doc = (AbstractDocument) textField.getDocument();
 
-        final EventList<String> items = new BasicEventList<String>();
+        final EventList<String> items = new BasicEventList<>();
         items.add("New Brunswick");
         items.add("Nova Scotia");
         items.add("Newfoundland");
@@ -607,7 +607,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
         final AbstractDocument doc = (AbstractDocument) textField.getDocument();
 
-        final EventList<String> items = new BasicEventList<String>();
+        final EventList<String> items = new BasicEventList<>();
         items.add("Muller");
         items.add("New Brunswick");
         items.add("Aenima");
@@ -764,7 +764,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
         final AbstractDocument doc = (AbstractDocument) textField.getDocument();
 
-        final EventList<String> items = new BasicEventList<String>();
+        final EventList<String> items = new BasicEventList<>();
         items.add("foobar");
 
         AutoCompleteSupport<String> support = AutoCompleteSupport.install(combo, items);
@@ -799,7 +799,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
     @SuppressWarnings("unchecked")
 	@Test
     public void testCreateTableCellEditor() {
-        final EventList<Integer> ints = new BasicEventList<Integer>();
+        final EventList<Integer> ints = new BasicEventList<>();
         ints.add(new Integer(0));
         ints.add(new Integer(10));
         ints.add(new Integer(199));
@@ -833,7 +833,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         final JComboBox<String> combo = new JComboBox<>();
         final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
         final AbstractDocument doc = (AbstractDocument) textField.getDocument();
-        final EventList<String> items = new BasicEventList<String>();
+        final EventList<String> items = new BasicEventList<>();
 
         AutoCompleteSupport.install(combo, items);
         final ComboBoxModel<String> comboBoxModel = combo.getModel();
@@ -871,7 +871,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         final JComboBox<String> combo = new JComboBox<>();
         final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
         final AbstractDocument doc = (AbstractDocument) textField.getDocument();
-        final EventList<String> items = new BasicEventList<String>();
+        final EventList<String> items = new BasicEventList<>();
 
         AutoCompleteSupport<String> support = AutoCompleteSupport.install(combo, items);
         assertNull(support.getFirstItem());
@@ -953,7 +953,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
         final AbstractDocument doc = (AbstractDocument) textField.getDocument();
 
-        final EventList<String> items = new BasicEventList<String>();
+        final EventList<String> items = new BasicEventList<>();
         items.add("foobar");
 
         AutoCompleteSupport.install(combo, items);
@@ -992,7 +992,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
 
         final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
 
-        final EventList<String> basicItems = new BasicEventList<String>();
+        final EventList<String> basicItems = new BasicEventList<>();
         final EventList<String> items = GlazedLists.threadSafeList(basicItems);
         items.add("foobar");
 

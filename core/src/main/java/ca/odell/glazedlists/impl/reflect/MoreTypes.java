@@ -36,7 +36,7 @@ class MoreTypes {
 
     private static final Map<TypeLiteral<?>, TypeLiteral<?>> PRIMITIVE_TO_WRAPPER;
     static {
-        final Map<TypeLiteral<?>, TypeLiteral<?>> primitiveToWrapper = new HashMap<TypeLiteral<?>, TypeLiteral<?>>();
+        final Map<TypeLiteral<?>, TypeLiteral<?>> primitiveToWrapper = new HashMap<>();
         primitiveToWrapper.put(TypeLiteral.get(boolean.class), TypeLiteral.get(Boolean.class));
         primitiveToWrapper.put(TypeLiteral.get(byte.class), TypeLiteral.get(Byte.class));
         primitiveToWrapper.put(TypeLiteral.get(short.class), TypeLiteral.get(Short.class));

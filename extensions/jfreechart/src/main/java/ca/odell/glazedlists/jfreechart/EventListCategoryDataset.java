@@ -104,7 +104,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
      * {@link ValueSegment} or the ending value of its {@link ValueSegment}.
      * The count of all such values within a range can thus be calculated.
      */
-    private Map<R,TreePair<C>> valueToTreePairs = new HashMap<R,TreePair<C>>();
+    private Map<R,TreePair<C>> valueToTreePairs = new HashMap<>();
 
     /**
      * Constructs an implementation of {@link CategoryDataset} which presents
@@ -116,7 +116,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
         this.source = source;
 
         // make a copy of the source list's content
-        this.sourceCopy = new ArrayList<ValueSegment<C,R>>(source.size());
+        this.sourceCopy = new ArrayList<>(source.size());
         this.sourceCopy.addAll(source);
 
         this.rebuildRowAndColumnKeyList();
@@ -137,14 +137,14 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
      * A local factory method for creating the list containing the row keys.
      */
     protected List<? extends Comparable> createRowKeyList() {
-        return new ArrayList<Comparable>();
+        return new ArrayList<>();
     }
 
     /**
      * A local factory method for creating the list containing the column keys.
      */
     protected List<? extends Comparable> createColumnKeyList() {
-        return new ArrayList<Comparable>();
+        return new ArrayList<>();
     }
 
     /**
@@ -374,7 +374,7 @@ public abstract class EventListCategoryDataset<R extends Comparable, C extends C
 
                     // if a TreePair has not been created for the segment's value, create one now
                     if (treePair == null) {
-                        treePair = new TreePair<C>();
+                        treePair = new TreePair<>();
                         valueToTreePairs.put(segment.getValue(), treePair);
                     }
 

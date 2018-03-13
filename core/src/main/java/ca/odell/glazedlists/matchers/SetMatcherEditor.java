@@ -43,7 +43,7 @@ public final class SetMatcherEditor<E, O> extends AbstractMatcherEditor<E> {
      * @see Mode
      */
     public static <E, O> SetMatcherEditor<E, O> create(final Mode mode, final Function<E, O> fn) {
-        return new SetMatcherEditor<E, O>(mode, fn);
+        return new SetMatcherEditor<>(mode, fn);
     }
 
 	private final Function<E, O> function;
@@ -74,7 +74,7 @@ public final class SetMatcherEditor<E, O> extends AbstractMatcherEditor<E> {
             oldSet = ((SetMatcher<E,O>) getMatcher()).matchSet;
 
         } else {
-            oldSet = new HashSet<O>();
+            oldSet = new HashSet<>();
         }
 
         if (oldSet.equals(newSet)) {
@@ -92,32 +92,32 @@ public final class SetMatcherEditor<E, O> extends AbstractMatcherEditor<E> {
 
         } else if (oldSet.isEmpty()) {
             L.fine("old set was empty, new set is not -> firing change");
-            this.fireChanged(new SetMatcher<E, O>(newSet, this.mode, this.function));
+            this.fireChanged(new SetMatcher<>(newSet, this.mode, this.function));
 
         } else if (oldSet.containsAll(newSet)) {
 
             if (this.mode == Mode.BLACKLIST) {
                 L.fine("old set contains new set (blacklist) -> firing relaxed");
-                this.fireRelaxed(new SetMatcher<E, O>(newSet, this.mode, this.function));
+                this.fireRelaxed(new SetMatcher<>(newSet, this.mode, this.function));
 
             } else {
                 L.fine("old set contains new set (whitelist) -> firing constrained");
-                this.fireConstrained(new SetMatcher<E, O>(newSet, this.mode, this.function));
+                this.fireConstrained(new SetMatcher<>(newSet, this.mode, this.function));
             }
 
         } else if (newSet.containsAll(oldSet)) {
             if (this.mode == Mode.BLACKLIST) {
                 L.fine("new set contains old set (blacklist) -> firing constrained");
-                this.fireConstrained(new SetMatcher<E, O>(newSet, this.mode, this.function));
+                this.fireConstrained(new SetMatcher<>(newSet, this.mode, this.function));
 
             } else {
                 L.fine("new set contains old set (whitelist) -> firing relaxed");
-                this.fireRelaxed(new SetMatcher<E, O>(newSet, this.mode, this.function));
+                this.fireRelaxed(new SetMatcher<>(newSet, this.mode, this.function));
             }
 
         } else {
             L.fine("old and new set differ -> firing change");
-            this.fireChanged(new SetMatcher<E, O>(newSet, this.mode, this.function));
+            this.fireChanged(new SetMatcher<>(newSet, this.mode, this.function));
         }
     }
 
@@ -140,7 +140,7 @@ public final class SetMatcherEditor<E, O> extends AbstractMatcherEditor<E> {
 		private final Mode mode;
 
         private SetMatcher(final Set<O> matchSet, final Mode mode, final Function<E, O> fn) {
-            this.matchSet = new HashSet<O>(matchSet);
+            this.matchSet = new HashSet<>(matchSet);
             this.mode = mode;
             this.fn = checkNotNull(fn);
         }

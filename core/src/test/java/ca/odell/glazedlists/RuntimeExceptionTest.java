@@ -23,7 +23,7 @@ public class RuntimeExceptionTest {
     private RuntimeException luckyException = new RuntimeException();
 
     /** list to fire events */
-    private BasicEventList<String> source = new BasicEventList<String>();
+    private BasicEventList<String> source = new BasicEventList<>();
 
     /** listener that throws exceptions */
     private ExceptionThrower exceptionThrower = new ExceptionThrower();

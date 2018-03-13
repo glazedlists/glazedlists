@@ -79,7 +79,7 @@ public class PublishFrame implements ActionListener, NetworkListStatusListener {
     private JPanel constructView() {
         // build the table
         final EventList<String> dataProxyList = GlazedListsSwing.swingThreadProxyList(data);
-        DefaultEventTableModel<String> tableModel = new DefaultEventTableModel<String>(dataProxyList, new StringTableFormat());
+        DefaultEventTableModel<String> tableModel = new DefaultEventTableModel<>(dataProxyList, new StringTableFormat());
         JTable table = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 

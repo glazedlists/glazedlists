@@ -57,8 +57,8 @@ public class Parser {
      * A map from each XMLTagPath that represents a location in an XML Document
      * to the Processor that defines the processing logic for that location.
      */
-    private final Map<XMLTagPath, PushProcessor> pushProcessors = new HashMap<XMLTagPath, PushProcessor>();
-    private final Map<XMLTagPath, PopProcessor> popProcessors = new HashMap<XMLTagPath, PopProcessor>();
+    private final Map<XMLTagPath, PushProcessor> pushProcessors = new HashMap<>();
+    private final Map<XMLTagPath, PopProcessor> popProcessors = new HashMap<>();
 
     /**
      * Map the logic defined the in the given <code>processor</code> to the
@@ -118,7 +118,7 @@ public class Parser {
      * @throws IOException if an error occurs parsing the <code>source</code>
      */
     public <T> void parse(InputStream source, T target) throws IOException {
-        parse(source, new Handler<T>(target));
+        parse(source, new Handler<>(target));
     }
 
     /**
@@ -145,7 +145,7 @@ public class Parser {
         private StringBuffer currentChars = new StringBuffer();
 
         /** the stack of miscellaneous objects being processed */
-        private List<Object> stack = new ArrayList<Object>();
+        private List<Object> stack = new ArrayList<>();
 
         /**
          * Constructs a SAX ContentHandler which populates the given

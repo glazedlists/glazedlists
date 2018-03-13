@@ -29,11 +29,11 @@ public class DefaultEventListModelTest extends SwingTestCase {
     @Test
     @ExecuteOnNonUiThread
     public void testOnMainThreadEDTViolation() {
-        EventList<Color> colors = new BasicEventList<Color>();
+        EventList<Color> colors = new BasicEventList<>();
         colors.add(Color.RED);
         colors.add(Color.GREEN);
 
-        final DefaultEventListModel<Color> listModel = new DefaultEventListModel<Color>(colors);
+        final DefaultEventListModel<Color> listModel = new DefaultEventListModel<>(colors);
         assertEquals(2, listModel.getSize());
         try {
             colors.add(Color.BLUE);
@@ -49,7 +49,7 @@ public class DefaultEventListModelTest extends SwingTestCase {
     @Test
     @ExecuteOnNonUiThread
     public void testOnMainThreadNoEDTViolation() {
-        EventList<Color> colors = new BasicEventList<Color>();
+        EventList<Color> colors = new BasicEventList<>();
         colors.add(Color.RED);
         colors.add(Color.GREEN);
 
@@ -68,12 +68,12 @@ public class DefaultEventListModelTest extends SwingTestCase {
      */
     @Test
     public void testGetElementAt() {
-        EventList<Color> colors = new BasicEventList<Color>();
+        EventList<Color> colors = new BasicEventList<>();
         colors.add(Color.RED);
         colors.add(Color.GREEN);
         colors.add(Color.BLUE);
 
-        DefaultEventListModel<Color> listModel = new DefaultEventListModel<Color>(colors);
+        DefaultEventListModel<Color> listModel = new DefaultEventListModel<>(colors);
 
         assertEquals(Color.RED, listModel.getElementAt(0));
         assertEquals(Color.GREEN, listModel.getElementAt(1));
@@ -101,11 +101,11 @@ public class DefaultEventListModelTest extends SwingTestCase {
     @Test
     public void testRemoveWithBlocksInListEvent() {
         // setup JList with EventListModel and EventSelectionModel
-        final EventList<String> list = new BasicEventList<String>();
+        final EventList<String> list = new BasicEventList<>();
         list.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
-        final DefaultEventListModel<String> model = new DefaultEventListModel<String>(list);
-        final JList<String> jList = new JList<String>(model);
-        final DefaultEventSelectionModel<String> selModel = new DefaultEventSelectionModel<String>(list);
+        final DefaultEventListModel<String> model = new DefaultEventListModel<>(list);
+        final JList<String> jList = new JList<>(model);
+        final DefaultEventSelectionModel<String> selModel = new DefaultEventSelectionModel<>(list);
         jList.setSelectionModel(selModel);
         // establish a selection
         selModel.setSelectionInterval(1, 1);

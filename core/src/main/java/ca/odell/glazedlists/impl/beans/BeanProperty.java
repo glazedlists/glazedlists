@@ -64,7 +64,7 @@ public class BeanProperty<T> {
 
         // look up the common chain
         final String[] propertyParts = propertyName.split("\\.");
-        final List<Method> commonChain = new ArrayList<Method>(propertyParts.length);
+        final List<Method> commonChain = new ArrayList<>(propertyParts.length);
         Class currentClass = beanClass;
         for(int p = 0; p < propertyParts.length - 1; p++) {
             Method partGetter = findGetterMethod(currentClass, propertyParts[p]);
@@ -77,7 +77,7 @@ public class BeanProperty<T> {
             if (identityProperty) {
                 valueClass = beanClass;
             } else {
-                getterChain = new ArrayList<Method>();
+                getterChain = new ArrayList<>();
                 getterChain.addAll(commonChain);
                 Method lastGetter = findGetterMethod(currentClass, propertyParts[propertyParts.length - 1]);
                 getterChain.add(lastGetter);
@@ -87,7 +87,7 @@ public class BeanProperty<T> {
 
         // look up the final setter
         if(writable) {
-            setterChain = new ArrayList<Method>();
+            setterChain = new ArrayList<>();
             setterChain.addAll(commonChain);
             Method lastSetter = findSetterMethod(currentClass, propertyParts[propertyParts.length - 1]);
             setterChain.add(lastSetter);

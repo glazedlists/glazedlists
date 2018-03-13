@@ -35,7 +35,7 @@ import java.util.HashMap;
 public abstract class TreeCriterion {
 
     /** The List of all possible TreeCriterion objects. */
-    public static final EventList<TreeCriterion> ALL_CRITERIA = new ObservableElementList<TreeCriterion>(new BasicEventList<TreeCriterion>(), GlazedLists.beanConnector(TreeCriterion.class));
+    public static final EventList<TreeCriterion> ALL_CRITERIA = new ObservableElementList<>(new BasicEventList<TreeCriterion>(), GlazedLists.beanConnector(TreeCriterion.class));
     static {
         ALL_CRITERIA.add(new TitleCriterion());
         ALL_CRITERIA.add(new AudienceRatingCriterion());
@@ -56,7 +56,7 @@ public abstract class TreeCriterion {
      * hierarchy. This acts as a cache to prevent building redundant synthetic
      * hierarchy Items.
      */
-    private final Map<Object, Item> syntheticItemCache = new HashMap<Object, Item>();
+    private final Map<Object, Item> syntheticItemCache = new HashMap<>();
 
     private TreeCriterion(String name, boolean active) {
         this.name = name;

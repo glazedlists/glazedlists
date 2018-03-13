@@ -171,7 +171,7 @@ public class EventTableColumnModel<T extends TableColumn> implements TableColumn
     /** @inheritDoc */
     @Override
     public Enumeration<TableColumn> getColumns() {
-        return new IteratorAsEnumeration<TableColumn>(swingThreadSource.iterator());
+        return new IteratorAsEnumeration<>(swingThreadSource.iterator());
     }
 
     /** @inheritDoc */

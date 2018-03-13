@@ -26,7 +26,7 @@ public class PriorityMatcherEditor implements ChangeListener<Number> {
 
     public PriorityMatcherEditor() {
         slider.valueProperty().addListener(this);
-        rangeMatcherEditor = new RangeMatcherEditor<Integer, Issue>(
+        rangeMatcherEditor = new RangeMatcherEditor<>(
                 GlazedLists.<Integer, Issue> filterator("priority.rating"));
 
         // priority slider

@@ -18,6 +18,6 @@ public class GlazedListsFx {
      * events from the JavaFX-application thread.
      */
     public static <E> TransformedList<E, E> threadProxyList(EventList<E> source) {
-        return new JavaFxThreadProxyEventList<E>(source);
+        return new JavaFxThreadProxyEventList<>(source);
     }
 }

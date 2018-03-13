@@ -48,7 +48,7 @@ public class SortingState {
     protected List<SortingColumn> sortingColumns;
 
     /** a list that contains all ColumnClickTrackers with non-zero click counts in their visitation order */
-    protected List<SortingColumn> recentlyClickedColumns = new ArrayList<SortingColumn>(2);
+    protected List<SortingColumn> recentlyClickedColumns = new ArrayList<>(2);
 
     private final AbstractTableComparatorChooser tableComparatorChooser;
 
@@ -78,7 +78,7 @@ public class SortingState {
         if(recentlyClickedColumns.isEmpty()) {
             return null;
         } else {
-            List<Comparator<Object>> comparators = new ArrayList<Comparator<Object>>(recentlyClickedColumns.size());
+            List<Comparator<Object>> comparators = new ArrayList<>(recentlyClickedColumns.size());
             for(Iterator<SortingColumn> i = recentlyClickedColumns.iterator(); i.hasNext(); ) {
                 SortingColumn sortingColumn = i.next();
                 Comparator comparator = sortingColumn.getComparator();
@@ -94,7 +94,7 @@ public class SortingState {
      * @return the indices of the columns currently being sorted.
      */
     public List<Integer> getSortingColumnIndexes() {
-        final List<Integer> sortingColumns = new ArrayList<Integer>();
+        final List<Integer> sortingColumns = new ArrayList<>();
         final List<SortingState.SortingColumn> recentlyClickedColumns = getRecentlyClickedColumns();
         for(int c = 0; c < recentlyClickedColumns.size(); c++) {
             SortingState.SortingColumn clickedColumn = recentlyClickedColumns.get(c);
@@ -175,7 +175,7 @@ public class SortingState {
         // build the column click trackers
         final int columnCount = tableFormat.getColumnCount();
 
-        sortingColumns = new ArrayList<SortingColumn>(columnCount);
+        sortingColumns = new ArrayList<>(columnCount);
         for(int i = 0; i < columnCount; i++) {
             sortingColumns.add(createSortingColumn(tableFormat, i));
         }
@@ -258,7 +258,7 @@ public class SortingState {
         /** the column whose sorting state is being managed */
         private final int column;
         /** the sequence of comparators for this column */
-        private final List<Comparator> comparators = new ArrayList<Comparator>(1);
+        private final List<Comparator> comparators = new ArrayList<>(1);
         /** whether this column is sorted in reverse order */
         private boolean reverse = false;
         /** the comparator in the comparator list to sort by */

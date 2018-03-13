@@ -33,7 +33,7 @@ final class ConditionalCount<E> extends AbstractCalculation<Integer> implements 
         // not consider concurrency, which is really an implementation detail
         source.getReadWriteLock().readLock().lock();
         try {
-            filtered = new FilterList<E>(source, matcher);
+            filtered = new FilterList<>(source, matcher);
             filtered.addListEventListener(this);
 
             setValue(new Integer(filtered.size()));

@@ -52,13 +52,13 @@ class JXTableSupportTestApp implements Runnable {
 
     @Override
     public void run() {
-        final List<Issue> issuesCopy = new ArrayList<Issue>();
+        final List<Issue> issuesCopy = new ArrayList<>();
         issues.getReadWriteLock().writeLock().lock();
         try {
             JTextField filterEdit = new JTextField(12);
-            TextComponentMatcherEditor<Issue> textMatcherEditor = new TextComponentMatcherEditor<Issue>(filterEdit, new IssueTextFilterator());
-            FilterList<Issue> textFilteredIssues = new FilterList<Issue>(issues, textMatcherEditor);
-            SortedList<Issue> sortedIssues = new SortedList<Issue>(textFilteredIssues, null);
+            TextComponentMatcherEditor<Issue> textMatcherEditor = new TextComponentMatcherEditor<>(filterEdit, new IssueTextFilterator());
+            FilterList<Issue> textFilteredIssues = new FilterList<>(issues, textMatcherEditor);
+            SortedList<Issue> sortedIssues = new SortedList<>(textFilteredIssues, null);
             JXTable table = new JXTable();
             final JXTableSupport<Issue> tableSupport = JXTableSupport.<Issue>install(table, sortedIssues,
                     new IssueTableFormat(), sortedIssues,
@@ -140,7 +140,7 @@ class JXTableSupportTestApp implements Runnable {
     }
 
     public static void main(String[] args) {
-        EventList<Issue> issues = new BasicEventList<Issue>();
+        EventList<Issue> issues = new BasicEventList<>();
         new Thread(new IssueLoader(issues, args[0])).start();
         SwingUtilities.invokeLater(new JXTableSupportTestApp(issues));
     }

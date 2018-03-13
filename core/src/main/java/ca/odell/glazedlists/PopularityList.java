@@ -46,7 +46,7 @@ public final class PopularityList<E> extends TransformedList<E, E> {
      * must implement {@link Comparable}.
      */
     public static <E extends Comparable<? super E>> PopularityList<E> create(EventList<E> source) {
-        return new PopularityList<E>(UniqueList.create(source));
+        return new PopularityList<>(UniqueList.create(source));
     }
 
     /**
@@ -56,7 +56,7 @@ public final class PopularityList<E> extends TransformedList<E, E> {
      * <p>Usage of factory method {@link #create(EventList)} is preferable.
      */
     public PopularityList(EventList<E> source) {
-        this(new UniqueList<E>(source));
+        this(new UniqueList<>(source));
     }
 
     /**
@@ -66,7 +66,7 @@ public final class PopularityList<E> extends TransformedList<E, E> {
      * @param uniqueComparator {@link Comparator} used to determine equality
      */
     public PopularityList(EventList<E> source, Comparator<E> uniqueComparator) {
-        this(new UniqueList<E>(source, uniqueComparator));
+        this(new UniqueList<>(source, uniqueComparator));
     }
 
     /**
@@ -74,7 +74,7 @@ public final class PopularityList<E> extends TransformedList<E, E> {
      * a reference to the specified {@link UniqueList}.
      */
     private PopularityList(UniqueList<E> uniqueList) {
-        super(new SortedList<E>(uniqueList, new PopularityComparator<E>(uniqueList)));
+        super(new SortedList<>(uniqueList, new PopularityComparator<>(uniqueList)));
         this.uniqueList = uniqueList;
 
         // listen for changes to the source list

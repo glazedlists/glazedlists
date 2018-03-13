@@ -19,7 +19,7 @@ public class TextFilterComponent implements FilterComponent<Issue> {
     private static final TextFilterator<Issue> ISSUE_TEXT_FILTERATOR = new IssueTextFilterator();
 
     private JTextField filterEdit = new JTextField(15);
-    private TextComponentMatcherEditor<Issue> textComponentMatcherEditor = new TextComponentMatcherEditor<Issue>(filterEdit, ISSUE_TEXT_FILTERATOR);
+    private TextComponentMatcherEditor<Issue> textComponentMatcherEditor = new TextComponentMatcherEditor<>(filterEdit, ISSUE_TEXT_FILTERATOR);
 
     @Override
     public JComponent getComponent() {

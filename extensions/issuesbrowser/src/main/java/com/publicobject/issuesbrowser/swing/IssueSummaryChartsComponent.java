@@ -65,7 +65,7 @@ class IssueSummaryChartsComponent {
         final FunctionList.Function<List<Issue>, Comparable<String>> keyFunction = new StatusFunction();
         final FunctionList.Function<List<Issue>, Number> valueFunction = new ListSizeFunction();
         final EventList<Issue> pieDataSource = GlazedListsSwing.swingThreadProxyList(issuesList);
-        final PieDataset issuesByStatusDataset = new EventListPieDataset<Issue, String>(pieDataSource, issuesByStatusGrouper, keyFunction, valueFunction);
+        final PieDataset issuesByStatusDataset = new EventListPieDataset<>(pieDataSource, issuesByStatusGrouper, keyFunction, valueFunction);
 
         // build a Pie Chart and a panel to display it
         final StatusProvider statusProvider = new StatusProvider(issuesList);
@@ -174,7 +174,7 @@ class IssueSummaryChartsComponent {
         private static final DateFormat DATE_FORMAT = new SimpleDateFormat("MMM yyyy");
 
         // map each Date to a pretty formatted display value
-        private final Map<Comparable,String> labelMap = new HashMap<Comparable,String>();
+        private final Map<Comparable,String> labelMap = new HashMap<>();
 
         public CustomCategoryAxis() {
             // display the labels vertically rather than horizontally

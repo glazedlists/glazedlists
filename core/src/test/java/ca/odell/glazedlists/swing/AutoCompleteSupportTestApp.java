@@ -49,7 +49,7 @@ import javax.swing.UIManager;
 
 public class AutoCompleteSupportTestApp {
 
-    private static final List<String> LOOK_AND_FEEL_SELECTIONS = new ArrayList<String>(Arrays.asList(
+    private static final List<String> LOOK_AND_FEEL_SELECTIONS = new ArrayList<>(Arrays.asList(
         "javax.swing.plaf.metal.MetalLookAndFeel",
         "apple.laf.AquaLookAndFeel",
         "com.sun.java.swing.plaf.motif.MotifLookAndFeel",
@@ -191,14 +191,14 @@ public class AutoCompleteSupportTestApp {
     private final ButtonGroup lafMenuGroup = new ButtonGroup();
 
     public AutoCompleteSupportTestApp() {
-        final EventList<Location> locations = new BasicEventList<Location>();
+        final EventList<Location> locations = new BasicEventList<>();
         locations.addAll(Arrays.asList(STATE_CAPITALS_DATA));
         final EventList<Location> locationsProxylist = GlazedListsSwing.swingThreadProxyList(locations);
         final String[] propertyNames = {"country", "state", "city"};
         final String[] columnLabels = {"Country", "State", "City"};
         final boolean[] writable = {true, true, true};
         final TableFormat<Location> tableFormat = GlazedLists.tableFormat(propertyNames, columnLabels, writable);
-        table.setModel(new DefaultEventTableModel<Location>(locationsProxylist, tableFormat));
+        table.setModel(new DefaultEventTableModel<>(locationsProxylist, tableFormat));
 
         // install a DefaultCellEditor with autocompleting support in each column
         final DefaultCellEditor cellEditor = AutoCompleteSupport.createTableCellEditor(tableFormat, locations, 2);
@@ -435,7 +435,7 @@ public class AutoCompleteSupportTestApp {
 
     private JPanel createMainPanel() {
         final TextFilterator<String> filterator = new URLTextFilterator();
-        final EventList<String> items = new BasicEventList<String>();
+        final EventList<String> items = new BasicEventList<>();
         items.addAll(Arrays.asList(URL_SAMPLE_DATA));
         final EventList<String> itemProxyList = GlazedListsSwing.swingThreadProxyList(items);
         final JPanel panel = new JPanel(new GridBagLayout());
@@ -450,7 +450,7 @@ public class AutoCompleteSupportTestApp {
 
         final JComboBox<String> plainComboBox = regularComboBox;
         plainComboBox.setEditable(true);
-        plainComboBox.setModel(new DefaultEventComboBoxModel<String>(itemProxyList));
+        plainComboBox.setModel(new DefaultEventComboBoxModel<>(itemProxyList));
 
         final JScrollPane tableScroller = new JScrollPane(table);
         tableScroller.setPreferredSize(new Dimension(1, 200));

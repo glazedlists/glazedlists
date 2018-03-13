@@ -69,7 +69,7 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
     private final Barcode barcode = new Barcode();
 
     /** the Lists and EventLists that this is composed of */
-    private final SimpleTree<ChildElement<E>> childElements = new SimpleTree<ChildElement<E>>();
+    private final SimpleTree<ChildElement<E>> childElements = new SimpleTree<>();
 
     /**
      * Create a {@link CollectionList} with its contents being the children of
@@ -231,7 +231,7 @@ public class CollectionList<S, E> extends TransformedList<S, E> implements ListE
         super.dispose();
 
         // iterate over all child elements and dispose them
-        final SimpleTreeIterator<ChildElement<E>> treeIterator = new SimpleTreeIterator<ChildElement<E>>(childElements);
+        final SimpleTreeIterator<ChildElement<E>> treeIterator = new SimpleTreeIterator<>(childElements);
 
         while(treeIterator.hasNext()) {
             treeIterator.next();

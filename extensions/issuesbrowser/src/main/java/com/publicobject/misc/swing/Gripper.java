@@ -3,8 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.misc.swing;
 
-import ca.odell.glazedlists.impl.GlazedListsImpl;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;

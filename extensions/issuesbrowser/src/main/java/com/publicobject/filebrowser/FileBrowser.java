@@ -50,9 +50,9 @@ public class FileBrowser implements Runnable {
         try {
             EventList<Entry> entries = GlazedListsSwing.swingThreadProxyList(sourceEntries);
 
-            SortedList<Entry> sortedEntries = new SortedList<Entry>(entries, null);
+            SortedList<Entry> sortedEntries = new SortedList<>(entries, null);
 
-            TreeList<Entry> treeList = new TreeList<Entry>(sortedEntries, treeFormat, TreeList.<Entry>nodesStartExpanded());
+            TreeList<Entry> treeList = new TreeList<>(sortedEntries, treeFormat, TreeList.<Entry>nodesStartExpanded());
             TableModel model = GlazedListsSwing.eventTableModel(treeList, tableFormat);
             JTable table = new JTable(model);
             TreeTableSupport.install(table, treeList, 0);

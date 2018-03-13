@@ -34,7 +34,7 @@ public class TextMatcher<E> implements Matcher<E> {
     private final TextSearchStrategy[] filterStrategies;
 
     /** a heavily recycled list of filter Strings, call clear() before use */
-    private final List<String> filterStrings = new ArrayList<String>();
+    private final List<String> filterStrings = new ArrayList<>();
 
     /**
      * @param searchTerms an array of search terms to be matched
@@ -116,7 +116,7 @@ public class TextMatcher<E> implements Matcher<E> {
      * given <code>mode</code>.
      */
     public TextMatcher<E> newMode(int mode) {
-        return new TextMatcher<E>(searchTerms, filterator, mode, strategy);
+        return new TextMatcher<>(searchTerms, filterator, mode, strategy);
     }
 
     /**
@@ -124,7 +124,7 @@ public class TextMatcher<E> implements Matcher<E> {
      * given <code>filterator</code>.
      */
     public TextMatcher<E> newFilterator(TextFilterator<? super E> filterator) {
-        return new TextMatcher<E>(searchTerms, filterator, mode, strategy);
+        return new TextMatcher<>(searchTerms, filterator, mode, strategy);
     }
 
     /**
@@ -132,7 +132,7 @@ public class TextMatcher<E> implements Matcher<E> {
      * given <code>strategy</code>.
      */
     public TextMatcher<E> newStrategy(Object strategy) {
-        return new TextMatcher<E>(searchTerms, filterator, mode, strategy);
+        return new TextMatcher<>(searchTerms, filterator, mode, strategy);
     }
 
     /**
@@ -166,8 +166,8 @@ public class TextMatcher<E> implements Matcher<E> {
 
         TextMatcher that = (TextMatcher) o;
 
-        Set<SearchTerm> thisSearchTerms = new HashSet<SearchTerm>(Arrays.asList(searchTerms));
-        Set<SearchTerm> thatSearchTerms = new HashSet<SearchTerm>(Arrays.asList(that.searchTerms));
+        Set<SearchTerm> thisSearchTerms = new HashSet<>(Arrays.asList(searchTerms));
+        Set<SearchTerm> thatSearchTerms = new HashSet<>(Arrays.asList(that.searchTerms));
 
         if (mode != that.mode) return false;
         if (!thisSearchTerms.equals(thatSearchTerms)) return false;
@@ -182,7 +182,7 @@ public class TextMatcher<E> implements Matcher<E> {
         int result;
         result = mode;
         result = 31 * result + strategy.hashCode();
-        result = 31 * result + new HashSet<SearchTerm>(Arrays.asList(searchTerms)).hashCode();
+        result = 31 * result + new HashSet<>(Arrays.asList(searchTerms)).hashCode();
         return result;
     }
 }

@@ -31,8 +31,8 @@ public class SeparatorListTest {
      */
     @Test
     public void testUpdateProblem() {
-        EventList<String> source = new BasicEventList<String>();
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        EventList<String> source = new BasicEventList<>();
+        SeparatorList<String> separatorList = new SeparatorList<>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -47,8 +47,8 @@ public class SeparatorListTest {
 
     @Test
     public void testUpdate1() {
-        EventList<String> source = new BasicEventList<String>();
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        EventList<String> source = new BasicEventList<>();
+        SeparatorList<String> separatorList = new SeparatorList<>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
         source.addAll(0, GlazedListsTests.stringToList("ABB"));
@@ -64,8 +64,8 @@ public class SeparatorListTest {
      */
     @Test
     public void testUpdateProblem2() {
-        EventList<String> source = new BasicEventList<String>();
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        EventList<String> source = new BasicEventList<>();
+        SeparatorList<String> separatorList = new SeparatorList<>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
         source.addAll(0, GlazedListsTests.stringToList("AACCC"));
@@ -78,8 +78,8 @@ public class SeparatorListTest {
     /** Change from AACCC -> AAACC. */
     @Test
     public void testUpdateBug500() {
-        EventList<String> source = new BasicEventList<String>();
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        EventList<String> source = new BasicEventList<>();
+        SeparatorList<String> separatorList = new SeparatorList<>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList, "SeparatorList", true);
         listConsistencyListener.setPreviousElementTracked(false);
         source.addAll(0, GlazedListsTests.stringToList("AACCC"));
@@ -93,8 +93,8 @@ public class SeparatorListTest {
     /** Change from AAACC -> AACCC. */
     @Test
     public void testUpdate2Bug500() {
-        EventList<String> source = new BasicEventList<String>();
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        EventList<String> source = new BasicEventList<>();
+        SeparatorList<String> separatorList = new SeparatorList<>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList, "SeparatorList", true);
         listConsistencyListener.setPreviousElementTracked(false);
         source.addAll(0, GlazedListsTests.stringToList("AAACC"));
@@ -107,8 +107,8 @@ public class SeparatorListTest {
 
     @Test
     public void testUpdate3() {
-        EventList<String> source = new BasicEventList<String>();
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        EventList<String> source = new BasicEventList<>();
+        SeparatorList<String> separatorList = new SeparatorList<>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
         source.addAll(0, GlazedListsTests.stringToList("AAACC"));
@@ -121,8 +121,8 @@ public class SeparatorListTest {
 
     @Test
     public void testUpdate4() {
-        EventList<String> source = new BasicEventList<String>();
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        EventList<String> source = new BasicEventList<>();
+        SeparatorList<String> separatorList = new SeparatorList<>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
         source.addAll(0, GlazedListsTests.stringToList("ABB"));
@@ -134,8 +134,8 @@ public class SeparatorListTest {
     }
     @Test
     public void testUpdate5() {
-        EventList<String> source = new BasicEventList<String>();
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        EventList<String> source = new BasicEventList<>();
+        SeparatorList<String> separatorList = new SeparatorList<>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
         source.addAll(0, GlazedListsTests.stringToList("AABCC"));
@@ -149,8 +149,8 @@ public class SeparatorListTest {
 
     @Test
     public void testUpdate6() {
-        EventList<String> source = new BasicEventList<String>();
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        EventList<String> source = new BasicEventList<>();
+        SeparatorList<String> separatorList = new SeparatorList<>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
         source.addAll(0, GlazedListsTests.stringToList("AABCC"));
@@ -167,8 +167,8 @@ public class SeparatorListTest {
      */
     @Test
     public void testUpdateSingletonList() {
-        EventList<String> source = new BasicEventList<String>();
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        EventList<String> source = new BasicEventList<>();
+        SeparatorList<String> separatorList = new SeparatorList<>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
         source.addAll(0, GlazedListsTests.stringToList("A"));
@@ -183,8 +183,8 @@ public class SeparatorListTest {
      */
     @Test
     public void testUpdateElemRemoveGroup() {
-        EventList<String> source = new BasicEventList<String>();
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        EventList<String> source = new BasicEventList<>();
+        SeparatorList<String> separatorList = new SeparatorList<>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
         source.addAll(0, GlazedListsTests.stringToList("ABC"));
@@ -198,8 +198,8 @@ public class SeparatorListTest {
      */
     @Test
     public void testRemoveElemRemoveGroup() {
-        EventList<String> source = new BasicEventList<String>();
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        EventList<String> source = new BasicEventList<>();
+        SeparatorList<String> separatorList = new SeparatorList<>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
         source.addAll(0, GlazedListsTests.stringToList("ABBC"));
@@ -215,8 +215,8 @@ public class SeparatorListTest {
      */
     @Test
     public void testAddElemAddGroup() {
-        EventList<String> source = new BasicEventList<String>();
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        EventList<String> source = new BasicEventList<>();
+        SeparatorList<String> separatorList = new SeparatorList<>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
         source.addAll(0, GlazedListsTests.stringToList("BB"));
@@ -232,10 +232,10 @@ public class SeparatorListTest {
 
     @Test
     public void testSimpleSetup() {
-        EventList<String> source = new BasicEventList<String>();
+        EventList<String> source = new BasicEventList<>();
         source.addAll(GlazedListsTests.stringToList("AAAABBBDDD"));
 
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, GlazedLists.comparableComparator(), 0, Integer.MAX_VALUE);
+        SeparatorList<String> separatorList = new SeparatorList<>(source, GlazedLists.comparableComparator(), 0, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -381,7 +381,7 @@ public class SeparatorListTest {
         EventList<String> source = SortedList.create(new BasicEventList<String>());
         source.addAll(GlazedListsTests.stringToList("AAAAAAABBCCCCC"));
 
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, GlazedLists.comparableComparator(), 0, 3);
+        SeparatorList<String> separatorList = new SeparatorList<>(source, GlazedLists.comparableComparator(), 0, 3);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -456,7 +456,7 @@ public class SeparatorListTest {
         EventList<String> source = SortedList.create(new BasicEventList<String>());
         source.addAll(GlazedListsTests.stringToList("AAABCCC"));
 
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, GlazedLists.comparableComparator(), 2, Integer.MAX_VALUE);
+        SeparatorList<String> separatorList = new SeparatorList<>(source, GlazedLists.comparableComparator(), 2, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -477,7 +477,7 @@ public class SeparatorListTest {
         EventList<String> source = SortedList.create(new BasicEventList<String>());
         source.addAll(GlazedListsTests.stringToList("AAABBBBBBBCCC"));
 
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, GlazedLists.comparableComparator(), 0, 5);
+        SeparatorList<String> separatorList = new SeparatorList<>(source, GlazedLists.comparableComparator(), 0, 5);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -517,7 +517,7 @@ public class SeparatorListTest {
         EventList<String> source = SortedList.create(new BasicEventList<String>());
         source.addAll(GlazedListsTests.stringToList("AAABBBBBBBCCC"));
 
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, GlazedLists.comparableComparator(), 0, 5);
+        SeparatorList<String> separatorList = new SeparatorList<>(source, GlazedLists.comparableComparator(), 0, 5);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -530,11 +530,11 @@ public class SeparatorListTest {
         Comparator<String> alphabetical = GlazedLists.comparableComparator();
         Comparator<String> length = GlazedLists.reverseComparator(new StringLengthComparator());
 
-        BasicEventList<String> unsortedSource = new BasicEventList<String>();
-        SortedList<String> source = new SortedList<String>(unsortedSource, null);
+        BasicEventList<String> unsortedSource = new BasicEventList<>();
+        SortedList<String> source = new SortedList<>(unsortedSource, null);
         unsortedSource.addAll(Arrays.asList("apple", "banana", "cat", "dear", "frog", "boat", "car", "jesse", "glazed", "shirt", "hat", "art", "dog", "puppy", "foot"));
 
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, length, 0, Integer.MAX_VALUE);
+        SeparatorList<String> separatorList = new SeparatorList<>(source, length, 0, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -562,11 +562,11 @@ public class SeparatorListTest {
         Random dice = new Random(0);
         int expectedEventCount = 0;
 
-        BasicEventList<String> unsortedSource = new BasicEventList<String>();
-        SortedList<String> source = new SortedList<String>(unsortedSource, null);
+        BasicEventList<String> unsortedSource = new BasicEventList<>();
+        SortedList<String> source = new SortedList<>(unsortedSource, null);
         unsortedSource.addAll(GlazedListsTests.stringToList("CcaCbCcCAaADdaAbBDbBdDb"));
 
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, caseInsensitive, 0, Integer.MAX_VALUE);
+        SeparatorList<String> separatorList = new SeparatorList<>(source, caseInsensitive, 0, Integer.MAX_VALUE);
         ListConsistencyListener consistencyTest = ListConsistencyListener.install(separatorList);
         consistencyTest.setPreviousElementTracked(false);
 
@@ -609,10 +609,10 @@ public class SeparatorListTest {
      */
     @Test
     public void testRemoveInsertSeparators() {
-        BasicEventList<String> source = new BasicEventList<String>();
+        BasicEventList<String> source = new BasicEventList<>();
         source.addAll(GlazedListsTests.stringToList("AABBBCCCCDDDDEFGHHHH"));
 
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, GlazedLists.comparableComparator(), 0, Integer.MAX_VALUE);
+        SeparatorList<String> separatorList = new SeparatorList<>(source, GlazedLists.comparableComparator(), 0, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
         assertEqualsIgnoreSeparators(source, separatorList, GlazedLists.comparableComparator());
@@ -658,10 +658,10 @@ public class SeparatorListTest {
 
     @Test
     public void testSeparatorIsThreadSafe() throws InterruptedException {
-        final BasicEventList<String> source = new BasicEventList<String>();
+        final BasicEventList<String> source = new BasicEventList<>();
         source.addAll(GlazedListsTests.stringToList("AABBBCCCCDDDDEFGHHHH"));
 
-        final SeparatorList<String> separatorList = new SeparatorList<String>(source, GlazedLists.comparableComparator(), 0, Integer.MAX_VALUE);
+        final SeparatorList<String> separatorList = new SeparatorList<>(source, GlazedLists.comparableComparator(), 0, Integer.MAX_VALUE);
         ListConsistencyListener listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
         assertEqualsIgnoreSeparators(source, separatorList, GlazedLists.comparableComparator());
@@ -705,10 +705,10 @@ public class SeparatorListTest {
      */
     @Test
     public void testSetComparator() {
-        EventList<String> source = new BasicEventList<String>();
+        EventList<String> source = new BasicEventList<>();
         source.addAll(GlazedListsTests.stringToList("AAaaaBBBBbCCCddd"));
 
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, GlazedLists.caseInsensitiveComparator(), 0, Integer.MAX_VALUE);
+        SeparatorList<String> separatorList = new SeparatorList<>(source, GlazedLists.caseInsensitiveComparator(), 0, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separatorList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -747,10 +747,10 @@ public class SeparatorListTest {
      */
     @Test
     public void testSetComparatorWithLimit() {
-        EventList<String> source = new BasicEventList<String>();
+        EventList<String> source = new BasicEventList<>();
         source.addAll(GlazedListsTests.stringToList("AAaaaBBBBbCCCddd"));
 
-        SeparatorList<String> separatorList = new SeparatorList<String>(source,
+        SeparatorList<String> separatorList = new SeparatorList<>(source,
                 GlazedLists.caseInsensitiveComparator(), 0, 2);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener
                 .install(separatorList);
@@ -862,9 +862,9 @@ public class SeparatorListTest {
      */
     @Test
     public void testHandleChange() {
-        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
-        FilterList<String> filtered = new FilterList<String>(source);
-        SeparatorList<String> separated = new SeparatorList<String>(filtered, GlazedLists.comparableComparator(), 1, Integer.MAX_VALUE);
+        TransactionList<String> source = new TransactionList<>(new BasicEventList<String>());
+        FilterList<String> filtered = new FilterList<>(source);
+        SeparatorList<String> separated = new SeparatorList<>(filtered, GlazedLists.comparableComparator(), 1, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separated);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -918,8 +918,8 @@ public class SeparatorListTest {
      */
     @Test
     public void testHandleChangeSimplified() {
-        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
-        SeparatorList<String> separated = new SeparatorList<String>(source, GlazedLists.comparableComparator(), 1, Integer.MAX_VALUE);
+        TransactionList<String> source = new TransactionList<>(new BasicEventList<String>());
+        SeparatorList<String> separated = new SeparatorList<>(source, GlazedLists.comparableComparator(), 1, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separated);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -935,11 +935,11 @@ public class SeparatorListTest {
 
     @Test
     public void testIssue599() {
-        BasicEventList<String> base = new BasicEventList<String>();
+        BasicEventList<String> base = new BasicEventList<>();
         base.add("A");
         base.add("A");
-        TransactionList<String> source = new TransactionList<String>(base);
-        SeparatorList<String> grouped = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        TransactionList<String> source = new TransactionList<>(base);
+        SeparatorList<String> grouped = new SeparatorList<>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
         ListConsistencyListener<String> listener = ListConsistencyListener.install(grouped, "GROUPED:", true);
         listener.setPreviousElementTracked(false);
         source.beginEvent(true);
@@ -969,8 +969,8 @@ public class SeparatorListTest {
      */
     @Test
     public void testHandleUpdateEvents() {
-        EventList<String> source = new BasicEventList<String>();
-        SeparatorList<String> separated = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        EventList<String> source = new BasicEventList<>();
+        SeparatorList<String> separated = new SeparatorList<>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(separated);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -991,8 +991,8 @@ public class SeparatorListTest {
 
     @Test
     public void testSet() {
-        EventList<String> source = new BasicEventList<String>();
-        SeparatorList<String> separated = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        EventList<String> source = new BasicEventList<>();
+        SeparatorList<String> separated = new SeparatorList<>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
 
         source.addAll(GlazedListsTests.stringToList("ABCABCABC"));
         assertEquals(9, source.size());
@@ -1027,8 +1027,8 @@ public class SeparatorListTest {
 
     @Test
     public void testAdd() {
-        EventList<String> source = new BasicEventList<String>();
-        SeparatorList<String> separated = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        EventList<String> source = new BasicEventList<>();
+        SeparatorList<String> separated = new SeparatorList<>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
 
         source.addAll(GlazedListsTests.stringToList("ABCABCABC"));
         assertEquals(9, source.size());
@@ -1069,8 +1069,8 @@ public class SeparatorListTest {
 
     @Test
     public void testRemove() {
-        EventList<String> source = new BasicEventList<String>();
-        SeparatorList<String> separated = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
+        EventList<String> source = new BasicEventList<>();
+        SeparatorList<String> separated = new SeparatorList<>(source, String.CASE_INSENSITIVE_ORDER, 1, Integer.MAX_VALUE);
 
         source.addAll(GlazedListsTests.stringToList("ABCABCABC"));
         assertEquals(9, source.size());
@@ -1109,8 +1109,8 @@ public class SeparatorListTest {
      */
     @Test
     public void testSetComparatorTwice() {
-        final EventList<Object> source = new BasicEventList<Object>();
-        final SeparatorList<Object> separated = new SeparatorList<Object>(source, GlazedListsImpl.equalsComparator(), 0, 0);
+        final EventList<Object> source = new BasicEventList<>();
+        final SeparatorList<Object> separated = new SeparatorList<>(source, GlazedListsImpl.equalsComparator(), 0, 0);
         separated.setComparator(GlazedListsImpl.equalsComparator());
 
         final Object o = new Object();
@@ -1125,11 +1125,11 @@ public class SeparatorListTest {
     @Test
     public void testIssue499()
    {
-        TransactionList<String> source = new TransactionList<String>(
+        TransactionList<String> source = new TransactionList<>(
                 new BasicEventList<String>());
 
         Comparator<String> comparator = GlazedListsTests.getFirstLetterComparator();
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, comparator, 0, Integer.MAX_VALUE);
+        SeparatorList<String> separatorList = new SeparatorList<>(source, comparator, 0, Integer.MAX_VALUE);
         ListConsistencyListener<String> listener = ListConsistencyListener.install(separatorList, "GROUPED:", true);
         listener.setPreviousElementTracked(false);
 
@@ -1159,11 +1159,11 @@ public class SeparatorListTest {
 
     @Test
     public void testSplitFirstGroup() {
-        TransactionList<String> source = new TransactionList<String>(
+        TransactionList<String> source = new TransactionList<>(
                 new BasicEventList<String>());
 
         Comparator<String> comparator = GlazedListsTests.getFirstLetterComparator();
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, comparator, 0, Integer.MAX_VALUE);
+        SeparatorList<String> separatorList = new SeparatorList<>(source, comparator, 0, Integer.MAX_VALUE);
         ListConsistencyListener<String> listener = ListConsistencyListener.install(separatorList, "GROUPED:", true);
         listener.setPreviousElementTracked(false);
 
@@ -1185,11 +1185,11 @@ public class SeparatorListTest {
 
     @Test
     public void testJoinToFirstGroup() {
-        TransactionList<String> source = new TransactionList<String>(
+        TransactionList<String> source = new TransactionList<>(
                 new BasicEventList<String>());
 
         Comparator<String> comparator = GlazedListsTests.getFirstLetterComparator();
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, comparator, 0, Integer.MAX_VALUE);
+        SeparatorList<String> separatorList = new SeparatorList<>(source, comparator, 0, Integer.MAX_VALUE);
         ListConsistencyListener<String> listener = ListConsistencyListener.install(separatorList, "GROUPED:", true);
         listener.setPreviousElementTracked(false);
 
@@ -1211,11 +1211,11 @@ public class SeparatorListTest {
 
     @Test
     public void testMultipleUpdateDeleteSeparatorList() {
-        TransactionList<String> source = new TransactionList<String>(
+        TransactionList<String> source = new TransactionList<>(
                 new BasicEventList<String>());
 
         Comparator<String> comparator = GlazedListsTests.getFirstLetterComparator();
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, comparator, 0, Integer.MAX_VALUE);
+        SeparatorList<String> separatorList = new SeparatorList<>(source, comparator, 0, Integer.MAX_VALUE);
         ListConsistencyListener<String> listener = ListConsistencyListener.install(separatorList, "GROUPED:", true);
         listener.setPreviousElementTracked(false);
 
@@ -1245,11 +1245,11 @@ public class SeparatorListTest {
 
     @Test
     public void testIssue522() {
-        TransactionList<String> source = new TransactionList<String>(
+        TransactionList<String> source = new TransactionList<>(
                 new BasicEventList<String>());
 
         Comparator<String> comparator = GlazedListsTests.getFirstLetterComparator();
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, comparator, 0, Integer.MAX_VALUE);
+        SeparatorList<String> separatorList = new SeparatorList<>(source, comparator, 0, Integer.MAX_VALUE);
         ListConsistencyListener<String> listener = ListConsistencyListener.install(separatorList, "GROUPED:", true);
         listener.setPreviousElementTracked(false);
 
@@ -1279,8 +1279,8 @@ public class SeparatorListTest {
 
     @Test
     public void testTwoGroupsToOne() {
-        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 0, Integer.MAX_VALUE);
+        TransactionList<String> source = new TransactionList<>(new BasicEventList<String>());
+        SeparatorList<String> separatorList = new SeparatorList<>(source, String.CASE_INSENSITIVE_ORDER, 0, Integer.MAX_VALUE);
         ListConsistencyListener<String> listener = ListConsistencyListener.install(separatorList, "GROUPED:", true);
         listener.setPreviousElementTracked(false);
 
@@ -1302,8 +1302,8 @@ public class SeparatorListTest {
 
     @Test
     public void testFourGroupsToOne() {
-        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 0, Integer.MAX_VALUE);
+        TransactionList<String> source = new TransactionList<>(new BasicEventList<String>());
+        SeparatorList<String> separatorList = new SeparatorList<>(source, String.CASE_INSENSITIVE_ORDER, 0, Integer.MAX_VALUE);
         ListConsistencyListener<String> listener = ListConsistencyListener.install(separatorList, "GROUPED:", true);
         listener.setPreviousElementTracked(false);
 
@@ -1330,8 +1330,8 @@ public class SeparatorListTest {
 
     @Test
     public void testMultipleUpdatesCreateGroupOnStartOfPrev() {
-        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 0, Integer.MAX_VALUE);
+        TransactionList<String> source = new TransactionList<>(new BasicEventList<String>());
+        SeparatorList<String> separatorList = new SeparatorList<>(source, String.CASE_INSENSITIVE_ORDER, 0, Integer.MAX_VALUE);
         ListConsistencyListener<String> listener = ListConsistencyListener.install(separatorList, "GROUPED:", true);
         listener.setPreviousElementTracked(false);
 
@@ -1364,8 +1364,8 @@ public class SeparatorListTest {
 
     @Test
     public void testMultipleUpdatesCreateGroupOnDuplicateOfPrev() {
-        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
-        SeparatorList<String> separatorList = new SeparatorList<String>(source, String.CASE_INSENSITIVE_ORDER, 0, Integer.MAX_VALUE);
+        TransactionList<String> source = new TransactionList<>(new BasicEventList<String>());
+        SeparatorList<String> separatorList = new SeparatorList<>(source, String.CASE_INSENSITIVE_ORDER, 0, Integer.MAX_VALUE);
         ListConsistencyListener<String> listener = ListConsistencyListener.install(separatorList, "GROUPED:", true);
         listener.setPreviousElementTracked(false);
 
@@ -1400,7 +1400,7 @@ public class SeparatorListTest {
     @Test
     public void testInsertBugFix() {
         TransactionList<Element> source = createElementSource();
-        SeparatorList<Element> separatorList = new SeparatorList<Element>(source, elementComparator(), 0, Integer.MAX_VALUE);
+        SeparatorList<Element> separatorList = new SeparatorList<>(source, elementComparator(), 0, Integer.MAX_VALUE);
 
         source.beginEvent();
         source.set(3, new Element(1, 4));
@@ -1414,7 +1414,7 @@ public class SeparatorListTest {
     @Test
     public void testDeleteBugFix() {
         TransactionList<Element> source = createElementSource();
-        SeparatorList<Element> separatorList = new SeparatorList<Element>(source, elementComparator(), 0, Integer.MAX_VALUE);
+        SeparatorList<Element> separatorList = new SeparatorList<>(source, elementComparator(), 0, Integer.MAX_VALUE);
 
         source.beginEvent();
         source.set(3, new Element(1, 4));
@@ -1428,7 +1428,7 @@ public class SeparatorListTest {
     @Test
     public void testSortingBug() {
         TransactionList<Element> source = createElementSource();
-        SeparatorList<Element> separatorList = new SeparatorList<Element>(source, elementComparator(), 0, Integer.MAX_VALUE);
+        SeparatorList<Element> separatorList = new SeparatorList<>(source, elementComparator(), 0, Integer.MAX_VALUE);
 
         source.beginEvent();
         source.set(10, new Element(1, 11));
@@ -1443,7 +1443,7 @@ public class SeparatorListTest {
     public void testSortingBug2() {
         TransactionList<Element> source = createElementSource();
         source.set(2, new Element(2, 3));
-        SeparatorList<Element> separatorList = new SeparatorList<Element>(source, elementComparator(), 0, Integer.MAX_VALUE);
+        SeparatorList<Element> separatorList = new SeparatorList<>(source, elementComparator(), 0, Integer.MAX_VALUE);
 
         source.beginEvent();
         source.set(10, new Element(1, 11));
@@ -1458,7 +1458,7 @@ public class SeparatorListTest {
     @Test
     public void testUpdateDeleteBug() {
         TransactionList<Element> source = createUpdateDeleteElementSource();
-        SeparatorList<Element> separatorList = new SeparatorList<Element>(source, elementComparator(), 0, Integer.MAX_VALUE);
+        SeparatorList<Element> separatorList = new SeparatorList<>(source, elementComparator(), 0, Integer.MAX_VALUE);
 
         source.beginEvent();
         source.set(3, new Element(2, 4));
@@ -1473,7 +1473,7 @@ public class SeparatorListTest {
     public void testUpdateDeleteBug2() {
         TransactionList<Element> source = createUpdateDeleteElementSource();
         source.add(new Element(2, 6));
-        SeparatorList<Element> separatorList = new SeparatorList<Element>(source, elementComparator(), 0, Integer.MAX_VALUE);
+        SeparatorList<Element> separatorList = new SeparatorList<>(source, elementComparator(), 0, Integer.MAX_VALUE);
 
         source.beginEvent();
         source.set(3, new Element(2, 4));
@@ -1490,7 +1490,7 @@ public class SeparatorListTest {
         TransactionList<Element> source = createUpdateDeleteElementSource();
         source.remove(6);
         source.set(5, new Element(2, 6));
-        SeparatorList<Element> separatorList = new SeparatorList<Element>(source, elementComparator(), 0, Integer.MAX_VALUE);
+        SeparatorList<Element> separatorList = new SeparatorList<>(source, elementComparator(), 0, Integer.MAX_VALUE);
 
         source.beginEvent();
         source.set(3, new Element(2, 4));
@@ -1505,7 +1505,7 @@ public class SeparatorListTest {
     public void testUpdateDeleteBug4() {
         TransactionList<Element> source = createUpdateDeleteElementSource();
         source.remove(6);
-        SeparatorList<Element> separatorList = new SeparatorList<Element>(source, elementComparator(), 0, Integer.MAX_VALUE);
+        SeparatorList<Element> separatorList = new SeparatorList<>(source, elementComparator(), 0, Integer.MAX_VALUE);
 
         source.beginEvent();
         source.set(3, new Element(2, 4));
@@ -1520,7 +1520,7 @@ public class SeparatorListTest {
     public void testSeparatorNotShifted()
     {
         TransactionList<Element> source = createLinearElementSource();
-        SeparatorList<Element> separatorList = new SeparatorList<Element>(source, elementComparator(), 0, Integer.MAX_VALUE);
+        SeparatorList<Element> separatorList = new SeparatorList<>(source, elementComparator(), 0, Integer.MAX_VALUE);
 //        GroupingList<Element> separatorList = new GroupingList<Element>(source, elementComparator());
 
         source.beginEvent();
@@ -1546,7 +1546,7 @@ public class SeparatorListTest {
     @Test
     public void testLinearNewGroupCreation() {
         TransactionList<Element> source = createLinearElementSource2();
-        SeparatorList<Element> separatorList = new SeparatorList<Element>(source, elementComparator(), 0, Integer.MAX_VALUE);
+        SeparatorList<Element> separatorList = new SeparatorList<>(source, elementComparator(), 0, Integer.MAX_VALUE);
 
         source.beginEvent();
         source.set(1, new Element(2, 2));
@@ -1565,7 +1565,7 @@ public class SeparatorListTest {
     @Test
     public void testLinearNewGroupCreation2() {
         TransactionList<Element> source = createLinearElementSource2();
-        SeparatorList<Element> separatorList = new SeparatorList<Element>(source, elementComparator(), 0, Integer.MAX_VALUE);
+        SeparatorList<Element> separatorList = new SeparatorList<>(source, elementComparator(), 0, Integer.MAX_VALUE);
 
         source.beginEvent();
         source.set(0, new Element(1, 1));
@@ -1580,7 +1580,7 @@ public class SeparatorListTest {
     }
 
     private TransactionList<Element> createElementSource() {
-        TransactionList<Element> source = new TransactionList<Element>(new BasicEventList<Element>());
+        TransactionList<Element> source = new TransactionList<>(new BasicEventList<Element>());
         source.add(new Element(1, 1));
         source.add(new Element(2, 2));
         source.add(new Element(3, 3));
@@ -1597,7 +1597,7 @@ public class SeparatorListTest {
     }
 
     private TransactionList<Element> createUpdateDeleteElementSource() {
-        TransactionList<Element> source = new TransactionList<Element>(new BasicEventList<Element>());
+        TransactionList<Element> source = new TransactionList<>(new BasicEventList<Element>());
         source.add(new Element(1, 1));
         source.add(new Element(1, 2));
         source.add(new Element(1, 3));
@@ -1609,7 +1609,7 @@ public class SeparatorListTest {
     }
 
     private TransactionList<Element> createLinearElementSource() {
-        TransactionList<Element> source = new TransactionList<Element>(new BasicEventList<Element>());
+        TransactionList<Element> source = new TransactionList<>(new BasicEventList<Element>());
         source.add(new Element(0, 1));
         source.add(new Element(2, 2));
         source.add(new Element(2, 3));
@@ -1645,7 +1645,7 @@ public class SeparatorListTest {
     }
 
     private TransactionList<Element> createLinearElementSource2() {
-        TransactionList<Element> source = new TransactionList<Element>(new BasicEventList<Element>());
+        TransactionList<Element> source = new TransactionList<>(new BasicEventList<Element>());
         source.add(new Element(1, 1));
         source.add(new Element(1, 2));
         source.add(new Element(1, 3));

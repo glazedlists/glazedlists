@@ -124,14 +124,14 @@ public class DefaultEventTableViewer<E> implements ListEventListener<E> {
             }
             // insert a checked source if supported by the table
             if ((table.getStyle() & SWT.CHECK) == SWT.CHECK) {
-                this.source = checkFilterList = new TableCheckFilterList<E,E>(this.source, table, tableFormat);
+                this.source = checkFilterList = new TableCheckFilterList<>(this.source, table, tableFormat);
             }
             this.table = table;
             this.tableFormat = tableFormat;
             this.tableItemConfigurer = tableItemConfigurer;
 
             // enable the selection lists
-            selection = new SelectionManager<E>(this.source, new SelectableTable());
+            selection = new SelectionManager<>(this.source, new SelectableTable());
 
             // configure how the Table will be manipulated
             if(isTableVirtual()) {

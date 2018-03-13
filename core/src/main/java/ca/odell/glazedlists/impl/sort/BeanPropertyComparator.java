@@ -28,7 +28,7 @@ public final class BeanPropertyComparator<T> implements Comparator<T> {
      * {@link ca.odell.glazedlists.GlazedLists GlazedLists} tool factory.
      */
     public BeanPropertyComparator(Class<T> className, String property, Comparator propertyComparator) {
-        beanProperty = new BeanProperty<T>(className, property, true, false);
+        beanProperty = new BeanProperty<>(className, property, true, false);
         this.propertyComparator = propertyComparator;
     }
 

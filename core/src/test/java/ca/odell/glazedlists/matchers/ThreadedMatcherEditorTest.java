@@ -48,9 +48,9 @@ public class ThreadedMatcherEditorTest {
     @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
-        textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
-        threadedMatcherEditor = new ThreadedMatcherEditor<String>(textMatcherEditor);
-        filterList = new FilterList<String>(new BasicEventList<String>(), threadedMatcherEditor);
+        textMatcherEditor = new TextMatcherEditor<>(GlazedLists.toStringTextFilterator());
+        threadedMatcherEditor = new ThreadedMatcherEditor<>(textMatcherEditor);
+        filterList = new FilterList<>(new BasicEventList<String>(), threadedMatcherEditor);
 
         matchAll = new MatcherEditor.Event(threadedMatcherEditor, MatcherEditor.Event.MATCH_ALL, Matchers.trueMatcher());
         matchNone = new MatcherEditor.Event(threadedMatcherEditor, MatcherEditor.Event.MATCH_NONE, Matchers.falseMatcher());
@@ -164,7 +164,7 @@ public class ThreadedMatcherEditorTest {
     @Test
     public void testQueuingConstraints() throws InterruptedException {
         final CountingMatcherEditorListener<String> counter =
-            new CountingMatcherEditorListener<String>(SIMULATED_PROCESSING_DELAY);
+            new CountingMatcherEditorListener<>(SIMULATED_PROCESSING_DELAY);
         threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"J"});
@@ -185,7 +185,7 @@ public class ThreadedMatcherEditorTest {
     @Test
     public void testQueuingRelaxations() throws InterruptedException {
         final CountingMatcherEditorListener<String> counter =
-            new CountingMatcherEditorListener<String>(SIMULATED_PROCESSING_DELAY);
+            new CountingMatcherEditorListener<>(SIMULATED_PROCESSING_DELAY);
         threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"James"});
@@ -206,7 +206,7 @@ public class ThreadedMatcherEditorTest {
     @Test
     public void testQueuingMatchAll() throws InterruptedException {
         final CountingMatcherEditorListener<String> counter =
-            new CountingMatcherEditorListener<String>(SIMULATED_PROCESSING_DELAY);
+            new CountingMatcherEditorListener<>(SIMULATED_PROCESSING_DELAY);
         threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"James"});
@@ -225,7 +225,7 @@ public class ThreadedMatcherEditorTest {
     @Test
     public void testQueuingChanged() throws InterruptedException {
         final CountingMatcherEditorListener<String> counter =
-            new CountingMatcherEditorListener<String>(SIMULATED_PROCESSING_DELAY);
+            new CountingMatcherEditorListener<>(SIMULATED_PROCESSING_DELAY);
         threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"James"});
@@ -244,7 +244,7 @@ public class ThreadedMatcherEditorTest {
     @Test
     public void testQueuingAllSorts_WithPause() throws InterruptedException {
         final CountingMatcherEditorListener<String> counter =
-            new CountingMatcherEditorListener<String>(SIMULATED_PROCESSING_DELAY);
+            new CountingMatcherEditorListener<>(SIMULATED_PROCESSING_DELAY);
         threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"James"});
@@ -281,7 +281,7 @@ public class ThreadedMatcherEditorTest {
     @Test
     public void testQueuingAllSorts_WithoutPause() throws InterruptedException {
         final CountingMatcherEditorListener<String> counter =
-            new CountingMatcherEditorListener<String>(SIMULATED_PROCESSING_DELAY);
+            new CountingMatcherEditorListener<>(SIMULATED_PROCESSING_DELAY);
         threadedMatcherEditor.addMatcherEditorListener(counter);
 
         textMatcherEditor.setFilterText(new String[] {"James"});

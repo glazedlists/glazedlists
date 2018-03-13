@@ -105,7 +105,7 @@ public final class UndoSupport<E> {
     public static <E> UndoSupport install(UndoManager undoManager, EventList<E> source, FunctionList.Function<UndoRedoSupport.Edit, UndoableEdit> editAdapter) {
         checkAccessThread();
 
-        return new UndoSupport<E>(undoManager, source, editAdapter);
+        return new UndoSupport<>(undoManager, source, editAdapter);
     }
 
     /**

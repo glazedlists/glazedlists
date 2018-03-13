@@ -21,7 +21,7 @@ public class ListEventBlockTest {
 
     @Test
     public void testSortListEventBlocks() {
-        TransactionList<String> list = new TransactionList<String>(new BasicEventList<String>());
+        TransactionList<String> list = new TransactionList<>(new BasicEventList<String>());
         ListConsistencyListener.install(list);
 
         list.beginEvent();
@@ -44,7 +44,7 @@ public class ListEventBlockTest {
 
     @Test
     public void testSortListEventBlocks2() {
-        TransactionList<String> list = new TransactionList<String>(new BasicEventList<String>());
+        TransactionList<String> list = new TransactionList<>(new BasicEventList<String>());
         ListConsistencyListener.install(list);
 
         list.beginEvent();
@@ -60,7 +60,7 @@ public class ListEventBlockTest {
 
     @Test
     public void testSortListEventBlocks3() {
-        TransactionList<String> list = new TransactionList<String>(new BasicEventList<String>());
+        TransactionList<String> list = new TransactionList<>(new BasicEventList<String>());
         ListConsistencyListener.install(list);
 
         list.beginEvent();
@@ -76,7 +76,7 @@ public class ListEventBlockTest {
 
     @Test
     public void testSortListEventBlocks4() {
-        TransactionList<String> list = new TransactionList<String>(new BasicEventList<String>());
+        TransactionList<String> list = new TransactionList<>(new BasicEventList<String>());
         ListConsistencyListener.install(list);
 
         list.beginEvent();
@@ -103,13 +103,13 @@ public class ListEventBlockTest {
 //        final int LIST_CHANGE_COUNT = 4;
 
         // prepare the change counters
-        List<ListChangeEnumeration> listChangeEnumarations = new ArrayList<ListChangeEnumeration>(LIST_CHANGE_COUNT);
+        List<ListChangeEnumeration> listChangeEnumarations = new ArrayList<>(LIST_CHANGE_COUNT);
         for(int i = 0; i < LIST_CHANGE_COUNT; i++) {
             listChangeEnumarations.add(new ListChangeEnumeration());
         }
 
         // prepare the list to perform all of our changes on
-        TransactionList<String> list = new TransactionList<String>(new BasicEventList<String>());
+        TransactionList<String> list = new TransactionList<>(new BasicEventList<String>());
         ListConsistencyListener.install(list);
 
         int count = 0;

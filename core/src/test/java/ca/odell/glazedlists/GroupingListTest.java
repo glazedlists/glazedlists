@@ -32,7 +32,7 @@ public class GroupingListTest {
 
     @Test
     public void testAdd() {
-        EventList<String> sourceList = new BasicEventList<String>();
+        EventList<String> sourceList = new BasicEventList<>();
         GroupingList<String> groupList = GroupingList.create(sourceList);
         ListConsistencyListener<List<String>> listConsistencyListener = ListConsistencyListener.install(groupList);
         listConsistencyListener.setPreviousElementTracked(false);
@@ -96,7 +96,7 @@ public class GroupingListTest {
 
     @Test
     public void testAddAll() {
-        EventList<String> sourceList = new BasicEventList<String>();
+        EventList<String> sourceList = new BasicEventList<>();
         GroupingList<String> groupList = GroupingList.create(sourceList);
         ListConsistencyListener<List<String>> listConsistencyListener = ListConsistencyListener.install(groupList);
         listConsistencyListener.setPreviousElementTracked(false);
@@ -122,7 +122,7 @@ public class GroupingListTest {
 
     @Test
     public void testInsert() {
-        EventList<String> sourceList = new BasicEventList<String>();
+        EventList<String> sourceList = new BasicEventList<>();
         GroupingList<String> groupList = GroupingList.create(sourceList);
         ListConsistencyListener<List<String>> listConsistencyListener = ListConsistencyListener.install(groupList);
         listConsistencyListener.setPreviousElementTracked(false);
@@ -177,7 +177,7 @@ public class GroupingListTest {
 
     @Test
     public void testSourceSet() {
-        EventList<String> sourceList = new BasicEventList<String>();
+        EventList<String> sourceList = new BasicEventList<>();
         GroupingList<String> groupList = GroupingList.create(sourceList);
         ListConsistencyListener<List<String>> listConsistencyListener = ListConsistencyListener.install(groupList);
         listConsistencyListener.setPreviousElementTracked(false);
@@ -202,7 +202,7 @@ public class GroupingListTest {
 
     @Test
     public void testSet() {
-        EventList<String> sourceList = new BasicEventList<String>();
+        EventList<String> sourceList = new BasicEventList<>();
         GroupingList<String> groupList = GroupingList.create(sourceList);
         ListConsistencyListener<List<String>> groupListConsistencyListener = ListConsistencyListener.install(groupList);
         groupListConsistencyListener.setPreviousElementTracked(false);
@@ -227,7 +227,7 @@ public class GroupingListTest {
 
     @Test
     public void testRemoveAPair() {
-        EventList<String> sourceList = new BasicEventList<String>();
+        EventList<String> sourceList = new BasicEventList<>();
         GroupingList<String> groupList = GroupingList.create(sourceList);
         ListConsistencyListener<List<String>> listConsistencyListener = ListConsistencyListener.install(groupList);
         listConsistencyListener.setPreviousElementTracked(false);
@@ -242,7 +242,7 @@ public class GroupingListTest {
 
     @Test
     public void testRemove() {
-        EventList<String> sourceList = new BasicEventList<String>();
+        EventList<String> sourceList = new BasicEventList<>();
         GroupingList<String> groupList = GroupingList.create(sourceList);
         ListConsistencyListener<List<String>> listConsistencyListener = ListConsistencyListener.install(groupList);
         listConsistencyListener.setPreviousElementTracked(false);
@@ -304,9 +304,9 @@ public class GroupingListTest {
      */
     @Test
     public void testGroupListMassUpdate() {
-        BasicEventList<String> sourceList = new BasicEventList<String>();
+        BasicEventList<String> sourceList = new BasicEventList<>();
         sourceList.addAll(GlazedListsTests.delimitedStringToList("A A A A"));
-        GroupingList<String> groupList = new GroupingList<String>(sourceList, GlazedListsTests.getFirstLetterComparator());
+        GroupingList<String> groupList = new GroupingList<>(sourceList, GlazedListsTests.getFirstLetterComparator());
         ListConsistencyListener<List<String>> checker = ListConsistencyListener.install(groupList);
         checker.setPreviousElementTracked(false);
 
@@ -412,7 +412,7 @@ public class GroupingListTest {
 
     @Test
     public void testDispose() {
-        final BasicEventList<String> source = new BasicEventList<String>();
+        final BasicEventList<String> source = new BasicEventList<>();
         final GroupingList<String> groupingList = GroupingList.create(source);
 
         assertEquals(1, source.updates.getListEventListeners().size());
@@ -430,7 +430,7 @@ public class GroupingListTest {
      */
     @Test
     public void testStaleGroupHandling() {
-        final EventList<String> source = new BasicEventList<String>();
+        final EventList<String> source = new BasicEventList<>();
         final GroupingList<String> groupingList = GroupingList.create(source);
 
         source.addAll(GlazedListsTests.stringToList("AAABBBCCC"));
@@ -450,8 +450,8 @@ public class GroupingListTest {
 
     @Test
     public void testWriteThroughGroupListElement() {
-        final EventList<String> source = new BasicEventList<String>();
-        final GroupingList<String> groupingList = new GroupingList<String>(source, GlazedListsTests.getFirstLetterComparator());
+        final EventList<String> source = new BasicEventList<>();
+        final GroupingList<String> groupingList = new GroupingList<>(source, GlazedListsTests.getFirstLetterComparator());
 
         source.addAll(GlazedListsTests.delimitedStringToList("Jesse James Jodie Mark Mariusz"));
 
@@ -478,8 +478,8 @@ public class GroupingListTest {
      */
     @Test
     public void testSeparatorListBreaks() {
-        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
-        GroupingList<String> grouped = new GroupingList<String>(source, GlazedLists.comparableComparator());
+        TransactionList<String> source = new TransactionList<>(new BasicEventList<String>());
+        GroupingList<String> grouped = new GroupingList<>(source, GlazedLists.comparableComparator());
         ListConsistencyListener<List<String>> listConsistencyListener = ListConsistencyListener.install(grouped);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -496,9 +496,9 @@ public class GroupingListTest {
 
     @Test
     public void testGenerics() {
-        EventList<String> source = new BasicEventList<String>();
+        EventList<String> source = new BasicEventList<>();
 
-        EventList<List<String>> testList = new GroupingList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        EventList<List<String>> testList = new GroupingList<>(source, String.CASE_INSENSITIVE_ORDER);
         testList.dispose();
     }
 
@@ -507,8 +507,8 @@ public class GroupingListTest {
      */
     @Test
     public void testSetComparator() {
-        final EventList<String> source = new BasicEventList<String>();
-        final GroupingList<String> groupingList = new GroupingList<String>(source, GlazedListsTests.getFirstLetterComparator());
+        final EventList<String> source = new BasicEventList<>();
+        final GroupingList<String> groupingList = new GroupingList<>(source, GlazedListsTests.getFirstLetterComparator());
         ListConsistencyListener<List<String>> listConsistencyListener = ListConsistencyListener.install(groupingList);
         listConsistencyListener.setPreviousElementTracked(false);
 
@@ -538,8 +538,8 @@ public class GroupingListTest {
 
     @Test
     public void testIndexOfGroup() {
-        final EventList<String> source = new BasicEventList<String>();
-        final GroupingList<String> groupingList = new GroupingList<String>(source, GlazedListsTests.getFirstLetterComparator());
+        final EventList<String> source = new BasicEventList<>();
+        final GroupingList<String> groupingList = new GroupingList<>(source, GlazedListsTests.getFirstLetterComparator());
 
         source.add("Bart");
         source.add("Brent");
@@ -568,9 +568,9 @@ public class GroupingListTest {
 
     @Test
     public void testWithFilters() {
-        EventList<String> source = new BasicEventList<String>();
-        FilterList<String> filtered = new FilterList<String>(source);
-        GroupingList<String> grouped = new GroupingList<String>(filtered, GlazedListsTests
+        EventList<String> source = new BasicEventList<>();
+        FilterList<String> filtered = new FilterList<>(source);
+        GroupingList<String> grouped = new GroupingList<>(filtered, GlazedListsTests
                 .getFirstLetterComparator());
 
         source.addAll(Arrays.asList("CGG"));
@@ -597,10 +597,10 @@ public class GroupingListTest {
      */
     @Test
     public void testChangeOnFirstAndSecondElement() {
-        TransactionList<String> source = new TransactionList<String>(
+        TransactionList<String> source = new TransactionList<>(
                 new BasicEventList<String>());
 
-        GroupingList<String> grouped = new GroupingList<String>(source, GlazedListsTests
+        GroupingList<String> grouped = new GroupingList<>(source, GlazedListsTests
                 .getFirstLetterComparator());
 
         source.add("A1");
@@ -624,10 +624,10 @@ public class GroupingListTest {
      */
     @Test
     public void testAddOnFirstAndUpdateOnSecondElement() {
-        TransactionList<String> source = new TransactionList<String>(
+        TransactionList<String> source = new TransactionList<>(
                 new BasicEventList<String>());
 
-        GroupingList<String> grouped = new GroupingList<String>(source, GlazedListsTests
+        GroupingList<String> grouped = new GroupingList<>(source, GlazedListsTests
                 .getFirstLetterComparator());
 
         source.add("A1");
@@ -651,10 +651,10 @@ public class GroupingListTest {
      */
     @Test
     public void testIssue486() {
-        TransactionList<String> txList = new TransactionList<String>(
+        TransactionList<String> txList = new TransactionList<>(
                 new BasicEventList<String>());
 
-        GroupingList<String> grouped = new GroupingList<String>(txList);
+        GroupingList<String> grouped = new GroupingList<>(txList);
         txList.beginEvent();
         txList.add("basket");
         txList.add("basket");
@@ -674,11 +674,11 @@ public class GroupingListTest {
 
     @Test
     public void testIssue522() {
-        TransactionList<String> source = new TransactionList<String>(
+        TransactionList<String> source = new TransactionList<>(
                 new BasicEventList<String>());
 
         Comparator<String> comparator = GlazedListsTests.getFirstLetterComparator();
-        GroupingList<String> grouped = new GroupingList<String>(source, comparator);
+        GroupingList<String> grouped = new GroupingList<>(source, comparator);
         ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped);
         listener.setPreviousElementTracked(false);
         String[] s = new String[] {"A", "B", "C", "D", "DD", "DDD", "E", "F", "FF"};
@@ -697,11 +697,11 @@ public class GroupingListTest {
 
     @Test
     public void testMultipleUpdateDelete() {
-        TransactionList<String> source = new TransactionList<String>(
+        TransactionList<String> source = new TransactionList<>(
                 new BasicEventList<String>());
 
         Comparator<String> comparator = GlazedListsTests.getFirstLetterComparator();
-        GroupingList<String> grouped = new GroupingList<String>(source, comparator);
+        GroupingList<String> grouped = new GroupingList<>(source, comparator);
         ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped);
         listener.setPreviousElementTracked(false);
         String[] s = new String[] {"C", "CC", "D", "DD", "E", "EE"};
@@ -726,11 +726,11 @@ public class GroupingListTest {
 
     @Test
     public void testLastGroup() {
-        TransactionList<String> source = new TransactionList<String>(
+        TransactionList<String> source = new TransactionList<>(
                 new BasicEventList<String>());
 
         Comparator<String> comparator = GlazedListsTests.getFirstLetterComparator();
-        GroupingList<String> grouped = new GroupingList<String>(source, comparator);
+        GroupingList<String> grouped = new GroupingList<>(source, comparator);
         ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped);
         listener.setPreviousElementTracked(false);
         String[] s = new String[] {"A", "B", "C", "D", "DD", "DDD", "E", "F", "FF"};
@@ -751,11 +751,11 @@ public class GroupingListTest {
 
     @Test
 	public void testIssue499() {
-		TransactionList<String> source = new TransactionList<String>(
+		TransactionList<String> source = new TransactionList<>(
 				new BasicEventList<String>());
 
 		Comparator<String> comparator = GlazedListsTests.getFirstLetterComparator();
-		GroupingList<String> grouped = new GroupingList<String>(source,
+		GroupingList<String> grouped = new GroupingList<>(source,
 				comparator);
         ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
         listener.setPreviousElementTracked(false);
@@ -781,11 +781,11 @@ public class GroupingListTest {
 
     @Test
     public void testSplitFirstGroup() {
-        TransactionList<String> source = new TransactionList<String>(
+        TransactionList<String> source = new TransactionList<>(
                 new BasicEventList<String>());
 
         Comparator<String> comparator = GlazedListsTests.getFirstLetterComparator();
-        GroupingList<String> grouped = new GroupingList<String>(source, comparator);
+        GroupingList<String> grouped = new GroupingList<>(source, comparator);
         ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
         listener.setPreviousElementTracked(false);
 
@@ -805,9 +805,9 @@ public class GroupingListTest {
 
     @Test
     public void testSplitFirstGroupLonger() {
-        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
+        TransactionList<String> source = new TransactionList<>(new BasicEventList<String>());
 
-        GroupingList<String> grouped = new GroupingList<String>(source,  GlazedListsTests.getFirstLetterComparator());
+        GroupingList<String> grouped = new GroupingList<>(source,  GlazedListsTests.getFirstLetterComparator());
         ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
         listener.setPreviousElementTracked(false);
 
@@ -839,11 +839,11 @@ public class GroupingListTest {
 
     @Test
     public void testJoinToFirstGroup() {
-        TransactionList<String> source = new TransactionList<String>(
+        TransactionList<String> source = new TransactionList<>(
                 new BasicEventList<String>());
 
         Comparator<String> comparator = GlazedListsTests.getFirstLetterComparator();
-        GroupingList<String> grouped = new GroupingList<String>(source, comparator);
+        GroupingList<String> grouped = new GroupingList<>(source, comparator);
         ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
         listener.setPreviousElementTracked(false);
 
@@ -862,9 +862,9 @@ public class GroupingListTest {
 
     @Test
     public void testTwoGroupsToOne() {
-        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
+        TransactionList<String> source = new TransactionList<>(new BasicEventList<String>());
 
-        GroupingList<String> grouped = new GroupingList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        GroupingList<String> grouped = new GroupingList<>(source, String.CASE_INSENSITIVE_ORDER);
         ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
         listener.setPreviousElementTracked(false);
 
@@ -885,10 +885,10 @@ public class GroupingListTest {
 
     @Test
     public void testFourGroupsToOne() {
-        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
+        TransactionList<String> source = new TransactionList<>(new BasicEventList<String>());
         ListConsistencyListener<String> listener2 = ListConsistencyListener.<String>install(source, "SOURCE:", true);
 
-        GroupingList<String> grouped = new GroupingList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        GroupingList<String> grouped = new GroupingList<>(source, String.CASE_INSENSITIVE_ORDER);
         ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
         listener.setPreviousElementTracked(false);
 
@@ -912,9 +912,9 @@ public class GroupingListTest {
 
     @Test
     public void testTakeLastElementFromPrevious() {
-        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
+        TransactionList<String> source = new TransactionList<>(new BasicEventList<String>());
 
-        GroupingList<String> grouped = new GroupingList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        GroupingList<String> grouped = new GroupingList<>(source, String.CASE_INSENSITIVE_ORDER);
         ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
         listener.setPreviousElementTracked(false);
 
@@ -937,9 +937,9 @@ public class GroupingListTest {
 
     @Test
     public void testTakeDuplicatesFromPrevious() {
-        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
+        TransactionList<String> source = new TransactionList<>(new BasicEventList<String>());
 
-        GroupingList<String> grouped = new GroupingList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        GroupingList<String> grouped = new GroupingList<>(source, String.CASE_INSENSITIVE_ORDER);
         ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
         listener.setPreviousElementTracked(false);
 
@@ -964,9 +964,9 @@ public class GroupingListTest {
 
     @Test
     public void testTakeDuplicatesFromPreviousInnerGroups() {
-        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
+        TransactionList<String> source = new TransactionList<>(new BasicEventList<String>());
 
-        GroupingList<String> grouped = new GroupingList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        GroupingList<String> grouped = new GroupingList<>(source, String.CASE_INSENSITIVE_ORDER);
         ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
         listener.setPreviousElementTracked(false);
 
@@ -993,9 +993,9 @@ public class GroupingListTest {
 
     @Test
     public void testMultipleUpdatesTakeAllFromPrevious() {
-        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
+        TransactionList<String> source = new TransactionList<>(new BasicEventList<String>());
 
-        GroupingList<String> grouped = new GroupingList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        GroupingList<String> grouped = new GroupingList<>(source, String.CASE_INSENSITIVE_ORDER);
         ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
         listener.setPreviousElementTracked(false);
 
@@ -1023,9 +1023,9 @@ public class GroupingListTest {
 
     @Test
     public void testMultipleUpdatesCreateGroupOnStartOfPrev() {
-        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
+        TransactionList<String> source = new TransactionList<>(new BasicEventList<String>());
 
-        GroupingList<String> grouped = new GroupingList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        GroupingList<String> grouped = new GroupingList<>(source, String.CASE_INSENSITIVE_ORDER);
         ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
         listener.setPreviousElementTracked(false);
 
@@ -1051,9 +1051,9 @@ public class GroupingListTest {
 
     @Test
     public void testMultipleUpdatesCreateGroupOnDuplicateOfPrev() {
-        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
+        TransactionList<String> source = new TransactionList<>(new BasicEventList<String>());
 
-        GroupingList<String> grouped = new GroupingList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        GroupingList<String> grouped = new GroupingList<>(source, String.CASE_INSENSITIVE_ORDER);
         ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
         listener.setPreviousElementTracked(false);
 
@@ -1079,11 +1079,11 @@ public class GroupingListTest {
 
     @Test
     public void testIssue599() {
-        BasicEventList<String> base = new BasicEventList<String>();
+        BasicEventList<String> base = new BasicEventList<>();
         base.add("A");
         base.add("A");
-        TransactionList<String> source = new TransactionList<String>(base);
-        GroupingList<String> grouped = new GroupingList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        TransactionList<String> source = new TransactionList<>(base);
+        GroupingList<String> grouped = new GroupingList<>(source, String.CASE_INSENSITIVE_ORDER);
         ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
         listener.setPreviousElementTracked(false);
         source.beginEvent(true);
@@ -1096,11 +1096,11 @@ public class GroupingListTest {
 
     @Test
     public void testIssue599_Variant1() {
-        BasicEventList<String> base = new BasicEventList<String>();
+        BasicEventList<String> base = new BasicEventList<>();
         base.add("B");
         base.add("B");
-        TransactionList<String> source = new TransactionList<String>(base);
-        GroupingList<String> grouped = new GroupingList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        TransactionList<String> source = new TransactionList<>(base);
+        GroupingList<String> grouped = new GroupingList<>(source, String.CASE_INSENSITIVE_ORDER);
         ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
         listener.setPreviousElementTracked(false);
         source.beginEvent(true);
@@ -1114,11 +1114,11 @@ public class GroupingListTest {
 
     @Test
     public void testIssue599_Variant2() {
-        BasicEventList<String> base = new BasicEventList<String>();
+        BasicEventList<String> base = new BasicEventList<>();
         base.add("B");
         base.add("B");
-        TransactionList<String> source = new TransactionList<String>(base);
-        GroupingList<String> grouped = new GroupingList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        TransactionList<String> source = new TransactionList<>(base);
+        GroupingList<String> grouped = new GroupingList<>(source, String.CASE_INSENSITIVE_ORDER);
         ListConsistencyListener<List<String>> listener = ListConsistencyListener.<List<String>>install(grouped, "GROUPED:", true);
         listener.setPreviousElementTracked(false);
         source.beginEvent(true);
@@ -1131,19 +1131,19 @@ public class GroupingListTest {
 
     @Test
     public void testIssue599ExpandedWithFunctionList() {
-        BasicEventList<Element> base = new BasicEventList<Element>();
+        BasicEventList<Element> base = new BasicEventList<>();
         base.add(new Element(State.OFF, 70012));
         base.add(new Element(State.OFF, 70027));
 
-        TransactionList<Element> trigger = new TransactionList<Element>(base);
-        GroupingList<Element> groupingList = new GroupingList<Element>(trigger, new Comparator<Element>() {
+        TransactionList<Element> trigger = new TransactionList<>(base);
+        GroupingList<Element> groupingList = new GroupingList<>(trigger, new Comparator<Element>() {
             @Override
             public int compare(Element o1, Element o2) {
                 return o1.getState().compareTo(o2.getState());
             }
         });
 
-        FunctionList<List<Element>, State> functionList = new FunctionList<List<Element>, State>(groupingList,
+        FunctionList<List<Element>, State> functionList = new FunctionList<>(groupingList,
                 new Function<List<Element>, State>() {
                     @Override
                     public State evaluate(List<Element> sourceValues) {

@@ -48,7 +48,7 @@ public class IssuesBrowser implements Runnable {
     public static final Border EMPTY_TWO_PIXEL_BORDER = BorderFactory.createEmptyBorder(2, 2, 2, 2);
 
     /** an event list to host the issues */
-    private EventList<Issue> issuesEventList = new BasicEventList<Issue>();
+    private EventList<Issue> issuesEventList = new BasicEventList<>();
 
     /** all the filters currently applied to the issues list */
     private FilterPanel filterPanel = new FilterPanel(issuesEventList);
@@ -139,16 +139,16 @@ public class IssuesBrowser implements Runnable {
      */
     private JPanel constructView() {
         // sort the original issues list
-        final SortedList<Issue> issuesSortedList = new SortedList<Issue>(issuesEventList, null);
+        final SortedList<Issue> issuesSortedList = new SortedList<>(issuesEventList, null);
 
         // filter the sorted issues
-        FilterList<Issue> filteredIssues = new FilterList<Issue>(issuesSortedList, filterPanel.getMatcherEditor());
+        FilterList<Issue> filteredIssues = new FilterList<>(issuesSortedList, filterPanel.getMatcherEditor());
 
-        SeparatorList<Issue> separatedIssues = new SeparatorList<Issue>(filteredIssues, GlazedLists.beanPropertyComparator(Issue.class, "subcomponent"), 0, Integer.MAX_VALUE);
+        SeparatorList<Issue> separatedIssues = new SeparatorList<>(filteredIssues, GlazedLists.beanPropertyComparator(Issue.class, "subcomponent"), 0, Integer.MAX_VALUE);
         EventList<Issue> separatedIssuesProxyList = GlazedListsSwing.swingThreadProxyList(separatedIssues);
         // build the issues table
         issuesTableModel = GlazedListsSwing.eventTableModel(separatedIssuesProxyList, new IssueTableFormat());
-        final TableColumnModel issuesTableColumnModel = new EventTableColumnModel<TableColumn>(new BasicEventList<TableColumn>());
+        final TableColumnModel issuesTableColumnModel = new EventTableColumnModel<>(new BasicEventList<TableColumn>());
         JSeparatorTable issuesJTable = new JSeparatorTable(issuesTableModel, issuesTableColumnModel);
         issuesJTable.setAutoCreateColumnsFromModel(true);
 

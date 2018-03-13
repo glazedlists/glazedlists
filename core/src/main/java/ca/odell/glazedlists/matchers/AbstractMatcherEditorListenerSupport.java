@@ -18,7 +18,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public abstract class AbstractMatcherEditorListenerSupport<E> implements MatcherEditor<E> {
 
 	/** listeners for this Editor */
-	private CopyOnWriteArrayList<Listener<E>> listenerList = new CopyOnWriteArrayList<Listener<E>>();
+	private CopyOnWriteArrayList<Listener<E>> listenerList = new CopyOnWriteArrayList<>();
 
 	/** {@inheritDoc} */
 	@Override
@@ -77,7 +77,7 @@ public abstract class AbstractMatcherEditorListenerSupport<E> implements Matcher
 
 	/** creates a matcher event for the given type and matcher. */
 	private MatcherEditor.Event<E> createEvent(int eventType, Matcher<E> matcher) {
-		return new MatcherEditor.Event<E>(this, eventType, matcher);
+		return new MatcherEditor.Event<>(this, eventType, matcher);
 	}
 
 }

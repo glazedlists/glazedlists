@@ -22,7 +22,7 @@ public final class CalculationsSWT {
      * events from the SWT event dispatch thread.
      */
     public static <E> Calculation<E> swtThreadProxyCalculation(Calculation<? extends E> source, Display display) {
-        return new SWTThreadProxyCalculation<E>(source, display);
+        return new SWTThreadProxyCalculation<>(source, display);
     }
 
     /**

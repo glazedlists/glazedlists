@@ -41,11 +41,11 @@ public class SearchEngineTextWidgetMatcherEditorTest extends SwtTestCase {
 
     @Before
     public void setUp() {
-        filterList = new FilterList<String>(new BasicEventList<String>());
+        filterList = new FilterList<>(new BasicEventList<String>());
         filterList.addAll(GlazedListsTests.delimitedStringToList("James Jesse Jodie Jimney Jocelyn"));
 
         textField = new Text(getShell(), SWT.SINGLE);
-        matcherEditor = new SearchEngineTextWidgetMatcherEditor<String>(textField, GlazedLists.toStringTextFilterator());
+        matcherEditor = new SearchEngineTextWidgetMatcherEditor<>(textField, GlazedLists.toStringTextFilterator());
         filterList.setMatcherEditor(matcherEditor);
     }
 
@@ -109,7 +109,7 @@ public class SearchEngineTextWidgetMatcherEditorTest extends SwtTestCase {
         final Customer holger = new Customer("Holger", "Brands");
         final Customer kevin = new Customer("Kevin", "Maltby");
 
-        final FilterList<Customer> filteredCustomers = new FilterList<Customer>(new BasicEventList<Customer>());
+        final FilterList<Customer> filteredCustomers = new FilterList<>(new BasicEventList<Customer>());
         filteredCustomers.add(jesse);
         filteredCustomers.add(james);
         filteredCustomers.add(holger);
@@ -117,11 +117,11 @@ public class SearchEngineTextWidgetMatcherEditorTest extends SwtTestCase {
 
         final JTextField customerFilterField = new JTextField();
         final TextFilterator<Customer> customerFilterator = GlazedLists.textFilterator(Customer.class, "firstName", "lastName");
-        Set<SearchEngineTextMatcherEditor.Field<Customer>> fields = new HashSet<SearchEngineTextMatcherEditor.Field<Customer>>(2);
-        fields.add(new SearchEngineTextMatcherEditor.Field<Customer>("first", GlazedLists.textFilterator(Customer.class, "firstName")));
-        fields.add(new SearchEngineTextMatcherEditor.Field<Customer>("last", GlazedLists.textFilterator(Customer.class, "lastName")));
+        Set<SearchEngineTextMatcherEditor.Field<Customer>> fields = new HashSet<>(2);
+        fields.add(new SearchEngineTextMatcherEditor.Field<>("first", GlazedLists.textFilterator(Customer.class, "firstName")));
+        fields.add(new SearchEngineTextMatcherEditor.Field<>("last", GlazedLists.textFilterator(Customer.class, "lastName")));
 
-        SearchEngineTextFieldMatcherEditor<Customer> matcherEditor = new SearchEngineTextFieldMatcherEditor<Customer>(customerFilterField, customerFilterator);
+        SearchEngineTextFieldMatcherEditor<Customer> matcherEditor = new SearchEngineTextFieldMatcherEditor<>(customerFilterField, customerFilterator);
         matcherEditor.setFields(fields);
         filteredCustomers.setMatcherEditor(matcherEditor);
 

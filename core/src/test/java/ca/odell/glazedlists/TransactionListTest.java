@@ -21,9 +21,9 @@ public class TransactionListTest {
 
     @Before
     public void setUp() {
-        source = new BasicEventList<String>();
-        txList = new TransactionList<String>(source);
-        counter = new GlazedListsTests.ListEventCounter<String>();
+        source = new BasicEventList<>();
+        txList = new TransactionList<>(source);
+        counter = new GlazedListsTests.ListEventCounter<>();
         txList.addListEventListener(counter);
     }
 
@@ -229,9 +229,9 @@ public class TransactionListTest {
 
     @Test
     public void testNoRollbackSupport() {
-        source = new BasicEventList<String>();
-        txList = new TransactionList<String>(source, false);
-        counter = new GlazedListsTests.ListEventCounter<String>();
+        source = new BasicEventList<>();
+        txList = new TransactionList<>(source, false);
+        counter = new GlazedListsTests.ListEventCounter<>();
         txList.addListEventListener(counter);
 
         txList.beginEvent();

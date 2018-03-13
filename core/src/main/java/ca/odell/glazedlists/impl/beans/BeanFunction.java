@@ -22,7 +22,7 @@ public class BeanFunction<E,V> implements FunctionList.Function<E,V> {
      * {@link ca.odell.glazedlists.GlazedLists GlazedLists} tool factory.
      */
     public BeanFunction(Class<E> beanClass, String propertyName) {
-        this.property = new BeanProperty<E>(beanClass, propertyName, true, false);
+        this.property = new BeanProperty<>(beanClass, propertyName, true, false);
     }
 
     /** @inheritDoc */

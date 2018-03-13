@@ -18,7 +18,7 @@ public class CalculationCategoryDatasetTest {
 
     @Test
     public void testFireChangesAppropriately() {
-        final EventList<Number> numbers = new BasicEventList<Number>();
+        final EventList<Number> numbers = new BasicEventList<>();
 
         final DatasetChangeEventCounter counter = new DatasetChangeEventCounter();
         final CalculationCategoryDataset dataset = new CalculationCategoryDataset();

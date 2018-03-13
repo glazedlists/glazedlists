@@ -24,7 +24,7 @@ import ca.odell.glazedlists.impl.adt.barcode2.ListToByteCoder;
 public class Tree4Deltas<E> {
 
     /** all the names of the index sets are with respect to the target */
-    private static final ListToByteCoder<String> BYTE_CODER = new ListToByteCoder<String>(Arrays.asList("+", "U", "X", "_"));
+    private static final ListToByteCoder<String> BYTE_CODER = new ListToByteCoder<>(Arrays.asList("+", "U", "X", "_"));
     public static final byte INSERT = BYTE_CODER.colorToByte("+");
     public static final byte UPDATE = BYTE_CODER.colorToByte("U");
     public static final byte DELETE = BYTE_CODER.colorToByte("X");
@@ -36,7 +36,7 @@ public class Tree4Deltas<E> {
     private static final byte CHANGE_INDICES = BYTE_CODER.colorsToByte(Arrays.asList("U", "X", "+"));
 
     /** the trees values include removed elements */
-    private FourColorTree<E> tree = new FourColorTree<E>(BYTE_CODER);
+    private FourColorTree<E> tree = new FourColorTree<>(BYTE_CODER);
     private boolean allowContradictingEvents = false;
 
     /**
@@ -234,7 +234,7 @@ public class Tree4Deltas<E> {
     }
 
     public Iterator<E> iterator() {
-        return new Iterator<E>(tree);
+        return new Iterator<>(tree);
     }
 
     @Override
@@ -252,7 +252,7 @@ public class Tree4Deltas<E> {
 
         private Iterator(FourColorTree<E> tree) {
             this.tree = tree;
-            this.treeIterator = new FourColorTreeIterator<E>(tree);
+            this.treeIterator = new FourColorTreeIterator<>(tree);
         }
 
         private Iterator(FourColorTree<E> tree, FourColorTreeIterator<E> treeIterator) {
@@ -260,7 +260,7 @@ public class Tree4Deltas<E> {
             this.treeIterator = treeIterator;
         }
         public Iterator<E> copy() {
-            return new Iterator<E>(tree, treeIterator.copy());
+            return new Iterator<>(tree, treeIterator.copy());
         }
 
         public int getIndex() {

@@ -21,10 +21,10 @@ import ca.odell.glazedlists.impl.adt.barcode2.SimpleTree;
  */
 final class TreePair<V extends Comparable> {
     /** The tree which orders the start indices of all ValueSegments. */
-    private SimpleTree<V> start = new SimpleTree<V>(GlazedLists.comparableComparator());
+    private SimpleTree<V> start = new SimpleTree<>(GlazedLists.comparableComparator());
 
     /** The tree which orders the start indices of all ValueSegments. */
-    private SimpleTree<V> end = new SimpleTree<V>(GlazedLists.comparableComparator());
+    private SimpleTree<V> end = new SimpleTree<>(GlazedLists.comparableComparator());
 
     /**
      * Inserts the given <code>segment</code> into the trees.
@@ -57,8 +57,8 @@ final class TreePair<V extends Comparable> {
      * Clears the data from the trees efficiently.
      */
     public void clear() {
-        start = new SimpleTree<V>(GlazedLists.comparableComparator());
-        end = new SimpleTree<V>(GlazedLists.comparableComparator());
+        start = new SimpleTree<>(GlazedLists.comparableComparator());
+        end = new SimpleTree<>(GlazedLists.comparableComparator());
     }
 
     /**

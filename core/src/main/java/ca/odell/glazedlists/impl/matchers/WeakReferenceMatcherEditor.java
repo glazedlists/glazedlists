@@ -39,7 +39,7 @@ import java.util.List;
 public final class WeakReferenceMatcherEditor<E> implements MatcherEditor<E>, MatcherEditor.Listener<E> {
 
     /** The Listeners for this MatcherEditor. */
-    private final List<Listener<E>> listenerList = new ArrayList<Listener<E>>();
+    private final List<Listener<E>> listenerList = new ArrayList<>();
 
     /** The last Matcher that was broadcast from this MatcherEditor. */
     private MatcherEditor<E> source;
@@ -57,7 +57,7 @@ public final class WeakReferenceMatcherEditor<E> implements MatcherEditor<E>, Ma
         this.source = source;
 
         // listen to the source weakly so we clean ourselves up when we're extinct
-        source.addMatcherEditorListener(new WeakMatcherEditorListener<E>(source, this));
+        source.addMatcherEditorListener(new WeakMatcherEditorListener<>(source, this));
     }
 
     /**
@@ -80,7 +80,7 @@ public final class WeakReferenceMatcherEditor<E> implements MatcherEditor<E>, Ma
      */
     @Override
     public synchronized void addMatcherEditorListener(Listener<E> listener) {
-        this.listenerList.add(new WeakMatcherEditorListener<E>(this, listener));
+        this.listenerList.add(new WeakMatcherEditorListener<>(this, listener));
     }
 
     /** {@inheritDoc} */
@@ -147,7 +147,7 @@ public final class WeakReferenceMatcherEditor<E> implements MatcherEditor<E>, Ma
          *      reacting to matcher changes
          */
         public WeakMatcherEditorListener(MatcherEditor<E> editor, Listener<E> listener) {
-            this.weakListener = new WeakReference<Listener<E>>(listener);
+            this.weakListener = new WeakReference<>(listener);
             this.editor = editor;
         }
 

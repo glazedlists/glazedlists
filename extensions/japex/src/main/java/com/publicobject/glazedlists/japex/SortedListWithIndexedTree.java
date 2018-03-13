@@ -7,7 +7,6 @@ import ca.odell.glazedlists.*;
 import com.publicobject.glazedlists.japex.adt.IndexedTreeNode;
 import com.publicobject.glazedlists.japex.adt.IndexedTree;
 import com.publicobject.glazedlists.japex.adt.IndexedTreeIterator;
-import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.event.ListEvent;
 
 import java.util.*;
@@ -132,6 +131,7 @@ public final class SortedListWithIndexedTree<E> extends TransformedList<E,E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public void listChanged(ListEvent<E> listChanges) {
         // handle reordering events
         if(listChanges.isReordering()) {
@@ -210,8 +210,8 @@ public final class SortedListWithIndexedTree<E> extends TransformedList<E,E> {
         updates.beginEvent();
 
         // first update the offset tree for all changes, and keep the changed nodes in a list
-        LinkedList<IndexedTreeNode> insertNodes = new LinkedList<IndexedTreeNode>();
-        List<IndexedTreeNode<IndexedTreeNode>> updateNodes = new ArrayList<IndexedTreeNode<IndexedTreeNode>>();
+        LinkedList<IndexedTreeNode> insertNodes = new LinkedList<>();
+        List<IndexedTreeNode<IndexedTreeNode>> updateNodes = new ArrayList<>();
 
         // Update the indexed tree so it matches the source.
         // Save the nodes to be inserted and updated as well
@@ -335,6 +335,7 @@ public final class SortedListWithIndexedTree<E> extends TransformedList<E,E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected int getSourceIndex(int mutationIndex) {
         IndexedTreeNode sortedNode = sorted.getNode(mutationIndex);
         IndexedTreeNode unsortedNode = (IndexedTreeNode)sortedNode.getValue();
@@ -342,6 +343,7 @@ public final class SortedListWithIndexedTree<E> extends TransformedList<E,E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected boolean isWritable() {
         return true;
     }
@@ -383,11 +385,11 @@ public final class SortedListWithIndexedTree<E> extends TransformedList<E,E> {
         Comparator treeComparator = null;
         if(comparator != null) treeComparator = new SortedListWithIndexedTree.IndexedTreeNodeComparator(comparator);
         else treeComparator = new SortedListWithIndexedTree.IndexedTreeNodeRawOrderComparator();
-        sorted = new IndexedTree<IndexedTreeNode>(treeComparator);
+        sorted = new IndexedTree<>(treeComparator);
 
         // create a list which knows the offsets of the indexes to initialize this list
         if(previousSorted == null && unsorted == null) {
-            unsorted = new IndexedTree<IndexedTreeNode>();
+            unsorted = new IndexedTree<>();
             // add all elements in the source list, in order
             for(int i = 0, n = source.size(); i < n; i++) {
                 IndexedTreeNode unsortedNode = unsorted.addByNode(i, IndexedTreeNode.EMPTY_NODE);
@@ -424,6 +426,7 @@ public final class SortedListWithIndexedTree<E> extends TransformedList<E,E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int indexOf(Object object) {
         if(mode != SortedListWithIndexedTree.STRICT_SORT_ORDER || comparator == null) return source.indexOf(object);
 
@@ -452,6 +455,7 @@ public final class SortedListWithIndexedTree<E> extends TransformedList<E,E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int lastIndexOf(Object object) {
         if(mode != SortedListWithIndexedTree.STRICT_SORT_ORDER || comparator == null) return source.lastIndexOf(object);
 
@@ -532,11 +536,13 @@ public final class SortedListWithIndexedTree<E> extends TransformedList<E,E> {
      * @deprecated Deprecated as of 12/11/2005. Replaced with {@link #sortIndex(Object)}
      *      which has cleaner semantics.
      */
+    @Deprecated
     public int indexOfSimulated(Object object) {
         return comparator != null ? sorted.indexOfSimulated(object) : size();
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean contains(Object object) {
         return indexOf(object) != -1;
     }
@@ -570,6 +576,7 @@ public final class SortedListWithIndexedTree<E> extends TransformedList<E,E> {
         /**
          * Compares object alpha to object beta by using the source comparator.
          */
+        @Override
         public int compare(Object alpha, Object beta) {
             Object alphaObject = alpha;
             Object betaObject = beta;
@@ -599,6 +606,7 @@ public final class SortedListWithIndexedTree<E> extends TransformedList<E,E> {
         /**
          * Compares the alpha object to the beta object by their indices.
          */
+        @Override
         public int compare(Object alpha, Object beta) {
             try {
                 IndexedTreeNode alphaTreeNode = (IndexedTreeNode)alpha;
@@ -615,6 +623,7 @@ public final class SortedListWithIndexedTree<E> extends TransformedList<E,E> {
     }
 
     /** {@inheritDoc} */
+    @Override
     public Iterator<E> iterator() {
         return new SortedListWithIndexedTree.SortedListIterator();
     }
@@ -630,6 +639,7 @@ public final class SortedListWithIndexedTree<E> extends TransformedList<E,E> {
         /**
          * Returns true iff there are more value to iterate on by caling next()
          */
+        @Override
         public boolean hasNext() {
             return treeIterator.hasNext();
         }
@@ -637,8 +647,9 @@ public final class SortedListWithIndexedTree<E> extends TransformedList<E,E> {
         /**
          * Returns the next value in the iteration.
          */
+        @Override
         public E next() {
-            IndexedTreeNode sortedNode = (IndexedTreeNode)treeIterator.next();
+            IndexedTreeNode sortedNode = treeIterator.next();
             IndexedTreeNode unsortedNode = (IndexedTreeNode)sortedNode.getValue();
             return source.get(unsortedNode.getIndex());
         }
@@ -646,6 +657,7 @@ public final class SortedListWithIndexedTree<E> extends TransformedList<E,E> {
         /**
          * Removes the last value returned by this iterator.
          */
+        @Override
         public void remove() {
             int indexToRemove = treeIterator.previousIndex();
             SortedListWithIndexedTree.this.source.remove(getSourceIndex(indexToRemove));

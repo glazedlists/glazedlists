@@ -15,14 +15,14 @@ public class AutoCompleteSupportThreadingTest {
     @Test
     public void testNonEDTAccess() throws Exception {
         try {
-            AutoCompleteSupport.install(new JComboBox<Object>(), new BasicEventList<Object>());
+            AutoCompleteSupport.install(new JComboBox<>(), new BasicEventList<>());
             fail("failed to receive IllegalStateException installing AutoCompleteSupport from non-EDT");
         } catch (IllegalStateException e) {
             // expected
         }
 
         try {
-            AutoCompleteSupport.install(new JComboBox<Object>(), new BasicEventList<Object>(), GlazedLists.toStringTextFilterator());
+            AutoCompleteSupport.install(new JComboBox<>(), new BasicEventList<>(), GlazedLists.toStringTextFilterator());
             fail("failed to receive IllegalStateException installing AutoCompleteSupport from non-EDT");
         } catch (IllegalStateException e) {
             // expected
@@ -60,7 +60,7 @@ public class AutoCompleteSupportThreadingTest {
 
         @Override
         public void run() {
-            support = AutoCompleteSupport.install(new JComboBox<Object>(), new BasicEventList<Object>());
+            support = AutoCompleteSupport.install(new JComboBox<>(), new BasicEventList<>());
         }
         public AutoCompleteSupport<Object> getSupport() {
             return support;

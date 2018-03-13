@@ -37,12 +37,12 @@ public class IteratorTest {
     @Test
     public void testIterateThrough() {
         // create a list of values
-        final EventList<Integer> originalList = new BasicEventList<Integer>();
+        final EventList<Integer> originalList = new BasicEventList<>();
         for (int i = 0; i < 26; i++)
             originalList.add(new Integer(i));
 
         // iterate through that list forwards and add the results to a new list
-        final List<Integer> forwardsControlList = new ArrayList<Integer>();
+        final List<Integer> forwardsControlList = new ArrayList<>();
         for (Iterator<Integer> i = originalList.iterator(); i.hasNext();)
             forwardsControlList.add(i.next());
 
@@ -50,7 +50,7 @@ public class IteratorTest {
         assertEquals(originalList, forwardsControlList);
 
         // iterate through that list backwards and add the results to a new list
-        final List<Integer> backwardsControlList = new ArrayList<Integer>();
+        final List<Integer> backwardsControlList = new ArrayList<>();
         for(ListIterator<Integer> i = originalList.listIterator(originalList.size()); i.hasPrevious();)
             backwardsControlList.add(i.previous());
 
@@ -67,15 +67,15 @@ public class IteratorTest {
     @Test
     public void testIterateWithExternalRemove() {
         // create a list of values
-        final EventList<Integer> deleteFromList = new BasicEventList<Integer>();
-        final List<Integer> originalList = new ArrayList<Integer>();
+        final EventList<Integer> deleteFromList = new BasicEventList<>();
+        final List<Integer> originalList = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
             final Integer value = new Integer(i);
             deleteFromList.add(value);
             originalList.add(value);
         }
 
-        final List<Integer> iteratedElements = new ArrayList<Integer>();
+        final List<Integer> iteratedElements = new ArrayList<>();
         final Iterator<Integer> iterator = deleteFromList.listIterator();
 
         // iterate through the list forwards for the first 50 values
@@ -103,9 +103,9 @@ public class IteratorTest {
     @Test
     public void testIterateWithInternalRemove() {
         // create a list of values
-        final EventList<Integer> iterateForwardList = new BasicEventList<Integer>();
-        final EventList<Integer> iterateBackwardList = new BasicEventList<Integer>();
-        final List<Integer> originalList = new ArrayList<Integer>();
+        final EventList<Integer> iterateForwardList = new BasicEventList<>();
+        final EventList<Integer> iterateBackwardList = new BasicEventList<>();
+        final List<Integer> originalList = new ArrayList<>();
         for (int i = 0; i < 20; i++) {
             final Integer value = new Integer(random.nextInt(100));
             iterateForwardList.add(value);
@@ -141,7 +141,7 @@ public class IteratorTest {
     @Test
     public void testPreviousEdgeCondition() {
         // create a list of values
-        final EventList<Integer> iterationList = new BasicEventList<Integer>();
+        final EventList<Integer> iterationList = new BasicEventList<>();
         for (int i = 0; i < 20; i++)
             iterationList.add(new Integer(random.nextInt(100)));
 
@@ -167,7 +167,7 @@ public class IteratorTest {
      */
     @Test
     public void testRemoveAfterInsertAtCursor() {
-        final EventList<String> testList = new BasicEventList<String>();
+        final EventList<String> testList = new BasicEventList<>();
         String hello = "Hello, world.";
         String bye = "Goodbye, cruel world.";
         String end = "the end";
@@ -189,7 +189,7 @@ public class IteratorTest {
      */
     @Test
     public void testRemoveAfterInsertAtNext() {
-        final EventList<String> testList = new BasicEventList<String>();
+        final EventList<String> testList = new BasicEventList<>();
         String hello = "Hello, world.";
         String bye = "Goodbye, cruel world.";
         String end = "the end";
@@ -211,7 +211,7 @@ public class IteratorTest {
      */
     @Test
     public void testRemoveAfterInsertAtCursorReverse() {
-        BasicEventList<String> testList = new BasicEventList<String>();
+        BasicEventList<String> testList = new BasicEventList<>();
         String hello = "Hello, world.";
         String bye = "Goodbye, cruel world.";
         String end = "the end";
@@ -233,7 +233,7 @@ public class IteratorTest {
      */
     @Test
     public void testRemoveAfterInsertAtPrevious() {
-        BasicEventList<String> testList = new BasicEventList<String>();
+        BasicEventList<String> testList = new BasicEventList<>();
         String hello = "Hello, world.";
         String bye = "Goodbye, cruel world.";
         String end = "the end";
@@ -255,7 +255,7 @@ public class IteratorTest {
     @Test
     public void testAdding() {
         // Create a control list to test against
-        final List<String> controlList = new ArrayList<String>();
+        final List<String> controlList = new ArrayList<>();
         controlList.add("zero");
         controlList.add("one");
         controlList.add("two");
@@ -263,7 +263,7 @@ public class IteratorTest {
         controlList.add("four");
 
         // Create a list to be iterated on forwards
-        final EventList<String> forwardsList = new BasicEventList<String>();
+        final EventList<String> forwardsList = new BasicEventList<>();
         forwardsList.add("one");
         forwardsList.add("three");
 
@@ -277,7 +277,7 @@ public class IteratorTest {
         assertEquals(controlList, forwardsList);
 
         // Create a list to be iterated of backwards
-        final EventList<String> backwardsList = new BasicEventList<String>();
+        final EventList<String> backwardsList = new BasicEventList<>();
         backwardsList.add("one");
         backwardsList.add("three");
 
@@ -300,7 +300,7 @@ public class IteratorTest {
      */
     @Test
     public void testEmptyListAdding() {
-        final List<String> testList = new BasicEventList<String>();
+        final List<String> testList = new BasicEventList<>();
         final ListIterator<String> iterator = testList.listIterator();
         iterator.add("just one element");
 
@@ -315,7 +315,7 @@ public class IteratorTest {
      */
     @Test
     public void testExternalAddingOnEmptyList() {
-        final EventList<String> testList = new BasicEventList<String>();
+        final EventList<String> testList = new BasicEventList<>();
         final ListIterator<String> iterator = testList.listIterator();
         assertFalse(iterator.hasPrevious());
         assertFalse(iterator.hasNext());
@@ -337,7 +337,7 @@ public class IteratorTest {
      * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=316">Issue 316</a>
      */
     public static void main(String[] args) {
-        final List<String> list = new BasicEventList<String>();
+        final List<String> list = new BasicEventList<>();
         list.addAll(GlazedListsTests.stringToList("ABCDEFGHIJK"));
 
         long memoryUsage = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/(1024);

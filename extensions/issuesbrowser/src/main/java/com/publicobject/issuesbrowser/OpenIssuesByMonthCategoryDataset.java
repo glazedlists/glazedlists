@@ -44,12 +44,12 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
      * @param issues the source list of {@link Issue} objects
      */
     public OpenIssuesByMonthCategoryDataset(EventList<Issue> issues) {
-        this(issues, new CollectionList<Issue,ValueSegment<Date,String>>(issues, new StateChangesCollectionModel()));
+        this(issues, new CollectionList<>(issues, new StateChangesCollectionModel()));
     }
 
     private OpenIssuesByMonthCategoryDataset(EventList<Issue> issues, CollectionList<Issue,ValueSegment<Date,String>> valueSegments) {
         // filter away ValueSegments whose value represents a retired issue (RESOLVED or CLOSED)
-        this(new FilterList<ValueSegment<Date,String>>(valueSegments, new OpenIssuesMatcher(new StatusProvider(issues))));
+        this(new FilterList<>(valueSegments, new OpenIssuesMatcher(new StatusProvider(issues))));
     }
 
     private OpenIssuesByMonthCategoryDataset(FilterList<ValueSegment<Date,String>> filteredValueSegments) {

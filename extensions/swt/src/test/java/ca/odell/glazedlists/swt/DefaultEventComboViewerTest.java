@@ -26,9 +26,9 @@ public class DefaultEventComboViewerTest extends SwtTestCase {
 	 */
     @Test
 	public void testEmptyConstruction() {
-        final BasicEventList<String> source = new BasicEventList<String>();
+        final BasicEventList<String> source = new BasicEventList<>();
         final Combo combo = new Combo(getShell(), SWT.DROP_DOWN);
-        final DefaultEventComboViewer<String> viewer = new DefaultEventComboViewer<String>(source, combo);
+        final DefaultEventComboViewer<String> viewer = new DefaultEventComboViewer<>(source, combo);
         assertSame(combo, viewer.getCombo());
         assertEquals(0, combo.getItemCount());
         assertTrue(Arrays.equals(new String[0], combo.getItems()));
@@ -39,10 +39,10 @@ public class DefaultEventComboViewerTest extends SwtTestCase {
 	 */
     @Test
 	public void testPrefilledConstruction() {
-		final BasicEventList<String> source = new BasicEventList<String>();
+		final BasicEventList<String> source = new BasicEventList<>();
         source.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
         final Combo combo = new Combo(getShell(), SWT.DROP_DOWN);
-        final DefaultEventComboViewer<String> viewer = new DefaultEventComboViewer<String>(source, combo);
+        final DefaultEventComboViewer<String> viewer = new DefaultEventComboViewer<>(source, combo);
         assertSame(combo, viewer.getCombo());
         assertEquals(source.size(), combo.getItemCount());
         assertTrue(Arrays.equals(source.toArray(new String[source.size()]), combo.getItems()));
@@ -59,9 +59,9 @@ public class DefaultEventComboViewerTest extends SwtTestCase {
 	 */
     @Test
 	public void testChangeList() {
-        final BasicEventList<String> source = new BasicEventList<String>();
+        final BasicEventList<String> source = new BasicEventList<>();
         final Combo combo = new Combo(getShell(), SWT.DROP_DOWN);
-        final DefaultEventComboViewer<String> viewer = new DefaultEventComboViewer<String>(source, combo);
+        final DefaultEventComboViewer<String> viewer = new DefaultEventComboViewer<>(source, combo);
         assertSame(combo, viewer.getCombo());
         source.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
         assertEquals(source.size(), combo.getItemCount());
@@ -93,10 +93,10 @@ public class DefaultEventComboViewerTest extends SwtTestCase {
 	 */
     @Test
 	public void testLabelProvider() {
-		final BasicEventList<String> source = new BasicEventList<String>();
+		final BasicEventList<String> source = new BasicEventList<>();
         source.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
         final Combo combo = new Combo(getShell(), SWT.DROP_DOWN);
-        final DefaultEventComboViewer<String> viewer = new DefaultEventComboViewer<String>(source, combo, new TestItemFormat());
+        final DefaultEventComboViewer<String> viewer = new DefaultEventComboViewer<>(source, combo, new TestItemFormat());
         assertSame(combo, viewer.getCombo());
         assertEquals(source.size(), combo.getItemCount());
         assertEquals("AA", combo.getItem(0));

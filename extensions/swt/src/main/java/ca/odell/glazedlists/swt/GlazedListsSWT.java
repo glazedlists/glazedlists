@@ -45,7 +45,7 @@ public final class GlazedListsSWT {
      * from the SWT user interface thread.
      */
     public static <E> TransformedList<E, E> swtThreadProxyList(EventList<E> source, Display display) {
-        return new SWTThreadProxyEventList<E>(source, display);
+        return new SWTThreadProxyEventList<>(source, display);
     }
 
     /**
@@ -95,7 +95,7 @@ public final class GlazedListsSWT {
 	 * @param property the JavaBean property name
      */
     public static <E> ItemFormat<E> beanItemFormat(String property) {
-        return new BeanItemFormat<E>(property);
+        return new BeanItemFormat<>(property);
     }
 
     /**
@@ -109,7 +109,7 @@ public final class GlazedListsSWT {
 	 *            property value
      */
     public static <E> ItemFormat<E> beanItemFormat(String property, String valueForNullElement) {
-        return new BeanItemFormat<E>(property, valueForNullElement);
+        return new BeanItemFormat<>(property, valueForNullElement);
     }
 
     // ThresholdViewers // // // // // // // // // // // // // // // // // // //
@@ -197,7 +197,7 @@ public final class GlazedListsSWT {
      */
     public static <E> DefaultEventTableViewer<E> eventTableViewer(EventList<E> source, Table table, TableFormat<? super E> tableFormat,
             TableItemConfigurer<? super E> tableItemConfigurer) {
-    	return new DefaultEventTableViewer<E>(source, table, tableFormat, tableItemConfigurer);
+    	return new DefaultEventTableViewer<>(source, table, tableFormat, tableItemConfigurer);
     }
 
     /**
@@ -241,7 +241,7 @@ public final class GlazedListsSWT {
     public static <E> DefaultEventTableViewer<E> eventTableViewerWithThreadProxyList(EventList<E> source, Table table, TableFormat<? super E> tableFormat,
             TableItemConfigurer<? super E> tableItemConfigurer) {
     	final EventList<E> proxySource = createSwtThreadProxyListWithLock(source, table.getDisplay());
-    	return new DefaultEventTableViewer<E>(proxySource, table, tableFormat, tableItemConfigurer, true);
+    	return new DefaultEventTableViewer<>(proxySource, table, tableFormat, tableItemConfigurer, true);
     }
 
     /**
@@ -260,7 +260,7 @@ public final class GlazedListsSWT {
      * @param list the list
      */
     public static <E> DefaultEventListViewer<E> eventListViewer(EventList<E> source, List list) {
-    	return new DefaultEventListViewer<E>(source, list);
+    	return new DefaultEventListViewer<>(source, list);
     }
 
     /**
@@ -279,7 +279,7 @@ public final class GlazedListsSWT {
      * @param itemFormat an {@link ItemFormat} for formatting the displayed values
      */
     public static <E> DefaultEventListViewer<E> eventListViewer(EventList<E> source, List list, ItemFormat<? super E> itemFormat) {
-    	return new DefaultEventListViewer<E>(source, list, itemFormat);
+    	return new DefaultEventListViewer<>(source, list, itemFormat);
     }
 
     /**
@@ -298,7 +298,7 @@ public final class GlazedListsSWT {
      */
     public static <E> DefaultEventListViewer<E> eventListViewerWithThreadProxyList(EventList<E> source, List list) {
     	final EventList<E> proxySource = createSwtThreadProxyListWithLock(source, list.getDisplay());
-    	return new DefaultEventListViewer<E>(proxySource, list, new DefaultItemFormat<E>(), true);
+    	return new DefaultEventListViewer<>(proxySource, list, new DefaultItemFormat<E>(), true);
     }
 
     /**
@@ -317,7 +317,7 @@ public final class GlazedListsSWT {
      */
     public static <E> DefaultEventListViewer<E> eventListViewerWithThreadProxyList(EventList<E> source, List list, ItemFormat<? super E> itemFormat) {
     	final EventList<E> proxySource = createSwtThreadProxyListWithLock(source, list.getDisplay());
-    	return new DefaultEventListViewer<E>(proxySource, list, itemFormat, true);
+    	return new DefaultEventListViewer<>(proxySource, list, itemFormat, true);
     }
 
     /**
@@ -338,7 +338,7 @@ public final class GlazedListsSWT {
      * @param combo the combo box
      */
     public static <E> DefaultEventComboViewer<E> eventComboViewer(EventList<E> source, Combo combo) {
-    	return new DefaultEventComboViewer<E>(source, combo);
+    	return new DefaultEventComboViewer<>(source, combo);
     }
 
     /**
@@ -360,7 +360,7 @@ public final class GlazedListsSWT {
      * @param itemFormat an {@link ItemFormat} for formatting the displayed values
      */
     public static <E> DefaultEventComboViewer<E> eventComboViewer(EventList<E> source, Combo combo, ItemFormat<? super E> itemFormat) {
-    	return new DefaultEventComboViewer<E>(source, combo, itemFormat);
+    	return new DefaultEventComboViewer<>(source, combo, itemFormat);
     }
 
     /**
@@ -381,7 +381,7 @@ public final class GlazedListsSWT {
      */
     public static <E> DefaultEventComboViewer<E> eventComboViewerWithThreadProxyList(EventList<E> source, Combo combo) {
     	final EventList<E> proxySource = createSwtThreadProxyListWithLock(source, combo.getDisplay());
-    	return new DefaultEventComboViewer<E>(proxySource, combo, new DefaultItemFormat<E>(), true);
+    	return new DefaultEventComboViewer<>(proxySource, combo, new DefaultItemFormat<E>(), true);
     }
 
     /**
@@ -403,7 +403,7 @@ public final class GlazedListsSWT {
      */
     public static <E> DefaultEventComboViewer<E> eventComboViewerWithThreadProxyList(EventList<E> source, Combo combo, ItemFormat<? super E> itemFormat) {
     	final EventList<E> proxySource = createSwtThreadProxyListWithLock(source, combo.getDisplay());
-    	return new DefaultEventComboViewer<E>(proxySource, combo, itemFormat, true);
+    	return new DefaultEventComboViewer<>(proxySource, combo, itemFormat, true);
     }
 
     /** Helper method to create a SwtThreadProxyList with read locks. */

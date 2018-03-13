@@ -35,8 +35,8 @@ public class MultipleListenersTest {
      */
     @Test
     public void testMultipleListeners() {
-        BasicEventList<Number> root = new BasicEventList<Number>();
-        List<Number> control = new ArrayList<Number>();
+        BasicEventList<Number> root = new BasicEventList<>();
+        List<Number> control = new ArrayList<>();
 
         // add 1000 elements to start
         for(int i = 0; i < 1000; i++) {
@@ -47,9 +47,9 @@ public class MultipleListenersTest {
 
         // create sorted and filtered derivatives
         Comparator<Number> comparator = (Comparator)GlazedLists.comparableComparator();
-        SortedList<Number> sorted = new SortedList<Number>(root, comparator);
+        SortedList<Number> sorted = new SortedList<>(root, comparator);
         AtLeastMatcherEditor matcherEditor = new AtLeastMatcherEditor(50);
-        FilterList<Number> filtered = new FilterList<Number>(root, matcherEditor);
+        FilterList<Number> filtered = new FilterList<>(root, matcherEditor);
 
         // repeatedly make updates and verify the derivates keep up
         for(int i = 0; i < 30; i++) {
@@ -64,13 +64,13 @@ public class MultipleListenersTest {
             assertEquals(root, control);
 
             // verify that the sorted list is correct
-            List<Number> sortedControl = new ArrayList<Number>();
+            List<Number> sortedControl = new ArrayList<>();
             sortedControl.addAll(control);
             Collections.sort(sortedControl, sorted.getComparator());
             assertEquals(sortedControl, sorted);
 
             // verify that the filtered list is correct
-            List<Number> filteredControl = new ArrayList<Number>();
+            List<Number> filteredControl = new ArrayList<>();
             for(int j = 0; j < control.size(); j++) {
                 if(matcherEditor.getMatcher().matches(control.get(j))) {
                     filteredControl.add(control.get(j));

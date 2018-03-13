@@ -29,7 +29,7 @@ public class FunctionListMapTest {
     @Test
     public void testConstructor() {
         // 1. test constructor with filled source list
-        EventList<String> source = new BasicEventList<String>();
+        EventList<String> source = new BasicEventList<>();
         source.addAll(GlazedListsTests.delimitedStringToList("Wilson Lemieux Jiries Ashford"));
         Map<String, String> eventMap = GlazedLists.syncEventListToMap(source, new FirstLetterFunction());
 
@@ -40,7 +40,7 @@ public class FunctionListMapTest {
         assertEquals("Ashford", eventMap.get("A"));
 
         // 2. test constructor with empty source list filled after construction
-        source = new BasicEventList<String>();
+        source = new BasicEventList<>();
         eventMap = GlazedLists.syncEventListToMap(source, new FirstLetterFunction());
         assertEquals(0, eventMap.size());
 
@@ -71,7 +71,7 @@ public class FunctionListMapTest {
 
     @Test
     public void testGet() {
-        final EventList<String> source = new BasicEventList<String>();
+        final EventList<String> source = new BasicEventList<>();
         final Map<String, String> eventMap = GlazedLists.syncEventListToMap(source, new FirstLetterFunction());
 
         source.add("James");
@@ -128,7 +128,7 @@ public class FunctionListMapTest {
 
     @Test
     public void testContainsKey() {
-        final EventList<String> source = new BasicEventList<String>();
+        final EventList<String> source = new BasicEventList<>();
         final Map<String, String> eventMap = GlazedLists.syncEventListToMap(source, new FirstLetterFunction());
 
         source.add("James");
@@ -173,7 +173,7 @@ public class FunctionListMapTest {
 
     @Test
     public void testContainsValue() {
-        final EventList<String> source = new BasicEventList<String>();
+        final EventList<String> source = new BasicEventList<>();
         final Map<String, String> eventMap = GlazedLists.syncEventListToMap(source, new FirstLetterFunction());
 
         assertEquals(null, eventMap.get("J"));
@@ -220,7 +220,7 @@ public class FunctionListMapTest {
 
     @Test
     public void testRemove() {
-        final EventList<String> source = new BasicEventList<String>();
+        final EventList<String> source = new BasicEventList<>();
         final Map<String, String> eventMap = GlazedLists.syncEventListToMap(source, new FirstLetterFunction());
 
         assertNull(eventMap.remove("W"));
@@ -255,7 +255,7 @@ public class FunctionListMapTest {
 
     @Test
     public void testValues() {
-        final EventList<String> source = new BasicEventList<String>();
+        final EventList<String> source = new BasicEventList<>();
         final Map<String, String> eventMap = GlazedLists.syncEventListToMap(source, new FirstLetterFunction());
 
         assertTrue(eventMap.values().isEmpty());
@@ -297,7 +297,7 @@ public class FunctionListMapTest {
 
     @Test
     public void testPut() {
-        final EventList<String> source = new BasicEventList<String>();
+        final EventList<String> source = new BasicEventList<>();
         final Map<String, String> eventMap = GlazedLists.syncEventListToMap(source, new FirstLetterFunction());
 
         assertTrue(eventMap.values().isEmpty());
@@ -329,7 +329,7 @@ public class FunctionListMapTest {
 
     @Test
     public void testPutReplacesExistingValue() {
-        final EventList<String> source = new BasicEventList<String>();
+        final EventList<String> source = new BasicEventList<>();
         final Map<String, String> eventMap = GlazedLists.syncEventListToMap(source, new FirstLetterFunction());
 
         assertTrue(eventMap.values().isEmpty());
@@ -362,9 +362,9 @@ public class FunctionListMapTest {
 
     @Test
     public void testPutAll() {
-        final EventList<String> source = new BasicEventList<String>();
+        final EventList<String> source = new BasicEventList<>();
         final Map<String, String> eventMap = GlazedLists.syncEventListToMap(source, new FirstLetterFunction());
-        Map<String, String> values = new HashMap<String, String>();
+        Map<String, String> values = new HashMap<>();
 
         assertTrue(eventMap.values().isEmpty());
 
@@ -398,7 +398,7 @@ public class FunctionListMapTest {
 
     @Test
     public void testKeySet() {
-        final EventList<String> source = new BasicEventList<String>();
+        final EventList<String> source = new BasicEventList<>();
         final Map<String, String> eventMap = GlazedLists.syncEventListToMap(source, new FirstLetterFunction());
 
         assertTrue(eventMap.isEmpty());
@@ -409,7 +409,7 @@ public class FunctionListMapTest {
         assertEquals(4, source.size());
         assertEquals(4, eventMap.size());
         assertEquals(4, eventMap.keySet().size());
-        assertEquals(new HashSet<String>(Arrays.asList("J", "K", "A", "H")), eventMap.keySet());
+        assertEquals(new HashSet<>(Arrays.asList("J", "K", "A", "H")), eventMap.keySet());
         assertTrue(eventMap.keySet().contains("J"));
         assertTrue(eventMap.keySet().contains("K"));
         assertTrue(eventMap.keySet().contains("A"));
@@ -419,13 +419,13 @@ public class FunctionListMapTest {
         assertEquals(3, source.size());
         assertEquals(3, eventMap.size());
         assertEquals(3, eventMap.keySet().size());
-        assertEquals(new HashSet<String>(Arrays.asList("K", "A", "H")), eventMap.keySet());
+        assertEquals(new HashSet<>(Arrays.asList("K", "A", "H")), eventMap.keySet());
 
         assertFalse(eventMap.keySet().remove("J"));
         assertEquals(3, source.size());
         assertEquals(3, eventMap.size());
         assertEquals(3, eventMap.keySet().size());
-        assertEquals(new HashSet<String>(Arrays.asList("K", "A", "H")), eventMap.keySet());
+        assertEquals(new HashSet<>(Arrays.asList("K", "A", "H")), eventMap.keySet());
 
         try {
             eventMap.keySet().add("J");
@@ -444,7 +444,7 @@ public class FunctionListMapTest {
 
     @Test
     public void testKeySetIterator() {
-        final EventList<String> source = new BasicEventList<String>();
+        final EventList<String> source = new BasicEventList<>();
         final Map<String, String> eventMap = GlazedLists.syncEventListToMap(source, new FirstLetterFunction());
 
         source.addAll(GlazedListsTests.delimitedStringToList("James Lemieux Andy Depue Holger Brands"));
@@ -534,7 +534,7 @@ public class FunctionListMapTest {
 
     @Test
     public void testEntrySet() {
-        final EventList<String> source = new BasicEventList<String>();
+        final EventList<String> source = new BasicEventList<>();
         final Map<String, String> eventMap = GlazedLists.syncEventListToMap(source, new FirstLetterFunction());
 
         assertTrue(eventMap.isEmpty());
@@ -571,7 +571,7 @@ public class FunctionListMapTest {
 
     @Test
     public void testEntrySetIterator() {
-        final EventList<String> source = new BasicEventList<String>();
+        final EventList<String> source = new BasicEventList<>();
         final Map<String, String> eventMap = GlazedLists.syncEventListToMap(source, new FirstLetterFunction());
 
         source.addAll(GlazedListsTests.delimitedStringToList("James Lemieux Andy Depue Holger Brands"));
@@ -691,7 +691,7 @@ public class FunctionListMapTest {
 
     @Test
     public void testMapEntrySetValue() {
-        final EventList<String> source = new BasicEventList<String>();
+        final EventList<String> source = new BasicEventList<>();
         final Map<String, String> eventMap = GlazedLists.syncEventListToMap(source, new FirstLetterFunction());
 
         source.addAll(GlazedListsTests.delimitedStringToList("James Lemieux Andy Depue Holger Brands"));
@@ -718,7 +718,7 @@ public class FunctionListMapTest {
 
     @Test
     public void testMapEntryEquals() {
-        final EventList<String> source = new BasicEventList<String>();
+        final EventList<String> source = new BasicEventList<>();
         final Map<String, String> eventMap = GlazedLists.syncEventListToMap(source, new FirstLetterFunction());
         final Map<String, String> eventMap2 = GlazedLists.syncEventListToMap(source, new FirstLetterFunction());
 
@@ -757,8 +757,8 @@ public class FunctionListMapTest {
      */
     @Test
     public void testRemoveOnMapBackedByUniqueList() {
-        final EventList<String> source = new BasicEventList<String>();
-        final EventList<String> unique = new UniqueList<String>(source, new FirstLetterComparator());
+        final EventList<String> source = new BasicEventList<>();
+        final EventList<String> unique = new UniqueList<>(source, new FirstLetterComparator());
         final Map<String, String> eventMap = GlazedLists.syncEventListToMap(unique, new FirstLetterFunction());
 
         source.add("Bluto");
@@ -782,7 +782,7 @@ public class FunctionListMapTest {
      */
     @Test
     public void testMoveElementInMap() {
-        final TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
+        final TransactionList<String> source = new TransactionList<>(new BasicEventList<String>());
         final Map<String, String> eventMap = GlazedLists.syncEventListToMap(source, new FirstLetterFunction());
 
         source.beginEvent();
@@ -817,7 +817,7 @@ public class FunctionListMapTest {
 
     @Test
     public void testDispose() {
-        final EventList<String> source = new BasicEventList<String>();
+        final EventList<String> source = new BasicEventList<>();
         final DisposableMap<String, String> eventMap = GlazedLists.syncEventListToMap(source, new FirstLetterFunction());
 
         // insert some data
@@ -831,7 +831,7 @@ public class FunctionListMapTest {
 
     @Test
     public void testPutNull() {
-        final EventList<String> source = new BasicEventList<String>();
+        final EventList<String> source = new BasicEventList<>();
         source.add("Jesse");
         source.add(null);
         source.add("Katie");

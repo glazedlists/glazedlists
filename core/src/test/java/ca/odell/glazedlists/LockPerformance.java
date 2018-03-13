@@ -17,7 +17,7 @@ public class LockPerformance {
 
     private static final Random dice = new Random();
 
-    private static final EventList<Integer> sharedList = new BasicEventList<Integer>();
+    private static final EventList<Integer> sharedList = new BasicEventList<>();
 
     private static volatile int totalReadDelay = 0;
     private static volatile int totalWriteDelay = 0;
@@ -25,11 +25,11 @@ public class LockPerformance {
     private static int numReads = 200000;
     private static int numWrites = 200000;
 
-    private static List<ReaderRunnable> readerRunnables = new ArrayList<ReaderRunnable>();
-    private static List<Thread> readerThreads = new ArrayList<Thread>();
+    private static List<ReaderRunnable> readerRunnables = new ArrayList<>();
+    private static List<Thread> readerThreads = new ArrayList<>();
 
-    private static List<WriterRunnable> writerRunnables = new ArrayList<WriterRunnable>();
-    private static List<Thread> writerThreads = new ArrayList<Thread>();
+    private static List<WriterRunnable> writerRunnables = new ArrayList<>();
+    private static List<Thread> writerThreads = new ArrayList<>();
 
     /**
      * Execute a performance test that is specified on the command line.

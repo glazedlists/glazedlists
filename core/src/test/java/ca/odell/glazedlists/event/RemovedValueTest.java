@@ -29,11 +29,11 @@ public class RemovedValueTest {
     @Test
     public void testGetRemovedValue() {
         // prep recording the deleted elements
-        EventList<String> source = new RemovedValueEventList<String>(new BasicEventList<String>());
+        EventList<String> source = new RemovedValueEventList<>(new BasicEventList<String>());
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(source);
         listConsistencyListener.setPreviousElementTracked(true);
 
-        RemovedValuesListener<String> removedValuesListener = new RemovedValuesListener<String>();
+        RemovedValuesListener<String> removedValuesListener = new RemovedValuesListener<>();
         source.addListEventListener(removedValuesListener);
         source.addAll(GlazedListsTests.stringToList("GLAZEDLISTS"));
 
@@ -55,7 +55,7 @@ public class RemovedValueTest {
      * Record the deleted elements as they happen.
      */
     static class RemovedValuesListener<E> implements ListEventListener<E> {
-        List<E> deleteLog = new ArrayList<E>();
+        List<E> deleteLog = new ArrayList<>();
 
         @Override
         public void listChanged(ListEvent<E> listChanges) {
@@ -72,7 +72,7 @@ public class RemovedValueTest {
      * Wrap any EventList and make sure that the deleted element is available.
      */
     static class RemovedValueEventList<E> extends TransformedList<E,E> {
-        public final List<E> sourceValues = new ArrayList<E>();
+        public final List<E> sourceValues = new ArrayList<>();
         public RemovedValueEventList(EventList<E> source) {
             super(source);
             sourceValues.addAll(source);

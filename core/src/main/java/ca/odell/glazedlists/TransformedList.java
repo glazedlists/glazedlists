@@ -7,8 +7,6 @@ package ca.odell.glazedlists;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
-import java.util.Collection;
-
 /**
  * A convenience class for {@link EventList}s that decorate another {@link EventList}.
  * Extending classes transform their source {@link EventList} by modifying the

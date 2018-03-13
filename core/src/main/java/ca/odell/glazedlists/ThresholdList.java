@@ -81,7 +81,7 @@ public final class ThresholdList<E> extends RangeList<E> {
      * specified {@link EventList} using the specified {@link Evaluator}.
      */
     public ThresholdList(EventList<E> source, Evaluator<E> evaluator) {
-        this(new SortedList<E>(source, new ThresholdComparator<E>(evaluator)), evaluator);
+        this(new SortedList<>(source, new ThresholdComparator<>(evaluator)), evaluator);
     }
 
     private ThresholdList(SortedList<E> sortedSource, Evaluator<E> evaluator) {

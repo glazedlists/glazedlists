@@ -31,7 +31,7 @@ public class SwingThreadProxyCalculationTest {
 
     @Before
     public void setUp() throws Exception {
-        source = new BasicEventList<String>();
+        source = new BasicEventList<>();
         countCalc = Calculations.count(source);
         countProxyCalc = CalculationsSwing.swingThreadProxyCalculation(countCalc);
     }

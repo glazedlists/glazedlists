@@ -42,8 +42,8 @@ class SwingUsersMatcherEditor extends UsersMatcherEditor implements FilterCompon
         // create a JList that contains users
         final EventList<String> allUsers = getUsersList();
         allUserProxyList = GlazedListsSwing.swingThreadProxyList(allUsers);
-        final DefaultEventListModel<String> usersListModel = new DefaultEventListModel<String>(allUserProxyList);
-        userSelect = new JList<String>(usersListModel);
+        final DefaultEventListModel<String> usersListModel = new DefaultEventListModel<>(allUserProxyList);
+        userSelect = new JList<>(usersListModel);
         userSelect.setPrototypeCellValue("jessewilson");
         userSelect.setVisibleRowCount(10);
         // turn off cell focus painting

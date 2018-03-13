@@ -76,7 +76,7 @@ public final class EventSelectionModel<E> implements AdvancedListSelectionModel<
         source.getReadWriteLock().readLock().lock();
         try {
             swingThreadSource = GlazedListsSwing.swingThreadProxyList(source);
-            delegateSelectionModel = new DefaultEventSelectionModel<E>(swingThreadSource);
+            delegateSelectionModel = new DefaultEventSelectionModel<>(swingThreadSource);
         } finally {
             source.getReadWriteLock().readLock().unlock();
         }

@@ -40,15 +40,15 @@ public class FilterListTest {
         final MatcherEditor<Number> numberMatcherEditor = new AtLeastMatcherEditor();
 
         // constructor should accept Matcher<Object>
-        new FilterList<Number>(new BasicEventList<Number>(), Matchers.falseMatcher());
+        new FilterList<>(new BasicEventList<Number>(), Matchers.falseMatcher());
         // constructor should accept Matcher<Number>
-        new FilterList<Number>(new BasicEventList<Number>(), numberMatcher);
+        new FilterList<>(new BasicEventList<Number>(), numberMatcher);
         // constructor should accept MatcherEditor<Object>
-        new FilterList<Number>(new BasicEventList<Number>(), new AllOrNothingMatcherEditor());
+        new FilterList<>(new BasicEventList<Number>(), new AllOrNothingMatcherEditor());
         // constructor should accept MatcherEditor<Number>
-        new FilterList<Number>(new BasicEventList<Number>(), numberMatcherEditor);
+        new FilterList<>(new BasicEventList<Number>(), numberMatcherEditor);
 
-        final FilterList<Number> filtered = new FilterList<Number>(new BasicEventList<Number>());
+        final FilterList<Number> filtered = new FilterList<>(new BasicEventList<Number>());
         // setMatcher should accept Matcher<Object>
         filtered.setMatcher(Matchers.falseMatcher());
         // setMatcher should accept Matcher<Number>
@@ -62,11 +62,11 @@ public class FilterListTest {
     @Test
     public void testRemovedValueInListEvent() {
         // construct a (contrived) list of initial values
-        EventList<String> original = new BasicEventList<String>();
+        EventList<String> original = new BasicEventList<>();
         original.addAll(GlazedListsTests.stringToList("LIMPBIZKIT"));
 
-        CollectionMatcherEditor<String> collectionMatcherEditor = new CollectionMatcherEditor<String>();
-        FilterList<String> filtered = new FilterList<String>(original, collectionMatcherEditor);
+        CollectionMatcherEditor<String> collectionMatcherEditor = new CollectionMatcherEditor<>();
+        FilterList<String> filtered = new FilterList<>(original, collectionMatcherEditor);
 
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(filtered);
         listConsistencyListener.setPreviousElementTracked(true);
@@ -99,12 +99,12 @@ public class FilterListTest {
     @Test
     public void testReplacedValueInListEvent() {
         // construct a (contrived) list of initial values
-        EventList<String> original = new BasicEventList<String>();
+        EventList<String> original = new BasicEventList<>();
         original.addAll(GlazedListsTests.stringToList("LIMPBIZKIT"));
 
-        CollectionMatcherEditor<String> collectionMatcherEditor = new CollectionMatcherEditor<String>();
+        CollectionMatcherEditor<String> collectionMatcherEditor = new CollectionMatcherEditor<>();
         collectionMatcherEditor.setCollection(GlazedListsTests.stringToList("LIPBZ"));
-        FilterList<String> filtered = new FilterList<String>(original, collectionMatcherEditor);
+        FilterList<String> filtered = new FilterList<>(original, collectionMatcherEditor);
         assertEquals(GlazedListsTests.stringToList("LIPBIZI"), filtered);
 
         ListConsistencyListener<String> listConsistencyListener = ListConsistencyListener.install(filtered);
@@ -129,13 +129,13 @@ public class FilterListTest {
     @Test
     public void testRelax() {
         // construct a (contrived) list of initial values
-        EventList<Integer> original = new BasicEventList<Integer>();
+        EventList<Integer> original = new BasicEventList<>();
         List<Integer> values = GlazedListsTests.intArrayToIntegerCollection(new int [] { 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 10, 11, 11, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 0, 10, 11, 11, 11, 11, 11, 11, 11, 10, 11, 11, 11, 11, 11, 10, 11, 11, 11, 11, 11, 11, 11, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 10, 1 });
         original.addAll(values);
 
         // prepare a filter to filter our list
         AtLeastMatcherEditor editor = new AtLeastMatcherEditor();
-        FilterList<Integer> myFilterList = new FilterList<Integer>(original, editor);
+        FilterList<Integer> myFilterList = new FilterList<>(original, editor);
         ListConsistencyListener<Integer> listConsistencyListener = ListConsistencyListener.install(myFilterList);
         listConsistencyListener.setPreviousElementTracked(true);
 
@@ -193,7 +193,7 @@ public class FilterListTest {
 	 */
 	@Test
 	public void testMatchAllOrNothing() {
-		EventList<Integer> baseList = new BasicEventList<Integer>();
+		EventList<Integer> baseList = new BasicEventList<>();
 		baseList.add(new Integer(1));
 		baseList.add(new Integer(2));
 		baseList.add(new Integer(3));
@@ -201,7 +201,7 @@ public class FilterListTest {
 		baseList.add(new Integer(5));
 
 		AllOrNothingMatcherEditor matcher = new AllOrNothingMatcherEditor();
-		FilterList<Integer> filterList = new FilterList<Integer>(baseList,matcher);
+		FilterList<Integer> filterList = new FilterList<>(baseList,matcher);
         ListConsistencyListener<Integer> listConsistencyListener = ListConsistencyListener.install(filterList);
         listConsistencyListener.setPreviousElementTracked(true);
 
@@ -228,12 +228,12 @@ public class FilterListTest {
     @Test
     public void testDispose() {
         EventList<String> baseList = GlazedLists.eventListOf("A", "B", "C", "C", "B", "A");
-        FilterList<String> filterList = new FilterList<String>(baseList);
+        FilterList<String> filterList = new FilterList<>(baseList);
 
-        GlazedListsTests.ListEventCounter<String> counter = new GlazedListsTests.ListEventCounter<String>();
+        GlazedListsTests.ListEventCounter<String> counter = new GlazedListsTests.ListEventCounter<>();
         filterList.addListEventListener(counter);
 
-        TextMatcherEditor<String> editor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
+        TextMatcherEditor<String> editor = new TextMatcherEditor<>(GlazedLists.toStringTextFilterator());
         filterList.setMatcherEditor(editor);
 
         assertEquals(0, counter.getCountAndReset());

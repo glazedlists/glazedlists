@@ -35,7 +35,7 @@ public class RangeMatcher<D extends Comparable,E> implements Matcher<E> {
     private final Filterator<D,E> filterator;
 
     /** a heavily recycled list of filter Comparables, call clear() before use */
-    private final List<D> filterComparables = new ArrayList<D>();
+    private final List<D> filterComparables = new ArrayList<>();
 
     /**
      * This constructor should be used when the objects to be filtered are

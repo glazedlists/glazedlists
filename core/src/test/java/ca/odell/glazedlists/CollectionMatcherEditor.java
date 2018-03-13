@@ -32,7 +32,7 @@ public class CollectionMatcherEditor<E> extends AbstractMatcherEditor<E> {
         boolean relaxed = current != null && values.containsAll(current);
         boolean constrained = current == null || current.containsAll(values);
         this.current = values;
-        CollectionMatcher<E> matcherEditor = new CollectionMatcher<E>(values);
+        CollectionMatcher<E> matcherEditor = new CollectionMatcher<>(values);
 
         if(relaxed) {
             fireRelaxed(matcherEditor);

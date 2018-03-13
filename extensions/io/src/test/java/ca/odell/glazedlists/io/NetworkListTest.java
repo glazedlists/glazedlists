@@ -122,7 +122,7 @@ public class NetworkListTest {
             assertTrue(targetListener.isConnected());
             assertTrue(targetList.isConnected());
             assertEquals(sourceList, targetList);
-            List<Integer> snapshot = new ArrayList<Integer>();
+            List<Integer> snapshot = new ArrayList<>();
             snapshot.addAll(sourceListTS);
 
             // disconnect the client
@@ -181,7 +181,7 @@ public class NetworkListTest {
             assertTrue(targetListener.isConnected());
             assertTrue(targetList.isConnected());
             assertEquals(sourceList, targetList);
-            List<Integer> snapshot = new ArrayList<Integer>();
+            List<Integer> snapshot = new ArrayList<>();
             snapshot.addAll(sourceListTS);
 
             // disconnect the server
@@ -236,7 +236,7 @@ public class NetworkListTest {
             int connectPort = serverPort;
 
             // prepare the listener's peers
-            List<ListPeer> peers = new ArrayList<ListPeer>();
+            List<ListPeer> peers = new ArrayList<>();
             for(int p = 0; p < 4; p++) {
                 serverPort++;
                 ListPeer listenerPeer = new ListPeer(serverPort);
@@ -245,7 +245,7 @@ public class NetworkListTest {
             }
 
             // prepare the listeners
-            List<NetworkList> listeners = new ArrayList<NetworkList>();
+            List<NetworkList> listeners = new ArrayList<>();
             for(Iterator<ListPeer> p = peers.iterator(); p.hasNext(); ) {
                 ListPeer listenerPeer = p.next();
                 NetworkList listener = listenerPeer.subscribe("localhost", connectPort, path, GlazedListsIO.serializableByteCoder());
@@ -303,7 +303,7 @@ public class NetworkListTest {
             // verify they're equal after a subscribe
             waitFor(1000);
             assertEquals(sourceList, targetList);
-            List<Integer> snapshot = new ArrayList<Integer>();
+            List<Integer> snapshot = new ArrayList<>();
             snapshot.addAll(sourceListTS);
 
             // disconnect the first list

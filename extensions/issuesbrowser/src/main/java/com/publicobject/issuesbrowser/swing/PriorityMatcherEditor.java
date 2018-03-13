@@ -34,7 +34,7 @@ public class PriorityMatcherEditor implements FilterComponent<Issue>, ChangeList
         slider = new JSlider(new DefaultBoundedRangeModel(0, 0, 0, 100));
         slider.addChangeListener(this);
 
-        rangeMatcherEditor = new RangeMatcherEditor<Integer,Issue>(GlazedLists.<Integer,Issue>filterator("priority.rating"));
+        rangeMatcherEditor = new RangeMatcherEditor<>(GlazedLists.<Integer,Issue>filterator("priority.rating"));
 
         // priority slider
         slider.setOpaque(false);
@@ -45,7 +45,7 @@ public class PriorityMatcherEditor implements FilterComponent<Issue>, ChangeList
         slider.setForeground(Color.BLACK);
         slider.setFocusable(false);
 
-        final Hashtable<Integer,JLabel> prioritySliderLabels = new Hashtable<Integer,JLabel>();
+        final Hashtable<Integer,JLabel> prioritySliderLabels = new Hashtable<>();
         prioritySliderLabels.put(MIN_PRIORITY, new JLabel("Low"));
         prioritySliderLabels.put(MAX_PRIORITY, new JLabel("High"));
         slider.setLabelTable(prioritySliderLabels);

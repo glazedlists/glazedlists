@@ -4,7 +4,6 @@
 package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.event.ListEvent;
-import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.impl.adt.barcode2.Element;
 import ca.odell.glazedlists.impl.adt.barcode2.SimpleTree;
 import ca.odell.glazedlists.impl.adt.barcode2.SimpleTreeIterator;
@@ -91,7 +90,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
      * @param source the {@link EventList} to be sorted
      */
     public static <E extends Comparable<? super E>> SortedList<E> create(EventList<E> source) {
-        return new SortedList<E>(source);
+        return new SortedList<>(source);
     }
 
     /**
@@ -159,7 +158,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
             // remember what the mapping was before
             int[] previousIndexToSortedIndex = new int[sorted.size()];
             int index = 0;
-            for(SimpleTreeIterator<Element> i = new SimpleTreeIterator<Element>(sorted); i.hasNext(); index++) {
+            for(SimpleTreeIterator<Element> i = new SimpleTreeIterator<>(sorted); i.hasNext(); index++) {
                 i.next();
                 Element<Element> unsortedNode = i.value();
                 int unsortedIndex = unsorted.indexOfNode(unsortedNode, ALL_COLORS);
@@ -174,7 +173,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
             // reorder the unsorted nodes to get the new sorted order
             Element<Element>[] unsortedNodes = new Element[unsorted.size()];
             index = 0;
-            for(SimpleTreeIterator<Element> i = new SimpleTreeIterator<Element>(unsorted); i.hasNext(); index++) {
+            for(SimpleTreeIterator<Element> i = new SimpleTreeIterator<>(unsorted); i.hasNext(); index++) {
                 i.next();
                 Element<Element> unsortedNode = i.node();
                 unsortedNodes[index] = unsortedNode;
@@ -185,7 +184,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
             int[] reorderMap = new int[sorted.size()];
             boolean indexChanged = false;
             index = 0;
-            for(SimpleTreeIterator<Element> i = new SimpleTreeIterator<Element>(sorted); i.hasNext(); index++) {
+            for(SimpleTreeIterator<Element> i = new SimpleTreeIterator<>(sorted); i.hasNext(); index++) {
                 i.next();
                 Element<Element> sortedNode = i.node();
                 Element<Element> unsortedNode = unsortedNodes[index];
@@ -232,9 +231,9 @@ public final class SortedList<E> extends TransformedList<E,E> {
         updates.beginEvent();
 
         // first update the offset tree for all changes, and keep the changed nodes in a list
-        LinkedList<Element> insertNodes = new LinkedList<Element>();
-        List<Element<Element>> updateNodes = new ArrayList<Element<Element>>();
-        List<E> previousValues = new ArrayList<E>();
+        LinkedList<Element> insertNodes = new LinkedList<>();
+        List<Element<Element>> updateNodes = new ArrayList<>();
+        List<E> previousValues = new ArrayList<>();
 
         // Update the indexed tree so it matches the source.
         // Save the nodes to be inserted and updated as well
@@ -443,7 +442,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
 
         // create a list which knows the offsets of the indexes to initialize this list
         if(previousSorted == null && unsorted == null) {
-            unsorted = new SimpleTree<Element>();
+            unsorted = new SimpleTree<>();
             // add all elements in the source list, in order
             for(int i = 0, n = source.size(); i < n; i++) {
                 Element unsortedNode = unsorted.add(i, EMPTY_ELEMENT, 1);
@@ -457,7 +456,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
         if(source.isEmpty()) return;
 
         // rebuild the sorted tree to reflect the new Comparator
-        for(SimpleTreeIterator<Element> i = new SimpleTreeIterator<Element>(unsorted); i.hasNext(); ) {
+        for(SimpleTreeIterator<Element> i = new SimpleTreeIterator<>(unsorted); i.hasNext(); ) {
             i.next();
             Element unsortedNode = i.node();
             insertByUnsortedNode(unsortedNode);
@@ -682,7 +681,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
     private class SortedListIterator implements Iterator<E> {
 
         /** the SimpleTreeIterator to use to move across the tree */
-        private SimpleTreeIterator<Element> treeIterator = new SimpleTreeIterator<Element>(sorted);
+        private SimpleTreeIterator<Element> treeIterator = new SimpleTreeIterator<>(sorted);
 
         /**
          * Returns true iff there are more value to iterate on by caling next()

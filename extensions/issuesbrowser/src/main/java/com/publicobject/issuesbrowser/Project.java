@@ -18,7 +18,7 @@ public class Project {
     private static EventList<Project> projects;
 
     static {
-		projects = new BasicEventList<Project>();
+		projects = new BasicEventList<>();
 		projects.add(new Project("glazedlists", "Glazed Lists", IssueTrackingSystem.getJavaNetJira()));
 		projects.add(new Project("glassfish", "Glassfish - Open Source Application Server for Java EE 6", IssueTrackingSystem.getJavaNetJira()));
 		projects.add(new Project("javacc", "Java Compiler Compiler", IssueTrackingSystem.getJavaNetJira()));

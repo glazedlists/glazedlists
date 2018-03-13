@@ -44,10 +44,10 @@ public class ThreadRecorderEventList<S> extends TransformedList<S,S> {
     private int readWriteBlockCount = 0;
 
     // a list of Rs and Ws for each atomic read and write
-    private final List<String> readWriteLog = new LinkedList<String>();
+    private final List<String> readWriteLog = new LinkedList<>();
 
     // a log of the thread names and the order in which they access this list
-    private final List<String> threadLog = new LinkedList<String>();
+    private final List<String> threadLog = new LinkedList<>();
 
 
     // to detect a change in reading or writing, we store the last operation performed

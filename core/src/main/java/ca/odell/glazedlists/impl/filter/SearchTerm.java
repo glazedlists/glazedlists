@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.filter;
 
-import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.matchers.SearchEngineTextMatcherEditor;
 
 import java.io.Serializable;
@@ -56,7 +55,7 @@ public final class SearchTerm<E> implements Serializable {
      * A recyclable list of filter strings extracted by the TextFilterator of
      * the {@link #field}.
      */
-    private final List<String> fieldFilterStrings = new ArrayList<String>();
+    private final List<String> fieldFilterStrings = new ArrayList<>();
 
     /**
      * Construct a new <code>SearchTerm</code> with the given <code>text</code>
@@ -123,7 +122,7 @@ public final class SearchTerm<E> implements Serializable {
      * the given <code>text</code>.
      */
     public SearchTerm<E> newSearchTerm(String text) {
-        return new SearchTerm<E>(text, isNegated(), isRequired(), getField());
+        return new SearchTerm<>(text, isNegated(), isRequired(), getField());
     }
 
     /**

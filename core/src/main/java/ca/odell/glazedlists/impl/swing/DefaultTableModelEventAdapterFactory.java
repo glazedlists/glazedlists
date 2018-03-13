@@ -24,7 +24,7 @@ public class DefaultTableModelEventAdapterFactory<E> implements Factory<E> {
      */
     @Override
     public TableModelEventAdapter<E> create(AbstractTableModel tableModel) {
-        return new DefaultTableModelEventAdapter<E>(tableModel);
+        return new DefaultTableModelEventAdapter<>(tableModel);
     }
 
     /**

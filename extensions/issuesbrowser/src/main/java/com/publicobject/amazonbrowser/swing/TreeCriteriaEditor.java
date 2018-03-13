@@ -54,10 +54,10 @@ public class TreeCriteriaEditor extends JListPanel<TreeCriteriaEditor.TreeCriter
      * @param source the List of all possible TreeCriterion objects available
      */
     public TreeCriteriaEditor(EventList<TreeCriterion> source) {
-        super(new FunctionList<TreeCriterion,TreeCriterionEditorPanel>(source, new ForwardFunction(), new ReverseFunction()));
+        super(new FunctionList<>(source, new ForwardFunction(), new ReverseFunction()));
 
         // build a filtered view of allCriteria that only contains active TreeCriterion objects
-        this.activeCriteria = new FilterList<TreeCriterion>(source, Matchers.beanPropertyMatcher(TreeCriterion.class, "active", Boolean.TRUE));
+        this.activeCriteria = new FilterList<>(source, Matchers.beanPropertyMatcher(TreeCriterion.class, "active", Boolean.TRUE));
         this.activeCriteria.addListEventListener(activeCriteriaListener);
     }
 
@@ -66,7 +66,7 @@ public class TreeCriteriaEditor extends JListPanel<TreeCriteriaEditor.TreeCriter
      * {@link TreeCriterion} objects.
      */
     public List<TreeCriterion> getActiveCriteria() {
-        return Collections.unmodifiableList(new ArrayList<TreeCriterion>(activeCriteria));
+        return Collections.unmodifiableList(new ArrayList<>(activeCriteria));
     }
 
     /**

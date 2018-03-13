@@ -26,10 +26,12 @@ public class ThreadProxyDriver extends JapexDriverBase {
     private AtLeastMatcherEditor matcherEditor;
     private Random dice = new Random(0);
 
+    @Override
     public void initializeDriver() {
         // do nothing
     }
 
+    @Override
     public void prepare(TestCase testCase) {
 
         // decide our update strategy
@@ -39,15 +41,15 @@ public class ThreadProxyDriver extends JapexDriverBase {
         matcherEditor = new AtLeastMatcherEditor();
 
         // create a short pipeline, ending in a thread proxied list
-        EventList<Integer> base = new BasicEventList<Integer>();
-        EventList<Integer> filtered = new FilterList<Integer>(base, matcherEditor);
+        EventList<Integer> base = new BasicEventList<>();
+        EventList<Integer> filtered = new FilterList<>(base, matcherEditor);
 
         if("iteratelistevent".equals(updateStrategy)) {
-            EventList<Integer> threadProxied = new IterateListEventThreadProxy<Integer>(filtered);
+            EventList<Integer> threadProxied = new IterateListEventThreadProxy<>(filtered);
         } else if("clearaddall".equals(updateStrategy)) {
-            EventList<Integer> threadProxied = new ClearAddAllThreadProxy<Integer>(filtered);
+            EventList<Integer> threadProxied = new ClearAddAllThreadProxy<>(filtered);
         } else if("synccopy".equals(updateStrategy)) {
-            EventList<Integer> threadProxied = new SyncCopyThreadProxy<Integer>(filtered);
+            EventList<Integer> threadProxied = new SyncCopyThreadProxy<>(filtered);
         }
 
         // fill it with data
@@ -60,6 +62,7 @@ public class ThreadProxyDriver extends JapexDriverBase {
     /**
      * Warmup is exactly the same as the run method.
      */
+    @Override
     public void warmup(TestCase testCase) {
         matcherEditor.setMinimum(dice.nextInt(1000));
     }
@@ -67,14 +70,17 @@ public class ThreadProxyDriver extends JapexDriverBase {
     /**
      * Execute the specified testcase one time.
      */
+    @Override
     public void run(TestCase testCase) {
         matcherEditor.setMinimum(dice.nextInt(1000));
     }
 
+    @Override
     public void finish(TestCase testCase) {
         // do nothing
     }
 
+    @Override
     public void terminateDriver() {
         // do nothing
     }
@@ -87,11 +93,12 @@ public class ThreadProxyDriver extends JapexDriverBase {
         public ClearAddAllThreadProxy(EventList<T> source) {
             super(source);
         }
+        @Override
         protected void schedule(Runnable runnable) {
             runnable.run();
         }
         protected List applyChangeToCache(List<T> source, ListEvent<T> listChanges, List<T> localCache) {
-            return new ArrayList<T>(source);
+            return new ArrayList<>(source);
         }
     }
 
@@ -102,6 +109,7 @@ public class ThreadProxyDriver extends JapexDriverBase {
         public IterateListEventThreadProxy(EventList<T> source) {
             super(source);
         }
+        @Override
         protected void schedule(Runnable runnable) {
             runnable.run();
         }
@@ -128,11 +136,12 @@ public class ThreadProxyDriver extends JapexDriverBase {
         public SyncCopyThreadProxy(EventList<T> source) {
             super(source);
         }
+        @Override
         protected void schedule(Runnable runnable) {
             runnable.run();
         }
         public List applyChangeToCache(List<T> source, ListEvent<T> listChanges, List<T> localCache) {
-            List<T> result = new ArrayList<T>(source.size());
+            List<T> result = new ArrayList<>(source.size());
 
             // cacheOffset == the difference between localCache and result
             int resultIndex = 0;

@@ -54,9 +54,9 @@ class JXTableTestApp2 implements Runnable {
         issues.getReadWriteLock().writeLock().lock();
         try {
             JTextField filterEdit = new JTextField(12);
-            TextComponentMatcherEditor<Issue> textMatcherEditor = new TextComponentMatcherEditor<Issue>(filterEdit, new IssueTextFilterator());
-            FilterList<Issue> textFilteredIssues = new FilterList<Issue>(issues, textMatcherEditor);
-            SortedList<Issue> sortedIssues = new SortedList<Issue>(textFilteredIssues, null);
+            TextComponentMatcherEditor<Issue> textMatcherEditor = new TextComponentMatcherEditor<>(filterEdit, new IssueTextFilterator());
+            FilterList<Issue> textFilteredIssues = new FilterList<>(issues, textMatcherEditor);
+            SortedList<Issue> sortedIssues = new SortedList<>(textFilteredIssues, null);
             EventList<Issue> issueProxyList = GlazedListsSwing.swingThreadProxyList(sortedIssues);
             TableModel tableModel = GlazedListsSwing.eventTableModel(issueProxyList, new IssueTableFormat());
             ListSelectionModel selectionModel = GlazedListsSwing.eventSelectionModel(issueProxyList);
@@ -125,7 +125,7 @@ class JXTableTestApp2 implements Runnable {
     }
 
     public static void main(String[] args) {
-        EventList<Issue> issues = new BasicEventList<Issue>();
+        EventList<Issue> issues = new BasicEventList<>();
         new Thread(new IssueLoader(issues, args[0])).start();
         SwingUtilities.invokeLater(new JXTableTestApp2(issues));
     }

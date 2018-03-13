@@ -26,7 +26,7 @@ import java.util.Set;
 public final class PropertyEventNameMatcher implements Matcher<PropertyChangeEvent> {
 
     /** Property names to consider. */
-    private final Set<String> propertyNames = new HashSet<String>();
+    private final Set<String> propertyNames = new HashSet<>();
 
     /**
      * Specifies how to use the {@link #propertyNames} to match property change events.

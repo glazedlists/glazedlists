@@ -73,7 +73,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
      *      extra elements are truncated
      */
     public SeparatorList(EventList<E> source, Comparator<? super E> comparator, int minimumSizeForSeparator, int defaultLimit) {
-        super(new SeparatorInjectorList<E>(new SortedList<E>(source, comparator), defaultLimit));
+        super(new SeparatorInjectorList<>(new SortedList<>(source, comparator), defaultLimit));
         this.separatorSource = (SeparatorInjectorList<E>)super.source;
         this.minimumSizeForSeparator = minimumSizeForSeparator;
 
@@ -188,7 +188,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         if(listChanges.isReordering()) {
             boolean canReorder = true;
 
-            for(SimpleTreeIterator<SeparatorInjectorList<E>.GroupSeparator> i = new SimpleTreeIterator<SeparatorInjectorList<E>.GroupSeparator>(separatorSource.separators); i.hasNext(); ) {
+            for(SimpleTreeIterator<SeparatorInjectorList<E>.GroupSeparator> i = new SimpleTreeIterator<>(separatorSource.separators); i.hasNext(); ) {
                 i.next();
                 Element<SeparatorInjectorList<E>.GroupSeparator> node = i.node();
                 int limit = node.get().getLimit();
@@ -499,7 +499,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
 
             // prepare the groups
             GrouperClient grouperClient = new GrouperClient();
-            this.grouper = new Grouper<E>(source, grouperClient);
+            this.grouper = new Grouper<>(source, grouperClient);
 
             // initialize separators state
             rebuildSeparators();
@@ -514,7 +514,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         private void rebuildSeparators() {
             // clear the initial state of these separators
             insertedSeparators = new Barcode();
-            separators = new SimpleTree<GroupSeparator>();
+            separators = new SimpleTree<>();
 
             // prepare the separator list
             insertedSeparators.add(0, SOURCE_ELEMENT, source.size());

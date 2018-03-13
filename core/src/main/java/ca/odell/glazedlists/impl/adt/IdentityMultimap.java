@@ -18,7 +18,7 @@ public class IdentityMultimap<K,V> extends IdentityHashMap<K, List<V>> {
     public void addValue(K key, V value) {
         List<V> values = super.get(key);
         if(values == null) {
-            values = new ArrayList<V>(2);
+            values = new ArrayList<>(2);
             put(key, values);
         }
         values.add(value);

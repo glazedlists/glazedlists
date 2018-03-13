@@ -147,9 +147,9 @@ public class ListEventPublisher2Test {
      */
     @Test
     public void testAppendContradictingEvents() {
-        EventList<String> source = new BasicEventList<String>();
-        NotFirstMatcherEditor<String> matcherEditor = new NotFirstMatcherEditor<String>();
-        FilterList<String> filtered = new FilterList<String>(source, matcherEditor);
+        EventList<String> source = new BasicEventList<>();
+        NotFirstMatcherEditor<String> matcherEditor = new NotFirstMatcherEditor<>();
+        FilterList<String> filtered = new FilterList<>(source, matcherEditor);
         source.addListEventListener(matcherEditor);
         source.add("A");
 
@@ -162,7 +162,7 @@ public class ListEventPublisher2Test {
         public void listChanged(ListEvent<E> listChanges) {
             EventList<E> sourceList = listChanges.getSourceList();
             if(sourceList.size() > 0) {
-                fireChanged(new NotSameMatcher<E>(sourceList.get(0)));
+                fireChanged(new NotSameMatcher<>(sourceList.get(0)));
             } else {
                 fireMatchAll();
             }

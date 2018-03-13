@@ -33,9 +33,9 @@ public class CompositeMatcherEditorTest {
      */
     @Before
     public void setUp() {
-        compositeMatcherEditor = new CompositeMatcherEditor<String>();
-        textMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
-        anotherTextMatcherEditor = new TextMatcherEditor<String>(GlazedLists.toStringTextFilterator());
+        compositeMatcherEditor = new CompositeMatcherEditor<>();
+        textMatcherEditor = new TextMatcherEditor<>(GlazedLists.toStringTextFilterator());
+        anotherTextMatcherEditor = new TextMatcherEditor<>(GlazedLists.toStringTextFilterator());
     }
 
     /**
@@ -206,7 +206,7 @@ public class CompositeMatcherEditorTest {
         compositeMatcherEditor.addMatcherEditorListener(listener);
 
         final EventList<String> strings = GlazedLists.eventListOf("horse", "cow", "pig", "sheep", "chicken", "duck");
-        final FilterList<String> filtered = new FilterList<String>(strings, compositeMatcherEditor);
+        final FilterList<String> filtered = new FilterList<>(strings, compositeMatcherEditor);
 
         // AND is the default mode
         assertEquals(CompositeMatcherEditor.AND, compositeMatcherEditor.getMode());
@@ -251,7 +251,7 @@ public class CompositeMatcherEditorTest {
         compositeMatcherEditor.addMatcherEditorListener(listener);
 
         final EventList<String> strings = GlazedLists.eventListOf("horse", "cow", "pig", "sheep", "chicken", "duck");
-        final FilterList<String> filtered = new FilterList<String>(strings, compositeMatcherEditor);
+        final FilterList<String> filtered = new FilterList<>(strings, compositeMatcherEditor);
         textMatcherEditor.setMode(TextMatcherEditor.CONTAINS);
         textMatcherEditor.setFilterText(new String[] {"e"});
         compositeMatcherEditor.getMatcherEditors().add(textMatcherEditor);
@@ -299,7 +299,7 @@ public class CompositeMatcherEditorTest {
         compositeMatcherEditor.addMatcherEditorListener(listener);
 
         final EventList<String> strings = GlazedLists.eventListOf("horse", "cow", "pig", "sheep", "chicken", "duck");
-        final FilterList<String> filtered = new FilterList<String>(strings, compositeMatcherEditor);
+        final FilterList<String> filtered = new FilterList<>(strings, compositeMatcherEditor);
         textMatcherEditor.setMode(TextMatcherEditor.CONTAINS);
         textMatcherEditor.setFilterText(new String[] {"e"});
         anotherTextMatcherEditor.setMode(TextMatcherEditor.CONTAINS);

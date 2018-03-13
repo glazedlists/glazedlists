@@ -31,9 +31,9 @@ public class SimultaneousUpdatesTest {
     public synchronized void testCompetingWriters() {
 
         // prepare a list with a Swing view
-        EventList<Integer> list = new BasicEventList<Integer>();
+        EventList<Integer> list = new BasicEventList<>();
         EvenOrAllMatcherEditor matcherEditor = new EvenOrAllMatcherEditor();
-        FilterList<Integer> filterList = new FilterList<Integer>(list, matcherEditor);
+        FilterList<Integer> filterList = new FilterList<>(list, matcherEditor);
         EventList<Integer> swingSafe = GlazedListsSwing.swingThreadProxyList(filterList);
 
         // make sure everything's always consistent

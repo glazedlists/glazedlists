@@ -14,8 +14,8 @@ public final class SubtractionTest {
 
     @Test
     public void testSubtractionFloat() {
-        final EventList<Object> aList = new BasicEventList<Object>();
-        final EventList<Object> bList = new BasicEventList<Object>();
+        final EventList<Object> aList = new BasicEventList<>();
+        final EventList<Object> bList = new BasicEventList<>();
 
         final Calculation<Integer> a = Calculations.count(aList);
         final Calculation<Integer> b = Calculations.count(bList);
@@ -32,8 +32,8 @@ public final class SubtractionTest {
 
     @Test
     public void testSubtractionDouble() {
-        final EventList<Object> aList = new BasicEventList<Object>();
-        final EventList<Object> bList = new BasicEventList<Object>();
+        final EventList<Object> aList = new BasicEventList<>();
+        final EventList<Object> bList = new BasicEventList<>();
 
         final Calculation<Integer> a = Calculations.count(aList);
         final Calculation<Integer> b = Calculations.count(bList);
@@ -50,8 +50,8 @@ public final class SubtractionTest {
 
     @Test
     public void testSubtractionInteger() {
-        final EventList<Object> aList = new BasicEventList<Object>();
-        final EventList<Object> bList = new BasicEventList<Object>();
+        final EventList<Object> aList = new BasicEventList<>();
+        final EventList<Object> bList = new BasicEventList<>();
 
         final Calculation<Integer> a = Calculations.count(aList);
         final Calculation<Integer> b = Calculations.count(bList);
@@ -68,8 +68,8 @@ public final class SubtractionTest {
 
     @Test
     public void testSubtractionLong() {
-        final EventList<Object> aList = new BasicEventList<Object>();
-        final EventList<Object> bList = new BasicEventList<Object>();
+        final EventList<Object> aList = new BasicEventList<>();
+        final EventList<Object> bList = new BasicEventList<>();
 
         final Calculation<Integer> a = Calculations.count(aList);
         final Calculation<Integer> b = Calculations.count(bList);

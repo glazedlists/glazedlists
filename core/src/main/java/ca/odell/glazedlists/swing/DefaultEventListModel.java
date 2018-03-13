@@ -46,7 +46,7 @@ public class DefaultEventListModel<E> implements ListEventListener<E>, ListModel
     private boolean disposeSource;
 
     /** whom to notify of data changes */
-    private final List<ListDataListener> listeners = new ArrayList<ListDataListener>();
+    private final List<ListDataListener> listeners = new ArrayList<>();
 
     /** recycle the list data event to prevent unnecessary object creation */
     protected final MutableListDataEvent listDataEvent = new MutableListDataEvent(this);

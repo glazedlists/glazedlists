@@ -38,11 +38,11 @@ public class MatcherTest {
 
     @Test
     public void testNotMatcher() {
-        Matcher<String> s = new NotMatcher<String>(new CapitalizedStringMatcher());
+        Matcher<String> s = new NotMatcher<>(new CapitalizedStringMatcher());
         assertFalse(s.matches("James"));
         assertTrue(s.matches("james"));
 
-        Matcher<Boolean> b = new NotMatcher<Boolean>(new OnMatcher());
+        Matcher<Boolean> b = new NotMatcher<>(new OnMatcher());
         assertFalse(b.matches(Boolean.TRUE));
         assertTrue(b.matches(Boolean.FALSE));
     }
@@ -63,7 +63,7 @@ public class MatcherTest {
         assertFalse(typedMatcherEditor.getMatcher().matches(new Integer(10)));
         assertTrue(typedMatcherEditor.getMatcher().matches(new Float(3.14f)));
 
-        typedMatcherEditor = new TextMatcherEditor<Number>(GlazedLists.toStringTextFilterator());
+        typedMatcherEditor = new TextMatcherEditor<>(GlazedLists.toStringTextFilterator());
         assertTrue(typedMatcherEditor.getMatcher().matches(new Integer(10)));
         assertTrue(typedMatcherEditor.getMatcher().matches(new Float(3.14f)));
 
@@ -74,7 +74,7 @@ public class MatcherTest {
 
     @Test
     public void testFilter() {
-        List<Integer> elements = new ArrayList<Integer>();
+        List<Integer> elements = new ArrayList<>();
         elements.add(new Integer(45));
         elements.add(new Integer(22));
         elements.add(new Integer(15));
@@ -106,7 +106,7 @@ public class MatcherTest {
 
     @Test
     public void testSelect() {
-        List<Integer> elements = new ArrayList<Integer>();
+        List<Integer> elements = new ArrayList<>();
         elements.add(new Integer(45));
         elements.add(new Integer(22));
         elements.add(new Integer(15));
@@ -132,7 +132,7 @@ public class MatcherTest {
 
     @Test
     public void testIndexOf() {
-        List<Integer> elements = new ArrayList<Integer>();
+        List<Integer> elements = new ArrayList<>();
         elements.add(new Integer(45));
         elements.add(new Integer(22));
         elements.add(new Integer(15));
@@ -255,7 +255,7 @@ public class MatcherTest {
 
     @Test
     public void testTypeMatcher() {
-        final List<Number> numbers = new ArrayList<Number>();
+        final List<Number> numbers = new ArrayList<>();
         numbers.add(new Float(0));
         numbers.add(new Double(1));
         numbers.add(new Short((short) 2));

@@ -197,7 +197,7 @@ public class Grouper<E> {
             }
         }
 
-        TryJoinResult<E> tryJoinResult = new TryJoinResult<E>();
+        TryJoinResult<E> tryJoinResult = new TryJoinResult<>();
 
         // second pass, handle toDoList, update groupLists, and fire events
         listChanges.reset();

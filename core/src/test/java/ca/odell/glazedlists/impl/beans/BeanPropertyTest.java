@@ -22,7 +22,7 @@ public class BeanPropertyTest {
      */
     @Test
     public void testSimpleProperties() {
-        BeanProperty<Automobile> painter = new BeanProperty<Automobile>(Automobile.class, "color", true, true);
+        BeanProperty<Automobile> painter = new BeanProperty<>(Automobile.class, "color", true, true);
         Automobile myCar = new Automobile(false);
 
         // simple get
@@ -34,13 +34,13 @@ public class BeanPropertyTest {
         assertEquals(Color.blue, myCar.getColor());
 
         // primitive get
-        BeanProperty<Automobile> transmission = new BeanProperty<Automobile>(Automobile.class, "automatic", true, false);
+        BeanProperty<Automobile> transmission = new BeanProperty<>(Automobile.class, "automatic", true, false);
         assertEquals(Boolean.FALSE, transmission.get(myCar));
         Automobile yourCar = new Automobile(true);
         assertEquals(Boolean.TRUE, transmission.get(yourCar));
 
         // superclass property set
-        BeanProperty<Truck> truckColor = new BeanProperty<Truck>(Truck.class, "color", true, true);
+        BeanProperty<Truck> truckColor = new BeanProperty<>(Truck.class, "color", true, true);
         Truck myTruck = new Truck(3);
         myTruck.setColor(Color.yellow);
         assertEquals(Color.yellow, truckColor.get(myTruck));
@@ -51,7 +51,7 @@ public class BeanPropertyTest {
         assertEquals(Color.green, myTruck.getColor());
 
         // write-only properties
-        BeanProperty<Automobile> gasUp = new BeanProperty<Automobile>(Automobile.class, "fullOfGas", false, true);
+        BeanProperty<Automobile> gasUp = new BeanProperty<>(Automobile.class, "fullOfGas", false, true);
         gasUp.set(myCar, Boolean.TRUE);
         assertEquals(true, myCar.getDrivable());
         assertEquals(boolean.class, gasUp.getValueClass());
@@ -59,7 +59,7 @@ public class BeanPropertyTest {
         assertEquals(false, myCar.getDrivable());
 
         // read-only properties
-        BeanProperty<Automobile> drivable = new BeanProperty<Automobile>(Automobile.class, "drivable", true, false);
+        BeanProperty<Automobile> drivable = new BeanProperty<>(Automobile.class, "drivable", true, false);
         myCar.setFullOfGas(true);
         assertEquals(Boolean.TRUE, drivable.get(myCar));
         assertEquals(boolean.class, drivable.getValueClass());
@@ -67,7 +67,7 @@ public class BeanPropertyTest {
         assertEquals(Boolean.FALSE, drivable.get(myCar));
 
         // interface property get
-        BeanProperty<SupportsTrailerHitch> towedVehicle = new BeanProperty<SupportsTrailerHitch>(SupportsTrailerHitch.class, "towedVehicle", true, true);
+        BeanProperty<SupportsTrailerHitch> towedVehicle = new BeanProperty<>(SupportsTrailerHitch.class, "towedVehicle", true, true);
         myTruck.setTowedVehicle(myCar);
         assertEquals(myCar, towedVehicle.get(myTruck));
         assertEquals(Automobile.class, towedVehicle.getValueClass());
@@ -83,7 +83,7 @@ public class BeanPropertyTest {
     @Test
     public void testNavigatedProperties() {
         // navigated get
-        BeanProperty<SupportsTrailerHitch> towAndPaint = new BeanProperty<SupportsTrailerHitch>(SupportsTrailerHitch.class, "towedVehicle.color", true, true);
+        BeanProperty<SupportsTrailerHitch> towAndPaint = new BeanProperty<>(SupportsTrailerHitch.class, "towedVehicle.color", true, true);
         Truck towTruck = new Truck(3);
         Automobile rainbowCar = new Automobile(true);
         towTruck.setTowedVehicle(rainbowCar);
@@ -96,7 +96,7 @@ public class BeanPropertyTest {
         assertEquals(Color.gray, rainbowCar.getColor());
 
         // deeply navigated get
-        BeanProperty<SupportsTrailerHitch> red = new BeanProperty<SupportsTrailerHitch>(SupportsTrailerHitch.class, "towedVehicle.color.red", true, false);
+        BeanProperty<SupportsTrailerHitch> red = new BeanProperty<>(SupportsTrailerHitch.class, "towedVehicle.color.red", true, false);
         rainbowCar.setColor(Color.blue);
         assertEquals(new Integer(0), red.get(towTruck));
         rainbowCar.setColor(Color.red);
@@ -106,7 +106,7 @@ public class BeanPropertyTest {
 
     @Test
     public void testBadSetterMethod() {
-        BeanProperty<Truck> painter = new BeanProperty<Truck>(Truck.class, "towedVehicle.color", true, true);
+        BeanProperty<Truck> painter = new BeanProperty<>(Truck.class, "towedVehicle.color", true, true);
         Truck truck = new Truck(2);
         truck.setTowedVehicle(new Automobile(true));
         try {
@@ -119,13 +119,13 @@ public class BeanPropertyTest {
     @Test
     public void testThisProperty() {
         try {
-            new BeanProperty<Truck>(Truck.class, "this", true, true);
+            new BeanProperty<>(Truck.class, "this", true, true);
             fail("failed to throw an exception when creating a writable BeanProperty with 'this'");
         } catch (IllegalArgumentException e) {
             // expected
         }
 
-        BeanProperty<Truck> identity = new BeanProperty<Truck>(Truck.class, "this", true, false);
+        BeanProperty<Truck> identity = new BeanProperty<>(Truck.class, "this", true, false);
 
         Truck truck = new Truck(2);
         assertSame(truck, identity.get(truck));
@@ -134,13 +134,13 @@ public class BeanPropertyTest {
 
     @Test
     public void testResolveGenericReturnType() {
-        final BeanProperty<Bus> busPassengers = new BeanProperty<Bus>(Bus.class, "passenger", true, true);
+        final BeanProperty<Bus> busPassengers = new BeanProperty<>(Bus.class, "passenger", true, true);
         assertSame(People.class, busPassengers.getValueClass());
     }
 
     @Test
     public void testResolveGenericParameterType() {
-        final BeanProperty<Bus> busDriver = new BeanProperty<Bus>(Bus.class, "driver", false, true);
+        final BeanProperty<Bus> busDriver = new BeanProperty<>(Bus.class, "driver", false, true);
         assertSame(People.class, busDriver.getValueClass());
     }
 
@@ -151,7 +151,7 @@ public class BeanPropertyTest {
      */
     @Test
     public void testInterfaces() {
-        BeanProperty<SubInterface> codeProperty = new BeanProperty<SubInterface>(SubInterface.class, "code", true, true);
+        BeanProperty<SubInterface> codeProperty = new BeanProperty<>(SubInterface.class, "code", true, true);
         NamedCode namedCode = new NamedCode();
         codeProperty.set(namedCode, "C++");
         assertEquals("C++", codeProperty.get(namedCode));

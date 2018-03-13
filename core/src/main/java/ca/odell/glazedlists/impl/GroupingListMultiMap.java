@@ -76,16 +76,16 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
         this.keyFunction = keyFunction;
 
         // construct a GroupingList which groups together the source elements for common keys
-        this.groupingList = new GroupingList<V>(source, new FunctionComparator(keyFunction, keyGrouper));
+        this.groupingList = new GroupingList<>(source, new FunctionComparator(keyFunction, keyGrouper));
 
         // wrap each List in the GroupingList in a layer that enforces the keyFunction constraints for writes
-        this.valueList = new FunctionList<List<V>, List<V>>(this.groupingList, new ValueListFunction());
+        this.valueList = new FunctionList<>(this.groupingList, new ValueListFunction());
         this.valueList.addListEventListener(this);
 
         // it is important that the keyList is a BasicEventList since we use its ListIterator, which remains
         // consistent with changes to its underlying data (any other Iterator would throw a ConcurrentModificationException)
-        this.keyList = new BasicEventList<K>(this.groupingList.size());
-        this.delegate = new HashMap<K,List<V>>(this.groupingList.size());
+        this.keyList = new BasicEventList<>(this.groupingList.size());
+        this.delegate = new HashMap<>(this.groupingList.size());
 
         // initialize both the keyList and the delegate Map
         for (Iterator<List<V>> i = this.valueList.iterator(); i.hasNext();) {
@@ -456,7 +456,7 @@ public class GroupingListMultiMap<K, V> implements DisposableMap<K, List<V>>, Li
             checkKeyValueAgreement(getKey(), newValue);
 
             // record the old value List elements (to return)
-            final List<V> oldValue = new ArrayList<V>(value);
+            final List<V> oldValue = new ArrayList<>(value);
 
             // replace all elements within the List
             //

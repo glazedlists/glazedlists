@@ -336,7 +336,7 @@ public final class IndexedTreeNode<V> {
 
         // if we need to create a new subtree, do that
         if(subtree == null) {
-            inserted = new IndexedTreeNode<V>(this, value);
+            inserted = new IndexedTreeNode<>(this, value);
 
             // assign a member value to the subtree
             if(insertOnLeft) this.left = inserted;
@@ -374,7 +374,7 @@ public final class IndexedTreeNode<V> {
 
         // we need to create a new subtree, do that
         if(subtree == null) {
-            inserted = new IndexedTreeNode<V>(this, value);
+            inserted = new IndexedTreeNode<>(this, value);
 
             // assign a member value to the subtree
             if(insertOnLeft) this.left = inserted;
@@ -815,6 +815,7 @@ public final class IndexedTreeNode<V> {
     /**
      * Prints the tree by its contents.
      */
+    @Override
     public String toString() {
 
 //        String leftString = left == null ? "." : left.toString();

@@ -36,7 +36,7 @@ public final class KeyedCollection<P, V> {
             allPositions.add(position);
 
         } else {
-            SortedSet<P> allPositions = new TreeSet<P>(positionComparator);
+            SortedSet<P> allPositions = new TreeSet<>(positionComparator);
             allPositions.add((P)previousPositions);
             allPositions.add(position);
             values.put(value, allPositions);

@@ -18,7 +18,7 @@ import java.util.Map;
 public class DefaultExternalExpansionModel<E> implements TreeList.ExpansionModel<E> {
 
     /** keep track of the expanded state of each element, by its identity */
-    private HashMap<E,Boolean> elementsExpandedStates = new HashMap<E,Boolean>();
+    private HashMap<E,Boolean> elementsExpandedStates = new HashMap<>();
 
     /** the {@link TreeList.ExpansionModel} to delegate to for unknown elements */
     private TreeList.ExpansionModel<E> defaultsModel;

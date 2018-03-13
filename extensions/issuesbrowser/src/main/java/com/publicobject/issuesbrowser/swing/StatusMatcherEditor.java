@@ -39,7 +39,7 @@ class StatusMatcherEditor extends AbstractMatcherEditor<Issue> implements ListEv
     private JPanel checkBoxPanel = new JPanel(new GridLayout(4, 2));
 
     /** A checkbox for each displayed status. */
-    private final Map<String, JCheckBox> statusCheckBoxes = new LinkedHashMap<String, JCheckBox>();
+    private final Map<String, JCheckBox> statusCheckBoxes = new LinkedHashMap<>();
 
     /** Issues grouped together by status. */
     private final GroupingList<Issue> issuesByStatus;
@@ -49,11 +49,11 @@ class StatusMatcherEditor extends AbstractMatcherEditor<Issue> implements ListEv
      * A cache of the list of statuses that mirrors the statuses of the issuesByStatus List.
      * It is used to determine which status is deleted when DELETE events arrive.
      */
-    private List<String> statuses = new ArrayList<String>();
+    private List<String> statuses = new ArrayList<>();
 
     public StatusMatcherEditor(EventList<Issue> issues, Status[] stati) {
         // group the issues according to their status
-        issuesByStatus = new GroupingList<Issue>(issues, new IssueStatusComparator());
+        issuesByStatus = new GroupingList<>(issues, new IssueStatusComparator());
         this.issuesByStatusSwingThread = GlazedListsSwing.swingThreadProxyList(issuesByStatus);
         this.issuesByStatusSwingThread.addListEventListener(this);
         for (Status status : stati) {
@@ -105,7 +105,7 @@ class StatusMatcherEditor extends AbstractMatcherEditor<Issue> implements ListEv
      * of the selected statuses.
      */
     private StatusMatcher buildMatcher() {
-        final Set<String> allowedStates = new HashSet<String>();
+        final Set<String> allowedStates = new HashSet<>();
 
         for (Iterator<Map.Entry<String, JCheckBox>> iter = statusCheckBoxes.entrySet().iterator(); iter.hasNext();) {
             Map.Entry<String, JCheckBox> entry = iter.next();

@@ -26,11 +26,11 @@ public class TableComparatorChooserTest extends SwingTestCase {
         String[] properties = {"text"};
         String[] labels = {"Text"};
         TableFormat<JLabel> tableFormat = GlazedLists.tableFormat(properties, labels);
-        EventList<JLabel> source = new BasicEventList<JLabel>();
+        EventList<JLabel> source = new BasicEventList<>();
 
-        JTable table = new JTable(new DefaultEventTableModel<JLabel>(source, tableFormat));
+        JTable table = new JTable(new DefaultEventTableModel<>(source, tableFormat));
 
-        SortedList<JLabel> sorted = new SortedList<JLabel>(source);
+        SortedList<JLabel> sorted = new SortedList<>(source);
         TableComparatorChooser.install(table, sorted, AbstractTableComparatorChooser.SINGLE_COLUMN);
 
         // install the System LnF

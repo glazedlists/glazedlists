@@ -41,7 +41,7 @@ public class ThresholdMatcherEditorTest {
     private static final Integer ELEVEN = new Integer(11);
     private static final Integer TWELVE = new Integer(12);
 
-    private static final List<Integer> INITIAL_LIST = new ArrayList<Integer>(10);
+    private static final List<Integer> INITIAL_LIST = new ArrayList<>(10);
     static {
         for (int i = 0; i < 11; i++) {
             INITIAL_LIST.add(new Integer(i));
@@ -55,8 +55,8 @@ public class ThresholdMatcherEditorTest {
     @Before
     public void setUp() throws Exception {
 		sourceList = GlazedLists.eventList(INITIAL_LIST);
-		thresholdMatcherEditor = new ThresholdMatcherEditor<Integer,Integer>();
-		filterList = new FilterList<Integer>(sourceList, thresholdMatcherEditor);
+		thresholdMatcherEditor = new ThresholdMatcherEditor<>();
+		filterList = new FilterList<>(sourceList, thresholdMatcherEditor);
 	}
 
     @After
@@ -423,8 +423,8 @@ public class ThresholdMatcherEditorTest {
     @Test
     public void testFunction() {
         sourceList = GlazedLists.eventList(INITIAL_LIST);
-        thresholdMatcherEditor = new ThresholdMatcherEditor<Integer,Integer>(null, null, null, new FirstNumberFunction());
-        filterList = new FilterList<Integer>(sourceList, thresholdMatcherEditor);
+        thresholdMatcherEditor = new ThresholdMatcherEditor<>(null, null, null, new FirstNumberFunction());
+        filterList = new FilterList<>(sourceList, thresholdMatcherEditor);
 
         thresholdMatcherEditor.setMatchOperation(ThresholdMatcherEditor.EQUAL);
         thresholdMatcherEditor.setThreshold(ONE);

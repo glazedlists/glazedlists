@@ -67,10 +67,10 @@ public class CalculationCategoryDataset extends AbstractDataset implements Categ
     private static final List<Integer> COLUMN_KEYS = Collections.singletonList(new Integer(0));
 
     /** the Calculations providing the values of this CategoryDataset */
-    private final ObservableElementList<Calculation<? extends Number>> calculations = new ObservableElementList<Calculation<? extends Number>>(new BasicEventList<Calculation<? extends Number>>(), GlazedLists.beanConnector(Calculation.class));
+    private final ObservableElementList<Calculation<? extends Number>> calculations = new ObservableElementList<>(new BasicEventList<Calculation<? extends Number>>(), GlazedLists.beanConnector(Calculation.class));
 
     /** the names of each of the {@link #calculations} reported as the row keys */
-    private final FunctionList<Calculation<? extends Number>, String> rowKeys = new FunctionList<Calculation<? extends Number>, String>(calculations, NAME_FUNCTION);
+    private final FunctionList<Calculation<? extends Number>, String> rowKeys = new FunctionList<>(calculations, NAME_FUNCTION);
 
     public CalculationCategoryDataset() {
         calculations.addListEventListener(this);

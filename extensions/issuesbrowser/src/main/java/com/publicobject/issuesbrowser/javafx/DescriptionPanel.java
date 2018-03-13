@@ -32,7 +32,7 @@ import java.util.Iterator;
 public final class DescriptionPanel {
 
     /** Issue-Property. */
-    private SimpleObjectProperty<Issue> issueProperty = new SimpleObjectProperty<Issue>();
+    private SimpleObjectProperty<Issue> issueProperty = new SimpleObjectProperty<>();
 
     private WebView webView = new WebView();
 

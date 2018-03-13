@@ -43,9 +43,9 @@ public class EventSelectionModelTest extends SwingTestCase {
      */
     @Test
     public void testSort() {
-        EventList<Comparable> list = new BasicEventList<Comparable>();
-        SortedList<Comparable> sorted = new SortedList<Comparable>(list, null);
-        EventSelectionModel<Comparable> eventSelectionModel = new EventSelectionModel<Comparable>(sorted);
+        EventList<Comparable> list = new BasicEventList<>();
+        SortedList<Comparable> sorted = new SortedList<>(list, null);
+        EventSelectionModel<Comparable> eventSelectionModel = new EventSelectionModel<>(sorted);
 
         // populate the list
         list.addAll(GlazedListsTests.delimitedStringToList("E C F B A D"));
@@ -83,8 +83,8 @@ public class EventSelectionModelTest extends SwingTestCase {
      */
     @Test
     public void testClear() {
-        EventList<String> list = new BasicEventList<String>();
-        EventSelectionModel eventSelectionModel = new EventSelectionModel<String>(list);
+        EventList<String> list = new BasicEventList<>();
+        EventSelectionModel eventSelectionModel = new EventSelectionModel<>(list);
 
         // populate the list
         list.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
@@ -117,8 +117,8 @@ public class EventSelectionModelTest extends SwingTestCase {
      */
     @Test
     public void testToggleSelection() {
-        EventList<String> list = new BasicEventList<String>();
-        EventSelectionModel<String> eventSelectionModel = new EventSelectionModel<String>(list);
+        EventList<String> list = new BasicEventList<>();
+        EventSelectionModel<String> eventSelectionModel = new EventSelectionModel<>(list);
         assertEquals(Collections.EMPTY_LIST, eventSelectionModel.getSelected());
         assertEquals(Collections.EMPTY_LIST, eventSelectionModel.getTogglingSelected());
         assertEquals(Collections.EMPTY_LIST, eventSelectionModel.getDeselected());
@@ -204,10 +204,10 @@ public class EventSelectionModelTest extends SwingTestCase {
     @Test
     public void testSelectionModel() {
         EventList<Object> source = GlazedLists.<Object>eventListOf("one", "two", "three");
-        FilterList<Object> filtered = new FilterList<Object>(source, Matchers.trueMatcher());
+        FilterList<Object> filtered = new FilterList<>(source, Matchers.trueMatcher());
 
         // create selection model
-        EventSelectionModel<Object> model = new EventSelectionModel<Object>(filtered);
+        EventSelectionModel<Object> model = new EventSelectionModel<>(filtered);
         ListSelectionChangeCounter counter = new ListSelectionChangeCounter();
         model.addListSelectionListener(counter);
 
@@ -235,7 +235,7 @@ public class EventSelectionModelTest extends SwingTestCase {
     @Test
     public void testConstructorLocking() throws InterruptedException {
         // create a list which will record our multithreaded interactions with a list
-        final ThreadRecorderEventList<Integer> atomicList = new ThreadRecorderEventList<Integer>(new BasicEventList<Integer>());
+        final ThreadRecorderEventList<Integer> atomicList = new ThreadRecorderEventList<>(new BasicEventList<Integer>());
 
         // start a thread which adds new Integers every 50 ms
         final Thread writerThread = new Thread(GlazedListsTests.createJerkyAddRunnable(atomicList, null, 2000, 50), "WriterThread");
@@ -245,10 +245,10 @@ public class EventSelectionModelTest extends SwingTestCase {
         Thread.sleep(200);
 
         // create a list whose get() method pauses for 50 ms before returning the value
-        final EventList<Integer> delayList = new DelayList<Integer>(atomicList, 50);
+        final EventList<Integer> delayList = new DelayList<>(atomicList, 50);
 
         // the test: creating the EventSelectionModel should be atomic and pause the writerThread while it initializes its internal state
-        new EventSelectionModel<Integer>(delayList);
+        new EventSelectionModel<>(delayList);
 
         // wait until the writerThread finishes before asserting the recorded state
         writerThread.join();
@@ -269,7 +269,7 @@ public class EventSelectionModelTest extends SwingTestCase {
         EventList<String> source = GlazedLists.eventListOf("Albert", "Alex", "Aaron", "Brian", "Bruce");
 
         // create selection model
-        EventSelectionModel<String> model = new EventSelectionModel<String>(source);
+        EventSelectionModel<String> model = new EventSelectionModel<>(source);
         ListSelectionChangeCounter counter = new ListSelectionChangeCounter();
         model.addListSelectionListener(counter);
 
@@ -345,10 +345,10 @@ public class EventSelectionModelTest extends SwingTestCase {
         EventList<String> source = GlazedLists.eventListOf("Albert", "Alex", "Aaron", "Brian", "Bruce");
 
         // create EventListModel (data model)
-        DefaultEventListModel<String> model = new DefaultEventListModel<String>(source);
+        DefaultEventListModel<String> model = new DefaultEventListModel<>(source);
 
         // create EventSelectionModel (our selection model)
-        EventSelectionModel<String> eventSelectionModel = new EventSelectionModel<String>(source);
+        EventSelectionModel<String> eventSelectionModel = new EventSelectionModel<>(source);
         ListSelectionChangeCounter eventSelectionModelCounter = new ListSelectionChangeCounter();
         eventSelectionModel.addListSelectionListener(eventSelectionModelCounter);
 
@@ -358,10 +358,10 @@ public class EventSelectionModelTest extends SwingTestCase {
         defaultListSelectionModel.addListSelectionListener(defaultListSelectionModelCounter);
 
         // create two different JLists (one with EventSelectionModel and one with DefaultListSelectionModel) that share the same data model
-        JList<String> eventList = new JList<String>(model);
+        JList<String> eventList = new JList<>(model);
         eventList.setSelectionModel(eventSelectionModel);
 
-        JList<String> defaultList = new JList<String>(model);
+        JList<String> defaultList = new JList<>(model);
         defaultList.setSelectionModel(defaultListSelectionModel);
 
         // select the first element in both selection models
@@ -397,7 +397,7 @@ public class EventSelectionModelTest extends SwingTestCase {
         EventList<String> source = GlazedLists.eventListOf("one", "two", "three");
 
         // create selection model
-        EventSelectionModel<String> model = new EventSelectionModel<String>(source);
+        EventSelectionModel<String> model = new EventSelectionModel<>(source);
         ListSelectionChangeCounter counter = new ListSelectionChangeCounter();
         model.addListSelectionListener(counter);
 
@@ -423,9 +423,9 @@ public class EventSelectionModelTest extends SwingTestCase {
         final EventList<String> source = GlazedLists.eventListOf("zero", "one", "two", "three");
 
         final EventList<String> sourceProxy = GlazedListsSwing.swingThreadProxyList(source);
-        final TreeList<String> treeList = new TreeList<String>(sourceProxy, new StringFormat(),
+        final TreeList<String> treeList = new TreeList<>(sourceProxy, new StringFormat(),
                 TreeList.<String>nodesStartExpanded());
-        final EventSelectionModel<String> selModel = new EventSelectionModel<String>(treeList);
+        final EventSelectionModel<String> selModel = new EventSelectionModel<>(treeList);
         selModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         selModel.setSelectionInterval(2, 2);
         assertEquals(Arrays.asList("two"), selModel.getSelected());

@@ -22,7 +22,7 @@ public class Tree4Test {
 
     /** test values */
     private static List<String> colors = GlazedListsTests.stringToList("ABC");
-    private static ListToByteCoder<String> coder = new ListToByteCoder<String>(Tree4Test.colors);
+    private static ListToByteCoder<String> coder = new ListToByteCoder<>(Tree4Test.colors);
     private static byte allColors = Tree4Test.coder.colorsToByte(GlazedListsTests.stringToList("ABC"));
     private static byte a = Tree4Test.coder.colorToByte("A");
     private static byte b = Tree4Test.coder.colorToByte("B");
@@ -38,7 +38,7 @@ public class Tree4Test {
 
     @Test
     public void testThreeColorInserts() {
-        FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
+        FourColorTree<String> tree = new FourColorTree<>(Tree4Test.coder);
 
         Element<String> nodeB1 = tree.add(0, Tree4Test.allColors, Tree4Test.b, Tree4Test.january, 5);
         Element<String> nodeA1 = tree.add(0, Tree4Test.allColors, Tree4Test.a, Tree4Test.march, 5);
@@ -109,7 +109,7 @@ public class Tree4Test {
 
     @Test
     public void testRemoves() {
-        FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
+        FourColorTree<String> tree = new FourColorTree<>(Tree4Test.coder);
 
         tree.add(0, Tree4Test.allColors, Tree4Test.b, Tree4Test.january, 5);
         tree.add(0, Tree4Test.allColors, Tree4Test.a, Tree4Test.march, 5);
@@ -151,7 +151,7 @@ public class Tree4Test {
 
     @Test
     public void testRemovesFromCenter() {
-        FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
+        FourColorTree<String> tree = new FourColorTree<>(Tree4Test.coder);
 
         tree.add(0, Tree4Test.allColors, Tree4Test.b, Tree4Test.february, 28);
         tree.add(0, Tree4Test.allColors, Tree4Test.a, Tree4Test.january, 31);
@@ -165,7 +165,7 @@ public class Tree4Test {
 
     @Test
     public void testRemoveInBulk() {
-        FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
+        FourColorTree<String> tree = new FourColorTree<>(Tree4Test.coder);
 
         // remove all nodes from the tree
         for(int i = 0; i < 10; i++) {
@@ -204,7 +204,7 @@ public class Tree4Test {
      */
     @Test
     public void testBalance() {
-        FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
+        FourColorTree<String> tree = new FourColorTree<>(Tree4Test.coder);
         tree.add(0, Tree4Test.allColors, Tree4Test.b, null, 1);
         tree.add(0, Tree4Test.allColors, Tree4Test.c, null, 1);
         tree.add(2, Tree4Test.allColors, Tree4Test.c, null, 1);
@@ -223,7 +223,7 @@ public class Tree4Test {
      */
     @Test
     public void testDeleteRebalance() {
-        FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
+        FourColorTree<String> tree = new FourColorTree<>(Tree4Test.coder);
         tree.add(0, Tree4Test.allColors, Tree4Test.a, null, 1);
         tree.add(0, Tree4Test.allColors, Tree4Test.a, null, 1);
         tree.add(2, Tree4Test.allColors, Tree4Test.b, null, 1);
@@ -241,8 +241,8 @@ public class Tree4Test {
      */
     @Test
     public void testRandomOperations() {
-        FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
-        List<String> expectedSequenceOfColors = new ArrayList<String>();
+        FourColorTree<String> tree = new FourColorTree<>(Tree4Test.coder);
+        List<String> expectedSequenceOfColors = new ArrayList<>();
 
         Random dice = new Random(0);
         for(int i = 0; i < 1000; i++) {
@@ -284,7 +284,7 @@ public class Tree4Test {
      */
     @Test
     public void testRemoveCentreShiftRight() {
-        FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
+        FourColorTree<String> tree = new FourColorTree<>(Tree4Test.coder);
         tree.add(0, Tree4Test.allColors, Tree4Test.b, Tree4Test.february, 4);
         tree.add(4, Tree4Test.allColors, Tree4Test.c, Tree4Test.march, 4);
         assertEquals("BBBBCCCC", tree.asSequenceOfColors());
@@ -295,7 +295,7 @@ public class Tree4Test {
 
     @Test
     public void testGet() {
-        FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
+        FourColorTree<String> tree = new FourColorTree<>(Tree4Test.coder);
         tree.add(0, Tree4Test.allColors, Tree4Test.b, Tree4Test.february, 4);
         tree.add(4, Tree4Test.allColors, Tree4Test.c, Tree4Test.march, 4);
         tree.add(0, Tree4Test.allColors, Tree4Test.a, Tree4Test.january, 4);
@@ -346,9 +346,9 @@ public class Tree4Test {
 
     @Test
     public void testTreeAsList() {
-        FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
-        FourColorTreeAsList<String> treeAsList = new FourColorTreeAsList<String>(tree);
-        List<String> expected = new ArrayList<String>();
+        FourColorTree<String> tree = new FourColorTree<>(Tree4Test.coder);
+        FourColorTreeAsList<String> treeAsList = new FourColorTreeAsList<>(tree);
+        List<String> expected = new ArrayList<>();
 
         treeAsList.add(0, "A");
         expected.add(0, "A");
@@ -378,7 +378,7 @@ public class Tree4Test {
 
     @Test
     public void testSetIndexIsCorrect() {
-        FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
+        FourColorTree<String> tree = new FourColorTree<>(Tree4Test.coder);
         tree.add(0, Tree4Test.allColors, Tree4Test.a, Tree4Test.january, 13);
         tree.set(0, Tree4Test.allColors, Tree4Test.b, Tree4Test.february, 1);
         tree.set(2, Tree4Test.a, Tree4Test.b, Tree4Test.february, 1);
@@ -392,7 +392,7 @@ public class Tree4Test {
      */
     @Test
     public void testTreeIterator() {
-        FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
+        FourColorTree<String> tree = new FourColorTree<>(Tree4Test.coder);
         tree.add(0, Tree4Test.allColors, Tree4Test.a, Tree4Test.january, 3);
         tree.add(3, Tree4Test.allColors, Tree4Test.b, Tree4Test.february, 4);
         tree.add(7, Tree4Test.allColors, Tree4Test.c, Tree4Test.march, 3);
@@ -400,7 +400,7 @@ public class Tree4Test {
         tree.add(12, Tree4Test.allColors, Tree4Test.a, Tree4Test.may, 2);
         tree.add(14, Tree4Test.allColors, Tree4Test.b, Tree4Test.january, 1);
 
-        FourColorTreeIterator<String> iterator = new FourColorTreeIterator<String>(tree);
+        FourColorTreeIterator<String> iterator = new FourColorTreeIterator<>(tree);
         assertTrue(iterator.hasNext(Tree4Test.allColors));
         assertTrue(iterator.hasNext(Tree4Test.a));
         assertTrue(iterator.hasNext(Tree4Test.aOrB));
@@ -446,7 +446,7 @@ public class Tree4Test {
 
     @Test
     public void testSortedTree() {
-        FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
+        FourColorTree<String> tree = new FourColorTree<>(Tree4Test.coder);
         tree.addInSortedOrder(Tree4Test.a, Tree4Test.january, 1);
         tree.addInSortedOrder(Tree4Test.a, Tree4Test.february, 1);
         tree.addInSortedOrder(Tree4Test.a, Tree4Test.march, 1);
@@ -458,7 +458,7 @@ public class Tree4Test {
 
     @Test
     public void testSortedTreeIndexOf() {
-        FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
+        FourColorTree<String> tree = new FourColorTree<>(Tree4Test.coder);
         tree.addInSortedOrder(Tree4Test.a, "B", 1);
         tree.addInSortedOrder(Tree4Test.a, "B", 1);
         tree.addInSortedOrder(Tree4Test.a, "C", 1);
@@ -486,7 +486,7 @@ public class Tree4Test {
 
     @Test
     public void testRemoveASingleNode() {
-        FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
+        FourColorTree<String> tree = new FourColorTree<>(Tree4Test.coder);
         Element<String> a = tree.addInSortedOrder(Tree4Test.a, "A", 4);
         Element<String> b = tree.addInSortedOrder(Tree4Test.b, "B", 5);
         Element<String> c = tree.addInSortedOrder(Tree4Test.c, "C", 6);
@@ -504,7 +504,7 @@ public class Tree4Test {
 
     @Test
     public void testIterator() {
-        FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
+        FourColorTree<String> tree = new FourColorTree<>(Tree4Test.coder);
         tree.addInSortedOrder(Tree4Test.a, "A", 3);
         tree.addInSortedOrder(Tree4Test.b, "B", 1);
         tree.addInSortedOrder(Tree4Test.c, "C", 2);
@@ -528,7 +528,7 @@ public class Tree4Test {
         assertEquals(GlazedListsTests.stringToList(""), iteratorToList(new FourColorTreeIterator(tree, 12, allColors)));
     }
     private static <T> List<T> iteratorToList(FourColorTreeIterator<T> iterator) {
-        List<T> result = new ArrayList<T>();
+        List<T> result = new ArrayList<>();
         while(iterator.hasNext(allColors)) {
             iterator.next(allColors);
             result.add(iterator.value());
@@ -541,7 +541,7 @@ public class Tree4Test {
      */
     @Test
     public void testIteratorOnBlocks() {
-        FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
+        FourColorTree<String> tree = new FourColorTree<>(Tree4Test.coder);
         // AAABCCDDDEFF
         tree.addInSortedOrder(Tree4Test.a, "A", 3);
         tree.addInSortedOrder(Tree4Test.b, "B", 1);
@@ -550,7 +550,7 @@ public class Tree4Test {
         tree.addInSortedOrder(Tree4Test.b, "E", 1);
         tree.addInSortedOrder(Tree4Test.c, "F", 2);
 
-        FourColorTreeIterator<String> iterator = new FourColorTreeIterator<String>(tree, 0, allColors);
+        FourColorTreeIterator<String> iterator = new FourColorTreeIterator<>(tree, 0, allColors);
 
         assertEquals(true, iterator.hasNextNode(allColors));
         iterator.nextNode(allColors);
@@ -597,7 +597,7 @@ public class Tree4Test {
 
     @Test
     public void testSetColor() {
-        FourColorTree<String> tree = new FourColorTree<String>(Tree4Test.coder);
+        FourColorTree<String> tree = new FourColorTree<>(Tree4Test.coder);
 
         Element<String> january = tree.add(0, Tree4Test.allColors, Tree4Test.a, Tree4Test.january, 3);
         Element<String> february = tree.add(3, Tree4Test.allColors, Tree4Test.a, Tree4Test.february, 2);

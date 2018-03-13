@@ -50,7 +50,7 @@ public final class Processors {
      * {@link XMLTagPath} of &lt;/customer&gt;.
      */
     public static <B> PushProcessor<B> createNewObject(Class<B> clazz, Class[] params, Object[] args) {
-        return new CreateNewObjectProcessor<B>(clazz, params, args);
+        return new CreateNewObjectProcessor<>(clazz, params, args);
     }
 
     /**
@@ -63,7 +63,7 @@ public final class Processors {
      * to &lt;/customer&gt; in the parse context map.
      */
     public static <B> PopProcessor<EventList<B>, B> addObjectToTargetList() {
-        return new AddObjectToTargetListProcessor<B>();
+        return new AddObjectToTargetListProcessor<>();
     }
 
     /**
@@ -92,7 +92,7 @@ public final class Processors {
      * setter.
      */
     public static <B,O,C> PopProcessor<B,O> setterMethod(Class<B> clazz, String propertyName, Converter<O,C> converter) {
-        return new CallSetterMethodProcessor<B,O,C>(new BeanProperty<B>(clazz, propertyName, false, true), converter);
+        return new CallSetterMethodProcessor<>(new BeanProperty<>(clazz, propertyName, false, true), converter);
     }
 
     /**
@@ -134,7 +134,7 @@ public final class Processors {
      * given <code>matcher</code>.
      */
     public static <B,V> PopProcessor<B,V> addToCollection(Class<B> clazz, String propertyName, Converter<V,V> converter, Matcher<V> matcher) {
-        return new AddToCollectionProcessor<B,V>(new BeanProperty<B>(clazz, propertyName, true, false), converter, matcher);
+        return new AddToCollectionProcessor<>(new BeanProperty<>(clazz, propertyName, true, false), converter, matcher);
     }
 
     private static class CreateNewObjectProcessor<T> implements PushProcessor<T> {

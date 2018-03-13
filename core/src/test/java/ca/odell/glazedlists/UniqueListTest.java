@@ -38,8 +38,8 @@ public class UniqueListTest {
      */
     @Before
     public void setUp() {
-        source = new BasicEventList<Object>();
-        unique = new UniqueList<Object>(source);
+        source = new BasicEventList<>();
+        unique = new UniqueList<>(source);
     }
 
     /**
@@ -113,7 +113,7 @@ public class UniqueListTest {
     public void testSimpleNonEmptySource() {
         unique = null;
         source.add("A");
-        unique = new UniqueList<Object>(source);
+        unique = new UniqueList<>(source);
         assertEquals(1, unique.size());
         assertEquals("A", unique.get(0));
     }
@@ -124,7 +124,7 @@ public class UniqueListTest {
         source.add("A");
         source.add("B");
         source.add("C");
-        unique = new UniqueList<Object>(source);
+        unique = new UniqueList<>(source);
         assertEquals(3, unique.size());
         assertEquals("A", unique.get(0));
         assertEquals("B", unique.get(1));
@@ -137,7 +137,7 @@ public class UniqueListTest {
         source.add("C");
         source.add("A");
         source.add("B");
-        unique = new UniqueList<Object>(source);
+        unique = new UniqueList<>(source);
         assertEquals(3, unique.size());
         assertEquals("A", unique.get(0));
         assertEquals("B", unique.get(1));
@@ -150,7 +150,7 @@ public class UniqueListTest {
         source.add("A");
         source.add("A");
         source.add("A");
-        unique = new UniqueList<Object>(source);
+        unique = new UniqueList<>(source);
         assertEquals(1, unique.size());
         assertEquals("A", unique.get(0));
     }
@@ -164,7 +164,7 @@ public class UniqueListTest {
         source.add("C");
         source.add("C");
         source.add("C");
-        unique = new UniqueList<Object>(source);
+        unique = new UniqueList<>(source);
         assertEquals(2, unique.size());
         assertEquals("A", unique.get(0));
         assertEquals("C", unique.get(1));
@@ -176,7 +176,7 @@ public class UniqueListTest {
         source.add("A");
         source.add("B");
         source.add("C");
-        unique = new UniqueList<Object>(source);
+        unique = new UniqueList<>(source);
         source.add("D");
         assertEquals(4, unique.size());
         assertEquals("A", unique.get(0));
@@ -191,7 +191,7 @@ public class UniqueListTest {
         source.add("B");
         source.add("C");
         source.add("D");
-        unique = new UniqueList<Object>(source);
+        unique = new UniqueList<>(source);
         source.add("A");
         assertEquals(4, unique.size());
         assertEquals("A", unique.get(0));
@@ -206,7 +206,7 @@ public class UniqueListTest {
         source.add("D");
         source.add("A");
         source.add("C");
-        unique = new UniqueList<Object>(source);
+        unique = new UniqueList<>(source);
         source.add("B");
         assertEquals(4, unique.size());
         assertEquals("A", unique.get(0));
@@ -221,7 +221,7 @@ public class UniqueListTest {
         source.add("A");
         source.add("A");
         source.add("A");
-        unique = new UniqueList<Object>(source);
+        unique = new UniqueList<>(source);
         source.add("C");
         source.add("C");
         source.add("C");
@@ -239,7 +239,7 @@ public class UniqueListTest {
         source.add("A");
         source.add("A");
         source.add("A");
-        unique = new UniqueList<Object>(source);
+        unique = new UniqueList<>(source);
         source.add("D");
         source.add("D");
         source.add("D");
@@ -257,7 +257,7 @@ public class UniqueListTest {
 
     @Test
     public void testSimpleAddOfSortedCollection() {
-        List<Object> duplicates = new LinkedList<Object>();
+        List<Object> duplicates = new LinkedList<>();
         duplicates.add("A");
         duplicates.add("B");
         duplicates.add("C");
@@ -270,7 +270,7 @@ public class UniqueListTest {
 
     @Test
     public void testSimpleAddOfUnsortedCollection() {
-        List<Object> duplicates = new LinkedList<Object>();
+        List<Object> duplicates = new LinkedList<>();
         duplicates.add("B");
         duplicates.add("C");
         duplicates.add("A");
@@ -283,7 +283,7 @@ public class UniqueListTest {
 
     @Test
     public void testAddOfCollectionContainingDuplicates() {
-        List<Object> duplicates = new LinkedList<Object>();
+        List<Object> duplicates = new LinkedList<>();
         duplicates.add("A");
         duplicates.add("C");
         duplicates.add("A");
@@ -302,8 +302,8 @@ public class UniqueListTest {
         source.add("A");
         source.add("B");
         source.add("C");
-        unique = new UniqueList<Object>(source);
-        List<Object> duplicates = new LinkedList<Object>();
+        unique = new UniqueList<>(source);
+        List<Object> duplicates = new LinkedList<>();
         duplicates.add("A");
         duplicates.add("B");
         duplicates.add("C");
@@ -324,8 +324,8 @@ public class UniqueListTest {
         source.add("C");
         source.add("C");
         source.add("C");
-        unique = new UniqueList<Object>(source);
-        List<Object> duplicates = new LinkedList<Object>();
+        unique = new UniqueList<>(source);
+        List<Object> duplicates = new LinkedList<>();
         duplicates.add("B");
         source.addAll(duplicates);
         assertEquals(3, unique.size());
@@ -343,8 +343,8 @@ public class UniqueListTest {
         source.add("A");
         source.add("C");
         source.add("C");
-        unique = new UniqueList<Object>(source);
-        List<Object> duplicates = new LinkedList<Object>();
+        unique = new UniqueList<>(source);
+        List<Object> duplicates = new LinkedList<>();
         duplicates.add("B");
         duplicates.add("B");
         duplicates.add("B");
@@ -367,8 +367,8 @@ public class UniqueListTest {
         source.add("C");
         source.add("C");
         source.add("C");
-        unique = new UniqueList<Object>(source);
-        List<Object> duplicates = new LinkedList<Object>();
+        unique = new UniqueList<>(source);
+        List<Object> duplicates = new LinkedList<>();
         duplicates.add("B");
         duplicates.add("B");
         duplicates.add("B");
@@ -546,15 +546,15 @@ public class UniqueListTest {
 
     @Test
     public void testUpdateDeleteCollide() {
-        BasicEventList<int[]> sourceList = new BasicEventList<int[]>();
+        BasicEventList<int[]> sourceList = new BasicEventList<>();
         sourceList.add(new int[] { 2, 0, 1 });
         sourceList.add(new int[] { 2, 0, 1 });
         sourceList.add(new int[] { 3, 0, 1 });
         sourceList.add(new int[] { 4, 1, 0 });
 
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
-        FilterList<int[]> filterList = new FilterList<int[]>(sourceList, matcherEditor);
-        UniqueList<int[]> uniqueList = new UniqueList<int[]>(filterList, GlazedListsTests.intArrayComparator(0));
+        FilterList<int[]> filterList = new FilterList<>(sourceList, matcherEditor);
+        UniqueList<int[]> uniqueList = new UniqueList<>(filterList, GlazedListsTests.intArrayComparator(0));
 
         matcherEditor.setFilter(2, 1);
         matcherEditor.setFilter(1, 1);
@@ -565,7 +565,7 @@ public class UniqueListTest {
      */
     @Test
     public void testMultipleDeleteWithMultipleInsert() {
-        BasicEventList<int[]> sourceList = new BasicEventList<int[]>();
+        BasicEventList<int[]> sourceList = new BasicEventList<>();
         sourceList.add(new int[] { 1, 1, 1 });
         sourceList.add(new int[] { 2, 1, 0 });
         sourceList.add(new int[] { 2, 1, 0 });
@@ -574,8 +574,8 @@ public class UniqueListTest {
         sourceList.add(new int[] { 4, 1, 1 });
 
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
-        FilterList<int[]> filterList = new FilterList<int[]>(sourceList, matcherEditor);
-        UniqueList<int[]> uniqueList = new UniqueList<int[]>(filterList, GlazedListsTests.intArrayComparator(0));
+        FilterList<int[]> filterList = new FilterList<>(sourceList, matcherEditor);
+        UniqueList<int[]> uniqueList = new UniqueList<>(filterList, GlazedListsTests.intArrayComparator(0));
 
         matcherEditor.setFilter(1, 1);
         matcherEditor.setFilter(2, 1);
@@ -591,15 +591,15 @@ public class UniqueListTest {
      */
     @Test
     public void testDeleteWithInsert() {
-        BasicEventList<int[]> sourceList = new BasicEventList<int[]>();
+        BasicEventList<int[]> sourceList = new BasicEventList<>();
         sourceList.add(new int[] { 1, 1, 1 });
         sourceList.add(new int[] { 2, 1, 0 });
         sourceList.add(new int[] { 3, 0, 1 });
         sourceList.add(new int[] { 4, 1, 1 });
 
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
-        FilterList<int[]> filterList = new FilterList<int[]>(sourceList, matcherEditor);
-        UniqueList<int[]> uniqueList = new UniqueList<int[]>(filterList, GlazedListsTests.intArrayComparator(0));
+        FilterList<int[]> filterList = new FilterList<>(sourceList, matcherEditor);
+        UniqueList<int[]> uniqueList = new UniqueList<>(filterList, GlazedListsTests.intArrayComparator(0));
 
         matcherEditor.setFilter(1, 1);
         matcherEditor.setFilter(2, 1);
@@ -615,7 +615,7 @@ public class UniqueListTest {
      */
     @Test
     public void testSingleValueKept() {
-        BasicEventList<int[]> sourceList = new BasicEventList<int[]>();
+        BasicEventList<int[]> sourceList = new BasicEventList<>();
         sourceList.add(new int[] { 1, 1, 0 });
         sourceList.add(new int[] { 2, 1, 0 });
         sourceList.add(new int[] { 3, 1, 1 });
@@ -623,8 +623,8 @@ public class UniqueListTest {
         sourceList.add(new int[] { 5, 0, 1 });
 
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
-        FilterList<int[]> filterList = new FilterList<int[]>(sourceList, matcherEditor);
-        UniqueList<int[]> uniqueList = new UniqueList<int[]>(filterList, GlazedListsTests.intArrayComparator(0));
+        FilterList<int[]> filterList = new FilterList<>(sourceList, matcherEditor);
+        UniqueList<int[]> uniqueList = new UniqueList<>(filterList, GlazedListsTests.intArrayComparator(0));
 
         matcherEditor.setFilter(1, 1);
         matcherEditor.setFilter(2, 1);
@@ -641,7 +641,7 @@ public class UniqueListTest {
      */
     @Test
     public void testMultipleValuesKept() {
-        BasicEventList<int[]> sourceList = new BasicEventList<int[]>();
+        BasicEventList<int[]> sourceList = new BasicEventList<>();
         sourceList.add(new int[] { 1, 1, 0 });
         sourceList.add(new int[] { 1, 1, 0 });
         sourceList.add(new int[] { 2, 1, 0 });
@@ -654,8 +654,8 @@ public class UniqueListTest {
         sourceList.add(new int[] { 5, 0, 1 });
 
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
-        FilterList<int[]> filterList = new FilterList<int[]>(sourceList, matcherEditor);
-        UniqueList<int[]> uniqueList = new UniqueList<int[]>(filterList, GlazedListsTests.intArrayComparator(0));
+        FilterList<int[]> filterList = new FilterList<>(sourceList, matcherEditor);
+        UniqueList<int[]> uniqueList = new UniqueList<>(filterList, GlazedListsTests.intArrayComparator(0));
 
         matcherEditor.setFilter(1, 1);
         matcherEditor.setFilter(2, 1);
@@ -672,7 +672,7 @@ public class UniqueListTest {
      */
     @Test
     public void testSubset() {
-        BasicEventList<int[]> sourceList = new BasicEventList<int[]>();
+        BasicEventList<int[]> sourceList = new BasicEventList<>();
         sourceList.add(new int[] { 1, 1, 0 });
         sourceList.add(new int[] { 1, 1, 0 });
         sourceList.add(new int[] { 2, 1, 1 });
@@ -685,8 +685,8 @@ public class UniqueListTest {
         sourceList.add(new int[] { 5, 1, 0 });
 
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
-        FilterList<int[]> filterList = new FilterList<int[]>(sourceList, matcherEditor);
-        UniqueList<int[]> uniqueList = new UniqueList<int[]>(filterList, GlazedListsTests.intArrayComparator(0));
+        FilterList<int[]> filterList = new FilterList<>(sourceList, matcherEditor);
+        UniqueList<int[]> uniqueList = new UniqueList<>(filterList, GlazedListsTests.intArrayComparator(0));
 
         matcherEditor.setFilter(1, 1);
         matcherEditor.setFilter(2, 1);
@@ -701,7 +701,7 @@ public class UniqueListTest {
      */
     @Test
     public void testMultipleChanges() {
-        BasicEventList<int[]> sourceList = new BasicEventList<int[]>();
+        BasicEventList<int[]> sourceList = new BasicEventList<>();
         sourceList.add(new int[] { 1, 1, 0, 0 });
         sourceList.add(new int[] { 1, 1, 0, 1 });
         sourceList.add(new int[] { 2, 1, 0, 1 });
@@ -710,8 +710,8 @@ public class UniqueListTest {
         sourceList.add(new int[] { 3, 0, 0, 1 });
 
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
-        FilterList<int[]> filterList = new FilterList<int[]>(sourceList, matcherEditor);
-        UniqueList<int[]> uniqueList = new UniqueList<int[]>(filterList, GlazedListsTests.intArrayComparator(0));
+        FilterList<int[]> filterList = new FilterList<>(sourceList, matcherEditor);
+        UniqueList<int[]> uniqueList = new UniqueList<>(filterList, GlazedListsTests.intArrayComparator(0));
 
         matcherEditor.setFilter(1, 1);
         matcherEditor.setFilter(2, 1);
@@ -731,10 +731,10 @@ public class UniqueListTest {
      */
     @Test
     public void testLargeRandomSet() {
-        BasicEventList<int[]> sourceList = new BasicEventList<int[]>();
+        BasicEventList<int[]> sourceList = new BasicEventList<>();
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
-        FilterList<int[]> filterList = new FilterList<int[]>(sourceList, matcherEditor);
-        UniqueList<int[]> uniqueList = new UniqueList<int[]>(filterList, GlazedListsTests.intArrayComparator(0));
+        FilterList<int[]> filterList = new FilterList<>(sourceList, matcherEditor);
+        UniqueList<int[]> uniqueList = new UniqueList<>(filterList, GlazedListsTests.intArrayComparator(0));
 
         // populate a list with 1000 random arrays between 0 and 1000
         for(int i = 0; i < 1000; i++) {
@@ -750,9 +750,9 @@ public class UniqueListTest {
             matcherEditor.setFilter(filterColumn + 1, 1);
 
             // construct the control list
-            SortedSet<int[]> controlSet = new TreeSet<int[]>(GlazedListsTests.intArrayComparator(0));
+            SortedSet<int[]> controlSet = new TreeSet<>(GlazedListsTests.intArrayComparator(0));
             controlSet.addAll(filterList);
-            List<int[]> controlList = new ArrayList<int[]>();
+            List<int[]> controlList = new ArrayList<>();
             controlList.addAll(controlSet);
             Collections.sort(controlList, GlazedListsTests.intArrayComparator(0));
 
@@ -771,9 +771,9 @@ public class UniqueListTest {
     @Test
     public void testReSortSource() {
         // create a unique list with a sorted source
-        BasicEventList<Integer> sourceList = new BasicEventList<Integer>();
-        SortedList<Integer> sortedList = new SortedList<Integer>(sourceList);
-        UniqueList<Integer> uniqueList = new UniqueList<Integer>(sortedList);
+        BasicEventList<Integer> sourceList = new BasicEventList<>();
+        SortedList<Integer> sortedList = new SortedList<>(sourceList);
+        UniqueList<Integer> uniqueList = new UniqueList<>(sortedList);
 
         // populate the source
         for(int i = 0; i < 1000; i++) {
@@ -781,9 +781,9 @@ public class UniqueListTest {
         }
 
         // build a control list
-        SortedSet<Integer> uniqueSource = new TreeSet<Integer>();
+        SortedSet<Integer> uniqueSource = new TreeSet<>();
         uniqueSource.addAll(sourceList);
-        List<Integer> controlList = new ArrayList<Integer>();
+        List<Integer> controlList = new ArrayList<>();
         controlList.addAll(uniqueSource);
 
         // verify the unique list is correct initially
@@ -982,7 +982,7 @@ public class UniqueListTest {
         unique.add("B");
         unique.add("C");
 
-        SortedSet<Object> replacementSet = new TreeSet<Object>();
+        SortedSet<Object> replacementSet = new TreeSet<>();
         replacementSet.addAll(source);
 
         // listen to changes on the unique list
@@ -1005,7 +1005,7 @@ public class UniqueListTest {
         unique.add("E");
         unique.add("F");
 
-        SortedSet<Object> replacementSet = new TreeSet<Object>();
+        SortedSet<Object> replacementSet = new TreeSet<>();
         replacementSet.add("A");
         replacementSet.add("B");
         replacementSet.add("C");
@@ -1014,7 +1014,7 @@ public class UniqueListTest {
 
         GlazedLists.replaceAllSorted(unique, replacementSet, false, null);
 
-        List<Object> controlList = new ArrayList<Object>();
+        List<Object> controlList = new ArrayList<>();
         controlList.addAll(replacementSet);
         assertEquals(controlList, unique);
     }
@@ -1028,7 +1028,7 @@ public class UniqueListTest {
             unique.add(new Integer(random.nextInt(100)));
         }
 
-        SortedSet<Object> replacementSet = new TreeSet<Object>();
+        SortedSet<Object> replacementSet = new TreeSet<>();
         for(int i = 0; i < 100; i++) {
             replacementSet.add(new Integer(random.nextInt(100)));
         }
@@ -1040,7 +1040,7 @@ public class UniqueListTest {
         GlazedLists.replaceAllSorted(unique, replacementSet, false, null);
 
         // verify that the change applies to the replacement set
-        List<Object> controlList = new ArrayList<Object>();
+        List<Object> controlList = new ArrayList<>();
         controlList.addAll(replacementSet);
         assertEquals(controlList, unique);
     }
@@ -1048,7 +1048,7 @@ public class UniqueListTest {
 
     @Test
     public void testNewReplaceAll() {
-        EventList<String> target = new BasicEventList<String>();
+        EventList<String> target = new BasicEventList<>();
         EventList<String> source = SortedList.create(new BasicEventList<String>());
 
         source.addAll(GlazedListsTests.stringToList("ACDF"));
@@ -1104,8 +1104,8 @@ public class UniqueListTest {
      */
     @Test
     public void testIndexOf() {
-        BasicEventList<Object> source = new BasicEventList<Object>();
-        UniqueList<Object> unique = new UniqueList<Object>(source);
+        BasicEventList<Object> source = new BasicEventList<>();
+        UniqueList<Object> unique = new UniqueList<>(source);
 
         // Add 12 leading 1's
         Integer one = new Integer(1);
@@ -1148,8 +1148,8 @@ public class UniqueListTest {
      */
     @Test
     public void testLastIndexOf() {
-        BasicEventList<Object> source = new BasicEventList<Object>();
-        UniqueList<Object> unique = new UniqueList<Object>(source);
+        BasicEventList<Object> source = new BasicEventList<>();
+        UniqueList<Object> unique = new UniqueList<>(source);
 
         // Add 12 leading 1's
         Integer one = new Integer(1);
@@ -1192,8 +1192,8 @@ public class UniqueListTest {
      */
     @Test
     public void testContains() {
-        BasicEventList<Object> source = new BasicEventList<Object>();
-        UniqueList<Object> unique = new UniqueList<Object>(source);
+        BasicEventList<Object> source = new BasicEventList<>();
+        UniqueList<Object> unique = new UniqueList<>(source);
 
         // Add 12 leading 1's
         Integer one = new Integer(1);
@@ -1335,11 +1335,11 @@ public class UniqueListTest {
      */
     @Test
     public void testRightEdgeSet() {
-        EventList<Object> source = new BasicEventList<Object>();
+        EventList<Object> source = new BasicEventList<>();
         source.add("Chevy");       // C
         source.add("Ford");        // C F
 
-        UniqueList<Object> uniqueList = new UniqueList<Object>(source);
+        UniqueList<Object> uniqueList = new UniqueList<>(source);
         ListConsistencyListener.install(uniqueList);
 
         // in sorted order changes
@@ -1351,11 +1351,11 @@ public class UniqueListTest {
      */
     @Test
     public void testLeftEdgeSet() {
-        EventList<Object> source = new BasicEventList<Object>();
+        EventList<Object> source = new BasicEventList<>();
         source.add("Chevy");       // C
         source.add("Ford");        // C F
 
-        UniqueList<Object> uniqueList = new UniqueList<Object>(source);
+        UniqueList<Object> uniqueList = new UniqueList<>(source);
         ListConsistencyListener.install(uniqueList);
 
         // in sorted order changes
@@ -1367,12 +1367,12 @@ public class UniqueListTest {
      */
     @Test
     public void testUpdateSet() {
-        EventList<Object> source = new BasicEventList<Object>();
+        EventList<Object> source = new BasicEventList<>();
         source.add("Chevy");       // C
         source.add("Datsun");      // C D
         source.add("Ford");        // C D F
 
-        UniqueList<Object> uniqueList = new UniqueList<Object>(source);
+        UniqueList<Object> uniqueList = new UniqueList<>(source);
         ListConsistencyListener.install(uniqueList);
 
         // in sorted order changes
@@ -1384,12 +1384,12 @@ public class UniqueListTest {
      */
     @Test
     public void testUpdateLeftSet() {
-        EventList<Object> source = new BasicEventList<Object>();
+        EventList<Object> source = new BasicEventList<>();
         source.add("Chevy");       // C
         source.add("Datsun");      // C D
         source.add("Ford");        // C D F
 
-        UniqueList<Object> uniqueList = new UniqueList<Object>(source);
+        UniqueList<Object> uniqueList = new UniqueList<>(source);
         ListConsistencyListener.install(uniqueList);
 
         // in sorted order changes
@@ -1401,12 +1401,12 @@ public class UniqueListTest {
      */
     @Test
     public void testUpdateRightSet() {
-        EventList<Object> source = new BasicEventList<Object>();
+        EventList<Object> source = new BasicEventList<>();
         source.add("Chevy");       // C
         source.add("Datsun");      // C D
         source.add("Ford");        // C D F
 
-        UniqueList<Object> uniqueList = new UniqueList<Object>(source);
+        UniqueList<Object> uniqueList = new UniqueList<>(source);
         ListConsistencyListener.install(uniqueList);
 
         // in sorted order changes
@@ -1418,12 +1418,12 @@ public class UniqueListTest {
      */
     @Test
     public void testLeftUpdateSet() {
-        EventList<Object> source = new BasicEventList<Object>();
+        EventList<Object> source = new BasicEventList<>();
         source.add("Chevy");       // C
         source.add("Chevy");       // C C
         source.add("Ford");        // C C F
 
-        UniqueList<Object> uniqueList = new UniqueList<Object>(source);
+        UniqueList<Object> uniqueList = new UniqueList<>(source);
         ListConsistencyListener.install(uniqueList);
 
         // in sorted order changes
@@ -1435,12 +1435,12 @@ public class UniqueListTest {
      */
     @Test
     public void testLeftInsertSet() {
-        EventList<Object> source = new BasicEventList<Object>();
+        EventList<Object> source = new BasicEventList<>();
         source.add("Chevy");       // C
         source.add("Chevy");       // C C
         source.add("Ford");        // C C F
 
-        UniqueList<Object> uniqueList = new UniqueList<Object>(source);
+        UniqueList<Object> uniqueList = new UniqueList<>(source);
         ListConsistencyListener.install(uniqueList);
 
         // in sorted order changes
@@ -1452,12 +1452,12 @@ public class UniqueListTest {
      */
     @Test
     public void testLeftMoveSet() {
-        EventList<Object> source = new BasicEventList<Object>();
+        EventList<Object> source = new BasicEventList<>();
         source.add("Chevy");       // C
         source.add("Chevy");       // C C
         source.add("Ford");        // C C F
 
-        UniqueList<Object> uniqueList = new UniqueList<Object>(source);
+        UniqueList<Object> uniqueList = new UniqueList<>(source);
         ListConsistencyListener.install(uniqueList);
 
         // in sorted order changes
@@ -1469,12 +1469,12 @@ public class UniqueListTest {
      */
     @Test
     public void testRightUpdateSet() {
-        EventList<Object> source = new BasicEventList<Object>();
+        EventList<Object> source = new BasicEventList<>();
         source.add("Chevy");       // C
         source.add("Ford");        // C F
         source.add("Ford");        // C F F
 
-        UniqueList<Object> uniqueList = new UniqueList<Object>(source);
+        UniqueList<Object> uniqueList = new UniqueList<>(source);
         ListConsistencyListener.install(uniqueList);
 
         // in sorted order changes
@@ -1486,12 +1486,12 @@ public class UniqueListTest {
      */
     @Test
     public void testRightInsertSet() {
-        EventList<Object> source = new BasicEventList<Object>();
+        EventList<Object> source = new BasicEventList<>();
         source.add("Chevy");       // C
         source.add("Ford");        // C F
         source.add("Ford");        // C F F
 
-        UniqueList<Object> uniqueList = new UniqueList<Object>(source);
+        UniqueList<Object> uniqueList = new UniqueList<>(source);
         ListConsistencyListener.install(uniqueList);
 
         // in sorted order changes
@@ -1503,12 +1503,12 @@ public class UniqueListTest {
      */
     @Test
     public void testRightMoveSet() {
-        EventList<Object> source = new BasicEventList<Object>();
+        EventList<Object> source = new BasicEventList<>();
         source.add("Chevy");       // C
         source.add("Ford");        // C F
         source.add("Ford");        // C F F
 
-        UniqueList<Object> uniqueList = new UniqueList<Object>(source);
+        UniqueList<Object> uniqueList = new UniqueList<>(source);
         ListConsistencyListener.install(uniqueList);
 
         // in sorted order changes
@@ -1517,7 +1517,7 @@ public class UniqueListTest {
 
     @Test
     public void testRemoveAPair() {
-        EventList<String> source = new BasicEventList<String>();
+        EventList<String> source = new BasicEventList<>();
         UniqueList<String> uniqueList = UniqueList.create(source);
         ListConsistencyListener.install(uniqueList);
 
@@ -1560,8 +1560,8 @@ public class UniqueListTest {
      */
     @Test
     public void testSetComparator() {
-        final BasicEventList<String> source = new BasicEventList<String>();
-        final UniqueList<String> uniqueList = new UniqueList<String>(source, GlazedListsTests.getFirstLetterComparator());
+        final BasicEventList<String> source = new BasicEventList<>();
+        final UniqueList<String> uniqueList = new UniqueList<>(source, GlazedListsTests.getFirstLetterComparator());
         ListConsistencyListener.install(uniqueList);
 
         source.add("Black");
@@ -1593,8 +1593,8 @@ public class UniqueListTest {
      */
     @Test
     public void testSetComparatorWithDuplicates() {
-        final BasicEventList<String> source = new BasicEventList<String>();
-        final UniqueList<String> uniqueList = new UniqueList<String>(source, GlazedListsTests.getFirstLetterComparator());
+        final BasicEventList<String> source = new BasicEventList<>();
+        final UniqueList<String> uniqueList = new UniqueList<>(source, GlazedListsTests.getFirstLetterComparator());
         ListConsistencyListener.install(uniqueList);
 
         source.add("Black");
@@ -1634,8 +1634,8 @@ public class UniqueListTest {
      */
     @Test
     public void testPreviousAndNewValues() {
-        final BasicEventList<String> source = new BasicEventList<String>();
-        final UniqueList<String> uniqueList = new UniqueList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        final BasicEventList<String> source = new BasicEventList<>();
+        final UniqueList<String> uniqueList = new UniqueList<>(source, String.CASE_INSENSITIVE_ORDER);
         ListConsistencyListener.install(uniqueList);
 
         source.add("a");
@@ -1654,20 +1654,20 @@ public class UniqueListTest {
 
     @Test
     public void testGenerics() {
-        final EventList<Integer> source = new BasicEventList<Integer>();
+        final EventList<Integer> source = new BasicEventList<>();
         final Comparator<Number> comparator = new Comparator<Number>() {
             @Override
             public int compare(Number o1, Number o2) {
                 return o1.intValue() - o2.intValue();
             }
         };
-        final UniqueList<Integer> unique = new UniqueList<Integer>(source, comparator);
+        final UniqueList<Integer> unique = new UniqueList<>(source, comparator);
     }
 
     @Test
     public void testAllPossibleGrouperStateChanges() {
-        final TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>(), true);
-        final UniqueList<String> uniqueList = new UniqueList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        final TransactionList<String> source = new TransactionList<>(new BasicEventList<String>(), true);
+        final UniqueList<String> uniqueList = new UniqueList<>(source, String.CASE_INSENSITIVE_ORDER);
         ListConsistencyListener.install(uniqueList);
 
         // insert: new group
@@ -1707,8 +1707,8 @@ public class UniqueListTest {
 
     @Test
     public void testMassUpdates() {
-        final TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>(), true);
-        final UniqueList<String> uniqueList = new UniqueList<String>(source, String.CASE_INSENSITIVE_ORDER);
+        final TransactionList<String> source = new TransactionList<>(new BasicEventList<String>(), true);
+        final UniqueList<String> uniqueList = new UniqueList<>(source, String.CASE_INSENSITIVE_ORDER);
 
         source.add("A");
         source.add("A");

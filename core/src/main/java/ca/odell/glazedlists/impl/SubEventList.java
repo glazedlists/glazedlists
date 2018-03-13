@@ -64,7 +64,7 @@ public final class SubEventList<E> extends TransformedList<E, E> {
 
         // listen directly or via a proxy that will do garbage collection
         if(automaticallyRemove) {
-            source.addListEventListener(new WeakReferenceProxy<E>(source, this));
+            source.addListEventListener(new WeakReferenceProxy<>(source, this));
         } else {
             source.addListEventListener(this);
         }

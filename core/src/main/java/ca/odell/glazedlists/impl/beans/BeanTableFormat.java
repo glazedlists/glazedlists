@@ -42,7 +42,7 @@ public class BeanTableFormat<E> implements WritableTableFormat<E>, AdvancedTable
     /** primitive class to object class conversion map */
     protected static final Map<Class,Class> primitiveToObjectMap;
     static {
-        Map<Class,Class> primitiveToObjectMapWritable = new HashMap<Class,Class>();
+        Map<Class,Class> primitiveToObjectMapWritable = new HashMap<>();
         primitiveToObjectMapWritable.put(boolean.class, Boolean.class);
         primitiveToObjectMapWritable.put(char.class, Character.class);
         primitiveToObjectMapWritable.put(byte.class, Byte.class);
@@ -103,7 +103,7 @@ public class BeanTableFormat<E> implements WritableTableFormat<E>, AdvancedTable
     protected void loadPropertyDescriptors(Class<E> beanClass) {
         beanProperties = new BeanProperty[propertyNames.length];
         for(int p = 0; p < propertyNames.length; p++) {
-            beanProperties[p] = new BeanProperty<E>(beanClass, propertyNames[p], true, editable[p]);
+            beanProperties[p] = new BeanProperty<>(beanClass, propertyNames[p], true, editable[p]);
         }
     }
 

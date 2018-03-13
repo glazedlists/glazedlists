@@ -129,7 +129,7 @@ public class TableComparatorTest {
      */
     public void guiTestTableModelStructureChanged() {
         final EventList<String> source = GlazedLists.eventListOf("James", "Jodie", "Jesse");
-        final SortedList<String> sorted = new SortedList<String>(source, null);
+        final SortedList<String> sorted = new SortedList<>(source, null);
 
         final JTable table = new JTable();
         final DefaultEventTableModel<String> firstModel;
@@ -138,7 +138,7 @@ public class TableComparatorTest {
         final int initialNumPropertyChangeListenersOnJTable = table.getPropertyChangeListeners().length;
 
         // 1. set up an EventTableModel to display 3 columns
-        firstModel = new DefaultEventTableModel<String>(sorted, new TestTableFormat(3));
+        firstModel = new DefaultEventTableModel<>(sorted, new TestTableFormat(3));
         table.setModel(firstModel);
 
         assertEquals(1, firstModel.getTableModelListeners().length);
@@ -174,7 +174,7 @@ public class TableComparatorTest {
 
 
         // 5. set a new EventTableModel that only uses 2 columns
-        secondModel = new DefaultEventTableModel<String>(sorted, new TestTableFormat(2));
+        secondModel = new DefaultEventTableModel<>(sorted, new TestTableFormat(2));
         table.setModel(secondModel);
 
         // nothing should listen to firstModel, and secondModel is now active
@@ -202,7 +202,7 @@ public class TableComparatorTest {
     @Test
     public void testMouseOnlySortingStrategyWithUndo() {
         final TestTableFormat tableFormat = new TestTableFormat(10);
-        final JTable table = new JTable(new DefaultEventTableModel<String>(new BasicEventList<String>(), tableFormat));
+        final JTable table = new JTable(new DefaultEventTableModel<>(new BasicEventList<String>(), tableFormat));
         tableComparatorChooser = TableComparatorChooser.install(table, sortedList, AbstractTableComparatorChooser.MULTIPLE_COLUMN_MOUSE_WITH_UNDO, tableFormat);
 
         // add some comparators to column 1 (for a total of 3 comparators)

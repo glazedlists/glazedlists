@@ -18,7 +18,7 @@ import java.util.Map;
  */
 class PriorityTableCellRenderer extends DefaultTableCellRenderer {
 
-    private static Map<Priority,Color> PRIORITY_COLOR_MAP = new IdentityHashMap<Priority,Color>();
+    private static Map<Priority,Color> PRIORITY_COLOR_MAP = new IdentityHashMap<>();
 
     static {
         PRIORITY_COLOR_MAP.put(Priority.P1, Color.RED.darker());

@@ -24,7 +24,7 @@ public class ManyToOneTableModelEventAdapterFactory<E> implements Factory<E> {
      */
     @Override
     public TableModelEventAdapter<E> create(AbstractTableModel tableModel) {
-        return new ManyToOneTableModelEventAdapter<E>(tableModel);
+        return new ManyToOneTableModelEventAdapter<>(tableModel);
     }
 
     /**

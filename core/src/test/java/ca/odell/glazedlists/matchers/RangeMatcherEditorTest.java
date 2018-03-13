@@ -17,8 +17,8 @@ public class RangeMatcherEditorTest {
 
     @Test
     public void testSetRange() {
-        final RangeMatcherEditor<Date,Date> matcherEditor = new RangeMatcherEditor<Date,Date>();
-        final CountingMatcherEditorListener<Date> counter = new CountingMatcherEditorListener<Date>();
+        final RangeMatcherEditor<Date,Date> matcherEditor = new RangeMatcherEditor<>();
+        final CountingMatcherEditorListener<Date> counter = new CountingMatcherEditorListener<>();
         matcherEditor.addMatcherEditorListener(counter);
         counter.assertCounterState(0, 0, 0, 0, 0);
 
@@ -65,8 +65,8 @@ public class RangeMatcherEditorTest {
 
     @Test
     public void testSetRangeWithNulls() {
-        final RangeMatcherEditor<Date,Date> matcherEditor = new RangeMatcherEditor<Date,Date>();
-        final CountingMatcherEditorListener<Date> counter = new CountingMatcherEditorListener<Date>();
+        final RangeMatcherEditor<Date,Date> matcherEditor = new RangeMatcherEditor<>();
+        final CountingMatcherEditorListener<Date> counter = new CountingMatcherEditorListener<>();
         matcherEditor.addMatcherEditorListener(counter);
         counter.assertCounterState(0, 0, 0, 0, 0);
 

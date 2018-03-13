@@ -37,9 +37,9 @@ public class MultipleSourcesTest {
      */
     @Test
     public void testMultipleSources() {
-        BasicEventList<String> source = new BasicEventList<String>();
-        FilterList<String> filterOne = new FilterList<String>(source, Matchers.trueMatcher());
-        FilterList<String> filterTwo = new FilterList<String>(source, Matchers.trueMatcher());
+        BasicEventList<String> source = new BasicEventList<>();
+        FilterList<String> filterOne = new FilterList<>(source, Matchers.trueMatcher());
+        FilterList<String> filterTwo = new FilterList<>(source, Matchers.trueMatcher());
 
         source.add("Game Cube");
         source.add("Genesis");
@@ -47,7 +47,7 @@ public class MultipleSourcesTest {
         source.add("PlayStation");
         source.add("Turbo Graphics 16");
 
-        List<EventList<String>> filterLists = new ArrayList<EventList<String>>();
+        List<EventList<String>> filterLists = new ArrayList<>();
         filterLists.add(filterOne);
         filterLists.add(filterTwo);
         MultipleSourcesListener filtersListener = new MultipleSourcesListener(filterLists, true);
@@ -75,9 +75,9 @@ public class MultipleSourcesTest {
      */
     @Test
     public void testMultipleSourcesNoListener() {
-        BasicEventList<String> source = new BasicEventList<String>();
-        FilterList<String> filterOne = new FilterList<String>(source, Matchers.trueMatcher());
-        FilterList<String> filterTwo = new FilterList<String>(source, Matchers.trueMatcher());
+        BasicEventList<String> source = new BasicEventList<>();
+        FilterList<String> filterOne = new FilterList<>(source, Matchers.trueMatcher());
+        FilterList<String> filterTwo = new FilterList<>(source, Matchers.trueMatcher());
 
         source.add("Game Cube");
         source.add("Genesis");
@@ -85,7 +85,7 @@ public class MultipleSourcesTest {
         source.add("PlayStation");
         source.add("Turbo Graphics 16");
 
-        List<EventList<String>> filterLists = new ArrayList<EventList<String>>();
+        List<EventList<String>> filterLists = new ArrayList<>();
         filterLists.add(filterOne);
         filterLists.add(filterTwo);
         MultipleSourcesListener filtersListener = new MultipleSourcesListener(filterLists, false);

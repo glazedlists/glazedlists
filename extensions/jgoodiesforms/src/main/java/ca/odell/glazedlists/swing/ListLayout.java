@@ -27,7 +27,7 @@ import java.util.List;
 class ListLayout extends LayoutDecorator {
 
     /** all components for the entire grid */
-    private final List<CellComponents> gridComponents = new ArrayList<CellComponents>();
+    private final List<CellComponents> gridComponents = new ArrayList<>();
 
     /** the formlayout does the actual legwork */
     private final FormLayout formLayout;
@@ -326,8 +326,8 @@ class ListLayout extends LayoutDecorator {
      * The components for a single cell.
      */
     private static class CellComponents {
-        private List<Component> components = new ArrayList<Component>(1);
-        private List<Constraints> constraints = new ArrayList<Constraints>(1);
+        private List<Component> components = new ArrayList<>(1);
+        private List<Constraints> constraints = new ArrayList<>(1);
     }
 
     /**

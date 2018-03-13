@@ -35,8 +35,8 @@ public class ListConsistencyListener<E> {
     private boolean previousElementTracked = true;
 
     /** count the number of changes per event */
-    private List<Integer> changeCounts = new ArrayList<Integer>();
-    private List<Boolean> reorderings = new ArrayList<Boolean>();
+    private List<Integer> changeCounts = new ArrayList<>();
+    private List<Boolean> reorderings = new ArrayList<>();
 
     /**
      * Creates a new ListConsistencyListener that ensures events from the source
@@ -50,7 +50,7 @@ public class ListConsistencyListener<E> {
         this.verbose = verbose;
 
         // populate the list of expected values
-        expected = new ArrayList<E>(source);
+        expected = new ArrayList<>(source);
 
         // handle changes to the source list
         source.addListEventListener(new ListChangeHandler());
@@ -62,7 +62,7 @@ public class ListConsistencyListener<E> {
      * listener will verify the change reported equals the change applied.
      */
     public static <E> ListConsistencyListener<E> install(EventList<E> source, String name, boolean verbose) {
-        return new ListConsistencyListener<E>(source, name, verbose);
+        return new ListConsistencyListener<>(source, name, verbose);
     }
     public static <E> ListConsistencyListener<E> install(EventList<E> source) {
         return install(source, null, false);
@@ -137,7 +137,7 @@ public class ListConsistencyListener<E> {
             if(verbose) System.out.println(name + ": " + listChanges + ", size: " + source.size() + ", source: " + source);
 
             // record the changed indices
-            List<Integer> changedIndices = new ArrayList<Integer>();
+            List<Integer> changedIndices = new ArrayList<>();
 
             // keep track of the highest change index so far
             int highestChangeIndex = 0;
@@ -146,7 +146,7 @@ public class ListConsistencyListener<E> {
             if(listChanges.isReordering()) {
                 int[] reorderMap = listChanges.getReorderMap();
                 assertTrue(expected.size() == reorderMap.length);
-                List<E> newExpectedValues = new ArrayList<E>(expected.size());
+                List<E> newExpectedValues = new ArrayList<>(expected.size());
                 for(int i = 0; i < reorderMap.length; i++) {
                     newExpectedValues.add(i, expected.get(reorderMap[i]));
                     changedIndices.add(new Integer(i));

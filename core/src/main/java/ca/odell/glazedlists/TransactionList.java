@@ -97,7 +97,7 @@ public class TransactionList<E> extends TransformedList<E, E> {
     private UndoRedoSupport rollbackSupport;
 
     /** A stack of transactions contexts; one for each layer of nested transaction */
-    private final List<Context> txContextStack = new ArrayList<Context>();
+    private final List<Context> txContextStack = new ArrayList<>();
 
     /**
      * Constructs a <code>TransactionList</code> that provides traditional

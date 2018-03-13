@@ -36,13 +36,13 @@ public class EventObservableListDemo extends Application {
     public void start(Stage stage) throws Exception {
         stage.setTitle("List Backed by GlazedLists");
 
-        final EventList<String> base_list = new BasicEventList<String>();
+        final EventList<String> base_list = new BasicEventList<>();
         for (int i = 0; i < 10; i++) {
             base_list.add(String.valueOf(i));
         }
 
         // Don't show 5's
-        EventList<String> filtered_list = new FilterList<String>(base_list, new Matcher<String>() {
+        EventList<String> filtered_list = new FilterList<>(base_list, new Matcher<String>() {
             @Override
             public boolean matches(String item) {
                 return !item.endsWith("5");
@@ -50,7 +50,7 @@ public class EventObservableListDemo extends Application {
         });
 
         // Reverse sort
-        EventList<String> sorted_list = new SortedList<String>(filtered_list,
+        EventList<String> sorted_list = new SortedList<>(filtered_list,
                 new Comparator<String>() {
                     @Override
                     public int compare(String o1, String o2) {
@@ -59,9 +59,9 @@ public class EventObservableListDemo extends Application {
                         return i2 - i1; // REVERSE
                     }
                 });
-        ObservableList<String> model = new EventObservableList<String>(sorted_list);
+        ObservableList<String> model = new EventObservableList<>(sorted_list);
 
-        final ListView<String> listView = new ListView<String>(model);
+        final ListView<String> listView = new ListView<>(model);
         listView.setPrefSize(200, 250);
         listView.setEditable(false);
 

@@ -31,12 +31,12 @@ public class ListEventCoderTest {
     @Test
     public void testEncodeDecode() throws IOException {
         // prepare the encoding list
-        EventList<Integer> toEncode = new BasicEventList<Integer>();
+        EventList<Integer> toEncode = new BasicEventList<>();
         EventEncoderListener encoder = new EventEncoderListener(intCoder);
         toEncode.addListEventListener(encoder);
 
         // prepare the decoding list
-        EventList<Integer> toDecode = new BasicEventList<Integer>();
+        EventList<Integer> toDecode = new BasicEventList<>();
 
         // change, encode, decode
         toEncode.add(new Integer(8));
@@ -58,10 +58,10 @@ public class ListEventCoderTest {
     @Test
     public void testSnapshotDecode() throws IOException {
         // prepare the encoding list
-        EventList<Integer> toEncode = new BasicEventList<Integer>();
+        EventList<Integer> toEncode = new BasicEventList<>();
 
         // prepare the decoding list
-        EventList<Integer> toDecode = new BasicEventList<Integer>();
+        EventList<Integer> toDecode = new BasicEventList<>();
         toDecode.add(new Integer(1));
         toDecode.add(new Integer(2));
         toDecode.add(new Integer(4));

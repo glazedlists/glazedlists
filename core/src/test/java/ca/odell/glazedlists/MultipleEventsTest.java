@@ -26,7 +26,7 @@ public class MultipleEventsTest {
     @Test
     public void testFilterList() {
         // create a list
-        EventList<int[]> source = new BasicEventList<int[]>();
+        EventList<int[]> source = new BasicEventList<>();
         source.add(new int[] { 1 });
         source.add(new int[] { 0 });
         source.add(new int[] { 1 });
@@ -35,7 +35,7 @@ public class MultipleEventsTest {
         // prepare a filter list
         IntegerArrayMatcherEditor matcherEditor = new IntegerArrayMatcherEditor(0, 0);
         matcherEditor.setFilter(0, 1);
-        FilterList<int[]> filterList = new FilterList<int[]>(source, matcherEditor);
+        FilterList<int[]> filterList = new FilterList<>(source, matcherEditor);
 
         // listen to changes on the filter list
         ListConsistencyListener<int[]> counter = ListConsistencyListener.install(filterList);
@@ -54,7 +54,7 @@ public class MultipleEventsTest {
     @Test
     public void testSubList() {
         // create a list
-        EventList<String> source = new BasicEventList<String>();
+        EventList<String> source = new BasicEventList<>();
         source.add("A");
         source.add("B");
         source.add("C");
@@ -81,7 +81,7 @@ public class MultipleEventsTest {
     @Test
     public void testUniqueList() {
         // create a list
-        EventList<String> source = new BasicEventList<String>();
+        EventList<String> source = new BasicEventList<>();
         source.add("A");
         source.add("B");
         source.add("B");

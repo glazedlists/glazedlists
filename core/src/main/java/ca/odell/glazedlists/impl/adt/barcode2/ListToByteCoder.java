@@ -20,7 +20,7 @@ public class ListToByteCoder<C> {
 
     public ListToByteCoder(List<C> allColors) {
         if(allColors.size() > 7) throw new IllegalArgumentException("Max 7 colors!");
-        this.allColors = Collections.unmodifiableList(new ArrayList<C>(allColors));
+        this.allColors = Collections.unmodifiableList(new ArrayList<>(allColors));
         this.colorCount = this.allColors.size();
     }
 
@@ -67,7 +67,7 @@ public class ListToByteCoder<C> {
      * Decode the specified bytes into colors.
      */
     public List<C> byteToColors(byte encoded) {
-        List<C> result = new ArrayList<C>(colorCount);
+        List<C> result = new ArrayList<>(colorCount);
         for(int i = 0; i < colorCount; i++) {
             if(((1 << i) & encoded) > 0) result.add(allColors.get(i));
         }

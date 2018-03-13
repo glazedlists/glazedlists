@@ -42,7 +42,7 @@ public final class GlazedListsSwing {
      * events from the Swing event dispatch thread.
      */
     public static <E> TransformedList<E, E> swingThreadProxyList(EventList<E> source) {
-        return new SwingThreadProxyEventList<E>(source);
+        return new SwingThreadProxyEventList<>(source);
     }
 
     /**
@@ -92,7 +92,7 @@ public final class GlazedListsSwing {
      *      from the row objects
      */
     public static <E> AdvancedTableModel<E> eventTableModel(EventList<E> source, TableFormat<? super E> tableFormat) {
-        return new DefaultEventTableModel<E>(source, tableFormat);
+        return new DefaultEventTableModel<>(source, tableFormat);
     }
 
     /**
@@ -110,7 +110,7 @@ public final class GlazedListsSwing {
      */
     public static <E> AdvancedTableModel<E> eventTableModelWithThreadProxyList(EventList<E> source, TableFormat<? super E> tableFormat) {
         final EventList<E> proxySource = createSwingThreadProxyList(source);
-        return new DefaultEventTableModel<E>(proxySource, true, tableFormat);
+        return new DefaultEventTableModel<>(proxySource, true, tableFormat);
     }
 
     /**
@@ -132,7 +132,7 @@ public final class GlazedListsSwing {
      * @param eventAdapterFactory factory for creating a {@link TableModelEventAdapter}
      */
     public static <E> AdvancedTableModel<E> eventTableModel(EventList<E> source, TableFormat<? super E> tableFormat, TableModelEventAdapter.Factory<E> eventAdapterFactory) {
-        final DefaultEventTableModel<E> result = new DefaultEventTableModel<E>(source, tableFormat);
+        final DefaultEventTableModel<E> result = new DefaultEventTableModel<>(source, tableFormat);
         final TableModelEventAdapter<E> eventAdapter = eventAdapterFactory.create(result);
         result.setEventAdapter(eventAdapter);
         return result;
@@ -159,7 +159,7 @@ public final class GlazedListsSwing {
      */
     public static <E> AdvancedTableModel<E> eventTableModelWithThreadProxyList(EventList<E> source, TableFormat<? super E> tableFormat, TableModelEventAdapter.Factory<E> eventAdapterFactory) {
         final EventList<E> proxySource = createSwingThreadProxyList(source);
-        final DefaultEventTableModel<E> result = new DefaultEventTableModel<E>(proxySource, true, tableFormat);
+        final DefaultEventTableModel<E> result = new DefaultEventTableModel<>(proxySource, true, tableFormat);
         final TableModelEventAdapter<E> eventAdapter = eventAdapterFactory.create(result);
         result.setEventAdapter(eventAdapter);
         return result;
@@ -298,7 +298,7 @@ public final class GlazedListsSwing {
      *      {@link AdvancedTableModel} or {@link EventListModel}.
      */
     public static <E> AdvancedListSelectionModel<E> eventSelectionModel(EventList<E> source) {
-        return new DefaultEventSelectionModel<E>(source);
+        return new DefaultEventSelectionModel<>(source);
     }
 
     /**
@@ -319,7 +319,7 @@ public final class GlazedListsSwing {
      */
     public static <E> AdvancedListSelectionModel<E> eventSelectionModelWithThreadProxyList(EventList<E> source) {
         final EventList<E> proxySource = createSwingThreadProxyList(source);
-        return new DefaultEventSelectionModel<E>(proxySource, true);
+        return new DefaultEventSelectionModel<>(proxySource, true);
     }
 
     // EventListModel convenience creators
@@ -338,7 +338,7 @@ public final class GlazedListsSwing {
      * @param source the EventList that provides the elements
      */
     public static <E> DefaultEventListModel<E> eventListModel(EventList<E> source) {
-        return new DefaultEventListModel<E>(source);
+        return new DefaultEventListModel<>(source);
     }
 
     /**
@@ -355,7 +355,7 @@ public final class GlazedListsSwing {
      */
     public static <E> DefaultEventListModel<E> eventListModelWithThreadProxyList(EventList<E> source) {
         final EventList<E> proxySource = createSwingThreadProxyList(source);
-        return new DefaultEventListModel<E>(proxySource, true);
+        return new DefaultEventListModel<>(proxySource, true);
     }
 
     // EventComboBoxModel convenience creators
@@ -374,7 +374,7 @@ public final class GlazedListsSwing {
      * @param source the EventList that provides the elements
      */
     public static <E> DefaultEventComboBoxModel<E> eventComboBoxModel(EventList<E> source) {
-        return new DefaultEventComboBoxModel<E>(source);
+        return new DefaultEventComboBoxModel<>(source);
     }
 
     /**
@@ -391,7 +391,7 @@ public final class GlazedListsSwing {
      */
     public static <E> DefaultEventComboBoxModel<E> eventComboBoxModelWithThreadProxyList(EventList<E> source) {
         final EventList<E> proxySource = createSwingThreadProxyList(source);
-        return new DefaultEventComboBoxModel<E>(proxySource, true);
+        return new DefaultEventComboBoxModel<>(proxySource, true);
     }
 
     /** Helper method to create a SwingThreadProxyList with read locks. */

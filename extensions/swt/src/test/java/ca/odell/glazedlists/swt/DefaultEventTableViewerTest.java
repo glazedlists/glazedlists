@@ -72,7 +72,7 @@ public class DefaultEventTableViewerTest {
     /** Tests creation of EventTableViewer with checkable table. */
     @Test
     public void testConstructorWithCheckableTable() {
-    	DefaultEventTableViewer<Integer> viewer = new DefaultEventTableViewer<Integer>(
+    	DefaultEventTableViewer<Integer> viewer = new DefaultEventTableViewer<>(
     			new BasicEventList<Integer>(), new Table(getShell(), SWT.CHECK), new IntegerTableFormat());
         viewer.dispose();
     }
@@ -89,11 +89,11 @@ public class DefaultEventTableViewerTest {
     @Test
     public void testSingleColumnSort() {
         final EventList<Color> source = GlazedLists.eventList(RGB);
-        final SortedList<Color> sorted = new SortedList<Color>(source, null);
+        final SortedList<Color> sorted = new SortedList<>(source, null);
         final TableFormat<Color> tableFormat = GlazedLists.tableFormat(new String[] { "red",
                 "green", "blue" }, new String[] { "Red", "Green", "Blue" });
         final Table table = new Table(getShell(), SWT.VIRTUAL | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-        final DefaultEventTableViewer<Color> viewer = new DefaultEventTableViewer<Color>(sorted, table, tableFormat);
+        final DefaultEventTableViewer<Color> viewer = new DefaultEventTableViewer<>(sorted, table, tableFormat);
         final TableComparatorChooser<Color> chooser = TableComparatorChooser.install(viewer, sorted, false);
         assertNull(table.getSortColumn());
         assertEquals(SWT.NONE, table.getSortDirection());
@@ -129,11 +129,11 @@ public class DefaultEventTableViewerTest {
     @Test
     public void testMultiColumnSort() {
         final EventList<Color> source = GlazedLists.eventList(RGB);
-        final SortedList<Color> sorted = new SortedList<Color>(source, null);
+        final SortedList<Color> sorted = new SortedList<>(source, null);
         final TableFormat<Color> tableFormat = GlazedLists.tableFormat(new String[] { "red",
                 "green", "blue" }, new String[] { "Red", "Green", "Blue" });
         final Table table = new Table(getShell(), SWT.VIRTUAL | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-        final DefaultEventTableViewer<Color> viewer = new DefaultEventTableViewer<Color>(sorted, table, tableFormat);
+        final DefaultEventTableViewer<Color> viewer = new DefaultEventTableViewer<>(sorted, table, tableFormat);
         final TableComparatorChooser<Color> chooser = TableComparatorChooser.install(viewer, sorted, true);
         assertNull(table.getSortColumn());
         assertEquals(SWT.NONE, table.getSortDirection());
@@ -174,7 +174,7 @@ public class DefaultEventTableViewerTest {
         final TableFormat<Color> tableFormat = GlazedLists.tableFormat(new String[] { "red",
                 "green", "blue" }, new String[] { "Red", "Green", "Blue" });
         final Table table = new Table(getShell(), SWT.CHECK | SWT.VIRTUAL);
-        DefaultEventTableViewer<Color> viewer = new DefaultEventTableViewer<Color>(source, table, tableFormat);
+        DefaultEventTableViewer<Color> viewer = new DefaultEventTableViewer<>(source, table, tableFormat);
         doTestDefaultConfigurer(table, viewer);
         // setting custom configurer
         viewer.setTableItemConfigurer(new ColorTableItemConfigurer());
@@ -239,7 +239,7 @@ public class DefaultEventTableViewerTest {
         final EventList<Color> source = GlazedLists.eventList(RGBNull);
         final TableFormat<Color> tableFormat = new ColorTableFormat();
         final Table table = new Table(getShell(), SWT.CHECK);
-        DefaultEventTableViewer<Color> viewer = new DefaultEventTableViewer<Color>(source, table, tableFormat);
+        DefaultEventTableViewer<Color> viewer = new DefaultEventTableViewer<>(source, table, tableFormat);
         checkColorTableFormatColumns(table);
         viewer.dispose();
     }
@@ -250,9 +250,9 @@ public class DefaultEventTableViewerTest {
      */
     @Test
     public void testToggleSelection() {
-        final BasicEventList<String> list = new BasicEventList<String>();
+        final BasicEventList<String> list = new BasicEventList<>();
         final Table table = new Table(getShell(), SWT.VIRTUAL | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-        final DefaultEventTableViewer<String> viewer = new DefaultEventTableViewer<String>(list, table, new SimpleTableFormat());
+        final DefaultEventTableViewer<String> viewer = new DefaultEventTableViewer<>(list, table, new SimpleTableFormat());
 
         // populate the list
         list.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
@@ -343,12 +343,12 @@ public class DefaultEventTableViewerTest {
 
     @Test
     public void testBug413() {
-        final BasicEventList<String> source = new BasicEventList<String>();
+        final BasicEventList<String> source = new BasicEventList<>();
         for (int i = 0; i < 3; i++) {
             source.add("Str" + i);
         }
         final Table table = new Table(getShell(), SWT.VIRTUAL | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-        final DefaultEventTableViewer<String> viewer = new DefaultEventTableViewer<String>(source, table, new SimpleTableFormat());
+        final DefaultEventTableViewer<String> viewer = new DefaultEventTableViewer<>(source, table, new SimpleTableFormat());
         // BUG:If comment the following line. The table will show Str0, Str1, Str2.
         // If donot comment the following line. The table will show Str1, Str2, Str0.
         // The item order is different.
@@ -366,9 +366,9 @@ public class DefaultEventTableViewerTest {
      */
     @Test
     public void testClearOnThreadProxy() {
-        final BasicEventList<String> list = new BasicEventList<String>();
+        final BasicEventList<String> list = new BasicEventList<>();
         final Table table = new Table(getShell(), SWT.VIRTUAL | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-        final DefaultEventTableViewer<String> viewer = new DefaultEventTableViewer<String>(list, table, new SimpleTableFormat());
+        final DefaultEventTableViewer<String> viewer = new DefaultEventTableViewer<>(list, table, new SimpleTableFormat());
         assertEquals(list, viewer.getSourceList());
         // populate the list
         list.addAll(GlazedListsTests.delimitedStringToList("A B C D E F"));
@@ -399,7 +399,7 @@ public class DefaultEventTableViewerTest {
         final EventList<Color> source = GlazedLists.eventList(RGBNull);
         final TableFormat<Color> tableFormat = new ColorTableFormat();
         final Table table = new Table(getShell(), SWT.CHECK);
-        DefaultEventTableViewer<Color> viewer = new DefaultEventTableViewer<Color>(source, table, tableFormat);
+        DefaultEventTableViewer<Color> viewer = new DefaultEventTableViewer<>(source, table, tableFormat);
         try {
         	viewer.setTableFormat(null);
         	fail("expected IllegalArgumentException for null TableFormat");
@@ -416,7 +416,7 @@ public class DefaultEventTableViewerTest {
         final EventList<Color> source = GlazedLists.eventList(RGB);
         final TableFormat<Color> tableFormat = new ColorTableFormat();
         final Table table = new Table(getShell(), SWT.CHECK);
-        DefaultEventTableViewer<Color> viewer = new DefaultEventTableViewer<Color>(source, table, tableFormat);
+        DefaultEventTableViewer<Color> viewer = new DefaultEventTableViewer<>(source, table, tableFormat);
         checkColorTableFormatColumns(table);
         checkColorTableFormatItems(viewer);
         // change TableFormat

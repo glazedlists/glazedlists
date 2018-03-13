@@ -42,7 +42,7 @@ public abstract class AbstractEventListCalculation<N, E> extends AbstractCalcula
         super(initialValue);
 
         this.source = source;
-        this.snapshot = new ArrayList<E>(source);
+        this.snapshot = new ArrayList<>(source);
 
         // compute the first value of this Calculation by simulating the entry
         // of all existing elements

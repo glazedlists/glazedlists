@@ -79,7 +79,7 @@ public class AmazonECSXMLParser {
      * it for Issuezilla XML and writes the issues to the command line.
      */
     public static void main(String[] args) throws IOException, InterruptedException {
-        EventList<Item> itemsList = new BasicEventList<Item>();
+        EventList<Item> itemsList = new BasicEventList<>();
 //        loadItem(itemsList, "B000B5XOW0");
 
         searchAndLoadItems(itemsList, "king", null);
@@ -213,7 +213,7 @@ public class AmazonECSXMLParser {
         // is notified and responds by placing a Runnable in a Channel that will eventually
         // be processed in a PooledExecutor. That Runnable executes the ItemLookup based on
         // the ASIN and the Item that is parsed out of the returned XML is placed into target.
-        private final EventList<String> itemASINs = new BasicEventList<String>();
+        private final EventList<String> itemASINs = new BasicEventList<>();
 
         private final ProgressBarUpdater progressBarUpdater;
         private final RequestEnqueuer requestEnqueuer;

@@ -21,7 +21,7 @@ import javax.swing.*;
  */
 class JEventListPanelDemo {
 
-    private final EventList<String> sillyObjects = new BasicEventList<String>();
+    private final EventList<String> sillyObjects = new BasicEventList<>();
 
     public class SillyObjectFormat extends JEventListPanel.AbstractFormat<String> {
 
@@ -70,7 +70,7 @@ class JEventListPanelDemo {
         sillyObjects.add("X 3");
         sillyObjects.add("X 9");
 
-        JEventListPanel<String> panel = new JEventListPanel<String>(sillyObjects, new SillyObjectFormat());
+        JEventListPanel<String> panel = new JEventListPanel<>(sillyObjects, new SillyObjectFormat());
         panel.setBorder(BorderFactory.createMatteBorder(5, 5, 5, 5, Color.RED));
         panel.setElementColumns(1);
 

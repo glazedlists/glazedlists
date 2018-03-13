@@ -196,10 +196,10 @@ public class TextMatchersTest {
 
     @Test
     public void testParseFields() {
-        SearchEngineTextMatcherEditor.Field<String> blahField = new SearchEngineTextMatcherEditor.Field<String>("blah", GlazedLists.toStringTextFilterator());
-        SearchEngineTextMatcherEditor.Field<String> burpField = new SearchEngineTextMatcherEditor.Field<String>("burp", GlazedLists.toStringTextFilterator());
+        SearchEngineTextMatcherEditor.Field<String> blahField = new SearchEngineTextMatcherEditor.Field<>("blah", GlazedLists.toStringTextFilterator());
+        SearchEngineTextMatcherEditor.Field<String> burpField = new SearchEngineTextMatcherEditor.Field<>("burp", GlazedLists.toStringTextFilterator());
 
-        Set<SearchEngineTextMatcherEditor.Field<String>> fields = new HashSet<SearchEngineTextMatcherEditor.Field<String>>();
+        Set<SearchEngineTextMatcherEditor.Field<String>> fields = new HashSet<>();
         fields.add(blahField);
         fields.add(burpField);
 
@@ -282,10 +282,10 @@ public class TextMatchersTest {
 
     @Test
     public void testNormalizeFieldfulSearchTerms() {
-        SearchEngineTextMatcherEditor.Field<String> blahField = new SearchEngineTextMatcherEditor.Field<String>("blah", GlazedLists.toStringTextFilterator());
-        SearchEngineTextMatcherEditor.Field<String> burpField = new SearchEngineTextMatcherEditor.Field<String>("burp", GlazedLists.toStringTextFilterator());
+        SearchEngineTextMatcherEditor.Field<String> blahField = new SearchEngineTextMatcherEditor.Field<>("blah", GlazedLists.toStringTextFilterator());
+        SearchEngineTextMatcherEditor.Field<String> burpField = new SearchEngineTextMatcherEditor.Field<>("burp", GlazedLists.toStringTextFilterator());
 
-        Set<SearchEngineTextMatcherEditor.Field<String>> fields = new HashSet<SearchEngineTextMatcherEditor.Field<String>>();
+        Set<SearchEngineTextMatcherEditor.Field<String>> fields = new HashSet<>();
         fields.add(blahField);
         fields.add(burpField);
 
@@ -364,10 +364,10 @@ public class TextMatchersTest {
 
     @Test
     public void testMatcherConstrainedAndRelaxedWithFields() {
-        SearchEngineTextMatcherEditor.Field<String> blahField = new SearchEngineTextMatcherEditor.Field<String>("blah", GlazedLists.toStringTextFilterator());
-        SearchEngineTextMatcherEditor.Field<String> burpField = new SearchEngineTextMatcherEditor.Field<String>("burp", GlazedLists.toStringTextFilterator());
+        SearchEngineTextMatcherEditor.Field<String> blahField = new SearchEngineTextMatcherEditor.Field<>("blah", GlazedLists.toStringTextFilterator());
+        SearchEngineTextMatcherEditor.Field<String> burpField = new SearchEngineTextMatcherEditor.Field<>("burp", GlazedLists.toStringTextFilterator());
 
-        Set<SearchEngineTextMatcherEditor.Field<String>> fields = new HashSet<SearchEngineTextMatcherEditor.Field<String>>();
+        Set<SearchEngineTextMatcherEditor.Field<String>> fields = new HashSet<>();
         fields.add(blahField);
         fields.add(burpField);
 
@@ -385,8 +385,8 @@ public class TextMatchersTest {
 
     @Test
     public void testMatcherConstrainedWithModeDifferences() {
-        TextMatcher<String> matcherA = new TextMatcher<String>(TextMatchers.parse(""), GlazedLists.toStringTextFilterator(), TextMatcherEditor.CONTAINS, TextMatcherEditor.IDENTICAL_STRATEGY);
-        TextMatcher<String> matcherB = new TextMatcher<String>(TextMatchers.parse(""), GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH, TextMatcherEditor.IDENTICAL_STRATEGY);
+        TextMatcher<String> matcherA = new TextMatcher<>(TextMatchers.parse(""), GlazedLists.toStringTextFilterator(), TextMatcherEditor.CONTAINS, TextMatcherEditor.IDENTICAL_STRATEGY);
+        TextMatcher<String> matcherB = new TextMatcher<>(TextMatchers.parse(""), GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH, TextMatcherEditor.IDENTICAL_STRATEGY);
 
         assertFalse(TextMatchers.isMatcherRelaxed(matcherA, matcherB));
         assertTrue(TextMatchers.isMatcherConstrained(matcherA, matcherB));
@@ -397,8 +397,8 @@ public class TextMatchersTest {
 
     @Test
     public void testMatcherConstrainedWithStrategyDifferences() {
-        TextMatcher<String> matcherA = new TextMatcher<String>(TextMatchers.parse(""), GlazedLists.toStringTextFilterator(), TextMatcherEditor.CONTAINS, TextMatcherEditor.IDENTICAL_STRATEGY);
-        TextMatcher<String> matcherB = new TextMatcher<String>(TextMatchers.parse(""), GlazedLists.toStringTextFilterator(), TextMatcherEditor.CONTAINS, TextMatcherEditor.NORMALIZED_STRATEGY);
+        TextMatcher<String> matcherA = new TextMatcher<>(TextMatchers.parse(""), GlazedLists.toStringTextFilterator(), TextMatcherEditor.CONTAINS, TextMatcherEditor.IDENTICAL_STRATEGY);
+        TextMatcher<String> matcherB = new TextMatcher<>(TextMatchers.parse(""), GlazedLists.toStringTextFilterator(), TextMatcherEditor.CONTAINS, TextMatcherEditor.NORMALIZED_STRATEGY);
 
         assertFalse(TextMatchers.isMatcherRelaxed(matcherA, matcherB));
         assertFalse(TextMatchers.isMatcherConstrained(matcherA, matcherB));
@@ -409,7 +409,7 @@ public class TextMatchersTest {
 
     @Test
     public void testRegularExpressionMatcher() {
-        TextMatcher<String> matcher = new TextMatcher<String>(TextMatchers.parse("[a-z]"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.REGULAR_EXPRESSION, TextMatcherEditor.IDENTICAL_STRATEGY);
+        TextMatcher<String> matcher = new TextMatcher<>(TextMatchers.parse("[a-z]"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.REGULAR_EXPRESSION, TextMatcherEditor.IDENTICAL_STRATEGY);
         assertEquals(TextMatcherEditor.REGULAR_EXPRESSION, matcher.getMode());
         assertTrue(matcher.matches("a"));
         assertTrue(matcher.matches("x"));
@@ -418,7 +418,7 @@ public class TextMatchersTest {
 
     @Test
     public void testExactExpressionMatcher() {
-        TextMatcher<String> matcher = new TextMatcher<String>(TextMatchers.parse("abc"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.EXACT, TextMatcherEditor.IDENTICAL_STRATEGY);
+        TextMatcher<String> matcher = new TextMatcher<>(TextMatchers.parse("abc"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.EXACT, TextMatcherEditor.IDENTICAL_STRATEGY);
         assertEquals(TextMatcherEditor.EXACT, matcher.getMode());
         assertFalse(matcher.matches("a"));
         assertFalse(matcher.matches("ab"));
@@ -428,8 +428,8 @@ public class TextMatchersTest {
 
     @Test
     public void testExactExpressionConstrainedAndRelaxed() {
-        TextMatcher<String> matcherA = new TextMatcher<String>(TextMatchers.parse("reactor core"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.EXACT, TextMatcherEditor.IDENTICAL_STRATEGY);
-        TextMatcher<String> matcherB = new TextMatcher<String>(TextMatchers.parse("reactor"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.EXACT, TextMatcherEditor.IDENTICAL_STRATEGY);
+        TextMatcher<String> matcherA = new TextMatcher<>(TextMatchers.parse("reactor core"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.EXACT, TextMatcherEditor.IDENTICAL_STRATEGY);
+        TextMatcher<String> matcherB = new TextMatcher<>(TextMatchers.parse("reactor"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.EXACT, TextMatcherEditor.IDENTICAL_STRATEGY);
         assertFalse(TextMatchers.isMatcherRelaxed(matcherA, matcherB));
         assertFalse(TextMatchers.isMatcherRelaxed(matcherB, matcherA));
         assertFalse(TextMatchers.isMatcherConstrained(matcherA, matcherB));
@@ -443,10 +443,10 @@ public class TextMatchersTest {
 
     @Test
     public void testConstructor() {
-        new TextMatcher<String>(TextMatchers.parse("[a-z]"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.REGULAR_EXPRESSION, TextMatcherEditor.IDENTICAL_STRATEGY);
+        new TextMatcher<>(TextMatchers.parse("[a-z]"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.REGULAR_EXPRESSION, TextMatcherEditor.IDENTICAL_STRATEGY);
 
         try {
-            new TextMatcher<String>(TextMatchers.parse("[a-z]"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.REGULAR_EXPRESSION, TextMatcherEditor.NORMALIZED_STRATEGY);
+            new TextMatcher<>(TextMatchers.parse("[a-z]"), GlazedLists.toStringTextFilterator(), TextMatcherEditor.REGULAR_EXPRESSION, TextMatcherEditor.NORMALIZED_STRATEGY);
             fail("failed to receive an IllegalArgumentException using REGULAR_EXPRESSION and NORMALIZED_STRATEGY together");
         } catch (IllegalArgumentException e) {
             // expected
@@ -470,10 +470,10 @@ public class TextMatchersTest {
     }
 
     private TextMatcher<String> textMatcher(String text) {
-        return new TextMatcher<String>(TextMatchers.parse(text), GlazedLists.toStringTextFilterator(), TextMatcherEditor.CONTAINS, TextMatcherEditor.IDENTICAL_STRATEGY);
+        return new TextMatcher<>(TextMatchers.parse(text), GlazedLists.toStringTextFilterator(), TextMatcherEditor.CONTAINS, TextMatcherEditor.IDENTICAL_STRATEGY);
     }
 
     private TextMatcher<String> textMatcher(String text, Set<SearchEngineTextMatcherEditor.Field<String>> fields) {
-        return new TextMatcher<String>(TextMatchers.parse(text, fields), GlazedLists.toStringTextFilterator(), TextMatcherEditor.CONTAINS, TextMatcherEditor.IDENTICAL_STRATEGY);
+        return new TextMatcher<>(TextMatchers.parse(text, fields), GlazedLists.toStringTextFilterator(), TextMatcherEditor.CONTAINS, TextMatcherEditor.IDENTICAL_STRATEGY);
     }
 }

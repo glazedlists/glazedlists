@@ -19,8 +19,8 @@ public class FreezableListTest {
 
     @Test
     public void testFreezableList() {
-        EventList<String> source = new BasicEventList<String>();
-        FreezableList<String> freezable = new FreezableList<String>(source);
+        EventList<String> source = new BasicEventList<>();
+        FreezableList<String> freezable = new FreezableList<>(source);
         ListConsistencyListener.install(freezable);
 
         source.addAll(GlazedListsTests.stringToList("ROUGHRIDERS"));

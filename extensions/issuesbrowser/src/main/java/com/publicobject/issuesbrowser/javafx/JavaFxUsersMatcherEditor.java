@@ -47,8 +47,8 @@ public final class JavaFxUsersMatcherEditor extends UsersMatcherEditor {
         super(source);
         final EventList<String> allUsers = getUsersList();
         threadProxyAllUsers = GlazedListsFx.threadProxyList(allUsers);
-        observableAllUsers = new EventObservableList<String>(threadProxyAllUsers);
-        userSelect = new ListView<String>();
+        observableAllUsers = new EventObservableList<>(threadProxyAllUsers);
+        userSelect = new ListView<>();
         userSelect.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         userSelect.setItems(observableAllUsers);
         scrollPane = new ScrollPane();

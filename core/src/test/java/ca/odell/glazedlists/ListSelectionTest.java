@@ -43,8 +43,8 @@ public class ListSelectionTest {
      */
     @Before
     public void setUp() {
-        source = new BasicEventList<Integer>();
-        listSelection = new ListSelection<Integer>(source);
+        source = new BasicEventList<>();
+        listSelection = new ListSelection<>(source);
         selectedList = listSelection.getSelected();
         deselectedList = listSelection.getDeselected();
         ListConsistencyListener.install(source);
@@ -532,9 +532,9 @@ public class ListSelectionTest {
 
     @Test
     public void testContradictingUpdates() {
-        TransactionList<String> source = new TransactionList<String>(new BasicEventList<String>());
+        TransactionList<String> source = new TransactionList<>(new BasicEventList<String>());
 
-        ListSelection<String> listSelection = new ListSelection<String>(source);
+        ListSelection<String> listSelection = new ListSelection<>(source);
         ListConsistencyListener.install(listSelection.getSelected());
 
         source.beginEvent(false);
@@ -618,7 +618,7 @@ public class ListSelectionTest {
         assertEquals(0, selectedList.size());
         assertEquals(6, deselectedList.size());
 
-        List<Integer> toSelect = new ArrayList<Integer>();
+        List<Integer> toSelect = new ArrayList<>();
         changed = listSelection.select(toSelect);
         assertEquals(false, changed);
         assertEquals(0, selectedList.size());
@@ -693,7 +693,7 @@ public class ListSelectionTest {
             listSelection.getTogglingDeselected().add(new Integer(6));
             fail("IllegalArgumentException not thrown when item not in source list added");
         } catch(IllegalArgumentException e) {}
-        List<Integer> ints = new ArrayList<Integer>();
+        List<Integer> ints = new ArrayList<>();
         ints.add(new Integer(0));
         ints.add(new Integer(1));
         try {
@@ -712,7 +712,7 @@ public class ListSelectionTest {
         EventList<Integer> togglingDeselected = listSelection.getTogglingDeselected();
         assertFalse(togglingSelected.remove(new Integer(6)));
         assertFalse(togglingDeselected.remove(new Integer(6)));
-        List<Integer> ints = new ArrayList<Integer>();
+        List<Integer> ints = new ArrayList<>();
         ints.add(new Integer(0));
         ints.add(new Integer(1));
         assertFalse(togglingSelected.removeAll(ints));
@@ -721,7 +721,7 @@ public class ListSelectionTest {
 
     @Test
     public void testTogglingViewBulkOperations(){
-        List<Integer> ints = new ArrayList<Integer>();
+        List<Integer> ints = new ArrayList<>();
         ints.add(new Integer(0));
         ints.add(new Integer(1));
         source.addAll(ints);
