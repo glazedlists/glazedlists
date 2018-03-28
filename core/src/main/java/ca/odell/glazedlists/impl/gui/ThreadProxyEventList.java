@@ -154,7 +154,7 @@ public abstract class ThreadProxyEventList<E> extends TransformedList<E, E> impl
      *      is now out of sync with that source list and will be repaired
      * @return a new List to serve as the up-to-date local cache
      */
-    private List<E> applyChangeToCache(EventList<E> source, ListEvent<E> listChanges, List<E> localCache) {
+    protected List<E> applyChangeToCache(EventList<E> source, ListEvent<E> listChanges, List<E> localCache) {
         List<E> result = new ArrayList<>(source.size());
 
         // cacheOffset is the running index delta between localCache and result

@@ -1,12 +1,14 @@
 /* Glazed Lists                                                 (c) 2003-2006 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-package com.publicobject.glazedlists.japex.adt;
+package ca.odell.glazedlists.adt;
 
-// for comparators and iterators
-import java.util.*;
 // for access to the ComparableComparator
 import ca.odell.glazedlists.GlazedLists;
+
+// for comparators and iterators
+import java.util.Comparator;
+import java.util.Iterator;
 
 /**
  * Models a tree which keeps its elements either in sorted order
@@ -20,10 +22,11 @@ import ca.odell.glazedlists.GlazedLists;
  * it does not support {@link #addByNode(Object)} because that
  * method specifies no index.
  *
- * @deprecated, replaced with {@link ca.odell.glazedlists.impl.adt.barcode2.BciiTree BC2}
- * 
+ * @deprecated replaced with {@link ca.odell.glazedlists.impl.adt.barcode2.BciiTree BC2}
+ *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
+@Deprecated
 public final class IndexedTree<V> {
 
     /** a decision maker for ordering elements */

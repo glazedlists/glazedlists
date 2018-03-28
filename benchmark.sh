@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 # benchmarks to include, regexp
-INCLUDE="BasicEventListBenchmark.testAdd"
+#INCLUDE="BasicEventListBenchmark.testAdd"
+INCLUDE="ThreadProxyBenchmark"
+#INCLUDE="SortedListBenchmark"
 
 # overrides annotations for warmup-iteration, iterations and fork count
 CONFIG="-wi 5 -i 10 -f 1"

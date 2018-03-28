@@ -21,7 +21,7 @@ version "$nextReleaseVersion${isSnapshot == "true" ? "-SNAPSHOT" : ""}"
 ext.targetDir = "target/"
 ext.user = System.getProperty("user.name")
 ext.buildTime = new Date()
-def exportedProjects = subprojects.findAll { it.name != 'issuesbrowser' && it.name != 'japex' }
+def exportedProjects = subprojects.findAll { it.name != 'issuesbrowser' && it.name != 'jmh-benchmark' }
 
 /**
  * settings for all modules including root-module

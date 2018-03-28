@@ -1,7 +1,10 @@
 @echo off
 
 rem benchmarks to include, regexp
-SET INCLUDE=BasicEventListBenchmark.testAdd
+rem SET INCLUDE=BasicEventListBenchmark.testAdd
+SET INCLUDE="ThreadProxyBenchmark"
+rem SET INCLUDE="SortedListBenchmark"
+
 
 rem overrides annotations for warmup-iteration, iterations and fork count
 SET CONFIG=-wi 5 -i 10 -f 1

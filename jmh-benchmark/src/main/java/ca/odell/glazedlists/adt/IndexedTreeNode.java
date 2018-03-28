@@ -1,10 +1,11 @@
 /* Glazed Lists                                                 (c) 2003-2006 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-package com.publicobject.glazedlists.japex.adt;
+package ca.odell.glazedlists.adt;
 
 // for specifying a sorting order
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * A tree node that can be accessed either in sorted order or by
@@ -24,10 +25,11 @@ import java.util.*;
  * but old elements are not to be moved once added. To mark a node as unsorted,
  * use the
  *
- * @deprecated, replaced with {@link ca.odell.glazedlists.impl.adt.barcode2.BciiTree BC2}
+ * @deprecated replaced with {@link ca.odell.glazedlists.impl.adt.barcode2.BciiTree BC2}
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
+@Deprecated
 public final class IndexedTreeNode<V> {
 
     /** a token node */

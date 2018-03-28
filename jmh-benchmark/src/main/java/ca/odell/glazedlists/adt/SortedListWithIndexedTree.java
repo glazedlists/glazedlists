@@ -1,12 +1,9 @@
 /* Glazed Lists                                                 (c) 2003-2006 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-package com.publicobject.glazedlists.japex;
+package ca.odell.glazedlists.adt;
 
 import ca.odell.glazedlists.*;
-import com.publicobject.glazedlists.japex.adt.IndexedTreeNode;
-import com.publicobject.glazedlists.japex.adt.IndexedTree;
-import com.publicobject.glazedlists.japex.adt.IndexedTreeIterator;
 import ca.odell.glazedlists.event.ListEvent;
 
 import java.util.*;
