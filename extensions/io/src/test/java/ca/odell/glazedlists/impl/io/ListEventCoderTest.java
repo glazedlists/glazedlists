@@ -3,23 +3,28 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.io;
 
+import static org.junit.Assert.assertEquals;
+
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.io.ByteCoder;
+
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Test;
-
-import static org.junit.Assert.*;
-
 /**
  * Tests the ListEventCoder.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public class ListEventCoderTest {
 
     /** encodes java.lang.Integer */

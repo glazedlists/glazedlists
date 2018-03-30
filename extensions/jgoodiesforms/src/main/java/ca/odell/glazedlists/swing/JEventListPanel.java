@@ -8,16 +8,16 @@ import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.RowSpec;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.RowSpec;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A panel that shows the contents of an EventList containing JComponents.
@@ -45,7 +45,12 @@ import com.jgoodies.forms.layout.RowSpec;
  * </ol>
  *
  * @author <a href="mailto:jesse@odell.ca">Jesse Wilson</a>
+
+ * @deprecated The jgoodiesforms extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public final class JEventListPanel<E> extends JPanel {
 
     /** the source contains all the JComponents */

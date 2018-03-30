@@ -12,7 +12,12 @@ import java.util.logging.Logger;
 
 /**
  * A task that gracefully shuts down the NIO daemon.
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 class Shutdown implements Runnable {
 
     /** logging */

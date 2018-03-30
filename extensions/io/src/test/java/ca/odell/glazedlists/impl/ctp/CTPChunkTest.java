@@ -3,22 +3,27 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.ctp;
 
+import static org.junit.Assert.fail;
+
 // for being a JUnit test case
 import ca.odell.glazedlists.RandomDataFactory;
-
-import java.io.IOException;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.io.IOException;
 
 /**
  * A CTPChunk test verifies that the CTPConnection provides proper chunks.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public class CTPChunkTest {
 
     /** connection manager to handle incoming connects */

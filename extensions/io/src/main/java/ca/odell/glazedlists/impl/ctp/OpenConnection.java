@@ -17,7 +17,12 @@ import java.nio.channels.SocketChannel;
  * queued until it can be processed by the CTP thread.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 class OpenConnection implements Runnable {
 
     /** the place to connect to */

@@ -14,7 +14,12 @@ import java.util.List;
  * A simple resource for a String.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public class StringResource implements Resource {
 
     /** the read/write lock provides mutual exclusion to access */

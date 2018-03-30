@@ -22,7 +22,12 @@ import java.nio.channels.SocketChannel;
  * used to notify the handlers of the data and status of a connection.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public final class CTPConnectionManager implements NIOServer {
 
     /** default port to bind to */

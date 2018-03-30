@@ -5,14 +5,20 @@ package ca.odell.glazedlists.nachocalendar;
 
 import ca.odell.glazedlists.Filterator;
 import ca.odell.glazedlists.matchers.RangeMatcherEditor;
-import net.sf.nachocalendar.CalendarFactory;
-import net.sf.nachocalendar.components.DateField;
 
-import javax.swing.*;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import java.awt.*;
+
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.util.Date;
+
+import net.sf.nachocalendar.CalendarFactory;
+import net.sf.nachocalendar.components.DateField;
 
 /**
  * This {@link NachoDateRangeMatcherEditor} uses
@@ -35,7 +41,12 @@ import java.util.Date;
  * needed.
  *
  * @author James Lemieux
+ *
+ * @deprecated The nachocalendar extension and its types are deprecated.
+ *             This extension becomes unsupported and {@link NachoDateRangeMatcherEditor}
+ *             will be moved to the Issues Browser demo with the next major release.
  */
+@Deprecated
 public class NachoDateRangeMatcherEditor<E> extends RangeMatcherEditor<Date,E> {
 
     /** The UI components which capture the start and end of the date range */

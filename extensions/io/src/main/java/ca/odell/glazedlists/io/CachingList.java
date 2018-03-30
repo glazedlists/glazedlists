@@ -45,6 +45,10 @@ import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
  * </td></tr>
  * </table>
  *
+ * NOTE: The io extension and its types are deprecated.
+ *       This extension becomes unsupported and will be removed
+ *       from the official distribution with the next major release.
+ *       However, {@link CachingList} will then be moved to the core.
  *
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>

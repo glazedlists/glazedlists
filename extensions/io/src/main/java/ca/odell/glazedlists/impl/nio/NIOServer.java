@@ -9,8 +9,13 @@ import java.nio.channels.Selector;
 
 /**
  * Handles incoming NIO connections.
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
 @FunctionalInterface
+@Deprecated
 public interface NIOServer {
 
     /**

@@ -37,7 +37,12 @@ import java.util.TreeMap;
  * </table>
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public final class FileList extends TransformedList {
 
     /** the destination file, just for user convenience */

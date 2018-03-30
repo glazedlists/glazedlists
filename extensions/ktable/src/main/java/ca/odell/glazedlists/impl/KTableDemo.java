@@ -8,6 +8,12 @@ import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.swt.DefaultEventKTableModel;
 import ca.odell.glazedlists.swt.GlazedListsKTable;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+
 import com.publicobject.issuesbrowser.Issue;
 import com.publicobject.issuesbrowser.IssueLoader;
 import com.publicobject.issuesbrowser.Project;
@@ -16,15 +22,14 @@ import com.publicobject.misc.Throbber;
 import de.kupzog.ktable.KTable;
 import de.kupzog.ktable.SWTX;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The ktable extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public class KTableDemo {
 
     public static void main(String[] args) {

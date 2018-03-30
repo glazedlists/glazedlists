@@ -6,7 +6,12 @@ package ca.odell.glazedlists.impl.pmap;
 // NIO is used for CTP
 /**
  * This doesn't do anything! It's useful for flushing pending events with invokeAndWait().
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 class NoOp implements Runnable {
 
     /** singleton */

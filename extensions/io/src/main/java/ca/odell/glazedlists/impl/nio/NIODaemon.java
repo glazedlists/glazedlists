@@ -14,7 +14,12 @@ import java.util.logging.Logger;
 
 /**
  * An event queue of I/O events and a thread to run them on.
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public final class NIODaemon implements Runnable {
 
     /** logging */

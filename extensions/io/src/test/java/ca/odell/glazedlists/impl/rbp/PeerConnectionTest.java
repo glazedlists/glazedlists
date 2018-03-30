@@ -3,20 +3,26 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.rbp;
 
-// for being a JUnit test case
-import java.io.IOException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+// for being a JUnit test case
+import java.io.IOException;
 
 /**
  * A CTPChunk test verifies that the CTPConnection provides proper chunks.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public class PeerConnectionTest {
 
     /** the peer manages publishing and subscribing */

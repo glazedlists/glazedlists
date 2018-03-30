@@ -12,7 +12,12 @@ import java.util.logging.Logger;
 
 /**
  * The SelectAndHandle selects ready keys and handles them.
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 class SelectAndHandle implements Runnable {
 
     /** logging */

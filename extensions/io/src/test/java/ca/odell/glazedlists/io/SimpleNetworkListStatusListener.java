@@ -7,7 +7,12 @@ package ca.odell.glazedlists.io;
  * Listens to the current status of a {@link NetworkList} with respect to the network.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public class SimpleNetworkListStatusListener implements NetworkListStatusListener {
 
     /** whether the list is connected */

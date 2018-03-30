@@ -15,7 +15,12 @@ import java.nio.channels.FileChannel;
  * A chunk of a file.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public final class Chunk {
 
     /** the host PersistentMap */

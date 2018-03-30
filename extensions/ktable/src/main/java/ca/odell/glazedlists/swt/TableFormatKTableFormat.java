@@ -5,6 +5,7 @@ package ca.odell.glazedlists.swt;
 
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.gui.TableFormat;
+
 import de.kupzog.ktable.KTable;
 import de.kupzog.ktable.KTableCellEditor;
 import de.kupzog.ktable.KTableCellRenderer;
@@ -15,7 +16,12 @@ import de.kupzog.ktable.KTableCellRenderer;
  * such as those created by  {@link GlazedLists#tableFormat}.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The ktable extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public class TableFormatKTableFormat extends AbstractKTableFormat {
 
     /** the TableFormat being adapted, methods will be delegated to */

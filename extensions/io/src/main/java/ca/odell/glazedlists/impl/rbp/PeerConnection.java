@@ -9,7 +9,11 @@ import ca.odell.glazedlists.impl.ctp.CTPHandler;
 import ca.odell.glazedlists.impl.io.Bufferlo;
 
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,7 +25,12 @@ import java.util.logging.Logger;
  * of resources being published and resources being subscribed to.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 class PeerConnection implements CTPHandler {
 
     /** logging */

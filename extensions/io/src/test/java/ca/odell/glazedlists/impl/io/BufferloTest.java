@@ -3,6 +3,11 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.io;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+import org.junit.Test;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,15 +17,16 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.text.ParseException;
 
-import org.junit.Test;
-
-import static org.junit.Assert.*;
-
 /**
  * Tests the Bufferlo.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public class BufferloTest {
 
     /**

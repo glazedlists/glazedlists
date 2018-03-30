@@ -17,7 +17,12 @@ import java.io.OutputStream;
  * must be JavaBeans.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public class BeanXMLByteCoder implements ByteCoder {
 
     /** {@inheritDoc} */

@@ -11,7 +11,12 @@ import java.util.logging.Logger;
  * Loads the value for a chunk from disk.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 class LoadValue implements Runnable {
 
     /** logging */

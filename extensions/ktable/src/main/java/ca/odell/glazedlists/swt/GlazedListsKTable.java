@@ -8,16 +8,21 @@ package ca.odell.glazedlists.swt;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.gui.TableFormat;
 
-import de.kupzog.ktable.KTable;
-
 import org.eclipse.swt.widgets.Display;
+
+import de.kupzog.ktable.KTable;
 
 
 /**
  * A factory for creating all sorts of objects relevant to the Glazed Lists {@link KTable} extension.
  *
  * @author Holger Brands
+ *
+ * @deprecated The ktable extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public final class GlazedListsKTable {
 
     /**

@@ -7,7 +7,12 @@ package ca.odell.glazedlists.impl.nio;
 /**
  * Handles all sorts of incoming NIO events. An object implementing this interface
  * must be set as the attachment for all SelectionKeys used by the NIODaemon.
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public interface NIOAttachment {
 
     /**

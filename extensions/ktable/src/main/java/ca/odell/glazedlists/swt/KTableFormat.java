@@ -20,7 +20,12 @@ import de.kupzog.ktable.KTableCellRenderer;
  * the simpler {@link TableFormat} can be used.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The ktable extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public interface KTableFormat extends TableFormat {
 
     /**

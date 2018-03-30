@@ -8,7 +8,12 @@ package ca.odell.glazedlists.impl.rbp;
  * Tracks the current status of a resource with respect to the network.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public interface ResourceStatus {
 
     /**

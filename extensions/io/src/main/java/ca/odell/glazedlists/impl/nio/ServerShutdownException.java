@@ -6,7 +6,12 @@ package ca.odell.glazedlists.impl.nio;
 // NIO is used for CTP
 /**
  * The reason a connection is closed when the server is shutdown.
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 class ServerShutdownException extends Exception {
 
     /**

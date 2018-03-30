@@ -3,6 +3,9 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.ctp;
 
+import ca.odell.glazedlists.impl.io.Bufferlo;
+import ca.odell.glazedlists.impl.nio.NIOAttachment;
+
 // NIO is used for CTP
 import java.io.EOFException;
 import java.io.IOException;
@@ -15,9 +18,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Logger;
-
-import ca.odell.glazedlists.impl.io.Bufferlo;
-import ca.odell.glazedlists.impl.nio.NIOAttachment;
 
 /**
  * The CTPConnection is base class for building a client or server implementation
@@ -35,7 +35,12 @@ import ca.odell.glazedlists.impl.nio.NIOAttachment;
  * <li>it interprets only the header, "Transfer-Encoding".
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public final class CTPConnection implements NIOAttachment {
     // client:
     // AWAITING_CONNECT

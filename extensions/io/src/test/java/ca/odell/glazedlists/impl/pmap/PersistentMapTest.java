@@ -3,24 +3,30 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.pmap;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 // for being a JUnit test case
 import ca.odell.glazedlists.impl.io.Bufferlo;
 import ca.odell.glazedlists.io.GlazedListsIO;
 
+import org.junit.Test;
+
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
-
-import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 
 /**
  * This test verifies that the PersistentMap works.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public class PersistentMapTest {
 
     /**

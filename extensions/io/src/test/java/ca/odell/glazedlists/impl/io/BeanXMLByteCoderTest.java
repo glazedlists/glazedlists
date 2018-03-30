@@ -3,21 +3,26 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.io;
 
+import static org.junit.Assert.assertEquals;
+
 import ca.odell.glazedlists.io.ByteCoder;
-
-import java.io.IOException;
-
-import javax.swing.JLabel;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import javax.swing.JLabel;
+
+import java.io.IOException;
 
 /**
  * Tests the BeanXMLByteCoder..
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public class BeanXMLByteCoderTest {
 
     /**

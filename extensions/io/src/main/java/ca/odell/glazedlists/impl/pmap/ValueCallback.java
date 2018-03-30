@@ -10,8 +10,13 @@ import ca.odell.glazedlists.impl.io.Bufferlo;
  * Listens for the loading of a value.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
 @FunctionalInterface
+@Deprecated
 public interface ValueCallback {
 
     /**

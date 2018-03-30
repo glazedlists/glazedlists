@@ -3,19 +3,24 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.ctp;
 
-// for being a JUnit test case
-import java.io.IOException;
+import static org.junit.Assert.fail;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+// for being a JUnit test case
+import java.io.IOException;
 
 /**
  * A CTPConnectionTest verifies that behaviour is correct when connections fail.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public class CTPConnectionTest {
 
     /**

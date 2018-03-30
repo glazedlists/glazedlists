@@ -22,7 +22,12 @@ import java.util.regex.Pattern;
  * A high-level class for moving data and parsing protocols.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public class Bufferlo implements CharSequence {
 
     /** the buffers managed by this Bufferlo */

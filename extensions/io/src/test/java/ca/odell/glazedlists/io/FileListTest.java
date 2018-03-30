@@ -3,19 +3,24 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.io;
 
-// for being a JUnit test case
-import java.io.File;
-import java.io.IOException;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+// for being a JUnit test case
+import java.io.File;
+import java.io.IOException;
 
 /**
  * This test verifies that the FileList works.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public class FileListTest {
 
     /**

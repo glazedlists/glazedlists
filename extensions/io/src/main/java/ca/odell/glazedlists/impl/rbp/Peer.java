@@ -9,14 +9,23 @@ import ca.odell.glazedlists.impl.ctp.CTPHandler;
 import ca.odell.glazedlists.impl.ctp.CTPHandlerFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 /**
  * A peer manages publishing and subscribing to resources.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public class Peer implements CTPHandlerFactory {
 
     /** logging */

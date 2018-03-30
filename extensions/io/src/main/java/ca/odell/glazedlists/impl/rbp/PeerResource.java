@@ -15,7 +15,12 @@ import java.util.Random;
  * A resource that is being published on the network.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 class PeerResource {
 
     /** the peer that owns all connections */

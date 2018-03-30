@@ -9,7 +9,12 @@ package ca.odell.glazedlists.impl.nio;
  *
  * <p>If this Runnable throws any {@link RuntimeException}s, they can be accessed
  * via this API. They will not be propagated up.
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 class BlockingRunnable implements Runnable {
 
     /** the target runnable */

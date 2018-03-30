@@ -6,14 +6,19 @@ package ca.odell.glazedlists.swing;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 
+import org.junit.Test;
+
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 
-import org.junit.Test;
-
 /**
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The jgoodiesforms extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public class JEventListPanelTest extends SwingTestCase {
 
     /**

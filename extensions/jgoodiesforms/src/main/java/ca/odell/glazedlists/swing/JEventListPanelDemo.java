@@ -6,19 +6,30 @@ package ca.odell.glazedlists.swing;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JSlider;
+import javax.swing.JTextField;
+import javax.swing.WindowConstants;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Random;
 
-import javax.swing.*;
-
 /**
  * A panel that shows the contents of an EventList containing JComponents.
  *
  * @author <a href="mailto:jesse@odell.ca">Jesse Wilson</a>
+ *
+ * @deprecated The jgoodiesforms extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 class JEventListPanelDemo {
 
     private final EventList<String> sillyObjects = new BasicEventList<>();

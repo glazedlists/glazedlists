@@ -10,7 +10,12 @@ import ca.odell.glazedlists.impl.io.SerializableByteCoder;
  * A factory for creating all sorts of objects to be used with Glazed Lists.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public final class GlazedListsIO {
 
     /**

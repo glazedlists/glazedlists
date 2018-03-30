@@ -15,7 +15,12 @@ import java.util.logging.Logger;
  * Opens a file for reading and writing a persistent map.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 class OpenFile implements Runnable {
 
     /** logging */

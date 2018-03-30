@@ -10,7 +10,12 @@ import java.util.List;
  * Make implementing {@link KTableFormat} easier.
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ *
+ * @deprecated The ktable extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 public abstract class AbstractKTableFormat implements KTableFormat {
 
     /** keep track of column widths, in pixels */

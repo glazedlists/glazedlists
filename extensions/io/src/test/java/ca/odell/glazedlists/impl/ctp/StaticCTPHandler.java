@@ -12,7 +12,12 @@ import java.util.List;
 
 /**
  * A CTPHandler where all data is known beforehand.
+ *
+ * @deprecated The io extension and its types are deprecated.
+ *             This extension becomes unsupported and will be removed
+ *             from the official distribution with the next major release.
  */
+@Deprecated
 class StaticCTPHandler implements CTPHandler {
 
     /** the actions to be performed on this connection */
