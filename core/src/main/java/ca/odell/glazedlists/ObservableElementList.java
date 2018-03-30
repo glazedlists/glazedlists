@@ -106,7 +106,7 @@ public class ObservableElementList<E> extends TransformedList<E, E> implements O
      *      elements are added or removed and thus element listeners must be
      *      registered or unregistered. Note that this constructor attachs
      *      this list to the given <code>elementConnector</code> by calling
-     *      {@link Connector#setObservableElementList(ObservableElementList)}.
+     *      {@link Connector#setObservableElementList(ObservableElementChangeHandler)}.
      */
     public ObservableElementList(EventList<E> source, Connector<? super E> elementConnector) {
         super(source);
@@ -368,7 +368,7 @@ public class ObservableElementList<E> extends TransformedList<E, E> implements O
      * {@link Connector} to remove all listeners from their associated list
      * elements and finally removes the reference to this list from the
      * Connector by calling
-     * {@link Connector#setObservableElementList(ObservableElementList)} with a
+     * {@link Connector#setObservableElementList(ObservableElementChangeHandler)} with a
      * <code>null</code> argument.
      *
      * <p><strong><font color="#FF0000">Warning:</font></strong> It is an error

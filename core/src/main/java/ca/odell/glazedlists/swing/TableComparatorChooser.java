@@ -11,17 +11,6 @@ import ca.odell.glazedlists.gui.TableFormat;
 import ca.odell.glazedlists.impl.SortIconFactory;
 import ca.odell.glazedlists.impl.gui.SortingStrategy;
 
-import java.awt.AWTEventMulticaster;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.Comparator;
-
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
@@ -32,6 +21,17 @@ import javax.swing.plaf.UIResource;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
+
+import java.awt.AWTEventMulticaster;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.Comparator;
 
 /**
  * A TableComparatorChooser is a tool that allows the user to sort a table by clicking
@@ -173,9 +173,9 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      * and it is from that AdvancedTableModel that the TableFormat should be
      * extracted. This is, by far, the typical case and so we provide this
      * simpler install method for convenience.
-     * 
+     *
      * <p>Note, that the default table header renderer will be wrapped with a
-     * {@link SortArrowHeaderRenderer}, which takes care of rendering the sort icons.
+     * SortArrowHeaderRenderer, which takes care of rendering the sort icons.
      * Please see the docu of {@link #createSortArrowHeaderRenderer(TableCellRenderer)} for details how this works.
      *
      * @param table the table with headers that can be clicked on
@@ -205,11 +205,11 @@ public class TableComparatorChooser<E> extends AbstractTableComparatorChooser<E>
      * that backs the JTable. As such, it requires the TableFormat as an explicit
      * parameter and expects the TableFormat to be constant (i.e. never changes)
      * for the life of the TableComparatorChooser.
-     * 
+     *
      * <p>Note, that the default table header renderer will be wrapped with a
-     * {@link SortArrowHeaderRenderer}, which takes care of rendering the sort icons.
+     * SortArrowHeaderRenderer, which takes care of rendering the sort icons.
      * Please see the docu of {@link #createSortArrowHeaderRenderer(TableCellRenderer)} for details how this works.
-     * 
+     *
      * @param table the table with headers that can be clicked on
      * @param tableFormat the TableFormat providing the columns for the table
      * @param sortedList the sorted list to update
