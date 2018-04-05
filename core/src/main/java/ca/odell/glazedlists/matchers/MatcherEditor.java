@@ -24,23 +24,33 @@ import java.util.EventObject;
  */
 public interface MatcherEditor<E> {
 
+
+    /**
+     * Create a {@link MatcherEditor} that is fixed on the specified {@link Matcher}.
+     */
+    static <E> MatcherEditor<E> fromMatcher(Matcher<E> matcher) {
+        return new FixedMatcherEditor<>(matcher);
+    }
+
+
+
     /**
      * Add a listener to be notified when this editor's {@link Matcher} changes.
      */
-	public void addMatcherEditorListener(Listener<E> listener);
+    void addMatcherEditorListener(Listener<E> listener);
 
     /**
      * Remove the listener so that it no longer receives notification when the
      * {@link Matcher} changes.
      */
-	public void removeMatcherEditorListener(Listener<E> listener);
+    void removeMatcherEditorListener(Listener<E> listener);
 
 	/**
      * Return the current {@link Matcher} specified by this {@link MatcherEditor}.
      *
      * @return a non-null {@link Matcher}.
 	 */
-	public Matcher<E> getMatcher();
+    Matcher<E> getMatcher();
 
     /**
      * A MatcherEditor.Listener handles changes fired by a {@link MatcherEditor}.
@@ -48,7 +58,7 @@ public interface MatcherEditor<E> {
      * which uses these events to update its state.
      */
 	@FunctionalInterface
-    public interface Listener<E> extends EventListener {
+    interface Listener<E> extends EventListener {
 
        /**
         * Indicates a changes has occurred in the Matcher produced by the
@@ -57,7 +67,7 @@ public interface MatcherEditor<E> {
         * @param matcherEvent a MatcherEditor.Event describing the change in the
         *      Matcher produced by the MatcherEditor
         */
-        public void changedMatcher(Event<E> matcherEvent);
+       void changedMatcher(Event<E> matcherEvent);
     }
 
     /**
@@ -84,7 +94,7 @@ public interface MatcherEditor<E> {
      *   <li> {@link #CHANGED}
      * </ul
      */
-    public class Event<E> extends EventObject {
+    class Event<E> extends EventObject {
 
         /** Indicates the associated Matcher will match anything. */
         public static final int MATCH_ALL = 0;

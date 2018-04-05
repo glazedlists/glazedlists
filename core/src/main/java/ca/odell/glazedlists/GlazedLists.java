@@ -28,7 +28,6 @@ import ca.odell.glazedlists.impl.beans.BeanThresholdEvaluator;
 import ca.odell.glazedlists.impl.beans.StringBeanFunction;
 import ca.odell.glazedlists.impl.filter.StringTextFilterator;
 import ca.odell.glazedlists.impl.functions.ConstantFunction;
-import ca.odell.glazedlists.impl.matchers.FixedMatcherEditor;
 import ca.odell.glazedlists.impl.sort.BeanPropertyComparator;
 import ca.odell.glazedlists.impl.sort.BooleanComparator;
 import ca.odell.glazedlists.impl.sort.ComparableComparator;
@@ -716,9 +715,11 @@ public final class GlazedLists {
 
     /**
      * Get a {@link MatcherEditor} that is fixed on the specified {@link Matcher}.
+     *
+     * @see MatcherEditor#fromMatcher(Matcher)
      */
     public static <E> MatcherEditor<E> fixedMatcherEditor(Matcher<E> matcher) {
-        return new FixedMatcherEditor<>(matcher);
+        return MatcherEditor.fromMatcher(matcher);
     }
 
     // Functions // // // // // // // // // // // // // // // // // // // // //
