@@ -11,7 +11,6 @@ import ca.odell.glazedlists.impl.adt.barcode2.Element;
 import ca.odell.glazedlists.impl.adt.barcode2.SimpleTree;
 import ca.odell.glazedlists.impl.adt.barcode2.SimpleTreeIterator;
 
-import java.util.BitSet;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -43,7 +42,7 @@ import java.util.List;
  *
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
-public class SeparatorList<E> extends TransformedList<E, E> {
+public class SeparatorListOld<E> extends TransformedList<E, E> {
 
     /** delegate to an inner class to insert the separators */
     private SeparatorInjectorList<E> separatorSource;
@@ -73,7 +72,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
      * @param defaultLimit the maximum number of element to display for a group;
      *      extra elements are truncated
      */
-    public SeparatorList(EventList<E> source, Comparator<? super E> comparator, int minimumSizeForSeparator, int defaultLimit) {
+    public SeparatorListOld(EventList<E> source, Comparator<? super E> comparator, int minimumSizeForSeparator, int defaultLimit) {
         super(new SeparatorInjectorList<>(new SortedList<>(source, comparator), defaultLimit));
         this.separatorSource = (SeparatorInjectorList<E>)super.source;
         this.minimumSizeForSeparator = minimumSizeForSeparator;
@@ -293,63 +292,30 @@ public class SeparatorList<E> extends TransformedList<E, E> {
 
             // Now make sure our limits are correct, which they may not be
             // due to the fact that we made a lot of guesses in the first pass.
+            // Note that this is really slow and needs some work for performance
+            // reasons
             listChanges.reset();
+            while(listChanges.next()) {
+                int changeIndex = listChanges.getIndex();
+                int changeType = listChanges.getType();
 
-            // needed to note all the groups tha must be updated
-            final BitSet groups = new BitSet(groupCount);
-            // for all changes, one block at a time
-            // iterate over the blocks to get the groups that must be updated
-            while (listChanges.nextBlock()) {
-                // handle the current block of events
-                final int startIndex = listChanges.getBlockStartIndex();
-                final int endIndex = listChanges.getBlockEndIndex();
-                final int changeType = listChanges.getType();
-                int changeIndex = startIndex;
-                int changeIndexGroup = -1;
-                int group = -1;
+                if(changeType == ListEvent.INSERT) {
+                    int group = separatorSource.insertedSeparators.getColourIndex(changeIndex, true, SEPARATOR);
+                    updateGroup(group, groupCount, true);
+                } else if(changeType == ListEvent.UPDATE) {
+                    int group = separatorSource.insertedSeparators.getColourIndex(changeIndex, true, SEPARATOR);
+                    // it's possible that this impacts the previous group!
+                    if(group > 0) updateGroup(group - 1, groupCount, true);
+                    updateGroup(group, groupCount, true);
+                    // it's possible that this impacts the next group
+                    if(group < groupCount - 1) updateGroup(group + 1, groupCount, true);
 
-                while (changeIndex <= endIndex) {
-                    // 1. get the group of the changed index
-                    switch (changeType) {
-                    case ListEvent.INSERT:
-                    case ListEvent.UPDATE:
-                        changeIndexGroup = separatorSource.insertedSeparators.getColourIndex(changeIndex, true, SEPARATOR);
-                        break;
-                    case ListEvent.DELETE:
-                        // if there is a group that this came from, update it
-                        if (changeIndex < separatorSource.insertedSeparators.size()) {
-                            changeIndexGroup = separatorSource.insertedSeparators.getColourIndex(changeIndex, true, SEPARATOR);
-                        }
-                        break;
-                    default:
-                        throw new IllegalArgumentException("ListEvent Type: " + changeType + " not supported");
+                } else if(changeType == ListEvent.DELETE) {
+                    // if there is a group that this came from, update it
+                    if(changeIndex < separatorSource.insertedSeparators.size()) {
+                        int group = separatorSource.insertedSeparators.getColourIndex(changeIndex, true, SEPARATOR);
+                        updateGroup(group, groupCount, true);
                     }
-
-                    // 2. ++
-                    ++changeIndex;
-
-                    // 3. note only real group changes
-                    if (group != changeIndexGroup) {
-                        group = changeIndexGroup;
-                        groups.set(group);
-                        if (changeType == ListEvent.UPDATE) {
-                            // it's possible that this impacts the previous group!
-                            if (group > 0) {
-                                groups.set(group - 1);
-                            }
-                            // it's possible that this impacts the next group
-                            if (group < (groupCount - 1)) {
-                                groups.set(group + 1);
-                            }
-                        }
-                    }
-                }
-            }
-            // update only the groups that have been changed
-            for (int i = groups.nextSetBit(0); i >= 0; i = groups.nextSetBit(i + 1)) {
-                updateGroup(i, groupCount, true);
-                if (i == Integer.MAX_VALUE) {
-                    break; // or (i+1) would overflow
                 }
             }
         }
@@ -443,7 +409,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
          * useful to collapse a group (limit of 0), cap the elements of a group
          * (limit of 5) or reverse those actions.
          *
-         * <p>This method requires the write lock of the {@link SeparatorList} to be
+         * <p>This method requires the write lock of the {@link SeparatorListOld} to be
          * held during invocation.
          */
         public void setLimit(int limit);
@@ -451,7 +417,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
         /**
          * Get the {@link List} of all elements in this group.
          *
-         * <p>This method requires the read lock of the {@link SeparatorList}
+         * <p>This method requires the read lock of the {@link SeparatorListOld}
          * to be held during invocation.
          */
         public List<E> getGroup();
@@ -906,7 +872,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
 
             /**
              * Update the cached {@link #first()} and {@link #size()} values, so that they
-             * can be retrieved without the {@link SeparatorList}'s lock.
+             * can be retrieved without the {@link SeparatorListOld}'s lock.
              */
             public void updateCachedValues() {
                 if(node != null) {

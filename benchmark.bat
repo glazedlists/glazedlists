@@ -2,8 +2,7 @@
 
 rem benchmarks to include, regexp
 rem SET INCLUDE=BasicEventListBenchmark.testAdd
-SET INCLUDE="ThreadProxyBenchmark"
-rem SET INCLUDE="SortedListBenchmark"
+SET INCLUDE="SeparatorListBenchmark"
 
 
 rem overrides annotations for warmup-iteration, iterations and fork count
