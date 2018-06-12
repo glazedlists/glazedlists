@@ -8,14 +8,18 @@ import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * A ReadOnlyListTest tests the functionality of the ReadOnlyList
@@ -170,6 +174,27 @@ public class ReadOnlyListTest {
 
         try {
             readOnly.set(0, null);
+            fail();
+        } catch (UnsupportedOperationException e) {
+            // expected
+        }
+
+        try {
+            readOnly.replaceAll(UnaryOperator.identity());
+            fail();
+        } catch (UnsupportedOperationException e) {
+            // expected
+        }
+
+        try {
+            readOnly.removeIf(e -> true);
+            fail();
+        } catch (UnsupportedOperationException e) {
+            // expected
+        }
+
+        try {
+            readOnly.sort(Comparator.naturalOrder());
             fail();
         } catch (UnsupportedOperationException e) {
             // expected

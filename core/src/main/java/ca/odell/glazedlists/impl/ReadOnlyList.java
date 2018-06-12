@@ -9,7 +9,10 @@ import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.event.ListEvent;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
 /**
  * An {@link EventList} that does not allow writing operations.
@@ -175,6 +178,24 @@ public final class ReadOnlyList<E> extends TransformedList<E, E> {
     /** @throws UnsupportedOperationException since ReadOnlyList cannot be modified */
     @Override
     public E set(int index, E value) {
+        throw new UnsupportedOperationException("ReadOnlyList cannot be modified");
+    }
+
+    /** @throws UnsupportedOperationException since ReadOnlyList cannot be modified */
+    @Override
+    public void replaceAll(UnaryOperator<E> operator) {
+        throw new UnsupportedOperationException("ReadOnlyList cannot be modified");
+    }
+
+    /** @throws UnsupportedOperationException since ReadOnlyList cannot be modified */
+    @Override
+    public boolean removeIf(Predicate<? super E> filter) {
+        throw new UnsupportedOperationException("ReadOnlyList cannot be modified");
+    }
+
+    /** @throws UnsupportedOperationException since ReadOnlyList cannot be modified */
+    @Override
+    public void sort(Comparator<? super E> c) {
         throw new UnsupportedOperationException("ReadOnlyList cannot be modified");
     }
 }
