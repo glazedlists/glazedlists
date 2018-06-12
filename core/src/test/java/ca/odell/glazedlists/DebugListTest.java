@@ -4,17 +4,24 @@
 package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class DebugListTest {
 
@@ -24,31 +31,36 @@ public class DebugListTest {
     private DebugList<String> list;
 
     private final List<Runnable> READ_OPERATIONS = Arrays.asList(
-        new Get(0),
-        new Size(),
-        new Contains("one"),
-        new ContainsAll(Arrays.asList("one", "five")),
-        new IndexOf("two"),
-        new LastIndexOf("three"),
-        new IsEmpty(),
-        new ToArray(),
-        new ToArray_Array(new Object[5]),
-        new Equals(null),
-        new HashCode(),
-        new ToString()
+            () -> list.get(0),
+            () -> list.size(),
+            () -> list.contains("one"),
+            () -> list.containsAll(Arrays.asList("one", "five")),
+            () -> list.indexOf("two"),
+            () -> list.lastIndexOf("three"),
+            () -> list.isEmpty(),
+            () -> list.toArray(),
+            () -> list.toArray(new Object[5]),
+            () -> list.equals(null),
+            () -> list.hashCode(),
+            () -> list.toString(),
+            () -> list.forEach(l -> {
+            })
     );
 
     private final List<Runnable> WRITE_OPERATIONS = Arrays.asList(
-        new Add("six"),
-        new Remove("six"),
-        new AddAll(Arrays.asList("six", "seven", "eight")),
-        new RemoveAll(Arrays.asList("six", "seven", "eight")),
-        new AddAll_Index(0, Arrays.asList("six", "seven", "eight")),
-        new RetainAll(Arrays.asList("one", "two", "three")),
-        new Set(0, "four"),
-        new Add_Index(1, "five"),
-        new Remove_Index(0),
-        new Clear()
+            () -> list.add("six"),
+            () -> list.remove("six"),
+            () -> list.addAll(Arrays.asList("six", "seven", "eight")),
+            () -> list.removeAll(Arrays.asList("six", "seven", "eight")),
+            () -> list.addAll(0, Arrays.asList("six", "seven", "eight")),
+            () -> list.retainAll(Arrays.asList("one", "two", "three")),
+            () -> list.set(0, "four"),
+            () -> list.add(1, "five"),
+            () -> list.remove(0),
+            () -> list.removeIf(elem -> elem.length() > 3),
+            () -> list.replaceAll(String::toUpperCase),
+            () -> list.sort(Comparator.naturalOrder()),
+            () -> list.clear()
     );
 
     @Before
@@ -255,188 +267,6 @@ public class DebugListTest {
         } catch (IllegalStateException e) {
             assertEquals("DebugList detected a failure to acquire the writeLock prior to a write operation", e.getMessage());
         }
-    }
-
-    //
-    // Read Operations
-    //
-
-    private class Get implements Runnable {
-        private final int index;
-
-        public Get(int index) { this.index = index; }
-        @Override
-        public void run() { list.get(index); }
-    }
-
-    private class Size implements Runnable {
-        @Override
-        public void run() { list.size(); }
-    }
-
-    private class Contains implements Runnable {
-        private final Object o;
-
-        public Contains(Object o) { this.o = o; }
-        @Override
-        public void run() { list.contains(o); }
-    }
-
-    private class ContainsAll implements Runnable {
-        private final Collection<?> collection;
-
-        public ContainsAll(Collection<?> collection) { this.collection = collection; }
-        @Override
-        public void run() { list.containsAll(collection); }
-    }
-
-    private class IndexOf implements Runnable {
-        private final Object o;
-
-        public IndexOf(Object o) { this.o = o; }
-        @Override
-        public void run() { list.indexOf(o); }
-    }
-
-    private class LastIndexOf implements Runnable {
-        private final Object o;
-
-        public LastIndexOf(Object o) { this.o = o; }
-        @Override
-        public void run() { list.lastIndexOf(o); }
-    }
-
-    private class IsEmpty implements Runnable {
-        @Override
-        public void run() { list.isEmpty(); }
-    }
-
-    private class ToArray implements Runnable {
-        @Override
-        public void run() { list.toArray(); }
-    }
-
-    private class ToArray_Array implements Runnable {
-        private final Object[] array;
-
-        public ToArray_Array(Object[] array) { this.array = array; }
-        @Override
-        public void run() { list.toArray(array); }
-    }
-
-    private class Equals implements Runnable {
-        private final Object o;
-
-        public Equals(Object o) { this.o = o; }
-        @Override
-        public void run() { list.equals(o); }
-    }
-
-    private class HashCode implements Runnable {
-        @Override
-        public void run() { list.hashCode(); }
-    }
-
-    private class ToString implements Runnable {
-        @Override
-        public void run() { list.toString(); }
-    }
-
-    //
-    // Write Operations
-    //
-
-    private class Add implements Runnable {
-        private final String o;
-
-        public Add(String o) { this.o = o; }
-        @Override
-        public void run() { list.add(o); }
-    }
-
-    private class Remove implements Runnable {
-        private final String o;
-
-        public Remove(String o) { this.o = o; }
-        @Override
-        public void run() { list.remove(o); }
-    }
-
-    private class AddAll implements Runnable {
-        private final Collection<String> collection;
-
-        public AddAll(Collection<String> collection) {
-            this.collection = collection;
-        }
-        @Override
-        public void run() { list.addAll(collection); }
-    }
-
-    private class AddAll_Index implements Runnable {
-        private final int index;
-        private final Collection<String> collection;
-
-        public AddAll_Index(int index, Collection<String> collection) {
-            this.index = index;
-            this.collection = collection;
-        }
-        @Override
-        public void run() { list.addAll(index, collection); }
-    }
-
-    private class RemoveAll implements Runnable {
-        private final Collection<?> collection;
-
-        public RemoveAll(Collection<?> collection) { this.collection = collection; }
-        @Override
-        public void run() { list.removeAll(collection); }
-    }
-
-    private class RetainAll implements Runnable {
-        private final Collection<?> collection;
-
-        public RetainAll(Collection<?> collection) { this.collection = collection; }
-        @Override
-        public void run() { list.retainAll(collection); }
-    }
-
-    private class Clear implements Runnable {
-        @Override
-        public void run() { list.clear(); }
-    }
-
-    private class Set implements Runnable {
-        private final int index;
-        private final String o;
-
-        public Set(int index, String o) {
-            this.index = index;
-            this.o = o;
-        }
-        @Override
-        public void run() { list.set(index, o); }
-    }
-
-    private class Add_Index implements Runnable {
-        private final int index;
-        private final String o;
-
-        public Add_Index(int index, String o) {
-            this.index = index;
-            this.o = o;
-        }
-        @Override
-        public void run() { list.add(index, o); }
-    }
-
-    private class Remove_Index implements Runnable {
-        private final int index;
-
-        public Remove_Index(int index) {
-            this.index = index;
-        }
-        @Override
-        public void run() { list.remove(index); }
     }
 
     private static class RecorderRunnable implements Runnable {

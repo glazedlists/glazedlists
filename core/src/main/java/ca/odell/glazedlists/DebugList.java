@@ -10,7 +10,16 @@ import ca.odell.glazedlists.util.concurrent.Lock;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
 /**
  * DebugList is meant to be used as a drop-in replacement for
@@ -293,6 +302,16 @@ public class DebugList<E> extends AbstractEventList<E> {
         }
     }
 
+    @Override
+    public void forEach(Consumer<? super E> action) {
+        beforeReadOperation();
+        try {
+            delegate.forEach(action);
+        } finally {
+            afterReadOperation();
+        }
+    }
+
     /** {@inheritDoc} */
     @Override
     public Object[] toArray() {
@@ -348,6 +367,16 @@ public class DebugList<E> extends AbstractEventList<E> {
         }
     }
 
+    @Override
+    public boolean removeIf(Predicate<? super E> filter) {
+        beforeWriteOperation();
+        try {
+            return delegate.removeIf(filter);
+        } finally {
+            afterWriteOperation();
+        }
+    }
+
     /** {@inheritDoc} */
     @Override
     public boolean addAll(Collection<? extends E> values) {
@@ -387,6 +416,26 @@ public class DebugList<E> extends AbstractEventList<E> {
         beforeWriteOperation();
         try {
             return delegate.retainAll(values);
+        } finally {
+            afterWriteOperation();
+        }
+    }
+
+    @Override
+    public void replaceAll(UnaryOperator<E> operator) {
+        beforeWriteOperation();
+        try {
+            delegate.replaceAll(operator);
+        } finally {
+            afterWriteOperation();
+        }
+    }
+
+    @Override
+    public void sort(Comparator<? super E> c) {
+        beforeWriteOperation();
+        try {
+            delegate.sort(c);
         } finally {
             afterWriteOperation();
         }
