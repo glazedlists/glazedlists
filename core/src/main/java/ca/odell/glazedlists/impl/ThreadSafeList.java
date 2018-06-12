@@ -9,33 +9,37 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
 /**
  * An {@link EventList} that obtains a {@link ReadWriteLock} for all operations.
- *
- * <p>This provides some support for sharing {@link EventList}s between multiple
- * threads.
- *
- * <p>Using a {@link ThreadSafeList} for concurrent access to lists can be expensive
- * because a {@link ReadWriteLock} is aquired and released for every operation.
- *
- * <p><strong><font color="#FF0000">Warning:</font></strong> Although this class
- * provides thread safe access, it does not provide any guarantees that changes
- * will not happen between method calls. For example, the following code is unsafe
- * because the source {@link EventList} may change between calls to {@link #size() size()}
- * and {@link #get(int) get()}:
- * <pre> EventList source = ...
+ * <p>
+ * This provides some support for sharing {@link EventList}s between multiple threads.
+ * <p>
+ * Using a {@link ThreadSafeList} for concurrent access to lists can be expensive because a
+ * {@link ReadWriteLock} is aquired and released for every operation.
+ * <p>
+ * <strong><font color="#FF0000">Warning:</font></strong> Although this class provides thread safe
+ * access, it does not provide any guarantees that changes will not happen between method calls. For
+ * example, the following code is unsafe because the source {@link EventList} may change between
+ * calls to {@link #size() size()} and {@link #get(int) get()}:
+ * 
+ * <pre>
+ *  EventList source = ...
  * ThreadSafeList myList = new ThreadSafeList(source);
  * if(myList.size() > 3) {
  *   System.out.println(myList.get(3));
- * }</pre>
- *
- * <p><strong><font color="#FF0000">Warning:</font></strong> The objects returned
- * by {@link #iterator() iterator()}, {@link #subList(int,int) subList()}, etc. are
- * not thread safe.
+ * }
+ * </pre>
+ * <p>
+ * <strong><font color="#FF0000">Warning:</font></strong> The objects returned by {@link #iterator()
+ * iterator()}, {@link #subList(int,int) subList()}, {@link #stream()}, {@link #parallelStream()},
+ * {@link #spliterator()} etc. are not thread safe.
  *
  * @see ca.odell.glazedlists.util.concurrent
- *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */
 public final class ThreadSafeList<E> extends TransformedList<E, E> {
@@ -156,6 +160,16 @@ public final class ThreadSafeList<E> extends TransformedList<E, E> {
         getReadWriteLock().readLock().lock();
         try {
             return source.isEmpty();
+        } finally {
+            getReadWriteLock().readLock().unlock();
+        }
+    }
+
+    @Override
+    public void forEach(Consumer<? super E> action) {
+        getReadWriteLock().readLock().lock();
+        try {
+            source.forEach(action);
         } finally {
             getReadWriteLock().readLock().unlock();
         }
@@ -288,6 +302,36 @@ public final class ThreadSafeList<E> extends TransformedList<E, E> {
         getReadWriteLock().writeLock().lock();
         try {
             return source.remove(index);
+        } finally {
+            getReadWriteLock().writeLock().unlock();
+        }
+    }
+
+    @Override
+    public boolean removeIf(Predicate<? super E> filter) {
+        getReadWriteLock().writeLock().lock();
+        try {
+            return source.removeIf(filter);
+        } finally {
+            getReadWriteLock().writeLock().unlock();
+        }
+    }
+
+    @Override
+    public void replaceAll(UnaryOperator<E> operator) {
+        getReadWriteLock().writeLock().lock();
+        try {
+            source.replaceAll(operator);
+        } finally {
+            getReadWriteLock().writeLock().unlock();
+        }
+    }
+
+    @Override
+    public void sort(Comparator<? super E> c) {
+        getReadWriteLock().writeLock().lock();
+        try {
+            source.sort(c);
         } finally {
             getReadWriteLock().writeLock().unlock();
         }
