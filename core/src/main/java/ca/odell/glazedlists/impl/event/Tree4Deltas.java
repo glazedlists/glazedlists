@@ -134,8 +134,7 @@ public class Tree4Deltas<E> {
      */
     @Deprecated
     public void targetUpdate(int startIndex, int endIndex, E oldValue, E newValue) {
-        this.addTargetChange(startIndex, ListEvent.UPDATE, Collections.nCopies(endIndex - startIndex, ObjectChange.create
-                (oldValue, newValue)));
+        this.addTargetChange(startIndex, ListEvent.UPDATE, ObjectChange.create(endIndex - startIndex, oldValue, newValue));
     }
 
     /**
@@ -152,8 +151,7 @@ public class Tree4Deltas<E> {
      */
     @Deprecated
     public void targetInsert(int startIndex, int endIndex, E newValue) {
-        this.addTargetChange(startIndex, ListEvent.INSERT, Collections.nCopies(endIndex - startIndex, ObjectChange.create
-                (ListEvent.unknownValue(), newValue)));
+        this.addTargetChange(startIndex, ListEvent.INSERT, ObjectChange.create(endIndex - startIndex, ListEvent.unknownValue(), newValue));
     }
 
     /**
@@ -168,8 +166,7 @@ public class Tree4Deltas<E> {
      */
     @Deprecated
     public void targetDelete(int startIndex, int endIndex, E value) {
-        this.addTargetChange(startIndex, ListEvent.DELETE, Collections.nCopies(endIndex - startIndex, ObjectChange.create
-                (value, ListEvent.unknownValue())));
+        this.addTargetChange(startIndex, ListEvent.DELETE, ObjectChange.create(endIndex - startIndex, value, ListEvent.unknownValue()));
     }
 
     public void sourceInsert(int sourceIndex) {
@@ -342,7 +339,7 @@ public class Tree4Deltas<E> {
             final Element<ObjectChange<E>> node = treeIterator.node();
             final int size = treeIterator.nodeSize(ALL_INDICES);
             if (size == 1) return Collections.singletonList(node.get());
-            return Collections.nCopies(size, node.get());
+            return ObjectChange.create(size, node.get());
         }
     }
 }

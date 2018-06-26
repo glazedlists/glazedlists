@@ -31,8 +31,7 @@ public class BlockSequence<E> {
      * @param endIndex the last index, exclusive
      */
     public boolean update(int startIndex, int endIndex) {
-        return this.addChange(startIndex, ListEvent.UPDATE, Collections.nCopies(endIndex-startIndex, ObjectChange
-                .unknownChange()));
+        return this.addChange(startIndex, ListEvent.UPDATE, ObjectChange.unknownChange(endIndex-startIndex));
     }
 
     /**
@@ -40,8 +39,7 @@ public class BlockSequence<E> {
      * @param endIndex the last index, exclusive
      */
     public boolean insert(int startIndex, int endIndex) {
-        return this.addChange(startIndex, ListEvent.INSERT, Collections.nCopies(endIndex-startIndex, ObjectChange
-                .unknownChange()));
+        return this.addChange(startIndex, ListEvent.INSERT, ObjectChange.unknownChange(endIndex-startIndex));
     }
 
     /**
@@ -49,8 +47,7 @@ public class BlockSequence<E> {
      * @param endIndex the last index, exclusive
      */
     public boolean delete(int startIndex, int endIndex) {
-        return this.addChange(startIndex, ListEvent.DELETE, Collections.nCopies(endIndex-startIndex, ObjectChange
-                .unknownChange()));
+        return this.addChange(startIndex, ListEvent.DELETE, ObjectChange.unknownChange(endIndex-startIndex));
     }
 
     /**
@@ -63,8 +60,7 @@ public class BlockSequence<E> {
      */
     @Deprecated
     public boolean addChange(int type, int startIndex, int endIndex, E oldValue, E newValue) {
-        return this.addChange(startIndex, type, Collections.nCopies(endIndex-startIndex, ObjectChange.create(oldValue,
-                newValue)));
+        return this.addChange(startIndex, type, ObjectChange.create(endIndex-startIndex, oldValue, newValue));
     }
 
     public boolean addChange(int startIndex, int changeType, List<ObjectChange<E>> events) {
