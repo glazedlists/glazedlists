@@ -4,9 +4,11 @@
 package ca.odell.glazedlists.impl.event;
 
 import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ObjectChange;
 import ca.odell.glazedlists.impl.adt.IntArrayList;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -19,20 +21,18 @@ public class BlockSequence<E> {
 
     /** the start indices of the change blocks, inclusive */
     private IntArrayList starts = new IntArrayList();
-    /** the end indices of the change blocks, exclusive */
-    private IntArrayList ends = new IntArrayList();
     /** the change types */
     private IntArrayList types = new IntArrayList();
     /** the impacted values */
-    private List<E> oldValues = new ArrayList<>();
-    private List<E> newValues = new ArrayList<>();
+    private List<List<ObjectChange<E>>> values = new ArrayList<>();
 
     /**
      * @param startIndex the first updated element, inclusive
      * @param endIndex the last index, exclusive
      */
     public boolean update(int startIndex, int endIndex) {
-        return addChange(ListEvent.UPDATE, startIndex, endIndex, ListEvent.<E>unknownValue(), ListEvent.<E>unknownValue());
+        return this.addChange(startIndex, ListEvent.UPDATE, Collections.nCopies(endIndex-startIndex, ObjectChange
+                .unknownChange()));
     }
 
     /**
@@ -40,7 +40,8 @@ public class BlockSequence<E> {
      * @param endIndex the last index, exclusive
      */
     public boolean insert(int startIndex, int endIndex) {
-        return addChange(ListEvent.INSERT, startIndex, endIndex, ListEvent.<E>unknownValue(), ListEvent.<E>unknownValue());
+        return this.addChange(startIndex, ListEvent.INSERT, Collections.nCopies(endIndex-startIndex, ObjectChange
+                .unknownChange()));
     }
 
     /**
@@ -48,7 +49,8 @@ public class BlockSequence<E> {
      * @param endIndex the last index, exclusive
      */
     public boolean delete(int startIndex, int endIndex) {
-        return addChange(ListEvent.DELETE, startIndex, endIndex, ListEvent.<E>unknownValue(), ListEvent.<E>unknownValue());
+        return this.addChange(startIndex, ListEvent.DELETE, Collections.nCopies(endIndex-startIndex, ObjectChange
+                .unknownChange()));
     }
 
     /**
@@ -57,50 +59,55 @@ public class BlockSequence<E> {
      *
      * @return true if the change was successfully applied, or <code>false</code>
      *      if no change was made because this change could not be handled.
+     * @deprecated  use {@link #addChange(int, int, List)}
      */
+    @Deprecated
     public boolean addChange(int type, int startIndex, int endIndex, E oldValue, E newValue) {
+        return this.addChange(startIndex, type, Collections.nCopies(endIndex-startIndex, ObjectChange.create(oldValue,
+                newValue)));
+    }
+
+    public boolean addChange(int startIndex, int changeType, List<ObjectChange<E>> events) {
         // remind ourselves of the most recent change
         int lastType;
         int lastStartIndex;
         int lastEndIndex;
         int lastChangedIndex;
         int size = types.size();
-        E lastOldValue;
-        E lastNewValue;
+        List<ObjectChange<E>> lastChange;
         if(size == 0) {
             lastType = -1;
             lastStartIndex = -1;
             lastEndIndex = 0;
             lastChangedIndex = 0;
-            lastOldValue = ListEvent.<E>unknownValue();
-            lastNewValue = ListEvent.<E>unknownValue();
         } else {
             lastType = types.get(size - 1);
             lastStartIndex = starts.get(size - 1);
-            lastEndIndex = ends.get(size - 1);
+            lastChange = values.get(size-1);
+            lastEndIndex = lastStartIndex + lastChange.size();
             lastChangedIndex = (lastType == ListEvent.DELETE) ? lastStartIndex : lastEndIndex;
-            lastOldValue = (lastType == ListEvent.DELETE) ? oldValues.get(size - 1) : ListEvent.<E>unknownValue();
-            lastNewValue = newValues.get(size - 1);
         }
 
         // this change breaks the linear-ordering requirement, convert
         // to a more powerful list blocks manager
         if(startIndex < lastChangedIndex) {
             return false;
-
-        // concatenate this change on to the previous one
-        } else if(lastChangedIndex == startIndex && lastType == type && oldValue == lastOldValue && newValue == lastNewValue) {
-            int newLength = (lastEndIndex - lastStartIndex) + (endIndex - startIndex);
-            ends.set(size - 1, lastStartIndex + newLength);
+            // concatenate this change on to the previous one
+        } else if(lastChangedIndex == startIndex && lastType == changeType) {
+            try {
+                values.get(size - 1).addAll(events);
+            }catch(UnsupportedOperationException ex){
+                final List<ObjectChange<E>> newList = new ArrayList<>(size + events.size());
+                newList.addAll(values.get(size-1));
+                newList.addAll(events);
+                values.set(size-1, newList);
+            }
             return true;
-
-        // add this change to the end of the list
+            // add this change to the end of the list
         } else {
             starts.add(startIndex);
-            ends.add(endIndex);
-            types.add(type);
-            oldValues.add(oldValue);
-            newValues.add(newValue);
+            types.add(changeType);
+            values.add(events);
             return true;
         }
     }
@@ -111,10 +118,8 @@ public class BlockSequence<E> {
 
     public void reset() {
         starts.clear();
-        ends.clear();
         types.clear();
-        oldValues.clear();
-        newValues.clear();
+        values.clear();
     }
 
     public Iterator iterator() {
@@ -138,7 +143,7 @@ public class BlockSequence<E> {
 
             // write the range
             int start = starts.get(i);
-            int end = ends.get(i);
+            int end = start + values.get(i).size();
             result.append(start);
             if(end != start) {
                 result.append("-");
@@ -161,6 +166,8 @@ public class BlockSequence<E> {
         private int endIndex = -1;
         private int type = -1;
 
+        private List<ObjectChange<E>> blockChanges = null;
+
         public Iterator copy() {
             Iterator result = new Iterator();
             result.blockIndex = blockIndex;
@@ -168,6 +175,7 @@ public class BlockSequence<E> {
             result.startIndex = startIndex;
             result.endIndex = endIndex;
             result.type = type;
+            result.blockChanges = blockChanges;
             return result;
         }
 
@@ -192,11 +200,23 @@ public class BlockSequence<E> {
             if(type == -1) throw new IllegalStateException("The ListEvent is not currently in a state to return a type");
             return type;
         }
+
         public E getOldValue() {
-            return oldValues.get(blockIndex);
+            if(blockChanges == null) throw new IllegalStateException("The ListEvent is not currently in a state to " +
+                    "return a old value");
+            return this.blockChanges.get(this.offset).getOldValue();
         }
+
         public E getNewValue() {
-            return newValues.get(blockIndex);
+            if(blockChanges == null) throw new IllegalStateException("The ListEvent is not currently in a state to " +
+                    "return a new value");
+            return this.blockChanges.get(this.offset).getNewValue();
+        }
+
+        public List<ObjectChange<E>> getBlockChanges(){
+            if(blockChanges == null) throw new IllegalStateException("The ListEvent is not currently in a state to " +
+                    "return a new value");
+            return this.blockChanges;
         }
 
         /**
@@ -208,16 +228,17 @@ public class BlockSequence<E> {
                 offset++;
                 return true;
 
-            // increment to the next block
+                // increment to the next block
             } else if(blockIndex + 1 < types.size()) {
                 blockIndex++;
                 offset = 0;
                 startIndex = starts.get(blockIndex);
-                endIndex = ends.get(blockIndex);
+                blockChanges = Collections.unmodifiableList(values.get(blockIndex));
+                endIndex = startIndex + blockChanges.size();
                 type = types.get(blockIndex);
                 return true;
 
-            // no more left
+                // no more left
             } else {
                 return false;
             }
@@ -232,11 +253,13 @@ public class BlockSequence<E> {
                 blockIndex++;
                 offset = 0;
                 startIndex = starts.get(blockIndex);
-                endIndex = ends.get(blockIndex);
+                blockChanges = Collections.unmodifiableList(values.get(blockIndex));
+                endIndex = startIndex + blockChanges.size();
                 type = types.get(blockIndex);
+                blockChanges = values.get(blockIndex);
                 return true;
 
-            // no more left
+                // no more left
             } else {
                 return false;
             }

@@ -7,6 +7,8 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.impl.event.BlockSequence;
 import ca.odell.glazedlists.impl.event.Tree4Deltas;
 
+import java.util.List;
+
 /**
  * A list event that iterates {@link Tree4Deltas} as the
  * datastore.
@@ -90,7 +92,7 @@ class Tree4DeltasListEvent<E> extends ListEvent<E> {
     @Override
     public int getBlockStartIndex() {
         if(linearIterator != null) return linearIterator.getBlockStart();
-        else return deltasIterator.getIndex();
+        else return deltasIterator.getStartIndex();
     }
 
     @Override
@@ -119,8 +121,20 @@ class Tree4DeltasListEvent<E> extends ListEvent<E> {
 
     @Override
     public E getNewValue() {
-        // TODO(jessewilson):
-        return ListEvent.<E>unknownValue();
+        if(linearIterator != null) {
+            return (E)linearIterator.getNewValue();
+        } else {
+            return (E)deltasIterator.getNewValue();
+        }
+    }
+
+    @Override
+    public List<ObjectChange<E>> getBlockChanges() {
+        if(linearIterator != null) {
+            return (List<ObjectChange<E>>)linearIterator.getBlockChanges();
+        } else {
+            return (List<ObjectChange<E>>)deltasIterator.getBlockChanges();
+        }
     }
 
     @Override
