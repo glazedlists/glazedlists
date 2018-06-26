@@ -143,8 +143,7 @@ public final class ListEventAssembler<E> {
     public void elementDeleted(int index, E oldValue) {
         addChange(ListEvent.DELETE, index,  ObjectChange.create(oldValue, ListEvent.unknownValue()));
     }
-
-
+    
     /**
      * @deprecated replaced with {@link #elementUpdated(int, Object, Object)}.
      */
