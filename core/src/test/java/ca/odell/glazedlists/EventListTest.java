@@ -3,11 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEventPublisher;
@@ -17,8 +12,6 @@ import ca.odell.glazedlists.matchers.Matchers;
 import ca.odell.glazedlists.util.concurrent.LockFactory;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
-import org.junit.Test;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,6 +20,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import org.junit.Assume;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Verifies that EventList matches the List API.
@@ -803,7 +804,9 @@ public class EventListTest {
     }
 
     @Test
-    public void testRemoveInvalidListener() {
+    public void testRemoveNonExistentListenerWithListenerCheck() {
+        Assume.assumeTrue(System.getProperty("glazedlists.compat.nonexistent_listener_check") != null);
+
     	final EventList<String> source = GlazedLists.eventListOf("TEST");
     	final GlazedListsTests.ListEventCounter<String> eventCounter =
                 new GlazedListsTests.ListEventCounter<>();
@@ -813,6 +816,15 @@ public class EventListTest {
     	} catch (IllegalArgumentException ex) {
     		// expected
     	}
+    }
+
+    @Test
+    public void testRemoveNonExistentListenerWithoutListenerCheck() {
+        Assume.assumeTrue(System.getProperty("glazedlists.compat.nonexistent_listener_check") == null);
+
+        final BasicEventList<String> source = new BasicEventList<>();
+        ListEventListener<String> listChangeListener = evt -> System.out.println(evt);
+        source.removeListEventListener(listChangeListener);
     }
 
     @Test
