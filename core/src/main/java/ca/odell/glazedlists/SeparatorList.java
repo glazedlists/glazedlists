@@ -243,7 +243,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
                         break;
                     }
                 }
-                updates.reorder(reorderMap);
+                updates.reorder(reorderMap, ObjectChange.getChanges(this, reorderMap));
 
             // fire insert/delete pairs. This loses selection because currently
             // Glazed Lists lacks the ability to fire a mix of move and insert/update
@@ -654,7 +654,7 @@ public class SeparatorList<E> extends TransformedList<E, E> {
                     // adjust this change within the current group
                     reorderMap[i + group + 1] = previousIndex + group + 1;
                 }
-                updates.reorder(reorderMap);
+                updates.reorder(reorderMap, ObjectChange.getChanges(this, reorderMap));
 
             // handle regular changes by adjusting the separators via our grouper
             } else {

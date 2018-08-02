@@ -5,6 +5,7 @@ package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventAssembler;
+import ca.odell.glazedlists.event.ObjectChange;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -279,7 +280,7 @@ public final class FunctionList<S, E> extends TransformedList<S, E> implements R
                 final int sourceIndex = reorderMap[i];
                 mappedElements.set(i, originalMappedElements.get(sourceIndex));
             }
-            updates.reorder(reorderMap);
+            updates.reorder(reorderMap, ObjectChange.getChanges(this, reorderMap));
 
         } else {
             while (listChanges.next()) {

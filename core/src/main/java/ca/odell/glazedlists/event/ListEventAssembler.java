@@ -203,7 +203,7 @@ public final class ListEventAssembler<E> {
      */
     public void addChange(int type, int startIndex, List<ObjectChange<E>> changeEvents) {
         // try the linear holder first
-        if(useListBlocksLinear) {
+        if (useListBlocksLinear) {
             final boolean success = blockSequence.addChange(startIndex, type, changeEvents);
             if (success)
                 return;
@@ -219,17 +219,15 @@ public final class ListEventAssembler<E> {
      * Sets the current event as a reordering. Reordering events cannot be
      * combined with other events.
      */
-    public void reorder(int[] reorderMap) {
-        if(!isEventEmpty()) throw new IllegalStateException("Cannot combine reorder with other change events");
+    public void reorder(int[] reorderMap, List<ObjectChange<E>> changes){
         // can't reorder an empty list, see bug 91
         if(reorderMap.length == 0) return;
-        final List<ObjectChange<E>> changes = new ArrayList<>(reorderMap.length);
-        for(int i = 0; i<reorderMap.length; i++){
-            changes.add(ObjectChange.create(this.sourceList.get(reorderMap[i]), this.sourceList.get(i)));
-        }
+        // Reordering events cannot be combined with other events.
+        if(!isEventEmpty()) throw new IllegalStateException("Cannot combine reorder with other change events");
         elementUpdated(0, changes);
         this.reorderMap = reorderMap;
     }
+
     /**
      * Forwards the event. This is a convenience method that does the following:
      * <br>1. beginEvent()
@@ -246,15 +244,16 @@ public final class ListEventAssembler<E> {
     public void forwardEvent(ListEvent<?> listChanges) {
         beginEvent(false);
         this.reorderMap = null;
-        if(isEventEmpty() && listChanges.isReordering()) {
-            reorder(listChanges.getReorderMap());
+        final ListEvent<E> cEvent = (ListEvent<E>)listChanges;
+        if(isEventEmpty() && cEvent.isReordering()) {
+            cEvent.nextBlock();
+            reorder(cEvent.getReorderMap(), cEvent.getBlockChanges());
         } else {
-            final ListEvent<E> cEvent = (ListEvent<E>)listChanges;
-            while(listChanges.nextBlock()){
+            while(cEvent.nextBlock()){
                 List<ObjectChange<E>> changes = cEvent.getBlockChanges();
-                addChange(listChanges.getType(), listChanges.getBlockStartIndex(), changes);
+                addChange(cEvent.getType(), cEvent.getBlockStartIndex(), changes);
             }
-            listChanges.reset();
+            cEvent.reset();
         }
         commitEvent();
     }

@@ -6,6 +6,7 @@ package ca.odell.glazedlists;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventAssembler;
 import ca.odell.glazedlists.event.ListEventListener;
+import ca.odell.glazedlists.event.ObjectChange;
 import ca.odell.glazedlists.impl.adt.Barcode;
 import ca.odell.glazedlists.impl.adt.BarcodeIterator;
 import ca.odell.glazedlists.matchers.Matcher;
@@ -851,12 +852,16 @@ public class ListSelection<E> implements ListEventListener<E> {
     }
 
     private void addSelectedReorder(int[] selectReorderMap) {
-        if(selectedList != null)  selectedList.updates().reorder(selectReorderMap);
-        if(selectedToggleList != null) selectedToggleList.updates().reorder(selectReorderMap);
+        if(selectedList != null)  selectedList.updates().reorder(selectReorderMap,
+                ObjectChange.getChanges(selectedList, selectReorderMap));
+        if(selectedToggleList != null) selectedToggleList.updates().reorder(selectReorderMap,
+                ObjectChange.getChanges(selectedToggleList, selectReorderMap));
     }
     private void addDeselectedReorder(int[] deselectReorderMap) {
-        if(deselectedList != null) deselectedList.updates().reorder(deselectReorderMap);
-        if(deselectedToggleList != null) deselectedToggleList.updates().reorder(deselectReorderMap);
+        if(deselectedList != null) deselectedList.updates().reorder(deselectReorderMap,
+                ObjectChange.getChanges(deselectedList, deselectReorderMap));
+        if(deselectedToggleList != null) deselectedToggleList.updates().reorder(deselectReorderMap,
+                ObjectChange.getChanges(deselectedToggleList, deselectReorderMap));
     }
 
     private void addSelectEvent(BarcodeIterator i) {

@@ -83,6 +83,16 @@ public class ObjectChange<T> {
         return changes;
     }
 
+    public static <E> List<ObjectChange<E>> getChanges(List<E> values, int[] reorderMap){
+        // can't reorder an empty list, see bug 91
+        if(reorderMap.length == 0) return Collections.emptyList();
+        final List<ObjectChange<E>> changes = new ArrayList<>(reorderMap.length);
+        for(int i = 0; i<reorderMap.length; i++){
+            changes.add(ObjectChange.create(values.get(reorderMap[i]), values.get(i)));
+        }
+        return changes;
+    }
+
     public static <E> ObjectChange<E> unknownChange(){
         return (ObjectChange<E>)UNKNOWN_CHANGE;
     }

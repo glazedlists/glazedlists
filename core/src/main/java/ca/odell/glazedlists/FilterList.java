@@ -5,6 +5,7 @@ package ca.odell.glazedlists;
 
 // the core Glazed Lists packages
 import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ObjectChange;
 import ca.odell.glazedlists.impl.adt.Barcode;
 import ca.odell.glazedlists.impl.adt.BarcodeIterator;
 import ca.odell.glazedlists.matchers.Matcher;
@@ -188,7 +189,7 @@ public final class FilterList<E> extends TransformedList<E,E> {
             }
 
             // fire the reorder
-            updates.reorder(filterReorderMap);
+            updates.reorder(filterReorderMap, ObjectChange.getChanges(this, filterReorderMap));
 
         // handle non-reordering events
         } else {

@@ -43,7 +43,8 @@ public class NestableEventsList<E> extends TransformedList<E, E> {
         } else {
             // don't forward() the event, just add the changes
             if(listChanges.isReordering()) {
-                updates.reorder(listChanges.getReorderMap());
+                listChanges.nextBlock();
+                updates.reorder(listChanges.getReorderMap(), listChanges.getBlockChanges());
             } else {
                 while(listChanges.next()) {
                     final int type = listChanges.getType();

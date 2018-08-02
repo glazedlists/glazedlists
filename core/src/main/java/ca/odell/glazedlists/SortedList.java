@@ -199,7 +199,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
             // notify the world of the reordering
             if(indexChanged) {
                 updates.beginEvent();
-                updates.reorder(reorderMap);
+                updates.reorder(reorderMap, ObjectChange.getChanges(this, reorderMap));
                 updates.commitEvent();
             }
 
@@ -477,7 +477,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
 
         // notification about the big change
         updates.beginEvent();
-        updates.reorder(reorderMap);
+        updates.reorder(reorderMap, ObjectChange.getChanges(this, reorderMap));
         updates.commitEvent();
     }
 
