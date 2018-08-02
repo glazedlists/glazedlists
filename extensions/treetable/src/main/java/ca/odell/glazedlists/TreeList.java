@@ -401,7 +401,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             // This node's visibility does not change, only that of its children
             if(toExpand.isVisible()) {
                 int visibleIndex = data.indexOfNode(toExpand.element, VISIBLE_NODES);
-                updates.addUpdate(visibleIndex);
+                updates.elementUpdated(visibleIndex, toExpand.getElement(), toExpand.getElement());
             }
 
             Node<E> toExpandNextSibling = nextNodeThatsNotAChildOfByStructure(toExpand);
@@ -609,7 +609,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
             }
 
             attachParentsAndSiblings();
-            fixVisibilityAndFireEvents();
+            fixVisibilityAndFireEvents(changed);
 
             // cleanup
             pathToRoot.clear();
@@ -737,7 +737,7 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         /**
          * Fire events for the recently changed node, going from root down
          */
-        private void fixVisibilityAndFireEvents() {
+        private void fixVisibilityAndFireEvents(Node<E> changed) {
             boolean visible = true;
             for(int i = pathToRoot.size() - 1; i >= 0; i--) {
                 current = pathToRoot.get(i);
@@ -749,14 +749,14 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
                         setVisible(current, true);
                         int visibleIndex = data.indexOfNode(current.element, VISIBLE_NODES);
                         if(fireEvents) {
-                            updates.addInsert(visibleIndex);
+                            updates.elementInserted(visibleIndex, current.getElement());
                         }
 
                     // an updated node
                     } else {
                         int visibleIndex = data.indexOfNode(current.element, VISIBLE_NODES);
                         if(fireEvents) {
-                            updates.addUpdate(visibleIndex);
+                            updates.elementUpdated(visibleIndex, changed.getElement(), current.getElement());
                         }
                     }
                 }

@@ -3,8 +3,6 @@
  */
 package ca.odell.glazedlists;
 
-import ca.odell.glazedlists.adt.SortedListWithIndexedTree;
-
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
@@ -47,17 +45,6 @@ public class SortedListBenchmark {
        for(int i = 0; i < baseSize; i++) {
            base.add(new Integer(dice.nextInt(Integer.MAX_VALUE)));
        }
-   }
-
-   @Benchmark
-   @Warmup(iterations = 5)
-   @Measurement(iterations = 10)
-   @Fork(1)
-   public EventList<Integer> testIndexedTree() {
-       EventList<Integer> baseCopy = GlazedLists.eventList(base);
-       EventList<Integer> sortedBase = new SortedListWithIndexedTree<>(baseCopy);
-       doTest(baseCopy, sortedBase);
-       return sortedBase;
    }
 
    @Benchmark

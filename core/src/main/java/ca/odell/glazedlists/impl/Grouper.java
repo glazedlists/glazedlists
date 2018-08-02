@@ -487,6 +487,7 @@ public class Grouper<E> {
          *      separator update that fixes Bug500
          * @param joinRight flag to indicate if the right group may need to be shifted
          */
-        public void groupChanged(int index, int groupIndex, int groupChangeType, boolean primary, int elementChangeType, E oldValue, E newValue, boolean updateNextSeparator, boolean joinRight);
+        public void groupChanged(int index, int groupIndex, int groupChangeType,  boolean primary, int
+                elementChangeType, E oldValue, E newValue, boolean updateNextSeparator, boolean joinRight);
     }
 }

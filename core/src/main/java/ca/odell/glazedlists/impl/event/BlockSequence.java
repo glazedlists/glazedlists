@@ -88,8 +88,10 @@ public class BlockSequence<E> {
         // to a more powerful list blocks manager
         if(startIndex < lastChangedIndex) {
             return false;
-            // concatenate this change on to the previous one
-        } else if(lastChangedIndex == startIndex && lastType == changeType) {
+        }
+
+        // concatenate this change on to the previous one
+        if(lastChangedIndex == startIndex && lastType == changeType) {
             try {
                 values.get(size - 1).addAll(events);
             }catch(UnsupportedOperationException ex){
@@ -207,6 +209,12 @@ public class BlockSequence<E> {
             if(blockChanges == null) throw new IllegalStateException("The ListEvent is not currently in a state to " +
                     "return a new value");
             return this.blockChanges.get(this.offset).getNewValue();
+        }
+
+        public ObjectChange<E> getChange(){
+            if(blockChanges == null) throw new IllegalStateException("The ListEvent is not currently in a state to " +
+                    "return the current change");
+            return this.blockChanges.get(this.offset);
         }
 
         public List<ObjectChange<E>> getBlockChanges(){

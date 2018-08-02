@@ -62,6 +62,27 @@ public class ObjectChange<T> {
         return Collections.nCopies(size, change);
     }
 
+    public static <E> List<ObjectChange<E>> getChanges(List<E> values, int changeType){
+        final List<ObjectChange<E>> changes = new ArrayList<>(values.size());
+        for(int i = 0; i<values.size(); i++){
+            final ObjectChange<E> change;
+            switch (changeType){
+                case ListEvent.INSERT:
+                    change = ObjectChange.create(ListEvent.unknownValue(), values.get(i));
+                    break;
+                case ListEvent.DELETE:
+                    change = ObjectChange.create(values.get(i), ListEvent.unknownValue());
+                    break;
+                default:
+                    final E value = values.get(i);
+                    change = ObjectChange.create(value, value);
+                    break;
+            }
+            changes.add(change);
+        }
+        return changes;
+    }
+
     public static <E> ObjectChange<E> unknownChange(){
         return (ObjectChange<E>)UNKNOWN_CHANGE;
     }

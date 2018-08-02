@@ -9,6 +9,7 @@ import ca.odell.glazedlists.impl.WeakReferenceProxy;
 import ca.odell.glazedlists.impl.event.BlockSequence;
 import ca.odell.glazedlists.impl.event.Tree4Deltas;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.List;
@@ -129,19 +130,56 @@ public final class ListEventAssembler<E> {
     public void elementInserted(int index, E newValue) {
         addChange(ListEvent.INSERT, index, ObjectChange.create(ListEvent.unknownValue(), newValue));
     }
+
     /**
-     * Add to the current ListEvent the update of the element at the specified
-     * index, with the specified previous value.
+     * Adds a block of insert events.
      */
-    public void elementUpdated(int index, E oldValue, E newValue) {
-        addChange(ListEvent.UPDATE, index, ObjectChange.create(oldValue, newValue));
+    public void elementInserted(int index, List<E> newValues) {
+        addChange(ListEvent.INSERT, index, ObjectChange.getChanges(newValues, ListEvent.INSERT));
     }
-    /**
+        /**
      * Add to the current ListEvent the removal of the element at the specified
      * index, with the specified previous value.
      */
     public void elementDeleted(int index, E oldValue) {
         addChange(ListEvent.DELETE, index,  ObjectChange.create(oldValue, ListEvent.unknownValue()));
+    }
+
+    /**
+     * Adds a block of removal events
+     */
+    public void elementDeleted(int index, List<E> oldValues) {
+        addChange(ListEvent.DELETE, index, ObjectChange.getChanges(oldValues, ListEvent.DELETE));
+    }
+
+    /**
+     * Adds a block of update events
+     */
+    public void elementUpdated(int index, List<ObjectChange<E>> changes){
+        addChange(ListEvent.UPDATE, index, changes);
+    }
+
+    /**
+     * Add to the current ListEvent the update of the element at the specified
+     * index, with the specified previous value.
+     */
+    public void elementUpdated(int index, E oldValue, E newValue) {
+        elementUpdated(index, ObjectChange.create(oldValue, newValue));
+    }
+
+    public void elementUpdated(int index, List<E> oldValues, List<E> newValues) {
+        if(oldValues.size() != newValues.size()){
+            throw new IllegalArgumentException();
+        }
+        final List<ObjectChange<E>> changes = new ArrayList<>(oldValues.size());
+        for(int i = 0; i<oldValues.size(); i++){
+            changes.add(ObjectChange.create(oldValues.get(i), newValues.get(i)));
+        }
+        elementUpdated(index, changes);
+    }
+
+    public void elementUpdated(int index, ObjectChange<E> change) {
+        addChange(ListEvent.UPDATE, index, change);
     }
 
     /**
@@ -153,96 +191,9 @@ public final class ListEventAssembler<E> {
     }
 
     /**
-     * Adds a block of changes to the set of list changes. The change block
-     * allows a range of changes to be grouped together for efficiency.
-     *
-     * <p>One or more calls to this method must be prefixed by a call to
-     * beginEvent() and followed by a call to commitEvent().
-     *
-     * @deprecated replaced with {@link #elementInserted}, {@link #elementUpdated}
-     *     and {@link #elementDeleted}.
-     */
-    @Deprecated
-    public void addChange(int type, int startIndex, int endIndex) {
-        addChange(type, startIndex, ObjectChange.unknownChange((endIndex+1)-startIndex));
-    }
-
-    /**
      * Convenience method for appending a single change of the specified type.
-     *
-     * @deprecated replaced with {@link #elementInserted}, {@link #elementUpdated}
-     *     and {@link #elementDeleted}.
      */
-    @Deprecated
-    public void addChange(int type, int index) {
-        addChange(type, index, index);
-    }
-
-    /**
-     * Convenience method for appending a single insert.
-     *
-     * @deprecated replaced with {@link #elementInserted}.
-     */
-    @Deprecated
-    public void addInsert(int index) {
-        addChange(ListEvent.INSERT, index);
-    }
-
-    /**
-     * Convenience method for appending a single delete.
-     *
-     * @deprecated replaced with {@link #elementDeleted}.
-     */
-    @Deprecated
-    public void addDelete(int index) {
-        addChange(ListEvent.DELETE, index);
-    }
-
-    /**
-     * Convenience method for appending a single update.
-     *
-     * @deprecated replaced with {@link #elementUpdated}.
-     */
-    @Deprecated
-    public void addUpdate(int index) {
-        addChange(ListEvent.UPDATE, index);
-    }
-
-    /**
-     * Convenience method for appending a range of inserts.
-     *
-     * @deprecated replaced with {@link #elementInserted}.
-     */
-    @Deprecated
-    public void addInsert(int startIndex, int endIndex) {
-        addChange(ListEvent.INSERT, startIndex, endIndex);
-    }
-
-    /**
-     * Convenience method for appending a range of deletes.
-     *
-     * @deprecated replaced with {@link #elementDeleted}.
-     */
-    @Deprecated
-    public void addDelete(int startIndex, int endIndex) {
-        addChange(ListEvent.DELETE, startIndex, endIndex);
-    }
-
-    /**
-     * Convenience method for appending a range of updates.
-     *
-     * @deprecated replaced with {@link #elementUpdated}.
-     */
-    @Deprecated
-    public void addUpdate(int startIndex, int endIndex) {
-        addChange(ListEvent.UPDATE, startIndex, endIndex);
-    }
-
-    /**
-     * Adds a block of changes to the set of list changes. The change block
-     * allows a range of changes to be grouped together for efficiency.
-     */
-    private void addChange(int type, int index, ObjectChange<E> event) {
+    public void addChange(int type, int index, ObjectChange<E> event) {
         this.addChange(type, index, Collections.singletonList(event));
     }
 
@@ -250,7 +201,7 @@ public final class ListEventAssembler<E> {
      * Adds a block of changes to the set of list changes. The change block
      * allows a range of changes to be grouped together for efficiency.
      */
-    private void addChange(int type, int startIndex, List<ObjectChange<E>> changeEvents) {
+    public void addChange(int type, int startIndex, List<ObjectChange<E>> changeEvents) {
         // try the linear holder first
         if(useListBlocksLinear) {
             final boolean success = blockSequence.addChange(startIndex, type, changeEvents);
@@ -272,8 +223,11 @@ public final class ListEventAssembler<E> {
         if(!isEventEmpty()) throw new IllegalStateException("Cannot combine reorder with other change events");
         // can't reorder an empty list, see bug 91
         if(reorderMap.length == 0) return;
-        addChange(ListEvent.DELETE, 0, ObjectChange.unknownChange(reorderMap.length));
-        addChange(ListEvent.INSERT, 0, ObjectChange.unknownChange(reorderMap.length));
+        final List<ObjectChange<E>> changes = new ArrayList<>(reorderMap.length);
+        for(int i = 0; i<reorderMap.length; i++){
+            changes.add(ObjectChange.create(this.sourceList.get(reorderMap[i]), this.sourceList.get(i)));
+        }
+        elementUpdated(0, changes);
         this.reorderMap = reorderMap;
     }
     /**

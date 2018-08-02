@@ -440,7 +440,7 @@ class WaitEventList extends TransformedList {
         // just pass on the changes
         updates.beginEvent();
         while(listChanges.next()) {
-            updates.addChange(listChanges.getType(), listChanges.getIndex());
+            updates.addChange(listChanges.getType(), listChanges.getIndex(), listChanges.getChange());
         }
         updates.commitEvent();
     }

@@ -45,33 +45,10 @@ public class SeparatorListBenchmark {
     @Warmup(iterations = 5)
     @Measurement(iterations = 10)
     @Fork(1)
-    public EventList<Element> testSeparatorListCrudOld() {
-        EventList<Element> baseCopy = GlazedLists.eventList(base);
-        EventList<Element> sepBase = new SeparatorListOld<>(baseCopy, elementComparator(), 0, Integer.MAX_VALUE);
-        doTest(baseCopy, sepBase);
-        return sepBase;
-    }
-
-    @Benchmark
-    @Warmup(iterations = 5)
-    @Measurement(iterations = 10)
-    @Fork(1)
     public EventList<Element> testSeparatorListCrudNew() {
         EventList<Element> baseCopy = GlazedLists.eventList(base);
         EventList<Element> sepBase = new SeparatorList<>(baseCopy, elementComparator(), 0, Integer.MAX_VALUE);
         doTest(baseCopy, sepBase);
-        return sepBase;
-    }
-
-    @Benchmark
-    @Warmup(iterations = 5)
-    @Measurement(iterations = 10)
-    @Fork(1)
-    public EventList<Element> testSeparatorListCrudTransactionOld() {
-        EventList<Element> baseCopy = GlazedLists.eventList(base);
-        TransactionList<Element> transactionList = new TransactionList<>(baseCopy);
-        EventList<Element> sepBase = new SeparatorListOld<>(transactionList, elementComparator(), 0, Integer.MAX_VALUE);
-        doTestTransaction(transactionList, sepBase);
         return sepBase;
     }
 
@@ -84,21 +61,6 @@ public class SeparatorListBenchmark {
         TransactionList<Element> transactionList = new TransactionList<>(baseCopy);
         EventList<Element> sepBase = new SeparatorList<>(transactionList, elementComparator(), 0, Integer.MAX_VALUE);
         doTestTransaction(transactionList, sepBase);
-        return sepBase;
-    }
-
-    @Benchmark
-    @Warmup(iterations = 5)
-    @Measurement(iterations = 10)
-    @Fork(1)
-    public EventList<Element> testSeparatorListFilterOld() {
-        EventList<Element> baseCopy = GlazedLists.eventList(base);
-        FilterList<Element> filterList = new FilterList<>(baseCopy);
-        EventList<Element> sepBase = new SeparatorListOld<>(filterList, elementComparator(), 0, Integer.MAX_VALUE);
-        for (int i = 0; i < 10; i++) {
-            filterList.setMatcher(Matchers.falseMatcher());
-            filterList.setMatcher(Matchers.trueMatcher());
-        }
         return sepBase;
     }
 

@@ -152,13 +152,14 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
         @Override
         public void groupChanged(int index, int groupIndex, int groupChangeType, boolean primary, int elementChangeType, E oldValue, E newValue, boolean updateNextSeparator, boolean joinRight) {
             if(groupChangeType == ListEvent.INSERT) {
-                insertGroupList(groupIndex);
-                updates.addInsert(groupIndex);
+                final GroupList newGroup = insertGroupList(groupIndex);
+                updates.elementInserted(groupIndex, newGroup);
             } else if(groupChangeType == ListEvent.DELETE) {
-                removeGroupList(groupIndex);
-                updates.addDelete(groupIndex);
+                final GroupList removedGroup = removeGroupList(groupIndex);
+                updates.elementDeleted(groupIndex, removedGroup);
             } else if(groupChangeType == ListEvent.UPDATE) {
-                updates.addUpdate(groupIndex);
+                final GroupList updatedGroup = groupLists.get(groupIndex).get();
+                updates.elementUpdated(groupIndex, updatedGroup, updatedGroup);
             } else {
                 throw new IllegalStateException();
             }
@@ -170,10 +171,11 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
          *
          * @param index the location at which to insert an empty GroupList
          */
-        private void insertGroupList(int index) {
+        private GroupList insertGroupList(int index) {
             final GroupList groupList = new GroupList();
             final Element<GroupList> indexedTreeNode = groupLists.add(index, groupList, 1);
             groupList.setTreeNode(indexedTreeNode);
+            return groupList;
         }
 
         /**
@@ -181,12 +183,13 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
          *
          * @param index the location at which to remove a GroupList
          */
-        private void removeGroupList(int index) {
+        private GroupList removeGroupList(int index) {
             final Element<GroupList> indexedTreeNode = groupLists.get(index);
             groupLists.remove(indexedTreeNode);
 
             // for safety, null out the GroupList's reference to its now defunct indexedTreeNode
             indexedTreeNode.get().setTreeNode(null);
+            return indexedTreeNode.get();
         }
     }
 
@@ -229,17 +232,16 @@ public final class GroupingList<E> extends TransformedList<E, List<E>> {
             // the grouper know so we can rebuild our groups from scratch
 
             // record the impending removal of all groups before adjusting the barcode
-            for (int i = 0, n = size(); i < n; i++)
-                updates.elementDeleted(0, get(i));
-
+            List<List<E>> beforeValues = new ArrayList<>(this);
             // adjust the Comparator used by the Grouper (which will change the barcode)
             grouper.setComparator(sourceComparator);
 
             // rebuild the tree which maps GroupLists to indices (so the tree matches the new barcode)
             rebuildGroupListTreeFromBarcode();
-
             // insert all new groups (represented by the newly formed barcode)
-            updates.addInsert(0, size() - 1);
+            updates.elementDeleted(0, beforeValues);
+            beforeValues = null;
+            updates.elementInserted(0, this);
 
         } else {
             grouper.listChanged(listChanges);

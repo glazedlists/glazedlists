@@ -4,6 +4,7 @@
 package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ObjectChange;
 import ca.odell.glazedlists.impl.adt.barcode2.Element;
 import ca.odell.glazedlists.impl.adt.barcode2.SimpleTree;
 import ca.odell.glazedlists.impl.adt.barcode2.SimpleTreeIterator;
@@ -232,8 +233,9 @@ public final class SortedList<E> extends TransformedList<E,E> {
 
         // first update the offset tree for all changes, and keep the changed nodes in a list
         LinkedList<Element> insertNodes = new LinkedList<>();
+        List<E> insertedValues = new ArrayList<>();
         List<Element<Element>> updateNodes = new ArrayList<>();
-        List<E> previousValues = new ArrayList<>();
+        List<ObjectChange<E>> previousValues = new ArrayList<>();
 
         // Update the indexed tree so it matches the source.
         // Save the nodes to be inserted and updated as well
@@ -247,14 +249,14 @@ public final class SortedList<E> extends TransformedList<E,E> {
             if(changeType == ListEvent.INSERT) {
                 Element<Element> unsortedNode = unsorted.add(unsortedIndex, EMPTY_ELEMENT, 1);
                 insertNodes.addLast(unsortedNode);
-
+                insertedValues.add(listChanges.getNewValue());
             // on update, mark the updated node as unsorted and save it so it can be moved
             } else if(changeType == ListEvent.UPDATE) {
                 Element<Element> unsortedNode = unsorted.get(unsortedIndex);
                 Element sortedNode = unsortedNode.get();
                 sortedNode.setSorted(Element.PENDING);
                 updateNodes.add(sortedNode);
-                previousValues.add(listChanges.getOldValue());
+                previousValues.add(listChanges.getChange());
 
             // on delete, delete the index and sorted node
             } else if(changeType == ListEvent.DELETE) {
@@ -263,7 +265,6 @@ public final class SortedList<E> extends TransformedList<E,E> {
                 unsorted.remove(unsortedNode);
                 int deleteSortedIndex = deleteByUnsortedNode(unsortedNode);
                 updates.elementDeleted(deleteSortedIndex, deleted);
-
             }
         }
 
@@ -322,7 +323,7 @@ public final class SortedList<E> extends TransformedList<E,E> {
 
         // fire update events
         for(int i = 0, size = updateNodes.size(); i < size; i++) {
-            E previous = previousValues.get(i);
+            ObjectChange<E> previous = previousValues.get(i);
             Element<Element> sortedNode = updateNodes.get(i);
             assert(sortedNode.getSorted() != Element.PENDING);
             int originalIndex = sorted.indexOfNode(sortedNode, ALL_COLORS);
@@ -339,19 +340,19 @@ public final class SortedList<E> extends TransformedList<E,E> {
             // sort order is enforced so move the element to its new location
             } else {
                 sorted.remove(sortedNode);
-                updates.elementDeleted(originalIndex, previous);
+                updates.elementDeleted(originalIndex, previous.getOldValue());
                 int insertedIndex = insertByUnsortedNode(sortedNode.get());
-                updates.addInsert(insertedIndex);
+                updates.elementInserted(insertedIndex, previous.getNewValue());
             }
         }
 
         // fire insert events
-        while(!insertNodes.isEmpty()) {
+        for(int i = 0; i<insertedValues.size(); i++){
+            E insertedValue = insertedValues.get(i);
             Element insertNode = insertNodes.removeFirst();
             int insertedIndex = insertByUnsortedNode(insertNode);
-            updates.addInsert(insertedIndex);
+            updates.elementInserted(insertedIndex, insertedValue);
         }
-
         // commit the changes and notify listeners
         updates.commitEvent();
     }

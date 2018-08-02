@@ -129,11 +129,20 @@ class Tree4DeltasListEvent<E> extends ListEvent<E> {
     }
 
     @Override
+    public ObjectChange<E> getChange() {
+        if(linearIterator != null) {
+            return linearIterator.getChange();
+        } else {
+            return deltasIterator.getChange();
+        }
+    }
+
+    @Override
     public List<ObjectChange<E>> getBlockChanges() {
         if(linearIterator != null) {
-            return (List<ObjectChange<E>>)linearIterator.getBlockChanges();
+            return linearIterator.getBlockChanges();
         } else {
-            return (List<ObjectChange<E>>)deltasIterator.getBlockChanges();
+            return deltasIterator.getBlockChanges();
         }
     }
 

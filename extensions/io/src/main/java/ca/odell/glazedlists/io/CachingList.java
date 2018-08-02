@@ -250,7 +250,7 @@ public class CachingList extends TransformedList {
                     currentSize--;
                 }
             }
-            updates.addChange(changeType, index);
+            updates.addChange(changeType, index, listChanges.getChange());
         }
         lastKnownSize = source.size();
         updates.commitEvent();

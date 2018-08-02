@@ -326,13 +326,16 @@ public class Tree4Deltas<E> {
         }
 
         public E getOldValue() {
-            final Element<ObjectChange<E>> element = treeIterator.node();
-            return element.get().getOldValue();
+            return getChange().getOldValue();
         }
 
         public E getNewValue() {
+            return getChange().getNewValue();
+        }
+
+        public ObjectChange<E> getChange(){
             final Element<ObjectChange<E>> element = treeIterator.node();
-            return element.get().getNewValue();
+            return element.get();
         }
 
         public List<ObjectChange<E>> getBlockChanges() {

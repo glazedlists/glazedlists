@@ -5,6 +5,9 @@ package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.event.ListEvent;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This {@link EventList} shows values from a continuous range of indices from
  * a source {@link EventList}. It can be used to limit the length of a list to
@@ -182,7 +185,12 @@ public class RangeList<E> extends TransformedList<E, E> {
 
         // insert before the beginning
         if(desiredStartIndex < currentStartIndex) {
-            updates.addInsert(0, currentStartIndex - desiredStartIndex - 1);
+            final int size = currentStartIndex - desiredStartIndex;
+            final List<E> insertedElements = new ArrayList<>(size);
+            for(int i = desiredStartIndex; i<currentStartIndex; i++){
+                insertedElements.add(source.get(i));
+            }
+            updates.elementInserted(0, insertedElements);
 
         // delete thru to the new beginning
         } else if(currentStartIndex < desiredStartIndex && currentStartIndex < currentEndIndex) {
@@ -202,7 +210,14 @@ public class RangeList<E> extends TransformedList<E, E> {
         // insert thru to the new end
         } else if(currentEndIndex < desiredEndIndex && desiredStartIndex < desiredEndIndex) {
             int insertFrom = Math.max(currentEndIndex, currentStartIndex);
-            updates.addInsert(insertFrom - currentStartIndex, desiredEndIndex - currentStartIndex - 1);
+            int rFrom = insertFrom - currentStartIndex;
+            int rTo = desiredEndIndex - currentStartIndex;
+            int size = rTo - rFrom;
+            final List<E> insertedElements = new ArrayList<>(size);
+            for(int i = insertFrom; i<(insertFrom+size); i++){
+                insertedElements.add(source.get(i));
+            }
+            updates.elementInserted(rFrom, insertedElements);
         }
         currentEndIndex = desiredEndIndex;
 

@@ -388,7 +388,7 @@ class CheckableWrapperList<S> extends TransformedList<S, CheckWrapped<S>> {
                 case ListEvent.DELETE: wrappedSource.remove(changeIndex); break;
             }
 
-            updates.addChange(changeType, changeIndex);
+            updates.addChange(changeType, changeIndex, listChanges.getChange());
         }
         updates.commitEvent();
     }

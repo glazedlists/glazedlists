@@ -336,6 +336,11 @@ public abstract class ListEvent<E> extends EventObject {
      */
     public abstract E getNewValue();
 
+    /**
+     * Gets the change at the specified index (old-/new value combined)
+     */
+    public abstract ObjectChange<E> getChange();
+
     public abstract List<ObjectChange<E>> getBlockChanges();
 
     /**
