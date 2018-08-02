@@ -112,74 +112,62 @@ public interface EventList<E> extends List<E> {
     /**
      * Executes the block of code represented by the given consumer while holding the read lock of
      * this EventList.
+     * <p>
+     * The consumer has access to the methods of the EventList interface. If you need access to
+     * methods of the implementation class, consider the helper methods in the {@link Guard} class
+     * instead.
      * 
      * @param consumer the consumer != null
-     * @deprecated this is a <strong>developer preview</strong> API that is experimental and not yet
-     *             finalized
+     * @see Guard#acceptWithReadLock(EventList, Consumer)
      */
-    @Deprecated
     default void acceptWithReadLock(Consumer<EventList<E>> consumer) {
-        getReadWriteLock().readLock().lock();
-        try {
-            consumer.accept(this);
-        } finally {
-            getReadWriteLock().readLock().unlock(); 
-        }
+        Guard.acceptWithReadLock(this, consumer);
     }
     
     /**
      * Executes the block of code represented by the given consumer while holding the write lock of
      * this EventList.
+     * <p>
+     * The consumer has access to the methods of the EventList interface. If you need access to
+     * methods of the implementation class, consider the helper methods in the {@link Guard} class
+     * instead.
      *
      * @param consumer the consumer != null
-     * @deprecated this is a <strong>developer preview</strong> API that is experimental and not yet
-     *             finalized
+     * @see Guard#acceptWithWriteLock(EventList, Consumer)
      */
-    @Deprecated
     default void acceptWithWriteLock(Consumer<EventList<E>> consumer) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            consumer.accept(this);
-        } finally {
-            getReadWriteLock().writeLock().unlock();    
-        }
+        Guard.acceptWithWriteLock(this, consumer);
     }
 
     /**
      * Applies the given function while holding the read lock of this EventList.
+     * <p>
+     * The function has access to the methods of the EventList interface. If you need access to
+     * methods of the implementation class, consider the helper methods in the {@link Guard} class
+     * instead.
      * 
      * @param function the function != null
      * @param <R> the result type of the function
      * @return the result of the function
-     * @deprecated this is a <strong>developer preview</strong> API that is experimental and not yet
-     *             finalized
+     * @see Guard#applyWithReadLock(EventList, Function)
      */
-    @Deprecated
     default <R> R applyWithReadLock(Function<EventList<E>, R> function) {
-        getReadWriteLock().readLock().lock();
-        try {
-            return function.apply(this);
-        } finally {
-            getReadWriteLock().readLock().unlock(); 
-        }
+        return Guard.applyWithReadLock(this, function);
     }
     
     /**
      * Applies the given function while holding the write lock of this EventList.
+     * <p>
+     * The function has access to the methods of the EventList interface. If you need access to
+     * methods of the implementation class, consider the helper methods in the {@link Guard} class
+     * instead.
      * 
      * @param function the function != null
      * @param <R> the result type of the function
      * @return the result of the function
-     * @deprecated this is a <strong>developer preview</strong> API that is experimental and not yet
-     *             finalized
+     * @see Guard#applyWithWriteLock(EventList, Function)
      */
-    @Deprecated
     default <R> R applyWithWriteLock(Function<EventList<E>, R> function) {
-        getReadWriteLock().writeLock().lock();
-        try {
-            return function.apply(this);
-        } finally {
-            getReadWriteLock().writeLock().unlock();    
-        }
+        return Guard.applyWithWriteLock(this, function);
     }
 }

@@ -8,7 +8,12 @@ import ca.odell.glazedlists.impl.adt.IdentityMultimap;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Manage listeners, firing events, and making sure that events arrive in order.
@@ -211,6 +216,11 @@ final class SequenceDependenciesEventPublisher implements ListEventPublisher, Se
     private <Subject,Listener,Event> List<SubjectAndListener> updateListEventListeners(Subject subject, Listener listenerToAdd, Listener listenerToRemove, EventFormat<Subject,Listener,Event> eventFormat) {
         // we'll want to output a copy of all the listeners
         int anticipatedSize = this.subjectAndListeners.size() + (listenerToAdd == null ? - 1 : 1);
+        // removing a non-existent listener can lead to negative size
+        if (anticipatedSize < 0) {
+            anticipatedSize = 0;
+        }
+
         List<SubjectAndListener> result = new ArrayList<>(anticipatedSize);
 
         // walk through, adding all the old listeners to the new listeners list,
