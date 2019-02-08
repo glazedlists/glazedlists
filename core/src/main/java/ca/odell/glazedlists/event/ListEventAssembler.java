@@ -27,6 +27,7 @@ import java.util.List;
  * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
  */
 public final class ListEventAssembler<E> {
+    private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("ca.odell.glazedlists.event.debug"));
 
     /** the list that this tracks changes for */
     protected EventList<E> sourceList;
@@ -51,6 +52,8 @@ public final class ListEventAssembler<E> {
     private final ListEventFormat eventFormat = new ListEventFormat();
     /** true if we're waiting on the publisher to distribute our event */
     private boolean eventIsBeingPublished = false;
+
+    private RuntimeException currentThreadStack = null;
 
     /**
      * Create a new {@link ListEventPublisher} for an {@link EventList} not attached
@@ -98,15 +101,21 @@ public final class ListEventAssembler<E> {
      * @see <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=52">Bug 52</a>
      *
      * @param allowNestedEvents false to throw an exception
-     *      if another call to beginEvent() is made before
-     *      the next call to commitEvent(). Nested events allow
-     *      multiple method's events to be composed into a single
-     *      event.
+     *                          if another call to beginEvent() is made before
+     *                          the next call to commitEvent(). Nested events allow
+     *                          multiple method's events to be composed into a single
+     *                          event.
      */
     public synchronized void beginEvent(boolean allowNestedEvents) {
         // complain if we cannot nest any further
-        if(!this.allowNestedEvents) {
-            throw new ConcurrentModificationException("Cannot begin a new event while another event is in progress by thread, "  + eventThread.getName());
+        if (!this.allowNestedEvents) {
+            throw new ConcurrentModificationException("Cannot begin a new event while another event is in progress by thread, " + eventThread.getName(),
+                    this.currentThreadStack);
+        }
+        if (DEBUG) {
+            if (this.currentThreadStack == null) {
+                this.currentThreadStack = new RuntimeException("Stack");
+            }
         }
         this.allowNestedEvents = allowNestedEvents;
         if(allowNestedEvents || (eventLevel == 0 && eventThread != null)) {
@@ -290,7 +299,18 @@ public final class ListEventAssembler<E> {
         }
 
         eventIsBeingPublished = true;
-        publisher.fireEvent(sourceList, listEvent, eventFormat);
+        if (DEBUG) {
+            try {
+                publisher.fireEvent(sourceList, listEvent, eventFormat);
+            } catch (Throwable cm) {
+                if (this.currentThreadStack != null) {
+                    throw this.currentThreadStack;
+                }
+                throw cm;
+            }
+        } else {
+            publisher.fireEvent(sourceList, listEvent, eventFormat);
+        }
     }
 
     /**
@@ -324,7 +344,7 @@ public final class ListEventAssembler<E> {
      * queue is empty; <tt>false</tt> otherwise.
      *
      * @return <tt>true</tt> if the current atomic change to this list change
-     *      queue is empty; <tt>false</tt> otherwise
+     * queue is empty; <tt>false</tt> otherwise
      */
     public boolean isEventEmpty() {
         return useListBlocksLinear ? blockSequence.isEmpty() : listDeltas.isEmpty();
@@ -344,7 +364,7 @@ public final class ListEventAssembler<E> {
      * @throws NullPointerException if the specified listener is null
      */
     public synchronized void addListEventListener(ListEventListener<? super E> listChangeListener) {
-    	Preconditions.checkNotNull(listChangeListener, "ListEventListener is undefined");
+        Preconditions.checkNotNull(listChangeListener, "ListEventListener is undefined");
         publisher.addListener(sourceList, listChangeListener, eventFormat);
     }
 
@@ -357,11 +377,11 @@ public final class ListEventAssembler<E> {
      * listening and therefore <code>equals()</code> may be ambiguous.
      *
      * @param listChangeListener event listener != null
-     * @throws NullPointerException if the specified listener is null
+     * @throws NullPointerException     if the specified listener is null
      * @throws IllegalArgumentException if the specified listener wasn't added before
      */
     public synchronized void removeListEventListener(ListEventListener<? super E> listChangeListener) {
-    	Preconditions.checkNotNull(listChangeListener, "ListEventListener is undefined");
+        Preconditions.checkNotNull(listChangeListener, "ListEventListener is undefined");
         publisher.removeListener(sourceList, listChangeListener);
     }
 
@@ -383,6 +403,7 @@ public final class ListEventAssembler<E> {
      */
     private void cleanup() {
         eventThread = null;
+        currentThreadStack = null;
         blockSequence.reset();
         listDeltas.reset(sourceList.size());
         reorderMap = null;
