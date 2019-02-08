@@ -19,3 +19,14 @@ before_script:
  - sh -e /etc/init.d/xvfb start
  - sleep 5
  - metacity --sm-disable --replace 2> metacity.err &
+
+after_success:
+- gpg2 --keyring=$TRAVIS_BUILD_DIR/pubring.gpg --no-default-keyring --import deployment/signingkey.asc
+- gpg2 --allow-secret-key-import --keyring=$TRAVIS_BUILD_DIR/secring.gpg --no-default-keyring
+  --import deployment/signingkey.asc
+- mvn clean deploy -P sign --settings deployment/settings.xml -Dgpg.executable=gpg2
+  -Dgpg.keyname=F941E9F172F06519 -Dgpg.passphrase=$PASSPHRASE -Dgpg.publicKeyring=$TRAVIS_BUILD_DIR/pubring.gpg
+  -Dgpg.secretKeyring=$TRAVIS_BUILD_DIR/secring.gpg
+before_install:
+- openssl aes-256-cbc -K $encrypted_3952c4d30315_key -iv $encrypted_3952c4d30315_iv
+  -in deployment/signingkey.asc.enc -out deployment/signingkey.asc -d

@@ -12,3 +12,4 @@ target/
 tools/
 *.swp
 *.DS_Store
+/deployment/signingkey.asc

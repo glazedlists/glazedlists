@@ -12,7 +12,7 @@ plugins {
 /**
  * group and version (artifact is set from rootProject.name in settings.gradle
  */
-group "com.glazedlists"
+group "at.swimmesberger"
 version "$nextReleaseVersion${isSnapshot == "true" ? "-SNAPSHOT" : ""}"
 
 /**
