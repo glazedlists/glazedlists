@@ -7,6 +7,7 @@ plugins {
     id "signing"
     id "us.kirchmeier.capsule" version "1.0.2"
     id "biz.aQute.bnd.builder" version "3.3.0"
+    id 'io.codearte.nexus-staging' version '0.20.0'
 }
 
 /**
@@ -196,6 +197,12 @@ signing {
     required { gradle.taskGraph.hasTask("uploadArchives") }
 
     sign configurations.archives
+}
+
+nexusStaging {
+    packageGroup = group
+    username = sonatypeUsername
+    password = sonatypePassword
 }
 
 uploadArchives {
