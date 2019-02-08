@@ -23,9 +23,7 @@ after_success:
 - gpg2 --keyring=$TRAVIS_BUILD_DIR/pubring.gpg --no-default-keyring --import deployment/signingkey.asc
 - gpg2 --allow-secret-key-import --keyring=$TRAVIS_BUILD_DIR/secring.gpg --no-default-keyring
   --import deployment/signingkey.asc
-- mvn clean deploy -P sign --settings deployment/settings.xml -Dgpg.executable=gpg2
-  -Dgpg.keyname=F941E9F172F06519 -Dgpg.passphrase=$PASSPHRASE -Dgpg.publicKeyring=$TRAVIS_BUILD_DIR/pubring.gpg
-  -Dgpg.secretKeyring=$TRAVIS_BUILD_DIR/secring.gpg
+- ./gradlew uploadArchives -Psigning.keyId=F941E9F172F06519 -Psigning.password=$PASSPHRASE -Psigning.secretKeyRingFile=$TRAVIS_BUILD_DIR/secring.gpg
 before_install:
 - openssl aes-256-cbc -K $encrypted_45cc9ac4f8c3_key -iv $encrypted_45cc9ac4f8c3_iv
   -in deployment/signingkey.asc.enc -out deployment/signingkey.asc -d
