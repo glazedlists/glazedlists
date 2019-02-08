@@ -392,6 +392,25 @@ public final class ListEventAssembler<E> {
         return publisher.getListeners(sourceList);
     }
 
+    public <F> ListEvent<F> splitUpdates(ListEvent<F> event){
+        ListEventAssembler<F> newAssembler = new ListEventAssembler<>(event.getSourceList(), this.publisher);
+        newAssembler.beginEvent();
+        while (event.nextBlock()) {
+            int sourceIndex = event.getIndex();
+            int type = event.getType();
+            List<ObjectChange<F>> blockChanges = event.getBlockChanges();
+            if (type == ListEvent.UPDATE) {
+                newAssembler.addChange(ListEvent.DELETE, sourceIndex, blockChanges);
+                newAssembler.addChange(ListEvent.INSERT, sourceIndex, blockChanges);
+            }else{
+                newAssembler.addChange(type, sourceIndex, event.getBlockChanges());
+            }
+        }
+        ListEvent<F> newEvent = newAssembler.listEvent;
+        newEvent.reset();
+        return newEvent;
+    }
+
     // these method sare used by the ListEvent
     boolean getUseListBlocksLinear() { return useListBlocksLinear; }
     Tree4Deltas getListDeltas() { return listDeltas; }

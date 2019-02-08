@@ -4,12 +4,14 @@
 package ca.odell.glazedlists;
 
 import ca.odell.glazedlists.event.ListEvent;
+import ca.odell.glazedlists.event.ObjectChange;
 import ca.odell.glazedlists.impl.GlazedListsImpl;
 import ca.odell.glazedlists.impl.adt.CircularArrayList;
 import ca.odell.glazedlists.impl.adt.KeyedCollection;
 import ca.odell.glazedlists.impl.adt.barcode2.Element;
 import ca.odell.glazedlists.impl.adt.barcode2.FourColorTree;
 import ca.odell.glazedlists.impl.adt.barcode2.ListToByteCoder;
+import ca.odell.glazedlists.impl.event.BlockSequence;
 
 import java.util.*;
 
@@ -483,20 +485,24 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         NodeAttacher nodeAttacher = new NodeAttacher(true);
         FinderInserter finderInserter = new FinderInserter();
 
-        while(listChanges.next()) {
+        if(listChanges.isReordering()){
+            // when reordering we have to split the UPDATE events into single DELETE/INSERT events
+            listChanges = updates.splitUpdates(listChanges);
+        }
+        while (listChanges.next()) {
             int sourceIndex = listChanges.getIndex();
             int type = listChanges.getType();
 
-            if(type == ListEvent.INSERT) {
+            if (type == ListEvent.INSERT) {
                 Node<E> inserted = finderInserter.findOrInsertNode(sourceIndex);
                 nodeAttacher.nodesToAttach.queueNewNodeForInserting(inserted);
 
-            } else if(type == ListEvent.UPDATE) {
-                replaceAndDetachNode( sourceIndex, nodesToVerify );
+            } else if (type == ListEvent.UPDATE) {
+                replaceAndDetachNode(sourceIndex, nodesToVerify);
                 Node<E> updated = finderInserter.findOrInsertNode(sourceIndex);
                 nodeAttacher.nodesToAttach.queueNewNodeForInserting(updated);
 
-            } else if(type == ListEvent.DELETE) {
+            } else if (type == ListEvent.DELETE) {
                 deleteAndDetachNode(sourceIndex, nodesToVerify);
             }
         }
