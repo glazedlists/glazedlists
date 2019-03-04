@@ -22,6 +22,8 @@ Browse [Release Notes](http://www.glazedlists.com/releases)
 
 Download [Latest Release](http://repo1.maven.org/maven2/com/glazedlists/glazedlists/1.11.0/)
 
+Download [Latest Snapshot version](https://oss.sonatype.org/content/repositories/snapshots/com/glazedlists/glazedlists/1.12.0-SNAPSHOT/)
+
 Configure [Maven](http://www.glazedlists.com/Home/maven)
 
 ### Mailing list archives
