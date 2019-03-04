@@ -6,10 +6,12 @@ include 'extensions:calculation'
 include 'extensions:hibernate'
 include 'extensions:icu4j'
 include 'extensions:io'
+if (!JavaVersion.current().isJava11() && !JavaVersion.current().isJava12()) {
 include 'extensions:issuesbrowser'
 include 'extensions:javafx'
 include 'extensions:ktable'
 include 'extensions:swinglabs'
+}
 include 'extensions:jfreechart'
 include 'extensions:jgoodiesforms'
 include 'extensions:nachocalendar'

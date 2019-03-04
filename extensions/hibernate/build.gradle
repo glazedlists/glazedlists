@@ -1,11 +1,7 @@
 dependencies {
     compile 'org.hibernate:hibernate-core:5.0.11.Final'
+    compile 'javax.xml.bind:jaxb-api:2.3.0'
+    compile 'org.glassfish.jaxb:jaxb-runtime:2.3.0.1'
+    compile 'com.sun.activation:javax.activation:1.2.0'
     testCompile 'org.hsqldb:hsqldb:2.3.4'
-}
-
-test {
-    // If the version reports a 1.<anything>, this is pre-Java 9.
-    if ( !System.getProperty('java.version').startsWith('1.') ) {
-        jvmArgs '--add-modules', 'java.xml.bind'
-    }
 }
