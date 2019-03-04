@@ -3,17 +3,19 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
+
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ExecuteOnNonUiThread;
 
-import java.awt.Color;
+import org.junit.Test;
 
 import javax.swing.JComboBox;
 
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import java.awt.Color;
 
 /**
  * Test <code>DefaultEventComboBoxModelTest</code> from the Swing thread.
@@ -55,7 +57,7 @@ public class DefaultEventComboBoxModelTest extends SwingTestCase {
         final DefaultEventComboBoxModel<Color> comboModel = GlazedListsSwing.eventComboBoxModelWithThreadProxyList(colors);
         assertEquals(2, comboModel.getSize());
         try {
-            colors.add(Color.BLUE);
+            colors.acceptWithWriteLock(list -> list.add(Color.BLUE));
         } catch (IllegalStateException ex) {
             fail("failed to proxy source list with ThreadProxyList");
         }
