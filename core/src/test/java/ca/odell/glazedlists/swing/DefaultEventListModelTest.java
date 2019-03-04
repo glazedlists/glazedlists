@@ -3,18 +3,19 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ExecuteOnNonUiThread;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 
-import java.awt.Color;
+import org.junit.Test;
 
 import javax.swing.JList;
 
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import java.awt.Color;
 
 /**
  * Test <code>DefaultEventListModelTest</code> from the Swing thread.
@@ -56,9 +57,9 @@ public class DefaultEventListModelTest extends SwingTestCase {
         final DefaultEventListModel<Color> listModel = GlazedListsSwing.eventListModelWithThreadProxyList(colors);
         assertEquals(2, listModel.getSize());
         try {
-            colors.add(Color.BLUE);
+            colors.acceptWithWriteLock(list -> list.add(Color.BLUE));
         } catch (IllegalStateException ex) {
-            fail("failed to proxy source list with ThreadProxyList");
+            fail("failed to proxy source list with ThreadProxyList: " + ex.getMessage());
         }
         listModel.dispose();
     }
