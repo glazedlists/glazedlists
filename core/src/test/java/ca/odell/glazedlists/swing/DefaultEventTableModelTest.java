@@ -3,6 +3,11 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
+
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ExecuteOnNonUiThread;
@@ -15,14 +20,8 @@ import ca.odell.glazedlists.gui.WritableTableFormat;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.matchers.Matcher;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.util.Arrays;
-import java.util.List;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import javax.swing.Action;
 import javax.swing.DefaultListCellRenderer;
@@ -33,10 +32,14 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableCellRenderer;
 
-import org.junit.Ignore;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Test DefaultEventTableModel
@@ -81,7 +84,7 @@ public class DefaultEventTableModelTest extends SwingTestCase {
         final AdvancedTableModel<Color> tableModel = GlazedListsSwing.eventTableModelWithThreadProxyList(colors, colorTableFormat);
         assertEquals(2, tableModel.getRowCount());
         try {
-            colors.add(Color.BLUE);
+            colors.acceptWithWriteLock(list -> list.add(Color.BLUE));
         } catch (IllegalStateException ex) {
             fail("failed to proxy source list with ThreadProxyList");
         }
