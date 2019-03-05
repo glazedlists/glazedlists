@@ -7,6 +7,7 @@ plugins {
     id "signing"
     id "it.gianluz.capsule" version "1.0.3"
     id "biz.aQute.bnd.builder" version "4.1.0"
+    id 'org.openjfx.javafxplugin' version '0.0.7' apply false
 }
 
 /**
