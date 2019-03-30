@@ -1,7 +1,9 @@
 language: java
 jdk:
   - oraclejdk8
-  - oraclejdk9
+  - openjdk11
+  - openjdk12
+#  - openjdk-ea
 sudo: false
 
 env: DISPLAY=:99.0

@@ -1,0 +1,7 @@
+if (JavaVersion.current().compareTo(JavaVersion.VERSION_11) >= 0) {
+    apply plugin: 'org.openjfx.javafxplugin'
+
+    javafx {
+        modules = [ 'javafx.controls', 'javafx.web' ]
+    }
+}

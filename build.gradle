@@ -5,8 +5,9 @@ plugins {
     id "base"
     id "maven"
     id "signing"
-    id "us.kirchmeier.capsule" version "1.0.2"
-    id "biz.aQute.bnd.builder" version "3.3.0"
+    id "it.gianluz.capsule" version "1.0.3"
+    id "biz.aQute.bnd.builder" version "4.1.0"
+    id 'org.openjfx.javafxplugin' version '0.0.7' apply false
 }
 
 /**
@@ -108,7 +109,7 @@ task docs(type: Javadoc) {
             "http://docs.oracle.com/javase/8/docs/api/",
             "http://help.eclipse.org/neon/topic/org.eclipse.platform.doc.isv/reference/api/",
             "http://doc.formdev.com/jgoodies-forms/",
-            "http://nachocalendar.sourceforge.net/doc/",
+            "http://nachocalendar.sourceforge.net/apidocs/",
             "http://www.jfree.org/jfreechart/api/javadoc/",
             "http://javadoc.geotoolkit.org/external/swingx/",
             "https://docs.jboss.org/hibernate/orm/current/javadocs/"

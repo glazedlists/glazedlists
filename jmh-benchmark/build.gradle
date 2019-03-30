@@ -1,4 +1,4 @@
-apply plugin: 'us.kirchmeier.capsule'
+apply plugin: 'it.gianluz.capsule'
 
 configurations {
     apt
