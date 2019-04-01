@@ -1,5 +1,5 @@
 dependencies {
-    compile 'org.hibernate:hibernate-core:5.0.11.Final'
+    compile 'org.hibernate:hibernate-core:5.2.17.Final'
     compile 'javax.xml.bind:jaxb-api:2.3.0'
     compile 'org.glassfish.jaxb:jaxb-runtime:2.3.0.1'
     compile 'com.sun.activation:javax.activation:1.2.0'

@@ -12,7 +12,7 @@ import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 import org.hibernate.collection.internal.PersistentList;
-import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.persister.collection.CollectionPersister;
 
 import java.io.IOException;
@@ -44,7 +44,7 @@ public final class PersistentEventList extends PersistentList implements EventLi
      * @param session the session
      * @param listFactory factory for EventLists
      */
-    public PersistentEventList(SessionImplementor session, EventListFactory listFactory) {
+    public PersistentEventList(SharedSessionContractImplementor session, EventListFactory listFactory) {
         super(session);
 
         final EventList delegate = listFactory.createEventList();
@@ -61,7 +61,7 @@ public final class PersistentEventList extends PersistentList implements EventLi
      * @param session the session
      * @param newList the EventList
      */
-    public PersistentEventList(SessionImplementor session, EventList newList) {
+    public PersistentEventList(SharedSessionContractImplementor session, EventList newList) {
         super(session, newList);
         if (newList == null) {
             throw new IllegalArgumentException("EventList parameter may not be null");

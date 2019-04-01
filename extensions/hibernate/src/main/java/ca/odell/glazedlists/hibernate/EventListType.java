@@ -10,7 +10,7 @@ import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 import org.hibernate.HibernateException;
 import org.hibernate.collection.spi.PersistentCollection;
-import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.persister.collection.CollectionPersister;
 import org.hibernate.usertype.ParameterizedType;
 import org.hibernate.usertype.UserCollectionType;
@@ -134,15 +134,15 @@ public class EventListType implements UserCollectionType, ParameterizedType {
 
     /** {@inheritDoc} */
     @Override
-    public PersistentCollection instantiate(SessionImplementor session,
-            CollectionPersister persister) throws HibernateException {
+    public PersistentCollection instantiate(SharedSessionContractImplementor session, CollectionPersister persister)
+            throws HibernateException {
         return new PersistentEventList(session, getListFactory());
     }
 
     /** {@inheritDoc} */
     @Override
-    public Object replaceElements(Object original, Object target, CollectionPersister persister,
-            Object owner, Map copyCache, SessionImplementor session) throws HibernateException {
+    public Object replaceElements(Object original, Object target, CollectionPersister persister, Object owner, Map copyCache,
+            SharedSessionContractImplementor session) throws HibernateException {
         final EventList result = (EventList) target;
         final EventList source = (EventList) original;
         result.clear();
@@ -152,7 +152,7 @@ public class EventListType implements UserCollectionType, ParameterizedType {
 
     /** {@inheritDoc} */
     @Override
-    public PersistentCollection wrap(SessionImplementor session, Object collection) {
+    public PersistentCollection wrap(SharedSessionContractImplementor session, Object collection) {
         return new PersistentEventList(session, (EventList) collection);
     }
 }
