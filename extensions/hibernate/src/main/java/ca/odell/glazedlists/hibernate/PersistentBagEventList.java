@@ -11,7 +11,7 @@ import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.event.ListEventPublisher;
 import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
-import org.hibernate.collection.internal.PersistentList;
+import org.hibernate.collection.internal.PersistentBag;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.persister.collection.CollectionPersister;
 
@@ -24,15 +24,14 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * A Hibernate persistent list wrapper for an {@link EventList}.
+ * A Hibernate persistent bag wrapper for an {@link EventList}.
  * <p>
  * Underlying collection implementation is {@link BasicEventList}.
  *
- * @author Bruce Alspaugh
  * @author Holger Brands
- * @author James Lemieux
+ * @author Julian Aliaj
  */
-public final class PersistentEventList extends PersistentList implements EventList, ListEventListener {
+public final class PersistentBagEventList extends PersistentBag implements EventList, ListEventListener {
 
     private static final long serialVersionUID = 0L;
 
@@ -45,7 +44,7 @@ public final class PersistentEventList extends PersistentList implements EventLi
      * @param session the session
      * @param listFactory factory for EventLists
      */
-    public PersistentEventList(SharedSessionContractImplementor session, EventListFactory listFactory) {
+    public PersistentBagEventList(SharedSessionContractImplementor session, EventListFactory listFactory) {
         super(session);
 
         final EventList delegate = listFactory.createEventList();
@@ -53,7 +52,7 @@ public final class PersistentEventList extends PersistentList implements EventLi
         // instantiate list here to avoid NullPointerExceptions with lazy loading
         updates = new ListEventAssembler(this, delegate.getPublisher());
         delegate.addListEventListener(this);
-        list = delegate;
+        bag = delegate;
     }
 
     /**
@@ -62,7 +61,7 @@ public final class PersistentEventList extends PersistentList implements EventLi
      * @param session the session
      * @param newList the EventList
      */
-    public PersistentEventList(SharedSessionContractImplementor session, EventList newList) {
+    public PersistentBagEventList(SharedSessionContractImplementor session, EventList newList) {
         super(session, newList);
         if (newList == null) {
             throw new IllegalArgumentException("EventList parameter may not be null");
@@ -88,7 +87,7 @@ public final class PersistentEventList extends PersistentList implements EventLi
      */
     private void beforeInitialize() {
         assert !wasInitialized() : "PersistentEventList is already initialized";
-        if (this.list == null) {
+        if (this.bag == null) {
             throw new IllegalStateException("'list' member is undefined");
         }
     }
@@ -96,13 +95,13 @@ public final class PersistentEventList extends PersistentList implements EventLi
     /** {@inheritDoc} */
     @Override
     public ListEventPublisher getPublisher() {
-        return ((EventList) list).getPublisher();
+        return ((EventList) bag).getPublisher();
     }
 
     /** {@inheritDoc} */
     @Override
     public ReadWriteLock getReadWriteLock() {
-        return ((EventList) list).getReadWriteLock();
+        return ((EventList) bag).getReadWriteLock();
     }
 
     /** {@inheritDoc} */
@@ -140,9 +139,9 @@ public final class PersistentEventList extends PersistentList implements EventLi
         out.defaultWriteObject();
         // write out all serializable listeners
         List<ListEventListener> serializableListeners = new ArrayList<>();
-        for(Iterator<ListEventListener> i = updates.getListEventListeners().iterator(); i.hasNext(); ) {
+        for (Iterator<ListEventListener> i = updates.getListEventListeners().iterator(); i.hasNext(); ) {
             ListEventListener listener = i.next();
-            if(!(listener instanceof Serializable)) {
+            if (!(listener instanceof Serializable)) {
                 continue;
             }
             serializableListeners.add(listener);
@@ -156,12 +155,12 @@ public final class PersistentEventList extends PersistentList implements EventLi
      */
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-        assert (list instanceof EventList) : "'list' member type unknown";
-        updates = new ListEventAssembler(this, ((EventList) list).getPublisher());
+        assert (bag instanceof EventList) : "'bag' member type unknown";
+        updates = new ListEventAssembler(this, ((EventList) bag).getPublisher());
 
         // read in the listeners
         final ListEventListener[] listeners = (ListEventListener[]) in.readObject();
-        for(int i = 0; i < listeners.length; i++) {
+        for (int i = 0; i < listeners.length; i++) {
             updates.addListEventListener(listeners[i]);
         }
     }
