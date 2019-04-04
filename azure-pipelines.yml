@@ -1,15 +1,7 @@
-pool:
-  vmImage: 'Ubuntu 16.04'
-
-steps:
-- task: Gradle@2
-  inputs:
-    workingDirectory: ''
-    gradleWrapperFile: 'gradlew'
-    gradleOptions: '-Xmx3072m'
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.11'
-    jdkArchitectureOption: 'x64'
-    publishJUnitResults: true
-    testResultsFiles: '**/TEST-*.xml'
-    tasks: 'build'
+jobs:
+  # Linux job
+  - template: azure-build-job.yml
+    parameters:
+      name: Linux
+      pool:
+        vmImage: 'ubuntu-16.04'
