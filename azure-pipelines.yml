@@ -1,6 +1,6 @@
 jobs:
   # Linux job
-  - template: azure-build-job.yml
+  - template: build-job.yml
     parameters:
       name: Linux
       pool:
