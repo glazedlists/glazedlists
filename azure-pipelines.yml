@@ -12,6 +12,7 @@ jobs:
       name: MacOS
       pool:
         vmImage: 'macOS-10.13'
+      tasks: 'build -x :extensions:swt:test'
 
   # Windows job
   - template: build-job.yml
