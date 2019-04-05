@@ -1,6 +1,7 @@
 parameters:
   name: ''
   pool: ''
+  tasks: 'build'
 
 jobs:
 - job: ${{ parameters.name }}
@@ -16,4 +17,4 @@ jobs:
         jdkArchitectureOption: 'x64'
         publishJUnitResults: true
         testResultsFiles: '**/TEST-*.xml'
-        tasks: 'build'
+        tasks: ${{ tasks }}
