@@ -2,11 +2,19 @@ parameters:
   name: ''
   pool: ''
   tasks: 'build'
+  initWindowManager: false
 
 jobs:
 - job: ${{ parameters.name }}
-  pool: ${{ parameters.pool }}
+  pool: ${{ parameters.pool }}  
   steps:
+    - bash: |
+        set -e
+        ./gradlew --version
+      env:
+        DISPLAY: :99.0
+      displayName: Setup Window Manager
+      condition: eq(${{ parameters.initWindowManager }}, true)
     - task: Gradle@2
       inputs:
         workingDirectory: ''
