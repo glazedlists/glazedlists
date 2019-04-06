@@ -13,11 +13,10 @@ jobs:
         set -x
         ./gradlew --version
         sudo apt install metacity        
-        Xvfb :99 &
+        Xvfb :1 &
         sleep 5
         metacity --sm-disable --replace 2> metacity.err &
-      env:
-        DISPLAY: :99.0
+        export DISPLAY=:1
       displayName: Setup Window Manager
       condition: eq(${{ parameters.initWindowManager }}, true)
     - task: Gradle@2
