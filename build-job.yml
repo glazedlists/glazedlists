@@ -10,9 +10,12 @@ jobs:
   steps:
     - bash: |
         set -e
+        set -x
         ./gradlew --version
-        sudo apt update
         sudo apt install metacity
+        sh -e /etc/init.d/xvfb start
+        sleep 5
+        metacity --sm-disable --replace 2> metacity.err &
       env:
         DISPLAY: :99.0
       displayName: Setup Window Manager
