@@ -21,3 +21,4 @@ jobs:
       name: Windows
       pool:
         vmImage: 'windows-2019'
+      tasks: 'build -PexcludeTests=**/CTPConnectionTest*'
