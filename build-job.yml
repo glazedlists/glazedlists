@@ -4,6 +4,9 @@ parameters:
   tasks: 'build'
   initWindowManager: false
 
+variables:
+  DISPLAY: :1
+
 jobs:
 - job: ${{ parameters.name }}
   pool: ${{ parameters.pool }}  
@@ -16,7 +19,6 @@ jobs:
         Xvfb :1 &
         sleep 5
         metacity --sm-disable --replace 2> metacity.err &
-        export DISPLAY=:1
       displayName: Setup Window Manager
       condition: eq(${{ parameters.initWindowManager }}, true)
     - bash: printenv
