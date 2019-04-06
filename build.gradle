@@ -61,6 +61,10 @@ subprojects {
         systemProperties 'java.awt.headless': 'true'
         maxHeapSize = "512m"
 
+        if (project.hasProperty('excludeTests')) { 
+            exclude project.property('excludeTests')
+        } 
+
         testLogging {
             events "failed"
             exceptionFormat "short"
