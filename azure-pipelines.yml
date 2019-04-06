@@ -5,6 +5,7 @@ jobs:
       name: Linux
       pool:
         vmImage: 'ubuntu-16.04'
+      initWindowManager: true
   
   # Mac OS job
   - template: build-job.yml
