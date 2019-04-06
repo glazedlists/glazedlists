@@ -22,11 +22,11 @@ import static org.junit.Assert.*;
 public class ThreadedMatcherEditorTest {
 
     // The amount of time (in ms) to wait until the CountingMatcherEditorListener is done processing and begins delaying
-    private static final long SIMULATED_PROCESSING_DELAY_STARTS = 300;
+    private static final long SIMULATED_PROCESSING_DELAY_STARTS = 200;
     // The amount of time (in ms) for the CountingMatcherEditorListener to delay
     private static final long SIMULATED_PROCESSING_DELAY = 250;
     // The amount of time (in ms) to wait until the CountingMatcherEditorListener completes processing AND delaying
-    private static final long SIMULATED_PROCESSING_DELAY_WAIT = 500;
+    private static final long SIMULATED_PROCESSING_DELAY_WAIT = 400;
 
     private MatcherEditor.Event matchAll;
     private MatcherEditor.Event matchNone;
