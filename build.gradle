@@ -94,6 +94,7 @@ clean.doLast {
  */
 task docs(type: Javadoc) {
     options.addStringOption('Xdoclint:none', '-quiet')
+    options.jFlags('-Dhttp.agent=gradle-javadoc')
     classpath = files(exportedProjects.collect { it.sourceSets.main.compileClasspath + it.sourceSets.main.output })
     source = exportedProjects.collect { it.sourceSets.main.allJava }
     destinationDir = file("$targetDir/docs/api")
@@ -111,7 +112,7 @@ task docs(type: Javadoc) {
             "http://doc.formdev.com/jgoodies-forms/",
             "http://nachocalendar.sourceforge.net/apidocs/",
             "http://www.jfree.org/jfreechart/api/javadoc/",
-            "http://javadoc.geotoolkit.org/external/swingx/",
+	    "https://static.javadoc.io/org.swinglabs.swingx/swingx-all/1.6.5-1/",
             "https://docs.jboss.org/hibernate/orm/current/javadocs/"
         )
     }
