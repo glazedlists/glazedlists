@@ -4,12 +4,11 @@ parameters:
   tasks: 'build'
   initWindowManager: false
 
-variables:
-  DISPLAY: :1
-
 jobs:
 - job: ${{ parameters.name }}
   pool: ${{ parameters.pool }}  
+  variables:
+    DISPLAY: :1
   steps:
     - bash: |
         set -e
