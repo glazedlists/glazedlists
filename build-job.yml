@@ -20,7 +20,6 @@ jobs:
         metacity --sm-disable --replace 2> metacity.err &
       displayName: Setup Window Manager
       condition: eq(${{ parameters.initWindowManager }}, true)
-    - bash: printenv
     - task: Gradle@2
       inputs:
         workingDirectory: ''
