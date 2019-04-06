@@ -11,6 +11,8 @@ jobs:
     - bash: |
         set -e
         ./gradlew --version
+        sudo apt update
+        sudo apt install metacity
       env:
         DISPLAY: :99.0
       displayName: Setup Window Manager
