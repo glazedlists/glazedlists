@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/glazedlists/glazedlists.svg?branch=master)](https://travis-ci.org/glazedlists/glazedlists)
 
-[![Build Status](https://dev.azure.com/glazedlists/glazedlists/_apis/build/status/glazedlists.glazedlists?branchName=azure-integration)](https://dev.azure.com/glazedlists/glazedlists/_build/latest?definitionId=1&branchName=azure-integration)
+[![Build Status](https://dev.azure.com/glazedlists/glazedlists/_apis/build/status/glazedlists.glazedlists?branchName=azure-integration)](https://dev.azure.com/glazedlists/glazedlists/_build/latest?definitionId=1&branchName=master)
 
 [![Join the chat at https://gitter.im/glazedlists/glazedlists](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/glazedlists/glazedlists)
 
