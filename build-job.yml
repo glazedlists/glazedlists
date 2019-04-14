@@ -1,0 +1,33 @@
+parameters:
+  name: ''
+  pool: ''
+  tasks: 'build'
+  initWindowManager: false
+
+jobs:
+- job: ${{ parameters.name }}
+  pool: ${{ parameters.pool }}  
+  variables:
+    DISPLAY: :1
+  steps:
+    - bash: |
+        set -e
+        set -x
+        ./gradlew --version
+        sudo apt install metacity        
+        Xvfb :1 &
+        sleep 5
+        metacity --sm-disable --replace 2> metacity.err &
+      displayName: Setup Window Manager
+      condition: eq(${{ parameters.initWindowManager }}, true)
+    - task: Gradle@2
+      inputs:
+        workingDirectory: ''
+        gradleWrapperFile: 'gradlew'
+        gradleOptions: '-Xmx3072m'
+        javaHomeOption: 'JDKVersion'
+        jdkVersionOption: '1.11'
+        jdkArchitectureOption: 'x64'
+        publishJUnitResults: true
+        testResultsFiles: '**/TEST-*.xml'
+        tasks: ${{ parameters.tasks }}

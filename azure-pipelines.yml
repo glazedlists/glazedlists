@@ -1,0 +1,24 @@
+jobs:
+  # Linux job
+  - template: build-job.yml
+    parameters:
+      name: Linux
+      pool:
+        vmImage: 'ubuntu-16.04'
+      initWindowManager: true
+  
+  # Mac OS job
+  - template: build-job.yml
+    parameters:
+      name: MacOS
+      pool:
+        vmImage: 'macOS-10.13'
+      tasks: 'build -x :extensions:swt:test'
+
+  # Windows job
+  - template: build-job.yml
+    parameters:
+      name: Windows
+      pool:
+        vmImage: 'windows-2019'
+      tasks: 'build -PexcludeTests=**/CTPConnectionTest*'
