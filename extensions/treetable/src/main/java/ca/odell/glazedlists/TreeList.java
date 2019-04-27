@@ -11,7 +11,14 @@ import ca.odell.glazedlists.impl.adt.barcode2.Element;
 import ca.odell.glazedlists.impl.adt.barcode2.FourColorTree;
 import ca.odell.glazedlists.impl.adt.barcode2.ListToByteCoder;
 
-import java.util.*;
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * A hierarchial EventList that infers its structure from a flat list.
@@ -1665,7 +1672,8 @@ public final class TreeList<E> extends TransformedList<TreeList.Node<E>,E> {
         /** {@inheritDoc} */
         @Override
         public boolean equals(Object o) {
-            if(this == o) return true;
+            if (this == o) return true;
+            if (!(o instanceof Node)) return false;
             final Node node = (Node) o;
             return path.equals(node.path);
         }

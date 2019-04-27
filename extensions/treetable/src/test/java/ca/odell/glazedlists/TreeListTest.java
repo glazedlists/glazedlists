@@ -1,7 +1,16 @@
 package ca.odell.glazedlists;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.impl.testing.ListConsistencyListener;
+
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -10,11 +19,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-
-import org.junit.Ignore;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 /**
  * Verifies that TreeList behaves as expected.
@@ -1988,6 +1992,17 @@ public class TreeListTest {
         TreeList.Node<String> abcd = new TreeList.Node<>(false, GlazedListsTests.stringToList("ABCd"));
 
         assertTrue(nodeComparator.compare(abc, abcd) < 0);
+    }
+
+    @Test
+    public void testTreeListNodeEquals() {
+        TreeList.Node<String> abc = new TreeList.Node<>(false, GlazedListsTests.stringToList("ABC"));
+        TreeList.Node<String> abc2 = new TreeList.Node<>(false, GlazedListsTests.stringToList("ABC"));
+        TreeList.Node<String> abcd = new TreeList.Node<>(false, GlazedListsTests.stringToList("ABCd"));
+        assertEquals(abc2, abc);
+        assertNotEquals(abcd, abc);
+        assertFalse(abc.equals("Test"));
+        assertFalse(abc.equals(null));
     }
 
     /**
