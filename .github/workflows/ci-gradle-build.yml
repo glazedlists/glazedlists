@@ -23,6 +23,7 @@ jobs:
         java-package: jdk+fx
     - name: Install required tools (Linux)
       run: |
+        sudo apt-get update
         sudo apt-get install xvfb
         sudo apt-get install metacity
         Xvfb :1 &
