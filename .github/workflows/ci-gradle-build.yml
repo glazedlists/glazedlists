@@ -8,8 +8,7 @@ jobs:
       DISPLAY: :1
     strategy:
       matrix:
-        os: [windows-latest]
-        #os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         java: [1.8, 11]
 
     runs-on: ${{ matrix.os }}
@@ -21,7 +20,7 @@ jobs:
       with:
         java-version: ${{ matrix.java }}
         java-package: jdk+fx
-    - name: Install required tools (Linux)
+    - name: Install and start window manager (Linux)
       run: |
         sudo apt-get update
         sudo apt-get install xvfb
@@ -40,4 +39,3 @@ jobs:
     - name: Build with Gradle (MacOS)
       run: ./gradlew build -x :extensions:swt:test
       if: matrix.os == 'macos-latest'
-      
