@@ -21,6 +21,14 @@ jobs:
       with:
         java-version: ${{ matrix.java }}
         java-package: jdk+fx
+    - name: Install required tools (Linux)
+      run: |
+        sudo apt-get install xvfb
+        sudo apt-get install metacity
+        Xvfb :1 &
+        sleep 5
+        metacity --sm-disable --replace 2> metacity.err &
+      if: matrix.os == 'ubuntu-latest'
     - name: Build with Gradle (Linux)
       run: ./gradlew build
       if: matrix.os == 'ubuntu-latest'
