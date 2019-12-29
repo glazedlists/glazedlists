@@ -8,7 +8,7 @@ jobs:
       DISPLAY: :1
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [windows-latest]
         #os: [ubuntu-latest, windows-latest, macos-latest]
         java: [1.8, 11]
 
@@ -34,7 +34,7 @@ jobs:
       run: ./gradlew build
       if: matrix.os == 'ubuntu-latest'
     - name: Build with Gradle (Windows)
-      run: ./gradlew build -x :extensions:swt:test -PexcludeTests=**/CTPConnectionTest*
+      run: ./gradlew build -PexcludeTests=**/CTPConnectionTest*
       shell: bash
       if: matrix.os == 'windows-latest'
     - name: Build with Gradle (MacOS)
