@@ -66,8 +66,8 @@ subprojects {
         } 
 
         testLogging {
-            events "failed"
-            exceptionFormat "short"
+            events "skipped", "failed"
+            exceptionFormat "full"
         }
     }
 
