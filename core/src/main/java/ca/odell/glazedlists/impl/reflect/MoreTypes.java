@@ -16,8 +16,16 @@
 package ca.odell.glazedlists.impl.reflect;
 
 import java.io.Serializable;
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.GenericDeclaration;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Static methods for working with types that we aren't publishing in the
@@ -102,7 +110,10 @@ class MoreTypes {
         } else if (type instanceof GenericArrayType) {
             // TODO: Is this sufficient?
             return Object[].class;
-
+        } else if (type instanceof TypeVariable || type instanceof WildcardType) {
+            // we could use the variable's bounds, but that'll won't work if there are multiple.
+            // having a raw type that's more general than necessary is okay
+            return Object.class;
         } else {
             // type is a parameterized type.
             throw unexpectedType(type, ParameterizedType.class);

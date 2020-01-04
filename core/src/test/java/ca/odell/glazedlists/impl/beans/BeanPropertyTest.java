@@ -3,11 +3,13 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.impl.beans;
 
-import java.awt.Color;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.awt.Color;
 
 /**
  * This test verifies that the BeanProperty works as expected.
@@ -155,6 +157,18 @@ public class BeanPropertyTest {
         NamedCode namedCode = new NamedCode();
         codeProperty.set(namedCode, "C++");
         assertEquals("C++", codeProperty.get(namedCode));
+    }
+
+    @Test
+    public void testResolveTypeParameter() {
+        final BeanProperty<Automobile> automobilePassengers = new BeanProperty<>(Automobile.class, "passenger", true, true);
+        assertSame(Object.class, automobilePassengers.getValueClass());
+
+        Automobile<Cattle> cattleCar = new Automobile<>(false);
+        Cattle passenger = new Cattle();
+        cattleCar.setPassenger(passenger);
+
+        assertSame(passenger, automobilePassengers.get(cattleCar));
     }
 }
 
