@@ -16,7 +16,9 @@ Home page: 		http://www.glazedlists.com/
 
 ### Documentation
 
-See documentation at [www.glazedlists.com](http://www.glazedlists.com/documentation)
+[Tutorial](https://glazedlists.github.io/glazedlists-tutorial/)
+
+See further documentation at [www.glazedlists.com](http://www.glazedlists.com/documentation)
 
 ### Issue tracker
 
