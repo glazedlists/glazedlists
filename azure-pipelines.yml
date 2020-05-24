@@ -12,7 +12,7 @@ jobs:
     parameters:
       name: MacOS
       pool:
-        vmImage: 'macOS-10.13'
+        vmImage: 'macOS-10.14'
       tasks: 'build -x :extensions:swt:test'
 
   # Windows job
