@@ -17,6 +17,7 @@ dependencies {
     compile project(':extensions:nachocalendar')
     compile project(':extensions:jgoodiesforms')
     compile files('lib/http.jar')
+    compile 'org.kohsuke:github-api:1.111'
 }
 
 /**

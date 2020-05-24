@@ -5,6 +5,7 @@ import ca.odell.glazedlists.impl.Preconditions;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 /**
  * <code>IssueTrackingSystem</code> is a facade for an issue tracking system.<p>
@@ -22,7 +23,11 @@ public abstract class IssueTrackingSystem {
 
     private static IssueTrackingSystem tigrisIssuezilla = new Issuezilla("Tigris", "http://@PROJECT@.tigris.org");
 
-    private static IssueTrackingSystem[] knownIssueTrackers = {javaNetJira, kenaiJira, codehausJira, tigrisIssuezilla};
+    private static IssueTrackingSystem apacheJira = new Jira("Apache", "http://issues.apache.org");
+
+    private static Github github = new Github();
+
+    private static IssueTrackingSystem[] knownIssueTrackers = {javaNetJira, kenaiJira, codehausJira, tigrisIssuezilla, apacheJira};
 
     private final String name;
 
@@ -152,6 +157,20 @@ public abstract class IssueTrackingSystem {
      */
     public static IssueTrackingSystem getTigrisIssuezilla() {
         return tigrisIssuezilla;
+    }
+
+    /**
+     * @return the Codehaus Jira issue tracker
+     */
+    public static IssueTrackingSystem getApacheJira() {
+        return apacheJira;
+    }
+
+    /**
+     * @return the Github IssueTracker
+     */
+    public static Github getGithub() {
+        return github;
     }
 
     /**
@@ -296,5 +315,52 @@ public abstract class IssueTrackingSystem {
         public void loadIssues(EventList<Issue> target, Project owner) throws IOException {
             JiraXMLParser.loadIssues(target, owner);
         }
+    }
+
+    public static class Github extends IssueTrackingSystem {
+
+        private static final String QUERY_URL = "/issues?q=is%3Aissue";
+        private String baseUrl;
+        private GithubFacade githubFacade;
+
+        Github() {
+            super("Github");
+            baseUrl = "https://github.com/";
+            githubFacade = new GithubFacade();
+        }
+
+        private String getBaseUrl() {
+            return baseUrl;
+        }
+
+        public List<String> getPublicRepoListNames() {
+            return githubFacade.getPublicRepoListNames();
+        }
+
+        @Override
+        public void loadIssues(EventList<Issue> target, InputStream source, Project owner) throws IOException {
+            loadIssues(target, owner);
+        }
+
+        @Override
+        public void loadIssues(EventList<Issue> target, Project owner) throws IOException {
+            githubFacade.loadIssues(target, owner);
+        }
+
+        @Override
+        public Status[] getSupportedStati() {
+            return GithubStatus.values();
+        }
+
+        @Override
+        protected String buildUrlFor(Issue issue) {
+            return getBaseUrl() + issue.getProject().getName() + "/issues/" + issue.getId();
+        }
+
+        @Override
+        protected String buildQueryUrlFor(Project project) {
+            return getBaseUrl() + project.getName() + QUERY_URL;
+        }
+
     }
 }

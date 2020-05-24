@@ -12,49 +12,48 @@ import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.matchers.Matcher;
 
 /**
- * An UsersMatcherEditor is a matcher editor that filters based on the selected
- * users.
+ * An LabelsMatcherEditor is a matcher editor that filters based on the selected
+ * label.
  *
- * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
- * @author <a href="mailto:jesse@swank.ca">Jesse Wilson</a>
+ * @author Holger Brands
  */
-public class UsersMatcherEditor extends AbstractMatcherEditor<Issue> {
+public class LabelsMatcherEditor extends AbstractMatcherEditor<Issue> {
 
-    /** a list of users */
-    private CollectionList<Issue, String> usersForIssues;
-    private UniqueList<String> allUsers;
+    /** a list of labels */
+    private CollectionList<Issue, String> labelForIssues;
+    private UniqueList<String> allLabels;
 
     /** a list that maintains selection */
-    private EventList<String> selectedUsers;
+    private EventList<String> selectedLabels;
 
     /**
      * Create a filter list that filters the specified source list, which
      * must contain only Issue objects.
      */
-    public UsersMatcherEditor(EventList<Issue> source) {
-        // create a unique users list from the source issues list
-        usersForIssues = new CollectionList<>(source, Issue::getAllUsers);
-        allUsers = UniqueList.create(usersForIssues);
+    public LabelsMatcherEditor(EventList<Issue> source) {
+        // create a unique label list from the source issues list
+        labelForIssues = new CollectionList<>(source, Issue::getKeywords);
+        allLabels = UniqueList.create(labelForIssues);
     }
 
     /**
      * Sets the selection driven EventList which triggers filter changes.
      */
-    public void setSelectionList(EventList<String> usersSelectedList) {
-        this.selectedUsers = usersSelectedList;
-        usersSelectedList.addListEventListener(new SelectionChangeEventList());
+    public void setSelectionList(EventList<String> labelsSelectedList) {
+        this.selectedLabels = labelsSelectedList;
+        labelsSelectedList.addListEventListener(new SelectionChangeEventList());
     }
 
     /**
-     * Allow access to the unique list of users
+     * Allow access to the unique list of labels
      */
-    public EventList<String> getUsersList() {
-        return allUsers;
+    public EventList<String> getLabelsList() {
+        return allLabels;
     }
 
     public void dispose() {
-        allUsers.dispose();
-        usersForIssues.dispose();
+        allLabels.dispose();
+        labelForIssues.dispose();
     }
 
     /**
@@ -65,42 +64,41 @@ public class UsersMatcherEditor extends AbstractMatcherEditor<Issue> {
         /** {@inheritDoc} */
         @Override
         public void listChanged(ListEvent<String> listChanges) {
-            // if we have all or no users selected, match all users
-            if(selectedUsers.isEmpty() || selectedUsers.size() == allUsers.size()) {
+            // if we have all or no labels selected, match all labels
+            if(selectedLabels.isEmpty() || selectedLabels.size() == allLabels.size()) {
                 fireMatchAll();
                 return;
             }
 
-            // match the selected subset of users
-            final StringValueMatcher newUserMatcher = new StringValueMatcher(selectedUsers, Issue::getAllUsers);
+            // match the selected subset of labels
+            final StringValueMatcher newComponentMatcher = new StringValueMatcher(selectedLabels, Issue::getKeywords);
 
-            // get the previous matcher. If it wasn't a user matcher, it must
+            // get the previous matcher. If it wasn't a component matcher, it must
             // have been an 'everything' matcher, so the new matcher must be
             // a constrainment of that
             final Matcher<Issue> previousMatcher = getMatcher();
             if(!(previousMatcher instanceof StringValueMatcher)) {
-                fireConstrained(newUserMatcher);
+                fireConstrained(newComponentMatcher);
                 return;
             }
-            final StringValueMatcher previousUserMatcher = (StringValueMatcher) previousMatcher;
+            final StringValueMatcher previousUserMatcher = (StringValueMatcher)previousMatcher;
 
             // Figure out what type of change to fire. This is an optimization over
             // always calling fireChanged() because it allows the FilterList to skip
             // extra elements by knowing how the new matcher relates to its predecessor
-            boolean relaxed = newUserMatcher.isRelaxationOf(previousMatcher);
-            boolean constrained = previousUserMatcher.isRelaxationOf(newUserMatcher);
+            boolean relaxed = newComponentMatcher.isRelaxationOf(previousMatcher);
+            boolean constrained = previousUserMatcher.isRelaxationOf(newComponentMatcher);
             if(relaxed && constrained) {
                 return;
             }
 
             if(relaxed) {
-                fireRelaxed(newUserMatcher);
+                fireRelaxed(newComponentMatcher);
             } else if(constrained) {
-                fireConstrained(newUserMatcher);
+                fireConstrained(newComponentMatcher);
             } else {
-                fireChanged(newUserMatcher);
+                fireChanged(newComponentMatcher);
             }
         }
     }
-
 }

@@ -3,13 +3,19 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser.javafx;
 
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.TransformedList;
+import ca.odell.glazedlists.javafx.EventObservableList;
 import ca.odell.glazedlists.javafx.TextInputControlMatcherEditor;
+import ca.odell.glazedlists.swing.GlazedListsSwing;
 
 import com.publicobject.issuesbrowser.Issue;
 import com.publicobject.issuesbrowser.IssueTextFilterator;
 import com.publicobject.issuesbrowser.Priority;
+import com.publicobject.issuesbrowser.Project;
 import com.publicobject.issuesbrowser.Status;
 
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -52,6 +58,12 @@ public class ViewComponentFactory {
         return result;
     }
 
+    public static Text newLabelsText() {
+        final Text result = new Text("Labels");
+        result.setFont(TEXT_FONT);
+        return result;
+    }
+
     public static Text newPriorityText() {
         final Text result = new Text("Minimum Priority");
         result.setFont(TEXT_FONT);
@@ -69,6 +81,17 @@ public class ViewComponentFactory {
         return result;
     }
 
+    public static ComboBox<Project> createProjectsComboBox() {
+        // projects
+//      EventList<Project> projects = Project.getProjects();
+      EventList<Project> projects = Project.getGithubProjects();
+      TransformedList<Project, Project> projectsProxyList = GlazedListsSwing.swingThreadProxyList(projects);
+      EventObservableList<Project> projectItems = new EventObservableList<>(projectsProxyList);
+      // project select combobox
+      ComboBox<Project> result = new ComboBox<>(projectItems);
+      result.setPromptText("Select a Github project...");
+      return result;
+    }
 
     public static PriorityMatcherEditor newPriorityMatcherEditor() {
         return new PriorityMatcherEditor();

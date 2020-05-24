@@ -1,0 +1,3282 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<issuezilla exporter="guest" charset="UTF-8" version="2.11" urlbase="https://glazedlists.dev.java.net/issues/" maintainer="owner@glazedlists.dev.java.net" project_domain="dev.java.net" project_name="glazedlists" project_id="1073" dtd_version="Revision: 1.2">
+<issue status_code="200" status_message="OK">
+  <issue_id>1</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20040521142009</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>TASK</issue_type>
+  <creation_ts>2003-12-02 22:09:52</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Improve filter performance upon list change</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>2</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P2</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20040130155512</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2003-12-02 22:11:34</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Filter regex fails with special characters</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>3</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040130155416</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>ildella</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-01-07 17:36:37</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>EventListIterator problem with remove() method</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>4</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20040211073459</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>ildella</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-01-14 20:06:46</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Error in setting header value in TableComparatorSelector</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>5</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20040211073533</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-01-15 14:40:43</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Speed up SparseLists</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>6</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>INVALID</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040211073416</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>ildella</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-01-16 12:29:12</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>MutationList return &quot;parent&quot; source instead of its own</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>7</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20040404145045</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2004-01-21 12:19:22</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>CaseInsensitiveFilterList non-&quot;live&quot; mode</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>8</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040211073606</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-01-23 07:42:58</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>ListChangeSequence hasNext() fails when there&apos;s no next</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>9</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040223154018</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>ildella</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-01-26 12:35:18</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>fails to report selection event</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>10</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040223153929</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-01-27 21:37:01</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>IndexedTree insert and remove are too slow</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>11</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040223154221</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>philblais</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2004-01-30 06:16:51</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Expose prepareRenderer from JTable into ListTable class</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>12</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040223154108</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>ildella</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-01-31 06:19:21</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Problem with ListTable.getSelected() ?</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>13</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>INVALID</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040223154152</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-02-01 10:09:09</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>ListChangeSequence grows unbounded</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>14</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20040408090738</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>FEATURE</issue_type>
+  <creation_ts>2004-02-03 09:12:43</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>JList support</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>15</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20040309163956</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-02-10 08:48:25</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Inserted items become selected</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>16</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040309164036</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-02-11 07:14:58</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>No removeSelectionListener() method in ListTable</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>17</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P1</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20040309163907</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-02-23 12:35:47</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Selection concurrency ArrayIndexOutOfBoundsException</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>18</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20040404144944</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-03-08 14:53:47</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>set(), add(), remove() etc. not implemented</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>19</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050105142158</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>FEATURE</issue_type>
+  <creation_ts>2004-03-09 08:53:47</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Glazed lists on the network</short_desc>
+  <dependson>
+    <issue_id>123</issue_id>
+  </dependson>
+  <dependson>
+    <issue_id>124</issue_id>
+  </dependson>
+  <dependson>
+    <issue_id>127</issue_id>
+  </dependson>
+  <dependson>
+    <issue_id>128</issue_id>
+  </dependson>
+  <dependson>
+    <issue_id>129</issue_id>
+  </dependson>
+  <dependson>
+    <issue_id>130</issue_id>
+  </dependson>
+  <dependson>
+    <issue_id>131</issue_id>
+  </dependson>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>20</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P5</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20040622154819</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-03-09 09:12:58</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Refactor package and class names</short_desc>
+  <blocks>
+    <issue_id>41</issue_id>
+  </blocks>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>21</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20040415131149</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-03-15 09:20:50</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>SubList not implemented</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>22</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>kevinmaltby</assigned_to>
+  <delta_ts>20040415131217</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-03-15 11:07:20</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>CachingList dumps all values whenever the list is changed</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>23</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040408090821</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>TASK</issue_type>
+  <creation_ts>2004-03-15 12:15:04</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Add JUnit Support</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>24</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P5</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20040704194528</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>FEATURE</issue_type>
+  <creation_ts>2004-03-18 15:07:01</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Add DeltaList for consistency with derivatives of WritableMutationList</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>25</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040719143651</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-03-19 14:44:50</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>CompositeList not thread-safe</short_desc>
+  <dependson>
+    <issue_id>26</issue_id>
+  </dependson>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>26</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20040609143533</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-03-21 10:09:09</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Replace global lock with reader/writer locks</short_desc>
+  <blocks>
+    <issue_id>41</issue_id>
+  </blocks>
+  <blocks>
+    <issue_id>25</issue_id>
+  </blocks>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>27</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>kevinmaltby</assigned_to>
+  <delta_ts>20040521142001</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>FEATURE</issue_type>
+  <creation_ts>2004-03-22 14:55:29</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>UniqueList not implemented</short_desc>
+  <dependson>
+    <issue_id>40</issue_id>
+  </dependson>
+  <blocks>
+    <issue_id>37</issue_id>
+  </blocks>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>28</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P1</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040521141924</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-03-22 16:52:20</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Lists may fail if the change event indicies are out of order</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>29</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P4</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20040521142023</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-03-25 12:39:34</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>ToString on BasicEventList, MutationList no good</short_desc>
+  <blocks>
+    <issue_id>37</issue_id>
+  </blocks>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>30</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P4</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040521142040</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>TASK</issue_type>
+  <creation_ts>2004-03-26 08:05:12</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Verify ListTable changeSizeRepaintAllThreshhold works</short_desc>
+  <blocks>
+    <issue_id>37</issue_id>
+  </blocks>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>31</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P2</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040521141941</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2004-03-26 09:04:45</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>More powerful TableComparatorSelector</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>32</issue_id>
+  <issue_status>STARTED</issue_status>
+  <priority>P5</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>kevinmaltby</assigned_to>
+  <delta_ts>20041101081857</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2004-03-31 18:42:49</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>CachingList could be more powerful</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>33</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P2</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20040521141946</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2004-04-03 20:20:10</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>SortedList raw order support</short_desc>
+  <blocks>
+    <issue_id>37</issue_id>
+  </blocks>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>34</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040521141953</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>kevinmaltby</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-04-07 22:33:08</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>UniqueList sometimes does not forward events on a DELETE</short_desc>
+  <blocks>
+    <issue_id>37</issue_id>
+  </blocks>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>35</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P5</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040811150354</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>kevinmaltby</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2004-04-07 22:39:16</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>UniqueList needs a means of forwarding non-mandatory change events</short_desc>
+  <blocks>
+    <issue_id>36</issue_id>
+  </blocks>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>36</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P5</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040811150434</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>kevinmaltby</reporter>
+  <issue_type>FEATURE</issue_type>
+  <creation_ts>2004-04-07 22:53:17</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>GlazedLists requires a counted, unique view of a given list.</short_desc>
+  <dependson>
+    <issue_id>35</issue_id>
+  </dependson>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>37</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040521142016</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>TASK</issue_type>
+  <creation_ts>2004-04-08 08:56:02</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Glazed Lists version 0.8 release</short_desc>
+  <dependson>
+    <issue_id>27</issue_id>
+  </dependson>
+  <dependson>
+    <issue_id>40</issue_id>
+  </dependson>
+  <dependson>
+    <issue_id>34</issue_id>
+  </dependson>
+  <dependson>
+    <issue_id>33</issue_id>
+  </dependson>
+  <dependson>
+    <issue_id>30</issue_id>
+  </dependson>
+  <dependson>
+    <issue_id>29</issue_id>
+  </dependson>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>38</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P4</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040521142032</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-04-08 08:59:21</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>TableComparatorChooser icon can get out of sync</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>39</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P2</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040811150501</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-04-13 13:41:26</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Sorting clears selection</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>40</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P2</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20040521141933</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-04-14 18:50:07</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Sorted List fails upon intensive filtering</short_desc>
+  <blocks>
+    <issue_id>27</issue_id>
+  </blocks>
+  <blocks>
+    <issue_id>37</issue_id>
+  </blocks>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>41</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040622154621</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>TASK</issue_type>
+  <creation_ts>2004-05-21 14:33:32</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Glazed Lists version 0.9 release</short_desc>
+  <dependson>
+    <issue_id>26</issue_id>
+  </dependson>
+  <dependson>
+    <issue_id>20</issue_id>
+  </dependson>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>42</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040609143521</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-05-21 14:38:14</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Enable concurrent mutation list modifications</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>43</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P5</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20041215180733</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-05-21 17:13:10</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Potential deadlock in CachingList</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>44</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P2</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040622154649</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-06-02 08:23:59</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>remove(object), clear() can have unwanted side effects</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>45</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P2</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040622154718</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2004-06-02 12:18:56</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Add write functionality to UniqueList</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>46</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P4</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040719143756</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-06-03 05:36:07</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>UniqueList, FilterList fire multiple events for some operations</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>47</issue_id>
+  <issue_status>RESOLVED</issue_status>
+  <priority>P5</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>kevinmaltby</assigned_to>
+  <delta_ts>20050205084051</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2004-06-03 05:39:31</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Threshhold List</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>48</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040622154743</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-06-03 13:02:42</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Migrationkit&apos;s DynamicQueryList fails to forward events</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>49</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040826154615</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>TASK</issue_type>
+  <creation_ts>2004-06-03 13:46:13</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Tutorial v. 0.9</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>50</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P5</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20041201125654</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2004-06-05 08:50:16</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>SWT Support</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>51</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20050105142215</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>TASK</issue_type>
+  <creation_ts>2004-06-09 20:56:35</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Implement Chunk Transfer Protocol client &amp; servers</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>52</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040719143705</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-06-10 08:07:33</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Support &apos;nested&apos; change events</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>53</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040706154337</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>kevinmaltby</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-06-17 15:27:20</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Protected constructors on final classes</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>54</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P2</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040719143549</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-06-22 08:40:09</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>EventSelectionModel does not support concurrency</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>55</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040719143729</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-06-24 12:37:37</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>UniqueList events delete indicies that do not exist</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>56</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P2</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040719143631</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-06-24 15:59:28</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>UniqueList replaceAll() can clear selection</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>57</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P3</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20050118091458</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>TASK</issue_type>
+  <creation_ts>2004-06-24 16:08:31</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Glazed Lists version 1.0 release</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>58</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040729141849</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>kevinmaltby</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2004-06-28 00:21:34</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>UniqueList and SortedList not optimized for contains and containsAll methods</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>59</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>WORKSFORME</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040719143741</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>kevinmaltby</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-06-28 00:23:56</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>read-only access is broken once a ReadOnlyList is decorated by a writable list.</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>60</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040811150524</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-07-04 20:00:05</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>SortedList fires insert &amp; delete instead of updates</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>61</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P5</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040811150541</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2004-07-06 12:44:16</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>SetEnabled(boolean) on EventSelectionModel</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>62</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P4</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040826154642</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2004-07-16 12:13:47</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>SortedList indexOf() etc. make multiple tree calls</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>63</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P5</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040928060739</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>kevinmaltby</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-07-19 22:10:12</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>EventLists don&apos;t get garbage collected unless source list is garbage collected..</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>64</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>WORKSFORME</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040826154623</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-07-20 20:29:20</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Multithreading problem in demo app &amp; tutorial part 6.</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>65</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P1</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040826154556</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>kevinmaltby</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-07-23 11:42:50</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Tutorial part 3 references outdated API</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>66</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P1</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20040811150602</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-07-26 12:20:37</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>SortedList fires empty events on setComparator</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>67</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P4</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.1</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20040928060722</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2004-07-29 14:50:22</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>SparseList makes 2 tree calls when 1 will suffice</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>68</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P3</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>0.9.1</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jplemieux</assigned_to>
+  <delta_ts>20041212104038</delta_ts>
+  <subcomponent>file</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2004-07-29 14:55:40</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Glazed lists on the filesystem</short_desc>
+  <has_duplicates>
+    <issue_id>74</issue_id>
+  </has_duplicates>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>69</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.1</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20040826154629</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>pkuzel</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-07-30 13:46:55</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Build fails on junit</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>70</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P2</priority>
+  <resolution>INVALID</resolution>
+  <component>glazedlists</component>
+  <version>0.9.1</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20040928060542</delta_ts>
+  <subcomponent>swing</subcomponent>
+  <reporter>pkuzel</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-07-30 13:54:53</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>UI does not allow to remove sorting order</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>71</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P2</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.1</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20040826154603</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>pkuzel</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-07-30 15:11:22</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Event API antipatterns</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>72</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.1</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20040826154636</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>pkuzel</reporter>
+  <issue_type>TASK</issue_type>
+  <creation_ts>2004-07-30 15:24:15</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Note on issue 71</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>73</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P2</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20040826154609</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-08-09 14:56:09</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>ArrayIndexOutOfBoundsException on J2SE 5.0 beta 2</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>74</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>DUPLICATE</resolution>
+  <component>glazedlists</component>
+  <version>1.1</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041105094142</delta_ts>
+  <subcomponent>file</subcomponent>
+  <reporter>pkuzel</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2004-08-18 05:32:19</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>File based list</short_desc>
+  <is_duplicate>
+    <issue_id>68</issue_id>
+  </is_duplicate>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>75</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P2</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.1</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050105141642</delta_ts>
+  <subcomponent>net</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>TASK</issue_type>
+  <creation_ts>2004-08-26 15:11:45</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Implement Resource Block Peer</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>76</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>WORKSFORME</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20040928060705</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>ildella</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-09-04 11:11:20</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>problem in EventListSelectionModel under Java 5</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>77</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P2</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.1</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20040928060554</delta_ts>
+  <subcomponent>swing</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-09-07 15:56:58</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>TableHeader indicator arrows point the wrong way</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>78</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P2</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.1</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20040928060615</delta_ts>
+  <subcomponent>swing</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-09-08 14:18:42</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>EventThreadProxy in wrong package</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>79</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.1</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041201125718</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>pkuzel</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2004-09-12 13:37:19</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>TransformedList with a virtual entry</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>80</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P2</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.2</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041214145724</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2004-09-14 12:23:59</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>AbstractFilterList.notifyFilterChanged() should have &quot;tighter&quot; and &quot;looser&quot;</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>81</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P5</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>0.9.2</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041201130839</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2004-09-16 14:09:33</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>JDBC support in Glazed Lists</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>82</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P5</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>0.9.2</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20040916141624</delta_ts>
+  <subcomponent>swing</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-09-16 14:16:24</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>TableComparatorChooser sort arrow indicators not right aligned</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>83</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P5</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.2</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041021180907</delta_ts>
+  <subcomponent>swing</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-09-16 14:25:33</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>TableComparatorChooser needs icons for new Java l&amp;fs</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>84</issue_id>
+  <issue_status>RESOLVED</issue_status>
+  <priority>P4</priority>
+  <resolution>WONTFIX</resolution>
+  <component>glazedlists</component>
+  <version>0.9.2</version>
+  <rep_platform>Macintosh</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050205103101</delta_ts>
+  <subcomponent>swing</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2004-09-21 20:52:19</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>TextFilterList optimization via caching results</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>85</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P4</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.2</version>
+  <rep_platform>Macintosh</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041021180920</delta_ts>
+  <subcomponent>swing</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2004-09-22 21:48:33</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Convenience constructors for automatic TableFormats</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>86</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.2</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041021180929</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2004-09-26 20:56:09</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Convenience constructor for automatic Filterators</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>87</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P5</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.2</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041021180943</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>kevinmaltby</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-09-27 15:21:38</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>GlazedLists is inconsistent in what exception is thrown on bounds checking</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>88</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>INVALID</resolution>
+  <component>glazedlists</component>
+  <version>0.9.2</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041105094334</delta_ts>
+  <subcomponent>swing</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-09-30 05:43:56</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>TableFormat may receive null Object</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>89</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.2</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041201125726</delta_ts>
+  <subcomponent>swing</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>TASK</issue_type>
+  <creation_ts>2004-09-30 05:46:00</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Validate performance of TextFilterList</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>90</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P5</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.2</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>kevinmaltby</assigned_to>
+  <delta_ts>20041215180828</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2004-09-30 13:43:57</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>CompressableList uses multiple nodes when one will do</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>91</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041021181000</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>ildella</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-10-04 11:01:21</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>EventListIterator falls in a loop</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>92</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.3</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041105094345</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>TASK</issue_type>
+  <creation_ts>2004-10-13 11:27:45</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Glazed Lists version 0.9.3 release</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>93</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P2</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.3</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041105094323</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-10-17 21:13:23</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Multiple source support</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>94</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P5</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.3</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041105094405</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-10-17 21:17:27</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>issues.xml is 104 KB</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>95</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.3</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041105094354</delta_ts>
+  <subcomponent>swing</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-10-18 13:31:39</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>TableComparatorChooser breaks when column count changes</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>96</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P3</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050127165646</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-10-21 18:04:19</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Multiple sources for CompositeList</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>97</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P2</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041105094431</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-10-21 18:15:36</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Multithreading is not intuitive</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>98</issue_id>
+  <issue_status>RESOLVED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050131194544</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>TASK</issue_type>
+  <creation_ts>2004-10-21 22:34:21</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Performance &apos;team&apos; idea</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>99</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.3</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20041201125734</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>kevinmaltby</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-11-03 09:35:27</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Demo app description table repaints twice for each selection change</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>100</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041201125742</delta_ts>
+  <subcomponent>swing</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-11-08 10:42:17</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>TableComparatorChooser needs listener</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>101</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041201125750</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-11-08 10:43:08</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Test classes should be in test/ tree</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>102</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P2</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041214145732</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-11-17 08:42:12</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Sublist follows an element through sort, filter, other changes</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>103</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041214145629</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-11-17 08:43:54</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>BeanTableFormat, BeanFilterator broken for read-only properties</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>104</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041214145642</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>FEATURE</issue_type>
+  <creation_ts>2004-11-17 08:48:50</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Popularity List</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>105</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>INVALID</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041214145651</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>TASK</issue_type>
+  <creation_ts>2004-11-17 08:58:56</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Create package-renamer for Spring RCP integration</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>106</issue_id>
+  <issue_status>RESOLVED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>reden</assigned_to>
+  <delta_ts>20050119202902</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>FEATURE</issue_type>
+  <creation_ts>2004-11-19 09:31:53</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Collection extracting List</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>107</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P3</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20041201130515</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>TASK</issue_type>
+  <creation_ts>2004-11-24 11:28:20</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Spring RCP catalyst class</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>108</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041214145700</delta_ts>
+  <subcomponent>swing</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-11-24 11:34:52</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>EventSelectionModel is not a ListSelectionModel</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>109</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P5</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041124114218</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2004-11-24 11:42:18</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Caching in IndexedTree</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>110</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P1</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041214145711</delta_ts>
+  <subcomponent>swing</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-11-26 08:45:54</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>EventSelectionModel throws exception on lead select</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>111</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>reden</assigned_to>
+  <delta_ts>20050105141738</delta_ts>
+  <subcomponent>swing</subcomponent>
+  <reporter>pdbruycker</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-11-29 04:51:29</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>TableFormat should have a getColumnClass() method.</short_desc>
+  <has_duplicates>
+    <issue_id>113</issue_id>
+  </has_duplicates>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>112</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>WONTFIX</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050131194232</delta_ts>
+  <subcomponent>swing</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-11-29 07:16:54</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>EventTableModel.setTableFormat() clears selection</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>113</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>DUPLICATE</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041215180900</delta_ts>
+  <subcomponent>swing</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-12-01 09:57:22</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>TableFormat.getColumnClass does not exist</short_desc>
+  <is_duplicate>
+    <issue_id>111</issue_id>
+  </is_duplicate>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>114</issue_id>
+  <issue_status>RESOLVED</issue_status>
+  <priority>P5</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.3</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>kevinmaltby</assigned_to>
+  <delta_ts>20050131094854</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>kevinmaltby</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2004-12-01 11:39:29</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>UniqueList still uses CompressableList not Barcode.</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>115</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>kevinmaltby</assigned_to>
+  <delta_ts>20050105141821</delta_ts>
+  <subcomponent>swt</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-12-01 13:01:12</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>SWT TableComparatorChooser</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>116</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>kevinmaltby</assigned_to>
+  <delta_ts>20050105141941</delta_ts>
+  <subcomponent>swt</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-12-01 13:01:52</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>SWT Demo application</short_desc>
+  <dependson>
+    <issue_id>133</issue_id>
+  </dependson>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>117</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>kevinmaltby</assigned_to>
+  <delta_ts>20050105141916</delta_ts>
+  <subcomponent>swt</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-12-01 13:02:40</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>SWT Table should be virtual</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>118</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>kevinmaltby</assigned_to>
+  <delta_ts>20050105142109</delta_ts>
+  <subcomponent>swt</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-12-01 13:03:16</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>SWT TextFilterList should be as good as the Swing one</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>119</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>kevinmaltby</assigned_to>
+  <delta_ts>20050105142125</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2004-12-04 06:23:52</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Comparators in a Factory</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>120</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>kevinmaltby</assigned_to>
+  <delta_ts>20050131194131</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-12-04 06:29:07</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Beans from a Factory</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>121</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P1</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050105141626</delta_ts>
+  <subcomponent>swing</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-12-06 12:06:36</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>TextFilterList breaks violently if filter goes from 0 to many</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>122</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P4</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041209133726</delta_ts>
+  <subcomponent>net</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>TASK</issue_type>
+  <creation_ts>2004-12-09 13:37:26</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Optimize Bufferlo</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>123</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050105142001</delta_ts>
+  <subcomponent>net</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-12-09 13:39:15</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>CTP Bind failure should throw IOException</short_desc>
+  <blocks>
+    <issue_id>19</issue_id>
+  </blocks>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>124</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050105141838</delta_ts>
+  <subcomponent>net</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-12-09 13:40:15</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Resource Block Peer needs concurrency strategy</short_desc>
+  <blocks>
+    <issue_id>19</issue_id>
+  </blocks>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>125</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P3</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041209134156</delta_ts>
+  <subcomponent>net</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>TASK</issue_type>
+  <creation_ts>2004-12-09 13:41:56</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Many calls to Bufferlo.write()</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>126</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P3</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041209134233</delta_ts>
+  <subcomponent>net</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-12-09 13:42:33</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Bufferlo length is really slow</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>127</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050105141854</delta_ts>
+  <subcomponent>net</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-12-09 13:43:53</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Automatic reconnect in Resource Block Peer</short_desc>
+  <blocks>
+    <issue_id>19</issue_id>
+  </blocks>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>128</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050105141702</delta_ts>
+  <subcomponent>net</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-12-09 13:46:02</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Glazed Lists on network packaging</short_desc>
+  <blocks>
+    <issue_id>19</issue_id>
+  </blocks>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>129</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050105141710</delta_ts>
+  <subcomponent>net</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-12-09 13:46:52</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>ByteCoder for Serializable</short_desc>
+  <blocks>
+    <issue_id>19</issue_id>
+  </blocks>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>130</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050105141724</delta_ts>
+  <subcomponent>net</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-12-09 13:47:34</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>ByteCoder for beans</short_desc>
+  <blocks>
+    <issue_id>19</issue_id>
+  </blocks>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>131</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050105141806</delta_ts>
+  <subcomponent>net</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-12-09 13:49:01</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Unpublish in Resource Block Peer</short_desc>
+  <blocks>
+    <issue_id>19</issue_id>
+  </blocks>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>132</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P3</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041209140213</delta_ts>
+  <subcomponent>net</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2004-12-09 14:02:13</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Resource Block Peer needs P2P</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>133</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.4</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>kevinmaltby</assigned_to>
+  <delta_ts>20050105142139</delta_ts>
+  <subcomponent>swt</subcomponent>
+  <reporter>kevinmaltby</reporter>
+  <issue_type>FEATURE</issue_type>
+  <creation_ts>2004-12-10 00:00:34</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>SWT Viewer class for Lists</short_desc>
+  <blocks>
+    <issue_id>116</issue_id>
+  </blocks>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>134</issue_id>
+  <issue_status>STARTED</issue_status>
+  <priority>P3</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>0.9.4</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>kevinmaltby</assigned_to>
+  <delta_ts>20050101134013</delta_ts>
+  <subcomponent>swt</subcomponent>
+  <reporter>kevinmaltby</reporter>
+  <issue_type>FEATURE</issue_type>
+  <creation_ts>2004-12-10 00:14:32</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>SWT Selection Event List for SWT</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>135</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P4</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>kevinmaltby</assigned_to>
+  <delta_ts>20050131194244</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>TASK</issue_type>
+  <creation_ts>2004-12-12 10:52:52</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Tutorial in DocBook</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>136</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P3</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041214145252</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2004-12-13 15:24:29</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Keep filter strings as upper case for better performance</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>137</issue_id>
+  <issue_status>RESOLVED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.4</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>kevinmaltby</assigned_to>
+  <delta_ts>20050201084629</delta_ts>
+  <subcomponent>swt</subcomponent>
+  <reporter>kevinmaltby</reporter>
+  <issue_type>FEATURE</issue_type>
+  <creation_ts>2004-12-15 08:38:43</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>SWT Viewer class for Sliders for ThresholdList</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>138</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050105141755</delta_ts>
+  <subcomponent>net</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-12-15 13:22:33</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>ResourceBlockPeer breaks with multiple subscribers</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>139</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050105141905</delta_ts>
+  <subcomponent>net</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-12-15 14:21:37</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>NetworkList.dispose()</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>140</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P4</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050105114444</delta_ts>
+  <subcomponent>net</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-12-16 09:22:26</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Potential DoS in Network Glazed Lists</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>141</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P4</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050105114952</delta_ts>
+  <subcomponent>net</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-12-16 09:24:25</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>NetworkList could suck up all ram</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>142</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050105141949</delta_ts>
+  <subcomponent>net</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-12-20 13:17:29</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Glazed Lists NetworkLists should have smart URIs</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>143</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.4</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050105142232</delta_ts>
+  <subcomponent>swing</subcomponent>
+  <reporter>mpo</reporter>
+  <issue_type>PATCH</issue_type>
+  <creation_ts>2004-12-21 06:41:32</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Nasty ClassCastException when user sorts a column with Boolean properties</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>144</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P4</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20041221094348</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2004-12-21 09:43:48</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Glazed Lists should recover from RuntimeExceptions</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>145</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>INVALID</resolution>
+  <component>glazedlists</component>
+  <version>0.9.4</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050131194210</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>kevinmaltby</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2005-01-05 08:51:18</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>WeakReferenceProxy seems out of place.</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>146</issue_id>
+  <issue_status>RESOLVED</issue_status>
+  <priority>P2</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050208160545</delta_ts>
+  <subcomponent>swing</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2005-01-05 10:44:34</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Cannot deregister Event*Model as Listener</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>147</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.4</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050131194147</delta_ts>
+  <subcomponent>swing</subcomponent>
+  <reporter>kevinmaltby</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2005-01-05 11:01:41</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Swing JTable selection can result in a RuntimeException</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>148</issue_id>
+  <issue_status>STARTED</issue_status>
+  <priority>P5</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050125162325</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2005-01-05 11:49:29</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>DecoratorList as opposed to TransformedList</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>149</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P4</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20050131194255</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>TASK</issue_type>
+  <creation_ts>2005-01-10 11:39:30</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Document ListEventPublisher</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>150</issue_id>
+  <issue_status>STARTED</issue_status>
+  <priority>P4</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>reden</assigned_to>
+  <delta_ts>20050205123603</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>TASK</issue_type>
+  <creation_ts>2005-01-11 06:42:20</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Demo jar</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>151</issue_id>
+  <issue_status>CLOSED</issue_status>
+  <priority>P2</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.4</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050131194109</delta_ts>
+  <subcomponent>demo</subcomponent>
+  <reporter>kevinmaltby</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2005-01-11 10:26:10</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Swing Demo descriptions table never has any contents.</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>152</issue_id>
+  <issue_status>RESOLVED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.4</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>kevinmaltby</assigned_to>
+  <delta_ts>20050203162518</delta_ts>
+  <subcomponent>swt</subcomponent>
+  <reporter>kevinmaltby</reporter>
+  <issue_type>FEATURE</issue_type>
+  <creation_ts>2005-01-12 11:44:30</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>SWT package lacks Combo support</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>153</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P4</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050117094859</delta_ts>
+  <subcomponent>swing</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2005-01-17 09:48:23</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Observable TableFormat class</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>154</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P3</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050117132242</delta_ts>
+  <subcomponent>swing</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2005-01-17 13:22:42</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Swing - selection inversion (to be on par with SWT)</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>155</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P3</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20050205084012</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2005-01-17 13:26:06</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Tutorial needs updating</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>156</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P3</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050207110801</delta_ts>
+  <subcomponent>net</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2005-01-17 13:31:10</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>NetworkList tests fail</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>157</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P5</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050202003217</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2005-01-17 14:31:28</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>A JavaBeans PropertyListener list</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>158</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P4</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050131065509</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>TASK</issue_type>
+  <creation_ts>2005-01-17 18:43:28</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>New unit-testing minimum requirements</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>159</issue_id>
+  <issue_status>RESOLVED</issue_status>
+  <priority>P4</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050210161304</delta_ts>
+  <subcomponent>swing</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2005-01-17 18:51:18</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Thread proxies should acquire read locks</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>160</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P5</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050124182456</delta_ts>
+  <subcomponent>swt</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>TASK</issue_type>
+  <creation_ts>2005-01-24 18:24:56</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>SWT virtual table doesn&apos;t allow rows to be garbage collected</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>161</issue_id>
+  <issue_status>RESOLVED</issue_status>
+  <priority>P1</priority>
+  <resolution>INVALID</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050127165805</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2005-01-25 16:46:12</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>SortedList fires inconsistent event</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>162</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P2</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050126144027</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2005-01-26 14:40:27</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Merge CompositeList and CollectionList</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>163</issue_id>
+  <issue_status>RESOLVED</issue_status>
+  <priority>P2</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050201202208</delta_ts>
+  <subcomponent>swt</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2005-01-27 16:45:35</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>SWT thread proxying is broken</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>164</issue_id>
+  <issue_status>RESOLVED</issue_status>
+  <priority>P2</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050201202127</delta_ts>
+  <subcomponent>swing</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2005-01-27 16:48:23</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Swing thread proxying can be enhanced</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>165</issue_id>
+  <issue_status>RESOLVED</issue_status>
+  <priority>P2</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050131192653</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2005-01-27 16:51:50</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Nested change events should support contradictions</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>166</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P4</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050207111232</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2005-01-27 17:02:08</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Add a tree based list to compete with ArrayList</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>167</issue_id>
+  <issue_status>RESOLVED</issue_status>
+  <priority>P1</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.4</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050128095812</delta_ts>
+  <subcomponent>demo</subcomponent>
+  <reporter>kevinmaltby</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2005-01-28 08:08:38</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>The demo won&apos;t load from the website.</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>168</issue_id>
+  <issue_status>RESOLVED</issue_status>
+  <priority>P1</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.4</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050128095908</delta_ts>
+  <subcomponent>demo</subcomponent>
+  <reporter>kevinmaltby</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2005-01-28 08:19:51</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>The selection driven descriptions are incorrect in some instances.</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>169</issue_id>
+  <issue_status>RESOLVED</issue_status>
+  <priority>P2</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050131192848</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2005-01-29 14:05:45</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>RemoveAll() is broken</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>170</issue_id>
+  <issue_status>RESOLVED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050131193551</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2005-01-31 17:45:53</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>SortedList.indexOf fails for raw-order sortedlist</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>171</issue_id>
+  <issue_status>RESOLVED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.4</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>kevinmaltby</assigned_to>
+  <delta_ts>20050201102032</delta_ts>
+  <subcomponent>swt</subcomponent>
+  <reporter>kevinmaltby</reporter>
+  <issue_type>TASK</issue_type>
+  <creation_ts>2005-02-01 08:49:08</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>SWT ThresholdViewers support Slider but not Scale</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>172</issue_id>
+  <issue_status>RESOLVED</issue_status>
+  <priority>P4</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050210172926</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2005-02-01 09:27:23</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>BeanTableFormat should implement AdvancedTableFormat</short_desc>
+  <cc>aaime</cc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>173</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P4</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20050201101806</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>TASK</issue_type>
+  <creation_ts>2005-02-01 10:18:06</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Set up forums for the casual user</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>174</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P2</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050203095801</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>TASK</issue_type>
+  <creation_ts>2005-02-03 09:58:01</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Glazed Lists version 0.9.5 release</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>175</issue_id>
+  <issue_status>RESOLVED</issue_status>
+  <priority>P1</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.4</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050203172711</delta_ts>
+  <subcomponent>demo</subcomponent>
+  <reporter>kevinmaltby</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2005-02-03 12:37:06</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>java.net upgrade broke the demo.</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>176</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P5</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050207130027</delta_ts>
+  <subcomponent>swt</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2005-02-07 13:00:27</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Sort indicator icons in SWT Table</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>177</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P5</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050207132911</delta_ts>
+  <subcomponent>swing</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2005-02-07 13:29:11</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>EventTableModel should support changing the EventList</short_desc>
+  <blocks>
+    <issue_id>180</issue_id>
+  </blocks>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>178</issue_id>
+  <issue_status>RESOLVED</issue_status>
+  <priority>P3</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>0.9.4</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050207184127</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>kevinmaltby</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2005-02-07 14:26:22</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>The &apos;test&apos; Ant task doesn&apos;t reference &apos;io&apos; as a dependency.</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>179</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P3</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>0.9.4</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050208072507</delta_ts>
+  <subcomponent>swing</subcomponent>
+  <reporter>aaime</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2005-02-08 07:25:07</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>Sorting icon disappears when clicking on a non-sortable column</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>180</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P5</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>0.9.4</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050208125502</delta_ts>
+  <subcomponent>swing</subcomponent>
+  <reporter>aaime</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2005-02-08 07:43:00</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>TableComparatorChooser should accept also an EventList</short_desc>
+  <dependson>
+    <issue_id>177</issue_id>
+  </dependson>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>181</issue_id>
+  <issue_status>RESOLVED</issue_status>
+  <priority>P2</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050208181518</delta_ts>
+  <subcomponent>swt</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2005-02-08 08:28:43</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>SWT IssueBrowser throws ConcurrentMod Exception</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>182</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P3</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>0.9.4</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20050209011941</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>aaime</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2005-02-09 01:19:41</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Forward mailing lists to GMane</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>183</issue_id>
+  <issue_status>RESOLVED</issue_status>
+  <priority>P2</priority>
+  <resolution>FIXED</resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>jessewilson</assigned_to>
+  <delta_ts>20050209203331</delta_ts>
+  <subcomponent>core</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>DEFECT</issue_type>
+  <creation_ts>2005-02-09 10:02:58</creation_ts>
+  <qa_contact>jessewilson</qa_contact>
+  <short_desc>BeanProperty doesn&apos;t follow interfaces</short_desc>
+  <cc>jmanning</cc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>184</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P4</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20050209132417</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2005-02-09 13:24:17</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>Add RAM stats to Javadoc</short_desc>
+</issue>
+<issue status_code="200" status_message="OK">
+  <issue_id>185</issue_id>
+  <issue_status>NEW</issue_status>
+  <priority>P4</priority>
+  <resolution></resolution>
+  <component>glazedlists</component>
+  <version>current</version>
+  <rep_platform>All</rep_platform>
+  <assigned_to>issues@glazedlists</assigned_to>
+  <delta_ts>20050209132536</delta_ts>
+  <subcomponent>www</subcomponent>
+  <reporter>jessewilson</reporter>
+  <issue_type>ENHANCEMENT</issue_type>
+  <creation_ts>2005-02-09 13:25:36</creation_ts>
+  <qa_contact>issues@glazedlists</qa_contact>
+  <short_desc>RAM usage performance test</short_desc>
+</issue>
+</issuezilla>

@@ -3,21 +3,53 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser.swing;
 
-import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.ListSelection;
+import ca.odell.glazedlists.SeparatorList;
+import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
-import ca.odell.glazedlists.swing.*;
+import ca.odell.glazedlists.swing.AdvancedListSelectionModel;
+import ca.odell.glazedlists.swing.AdvancedTableModel;
+import ca.odell.glazedlists.swing.DefaultEventComboBoxModel;
+import ca.odell.glazedlists.swing.EventTableColumnModel;
+import ca.odell.glazedlists.swing.GlazedListsSwing;
+import ca.odell.glazedlists.swing.TableComparatorChooser;
 
-import com.publicobject.issuesbrowser.*;
+import com.publicobject.issuesbrowser.Issue;
+import com.publicobject.issuesbrowser.IssueLoader;
+import com.publicobject.issuesbrowser.IssueTableFormat;
+import com.publicobject.issuesbrowser.Priority;
+import com.publicobject.issuesbrowser.Project;
 import com.publicobject.misc.Exceptions;
-import com.publicobject.misc.swing.*;
+import com.publicobject.misc.swing.ExceptionHandlerFactory;
+import com.publicobject.misc.swing.GradientPanel;
+import com.publicobject.misc.swing.Icons;
+import com.publicobject.misc.swing.IndeterminateToggler;
+import com.publicobject.misc.swing.JSeparatorTable;
+import com.publicobject.misc.swing.LookAndFeelTweaks;
+import com.publicobject.misc.swing.NoFocusRenderer;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.net.URL;
-import java.text.MessageFormat;
-
-import javax.swing.*;
+import javax.swing.AbstractCellEditor;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -25,6 +57,22 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.net.URL;
+import java.text.MessageFormat;
 
 /**
  * An IssueBrowser is a program for finding and viewing issues.
@@ -179,7 +227,8 @@ public class IssuesBrowser implements Runnable {
         issueDetails = new IssueDetailsComponent(filteredIssues);
 
         // projects
-        EventList<Project> projects = Project.getProjects();
+//        EventList<Project> projects = Project.getProjects();
+        EventList<Project> projects = Project.getGithubProjects();
         TransformedList<Project, Project> projectsProxyList = GlazedListsSwing.swingThreadProxyList(projects);
         // project select combobox
         DefaultEventComboBoxModel<Project> projectsComboModel = new DefaultEventComboBoxModel<>(projectsProxyList);
@@ -187,7 +236,7 @@ public class IssuesBrowser implements Runnable {
         projectsCombo.setEditable(false);
         projectsCombo.setOpaque(false);
         projectsCombo.addItemListener(new ProjectChangeListener());
-        projectsComboModel.setSelectedItem(new Project(null, "Select a Java.net project...", null));
+        projectsComboModel.setSelectedItem(new Project(null, "Select a Github project...", null));
 
         // build a label to display the number of issues in the issue table
         issueCounter = new IssueCounterLabel(filteredIssues);

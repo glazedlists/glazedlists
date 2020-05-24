@@ -19,14 +19,25 @@ import com.publicobject.issuesbrowser.IssueTrackingSystem;
 import com.publicobject.issuesbrowser.Status;
 import com.publicobject.misc.swing.RoundedBorder;
 
-import java.awt.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.border.Border;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-
-import javax.swing.*;
-import javax.swing.border.Border;
 
 /**
  * Manage a bunch of issue filters in a panel.
@@ -51,13 +62,15 @@ class FilterPanel {
         this.selectedFilterComponents.add(new CloseableFilterComponent(new SwingUsersMatcherEditor(issues)));
         // and then have the rest
         // TODO make StatusMatcherEditor dynamic, so we can switch issue tracking system (-> and supported stati) at runtime
-        final Status[] stati = IssueTrackingSystem.getJavaNetJira().getSupportedStati();
+//        final Status[] stati = IssueTrackingSystem.getJavaNetJira().getSupportedStati();
+        final Status[] stati = IssueTrackingSystem.getGithub().getSupportedStati();
         this.remainingFilterComponents.add(new CloseableFilterComponent(new StatusMatcherEditor(issues, stati)));
+        this.remainingFilterComponents.add(new CloseableFilterComponent(new SwingLabelsMatcherEditor(issues)));
         this.remainingFilterComponents.add(new CloseableFilterComponent(new PriorityMatcherEditor()));
         this.remainingFilterComponents.add(new CloseableFilterComponent(new CreationDateMatcherEditor()));
         this.remainingFilterComponents.add(new CloseableFilterComponent(new ModificationDateMatcherEditor()));
         // make 'em into matcher editors
-        EventList<MatcherEditor<Issue>> matcherEditors = new FunctionList<>(selectedFilterComponents, new CloseableFilterComponentToMatcherEditor<Issue>());
+        EventList<MatcherEditor<Issue>> matcherEditors = new FunctionList<>(selectedFilterComponents, CloseableFilterComponent::getMatcherEditor);
         this.matcherEditor = new CompositeMatcherEditor<>(matcherEditors);
 
         // create the filters panel
@@ -235,17 +248,6 @@ class FilterPanel {
             else if(component == 1) return element.getComponent();
             else if(component == 2) return element.getWrapPanel();
             else throw new IllegalStateException();
-        }
-    }
-
-    /**
-     * Convert a list of {@link CloseableFilterComponentToMatcherEditor}s into
-     * {@link ca.odell.glazedlists.matchers.MatcherEditor}s.
-     */
-    private static class CloseableFilterComponentToMatcherEditor<E> implements FunctionList.Function<CloseableFilterComponent,MatcherEditor<E>> {
-        @Override
-        public MatcherEditor<E> evaluate(CloseableFilterComponent sourceValue) {
-            return sourceValue.getMatcherEditor();
         }
     }
 }

@@ -7,6 +7,11 @@ package com.publicobject.issuesbrowser;
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 
+import com.publicobject.issuesbrowser.IssueTrackingSystem.Github;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * Models a project on Java.net.
  *
@@ -31,7 +36,7 @@ public class Project {
 		projects.add(new Project("swingx", "SwingX", IssueTrackingSystem.getJavaNetJira()));
 		projects.add(new Project("binding", "JGoodies Binding", IssueTrackingSystem.getJavaNetJira()));
 		projects.add(new Project("kenai", "Kenai (kenai.com)", IssueTrackingSystem.getKenaiJira()));
-		projects.add(new Project("mng", "Maven (codehaus.org)", IssueTrackingSystem.getCodehausJira()));
+		projects.add(new Project("MNG", "Maven (apache.org)", IssueTrackingSystem.getApacheJira()));
 //		projects.add(new Project("subclipse", "Subclipse (tigris.org)", IssueTrackingSystem.getTigrisIssuezilla()));
 
     }
@@ -100,5 +105,16 @@ public class Project {
      */
     public static EventList<Project> getProjects() {
         return projects;
+    }
+
+    /**
+     * Get a list of all projects.
+     */
+    public static EventList<Project> getGithubProjects() {
+        Github github = IssueTrackingSystem.getGithub();
+        List<String> repoNames = github.getPublicRepoListNames();
+        return repoNames.stream()
+                .map(name -> new Project(name, name, github))
+                .collect(Collectors.toCollection(BasicEventList::new));
     }
 }

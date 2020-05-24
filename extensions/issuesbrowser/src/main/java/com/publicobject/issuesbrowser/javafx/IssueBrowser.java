@@ -16,12 +16,16 @@ import com.publicobject.issuesbrowser.Project;
 import com.publicobject.misc.Throbber;
 
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.Scene;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableView;
+import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -48,9 +52,13 @@ public final class IssueBrowser extends Application {
 
     private JavaFxUsersMatcherEditor usersMatcherEditor = new JavaFxUsersMatcherEditor(issuesEventList);
 
+    private JavaFxLabelsMatcherEditor labelsMatcherEditor = new JavaFxLabelsMatcherEditor(issuesEventList);
+
     private FilterList<Issue> issuesUserFiltered = new FilterList<>(issuesEventList, usersMatcherEditor);
 
-    private FilterList<Issue> issuesTextFiltered = new FilterList<>(issuesUserFiltered, Matchers.trueMatcher());
+    private FilterList<Issue> issuesLabelsFiltered = new FilterList<>(issuesUserFiltered, labelsMatcherEditor);
+
+    private FilterList<Issue> issuesTextFiltered = new FilterList<>(issuesLabelsFiltered, Matchers.trueMatcher());
 
     private FilterList<Issue> issuesPriorityFiltered = new FilterList<>(issuesTextFiltered);
 
@@ -63,7 +71,7 @@ public final class IssueBrowser extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        final StackPane root = new StackPane();
+        final StackPane main = new StackPane();
 
         SplitPane splitPane1 = new SplitPane();
         splitPane1.setOrientation(Orientation.HORIZONTAL);
@@ -92,7 +100,7 @@ public final class IssueBrowser extends Application {
         issuesTextFiltered.setMatcherEditor(matcherEditor);
 //        issuesTextFiltered.setMatcherEditor(new ThreadedMatcherEditor<Issue>(matcherEditor));
         final Text usersText = ViewComponentFactory.newUsersText();
-
+        final Text labelsText = ViewComponentFactory.newLabelsText();
         final PriorityMatcherEditor priorityMatcherEditor = ViewComponentFactory.newPriorityMatcherEditor();
         issuesPriorityFiltered.setMatcherEditor(priorityMatcherEditor.getMatcherEditor());
         final Text priorityText = ViewComponentFactory.newPriorityText();
@@ -105,15 +113,29 @@ public final class IssueBrowser extends Application {
         prioBox.getChildren().addAll(priorityMatcherEditor.getControl(), prioTickPane);
 
         filterBox.getChildren().addAll(filterText, matcherEditor.getTextControl(), priorityText,
-                prioBox, usersText, usersMatcherEditor.getControl());
+                prioBox, usersText, usersMatcherEditor.getControl(), labelsText, labelsMatcherEditor.getControl());
 
         VBox.setVgrow(usersMatcherEditor.getControl(), javafx.scene.layout.Priority.ALWAYS);
+        VBox.setVgrow(labelsMatcherEditor.getControl(), javafx.scene.layout.Priority.ALWAYS);
 
         splitPane1.getItems().addAll(filterBox, splitPane2);
 
-        root.getChildren().add(splitPane1);
+        main.getChildren().add(splitPane1);
+
+        ToolBar toolBar = new ToolBar();
+        ComboBox<Project> projectsComboBox = ViewComponentFactory.createProjectsComboBox();
+        projectsComboBox.valueProperty().addListener(new ChangeListener<Project>() {
+            @Override
+            public void changed(ObservableValue<? extends Project> observable, Project oldValue, Project newValue) {
+                issueLoader.setProject(newValue);
+            };
+        });
+
+        toolBar.getItems().add(projectsComboBox);
 
         initEventHandling();
+
+        VBox root = new VBox(toolBar, main);
 
         stage.setScene(new Scene(root, 1024, 600));
         stage.setTitle("Issues");
