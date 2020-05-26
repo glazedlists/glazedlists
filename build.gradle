@@ -56,6 +56,8 @@ subprojects {
     /* dependencies for test */
     dependencies {
         testCompile 'junit:junit:4.11'
+        testCompile 'org.awaitility:awaitility:4.0.3'
+        testCompile 'org.assertj:assertj-core:3.16.1'
     }
     test {
         systemProperties 'java.awt.headless': 'true'
