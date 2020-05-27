@@ -124,11 +124,10 @@ public class EventTableModelTest extends SwingTestCase {
         final ThreadRecorderEventList<Integer> atomicList = new ThreadRecorderEventList<>(new BasicEventList<Integer>());
 
         // start a thread which adds new Integers every 50 ms
-        final Thread writerThread = new Thread(GlazedListsTests.createJerkyAddRunnable2(atomicList, null, 40, 50), "WriterThread");
+        final Thread writerThread = new Thread(GlazedListsTests.createJerkyAddRunnable(atomicList, null, 40, 50), "WriterThread");
         writerThread.start();
 
         // make sure the writerThread has started writing
-//        Thread.sleep(200);
         await().until(() -> atomicList.size() > 3);
 
         // create a list whose get() method pauses for 50 ms before returning the value

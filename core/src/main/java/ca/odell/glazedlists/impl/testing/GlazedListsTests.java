@@ -219,8 +219,7 @@ public class GlazedListsTests {
     }
 
     /**
-     * Create a Runnable which executes the following logic repeatedly for the
-     * given duration:
+     * Create a Runnable which executes the following logic repeatedly for the given count:
      *
      * <ol>
      *   <li> acquires the write lock for the list
@@ -229,62 +228,17 @@ public class GlazedListsTests {
      *   <li> pauses for the given pause (in milliseconds)
      * </ol>
      */
-    public static <E> Runnable createJerkyAddRunnable(EventList<E> list, E value, long duration, long pause) {
-        return new JerkyAddRunnable(list, value, duration, pause);
+    public static <E> Runnable createJerkyAddRunnable(EventList<E> list, E value, long count, long pause) {
+        return new JerkyAddRunnable<E>(list, value, count, pause);
     }
 
-    public static <E> Runnable createJerkyAddRunnable2(EventList<E> list, E value, long count, long pause) {
-        return new JerkyAddRunnable2(list, value, count, pause);
-    }
-
-    private static final class JerkyAddRunnable implements Runnable {
-        private final EventList list;
-        private final Object value;
-        private final long duration;
-        private final long pause;
-
-        public JerkyAddRunnable(EventList list, Object value, long duration, long pause) {
-            if (duration < 1)
-                throw new IllegalArgumentException("duration must be non-negative");
-            if (pause < 1)
-                throw new IllegalArgumentException("pause must be non-negative");
-
-            this.list = list;
-            this.value = value;
-            this.duration = duration;
-            this.pause = pause;
-        }
-
-        @Override
-        public void run() {
-            final long endTime = System.currentTimeMillis() + this.duration;
-
-            while (System.currentTimeMillis() < endTime) {
-                // acquire the write lock and add a new element
-                this.list.getReadWriteLock().writeLock().lock();
-                try {
-                    this.list.add(this.value);
-                } finally {
-                    this.list.getReadWriteLock().writeLock().unlock();
-                }
-
-                // pause before adding another element
-                try {
-                    Thread.sleep(this.pause);
-                } catch (InterruptedException e) {
-                    // best attempt only
-                }
-            }
-        }
-    }
-
-    private static final class JerkyAddRunnable2 implements Runnable {
-        private final EventList list;
-        private final Object value;
+    private static final class JerkyAddRunnable<E> implements Runnable {
+        private final EventList<E> list;
+        private final E value;
         private final long count;
         private final long pause;
 
-        public JerkyAddRunnable2(EventList list, Object value, long count, long pause) {
+        public JerkyAddRunnable(EventList<E> list, E value, long count, long pause) {
             if (count < 1)
                 throw new IllegalArgumentException("count must be non-negative");
             if (pause < 1)
