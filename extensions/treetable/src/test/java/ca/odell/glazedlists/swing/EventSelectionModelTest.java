@@ -3,6 +3,9 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
+import static org.awaitility.Awaitility.await;
+import static org.junit.Assert.assertEquals;
+
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.DelayList;
 import ca.odell.glazedlists.EventList;
@@ -14,10 +17,8 @@ import ca.odell.glazedlists.TreeList;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.matchers.Matchers;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JList;
@@ -25,10 +26,10 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import org.junit.Ignore;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * This test verifies that the EventSelectionModel works.
@@ -238,11 +239,12 @@ public class EventSelectionModelTest extends SwingTestCase {
         final ThreadRecorderEventList<Integer> atomicList = new ThreadRecorderEventList<>(new BasicEventList<Integer>());
 
         // start a thread which adds new Integers every 50 ms
-        final Thread writerThread = new Thread(GlazedListsTests.createJerkyAddRunnable(atomicList, null, 2000, 50), "WriterThread");
+        final Thread writerThread = new Thread(GlazedListsTests.createJerkyAddRunnable2(atomicList, null, 40, 50), "WriterThread");
         writerThread.start();
 
         // make sure the writerThread has started writing
-        Thread.sleep(200);
+//        Thread.sleep(200);
+        await().until(() -> atomicList.size() > 3);
 
         // create a list whose get() method pauses for 50 ms before returning the value
         final EventList<Integer> delayList = new DelayList<>(atomicList, 50);

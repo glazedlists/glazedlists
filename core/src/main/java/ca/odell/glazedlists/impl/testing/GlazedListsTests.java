@@ -9,8 +9,17 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.Matcher;
 
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
 
 /**
  * A factory class useful for testing!
@@ -224,6 +233,10 @@ public class GlazedListsTests {
         return new JerkyAddRunnable(list, value, duration, pause);
     }
 
+    public static <E> Runnable createJerkyAddRunnable2(EventList<E> list, E value, long count, long pause) {
+        return new JerkyAddRunnable2(list, value, count, pause);
+    }
+
     private static final class JerkyAddRunnable implements Runnable {
         private final EventList list;
         private final Object value;
@@ -255,6 +268,46 @@ public class GlazedListsTests {
                     this.list.getReadWriteLock().writeLock().unlock();
                 }
 
+                // pause before adding another element
+                try {
+                    Thread.sleep(this.pause);
+                } catch (InterruptedException e) {
+                    // best attempt only
+                }
+            }
+        }
+    }
+
+    private static final class JerkyAddRunnable2 implements Runnable {
+        private final EventList list;
+        private final Object value;
+        private final long count;
+        private final long pause;
+
+        public JerkyAddRunnable2(EventList list, Object value, long count, long pause) {
+            if (count < 1)
+                throw new IllegalArgumentException("count must be non-negative");
+            if (pause < 1)
+                throw new IllegalArgumentException("pause must be non-negative");
+
+            this.list = list;
+            this.value = value;
+            this.count = count;
+            this.pause = pause;
+        }
+
+        @Override
+        public void run() {
+            long run = 0;
+            while (run < count) {
+                // acquire the write lock and add a new element
+                this.list.getReadWriteLock().writeLock().lock();
+                try {
+                    this.list.add(this.value);
+                    run++;
+                } finally {
+                    this.list.getReadWriteLock().writeLock().unlock();
+                }
                 // pause before adding another element
                 try {
                     Thread.sleep(this.pause);

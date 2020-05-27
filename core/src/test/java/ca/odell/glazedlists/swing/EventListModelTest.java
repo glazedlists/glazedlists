@@ -3,19 +3,21 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
+import static org.awaitility.Awaitility.await;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.DelayList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.ThreadRecorderEventList;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 
-import java.awt.Color;
+import org.junit.Test;
 
 import javax.swing.JList;
 
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import java.awt.Color;
 
 /**
  * Test EventListModel from the Swing thread.
@@ -58,11 +60,12 @@ public class EventListModelTest extends SwingTestCase {
         final ThreadRecorderEventList<Integer> atomicList = new ThreadRecorderEventList<>(new BasicEventList<Integer>());
 
         // start a thread which adds new Integers every 50 ms
-        final Thread writerThread = new Thread(GlazedListsTests.createJerkyAddRunnable(atomicList, null, 2000, 50), "WriterThread");
+        final Thread writerThread = new Thread(GlazedListsTests.createJerkyAddRunnable2(atomicList, null, 40, 50), "WriterThread");
         writerThread.start();
 
         // make sure the writerThread has started writing
-        Thread.sleep(200);
+//        Thread.sleep(200);
+        await().until(() -> atomicList.size() > 3);
 
         // create a list whose get() method pauses for 50 ms before returning the value
         final EventList<Integer> delayList = new DelayList<>(atomicList, 50);

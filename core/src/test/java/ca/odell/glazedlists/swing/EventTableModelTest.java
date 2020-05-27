@@ -3,6 +3,14 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.swing;
 
+import static org.awaitility.Awaitility.await;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.DelayList;
 import ca.odell.glazedlists.EventList;
@@ -17,14 +25,8 @@ import ca.odell.glazedlists.gui.WritableTableFormat;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 import ca.odell.glazedlists.matchers.Matcher;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.util.Arrays;
-import java.util.List;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import javax.swing.Action;
 import javax.swing.DefaultListCellRenderer;
@@ -35,10 +37,14 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableCellRenderer;
 
-import org.junit.Ignore;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Test EventTableModel from the Swing thread.
@@ -118,11 +124,12 @@ public class EventTableModelTest extends SwingTestCase {
         final ThreadRecorderEventList<Integer> atomicList = new ThreadRecorderEventList<>(new BasicEventList<Integer>());
 
         // start a thread which adds new Integers every 50 ms
-        final Thread writerThread = new Thread(GlazedListsTests.createJerkyAddRunnable(atomicList, null, 2000, 50), "WriterThread");
+        final Thread writerThread = new Thread(GlazedListsTests.createJerkyAddRunnable2(atomicList, null, 40, 50), "WriterThread");
         writerThread.start();
 
         // make sure the writerThread has started writing
-        Thread.sleep(200);
+//        Thread.sleep(200);
+        await().until(() -> atomicList.size() > 3);
 
         // create a list whose get() method pauses for 50 ms before returning the value
         final EventList<Integer> delayList = new DelayList<>(atomicList, 50);
