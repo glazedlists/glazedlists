@@ -7,6 +7,7 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
+import ca.odell.glazedlists.event.ObjectChange;
 import javafx.beans.InvalidationListener;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -619,7 +620,13 @@ public class EventObservableList<E> extends AbstractList<E> implements Observabl
 
         @Override
         public List<E> getRemoved() {
-            return Collections.singletonList(changes.getOldValue());
+            final List<ObjectChange<E>> changed = changes.getBlockChanges();
+            final List<E> removed = new ArrayList<>(changed.size());
+            for(int i = 0; i<changed.size(); i++){
+                final ObjectChange<E> c = changed.get(i);
+                removed.add(c.getOldValue());
+            }
+            return removed;
         }
 
         // @Override

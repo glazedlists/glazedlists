@@ -456,7 +456,7 @@ public class EventTableModelTest extends SwingTestCase {
         assertEquals(GlazedListsTests.stringToList("B"), selModel.getSelected());
         assertEquals(GlazedListsTests.delimitedStringToList("A C D E F"), selModel.getDeselected());
         list.removeAll(GlazedListsTests.delimitedStringToList("E F"));
-        assertEquals(2, counter.getCountAndReset());
+        assertEquals(1, counter.getCountAndReset());
         assertEquals(GlazedListsTests.stringToList("B"), selModel.getSelected());
         assertEquals(GlazedListsTests.delimitedStringToList("A C D"), selModel.getDeselected());
     }

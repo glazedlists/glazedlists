@@ -496,8 +496,7 @@ public class EventObservableListTest {
 
         // removeAll (Collection)
         root.removeAll(asList("Kiwi", "Jack fruit"));
-        expectEvent(expectation(ChangeType.DELETE, 9, 10, null, asList("Jack fruit")),
-                expectation(ChangeType.DELETE, 9, 10, null, asList("Kiwi")));
+        expectEvent(expectation(ChangeType.DELETE, 9, 11, null, asList("Jack fruit", "Kiwi")));
         assertEquals(9, wrapper.size());
         assertEquals(9, root.size());
         assertEquals("Apple", wrapper.get(0));
@@ -542,13 +541,8 @@ public class EventObservableListTest {
 
         // clear
         root.clear();
-        expectEvent(expectation(ChangeType.DELETE, 0, 1, null, asList("Apple")),
-                expectation(ChangeType.DELETE, 0, 1, null, asList("Banana")),
-                expectation(ChangeType.DELETE, 0, 1, null, asList("Cantaloupe")),
-                expectation(ChangeType.DELETE, 0, 1, null, asList("Elderberry")),
-                expectation(ChangeType.DELETE, 0, 1, null, asList("Fig")),
-                expectation(ChangeType.DELETE, 0, 1, null, asList("Grape")),
-                expectation(ChangeType.DELETE, 0, 1, null, asList("Honeydew")));
+        expectEvent(expectation(ChangeType.DELETE, 0, 7, null, asList("Apple", "Banana", "Cantaloupe", "Elderberry",
+                "Fig", "Grape", "Honeydew")));
         assertTrue(wrapper.isEmpty());
         assertTrue(root.isEmpty());
         assertEquals(0, wrapper.size());

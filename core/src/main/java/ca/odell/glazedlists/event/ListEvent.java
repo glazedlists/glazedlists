@@ -8,6 +8,7 @@ import ca.odell.glazedlists.SortedList;
 import ca.odell.glazedlists.TransformedList;
 
 import java.util.EventObject;
+import java.util.List;
 
 /**
  * A ListEvent models a sequence of changes to an {@link EventList}. A
@@ -326,24 +327,16 @@ public abstract class ListEvent<E> extends EventObject {
     /**
      * Gets the previous value for a deleted or updated element. If that data is
      * not available, this will return {@link ListEvent#UNKNOWN_VALUE}.
-     *
-     * @deprecated this is a <strong>developer preview</strong> API that is not
-     * yet fit for human consumption. Hopefully the full implementation is
-     * complete for Glazed Lists 2.0.
      */
-    @Deprecated
     public abstract E getOldValue();
 
     /**
      * Gets the current value for an inserted or updated element. If that data is
      * not available, this will return {@link ListEvent#UNKNOWN_VALUE}.
-     *
-     * @deprecated this is a <strong>developer preview</strong> API that is not
-     * yet fit for human consumption. Hopefully the full implementation is
-     * complete for Glazed Lists 2.0.
      */
-    @Deprecated
     public abstract E getNewValue();
+
+    public abstract List<ObjectChange<E>> getBlockChanges();
 
     /**
      * Gets the number of blocks currently remaining in this atomic change.
