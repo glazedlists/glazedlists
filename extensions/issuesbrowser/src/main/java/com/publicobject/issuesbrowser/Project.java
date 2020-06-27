@@ -9,6 +9,7 @@ import ca.odell.glazedlists.EventList;
 
 import com.publicobject.issuesbrowser.IssueTrackingSystem.Github;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -78,6 +79,10 @@ public class Project {
      */
     public String getIssueQueryUri() {
         return getOwner().queryUrlFor(this);
+    }
+
+    public void loadComments(Issue issue) throws IOException {
+        getOwner().loadComments(issue, this);
     }
 
     /**

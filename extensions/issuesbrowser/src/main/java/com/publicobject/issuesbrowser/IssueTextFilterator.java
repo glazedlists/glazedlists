@@ -3,10 +3,10 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.issuesbrowser;
 
+import ca.odell.glazedlists.TextFilterator;
+
 import java.util.Iterator;
 import java.util.List;
-
-import ca.odell.glazedlists.TextFilterator;
 
 /**
  * Provide text filter strings for {@link Issue} objects.

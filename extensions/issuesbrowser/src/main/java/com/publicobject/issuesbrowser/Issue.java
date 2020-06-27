@@ -6,11 +6,13 @@ package com.publicobject.issuesbrowser;
 import ca.odell.glazedlists.jfreechart.DefaultValueSegment;
 import ca.odell.glazedlists.jfreechart.ValueSegment;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -324,6 +326,22 @@ public class Issue implements Comparable {
      * the log of additional comments.
      */
     public List<Description> getDescriptions() { return descriptions; }
+
+    public List<Description> loadAndGetDescriptions() {
+        // ensure descriptions are populated
+        try {
+            getProject().loadComments(this);
+            return descriptions;
+        } catch (IOException e) {
+            System.err.println("Could not load comments for issue " + getId() + ":");
+            e.printStackTrace();
+            Description errorDesc = new Description();
+            errorDesc.setText("Could not load comments for this issue. Please try again later.");
+            errorDesc.setWho("ERRORREPORTER");
+            errorDesc.setWhen(new Date());
+            return Collections.singletonList(errorDesc);
+        }
+    }
 
     /**
      * Get the attachments to this issue.

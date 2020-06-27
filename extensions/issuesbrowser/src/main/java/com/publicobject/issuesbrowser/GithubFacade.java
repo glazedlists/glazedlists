@@ -15,7 +15,12 @@ import org.kohsuke.github.GitHub;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -31,6 +36,8 @@ public class GithubFacade {
     private GHMyself myself;
 
     private List<GHRepository> publicRepoList;
+
+    private Map<String, GHIssue> currentIssuesMap = new HashMap<>();
 
     public List<GHRepository> getPublicRepoList() {
         return publicRepoList;
@@ -48,6 +55,14 @@ public class GithubFacade {
      */
     public GithubFacade() {
         try {
+
+            Logger logger = Logger.getLogger("org.kohsuke.github");
+            logger.setLevel(Level.FINE);
+            ConsoleHandler handler = new ConsoleHandler();
+            // PUBLISH this level
+            handler.setLevel(Level.FINE);
+            logger.addHandler(handler);
+
             github = GitHub.connect();
             myself = github.getMyself();
             publicRepoList = myself.listRepositories(20, GHMyself.RepositoryListFilter.PUBLIC).toList();
@@ -63,6 +78,7 @@ public class GithubFacade {
      * @param project Github project
      */
     public void loadIssues(EventList<Issue> target, Project project) {
+        currentIssuesMap.clear();
         Date loadingStarted = new Date();
         GithubIssueMapper mapper = new GithubIssueMapper(project);
         try {
@@ -70,6 +86,20 @@ public class GithubFacade {
             for (GHIssue ghIssue : repo.listIssues(GHIssueState.ALL)) {
                 Issue newIssue = mapper.mapIssue(ghIssue, loadingStarted);
                 target.add(newIssue);
+                currentIssuesMap.put(newIssue.getId(), ghIssue);
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public void loadComments(Issue target, Project project) {
+        GHIssue ghIssue = currentIssuesMap.get(target.getId());
+        GithubIssueMapper mapper = new GithubIssueMapper(project);
+        try {
+            int commentsCount = ghIssue.getCommentsCount();
+            if (commentsCount > 0 && target.getDescriptions().isEmpty()) {
+                mapper.mapCommentsToDescriptions(ghIssue, target);
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);

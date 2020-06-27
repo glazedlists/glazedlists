@@ -13,6 +13,7 @@ import org.w3c.dom.events.EventTarget;
 import com.publicobject.issuesbrowser.Description;
 import com.publicobject.issuesbrowser.Issue;
 
+import javafx.application.Platform;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -87,7 +88,7 @@ public final class DescriptionPanel {
             htmlText.append(">View Issue ");
             htmlText.append(issue.getId());
             htmlText.append("</a></h3>");
-            for (Iterator<Description> d = issue.getDescriptions().iterator(); d.hasNext();) {
+            for (Iterator<Description> d = issue.loadAndGetDescriptions().iterator(); d.hasNext();) {
                 Description description = d.next();
                 writeDescription(htmlText, description);
             }
@@ -97,7 +98,7 @@ public final class DescriptionPanel {
     }
 
     private void showHtmlTest(String htmlTest) {
-        webView.getEngine().loadContent(htmlTest);
+        Platform.runLater(() -> webView.getEngine().loadContent(htmlTest));
     }
 
     public WebView getWebView() {

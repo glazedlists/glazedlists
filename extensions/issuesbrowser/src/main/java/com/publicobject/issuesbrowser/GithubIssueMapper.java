@@ -51,7 +51,7 @@ public class GithubIssueMapper {
             for (GHLabel label : ghIssue.getLabels()) {
                 result.getKeywords().add(label.getName());
             }
-            mapCommentsToDescriptions(ghIssue, result);
+//            mapCommentsToDescriptions(ghIssue, result);
             // add activity for closed issues
             mapActivityForClose(ghIssue, result);
 
@@ -67,7 +67,7 @@ public class GithubIssueMapper {
     }
 
 
-    private static void mapCommentsToDescriptions(GHIssue fromIssue, Issue toIssue) throws IOException {
+    public void mapCommentsToDescriptions(GHIssue fromIssue, Issue toIssue) throws IOException {
         toIssue.getDescriptions().addAll(
                 fromIssue.getComments().stream()
                     .map(GithubIssueMapper::toDescription)

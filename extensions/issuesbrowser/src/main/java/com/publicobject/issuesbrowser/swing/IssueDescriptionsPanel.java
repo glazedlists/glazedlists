@@ -8,15 +8,15 @@ import com.publicobject.issuesbrowser.Issue;
 import com.publicobject.misc.swing.MacCornerScrollPaneLayoutManager;
 import com.publicobject.misc.swing.WebStart;
 
-import java.net.URL;
-import java.util.Iterator;
-
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
+
+import java.net.URL;
+import java.util.Iterator;
 
 /**
  * The details for a particular issue listed out. This also includes a link
@@ -76,7 +76,7 @@ class IssueDescriptionsPanel {
             htmlText.append(">View Issue ");
             htmlText.append(issue.getId());
             htmlText.append("</a></h3>");
-            for (Iterator<Description> d = issue.getDescriptions().iterator(); d.hasNext();) {
+            for (Iterator<Description> d = issue.loadAndGetDescriptions().iterator(); d.hasNext();) {
                 Description description = d.next();
                 writeDescription(htmlText, description);
             }

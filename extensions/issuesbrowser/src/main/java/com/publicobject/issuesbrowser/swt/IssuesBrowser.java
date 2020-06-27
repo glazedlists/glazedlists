@@ -4,16 +4,22 @@
 package com.publicobject.issuesbrowser.swt;
 
 // swt
-import ca.odell.glazedlists.*;
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.SortedList;
+import ca.odell.glazedlists.ThresholdList;
+import ca.odell.glazedlists.UniqueList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.matchers.Matchers;
 import ca.odell.glazedlists.matchers.ThreadedMatcherEditor;
-import ca.odell.glazedlists.swt.*;
-
-import com.publicobject.issuesbrowser.*;
-import com.publicobject.misc.Throbber;
+import ca.odell.glazedlists.swt.DefaultEventListViewer;
+import ca.odell.glazedlists.swt.DefaultEventTableViewer;
+import ca.odell.glazedlists.swt.GlazedListsSWT;
+import ca.odell.glazedlists.swt.TableComparatorChooser;
+import ca.odell.glazedlists.swt.TextWidgetMatcherEditor;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -21,7 +27,25 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Canvas;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.List;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Slider;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
+
+import com.publicobject.issuesbrowser.Description;
+import com.publicobject.issuesbrowser.Issue;
+import com.publicobject.issuesbrowser.IssueLoader;
+import com.publicobject.issuesbrowser.IssueTextFilterator;
+import com.publicobject.issuesbrowser.Project;
+import com.publicobject.issuesbrowser.UsersMatcherEditor;
+import com.publicobject.misc.Throbber;
 
 
 /**
@@ -383,7 +407,7 @@ public class IssuesBrowser {
                 // The selected value to display was changed
                 if(source.size() != 0) {
                     Issue selected = source.get(0);
-                    java.util.List descriptions = selected.getDescriptions();
+                    java.util.List descriptions = selected.loadAndGetDescriptions();
                     for (int i = 0; i < descriptions.size(); i++) {
                        int rowOffset = descriptionsTable.getItemCount();
                        formatDescription((Description)descriptions.get(i), rowOffset);

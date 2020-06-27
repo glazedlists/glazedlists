@@ -58,6 +58,15 @@ public abstract class IssueTrackingSystem {
     public abstract void loadIssues(EventList<Issue> target, Project owner) throws IOException;
 
     /**
+     * Loads and maps the issue comments on demand when supported by the IssueTrackingSystem.
+     * @param issue the issue
+     * @param owner the owning project
+     * @throws IOException
+     * @throws UnsupportedOperationException when not supported
+     */
+    public abstract void loadComments(Issue issue, Project owner) throws IOException;
+
+    /**
      * @return the supported stati of this issue tracking system
      */
     public abstract Status[] getSupportedStati();
@@ -245,6 +254,11 @@ public abstract class IssueTrackingSystem {
             return baseUrlFor(project) +  "/issues/xml.cgi";
         }
 
+        @Override
+        public void loadComments(Issue issue, Project owner) throws IOException {
+            // Not supported by Issuezilla
+        }
+
         private String baseUrlFor(Project project) {
             return getBaseUrlTemplate().replace(PROJECT_PLACEHOLDER,
                     (project.getName() == null) ? "" : project.getName());
@@ -315,6 +329,11 @@ public abstract class IssueTrackingSystem {
         public void loadIssues(EventList<Issue> target, Project owner) throws IOException {
             JiraXMLParser.loadIssues(target, owner);
         }
+
+        @Override
+        public void loadComments(Issue issue, Project owner) throws IOException {
+            // Not supported by JIRA
+        }
     }
 
     public static class Github extends IssueTrackingSystem {
@@ -345,6 +364,11 @@ public abstract class IssueTrackingSystem {
         @Override
         public void loadIssues(EventList<Issue> target, Project owner) throws IOException {
             githubFacade.loadIssues(target, owner);
+        }
+
+        @Override
+        public void loadComments(Issue target, Project owner) throws IOException {
+            githubFacade.loadComments(target, owner);
         }
 
         @Override
