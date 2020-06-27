@@ -3,22 +3,35 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.javafx;
 
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.SortedList;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
-import javafx.collections.ListChangeListener;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.collections.ListChangeListener;
 
-import static java.util.Arrays.asList;
-import static org.junit.Assert.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Queue;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Tests the behaviour of {@link EventObservableList}.
@@ -90,11 +103,13 @@ public class EventObservableListTest {
                             assertFalse(change.wasRemoved());
                             assertFalse(change.wasReplaced());
                             assertFalse(change.wasUpdated());
+                            assertEquals(0, change.getRemovedSize());
                         } else if (change.wasRemoved()) {
                             type = ChangeType.DELETE;
                             assertFalse(change.wasAdded());
                             assertFalse(change.wasReplaced());
                             assertFalse(change.wasUpdated());
+                            assertEquals(0, change.getAddedSize());
                         } else if (change.wasReplaced()) {
                             type = ChangeType.REPLACE;
                             assertFalse(change.wasAdded());
