@@ -619,7 +619,7 @@ public class EventObservableList<E> extends AbstractList<E> implements Observabl
 
         @Override
         public List<E> getRemoved() {
-            return Collections.singletonList(changes.getOldValue());
+            return wasAdded() ? Collections.<E>emptyList() : Collections.singletonList(changes.getOldValue());
         }
 
         // @Override
