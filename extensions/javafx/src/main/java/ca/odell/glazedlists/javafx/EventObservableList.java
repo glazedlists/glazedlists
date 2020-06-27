@@ -16,9 +16,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Spliterator;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
 /**
  * This list serves as an adapter to allow GlazedList's
@@ -254,6 +260,16 @@ public class EventObservableList<E> extends AbstractList<E> implements Observabl
         }
     }
 
+    @Override
+    public void forEach(Consumer<? super E> action) {
+        source.getReadWriteLock().readLock().lock();
+        try {
+            source.forEach(action);
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -381,6 +397,66 @@ public class EventObservableList<E> extends AbstractList<E> implements Observabl
             source.clear();
         } finally {
             source.getReadWriteLock().writeLock().unlock();
+        }
+    }
+
+    @Override
+    public boolean removeIf(Predicate<? super E> filter) {
+        source.getReadWriteLock().writeLock().lock();
+        try {
+            return source.removeIf(filter);
+        } finally {
+            source.getReadWriteLock().writeLock().unlock();
+        }
+    }
+
+    @Override
+    public void replaceAll(UnaryOperator<E> operator) {
+        source.getReadWriteLock().writeLock().lock();
+        try {
+            source.replaceAll(operator);
+        } finally {
+            source.getReadWriteLock().writeLock().unlock();
+        }
+    }
+
+    @Override
+    public void sort(Comparator<? super E> c) {
+        source.getReadWriteLock().writeLock().lock();
+        try {
+            source.sort(c);
+        } finally {
+            source.getReadWriteLock().writeLock().unlock();
+        }
+    }
+
+    @Override
+    public Stream<E> stream() {
+        source.getReadWriteLock().readLock().lock();
+        try {
+            return source.stream();
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
+        }
+    }
+
+    @Override
+    public Stream<E> parallelStream() {
+        source.getReadWriteLock().readLock().lock();
+        try {
+            return source.parallelStream();
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
+        }
+    }
+
+    @Override
+    public Spliterator<E> spliterator() {
+        source.getReadWriteLock().readLock().lock();
+        try {
+            return source.spliterator();
+        } finally {
+            source.getReadWriteLock().readLock().unlock();
         }
     }
 
