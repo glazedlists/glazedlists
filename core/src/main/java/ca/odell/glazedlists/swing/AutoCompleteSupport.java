@@ -37,6 +37,8 @@ import javax.swing.plaf.basic.BasicComboBoxEditor;
 import javax.swing.plaf.basic.ComboPopup;
 import javax.swing.text.*;
 
+import ca.odell.glazedlists.impl.filter.TextSearchStrategy;
+
 /**
  * This class {@link #install}s support for filtering and autocompletion into
  * a standard {@link JComboBox}. It also acts as a factory class for
@@ -275,11 +277,8 @@ public final class AutoCompleteSupport<E> {
     /** A DocumentFilter that controls edits to the document. */
     private final AutoCompleteFilter documentFilter = new AutoCompleteFilter();
 
-    /** The last prefix specified by the user. */
-    private String prefix = "";
-
     /** The Matcher that decides if a ComboBoxModel element is filtered out. */
-    private Matcher<String> filterMatcher = Matchers.trueMatcher();
+    private UserInputFilter filterMatcher;
 
     /** <tt>true</tt> while processing a text change to the {@link #comboBoxEditorComponent}; <tt>false</tt> otherwise. */
     private boolean isFiltering = false;
@@ -405,6 +404,182 @@ public final class AutoCompleteSupport<E> {
     private Action originalAquaSelectNextAction;
     private Action originalAquaSelectPreviousAction;
 
+    
+    
+    /**
+     * This class encapsulates the specifics of tracking user input and
+     * using it to search the ComboBox items according to FilterMode of
+     * STARTS_WITH or CONTAINS. {@link #getTextMatchingStrategy() }
+     * is taken into account.
+     */
+    private abstract class UserInputFilter {
+        protected Matcher<String> filterMatcher = Matchers.trueMatcher();
+        protected String input = "";
+
+        /**
+         * This method typically updates the prefix to be the current
+         * value in the ComboBoxEditor; sets up the filterMatcher.
+         */
+        abstract void updateFilter(String userInput);
+        
+        /**
+         * Does this UserInputFilter match the specified string.
+         * @param itemString string to check for match
+         * @return true if match
+         */
+        boolean matches(String itemString) {
+            return filterMatcher.matches(itemString);
+        }
+
+        /**
+         * Given the current state of this UserInputFilter,
+         * examine the ComboBox editor and determine
+         * the user input to use for filtering.
+         * @return 
+         */
+        abstract String determineInput();
+
+        /**
+         * Indicate/highlight the characters input by the user in the ComboBox editor.
+         */
+        abstract void visualizeUserInputText();
+
+        /**
+         * Track location/offset of user input in current combo text.
+         * {@code findInputInString("")} conventionally resets/clears info.
+         * @param matchString find user input in this string
+         */
+        abstract void findInputInString(String matchString);
+
+        /**
+         * Search matchString to find the index of the current input
+         * using the TextMatchingStrategy in effect.
+         * @param matchString search in this string
+         * @return index into matchString
+         */
+        protected int indexOf(String matchString) {
+            Object strategyFactory = getTextMatchingStrategy();
+            if (strategyFactory instanceof TextSearchStrategy.Factory) {
+                TextSearchStrategy finder = ((TextSearchStrategy.Factory)strategyFactory).create(getFilterMode(), input);
+                finder.setSubtext(input);
+                return finder.indexOf(matchString);
+            }
+            return -1;
+        }
+    }
+
+    /**
+     * For STARTS_WITH
+     */
+    private class PrefixFilter extends UserInputFilter
+    {
+        @Override
+        void updateFilter(String userInput)
+        {
+            input = userInput;
+            if (input.isEmpty()) {
+                filterMatcher = Matchers.trueMatcher();
+            } else {
+                filterMatcher = new TextMatcher<>(new SearchTerm[] {new SearchTerm(input)}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH, getTextMatchingStrategy());
+            }
+        }
+
+        @Override
+        String determineInput()
+        {
+            return comboBoxEditorComponent.getText();
+
+        }
+
+        /**
+         * Select the text after the prefix but before the end of the text
+         * (it represents the autocomplete text)
+         * 
+         * The user input chars are a prefix;
+         * the prefix is shown in normal text and the characters *after* the prefix
+         * are selected. When the user enters a character, it replaces the
+         * selected chars and forms a new prefix.
+         */
+        @Override
+        void visualizeUserInputText()
+        {
+            comboBoxEditorComponent.select(input.length(), document.getLength());
+        }
+
+        @Override
+        void findInputInString(String matchString)
+        {
+            // input is always a prefix and starts at 0, nothing to do.
+        }
+    }
+
+    /**
+     * For CONTAINS
+     */
+    private class ContainsFilter extends UserInputFilter
+    {
+        private int inputOffset;
+
+        @Override
+        void updateFilter(String userText)
+        {
+            input = userText;
+            if (input.isEmpty()) {
+                filterMatcher = Matchers.trueMatcher();
+            } else {
+                filterMatcher = new TextMatcher<>(new SearchTerm[] {new SearchTerm(input)}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.CONTAINS, getTextMatchingStrategy());
+            }
+        }
+
+        @Override
+        String determineInput()
+        {
+            String valueAfterEdit = comboBoxEditorComponent.getText();
+            // given "...ABC", where "ABC" are the user input chars, and "..."
+            // are from the previously matched item, prefixOffset should point
+            // to "ABC". This might not be the case if the user caused the;
+            // previous prefix to be removed. If things don't match up,
+            // set prefixOffset to 0, and use the editor text as usual.
+            //
+            // We might see "...AX", "...X", "...XABC", "...AXB"
+            // (not too sure about the last two)
+            // just grab the chars after "..." and use them.
+            // May want to refine this in the future.
+            //
+            // Notice that if a single char in editor, prefixOffset goes to zero.
+            if (valueAfterEdit.length() <= inputOffset) {
+                inputOffset = 0;
+                // use the entire string.
+            } else {
+                valueAfterEdit = valueAfterEdit.substring(inputOffset);
+            }
+            return valueAfterEdit;
+        }
+
+        /**
+         * For STRICT+CONTAINS, offset is not necessarily zero and
+         * must indicate characters in the middle of a string.
+         * 
+         * At least for now, select the characters after the user input text.
+         * <p>
+         * A single line JTextPane with StyledDocument would be ideal,
+         * and the typed characters could be easily indicated.
+         */
+        @Override
+        void visualizeUserInputText()
+        {
+            comboBoxEditorComponent.select(inputOffset + input.length(), document.getLength());
+        }
+
+        @Override
+        void findInputInString(String matchString)
+        {
+            int offset = indexOf(matchString);
+            inputOffset = offset < 0 ? 0 : offset;
+        }
+    }
+    // private class FuzzyFilter extends UserTextFilter {} // FUTURE
+    
     /**
      * This private constructor creates an AutoCompleteSupport object which adds
      * autocompletion functionality to the given <code>comboBox</code>. In
@@ -442,6 +617,7 @@ public final class AutoCompleteSupport<E> {
             // build the ComboBoxModel capable of filtering its values
             this.filterMatcherEditor = new TextMatcherEditor(filterator == null ? new DefaultTextFilterator() : filterator);
             this.filterMatcherEditor.setMode(TextMatcherEditor.STARTS_WITH);
+            filterMatcher = new PrefixFilter();
             this.filteredItems = new FilterList<>(items, this.filterMatcherEditor);
             this.firstItem = new BasicEventList<>(items.getPublisher(), items.getReadWriteLock());
 
@@ -886,6 +1062,17 @@ public final class AutoCompleteSupport<E> {
     public boolean isStrict() {
         return strict;
     }
+
+    // TODO: Implement a UI that can highlight the users input chars.
+    //       The STRICT solution doesn't work when user input
+    //       can appear in the middle of the string.
+    //
+    //       Need to change comboBoxEditorComponent to a JTextComponent
+    //
+    // boolean useAttributes() {
+    //     return doc instanceof DefaultStyledDocument) && comboBoxEditorComponent instanceof JTextArea;
+    // }
+
     /**
      * If <code>strict</code> is <tt>false</tt>, the user can specify values
      * not appearing within the ComboBoxModel. If it is <tt>true</tt> each
@@ -1056,6 +1243,7 @@ public final class AutoCompleteSupport<E> {
         doNotChangeDocument = true;
         try {
             filterMatcherEditor.setMode(mode);
+            filterMatcher = mode == TextMatcherEditor.CONTAINS ? new ContainsFilter() : new PrefixFilter();
         } finally {
             doNotChangeDocument = false;
         }
@@ -1222,7 +1410,7 @@ public final class AutoCompleteSupport<E> {
 
     /**
      * This method updates the value which filters the items in the
-     * ComboBoxModel.
+     * ComboBoxModel. Events may cause the combo list to be filtered.
      *
      * @param newFilter the new value by which to filter the item
      */
@@ -1242,19 +1430,6 @@ public final class AutoCompleteSupport<E> {
             registerAllActionListeners(comboBox, listeners);
             doNotChangeDocument = false;
         }
-    }
-
-    /**
-     * This method updates the {@link #prefix} to be the current value in the
-     * ComboBoxEditor.
-     */
-    private void updateFilter() {
-        prefix = comboBoxEditorComponent.getText();
-
-        if (prefix.length() == 0)
-            filterMatcher = Matchers.trueMatcher();
-        else
-            filterMatcher = new TextMatcher<>(new SearchTerm[] {new SearchTerm(prefix)}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH, getTextMatchingStrategy());
     }
 
     /**
@@ -1281,11 +1456,12 @@ public final class AutoCompleteSupport<E> {
      * <p>If no exact or partial match can be located, <code>null</code> is
      * returned.
      */
+    // NOTE: this is only used when isStrict() == true
     private Object findAutoCompleteTerm(String value) {
         // determine if our value is empty
         final boolean prefixIsEmpty = "".equals(value);
 
-        final Matcher<String> valueMatcher = new TextMatcher<>(new SearchTerm[] {new SearchTerm(value)}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH, getTextMatchingStrategy());
+        final Matcher<String> valueMatcher = new TextMatcher<String>(new SearchTerm[] {new SearchTerm(value)}, GlazedLists.toStringTextFilterator(), getFilterMode(), getTextMatchingStrategy());
 
         Object partialMatchItem = NOT_FOUND;
 
@@ -1439,9 +1615,16 @@ public final class AutoCompleteSupport<E> {
             // break out early if we're flagged to not post process the Document change
             if (doNotPostProcessDocumentChanges) return;
 
-            final String valueAfterEdit = comboBoxEditorComponent.getText();
-
+            String valueAfterEdit = filterMatcher.determineInput();
             // if an autocomplete term could not be found and we're in strict mode, rollback the edit
+
+            // NOTE that doc attributes are not handled well.
+            // For example, they could be per character.
+            // When DocumentFilter.super methods are invoked above,
+            // they wipe out attributes. They're not getting restored
+            // by doing: comboBoxEditorComponent.setText(valueBeforeEdit)
+            // Seems better to just use null, than pretend.
+
             if (isStrict() && (findAutoCompleteTerm(valueAfterEdit) == NOT_FOUND) && !allItemsUnfiltered.isEmpty()) {
                 // indicate the error to the user
                 if (getBeepOnStrictViolation())
@@ -1466,8 +1649,8 @@ public final class AutoCompleteSupport<E> {
             // (we'll use this to decide whether to broadcast an ActionEvent when choosing the next selected index)
             final Object selectedItemBeforeEdit = comboBox.getSelectedItem();
 
-            updateFilter();
-            applyFilter(prefix);
+            filterMatcher.updateFilter(valueAfterEdit);
+            applyFilter(filterMatcher.input);
             selectAutoCompleteTerm(filterBypass, attributeSet, selectedItemBeforeEdit, allowPartialAutoCompletionTerm);
             togglePopup();
         }
@@ -1485,7 +1668,9 @@ public final class AutoCompleteSupport<E> {
             if (doNotAutoComplete) return;
 
             // determine if our prefix is empty (in which case we cannot use our filterMatcher to locate an autocompletion term)
-            final boolean prefixIsEmpty = "".equals(prefix);
+
+            String input = filterMatcher.input;
+            final boolean inputIsEmpty = input.isEmpty();
 
             // record the original caret position in case we don't want to disturb the text (occurs when an exact autocomplete term match is found)
             final int originalCaretPosition = comboBoxEditorComponent.getCaretPosition();
@@ -1493,12 +1678,12 @@ public final class AutoCompleteSupport<E> {
             // a flag to indicate whether a partial match or exact match exists on the autocomplete term
             boolean autoCompleteTermIsExactMatch = false;
 
-            // search the combobox model for a value that starts with our prefix (called an autocompletion term)
+            // search the combobox model for a value that matches our input (called an autocompletion term)
             for (int i = 0, n = comboBoxModel.getSize(); i < n; i++) {
                 String itemString = convertToString(comboBoxModel.getElementAt(i));
 
-                // if itemString does not match the prefix, continue searching for an autocompletion term
-                if (prefixIsEmpty ? !"".equals(itemString) : !filterMatcher.matches(itemString))
+                // if itemString does not match the input, continue searching for an autocompletion term
+                if (inputIsEmpty ? !itemString.isEmpty() : !filterMatcher.matches(itemString))
                     continue;
 
                 // record the index and value that are our "best" autocomplete terms so far
@@ -1511,7 +1696,7 @@ public final class AutoCompleteSupport<E> {
                     itemString = convertToString(comboBoxModel.getElementAt(j));
 
                     // if we've located an exact match, use its index and value rather than the partial match
-                    if (prefix.equals(itemString)) {
+                    if (input.equals(itemString)) {
                         matchIndex = j;
                         matchString = itemString;
                         autoCompleteTermIsExactMatch = true;
@@ -1520,17 +1705,22 @@ public final class AutoCompleteSupport<E> {
                 }
 
                 // if partial autocompletion terms are not allowed, and we only have a partial term, bail early
-                if (!allowPartialAutoCompletionTerm && !prefix.equals(itemString))
+                if (!allowPartialAutoCompletionTerm && !input.equals(itemString))
                     return;
 
-                // either keep the user's prefix or replace it with the itemString's prefix
+                // either keep the user's input or replace it with the itemString's prefix
                 // depending on whether we correct the case
                 if (getCorrectsCase() || isStrict()) {
-                    filterBypass.replace(0, prefix.length(), matchString, attributeSet);
+                    //filterBypass.replace(0, prefix.length(), matchString, attributeSet);
+                    // TODO: not sure of all the cases here,
+                    //       is it OK to replace the whole string?
+                    filterBypass.replace(0, document.getLength(), matchString, attributeSet);
                 } else {
-                    final String itemSuffix = matchString.substring(prefix.length());
-                    filterBypass.insertString(prefix.length(), itemSuffix, attributeSet);
+                    final String itemSuffix = matchString.substring(input.length());
+                    filterBypass.insertString(input.length(), itemSuffix, attributeSet);
                 }
+
+                filterMatcher.findInputInString(matchString);
 
                 // select the autocompletion term
                 final boolean silently = isTableCellEditor || Objects.equals(selectedItemBeforeEdit, matchString);
@@ -1540,8 +1730,7 @@ public final class AutoCompleteSupport<E> {
                     // if the term matched the original text exactly, return the caret to its original location
                     comboBoxEditorComponent.setCaretPosition(originalCaretPosition);
                 } else {
-                    // select the text after the prefix but before the end of the text (it represents the autocomplete text)
-                    comboBoxEditorComponent.select(prefix.length(), document.getLength());
+                    filterMatcher.visualizeUserInputText();
                 }
 
                 return;
@@ -1633,7 +1822,7 @@ public final class AutoCompleteSupport<E> {
             // if the original index wasn't valid, we've cleared the selection
             // and must set the user's prefix into the editor
             if (!validIndex) {
-                comboBoxEditorComponent.setText(prefix);
+                comboBoxEditorComponent.setText(filterMatcher.input);
 
                 // don't bother unfiltering the popup since we'll redisplay the popup immediately
                 doNotClearFilterOnPopupHide = true;
@@ -1650,8 +1839,14 @@ public final class AutoCompleteSupport<E> {
 
         // if the comboBoxEditorComponent's values begins with the user's prefix, highlight the remainder of the value
         final String newSelection = comboBoxEditorComponent.getText();
-        if (filterMatcher.matches(newSelection))
-            comboBoxEditorComponent.select(prefix.length(), newSelection.length());
+        // forget about where the input is found in the string
+        filterMatcher.findInputInString("");
+        //  TODO: NOTE:  in selectAutoCompleteTerm(...) for exact match
+        // it doesn't do a select. But in here it does. WHY?
+        if (filterMatcher.matches(newSelection)) {
+            filterMatcher.findInputInString(newSelection);
+            filterMatcher.visualizeUserInputText();
+        }
     }
 
     /**
@@ -1670,7 +1865,7 @@ public final class AutoCompleteSupport<E> {
                 if (comboBox.isPopupVisible()) {
                     selectPossibleValue(comboBox.getSelectedIndex() + offset);
                 } else {
-                    applyFilter(prefix);
+                    applyFilter(filterMatcher.input);
                     comboBox.showPopup();
                 }
             }
@@ -1963,8 +2158,9 @@ public final class AutoCompleteSupport<E> {
             // so now it is time to perform our own processing. We reattach all ActionListeners
             // and simulate exactly ONE ActionEvent in the JComboBox and then reenable Document changes.
             if (e.getKeyChar() == KeyEvent.VK_ENTER) {
-                updateFilter();
-
+                filterMatcher.updateFilter(comboBoxEditorComponent.getText());
+                filterMatcher.findInputInString("");
+                
                 // reregister all ActionListeners and then notify them due to the ENTER key
 
                 // Note: We *must* check for a null ActionListener[]. The reason
