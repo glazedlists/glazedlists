@@ -452,6 +452,23 @@ public final class AutoCompleteSupport<E> {
         abstract void findInputInString(String matchString);
 
         /**
+         * Return the offset of the user input into the match string
+         */
+        abstract int getInputOffset();
+
+        /**
+         * Using given user input and mode, create/save this' filterMatcher.
+         */
+        protected void updateFilterCommon(String userInput, int mode) {
+            input = userInput;
+            if (input.isEmpty()) {
+                filterMatcher = Matchers.trueMatcher();
+            } else {
+                filterMatcher = new TextMatcher<>(new SearchTerm[] {new SearchTerm(input)}, GlazedLists.toStringTextFilterator(), mode, getTextMatchingStrategy());
+            }
+        }
+
+        /**
          * Search matchString to find the index of the current input
          * using the TextMatchingStrategy in effect.
          * @param matchString search in this string
@@ -471,22 +488,14 @@ public final class AutoCompleteSupport<E> {
     /**
      * For STARTS_WITH
      */
-    private class PrefixFilter extends UserInputFilter
-    {
+    private class PrefixFilter extends UserInputFilter {
         @Override
-        void updateFilter(String userInput)
-        {
-            input = userInput;
-            if (input.isEmpty()) {
-                filterMatcher = Matchers.trueMatcher();
-            } else {
-                filterMatcher = new TextMatcher<>(new SearchTerm[] {new SearchTerm(input)}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH, getTextMatchingStrategy());
-            }
+        void updateFilter(String userInput) {
+            updateFilterCommon(userInput, TextMatcherEditor.STARTS_WITH);
         }
 
         @Override
-        String determineInput()
-        {
+        String determineInput() {
             return comboBoxEditorComponent.getText();
 
         }
@@ -501,39 +510,34 @@ public final class AutoCompleteSupport<E> {
          * selected chars and forms a new prefix.
          */
         @Override
-        void visualizeUserInputText()
-        {
+        void visualizeUserInputText() {
             comboBoxEditorComponent.select(input.length(), document.getLength());
         }
 
         @Override
-        void findInputInString(String matchString)
-        {
+        void findInputInString(String matchString) {
             // input is always a prefix and starts at 0, nothing to do.
+        }
+
+        @Override
+        int getInputOffset() {
+            return 0;
         }
     }
 
     /**
      * For CONTAINS
      */
-    private class ContainsFilter extends UserInputFilter
-    {
+    private class ContainsFilter extends UserInputFilter {
         private int inputOffset;
 
         @Override
-        void updateFilter(String userText)
-        {
-            input = userText;
-            if (input.isEmpty()) {
-                filterMatcher = Matchers.trueMatcher();
-            } else {
-                filterMatcher = new TextMatcher<>(new SearchTerm[] {new SearchTerm(input)}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.CONTAINS, getTextMatchingStrategy());
-            }
+        void updateFilter(String userInput) {
+            updateFilterCommon(userInput, TextMatcherEditor.CONTAINS);
         }
 
         @Override
-        String determineInput()
-        {
+        String determineInput() {
             String valueAfterEdit = comboBoxEditorComponent.getText();
             // given "...ABC", where "ABC" are the user input chars, and "..."
             // are from the previously matched item, prefixOffset should point
@@ -566,16 +570,19 @@ public final class AutoCompleteSupport<E> {
          * and the typed characters could be easily indicated.
          */
         @Override
-        void visualizeUserInputText()
-        {
+        void visualizeUserInputText() {
             comboBoxEditorComponent.select(inputOffset + input.length(), document.getLength());
         }
 
         @Override
-        void findInputInString(String matchString)
-        {
+        void findInputInString(String matchString) {
             int offset = indexOf(matchString);
             inputOffset = offset < 0 ? 0 : offset;
+        }
+
+        @Override
+        int getInputOffset() {
+            return inputOffset;
         }
     }
     // private class FuzzyFilter extends UserTextFilter {} // FUTURE
@@ -617,7 +624,7 @@ public final class AutoCompleteSupport<E> {
             // build the ComboBoxModel capable of filtering its values
             this.filterMatcherEditor = new TextMatcherEditor(filterator == null ? new DefaultTextFilterator() : filterator);
             this.filterMatcherEditor.setMode(TextMatcherEditor.STARTS_WITH);
-            filterMatcher = new PrefixFilter();
+            this.filterMatcher = new PrefixFilter();
             this.filteredItems = new FilterList<>(items, this.filterMatcherEditor);
             this.firstItem = new BasicEventList<>(items.getPublisher(), items.getReadWriteLock());
 
@@ -1069,8 +1076,12 @@ public final class AutoCompleteSupport<E> {
     //
     //       Need to change comboBoxEditorComponent to a JTextComponent
     //
+    // /**
+    //  * Return true if the current document and editorComponent
+    //  * can handle document style attributes
+    //  */
     // boolean useAttributes() {
-    //     return doc instanceof DefaultStyledDocument) && comboBoxEditorComponent instanceof JTextArea;
+    //     return document instanceof DefaultStyledDocument && comboBoxEditorComponent instanceof JTextPane;
     // }
 
     /**
@@ -1674,6 +1685,7 @@ public final class AutoCompleteSupport<E> {
 
             // record the original caret position in case we don't want to disturb the text (occurs when an exact autocomplete term match is found)
             final int originalCaretPosition = comboBoxEditorComponent.getCaretPosition();
+            final String originalText = comboBoxEditorComponent.getText();
 
             // a flag to indicate whether a partial match or exact match exists on the autocomplete term
             boolean autoCompleteTermIsExactMatch = false;
@@ -1691,7 +1703,17 @@ public final class AutoCompleteSupport<E> {
                 String matchString = itemString;
 
                 // search for an *exact* match in the remainder of the ComboBoxModel
-                // before settling for the partial match we have just found
+                // before settling for the partial match we have just found.
+
+
+                // If doing CONTAINS, also search for startsWith match; unless disabled.
+                boolean preferStartsWith = !Boolean.TRUE.equals(comboBox.getClientProperty("GL:DisableContainsPreferStartsWith"));
+                int matchIndexStartsWith = 0;
+                String matchStringStartsWith = null;
+                TextMatcher<String> matchStartsWith = null;
+                if (preferStartsWith && getFilterMode() == TextMatcherEditor.CONTAINS)
+                    matchStartsWith = new TextMatcher<>(new SearchTerm[] {new SearchTerm(input)}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH, getTextMatchingStrategy());
+
                 for (int j = i; j < n; j++) {
                     itemString = convertToString(comboBoxModel.getElementAt(j));
 
@@ -1702,31 +1724,62 @@ public final class AutoCompleteSupport<E> {
                         autoCompleteTermIsExactMatch = true;
                         break;
                     }
+
+                    // if enabled and not yet found, check for a startsWith match
+                    if (matchStartsWith != null && matchStringStartsWith == null) {
+                        if (matchStartsWith.matches(itemString)) {
+                            matchIndexStartsWith = j;
+                            matchStringStartsWith = itemString;
+                        }
+                    }
                 }
 
                 // if partial autocompletion terms are not allowed, and we only have a partial term, bail early
                 if (!allowPartialAutoCompletionTerm && !input.equals(itemString))
                     return;
 
-                // either keep the user's input or replace it with the itemString's prefix
-                // depending on whether we correct the case
-                if (getCorrectsCase() || isStrict()) {
-                    //filterBypass.replace(0, prefix.length(), matchString, attributeSet);
-                    // TODO: not sure of all the cases here,
-                    //       is it OK to replace the whole string?
-                    filterBypass.replace(0, document.getLength(), matchString, attributeSet);
-                } else {
-                    final String itemSuffix = matchString.substring(input.length());
-                    filterBypass.insertString(input.length(), itemSuffix, attributeSet);
+                // if prefer startsWith and found a match, then use it
+                if (!autoCompleteTermIsExactMatch && matchStringStartsWith != null) {
+                    matchIndex = matchIndexStartsWith;
+                    matchString = matchStringStartsWith;
                 }
 
+                // Determine the offset into the matchString of the user input 
                 filterMatcher.findInputInString(matchString);
+
+                // There is a matchString and it goes into the editor.
+                // The characters in the matchString that correspond to
+                // the user input may keep the user input case depending
+                // on whether we correct the case.
+                if (getCorrectsCase() || isStrict()) {
+                    // put the string into the editor verbatim
+                    filterBypass.replace(0, document.getLength(), matchString, attributeSet);
+                } else {
+                    // Keep the case of the user input.
+                    // There are three regions to consider, (some may be empty)
+                    // - before the user input; taken from matchString
+                    // - the user input
+                    // - after the user input; taken from matchString
+                    // Do a little checking (should never fail)
+                    int tOff = filterMatcher.getInputOffset();
+                    int inputLen = input.length();
+                    if (tOff + inputLen <= matchString.length()) {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append(matchString.substring(0, tOff))
+                                .append(input)
+                                .append(matchString.substring(tOff + inputLen));
+                        filterBypass.replace(0, document.getLength(), sb.toString(), attributeSet);
+                    } else {
+                        // oops, this can't happen, but I'm feeling paranoid
+                        filterBypass.replace(0, document.getLength(), matchString, attributeSet);
+                    }
+                }
 
                 // select the autocompletion term
                 final boolean silently = isTableCellEditor || Objects.equals(selectedItemBeforeEdit, matchString);
                 selectItem(matchIndex, silently);
 
-                if (autoCompleteTermIsExactMatch) {
+                if (autoCompleteTermIsExactMatch && originalText.equals(input)) {
                     // if the term matched the original text exactly, return the caret to its original location
                     comboBoxEditorComponent.setCaretPosition(originalCaretPosition);
                 } else {
@@ -1735,6 +1788,12 @@ public final class AutoCompleteSupport<E> {
 
                 return;
             }
+
+            // With CONTAINS handling, combo editor might have ".....input".
+            // If here, didn't find "input" in model, so set editor to "input";
+            // only change if there's different text to avoid perturbing caret.
+            if (!originalText.equals(input))
+                filterBypass.replace(0, document.getLength(), input, attributeSet);
 
             // reset the selection since we couldn't find the prefix in the model
             // (this has the side-effect of scrolling the popup to the top)

@@ -38,6 +38,7 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
+import javax.swing.text.JTextComponent;
 import javax.swing.text.Position;
 import javax.swing.text.Segment;
 
@@ -1030,6 +1031,208 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         Thread.sleep(250); // wait for the EDT to process the change to items
         assertEquals("hoobedy", textField.getText());
         assertEquals("hoobedy", combo.getSelectedItem());
+    }
+
+    /**
+     * If there is no selection, then return caret position.
+     * If there is a selection, it must include the end of the text, else null;
+     * return the lowest value of selection begin/end.
+     */
+    private static Integer findSelectionStartToEnd(JTextComponent text) {
+        int start = text.getSelectionStart();
+        int end = text.getSelectionEnd();
+        if (start == end)
+            return start;
+        if (Integer.max(start,end) != text.getDocument().getLength())
+            return null;
+        return Integer.min(start,end);
+    }
+
+    private static final String GL_DISABLE_CONTAINS_PREFER_STARTS_WITH = "GL:DisableContainsPreferStartsWith";
+
+    /**
+     * Test contains/exactMatch/preferStartsWith interactions;
+     * verify text, selected text, caret position and selected item after each input.
+     * With dropdown values "xabcdex", "ab", "abcd",
+     * enter the chars: "abcde", matching "ab", "abcd", "xabcdex".
+     * {@literal <BS>} removes selection "x",
+     * {@literal <BS>} get's back to "abcd" input/match
+     */
+    @Test
+    public void testContainsPreferStartsWith() throws BadLocationException {
+        final JComboBox<String> combo = new JComboBox<>();
+
+        final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
+        final AbstractDocument doc = (AbstractDocument) textField.getDocument();
+
+        final EventList<String> items = new BasicEventList<>();
+        items.add("xabcdex");
+        items.add("ab");
+        items.add("abcd");
+
+        AutoCompleteSupport<String> support = AutoCompleteSupport.install(combo, items);
+        final ComboBoxModel<String> model = combo.getModel();
+        support.setFilterMode(TextMatcherEditor.CONTAINS);
+        assertEquals(false, Boolean.TRUE.equals(combo.getClientProperty(GL_DISABLE_CONTAINS_PREFER_STARTS_WITH)));
+        assertEquals(TextMatcherEditor.IDENTICAL_STRATEGY, support.getTextMatchingStrategy());
+
+        Integer selStart;
+
+        // type "a", match "ab" since prefer starts with
+        doc.replace(0, 0, "a", null);
+        assertEquals(2, textField.getCaretPosition());
+        assertEquals("ab", model.getSelectedItem());
+        assertEquals("b", textField.getSelectedText());
+
+        selStart = findSelectionStartToEnd(textField);
+        assertNotNull(selStart);
+        assertEquals(1, (int)selStart);
+
+        // type "b" replaces "b", match "ab" since exact and prefer starts with
+        doc.replace(selStart, doc.getLength() - selStart, "b", null);
+        assertEquals(2, textField.getCaretPosition());
+        assertEquals("ab", model.getSelectedItem());
+        assertEquals(null, textField.getSelectedText());
+
+        selStart = findSelectionStartToEnd(textField);
+        assertNotNull(selStart);
+        assertEquals(2, (int)selStart);
+
+        // type "c", match "abcd"
+        doc.replace(selStart, doc.getLength() - selStart, "c", null);
+        assertEquals(4, textField.getCaretPosition());
+        assertEquals("abcd", model.getSelectedItem());
+        assertEquals("d", textField.getSelectedText());
+
+        selStart = findSelectionStartToEnd(textField);
+        assertNotNull(selStart);
+        assertEquals(3, (int)selStart);
+
+        // type "d", match "abcd"
+        doc.replace(selStart, doc.getLength() - selStart, "d", null);
+        assertEquals(4, textField.getCaretPosition());
+        assertEquals("abcd", model.getSelectedItem());
+        assertEquals(null, textField.getSelectedText());
+
+        selStart = findSelectionStartToEnd(textField);
+        assertNotNull(selStart);
+        assertEquals(4, (int)selStart);
+
+        // type "e", match "xabcdex" since contains and no starts with match
+        doc.replace(selStart, doc.getLength() - selStart, "e", null);
+        assertEquals(7, textField.getCaretPosition());
+        assertEquals("xabcdex", model.getSelectedItem());
+        assertEquals("x", textField.getSelectedText());
+
+        selStart = findSelectionStartToEnd(textField);
+        assertNotNull(selStart);
+        assertEquals(6, (int)selStart);
+        
+        // type <BS>, remove selection "x", input is "abcde",
+        // still see "xabcdex" in combo list
+        // caret is after "e", no selection
+        doc.remove(6, 1);
+        assertEquals(6, textField.getCaretPosition());
+        assertEquals("xabcdex", model.getSelectedItem());
+        assertEquals(null, textField.getSelectedText());
+        
+        // type <BS>, remove "e", input is now "abcd", back to "abcd" match
+        doc.remove(5, 1);
+        assertEquals(4, textField.getCaretPosition());
+        assertEquals("abcd", model.getSelectedItem());
+        assertEquals(null, textField.getSelectedText());
+    }
+
+    /**
+     * Test contains/exactMatch/notPreferStartsWith interactions.
+     * Like the previous, but disable ContainsPreferStartsWith
+     * Enter the chars: "abcde",
+     * match: "xabcdex", "ab", "xabcdex", "abcd", "xabcdex".
+     * The matches to "ab" and "abcd" are because of exact match.
+     */
+    @Test
+    public void testContainsPreferStartsWithNot() throws BadLocationException {
+        final JComboBox<String> combo = new JComboBox<>();
+
+        final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
+        final AbstractDocument doc = (AbstractDocument) textField.getDocument();
+
+        final EventList<String> items = new BasicEventList<>();
+        items.add("xabcdex");
+        items.add("ab");
+        items.add("abcd");
+
+        AutoCompleteSupport<String> support = AutoCompleteSupport.install(combo, items);
+        final ComboBoxModel<String> model = combo.getModel();
+        support.setFilterMode(TextMatcherEditor.CONTAINS);
+        combo.putClientProperty(GL_DISABLE_CONTAINS_PREFER_STARTS_WITH, true);
+        assertEquals(TextMatcherEditor.IDENTICAL_STRATEGY, support.getTextMatchingStrategy());
+
+        Integer selStart;
+
+        // type "a", match "xabcdex" since prefer starts with
+        doc.replace(0, 0, "a", null);
+        assertEquals(7, textField.getCaretPosition());
+        assertEquals("xabcdex", model.getSelectedItem());
+        assertEquals("bcdex", textField.getSelectedText());
+
+        selStart = findSelectionStartToEnd(textField);
+        assertNotNull(selStart);
+        assertEquals(2, (int)selStart);
+
+        // type "b" replaces "bcdex", match "ab" since exact match
+        doc.replace(selStart, doc.getLength() - selStart, "b", null);
+        assertEquals(2, textField.getCaretPosition());
+        assertEquals("ab", model.getSelectedItem());
+        assertEquals(null, textField.getSelectedText());
+
+        selStart = findSelectionStartToEnd(textField);
+        assertNotNull(selStart);
+        assertEquals(2, (int)selStart);
+
+        // type "c", match "xabcdex"
+        doc.replace(selStart, doc.getLength() - selStart, "c", null);
+        assertEquals(7, textField.getCaretPosition());
+        assertEquals("xabcdex", model.getSelectedItem());
+        assertEquals("dex", textField.getSelectedText());
+
+        selStart = findSelectionStartToEnd(textField);
+        assertNotNull(selStart);
+        assertEquals(4, (int)selStart);
+    
+        // type "d", match "abcd" match since exact
+        doc.replace(selStart, doc.getLength() - selStart, "d", null);
+        assertEquals(4, textField.getCaretPosition());
+        assertEquals("abcd", model.getSelectedItem());
+        assertEquals(null, textField.getSelectedText());
+
+        selStart = findSelectionStartToEnd(textField);
+        assertNotNull(selStart);
+        assertEquals(4, (int)selStart);
+
+        // type "e", match "xabcdex" since contains
+        doc.replace(selStart, doc.getLength() - selStart, "e", null);
+        assertEquals(7, textField.getCaretPosition());
+        assertEquals("xabcdex", model.getSelectedItem());
+        assertEquals("x", textField.getSelectedText());
+        
+        selStart = findSelectionStartToEnd(textField);
+        assertNotNull(selStart);
+        assertEquals(6, (int)selStart);
+
+        // type <BS>, remove selection "x", input is "abcde",
+        // still see "xabcdex" in combo list
+        // caret is after "e", no selection
+        doc.remove(6, 1);
+        assertEquals(6, textField.getCaretPosition());
+        assertEquals("xabcdex", model.getSelectedItem());
+        assertEquals(null, textField.getSelectedText());
+        
+        // type <BS>, remove "e", input is now "abcd", back to "abcd" match
+        doc.remove(5, 1);
+        assertEquals(4, textField.getCaretPosition());
+        assertEquals("abcd", model.getSelectedItem());
+        assertEquals(null, textField.getSelectedText());
     }
 
     private static class NoopDocument implements Document {
