@@ -131,6 +131,8 @@ public class AutoCompleteSupportTestApp {
         new Location("USA", "Wyoming", "Cheyenne")
     };
 
+    private static final String GL_DISABLE_CONTAINS_PREFER_STARTS_WITH = "GL:DisableContainsPreferStartsWith";
+
     /** The currently installed look and feel. */
     private String currentLookAndFeel;
 
@@ -187,6 +189,9 @@ public class AutoCompleteSupportTestApp {
     /** A checkbox to toggle whether the {@link #autoCompleteSupport} hides the popup menu when losing focus. */
     private final JCheckBox hidesPopupOnFocusLostCheckBox = new JCheckBox();
 
+    /** A checkbox to toggle whether the {@link #autoCompleteSupport} prefer a startsWith match when CONTAINS. */
+    private final JCheckBox containsPreferStartsWithCheckBox = new JCheckBox();
+
     /** The ButtonGroup to which all Look & Feel radio buttons belong. */
     private final ButtonGroup lafMenuGroup = new ButtonGroup();
 
@@ -236,6 +241,9 @@ public class AutoCompleteSupportTestApp {
 
         hidesPopupOnFocusLostCheckBox.addActionListener(new HidePopupOnFocusLostActionHandler());
         hidesPopupOnFocusLostCheckBox.setSelected(autoCompleteSupport.getHidesPopupOnFocusLost());
+
+        containsPreferStartsWithCheckBox.addActionListener(new PreferStartsWithActionHandler());
+        containsPreferStartsWithCheckBox.setSelected(!Boolean.TRUE.equals(autoCompleteComboBox.getClientProperty(GL_DISABLE_CONTAINS_PREFER_STARTS_WITH)));
 
         frame.pack();
         frame.setLocationRelativeTo(null);
@@ -364,6 +372,15 @@ public class AutoCompleteSupportTestApp {
         }
     }
 
+    private class PreferStartsWithActionHandler implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e)
+        {
+            autoCompleteComboBox.putClientProperty(GL_DISABLE_CONTAINS_PREFER_STARTS_WITH,
+                    !containsPreferStartsWithCheckBox.isSelected() ? Boolean.TRUE : null);
+        }
+    }
+
     private class FilterModeActionHandler implements ActionListener {
         private final int mode;
 
@@ -406,8 +423,11 @@ public class AutoCompleteSupportTestApp {
         panel.add(new JLabel("Hide Popup on Focus Lost:"),  new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
         panel.add(hidesPopupOnFocusLostCheckBox,            new GridBagConstraints(1, 3, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
-        panel.add(new JLabel("Filter Mode:"),               new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
-        panel.add(filterModePanel,                          new GridBagConstraints(1, 4, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(new JLabel("Prefer Starts With Match:"),  new GridBagConstraints(0, 5, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
+        panel.add(containsPreferStartsWithCheckBox,         new GridBagConstraints(1, 5, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+
+        panel.add(new JLabel("Filter Mode:"),               new GridBagConstraints(0, 6, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
+        panel.add(filterModePanel,                          new GridBagConstraints(1, 6, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
         return panel;
     }
