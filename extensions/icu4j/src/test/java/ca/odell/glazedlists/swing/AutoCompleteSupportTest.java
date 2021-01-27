@@ -1251,6 +1251,101 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals("abcd", model.getElementAt(1));
     }
 
+    /**
+     * Test that newlines get replaced by space
+     */
+    @Test
+    public void testFilterNewlines() throws BadLocationException {
+        final JComboBox<String> combo = new JComboBox<>();
+
+        final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
+        final AbstractDocument doc = (AbstractDocument) textField.getDocument();
+
+        final EventList<String> items = new BasicEventList<>();
+        items.add("a\nb"); // "a b"
+        items.add("xxx"); // "xxx"
+
+        AutoCompleteSupport<String> support = AutoCompleteSupport.install(combo, items);
+        support.setFilterMode(TextMatcherEditor.CONTAINS);
+        final ComboBoxModel<String> model = combo.getModel();
+
+        // replace string should get filtered
+        doc.replace(0, 0, "\n\n", null);
+        assertEquals("  ", textField.getText());
+        assertEquals(null, model.getSelectedItem());
+
+        doc.remove(0, doc.getLength());
+        assertEquals("", textField.getText());
+
+        // insert string should get filtered
+        doc.insertString(0, "\n\n", null);
+        assertEquals("  ", textField.getText());
+        assertEquals(null, model.getSelectedItem());
+
+        doc.remove(0, doc.getLength());
+        assertEquals("", textField.getText());
+
+        // when a match is found in combo list, any newline from match get filtered
+
+        // type "a", match "a\nb" since prefer starts with
+        doc.replace(0, 0, "A", null);
+        assertEquals("a\nb", model.getSelectedItem());
+        assertEquals("a b", textField.getText());
+        assertEquals(" b", textField.getSelectedText());
+
+        doc.remove(0, doc.getLength());
+        assertEquals("", textField.getText());
+
+        // setSelectedItem text should get filterNewlines
+        model.setSelectedItem("a\nb");
+        assertEquals("a\nb", model.getSelectedItem());
+        assertEquals("a b", textField.getText());
+        assertEquals(null, textField.getSelectedText());
+
+        doc.remove(0, doc.getLength());
+        assertEquals("", textField.getText());
+
+        doc.remove(0, doc.getLength());
+        assertEquals("", textField.getText());
+
+        // setSelectedIndex text should get filterNewlines
+        combo.setSelectedIndex(0);
+        assertEquals("a\nb", model.getSelectedItem());
+        assertEquals("a b", textField.getText());
+        assertEquals(null, textField.getSelectedText());
+
+        doc.remove(0, doc.getLength());
+        assertEquals("", textField.getText());
+
+        // random check that filterNewlines works with CorectsCase
+        support.setCorrectsCase(false);
+        doc.replace(0, 0, "A", null);
+        assertEquals("a\nb", model.getSelectedItem());
+        assertEquals("A b", textField.getText());
+        assertEquals(" b", textField.getSelectedText());
+
+        // There was a strict mode failure, detect it.
+        // First check the transition to strict mode.
+
+        doc.remove(0, doc.getLength());
+        assertEquals("", textField.getText());
+        assertEquals(null, model.getSelectedItem());
+        
+        // test going into strict mode (needed for next test)
+        // the first item should become selected
+        support.setStrict(true);
+        assertEquals("a\nb", model.getSelectedItem());
+        combo.setSelectedIndex(1);
+        assertEquals("xxx", model.getSelectedItem());
+
+        // combo.setSelectedItem text should also get filterNewlines
+        // strict matters for a bug
+        combo.setSelectedItem("a\nb");
+        assertEquals("a\nb", model.getSelectedItem());
+        assertEquals("a b", textField.getText());
+        assertEquals(null, textField.getSelectedText());
+    }
+
     private static class NoopDocument implements Document {
         private Element root = new NoopElement();
 
