@@ -17,10 +17,18 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -46,6 +54,9 @@ import javax.swing.JTable;
 import javax.swing.LookAndFeel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.text.JTextComponent;
+
+import static java.awt.EventQueue.invokeLater;
 
 public class AutoCompleteSupportTestApp {
 
@@ -192,6 +203,9 @@ public class AutoCompleteSupportTestApp {
     /** A checkbox to toggle whether the {@link #autoCompleteSupport} prefer a startsWith match when CONTAINS. */
     private final JCheckBox containsPreferStartsWithCheckBox = new JCheckBox();
 
+    /** A checkbox to toggle whether the {@link #autoCompleteSupport} puts the caret on the left or right side of a selection or text. */
+    private final JCheckBox positionCaretTowardZeroCheckBox = new JCheckBox();
+
     /** The ButtonGroup to which all Look & Feel radio buttons belong. */
     private final ButtonGroup lafMenuGroup = new ButtonGroup();
 
@@ -238,9 +252,15 @@ public class AutoCompleteSupportTestApp {
 
         selectTextOnFocusGainCheckBox.addActionListener(new SelectTextOnFocusGainActionHandler());
         selectTextOnFocusGainCheckBox.setSelected(autoCompleteSupport.getSelectsTextOnFocusGain());
-
+ 
         hidesPopupOnFocusLostCheckBox.addActionListener(new HidePopupOnFocusLostActionHandler());
         hidesPopupOnFocusLostCheckBox.setSelected(autoCompleteSupport.getHidesPopupOnFocusLost());
+ 
+        if (hasPositionCaretTowardZero()) {
+            positionCaretTowardZeroCheckBox.addActionListener(new CaretTowardZeroActionHandler());
+            positionCaretTowardZeroCheckBox.setSelected(isPositionCaretTowardZero());
+        }
+
 
         containsPreferStartsWithCheckBox.addActionListener(new PreferStartsWithActionHandler());
         containsPreferStartsWithCheckBox.setSelected(!Boolean.TRUE.equals(autoCompleteComboBox.getClientProperty(GL_DISABLE_CONTAINS_PREFER_STARTS_WITH)));
@@ -381,6 +401,59 @@ public class AutoCompleteSupportTestApp {
         }
     }
 
+
+    /**
+     * This is a little tricky, ideally only want to focus the autosupport combobox
+     * if it was focused when the button was pushed. Not worth figuring that out
+     * so always focus it and restore a selection, then finally invoke
+     * {@code setPositionCaretTowardZero}.
+     * Note that reflection is used so that this test file can be used with
+     * older versions of AutoCompleteSupport.
+     */
+    private class CaretTowardZeroActionHandler implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e)
+        {
+            JTextComponent ed = (JTextComponent)autoCompleteComboBox.getEditor().getEditorComponent();
+            int selectionStart = ed.getSelectionStart();
+            int selectionEnd = ed.getSelectionEnd();
+            
+            int stepTime = 50;
+            
+            CountDownLatch busy = new CountDownLatch(1);
+            ScheduledExecutorService exec = Executors.newScheduledThreadPool(2);
+            exec.schedule(() -> {
+                try {
+                    ScheduledFuture<?> step;
+                    
+                    // Before issuing setPositionCaretTowardZero, restore focus/combo state.
+                    // Let the button push finish
+                    step = exec.schedule(() -> {
+                        invokeLater(() -> autoCompleteComboBox.requestFocus());
+                    }, stepTime, TimeUnit.MILLISECONDS);
+                    step.get();
+                    
+                    // After AutoCompleteSupport focus gain operates then restore state
+                    step = exec.schedule(() -> {
+                        invokeLater(() -> ed.select(selectionStart, selectionEnd));
+                    }, stepTime, TimeUnit.MILLISECONDS);
+                    step.get();
+                    
+                    // After state restored then flip the switch
+                    step = exec.schedule(() -> {
+                        invokeLater(() -> setPositionCaretTowardZero(positionCaretTowardZeroCheckBox.isSelected()));
+                    }, stepTime, TimeUnit.MILLISECONDS);
+                    step.get();
+                    busy.countDown();
+                } catch(InterruptedException | ExecutionException ex) { }
+                try {
+                    busy.await();
+                    exec.shutdown();
+                } catch(InterruptedException ex) { }
+            }, 0, TimeUnit.MILLISECONDS);
+        }
+    }
+
     private class FilterModeActionHandler implements ActionListener {
         private final int mode;
 
@@ -411,23 +484,28 @@ public class AutoCompleteSupportTestApp {
     private JPanel createTweakerPanel() {
         final JPanel panel = new JPanel(new GridBagLayout());
 
-        panel.add(new JLabel("Corrects Case:"),             new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
-        panel.add(correctsCaseCheckBox,                     new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(new JLabel("Corrects Case:"),              new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
+        panel.add(correctsCaseCheckBox,                      new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
-        panel.add(new JLabel("Strict:"),                    new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
-        panel.add(strictModeCheckBox,                       new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(new JLabel("Strict:"),                     new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
+        panel.add(strictModeCheckBox,                        new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
-        panel.add(new JLabel("Select Text on Focus Gain:"), new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
-        panel.add(selectTextOnFocusGainCheckBox,            new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(new JLabel("Select Text on Focus Gain:"),  new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
+        panel.add(selectTextOnFocusGainCheckBox,             new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
-        panel.add(new JLabel("Hide Popup on Focus Lost:"),  new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
-        panel.add(hidesPopupOnFocusLostCheckBox,            new GridBagConstraints(1, 3, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(new JLabel("Hide Popup on Focus Lost:"),   new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
+        panel.add(hidesPopupOnFocusLostCheckBox,             new GridBagConstraints(1, 3, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
-        panel.add(new JLabel("Prefer Starts With Match:"),  new GridBagConstraints(0, 5, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
-        panel.add(containsPreferStartsWithCheckBox,         new GridBagConstraints(1, 5, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+        panel.add(new JLabel("Prefer Starts With Match:"),   new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
+        panel.add(containsPreferStartsWithCheckBox,          new GridBagConstraints(1, 4, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
-        panel.add(new JLabel("Filter Mode:"),               new GridBagConstraints(0, 6, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
-        panel.add(filterModePanel,                          new GridBagConstraints(1, 6, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+    if(hasPositionCaretTowardZero()) {
+        panel.add(new JLabel("Position Caret Toward Zero:"), new GridBagConstraints(0, 5, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
+        panel.add(positionCaretTowardZeroCheckBox,           new GridBagConstraints(1, 5, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+    }
+
+        panel.add(new JLabel("Filter Mode:"),                new GridBagConstraints(0, 6, 1, 1, 0.0, 0.0, GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
+        panel.add(filterModePanel,                           new GridBagConstraints(1, 6, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 
         return panel;
     }
@@ -563,6 +641,38 @@ public class AutoCompleteSupportTestApp {
                 if (element.startsWith("http://www."))
                     baseList.add(element.substring(11));
             }
+        }
+    }
+    
+    private static boolean hasPositionCaretTowardZero()  {
+        try {
+            AutoCompleteSupport.class.getMethod("setPositionCaretTowardZero", boolean.class);
+            return true;
+            //Method valueOfMethod = _clazz.getMethod("valueOf", String.class);
+        } catch(NoSuchMethodException | SecurityException ex) {
+            return false;
+        }
+    }
+
+    private boolean isPositionCaretTowardZero() {
+            //positionCaretTowardZeroCheckBox.setSelected(autoCompleteSupport.isPositionCaretTowardZero());
+        try {
+            Method method = AutoCompleteSupport.class.getMethod("isPositionCaretTowardZero");
+            Object result = method.invoke(autoCompleteSupport);
+            return (boolean)result;
+        } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException | IllegalArgumentException ex) {
+            throw new IllegalStateException(ex);
+        }
+    }
+
+    private void setPositionCaretTowardZero(boolean flag)
+            throws NumberFormatException {
+        
+        try {
+            Method method = AutoCompleteSupport.class.getMethod("setPositionCaretTowardZero", boolean.class);
+            method.invoke(autoCompleteSupport, flag);
+        } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException | IllegalArgumentException ex) {
+            throw new IllegalStateException(ex);
         }
     }
 }
