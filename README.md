@@ -1,3 +1,34 @@
+## Glazed Lists Bug Fixes
+
+This fork is primarily fixes for strict+CONTAINS:
+[AutoCompleteSupport: TextMatcherEditor.CONTAINS not working in strict mode](https://github.com/glazedlists/glazedlists/issues/676),
+see [ComboBox UI issues with AutoCompleteSupport](https://github.com/glazedlists/glazedlists/issues/696) for the visual differences seen in the JComboBox. Specifically, as described in the issue, the problems arise when:
+- setting the AutoCompleteSupport's "strict" property to "true"
+- and setting the AutoCompleteSupport's "filterMode" property to TextMatcherEditor.CONTAINS
+
+There are also fixes for a few bugs found along the way while putting the primary fix into production,
+in particular [glazedlists combox doesn't handle "\n" compatibly](https://github.com/glazedlists/glazedlists/issues/695)
+and [ComboBox caret positioning hides user input in narrow ComboBox](https://github.com/glazedlists/glazedlists/issues/699).
+
+The following has fixes for these three bugs.
+```
+<dependency>
+    <groupId>com.raelity.3rdparty.com.glazedlists</groupId>
+    <artifactId>glazedlists</artifactId>
+    <version>1.11.1203</version>
+</dependency>
+```
+
+The unusual version number indiates that it's post glazedlists-1.11, base on the glazedlists-1.12 development release. Note that 1.12-dev is used in production by at least one of its authors.
+
+For the issue `ComboBox caret positioning hides user input in narrow ComboBox` there's a new property PositionCaretTowardZero, when set to true
+```
+autoCompleteSupport.setPositionCaretTowardZero(true)
+```
+the caret is positioned where the next user input character goes rather than always at the end of the text.
+
+-------------------------------
+
 ## Glazed Lists - List transformations in Java
 
 ### CI build status
