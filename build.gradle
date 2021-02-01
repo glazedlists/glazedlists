@@ -13,7 +13,7 @@ plugins {
 /**
  * group and version (artifact is set from rootProject.name in settings.gradle
  */
-group "com.glazedlists"
+group "com.raelity.3rdparty.com.glazedlists"
 version "$nextReleaseVersion${isSnapshot == "true" ? "-SNAPSHOT" : ""}"
 
 /**
@@ -23,6 +23,16 @@ ext.targetDir = "target/"
 ext.user = System.getProperty("user.name")
 ext.buildTime = new Date()
 def exportedProjects = subprojects.findAll { it.name != 'issuesbrowser' && it.name != 'jmh-benchmark' }
+
+/**
+ * thanks to StackOverflow: https://stackoverflow.com/questions/52636622
+ */
+if (hasProperty('buildScan')) {
+    buildScan {
+        termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+        termsOfServiceAgree = 'yes'
+    }
+}
 
 /**
  * settings for all modules including root-module
@@ -203,6 +213,7 @@ artifacts {
 signing {
     required { gradle.taskGraph.hasTask("uploadArchives") }
 
+    //useGpgCmd()
     sign configurations.archives
 }
 
