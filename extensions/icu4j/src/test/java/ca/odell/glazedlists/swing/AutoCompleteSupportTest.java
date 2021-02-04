@@ -1048,18 +1048,19 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         return Integer.min(start,end);
     }
 
-    private static final String GL_DISABLE_CONTAINS_PREFER_STARTS_WITH = "GL:DisableContainsPreferStartsWith";
+    private static final String GL_ENABLE_NON_STRICT_CONTAINS_SELECTION = "GL:SelectContains";
 
     /**
-     * Test contains/exactMatch/preferStartsWith interactions;
-     * verify text, selected text, caret position and selected item after each input.
+     * Test containsSelection/exactMatch interactions;
+     * This test added after Strict+CONTAINS issue fix.
+     * Verify text, selected text, caret position and selected item after each input.
      * With dropdown values "xabcdex", "ab", "abcd",
      * enter the chars: "abcde", matching "ab", "abcd", "xabcdex".
      * {@literal <BS>} removes selection "x",
      * {@literal <BS>} get's back to "abcd" input/match
      */
     @Test
-    public void testContainsPreferStartsWith() throws BadLocationException {
+    public void testNonStrictContainsSelection() throws BadLocationException {
         final JComboBox<String> combo = new JComboBox<>();
 
         final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
@@ -1073,7 +1074,7 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         AutoCompleteSupport<String> support = AutoCompleteSupport.install(combo, items);
         final ComboBoxModel<String> model = combo.getModel();
         support.setFilterMode(TextMatcherEditor.CONTAINS);
-        assertEquals(false, Boolean.TRUE.equals(combo.getClientProperty(GL_DISABLE_CONTAINS_PREFER_STARTS_WITH)));
+        combo.putClientProperty(GL_ENABLE_NON_STRICT_CONTAINS_SELECTION, true);
         assertEquals(TextMatcherEditor.IDENTICAL_STRATEGY, support.getTextMatchingStrategy());
 
         Integer selStart;
@@ -1144,14 +1145,17 @@ public class AutoCompleteSupportTest extends SwingTestCase {
     }
 
     /**
-     * Test contains/exactMatch/notPreferStartsWith interactions.
-     * Like the previous, but disable ContainsPreferStartsWith
-     * Enter the chars: "abcde",
-     * match: "xabcdex", "ab", "xabcdex", "abcd", "xabcdex".
-     * The matches to "ab" and "abcd" are because of exact match.
+     * Test legacy containsSelection/exactMatch interactions (the default);
+     * set combo client property GL_ENABLE_NON_STRICT_CONTAINS_SELECTION false.
+     * Verify text, selected text, caret position and selected item after each input.
+     * With dropdown values "xabcdex", "ab", "abcd",
+     * enter the chars: "abcde", matching "ab", "abcd", "xabcdex";
+     * note that legacy mode "xabcdex" is never a selected item.
+     * {@literal <BS>} removes selection "x",
+     * {@literal <BS>} get's back to "abcd" input/match
      */
     @Test
-    public void testContainsPreferStartsWithNot() throws BadLocationException {
+    public void testNonStrictContainsLegacySelection() throws BadLocationException {
         final JComboBox<String> combo = new JComboBox<>();
 
         final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
@@ -1165,22 +1169,23 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         AutoCompleteSupport<String> support = AutoCompleteSupport.install(combo, items);
         final ComboBoxModel<String> model = combo.getModel();
         support.setFilterMode(TextMatcherEditor.CONTAINS);
-        combo.putClientProperty(GL_DISABLE_CONTAINS_PREFER_STARTS_WITH, true);
+        assertEquals(false, Boolean.TRUE.equals(combo.getClientProperty(GL_ENABLE_NON_STRICT_CONTAINS_SELECTION)));
+        combo.putClientProperty(GL_ENABLE_NON_STRICT_CONTAINS_SELECTION, false);
         assertEquals(TextMatcherEditor.IDENTICAL_STRATEGY, support.getTextMatchingStrategy());
 
         Integer selStart;
 
-        // type "a", match "xabcdex" since prefer starts with
+        // type "a", match "ab" since prefer starts with
         doc.replace(0, 0, "a", null);
-        assertEquals(7, textField.getCaretPosition());
-        assertEquals("xabcdex", model.getSelectedItem());
-        assertEquals("bcdex", textField.getSelectedText());
+        assertEquals(2, textField.getCaretPosition());
+        assertEquals("ab", model.getSelectedItem());
+        assertEquals("b", textField.getSelectedText());
 
         selStart = findSelectionStartToEnd(textField);
         assertNotNull(selStart);
-        assertEquals(2, (int)selStart);
+        assertEquals(1, (int)selStart);
 
-        // type "b" replaces "bcdex", match "ab" since exact match
+        // type "b" replaces "b", match "ab" since exact and prefer starts with
         doc.replace(selStart, doc.getLength() - selStart, "b", null);
         assertEquals(2, textField.getCaretPosition());
         assertEquals("ab", model.getSelectedItem());
@@ -1190,17 +1195,17 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertNotNull(selStart);
         assertEquals(2, (int)selStart);
 
-        // type "c", match "xabcdex"
+        // type "c", match "abcd"
         doc.replace(selStart, doc.getLength() - selStart, "c", null);
-        assertEquals(7, textField.getCaretPosition());
-        assertEquals("xabcdex", model.getSelectedItem());
-        assertEquals("dex", textField.getSelectedText());
+        assertEquals(4, textField.getCaretPosition());
+        assertEquals("abcd", model.getSelectedItem());
+        assertEquals("d", textField.getSelectedText());
 
         selStart = findSelectionStartToEnd(textField);
         assertNotNull(selStart);
-        assertEquals(4, (int)selStart);
-    
-        // type "d", match "abcd" match since exact
+        assertEquals(3, (int)selStart);
+
+        // type "d", match "abcd"
         doc.replace(selStart, doc.getLength() - selStart, "d", null);
         assertEquals(4, textField.getCaretPosition());
         assertEquals("abcd", model.getSelectedItem());
@@ -1210,29 +1215,40 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertNotNull(selStart);
         assertEquals(4, (int)selStart);
 
-        // type "e", match "xabcdex" since contains
+        // type "e", match "xabcdex" since contains and no starts with match
         doc.replace(selStart, doc.getLength() - selStart, "e", null);
-        assertEquals(7, textField.getCaretPosition());
-        assertEquals("xabcdex", model.getSelectedItem());
-        assertEquals("x", textField.getSelectedText());
-        
+        // legacy doesn't select if not starts with, so
+        assertEquals("abcde", textField.getText());
+        assertEquals(5, textField.getCaretPosition());
+        assertEquals(null, model.getSelectedItem());
+        assertEquals(null, textField.getSelectedText());
+        assertEquals(1, model.getSize());
+        assertEquals("xabcdex", model.getElementAt(0));
+
         selStart = findSelectionStartToEnd(textField);
         assertNotNull(selStart);
-        assertEquals(6, (int)selStart);
-
-        // type <BS>, remove selection "x", input is "abcde",
-        // still see "xabcdex" in combo list
-        // caret is after "e", no selection
-        doc.remove(6, 1);
-        assertEquals(6, textField.getCaretPosition());
-        assertEquals("xabcdex", model.getSelectedItem());
-        assertEquals(null, textField.getSelectedText());
+        assertEquals(5, (int)selStart);
         
-        // type <BS>, remove "e", input is now "abcd", back to "abcd" match
-        doc.remove(5, 1);
+        // type <BS>, remove "e", input is "abcd",
+        // caret is after "e", no selection
+        doc.remove(4, 1);
+        assertEquals("abcd", textField.getText());
         assertEquals(4, textField.getCaretPosition());
         assertEquals("abcd", model.getSelectedItem());
         assertEquals(null, textField.getSelectedText());
+        assertEquals(2, model.getSize());
+        assertEquals("xabcdex", model.getElementAt(0));
+        assertEquals("abcd", model.getElementAt(1));
+        
+        // type <BS>, remove "d", input is now "abc"
+        doc.remove(3, 1);
+        assertEquals("abc", textField.getText());
+        assertEquals(3, textField.getCaretPosition());
+        assertEquals("abcd", model.getSelectedItem());
+        assertEquals(null, textField.getSelectedText());
+        assertEquals(2, model.getSize());
+        assertEquals("xabcdex", model.getElementAt(0));
+        assertEquals("abcd", model.getElementAt(1));
     }
 
     private static class NoopDocument implements Document {

@@ -148,6 +148,14 @@ import ca.odell.glazedlists.impl.filter.TextSearchStrategy;
  * achieved, it greatly reduces the cross-functional communication required to
  * customize the behaviour of JComboBox for filtering and autocompletion.
  *
+ * <strong>TextMatcherEditor.CONTAINS and strict mode</strong>
+ * Strict+CONTAINS works as expected; the combo box editor is populated with a
+ * matching autocomplete item and the text after the user input is selected.
+ * By default, for backwards compatibility, NonStrict+CONTAINS acts like
+ * STARTS_WITH regarding autocomplete item selection; enable general CONTAINS
+ * autocomplete selection with a {@code JComboBox} client property by doing
+ * {@code combo.putClientProperty("GL:SelectContains" ,true)}.
+ *
  * <p><strong><font color="#FF0000">Warning:</font></strong> This class must be
  * mutated from the Swing Event Dispatch Thread. Failure to do so will result in
  * an {@link IllegalStateException} thrown from any one of:
@@ -1464,7 +1472,7 @@ public final class AutoCompleteSupport<E> {
      * returned. If an exact match cannot be found, the first term that
      * <strong>starts with</strong> the given <code>value</code> is returned.
      *
-     * <p>If no exact or partial match can be located, <code>null</code> is
+     * <p>If no exact or partial match can be located, <code>NOT_FOUND</code> is
      * returned.
      */
     // NOTE: this is only used when isStrict() == true
@@ -1556,7 +1564,17 @@ public final class AutoCompleteSupport<E> {
             }
         }
     }
-
+    
+    private static final String GL_ENABLE_NON_STRICT_CONTAINS_SELECTION = "GL:SelectContains";
+    
+    /**
+     * When false, handle NotStrict+CONTAINS like STARTS_WITH (old behavior).
+     * When true, handle it like new CONTAINS, consistent with Strict+CONTAINS.
+     */
+    private boolean isSelectNSContains() {
+        return Boolean.TRUE.equals(comboBox.getClientProperty(GL_ENABLE_NON_STRICT_CONTAINS_SELECTION));
+    }
+    
     /**
      * This class is the crux of the entire solution. This custom DocumentFilter
      * controls all edits which are attempted against the Document of the
@@ -1670,9 +1688,25 @@ public final class AutoCompleteSupport<E> {
          * This method will attempt to locate a reasonable autocomplete item
          * from all combo box items and select it. It will also populate the
          * combo box editor with the remaining text which matches the
-         * autocomplete item and select it. If the selection changes and the
-         * JComboBox is not a Table Cell Editor, an ActionEvent will be
-         * broadcast from the combo box.
+         * autocomplete item and do a text-select of it. If the item-selection
+         * changes and the JComboBox is not a Table Cell Editor,
+         * an ActionEvent will be broadcast from the combo box.
+         * 
+         * The Strict+CONTAINS support complicates things, particularly since
+         * Strict+CONTAINS is handled differently than NonStict+CONTAINS.
+         * glazedlists-v1.11 essentially populates the combo box editor in the
+         * same manner for all four cases, non-strict/strict + STARTS_WITH/CONTAINS,
+         * (use NS/S + SW/C as abbreviations). All four cases are treated the
+         * same, like STARTS_WITH, and Strict is ignored (except for a minor
+         * adjustment because Strict implies CorrectsCase).
+         * 
+         * Fixing Strict+CONTAINS changes how S+C populates the combo box editor
+         * by necessity. However, for backwards compatibility of UI, there is an
+         * option for NS+C to behave like either like NS+SW/S+SW or S+C.
+         * See {@link https://github.com/glazedlists/glazedlists/issues/696
+         * ComboBox UI issues with AutoCompleteSupport}
+         * for a detailed look at how the combo box editor is populated for
+         * each of the four cases given various user input.
          */
         private void selectAutoCompleteTerm(FilterBypass filterBypass, AttributeSet attributeSet, Object selectedItemBeforeEdit, boolean allowPartialAutoCompletionTerm) throws BadLocationException {
             // break out early if we're flagged to ignore attempts to autocomplete
@@ -1704,14 +1738,13 @@ public final class AutoCompleteSupport<E> {
 
                 // search for an *exact* match in the remainder of the ComboBoxModel
                 // before settling for the partial match we have just found.
+                // Notice that the "partial match" is checked for "*exact*".
 
-
-                // If doing CONTAINS, also search for startsWith match; unless disabled.
-                boolean preferStartsWith = !Boolean.TRUE.equals(comboBox.getClientProperty("GL:DisableContainsPreferStartsWith"));
+                // If doing CONTAINS, also search for startsWith match.
                 int matchIndexStartsWith = 0;
                 String matchStringStartsWith = null;
                 TextMatcher<String> matchStartsWith = null;
-                if (preferStartsWith && getFilterMode() == TextMatcherEditor.CONTAINS)
+                if (getFilterMode() == TextMatcherEditor.CONTAINS)
                     matchStartsWith = new TextMatcher<>(new SearchTerm[] {new SearchTerm(input)}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH, getTextMatchingStrategy());
 
                 for (int j = i; j < n; j++) {
@@ -1737,6 +1770,14 @@ public final class AutoCompleteSupport<E> {
                 // if partial autocompletion terms are not allowed, and we only have a partial term, bail early
                 if (!allowPartialAutoCompletionTerm && !input.equals(itemString))
                     return;
+
+                // If old NotStrict+CONTAINS, then must be a starts with or exact match.
+                if (!isSelectNSContains() && !isStrict() && getFilterMode() == TextMatcherEditor.CONTAINS) {
+                    // If there isn't a startWith or exact match, then treat it like no match
+                    if (matchStringStartsWith == null && !autoCompleteTermIsExactMatch) {
+                        break;
+                    }
+                }
 
                 // if prefer startsWith and found a match, then use it
                 if (!autoCompleteTermIsExactMatch && matchStringStartsWith != null) {
@@ -1896,12 +1937,18 @@ public final class AutoCompleteSupport<E> {
             doNotPostProcessDocumentChanges = false;
         }
 
-        // if the comboBoxEditorComponent's values begins with the user's prefix, highlight the remainder of the value
+        // if the comboBoxEditorComponent's values matches the user's input, highlight the remainder of the value
         final String newSelection = comboBoxEditorComponent.getText();
         // forget about where the input is found in the string
         filterMatcher.findInputInString("");
-        //  TODO: NOTE:  in selectAutoCompleteTerm(...) for exact match
-        // it doesn't do a select. But in here it does. WHY?
+        if (!isSelectNSContains() && !isStrict() && getFilterMode() == TextMatcherEditor.CONTAINS) {
+            // old style select, only startsWith
+            TextMatcher<Object> m = new TextMatcher<>(new SearchTerm[] {new SearchTerm(filterMatcher.input)}, GlazedLists.toStringTextFilterator(), TextMatcherEditor.STARTS_WITH, getTextMatchingStrategy());
+            if (m.matches(newSelection)) {
+                comboBoxEditorComponent.select(filterMatcher.input.length(), document.getLength());
+            }
+            return;
+        }
         if (filterMatcher.matches(newSelection)) {
             filterMatcher.findInputInString(newSelection);
             filterMatcher.visualizeUserInputText();
