@@ -2,8 +2,6 @@
 
 ### CI build status
 
-[![Build Status](https://travis-ci.org/glazedlists/glazedlists.svg?branch=master)](https://travis-ci.org/glazedlists/glazedlists)
-
 [![Build Status](https://github.com/glazedlists/glazedlists/workflows/Java%20CI/badge.svg)](https://github.com/glazedlists/glazedlists/actions)
 
 [![Build Status](https://dev.azure.com/glazedlists/glazedlists/_apis/build/status/glazedlists.glazedlists?branchName=master)](https://dev.azure.com/glazedlists/glazedlists/_build/latest?definitionId=1&branchName=master)
