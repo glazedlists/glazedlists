@@ -10,13 +10,13 @@
 
 ### Project sites
 
-Home page: 		http://www.glazedlists.com/
+Home page: 		https://sites.google.com/view/glazedlists/
 
 ### Documentation
 
 [Tutorial](https://glazedlists.github.io/glazedlists-tutorial/)
 
-See further documentation at [www.glazedlists.com](http://www.glazedlists.com/documentation)
+See further documentation at [https://sites.google.com/view/glazedlists/](https://sites.google.com/view/glazedlists/documentation)
 
 ### Issue tracker
 
@@ -24,13 +24,13 @@ See further documentation at [www.glazedlists.com](http://www.glazedlists.com/do
 
 ### Releases
 
-Browse [Release Notes](http://www.glazedlists.com/releases)
+Browse [Release Notes](https://sites.google.com/view/glazedlists/releases)
 
 Download [Latest Release](http://repo1.maven.org/maven2/com/glazedlists/glazedlists/1.11.0/)
 
 Download [Latest Snapshot version](https://oss.sonatype.org/content/repositories/snapshots/com/glazedlists/glazedlists/1.12.0-SNAPSHOT/)
 
-Configure [Maven](http://www.glazedlists.com/Home/maven)
+Configure [Maven](https://sites.google.com/view/glazedlists/Home/maven)
 
 ### Mailing list archives
 
