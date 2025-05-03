@@ -1015,12 +1015,34 @@ public final class AutoCompleteSupport<E> {
         if (comboBoxElement == NOT_FOUND)
             return "NOT_FOUND";
 
-        if (format != null)
-            return format.format(comboBoxElement);
-
-        return comboBoxElement == null ? "" : comboBoxElement.toString();
+        return filterNewlines(format != null ? format.format(comboBoxElement)
+                              : comboBoxElement == null ? "" 
+                              : comboBoxElement.toString());
     }
-
+    
+    /**
+     * Honor the "filterNewlines" document property;
+     * as seen in PlainDocument.insertString()
+     */
+    private String filterNewlines(String str) {
+        if(document == null)
+            return str;
+        Object filterNewlines = document.getProperty("filterNewlines");
+        if ((filterNewlines instanceof Boolean) && filterNewlines.equals(Boolean.TRUE)) {
+            if ((str != null) && (str.indexOf('\n') >= 0)) {
+                StringBuilder filtered = new StringBuilder(str);
+                int n = filtered.length();
+                for (int i = 0; i < n; i++) {
+                    if (filtered.charAt(i) == '\n') {
+                        filtered.setCharAt(i, ' ');
+                    }
+                }
+                str = filtered.toString();
+            }
+        }
+        return str;
+    }
+    
     /**
      * Returns the autocompleting {@link JComboBox} or <code>null</code> if
      * {@link AutoCompleteSupport} has been {@link #uninstall}ed.
@@ -1587,6 +1609,8 @@ public final class AutoCompleteSupport<E> {
         public void replace(FilterBypass filterBypass, int offset, int length, String string, AttributeSet attributeSet) throws BadLocationException {
             if (doNotChangeDocument) return;
 
+            string = filterNewlines(string);
+
             // collect rollback information before performing the replace
             final String valueBeforeEdit = comboBoxEditorComponent.getText();
             final int selectionStart = comboBoxEditorComponent.getSelectionStart();
@@ -1605,6 +1629,8 @@ public final class AutoCompleteSupport<E> {
         @Override
         public void insertString(FilterBypass filterBypass, int offset, String string, AttributeSet attributeSet) throws BadLocationException {
             if (doNotChangeDocument) return;
+
+            string = filterNewlines(string);
 
             // collect rollback information before performing the insert
             final String valueBeforeEdit = comboBoxEditorComponent.getText();
