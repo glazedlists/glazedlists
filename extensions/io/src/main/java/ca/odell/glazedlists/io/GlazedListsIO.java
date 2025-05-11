@@ -3,7 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package ca.odell.glazedlists.io;
 
-import ca.odell.glazedlists.impl.io.BeanXMLByteCoder;
 import ca.odell.glazedlists.impl.io.SerializableByteCoder;
 
 /**
@@ -30,7 +29,6 @@ public final class GlazedListsIO {
 
     /** Provide Singleton access for all ByteCoders with no internal state */
     private static ByteCoder serializableByteCoder = new SerializableByteCoder();
-    private static ByteCoder beanXMLByteCoder = new BeanXMLByteCoder();
 
     /**
      * Creates a {@link ByteCoder} that encodes {@link java.io.Serializable Serializable}
@@ -41,13 +39,4 @@ public final class GlazedListsIO {
         return serializableByteCoder;
     }
 
-    /**
-     * Creates a {@link ByteCoder} that uses {@link java.beans.XMLEncoder XMLEncoder} and
-     * {@link java.beans.XMLDecoder XMLDecoder} classes from java.beans. Encoded
-     * Objects must be JavaBeans.
-     */
-    public static ByteCoder beanXMLByteCoder() {
-        if(beanXMLByteCoder == null) beanXMLByteCoder = new BeanXMLByteCoder();
-        return beanXMLByteCoder;
-    }
 }
