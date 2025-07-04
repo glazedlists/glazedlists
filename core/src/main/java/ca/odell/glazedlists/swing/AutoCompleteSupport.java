@@ -171,6 +171,7 @@ import ca.odell.glazedlists.impl.filter.TextSearchStrategy;
  *   <li> {@link #setBeepOnStrictViolation(boolean)}
  *   <li> {@link #setSelectsTextOnFocusGain(boolean)}
  *   <li> {@link #setHidesPopupOnFocusLost(boolean)}
+ *   <li> {@link #setPositionCaretTowardZero(boolean)}
  *   <li> {@link #setFilterMode(int)}
  *   <li> {@link #setFirstItem(Object)}
  *   <li> {@link #removeFirstItem()}
@@ -225,6 +226,12 @@ public final class AutoCompleteSupport<E> {
      * leave the JPopupMenu visible.
      */
     private boolean hidesPopupOnFocusLost = true;
+
+    /**
+     * This controls on which side of a ComboBox text selection
+     * to place the caret.
+     */
+    private boolean positionCaretTowardZero = false;
 
     //
     // These are member variables for convenience
@@ -412,6 +419,9 @@ public final class AutoCompleteSupport<E> {
     private Action originalAquaSelectNextAction;
     private Action originalAquaSelectPreviousAction;
 
+    /** The original Action associated with SelectAll. */
+    private Action originalSelectAllAction;
+
     
     
     /**
@@ -455,6 +465,7 @@ public final class AutoCompleteSupport<E> {
         /**
          * Track location/offset of user input in current combo text.
          * {@code findInputInString("")} conventionally resets/clears info.
+         * This should be invoked whenever the combo display gets a new value.
          * @param matchString find user input in this string
          */
         abstract void findInputInString(String matchString);
@@ -463,6 +474,13 @@ public final class AutoCompleteSupport<E> {
          * Return the offset of the user input into the match string
          */
         abstract int getInputOffset();
+
+        /**
+         * Return the offset of the char after the input
+         */
+        int getInputEndOffset() {
+            return getInputOffset() + input.length();
+        }
 
         /**
          * Using given user input and mode, create/save this' filterMatcher.
@@ -482,7 +500,7 @@ public final class AutoCompleteSupport<E> {
          * @param matchString search in this string
          * @return index into matchString
          */
-        protected int indexOf(String matchString) {
+        final int indexOf(String matchString) {
             Object strategyFactory = getTextMatchingStrategy();
             if (strategyFactory instanceof TextSearchStrategy.Factory) {
                 TextSearchStrategy finder = ((TextSearchStrategy.Factory)strategyFactory).create(getFilterMode(), input);
@@ -500,6 +518,7 @@ public final class AutoCompleteSupport<E> {
         @Override
         void updateFilter(String userInput) {
             updateFilterCommon(userInput, TextMatcherEditor.STARTS_WITH);
+            dumpOffsets("PrefixFilter");
         }
 
         @Override
@@ -519,7 +538,7 @@ public final class AutoCompleteSupport<E> {
          */
         @Override
         void visualizeUserInputText() {
-            comboBoxEditorComponent.select(input.length(), document.getLength());
+            selectInComboBox(input.length(), document.getLength());
         }
 
         @Override
@@ -542,6 +561,7 @@ public final class AutoCompleteSupport<E> {
         @Override
         void updateFilter(String userInput) {
             updateFilterCommon(userInput, TextMatcherEditor.CONTAINS);
+            dumpOffsets("ContainsFilter");
         }
 
         @Override
@@ -579,7 +599,7 @@ public final class AutoCompleteSupport<E> {
          */
         @Override
         void visualizeUserInputText() {
-            comboBoxEditorComponent.select(inputOffset + input.length(), document.getLength());
+            selectInComboBox(inputOffset + input.length(), document.getLength());
         }
 
         @Override
@@ -775,6 +795,11 @@ public final class AutoCompleteSupport<E> {
         this.document = (AbstractDocument) comboBoxEditorComponent.getDocument();
         this.document.setDocumentFilter(documentFilter);
 
+        // Record original select-all action, install custom action
+        final ActionMap actionMap2 = comboBoxEditorComponent.getActionMap();
+        this.originalSelectAllAction = actionMap2.get("select-all");
+        actionMap2.put("select-all", new SelectAllAction());
+
         // install a custom renderer on the combobox, if we have built one
         if (this.renderer != null)
             comboBox.setRenderer(renderer);
@@ -807,6 +832,9 @@ public final class AutoCompleteSupport<E> {
         // restore the original ComboBoxEditor if our custom ComboBoxEditor is still installed
         if (this.comboBox.getEditor() == comboBoxEditor)
             this.comboBox.setEditor(comboBoxEditor.getDelegate());
+
+        final ActionMap actionMap2 = comboBoxEditorComponent.getActionMap();
+        actionMap2.put("select-all", originalSelectAllAction);
 
         // stop adjusting the popup's width according to the prototype value
         this.popupMenu.removePopupMenuListener(popupSizerHandler);
@@ -1015,12 +1043,34 @@ public final class AutoCompleteSupport<E> {
         if (comboBoxElement == NOT_FOUND)
             return "NOT_FOUND";
 
-        if (format != null)
-            return format.format(comboBoxElement);
-
-        return comboBoxElement == null ? "" : comboBoxElement.toString();
+        return filterNewlines(format != null ? format.format(comboBoxElement)
+                              : comboBoxElement == null ? "" 
+                              : comboBoxElement.toString());
     }
-
+    
+    /**
+     * Honor the "filterNewlines" document property;
+     * as seen in PlainDocument.insertString()
+     */
+    private String filterNewlines(String str) {
+        if(document == null)
+            return str;
+        Object filterNewlines = document.getProperty("filterNewlines");
+        if ((filterNewlines instanceof Boolean) && filterNewlines.equals(Boolean.TRUE)) {
+            if ((str != null) && (str.indexOf('\n') >= 0)) {
+                StringBuilder filtered = new StringBuilder(str);
+                int n = filtered.length();
+                for (int i = 0; i < n; i++) {
+                    if (filtered.charAt(i) == '\n') {
+                        filtered.setCharAt(i, ' ');
+                    }
+                }
+                str = filtered.toString();
+            }
+        }
+        return str;
+    }
+    
     /**
      * Returns the autocompleting {@link JComboBox} or <code>null</code> if
      * {@link AutoCompleteSupport} has been {@link #uninstall}ed.
@@ -1365,6 +1415,52 @@ public final class AutoCompleteSupport<E> {
     }
 
     /**
+     * Returns {@code true} if when {@code JComboBox} text is selected
+     * then the caret is placed at the beginning of the selection;
+     * {@code false} otherwise.
+     * 
+     * Default is {@code false}.
+     */
+    public boolean isPositionCaretTowardZero() {
+        return positionCaretTowardZero;
+    }
+
+    /**
+     * If {@code positionCaretTowardZero} is {@code true}, when a text selection is made
+     * by the {@code AutoCompleteSupport} then
+     * the caret is positioned on the side of the selection near the beginning
+     * of the string. This setting is also used when the caret is positioned
+     * at the begining or end of the text.
+     * 
+     * Default is {@code false}
+     *
+     * @throws IllegalStateException if this method is called from any Thread
+     *      other than the Swing Event Dispatch Thread
+     */
+    public void setPositionCaretTowardZero(boolean positionCaretTowardZero) {
+        checkAccessThread();
+        this.positionCaretTowardZero = positionCaretTowardZero;
+        dumpOffsets("setPosEnter");
+
+        // There are three cases to consider:
+        // 1) There is currently a selection.
+        // 2) No selection, the caret is currently at one end or the other.
+        // 3) No selection, the caret is not at either side.
+        int selectionStart = comboBoxEditorComponent.getSelectionStart();
+        int selectionEnd = comboBoxEditorComponent.getSelectionEnd();
+        if (selectionStart != selectionEnd)
+            selectInComboBox(selectionStart, selectionEnd);
+        else
+            handleCaretAfterNoTextSelection();
+        dumpOffsets("setPosExit");
+    }
+
+    private void dumpOffsets(String tag) {
+        if(false)
+        System.err.println(String.format("%s: inputOff %d, inputEnd %d, selStart %d, setEnd %d", tag, filterMatcher.getInputOffset(), filterMatcher.getInputOffset() + filterMatcher.input.length(), comboBoxEditorComponent.getSelectionStart(), comboBoxEditorComponent.getSelectionEnd()));
+    }
+
+    /**
      * Returns <tt>true</tt> if this autocomplete support instance is currently
      * installed and altering the behaviour of the combo box; <tt>false</tt> if
      * it has been {@link #uninstall}ed.
@@ -1505,6 +1601,53 @@ public final class AutoCompleteSupport<E> {
     }
 
     /**
+     * Select characters in the ComboBox; placing caret at one end
+     * of selection or the other depending on positionCaretTowardZero.
+     * Since the params may be used with TextComp.select(start, end)
+     * {@code start <= end}.
+     */
+    private void selectInComboBox(int selectionStart, int selectionEnd) {
+        assert selectionStart <= selectionEnd;
+        Caret caret = comboBoxEditorComponent.getCaret();
+        if (positionCaretTowardZero) {
+            // Place the caret at the beginning of the selection
+            // This gives max visibility to the beginning of the text.
+            caret.setDot(selectionEnd);
+            caret.moveDot(selectionStart);
+        } else {
+            caret.setDot(selectionStart);
+            caret.moveDot(selectionEnd);
+        }
+    }
+
+    /**
+     * This is typically used when there is no selection.
+     * The idea is that if the caret is at one end, position it at the other.
+     * Nothing happens if the caret is not at either end.
+     * 
+     * When moving from an endpoint,
+     * the caret should never be placed earlier than the user input.
+     */
+    private void handleCaretAfterNoTextSelection() {
+        if (comboBoxEditorComponent != null) {
+            final int caretPos = comboBoxEditorComponent.getCaretPosition();
+            final int newPos = caretPos != 0 && caretPos != document.getLength()
+                    ? caretPos : positionCaretTowardZero ? filterMatcher.getInputEndOffset() : document.getLength();
+            comboBoxEditorComponent.getCaret().setDot(newPos);
+        }
+    }
+
+    /**
+     * Action typically invoked by Ctrl-A
+     */
+    private class SelectAllAction extends AbstractAction {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            selectInComboBox(0, document.getLength());
+        }
+    }
+
+    /**
      * This special version of EventComboBoxModel simply marks a flag to
      * indicate the items in the ComboBoxModel should not be filtered as a
      * side-effect of setting the selected item. It also marks another flag
@@ -1531,11 +1674,7 @@ public final class AutoCompleteSupport<E> {
             try {
                 super.setSelectedItem(selected);
 
-                if (comboBoxEditorComponent != null) {
-                    // remove any text selection that might exist when an item is selected
-                    final int caretPos = comboBoxEditorComponent.getCaretPosition();
-                    comboBoxEditorComponent.select(caretPos, caretPos);
-                }
+                handleCaretAfterNoTextSelection();
             } finally {
                 // reinstall the ActionListeners we removed
                 registerAllActionListeners(comboBox, listeners);
@@ -1587,6 +1726,8 @@ public final class AutoCompleteSupport<E> {
         public void replace(FilterBypass filterBypass, int offset, int length, String string, AttributeSet attributeSet) throws BadLocationException {
             if (doNotChangeDocument) return;
 
+            string = filterNewlines(string);
+
             // collect rollback information before performing the replace
             final String valueBeforeEdit = comboBoxEditorComponent.getText();
             final int selectionStart = comboBoxEditorComponent.getSelectionStart();
@@ -1605,6 +1746,8 @@ public final class AutoCompleteSupport<E> {
         @Override
         public void insertString(FilterBypass filterBypass, int offset, String string, AttributeSet attributeSet) throws BadLocationException {
             if (doNotChangeDocument) return;
+
+            string = filterNewlines(string);
 
             // collect rollback information before performing the insert
             final String valueBeforeEdit = comboBoxEditorComponent.getText();
@@ -1668,9 +1811,11 @@ public final class AutoCompleteSupport<E> {
                 }
 
                 // restore the selection as it existed
-                comboBoxEditorComponent.select(selectionStart, selectionEnd);
+                comboBoxEditorComponent.setCaretPosition(selectionStart);
+                comboBoxEditorComponent.moveCaretPosition(selectionEnd);
 
                 // do not continue post processing changes
+                dumpOffsets("ProcessDocumentChange0");
                 return;
             }
 
@@ -1682,6 +1827,7 @@ public final class AutoCompleteSupport<E> {
             applyFilter(filterMatcher.input);
             selectAutoCompleteTerm(filterBypass, attributeSet, selectedItemBeforeEdit, allowPartialAutoCompletionTerm);
             togglePopup();
+            dumpOffsets("ProcessDocumentChange1");
         }
 
         /**
@@ -1833,8 +1979,10 @@ public final class AutoCompleteSupport<E> {
             // With CONTAINS handling, combo editor might have ".....input".
             // If here, didn't find "input" in model, so set editor to "input";
             // only change if there's different text to avoid perturbing caret.
-            if (!originalText.equals(input))
+            if (!originalText.equals(input)) {
                 filterBypass.replace(0, document.getLength(), input, attributeSet);
+                filterMatcher.visualizeUserInputText();
+            }
 
             // reset the selection since we couldn't find the prefix in the model
             // (this has the side-effect of scrolling the popup to the top)
@@ -2308,7 +2456,7 @@ public final class AutoCompleteSupport<E> {
         @Override
         public void focusGained(FocusEvent e) {
             if (getSelectsTextOnFocusGain())
-                comboBoxEditorComponent.select(0, comboBoxEditorComponent.getText().length());
+                selectInComboBox(0, comboBoxEditorComponent.getText().length());
         }
 
         @Override

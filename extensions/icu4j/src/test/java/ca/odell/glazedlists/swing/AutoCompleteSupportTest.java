@@ -14,9 +14,11 @@ import ca.odell.glazedlists.matchers.TextMatcherEditor;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
+import java.util.Arrays;
 
 import javax.swing.Action;
 import javax.swing.ComboBoxEditor;
@@ -1249,6 +1251,214 @@ public class AutoCompleteSupportTest extends SwingTestCase {
         assertEquals(2, model.getSize());
         assertEquals("xabcdex", model.getElementAt(0));
         assertEquals("abcd", model.getElementAt(1));
+    }
+
+    /**
+     * Test that newlines get replaced by space
+     */
+    @Test
+    public void testFilterNewlines() throws BadLocationException {
+        final JComboBox<String> combo = new JComboBox<>();
+
+        final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
+        final AbstractDocument doc = (AbstractDocument) textField.getDocument();
+
+        final EventList<String> items = new BasicEventList<>();
+        items.add("a\nb"); // "a b"
+        items.add("xxx"); // "xxx"
+
+        AutoCompleteSupport<String> support = AutoCompleteSupport.install(combo, items);
+        support.setFilterMode(TextMatcherEditor.CONTAINS);
+        final ComboBoxModel<String> model = combo.getModel();
+
+        // replace string should get filtered
+        doc.replace(0, 0, "\n\n", null);
+        assertEquals("  ", textField.getText());
+        assertEquals(null, model.getSelectedItem());
+
+        doc.remove(0, doc.getLength());
+        assertEquals("", textField.getText());
+
+        // insert string should get filtered
+        doc.insertString(0, "\n\n", null);
+        assertEquals("  ", textField.getText());
+        assertEquals(null, model.getSelectedItem());
+
+        doc.remove(0, doc.getLength());
+        assertEquals("", textField.getText());
+
+        // when a match is found in combo list, any newline from match get filtered
+
+        // type "a", match "a\nb" since prefer starts with
+        doc.replace(0, 0, "A", null);
+        assertEquals("a\nb", model.getSelectedItem());
+        assertEquals("a b", textField.getText());
+        assertEquals(" b", textField.getSelectedText());
+
+        doc.remove(0, doc.getLength());
+        assertEquals("", textField.getText());
+
+        // setSelectedItem text should get filterNewlines
+        model.setSelectedItem("a\nb");
+        assertEquals("a\nb", model.getSelectedItem());
+        assertEquals("a b", textField.getText());
+        assertEquals(null, textField.getSelectedText());
+
+        doc.remove(0, doc.getLength());
+        assertEquals("", textField.getText());
+
+        doc.remove(0, doc.getLength());
+        assertEquals("", textField.getText());
+
+        // setSelectedIndex text should get filterNewlines
+        combo.setSelectedIndex(0);
+        assertEquals("a\nb", model.getSelectedItem());
+        assertEquals("a b", textField.getText());
+        assertEquals(null, textField.getSelectedText());
+
+        doc.remove(0, doc.getLength());
+        assertEquals("", textField.getText());
+
+        // random check that filterNewlines works with CorectsCase
+        support.setCorrectsCase(false);
+        doc.replace(0, 0, "A", null);
+        assertEquals("a\nb", model.getSelectedItem());
+        assertEquals("A b", textField.getText());
+        assertEquals(" b", textField.getSelectedText());
+
+        // There was a strict mode failure, detect it.
+        // First check the transition to strict mode.
+
+        doc.remove(0, doc.getLength());
+        assertEquals("", textField.getText());
+        assertEquals(null, model.getSelectedItem());
+        
+        // test going into strict mode (needed for next test)
+        // the first item should become selected
+        support.setStrict(true);
+        assertEquals("a\nb", model.getSelectedItem());
+        combo.setSelectedIndex(1);
+        assertEquals("xxx", model.getSelectedItem());
+
+        // combo.setSelectedItem text should also get filterNewlines
+        // strict matters for a bug
+        combo.setSelectedItem("a\nb");
+        assertEquals("a\nb", model.getSelectedItem());
+        assertEquals("a b", textField.getText());
+        assertEquals(null, textField.getSelectedText());
+    }
+
+    /**
+     * Check the JTextComponent selection and caret position.
+     * "atRight" is the side where the caret is expected.
+     * If there is an error, return a string the describes the error.
+     * Return null if no error.
+     * 
+     * @param atRight which side of selection to expect the caret
+     * @param jtc the text component
+     * @param expect expected contents of text component
+     * @param left expected selectionStart
+     * @param right expected selectionEnd
+     * @return null if no error, else description of error
+     */
+    private static String checkCaretPosition(
+            boolean atRight, JTextComponent jtc, String expect, int left, int right) {
+        String lr = atRight ? "right" : "left";
+        if (!jtc.getText().equals(expect))
+            return String.format("text %s: expect '%s', got '%s'", lr, expect, jtc.getText());
+        int start = jtc.getSelectionStart();
+        int end = jtc.getSelectionEnd();
+        if (start != left || end != right)
+            return String.format("selection %s: expect [%d,%d) got [%d,%d)",
+                    lr, left, right, start, end);
+        int expectPos = atRight ? right : left;
+        int pos = jtc.getCaretPosition();
+        if (pos != expectPos)
+            return String.format("position %s: expect %d, got %d", lr, expectPos, pos);
+        return null;
+    }
+
+    /**
+     * Glazedlists does a combo.setSelectedItem for items that match user input.
+     * And it does a java text selection of the characters after the user input.
+     * There is an option for the caret to be positioned at the left or right
+     * of the text selection. The default is the right of the selection, which
+     * is away from where the user is typing.
+     */
+    @Test
+    public void testPositionCaret() throws BadLocationException {
+        final JComboBox<String> combo = new JComboBox<>();
+
+        final JTextField textField = (JTextField) combo.getEditor().getEditorComponent();
+        final AbstractDocument doc = (AbstractDocument) textField.getDocument();
+
+        final EventList<String> items = new BasicEventList<>();
+        items.add("abcd");
+        items.add("wxyz");
+        items.add("wabcd");
+
+        AutoCompleteSupport<String> support = AutoCompleteSupport.install(combo, items);
+        //support.setFilterMode(TextMatcherEditor.CONTAINS);
+        final ComboBoxModel<String> model = combo.getModel();
+        String result;
+
+        for (boolean isRight : Arrays.asList(true, false)) {
+            doc.remove(0, doc.getLength());
+            support.setPositionCaretTowardZero(!isRight);
+
+            doc.replace(0, doc.getLength() - 0, "a", null);
+            result = checkCaretPosition(isRight, textField, "abcd", 1, doc.getLength());
+            assertNull(result);
+
+            doc.replace(1, doc.getLength() - 1, "b", null);
+            result = checkCaretPosition(isRight, textField, "abcd", 2, doc.getLength());
+            assertNull(result);
+
+            doc.replace(2, doc.getLength() - 2, "c", null);
+            result = checkCaretPosition(isRight, textField, "abcd", 3, doc.getLength());
+            assertNull(result);
+
+            doc.replace(3, doc.getLength() - 3, "d", null);
+            result = checkCaretPosition(isRight, textField, "abcd", 4, doc.getLength());
+            assertNull(result);
+            
+            // start with something else selected
+            doc.replace(0, doc.getLength() - 0, "w", null);
+            result = checkCaretPosition(isRight, textField, "wxyz", 1, doc.getLength());
+            assertNull(result);
+            assertEquals("wxyz", model.getSelectedItem());
+
+            // setSelectedItem ends up also setting "input" to the item.
+            // When towardsZero, position is generally at the end of input,
+            // which is at the end of the selected item.
+            // So for either direction the caret ends up at the end.
+            combo.setSelectedItem("abcd");
+            assertEquals("abcd", textField.getText());
+            int expectPos = 4;
+            int pos = textField.getCaretPosition();
+            assertEquals(isRight ? "right: " : "left: ", expectPos, pos);
+
+            // Check the selection after a match after VK_DOWN.
+            //
+            // Can't because that's intertwined with focus/visibility.
+            // Run AutoCompleteSupportTestApp, PositionCaretTowardZero,
+            // enter "ht", DOWN, observe caret stays towards zero.
+            //
+            // doc.replace(0, doc.getLength() - 0, "w", null);
+            // result = checkCaretPosition(isRight, textField, "wxyz", 1, doc.getLength());
+            // assertNull(result);
+            // assertEquals("wxyz", model.getSelectedItem());
+            // 
+            // KeyEvent keyDown = new KeyEvent(combo,
+            //                 KeyEvent.KEY_PRESSED, System.currentTimeMillis(), 0,
+            //                 KeyEvent.VK_DOWN, KeyEvent.CHAR_UNDEFINED);
+            // combo.dispatchEvent(keyDown);
+            // after "wxyz" is "wabcd"
+            // after down, the chars after the input "w", should be selected
+            // result = checkCaretPosition(isRight, textField, "wabcd", 1, doc.getLength());
+            // assertNull(result);
+            // assertEquals("wabcd", model.getSelectedItem());
+        }
     }
 
     private static class NoopDocument implements Document {
