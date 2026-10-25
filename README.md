@@ -28,7 +28,33 @@ Browse [Release Notes](https://sites.google.com/view/glazedlists/releases)
 
 Download [Latest Release](http://repo1.maven.org/maven2/com/glazedlists/glazedlists/1.11.0/)
 
-Download [Latest Snapshot version](https://oss.sonatype.org/content/repositories/snapshots/com/glazedlists/glazedlists/1.12.0-SNAPSHOT/)
+Snapshot versions are available from the [Sonatype Central snapshot repository](https://central.sonatype.com/repository/maven-snapshots/).
+They are not synced to Maven Central and are removed after 90 days. To use them, add the repository to your build:
+
+Gradle:
+```groovy
+repositories {
+    maven {
+        url "https://central.sonatype.com/repository/maven-snapshots/"
+        content { includeModule("com.glazedlists", "glazedlists") }
+    }
+}
+dependencies {
+    implementation "com.glazedlists:glazedlists:1.12.0-SNAPSHOT"
+}
+```
+
+Maven:
+```xml
+<repositories>
+  <repository>
+    <id>central-snapshots</id>
+    <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+    <releases><enabled>false</enabled></releases>
+    <snapshots><enabled>true</enabled></snapshots>
+  </repository>
+</repositories>
+```
 
 Configure [Maven](https://sites.google.com/view/glazedlists/Home/maven)
 

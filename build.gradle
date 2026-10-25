@@ -20,6 +20,7 @@ version "$nextReleaseVersion${isSnapshot == "true" ? "-SNAPSHOT" : ""}"
  * variables
  */
 ext.targetDir = "target/"
+ext.centralStagingDir = file("$targetDir/central-staging")
 ext.user = System.getProperty("user.name")
 ext.buildTime = new Date()
 def exportedProjects = subprojects.findAll { it.name != 'issuesbrowser' && it.name != 'jmh-benchmark' }
@@ -177,6 +178,10 @@ task dist(type: Zip) {
     includeEmptyDirs = false
     from fileTree(".") {
         exclude ".git"
+        exclude ".github"
+		exclude "azure-pipelines.yml"
+		exclude "build-job.yml"
+		exclude "RELEASING.md"
         exclude "www"
         exclude "**/.classpath"
         exclude "**/.project"
@@ -201,7 +206,7 @@ artifacts {
 }
 
 signing {
-    required { gradle.taskGraph.hasTask("uploadArchives") }
+    required { gradle.taskGraph.hasTask(":uploadArchives") }
 
     sign configurations.archives
 }
@@ -211,9 +216,8 @@ uploadArchives {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-            repository(url: "${mavenStagingRepositoryUrl}") {
-                authentication(userName: sonatypeUsername, password: sonatypePassword)
-            }
+            // releases go to a local repository and are published via a Central Portal bundle (see centralBundle)
+            repository(url: centralStagingDir.toURI().toString())
 
             snapshotRepository(url: "${mavenSnapshotsRepositoryUrl}") {
                 authentication(userName: sonatypeUsername, password: sonatypePassword)
@@ -224,7 +228,7 @@ uploadArchives {
                 name "Glazed Lists"
                 description "Event-driven lists for dynamically filtered and sorted tables"
 
-                url "http://www.glazedlists.com"
+                url "https://github.com/glazedlists/glazedlists"
 
                 issueManagement {
                     system "GitHub Issues"
@@ -333,3 +337,44 @@ uploadArchives {
 uploadArchives.dependsOn sourcejar
 uploadArchives.dependsOn javadocjar
 uploadArchives.dependsOn dist
+uploadArchives.doFirst {
+    if (isSnapshot != "true") {
+        project.delete(centralStagingDir)
+    }
+}
+
+/**
+ * Central Portal bundle: zips the signed release artifacts of the local staging repository
+ * for upload to https://central.sonatype.com (see RELEASING.md)
+ */
+task centralBundle(type: Zip, dependsOn: uploadArchives) {
+    def versionPath = "${project.group.replace('.', '/')}/${rootProject.name}/${project.version}"
+    destinationDir = file(targetDir)
+    archiveName = "${rootProject.name}-${project.version}-central-bundle.zip"
+    from(centralStagingDir) {
+        include "$versionPath/**"
+    }
+
+    doFirst {
+        def versionDir = new File(centralStagingDir, versionPath)
+        def prefix = "${rootProject.name}-${project.version}"
+        ["${prefix}.pom", "${prefix}.jar", "${prefix}-sources.jar", "${prefix}-javadoc.jar"].each { name ->
+            if (!new File(versionDir, name).exists()) {
+                throw new GradleException("Missing $name in $versionDir")
+            }
+        }
+        versionDir.listFiles().findAll { !(it.name ==~ /.*\.(asc|md5|sha1)/) }.each { artifact ->
+            [".asc", ".md5", ".sha1"].each { ext ->
+                if (!new File(versionDir, artifact.name + ext).exists()) {
+                    throw new GradleException("Missing ${artifact.name}$ext in $versionDir")
+                }
+            }
+        }
+    }
+}
+
+gradle.taskGraph.whenReady { graph ->
+    if (graph.hasTask(centralBundle) && isSnapshot == "true") {
+        throw new GradleException("centralBundle needs a release version: run with -PisSnapshot=false")
+    }
+}
