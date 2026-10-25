@@ -12,7 +12,7 @@ jobs:
     parameters:
       name: MacOS
       pool:
-        vmImage: 'macOS-13'
+        vmImage: 'macOS-15'
       tasks: 'build -x :extensions:swt:test'
 
   # Windows job
@@ -20,5 +20,5 @@ jobs:
     parameters:
       name: Windows
       pool:
-        vmImage: 'windows-2019'
+        vmImage: 'windows-2025'
       tasks: 'build -PexcludeTests=**/CTPConnectionTest*'
