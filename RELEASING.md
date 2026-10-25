@@ -50,12 +50,14 @@ Snapshots are removed by Sonatype after 90 days.
 3. Wait until the deployment is **VALIDATED** (on **FAILED**, the Portal lists the problems). Nothing is
    public yet.
 4. Optional smoke test: a validated deployment can be consumed before publishing, e.g. from a
-   throwaway Gradle project. The Bearer token is built from the Portal user token in
+   throwaway Gradle project. Use the endpoint for the specific deployment, with the deployment id from
+   the Portal's *Deployments* page. The generic endpoint `.../publisher/deployments/download/` (any
+   validated deployment) timed out in tests. The Bearer token is built from the Portal user token in
    `~/.gradle/gradle.properties`, so no credentials end up in the build file:
    ```groovy
    repositories {
        maven {
-           url "https://central.sonatype.com/api/v1/publisher/deployments/download/"
+           url "https://central.sonatype.com/api/v1/publisher/deployment/<deploymentId>/download/"
            credentials(HttpHeaderCredentials) {
                name = "Authorization"
                value = "Bearer " + "${sonatypeUsername}:${sonatypePassword}".bytes.encodeBase64().toString()
