@@ -91,8 +91,12 @@ public class SwtClassRule implements TestRule {
 
         public void init() throws InterruptedException {
             if (display == null) {
-                displayOwner = Display.getCurrent() == null;
-                display = Display.getDefault();
+                // don't use Display.getDefault(), it could return a display of another thread
+                display = Display.getCurrent();
+                displayOwner = display == null;
+                if (displayOwner) {
+                    display = new Display();
+                }
             }
             shell = new Shell(display);
         }
