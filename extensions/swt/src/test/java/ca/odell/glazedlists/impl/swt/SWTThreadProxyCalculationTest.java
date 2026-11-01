@@ -95,49 +95,52 @@ public class SWTThreadProxyCalculationTest {
         // start the background task to init the display
         final Thread background = new Thread(displayInit);
         background.start();
-        sleep(1000);
-        final PropertyChangeEventRecorder recorder = new PropertyChangeEventRecorder(displayInit.getDisplay());
-        source = new BasicEventList<>();
-        countCalc = Calculations.count(source);
-        countProxyCalc = CalculationsSWT.swtThreadProxyCalculation(countCalc, displayInit.getDisplay());
-        countProxyCalc.addPropertyChangeListener(recorder);
-        assertEquals(0, recorder.getCallbackCount());
-        assertNull(recorder.getLastCallbackOldValue());
-        assertNull(recorder.getLastCallbackNewValue());
-        source.add("one");
-        sleep(300);
-        assertEquals(1, recorder.getCallbackCount());
-        assertTrue(recorder.getLastCallbackThreadWasDisplayThread());
-        assertEquals(Integer.valueOf(0), recorder.getLastCallbackOldValue());
-        assertEquals(Integer.valueOf(1), recorder.getLastCallbackNewValue());
-        recorder.reset();
-        source.addAll(Arrays.asList("two", "three"));
-        sleep(300);
-        assertEquals(1, recorder.getCallbackCount());
-        assertTrue(recorder.getLastCallbackThreadWasDisplayThread());
-        assertEquals(Integer.valueOf(1), recorder.getLastCallbackOldValue());
-        assertEquals(Integer.valueOf(3), recorder.getLastCallbackNewValue());
-        recorder.reset();
-        source.remove(1);
-        sleep(300);
-        assertEquals(1, recorder.getCallbackCount());
-        assertTrue(recorder.getLastCallbackThreadWasDisplayThread());
-        assertEquals(Integer.valueOf(3), recorder.getLastCallbackOldValue());
-        assertEquals(Integer.valueOf(2), recorder.getLastCallbackNewValue());
-        recorder.reset();
-        source.clear();
-        sleep(300);
-        assertEquals(1, recorder.getCallbackCount());
-        assertTrue(recorder.getLastCallbackThreadWasDisplayThread());
-        assertEquals(Integer.valueOf(2), recorder.getLastCallbackOldValue());
-        assertEquals(Integer.valueOf(0), recorder.getLastCallbackNewValue());
-        recorder.reset();
-        // stop the event loop and wait for completion
         try {
-            displayInit.stop();
-            background.join();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            sleep(1000);
+            final PropertyChangeEventRecorder recorder = new PropertyChangeEventRecorder(displayInit.getDisplay());
+            source = new BasicEventList<>();
+            countCalc = Calculations.count(source);
+            countProxyCalc = CalculationsSWT.swtThreadProxyCalculation(countCalc, displayInit.getDisplay());
+            countProxyCalc.addPropertyChangeListener(recorder);
+            assertEquals(0, recorder.getCallbackCount());
+            assertNull(recorder.getLastCallbackOldValue());
+            assertNull(recorder.getLastCallbackNewValue());
+            source.add("one");
+            sleep(300);
+            assertEquals(1, recorder.getCallbackCount());
+            assertTrue(recorder.getLastCallbackThreadWasDisplayThread());
+            assertEquals(Integer.valueOf(0), recorder.getLastCallbackOldValue());
+            assertEquals(Integer.valueOf(1), recorder.getLastCallbackNewValue());
+            recorder.reset();
+            source.addAll(Arrays.asList("two", "three"));
+            sleep(300);
+            assertEquals(1, recorder.getCallbackCount());
+            assertTrue(recorder.getLastCallbackThreadWasDisplayThread());
+            assertEquals(Integer.valueOf(1), recorder.getLastCallbackOldValue());
+            assertEquals(Integer.valueOf(3), recorder.getLastCallbackNewValue());
+            recorder.reset();
+            source.remove(1);
+            sleep(300);
+            assertEquals(1, recorder.getCallbackCount());
+            assertTrue(recorder.getLastCallbackThreadWasDisplayThread());
+            assertEquals(Integer.valueOf(3), recorder.getLastCallbackOldValue());
+            assertEquals(Integer.valueOf(2), recorder.getLastCallbackNewValue());
+            recorder.reset();
+            source.clear();
+            sleep(300);
+            assertEquals(1, recorder.getCallbackCount());
+            assertTrue(recorder.getLastCallbackThreadWasDisplayThread());
+            assertEquals(Integer.valueOf(2), recorder.getLastCallbackOldValue());
+            assertEquals(Integer.valueOf(0), recorder.getLastCallbackNewValue());
+            recorder.reset();
+        } finally {
+            // stop the event loop and wait for completion
+            try {
+                displayInit.stop();
+                background.join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -155,7 +158,7 @@ public class SWTThreadProxyCalculationTest {
      * @author Holger Brands
      */
     private static class DisplayRunner implements Runnable {
-        private Display display;
+        private volatile Display display;
         private Shell shell;
         private volatile boolean stop;
         @Override
@@ -174,7 +177,10 @@ public class SWTThreadProxyCalculationTest {
         }
         void stop() {
             stop = true;
-            display.wake();
+            // the display doesn't exist yet if the test fails early, run() then exits on its own
+            if (display != null) {
+                display.wake();
+            }
         }
     }
 

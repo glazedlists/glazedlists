@@ -5,11 +5,12 @@ package ca.odell.glazedlists;
 
 import org.junit.runners.model.Statement;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 
 /**
  * A statement implementation that executes a given {@link Statement} with a
- * supplied {@link Executor}.
+ * supplied {@link Executor} and waits for its completion.
  *
  * @author Holger Brands
  */
@@ -37,6 +38,7 @@ public class ExecutorStatement extends Statement {
      */
     @Override
     public void evaluate() throws Throwable {
+        final CountDownLatch completed = new CountDownLatch(1);
         final Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -44,11 +46,15 @@ public class ExecutorStatement extends Statement {
                     statement.evaluate();
                 } catch (Throwable e) {
                     statementException = e;
+                } finally {
+                    completed.countDown();
                 }
             }
         };
         try {
             executor.execute(runnable);
+            // the executor may be asynchronous, so the test is not finished yet
+            completed.await();
         } catch (Throwable e) {
             invocationException = e;
         }
