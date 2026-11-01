@@ -26,7 +26,7 @@ See further documentation at [https://sites.google.com/view/glazedlists/](https:
 
 Browse [Release Notes](https://sites.google.com/view/glazedlists/releases)
 
-Download [Latest Release](http://repo1.maven.org/maven2/com/glazedlists/glazedlists/1.11.0/)
+Download [Latest Release](http://repo1.maven.org/maven2/com/glazedlists/glazedlists/1.12.0/)
 
 Snapshot versions are available from the [Sonatype Central snapshot repository](https://central.sonatype.com/repository/maven-snapshots/).
 They are not synced to Maven Central and are removed after 90 days. To use them, add the repository to your build:
