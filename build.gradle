@@ -3,7 +3,7 @@
  */
 plugins {
     id "base"
-    id "maven"
+    id "maven-publish"
     id "signing"
     id "it.gianluz.capsule" version "1.0.3"
     id "biz.aQute.bnd.builder" version "4.1.0"
@@ -13,8 +13,8 @@ plugins {
 /**
  * group and version (artifact is set from rootProject.name in settings.gradle
  */
-group "com.glazedlists"
-version "$nextReleaseVersion${isSnapshot == "true" ? "-SNAPSHOT" : ""}"
+group = "com.glazedlists"
+version = "$nextReleaseVersion${isSnapshot == "true" ? "-SNAPSHOT" : ""}"
 
 /**
  * variables
@@ -27,17 +27,30 @@ def exportedProjects = subprojects.findAll { it.name != 'issuesbrowser' && it.na
 
 /**
  * settings for all modules including root-module
+ * (the root project resolves the classpath of the docs task)
  */
 allprojects {
-    sourceCompatibility = javaTargetVersion
-    targetCompatibility = javaTargetVersion
+    repositories {
+        mavenCentral()
+
+        // for SWT
+        maven {
+            url = "https://maven-eclipse.github.io/maven"
+        }
+    }
 }
 
 /**
  * settings for subprojects = everything except the root-project
  */
 subprojects {
-    apply plugin: 'java'
+    apply plugin: 'java-library'
+
+    java {
+        sourceCompatibility = JavaVersion.toVersion(javaTargetVersion)
+        targetCompatibility = JavaVersion.toVersion(javaTargetVersion)
+    }
+
     tasks.withType(JavaCompile) {
         options.encoding = "UTF-8"
     }
@@ -45,20 +58,11 @@ subprojects {
         options.encoding = "UTF-8"
     }
 
-    repositories {
-        jcenter()
-
-        // for SWT
-        maven {
-            url "http://maven-eclipse.github.io/maven"
-        }
-    }
-
     /* dependencies for test */
     dependencies {
-        testCompile 'junit:junit:4.11'
-        testCompile 'org.awaitility:awaitility:4.0.3'
-        testCompile 'org.assertj:assertj-core:3.16.1'
+        testImplementation 'junit:junit:4.11'
+        testImplementation 'org.awaitility:awaitility:4.0.3'
+        testImplementation 'org.assertj:assertj-core:3.16.1'
     }
     test {
         systemProperties 'java.awt.headless': 'true'
@@ -70,11 +74,11 @@ subprojects {
 
         testLogging {
             events "skipped", "failed"
-            exceptionFormat "full"
+            exceptionFormat = "full"
         }
     }
 
-    jar.archiveName = "glazedlists-${name}.jar"
+    jar.archiveFileName = "glazedlists-${name}.jar"
 }
 
 /**
@@ -83,8 +87,8 @@ subprojects {
 configure(subprojects.findAll { it.name != 'core' }) {
     /* everything depends on core */
     dependencies {
-        compile project(':core')
-        testCompile project(':core').sourceSets.test.output
+        api project(':core')
+        testImplementation project(':core').sourceSets.test.output
     }
 }
 
@@ -99,10 +103,18 @@ clean.doLast {
 /**
  * JavaDoc
  */
+configurations {
+    /* the exported projects with their dependencies, resolved via project dependencies */
+    docsClasspath
+}
+dependencies {
+    exportedProjects.each { docsClasspath project(it.path) }
+}
+
 task docs(type: Javadoc) {
     options.addStringOption('Xdoclint:none', '-quiet')
     options.jFlags('-Dhttp.agent=gradle-javadoc')
-    classpath = files(exportedProjects.collect { it.sourceSets.main.compileClasspath + it.sourceSets.main.output })
+    classpath = configurations.docsClasspath
     source = exportedProjects.collect { it.sourceSets.main.allJava }
     destinationDir = file("$targetDir/docs/api")
     title = "Glazed Lists $version"
@@ -129,9 +141,9 @@ task docs(type: Javadoc) {
  * JavaDoc-Jar
  */
 task javadocjar(type: Jar, dependsOn: "docs") {
-	classifier = 'javadoc'
-    destinationDir = file(targetDir)
-    archiveName = "${rootProject.name}-${version}-javadoc.jar"
+    archiveClassifier = 'javadoc'
+    destinationDirectory = file(targetDir)
+    archiveFileName = "${rootProject.name}-${version}-javadoc.jar"
     from fileTree("$targetDir/docs/api")
 }
 
@@ -139,9 +151,9 @@ task javadocjar(type: Jar, dependsOn: "docs") {
  * Source-Jar
  */
 task sourcejar(type: Jar) {
-	classifier = 'sources'
-    destinationDir = file(targetDir)
-    archiveName = "${rootProject.name}-$version-sources.jar"
+    archiveClassifier = 'sources'
+    destinationDirectory = file(targetDir)
+    archiveFileName = "${rootProject.name}-$version-sources.jar"
     includeEmptyDirs = false
     from files(
         subprojects.collect { it.sourceSets.main.allSource }
@@ -152,8 +164,8 @@ task sourcejar(type: Jar) {
  * Jar (osgi compatible)
  */
 jar {
-    destinationDir = file(targetDir)
-    archiveName = "${rootProject.name}-${version}.jar"
+    destinationDirectory = file(targetDir)
+    archiveFileName = "${rootProject.name}-${version}.jar"
 
     apply from: 'glazedlists.bnd.gradle'
     bndfile = makeBNDFile()
@@ -173,8 +185,8 @@ task dist(type: Zip) {
       DirectoryScanner.removeDefaultExclude "**/.gitignore"
     }
     
-    destinationDir = file(targetDir)
-    archiveName = "${rootProject.name}-$version-dist.zip"
+    destinationDirectory = file(targetDir)
+    archiveFileName = "${rootProject.name}-$version-dist.zip"
     includeEmptyDirs = false
     from fileTree(".") {
         exclude ".git"
@@ -201,156 +213,149 @@ task dist(type: Zip) {
  */
 build.dependsOn(["jar", "sourcejar", "javadocjar", "dist"])
 
-artifacts {
-    archives javadocjar, sourcejar, dist
-}
+assemble.dependsOn javadocjar, sourcejar, dist
 
-signing {
-    required { gradle.taskGraph.hasTask(":uploadArchives") }
+/**
+ * Publishing: release versions go to the local repository target/central-staging and are published
+ * via a Central Portal bundle (see centralBundle), snapshots go to the Portal snapshot repository
+ */
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            // explicit artifacts instead of components.java: no dependencies and no Gradle module metadata
+            artifact jar
+            artifact sourcejar
+            artifact javadocjar
+            artifact dist
 
-    sign configurations.archives
-}
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-            // releases go to a local repository and are published via a Central Portal bundle (see centralBundle)
-            repository(url: centralStagingDir.toURI().toString())
-
-            snapshotRepository(url: "${mavenSnapshotsRepositoryUrl}") {
-                authentication(userName: sonatypeUsername, password: sonatypePassword)
-            }
-
-            pom.project {
-                packaging 'jar'
-                name "Glazed Lists"
-                description "Event-driven lists for dynamically filtered and sorted tables"
-
-                url "https://github.com/glazedlists/glazedlists"
-
-                issueManagement {
-                    system "GitHub Issues"
-                    url "https://github.com/glazedlists/glazedlists/issues"
-                }
-
-                inceptionYear 2003
-
-                scm {
-                    connection "scm:git:git://github.com/glazedlists/glazedlists"
-                    developerConnection "scm:git:git://github.com/glazedlists/glazedlists"
-                    url "https://github.com/glazedlists/glazedlists"
-                }
+            pom {
+                // jar and dist zip both have no classifier, so Gradle can't derive the packaging
+                packaging = "jar"
+                name = "Glazed Lists"
+                description = "Event-driven lists for dynamically filtered and sorted tables"
+                url = "https://github.com/glazedlists/glazedlists"
+                inceptionYear = "2003"
 
                 licenses {
                     license {
-                        name "GNU Lesser General Public License"
-                        url "http://www.gnu.org/copyleft/lesser.html"
-                        distribution "repo"
+                        name = "GNU Lesser General Public License"
+                        url = "http://www.gnu.org/copyleft/lesser.html"
+                        distribution = "repo"
                     }
                     license {
-                        name "Mozilla Public License Version 1.1"
-                        url "http://www.mozilla.org/MPL/MPL-1.1.html"
-                        distribution "repo"
+                        name = "Mozilla Public License Version 1.1"
+                        url = "http://www.mozilla.org/MPL/MPL-1.1.html"
+                        distribution = "repo"
                     }
                 }
 
                 developers {
                     developer {
-                        id "jessewilson"
-                        name "Jesse Wilson"
-                        email "jesse@swank.ca"
-                        roles {
-                            role "Java developer"
-                        }
-                        timezone "PDT"
+                        id = "jessewilson"
+                        name = "Jesse Wilson"
+                        email = "jesse@swank.ca"
+                        roles = ["Java developer"]
+                        timezone = "PDT"
                     }
                     developer {
-                        id "jplemieux"
-                        name "James Lemieux"
-                        email ""
-                        roles {
-                            role "Java developer"
-                        }
-                        timezone "PDT"
+                        id = "jplemieux"
+                        name = "James Lemieux"
+                        email = ""
+                        roles = ["Java developer"]
+                        timezone = "PDT"
                     }
                     developer {
-                        id "kevinmaltby"
-                        name "Kevin Maltby"
-                        email ""
-                        roles {
-                            role "Java developer"
-                        }
-                        timezone "EST"
+                        id = "kevinmaltby"
+                        name = "Kevin Maltby"
+                        email = ""
+                        roles = ["Java developer"]
+                        timezone = "EST"
                     }
                     developer {
-                        id "robeden"
-                        name "Rob Eden"
-                        email "robeden1@gmail.com"
-                        roles {
-                            role "Java developer"
-                        }
-                        timezone "CST"
+                        id = "robeden"
+                        name = "Rob Eden"
+                        email = "robeden1@gmail.com"
+                        roles = ["Java developer"]
+                        timezone = "CST"
                     }
                     developer {
-                        id "brands"
-                        name "Holger Brands"
-                        email ""
-                        roles {
-                            role "Java developer"
-                        }
-                        timezone "CET"
+                        id = "brands"
+                        name = "Holger Brands"
+                        email = ""
+                        roles = ["Java developer"]
+                        timezone = "CET"
                     }
                 }
 
                 contributors {
                     contributor {
-                        name "Geoffrey De Smet"
-                        email "ge0ffrey.spam_AT_gmail.com"
-                        roles {
-                            role "Maven2izer"
-                        }
-                        timezone "+1"
+                        name = "Geoffrey De Smet"
+                        email = "ge0ffrey.spam_AT_gmail.com"
+                        roles = ["Maven2izer"]
+                        timezone = "+1"
                     }
                     contributor {
-                        name "Fabian Zeindl"
-                        email ""
-                        roles {
-                            role "Java developer"
-                        }
-                        timezone "CET"
+                        name = "Fabian Zeindl"
+                        email = ""
+                        roles = ["Java developer"]
+                        timezone = "CET"
                     }
                 }
-                dependencies {
-                    dependency {
-                        groupId "junit"
-                        artifactId "junit"
-                        version "4.11"
-                        scope "test"
-                    }
+
+                scm {
+                    connection = "scm:git:git://github.com/glazedlists/glazedlists"
+                    developerConnection = "scm:git:git://github.com/glazedlists/glazedlists"
+                    url = "https://github.com/glazedlists/glazedlists"
+                }
+
+                issueManagement {
+                    system = "GitHub Issues"
+                    url = "https://github.com/glazedlists/glazedlists/issues"
                 }
             }
         }
     }
-}
-uploadArchives.dependsOn sourcejar
-uploadArchives.dependsOn javadocjar
-uploadArchives.dependsOn dist
-uploadArchives.doFirst {
-    if (isSnapshot != "true") {
-        project.delete(centralStagingDir)
+
+    repositories {
+        maven {
+            name = "central"
+            if (isSnapshot == "true") {
+                url = mavenSnapshotsRepositoryUrl
+                credentials {
+                    username = sonatypeUsername
+                    password = sonatypePassword
+                }
+            } else {
+                url = centralStagingDir.toURI()
+            }
+        }
     }
+}
+
+def publishToCentral = tasks.named("publishMavenJavaPublicationToCentralRepository")
+publishToCentral.configure {
+    doFirst {
+        // a release bundle must not pick up stale files from an earlier run
+        if (isSnapshot != "true") {
+            project.delete(centralStagingDir)
+        }
+    }
+}
+
+signing {
+    required { gradle.taskGraph.hasTask(":publishMavenJavaPublicationToCentralRepository") }
+
+    sign publishing.publications.mavenJava
 }
 
 /**
  * Central Portal bundle: zips the signed release artifacts of the local staging repository
  * for upload to https://central.sonatype.com (see RELEASING.md)
  */
-task centralBundle(type: Zip, dependsOn: uploadArchives) {
+task centralBundle(type: Zip, dependsOn: publishToCentral) {
     def versionPath = "${project.group.replace('.', '/')}/${rootProject.name}/${project.version}"
-    destinationDir = file(targetDir)
-    archiveName = "${rootProject.name}-${project.version}-central-bundle.zip"
+    destinationDirectory = file(targetDir)
+    archiveFileName = "${rootProject.name}-${project.version}-central-bundle.zip"
     from(centralStagingDir) {
         include "$versionPath/**"
     }
@@ -363,7 +368,8 @@ task centralBundle(type: Zip, dependsOn: uploadArchives) {
                 throw new GradleException("Missing $name in $versionDir")
             }
         }
-        versionDir.listFiles().findAll { !(it.name ==~ /.*\.(asc|md5|sha1)/) }.each { artifact ->
+        // Gradle 6+ also writes .sha256/.sha512 files
+        versionDir.listFiles().findAll { !(it.name ==~ /.*\.(asc|md5|sha1|sha256|sha512)/) }.each { artifact ->
             [".asc", ".md5", ".sha1"].each { ext ->
                 if (!new File(versionDir, artifact.name + ext).exists()) {
                     throw new GradleException("Missing ${artifact.name}$ext in $versionDir")

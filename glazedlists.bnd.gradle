@@ -1,7 +1,7 @@
 ext.makeBNDFile = {  ->
     def implementationVersion
     if (isSnapshot == "true") {
-        implementationVersion = "${nextReleaseVersion}.alpha${buildTime.format("yyyyMMdd")}"
+        implementationVersion = "${nextReleaseVersion}.alpha${new java.text.SimpleDateFormat("yyyyMMdd").format(buildTime)}"
     } else {
         implementationVersion = nextReleaseVersion
     }
@@ -12,12 +12,12 @@ Manifest-Version: 1.0
 Main-Class: ca.odell.glazedlists.impl.Main
 Sealed: true
 Built-By: ${user}
-Built-At: ${buildTime.format("yyyy-MM-dd H:mm")}
+Built-At: ${new java.text.SimpleDateFormat("yyyy-MM-dd H:mm").format(buildTime)}
 Implementation-Version: ${implementationVersion}
 Implementation-Title: Glazed Lists
 Implementation-URL: http://publicobject.com/glazedlists/
 Contributors: Jesse Wilson, Kevin Maltby, James Lemieux, Rob Eden, Holger Brands
-Source-Version: JDK ${sourceCompatibility}
+Source-Version: JDK ${javaTargetVersion}
 
 # OSGi bundle information
 Bundle-ManifestVersion: 2

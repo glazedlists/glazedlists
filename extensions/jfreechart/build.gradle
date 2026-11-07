@@ -1,4 +1,4 @@
 dependencies {
-    compile project(':extensions:calculation')
-    compile 'jfreechart:jfreechart:1.0.0'
+    api project(':extensions:calculation')
+    api 'jfreechart:jfreechart:1.0.0'
 }
