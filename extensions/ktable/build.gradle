@@ -1,4 +1,4 @@
 dependencies {
-    compile project(':extensions:issuesbrowser')
-    compile files('lib/ktable-2.1.2.jar')
+    api project(':extensions:issuesbrowser')
+    api files('lib/ktable-2.1.2.jar')
 }

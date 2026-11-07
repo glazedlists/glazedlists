@@ -1,23 +1,17 @@
 apply plugin: 'it.gianluz.capsule'
 
-configurations {
-    apt
-}
-
 dependencies {
-    compile project(':core')
-    compile "org.openjdk.jmh:jmh-core:1.19"
+    api project(':core')
+    api "org.openjdk.jmh:jmh-core:1.19"
 
-    apt "org.openjdk.jmh:jmh-generator-annprocess:1.19"
-}
-
-compileJava {
-    options.annotationProcessorPath = configurations.apt
+    annotationProcessor "org.openjdk.jmh:jmh-generator-annprocess:1.19"
 }
 
 task capsule(type: FatCapsule) {
-    destinationDir = file("$buildDir/capsule")
-    archiveName = "glazedlists-benchmarks.jar"
+    destinationDirectory = file("$buildDir/capsule")
+    archiveFileName = "glazedlists-benchmarks.jar"
+    // FatCapsule embeds the legacy 'runtime' configuration by default, which no longer gets the 'api' dependencies
+    embedConfiguration = configurations.runtimeClasspath
     applicationClass 'ca.odell.glazedlists.BenchmarkMain'
 
     capsuleManifest {

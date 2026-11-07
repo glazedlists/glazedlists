@@ -10,22 +10,24 @@ if (JavaVersion.current().compareTo(JavaVersion.VERSION_11) >= 0) {
 }
 
 dependencies {
-    compile project(':extensions:swt')
-    compile project(':extensions:treetable')
-    compile project(':extensions:jfreechart')
-    compile project(':extensions:javafx')
-    compile project(':extensions:nachocalendar')
-    compile project(':extensions:jgoodiesforms')
-    compile files('lib/http.jar')
-    compile 'org.kohsuke:github-api:1.111'
+    api project(':extensions:swt')
+    api project(':extensions:treetable')
+    api project(':extensions:jfreechart')
+    api project(':extensions:javafx')
+    api project(':extensions:nachocalendar')
+    api project(':extensions:jgoodiesforms')
+    api files('lib/http.jar')
+    api 'org.kohsuke:github-api:1.111'
 }
 
 /**
  * Issues-Browser
  */
 task issuesbrowserjar(type: FatCapsule) {
-    destinationDir = file("$rootDir/$targetDir")
-    archiveName = "glazedlists-demo.jar"
+    destinationDirectory = file("$rootDir/$targetDir")
+    archiveFileName = "glazedlists-demo.jar"
+    // FatCapsule embeds the legacy 'runtime' configuration by default, which no longer gets the 'api' dependencies
+    embedConfiguration = configurations.runtimeClasspath
 
     applicationClass 'com.publicobject.issuesbrowser.swing.IssuesBrowser'
 
@@ -40,8 +42,9 @@ task issuesbrowserjar(type: FatCapsule) {
  * XML-Browser
  */
 task xmlbrowserjar(type: FatCapsule) {
-    destinationDir = file("$rootDir/$targetDir")
-    archiveName = "xmlbrowser.jar"
+    destinationDirectory = file("$rootDir/$targetDir")
+    archiveFileName = "xmlbrowser.jar"
+    embedConfiguration = configurations.runtimeClasspath
 
     applicationClass 'com.publicobject.xmlbrowser.XmlBrowser'
 

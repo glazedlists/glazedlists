@@ -13,8 +13,8 @@ plugins {
 /**
  * group and version (artifact is set from rootProject.name in settings.gradle
  */
-group "com.glazedlists"
-version "$nextReleaseVersion${isSnapshot == "true" ? "-SNAPSHOT" : ""}"
+group = "com.glazedlists"
+version = "$nextReleaseVersion${isSnapshot == "true" ? "-SNAPSHOT" : ""}"
 
 /**
  * variables
@@ -27,17 +27,30 @@ def exportedProjects = subprojects.findAll { it.name != 'issuesbrowser' && it.na
 
 /**
  * settings for all modules including root-module
+ * (the root project resolves the classpath of the docs task)
  */
 allprojects {
-    sourceCompatibility = javaTargetVersion
-    targetCompatibility = javaTargetVersion
+    repositories {
+        mavenCentral()
+
+        // for SWT
+        maven {
+            url = "https://maven-eclipse.github.io/maven"
+        }
+    }
 }
 
 /**
  * settings for subprojects = everything except the root-project
  */
 subprojects {
-    apply plugin: 'java'
+    apply plugin: 'java-library'
+
+    java {
+        sourceCompatibility = JavaVersion.toVersion(javaTargetVersion)
+        targetCompatibility = JavaVersion.toVersion(javaTargetVersion)
+    }
+
     tasks.withType(JavaCompile) {
         options.encoding = "UTF-8"
     }
@@ -45,20 +58,11 @@ subprojects {
         options.encoding = "UTF-8"
     }
 
-    repositories {
-        jcenter()
-
-        // for SWT
-        maven {
-            url "http://maven-eclipse.github.io/maven"
-        }
-    }
-
     /* dependencies for test */
     dependencies {
-        testCompile 'junit:junit:4.11'
-        testCompile 'org.awaitility:awaitility:4.0.3'
-        testCompile 'org.assertj:assertj-core:3.16.1'
+        testImplementation 'junit:junit:4.11'
+        testImplementation 'org.awaitility:awaitility:4.0.3'
+        testImplementation 'org.assertj:assertj-core:3.16.1'
     }
     test {
         systemProperties 'java.awt.headless': 'true'
@@ -70,11 +74,11 @@ subprojects {
 
         testLogging {
             events "skipped", "failed"
-            exceptionFormat "full"
+            exceptionFormat = "full"
         }
     }
 
-    jar.archiveName = "glazedlists-${name}.jar"
+    jar.archiveFileName = "glazedlists-${name}.jar"
 }
 
 /**
@@ -83,8 +87,8 @@ subprojects {
 configure(subprojects.findAll { it.name != 'core' }) {
     /* everything depends on core */
     dependencies {
-        compile project(':core')
-        testCompile project(':core').sourceSets.test.output
+        api project(':core')
+        testImplementation project(':core').sourceSets.test.output
     }
 }
 
@@ -99,10 +103,18 @@ clean.doLast {
 /**
  * JavaDoc
  */
+configurations {
+    /* the exported projects with their dependencies, resolved via project dependencies */
+    docsClasspath
+}
+dependencies {
+    exportedProjects.each { docsClasspath project(it.path) }
+}
+
 task docs(type: Javadoc) {
     options.addStringOption('Xdoclint:none', '-quiet')
     options.jFlags('-Dhttp.agent=gradle-javadoc')
-    classpath = files(exportedProjects.collect { it.sourceSets.main.compileClasspath + it.sourceSets.main.output })
+    classpath = configurations.docsClasspath
     source = exportedProjects.collect { it.sourceSets.main.allJava }
     destinationDir = file("$targetDir/docs/api")
     title = "Glazed Lists $version"
@@ -129,9 +141,9 @@ task docs(type: Javadoc) {
  * JavaDoc-Jar
  */
 task javadocjar(type: Jar, dependsOn: "docs") {
-	classifier = 'javadoc'
-    destinationDir = file(targetDir)
-    archiveName = "${rootProject.name}-${version}-javadoc.jar"
+    archiveClassifier = 'javadoc'
+    destinationDirectory = file(targetDir)
+    archiveFileName = "${rootProject.name}-${version}-javadoc.jar"
     from fileTree("$targetDir/docs/api")
 }
 
@@ -139,9 +151,9 @@ task javadocjar(type: Jar, dependsOn: "docs") {
  * Source-Jar
  */
 task sourcejar(type: Jar) {
-	classifier = 'sources'
-    destinationDir = file(targetDir)
-    archiveName = "${rootProject.name}-$version-sources.jar"
+    archiveClassifier = 'sources'
+    destinationDirectory = file(targetDir)
+    archiveFileName = "${rootProject.name}-$version-sources.jar"
     includeEmptyDirs = false
     from files(
         subprojects.collect { it.sourceSets.main.allSource }
@@ -152,8 +164,8 @@ task sourcejar(type: Jar) {
  * Jar (osgi compatible)
  */
 jar {
-    destinationDir = file(targetDir)
-    archiveName = "${rootProject.name}-${version}.jar"
+    destinationDirectory = file(targetDir)
+    archiveFileName = "${rootProject.name}-${version}.jar"
 
     apply from: 'glazedlists.bnd.gradle'
     bndfile = makeBNDFile()
@@ -173,8 +185,8 @@ task dist(type: Zip) {
       DirectoryScanner.removeDefaultExclude "**/.gitignore"
     }
     
-    destinationDir = file(targetDir)
-    archiveName = "${rootProject.name}-$version-dist.zip"
+    destinationDirectory = file(targetDir)
+    archiveFileName = "${rootProject.name}-$version-dist.zip"
     includeEmptyDirs = false
     from fileTree(".") {
         exclude ".git"
@@ -349,8 +361,8 @@ uploadArchives.doFirst {
  */
 task centralBundle(type: Zip, dependsOn: uploadArchives) {
     def versionPath = "${project.group.replace('.', '/')}/${rootProject.name}/${project.version}"
-    destinationDir = file(targetDir)
-    archiveName = "${rootProject.name}-${project.version}-central-bundle.zip"
+    destinationDirectory = file(targetDir)
+    archiveFileName = "${rootProject.name}-${project.version}-central-bundle.zip"
     from(centralStagingDir) {
         include "$versionPath/**"
     }

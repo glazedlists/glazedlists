@@ -29,8 +29,8 @@ switch (System.getProperty('os.name').toLowerCase().split()[0]) {
 }
 
 dependencies {
-    compile project(':extensions:calculation')
-    compile "org.eclipse.swt:org.eclipse.swt.${swtJar}:4.6"
+    api project(':extensions:calculation')
+    api "org.eclipse.swt:org.eclipse.swt.${swtJar}:4.6"
 }
 
 
