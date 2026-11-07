@@ -26,10 +26,10 @@ snapshot repository.
 ## Snapshots
 
 ```
-./gradlew :uploadArchives
+./gradlew publish
 ```
 
-Deploys the current `-SNAPSHOT` version to `https://central.sonatype.com/repository/maven-snapshots/`.
+Signs and deploys the current `-SNAPSHOT` version to `https://central.sonatype.com/repository/maven-snapshots/`.
 Snapshots are removed by Sonatype after 90 days.
 
 ## Releases
@@ -38,8 +38,9 @@ Snapshots are removed by Sonatype after 90 days.
    ```
    ./gradlew clean centralBundle -PisSnapshot=false
    ```
-   This deploys the jar, sources, javadoc, dist zip and POM, with signatures and checksums, into the
-   local repository `target/central-staging`, and zips it into
+   This publishes the jar, sources, javadoc, dist zip and POM, with signatures and checksums, into the
+   local repository `target/central-staging` (task `publishMavenJavaPublicationToCentralRepository`),
+   and zips it into
    `target/glazedlists-<version>-central-bundle.zip`.
 2. Upload the bundle: Portal → *Publish Component* → enter a deployment name (e.g.
    `com.glazedlists:glazedlists:<version>`) → upload the zip.
