@@ -8,7 +8,7 @@ jobs:
       DISPLAY: :1
     strategy:
       matrix:
-        # macOS: Intel runner (Gradle 6.9 also runs natively on Apple Silicon; switching the runner is a separate step)
+        # macOS: Intel runner (Gradle 7.6 also runs natively on Apple Silicon; switching the runner is a separate step)
         os: [ubuntu-latest, windows-latest, macos-15-intel]
         java: [8, 11]
 
