@@ -21,7 +21,7 @@ snapshot repository.
   signing.password=<passphrase>
   signing.secretKeyRingFile=<path to secring.gpg>
   ```
-- JDK 8 or 11 to run Gradle 5.6.4.
+- JDK 8 or 11 to run Gradle 6.9.4.
 
 ## Snapshots
 

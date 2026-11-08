@@ -1,4 +1,4 @@
-apply plugin: 'it.gianluz.capsule'
+apply plugin: 'com.github.johnrengelman.shadow'
 
 dependencies {
     api project(':core')
@@ -7,15 +7,15 @@ dependencies {
     annotationProcessor "org.openjdk.jmh:jmh-generator-annprocess:1.19"
 }
 
-task capsule(type: FatCapsule) {
-    destinationDirectory = file("$buildDir/capsule")
+/**
+ * runnable benchmark jar with all runtime dependencies merged in (see benchmark.sh/benchmark.bat)
+ */
+shadowJar {
     archiveFileName = "glazedlists-benchmarks.jar"
-    // FatCapsule embeds the legacy 'runtime' configuration by default, which no longer gets the 'api' dependencies
-    embedConfiguration = configurations.runtimeClasspath
-    applicationClass 'ca.odell.glazedlists.BenchmarkMain'
+    // Shadow 6.1.0's own default exclude is broken (relocated to 'shadow.module-info.class')
+    exclude 'module-info.class'
 
-    capsuleManifest {
-        applicationId = 'ca.odell.glazedlists.BenchmarkMain'
-        minJavaVersion = '1.8.0'
+    manifest {
+        attributes 'Main-Class': 'ca.odell.glazedlists.BenchmarkMain'
     }
 }
