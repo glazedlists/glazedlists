@@ -12,8 +12,6 @@ dependencies {
  */
 shadowJar {
     archiveFileName = "glazedlists-benchmarks.jar"
-    // Shadow 6.1.0's own default exclude is broken (relocated to 'shadow.module-info.class')
-    exclude 'module-info.class'
 
     manifest {
         attributes 'Main-Class': 'ca.odell.glazedlists.BenchmarkMain'

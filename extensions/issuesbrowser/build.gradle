@@ -29,8 +29,6 @@ dependencies {
 shadowJar {
     destinationDirectory = file("$rootDir/$targetDir")
     archiveFileName = "glazedlists-demo.jar"
-    // Shadow 6.1.0's own default exclude is broken (relocated to 'shadow.module-info.class')
-    exclude 'module-info.class'
 
     manifest {
         attributes 'Main-Class': 'com.publicobject.issuesbrowser.swing.IssuesBrowser'
