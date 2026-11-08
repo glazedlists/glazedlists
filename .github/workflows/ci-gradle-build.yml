@@ -8,8 +8,8 @@ jobs:
       DISPLAY: :1
     strategy:
       matrix:
-        # macOS: Intel runner (Gradle 8.14 also runs natively on Apple Silicon; switching the runner is a separate step)
-        os: [ubuntu-latest, windows-latest, macos-15-intel]
+        # macOS: macos-15-intel runs on Intel, macos-15 on Apple Silicon
+        os: [ubuntu-latest, windows-latest, macos-15-intel, macos-15]
         java: [8, 11]
 
     runs-on: ${{ matrix.os }}
@@ -22,6 +22,10 @@ jobs:
         distribution: zulu
         java-version: ${{ matrix.java }}
         java-package: jdk+fx
+    - name: Set up Gradle
+      uses: gradle/actions/setup-gradle@v6
+      with:
+        cache-provider: basic
     - name: Install and start window manager (Linux)
       run: |
         sudo apt-get update
@@ -40,4 +44,4 @@ jobs:
       if: matrix.os == 'windows-latest'
     - name: Build with Gradle (MacOS)
       run: ./gradlew build -x :extensions:swt:test
-      if: matrix.os == 'macos-15-intel'
+      if: startsWith(matrix.os, 'macos')
