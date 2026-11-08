@@ -1,3 +1,7 @@
+/* the dist zip should contain .gitignore, which is one of Ant's default excludes
+   (since Gradle 6.8 the default excludes may only be changed in the settings script) */
+org.apache.tools.ant.DirectoryScanner.removeDefaultExclude "**/.gitignore"
+
 rootProject.name = "glazedlists"
 
 include 'core'

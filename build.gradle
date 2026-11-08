@@ -1,13 +1,26 @@
 /**
  * settings and plugins for build
  */
+buildscript {
+    repositories {
+        gradlePluginPortal()
+    }
+    dependencies {
+        // The JavaFX plugin is built for Java 11, so Gradle refuses to resolve it on JDK 8.
+        // It is only applied on JDK 11+ anyway (JDK 8 builds use the JavaFX bundled with the JDK).
+        if (JavaVersion.current().isJava11Compatible()) {
+            classpath "org.openjfx:javafx-plugin:0.1.0"
+        }
+    }
+}
+
 plugins {
-    id "base"
+    // provides the jar task for the merged OSGi jar (bnd); the root project has no sources of its own
+    id "java"
     id "maven-publish"
     id "signing"
-    id "it.gianluz.capsule" version "1.0.3"
-    id "biz.aQute.bnd.builder" version "4.1.0"
-    id 'org.openjfx.javafxplugin' version '0.0.7' apply false
+    id "biz.aQute.bnd.builder" version "6.4.0"
+    id "com.github.johnrengelman.shadow" version "6.1.0" apply false
 }
 
 /**
@@ -104,11 +117,28 @@ clean.doLast {
  * JavaDoc
  */
 configurations {
-    /* the exported projects with their dependencies, resolved via project dependencies */
-    docsClasspath
+    /* the exported projects with their dependencies, resolved via project dependencies
+       (as runtime jars, like the 'default' configuration that an attribute-less configuration resolves) */
+    docsClasspath {
+        canBeConsumed = false
+        attributes {
+            attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME))
+            attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category, Category.LIBRARY))
+            attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, objects.named(LibraryElements, LibraryElements.JAR))
+        }
+    }
 }
 dependencies {
     exportedProjects.each { docsClasspath project(it.path) }
+}
+if (JavaVersion.current().isJava11Compatible()) {
+    /* The JavaFX plugin selects the platform jars (e.g. javafx-base-<version>-win.jar) only in projects it is applied to,
+       through a component metadata rule and OS/architecture attributes on the source set classpaths.
+       Applied here without modules, so the docs classpath can request the same platform. */
+    apply plugin: 'org.openjfx.javafxplugin'
+    [OperatingSystemFamily.OPERATING_SYSTEM_ATTRIBUTE, MachineArchitecture.ARCHITECTURE_ATTRIBUTE].each { attribute ->
+        configurations.docsClasspath.attributes.attribute(attribute, configurations.compileClasspath.attributes.getAttribute(attribute))
+    }
 }
 
 task docs(type: Javadoc) {
@@ -143,7 +173,7 @@ task docs(type: Javadoc) {
 task javadocjar(type: Jar, dependsOn: "docs") {
     archiveClassifier = 'javadoc'
     destinationDirectory = file(targetDir)
-    archiveFileName = "${rootProject.name}-${version}-javadoc.jar"
+    archiveFileName = "${rootProject.name}-${project.version}-javadoc.jar"
     from fileTree("$targetDir/docs/api")
 }
 
@@ -153,7 +183,7 @@ task javadocjar(type: Jar, dependsOn: "docs") {
 task sourcejar(type: Jar) {
     archiveClassifier = 'sources'
     destinationDirectory = file(targetDir)
-    archiveFileName = "${rootProject.name}-$version-sources.jar"
+    archiveFileName = "${rootProject.name}-${project.version}-sources.jar"
     includeEmptyDirs = false
     from files(
         subprojects.collect { it.sourceSets.main.allSource }
@@ -165,10 +195,12 @@ task sourcejar(type: Jar) {
  */
 jar {
     destinationDirectory = file(targetDir)
-    archiveFileName = "${rootProject.name}-${version}.jar"
+    archiveFileName = "${rootProject.name}-${project.version}.jar"
 
     apply from: 'glazedlists.bnd.gradle'
-    bndfile = makeBNDFile()
+    bundle {
+        bndfile = makeBNDFile()
+    }
 
     from files(
         exportedProjects.collect { it.sourceSets.main.output }
@@ -178,15 +210,10 @@ jar {
 /**
  * Dist
  */
-import org.apache.tools.ant.DirectoryScanner
 task dist(type: Zip) {
-    /* fileTree uses ANT default excludes, but .gitignore should not be excluded */
-    doFirst {
-      DirectoryScanner.removeDefaultExclude "**/.gitignore"
-    }
-    
+    /* fileTree uses ANT default excludes; settings.gradle removes .gitignore from them */
     destinationDirectory = file(targetDir)
-    archiveFileName = "${rootProject.name}-$version-dist.zip"
+    archiveFileName = "${rootProject.name}-${project.version}-dist.zip"
     includeEmptyDirs = false
     from fileTree(".") {
         exclude ".git"
@@ -202,10 +229,6 @@ task dist(type: Zip) {
             exclude it
         }
     }
-    
-    doLast {
-      DirectoryScanner.resetDefaultExcludes()
-    }    
 }
 
 /**

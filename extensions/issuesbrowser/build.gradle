@@ -1,10 +1,13 @@
-apply plugin: 'it.gianluz.capsule'
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
+apply plugin: 'com.github.johnrengelman.shadow'
 
 if (JavaVersion.current().compareTo(JavaVersion.VERSION_11) >= 0) {
 
     apply plugin: 'org.openjfx.javafxplugin'
 
     javafx {
+        version = javafxVersion
         modules = [ 'javafx.controls', 'javafx.web' ]
     }
 }
@@ -21,36 +24,40 @@ dependencies {
 }
 
 /**
- * Issues-Browser
+ * Issues-Browser: runnable jar with all runtime dependencies merged in
  */
-task issuesbrowserjar(type: FatCapsule) {
+shadowJar {
     destinationDirectory = file("$rootDir/$targetDir")
     archiveFileName = "glazedlists-demo.jar"
-    // FatCapsule embeds the legacy 'runtime' configuration by default, which no longer gets the 'api' dependencies
-    embedConfiguration = configurations.runtimeClasspath
+    // Shadow 6.1.0's own default exclude is broken (relocated to 'shadow.module-info.class')
+    exclude 'module-info.class'
 
-    applicationClass 'com.publicobject.issuesbrowser.swing.IssuesBrowser'
-
-    capsuleManifest {
-        applicationId = 'com.publicobject.issuesbrowser.swing.IssuesBrowser'
-        applicationName = 'IssuesBrowser'
-        minJavaVersion = '1.8.0'
+    manifest {
+        attributes 'Main-Class': 'com.publicobject.issuesbrowser.swing.IssuesBrowser'
     }
 }
 
+task issuesbrowserjar {
+    group = 'Shadow'
+    description = 'Builds the Issues-Browser demo jar (same as shadowJar).'
+    dependsOn shadowJar
+}
+
 /**
- * XML-Browser
+ * XML-Browser: same content as the Issues-Browser jar, different main class
  */
-task xmlbrowserjar(type: FatCapsule) {
+task xmlbrowserjar(type: ShadowJar) {
+    group = 'Shadow'
+    description = 'Builds the XML-Browser demo jar.'
     destinationDirectory = file("$rootDir/$targetDir")
     archiveFileName = "xmlbrowser.jar"
-    embedConfiguration = configurations.runtimeClasspath
 
-    applicationClass 'com.publicobject.xmlbrowser.XmlBrowser'
+    from sourceSets.main.output
+    configurations = [project.configurations.runtimeClasspath]
+    // the excludes the plugin intends for its shadowJar task
+    exclude 'META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'module-info.class'
 
-    capsuleManifest {
-        applicationId = 'com.publicobject.xmlbrowser.XmlBrowser'
-        applicationName = 'XmlBrowser'
-        minJavaVersion = '1.8.0'
+    manifest {
+        attributes 'Main-Class': 'com.publicobject.xmlbrowser.XmlBrowser'
     }
 }
