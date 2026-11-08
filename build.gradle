@@ -20,7 +20,7 @@ plugins {
     id "maven-publish"
     id "signing"
     id "biz.aQute.bnd.builder" version "6.4.0"
-    id "com.github.johnrengelman.shadow" version "7.1.2" apply false
+    id "com.gradleup.shadow" version "8.3.11" apply false
 }
 
 /**
@@ -360,13 +360,13 @@ publishToCentral.configure {
     doFirst {
         // a release bundle must not pick up stale files from an earlier run
         if (isSnapshot != "true") {
-            project.delete(centralStagingDir)
+            delete(centralStagingDir)
         }
     }
 }
 
 signing {
-    required { gradle.taskGraph.hasTask(":publishMavenJavaPublicationToCentralRepository") }
+    required = { gradle.taskGraph.hasTask(":publishMavenJavaPublicationToCentralRepository") }
 
     sign publishing.publications.mavenJava
 }
@@ -377,6 +377,7 @@ signing {
  */
 task centralBundle(type: Zip, dependsOn: publishToCentral) {
     def versionPath = "${project.group.replace('.', '/')}/${rootProject.name}/${project.version}"
+    def prefix = "${rootProject.name}-${project.version}"
     destinationDirectory = file(targetDir)
     archiveFileName = "${rootProject.name}-${project.version}-central-bundle.zip"
     from(centralStagingDir) {
@@ -385,7 +386,6 @@ task centralBundle(type: Zip, dependsOn: publishToCentral) {
 
     doFirst {
         def versionDir = new File(centralStagingDir, versionPath)
-        def prefix = "${rootProject.name}-${project.version}"
         ["${prefix}.pom", "${prefix}.jar", "${prefix}-sources.jar", "${prefix}-javadoc.jar"].each { name ->
             if (!new File(versionDir, name).exists()) {
                 throw new GradleException("Missing $name in $versionDir")
