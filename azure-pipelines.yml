@@ -14,7 +14,15 @@ jobs:
         vmImage: 'ubuntu-24.04'
       initWindowManager: true
       jdkVersion: '1.17'
-  
+
+  - template: build-job.yml
+    parameters:
+      name: Linux_JDK21
+      pool:
+        vmImage: 'ubuntu-24.04'
+      initWindowManager: true
+      jdkVersion: '1.21'
+
   # Mac OS job
   - template: build-job.yml
     parameters:
@@ -31,6 +39,14 @@ jobs:
       tasks: 'build -x :extensions:swt:test'
       jdkVersion: '1.17'
 
+  - template: build-job.yml
+    parameters:
+      name: MacOS_JDK21
+      pool:
+        vmImage: 'macOS-15'
+      tasks: 'build -x :extensions:swt:test'
+      jdkVersion: '1.21'
+
   # Windows job
   - template: build-job.yml
     parameters:
@@ -46,3 +62,11 @@ jobs:
         vmImage: 'windows-2025'
       tasks: 'build -PexcludeTests=**/CTPConnectionTest*'
       jdkVersion: '1.17'
+
+  - template: build-job.yml
+    parameters:
+      name: Windows_JDK21
+      pool:
+        vmImage: 'windows-2025'
+      tasks: 'build -PexcludeTests=**/CTPConnectionTest*'
+      jdkVersion: '1.21'
