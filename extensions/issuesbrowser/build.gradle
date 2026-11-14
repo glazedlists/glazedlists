@@ -1,15 +1,11 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 apply plugin: 'com.gradleup.shadow'
+apply plugin: 'org.openjfx.javafxplugin'
 
-if (JavaVersion.current().compareTo(JavaVersion.VERSION_11) >= 0) {
-
-    apply plugin: 'org.openjfx.javafxplugin'
-
-    javafx {
-        version = javafxVersion
-        modules = [ 'javafx.controls', 'javafx.web' ]
-    }
+javafx {
+    version = javafxVersion
+    modules = [ 'javafx.controls', 'javafx.web' ]
 }
 
 dependencies {

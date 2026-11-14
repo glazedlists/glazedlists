@@ -6,11 +6,7 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies {
-        // The JavaFX plugin is built for Java 11, so Gradle refuses to resolve it on JDK 8.
-        // It is only applied on JDK 11+ anyway (JDK 8 builds use the JavaFX bundled with the JDK).
-        if (JavaVersion.current().isJava11Compatible()) {
-            classpath "org.openjfx:javafx-plugin:0.1.0"
-        }
+        classpath "org.openjfx:javafx-plugin:0.1.0"
     }
 }
 
@@ -66,6 +62,8 @@ subprojects {
 
     tasks.withType(JavaCompile) {
         options.encoding = "UTF-8"
+        // compile against the API of javaTargetVersion, also on a newer JDK (javac --release)
+        options.release = javaTargetVersion as int
     }
     tasks.withType(Javadoc) {
         options.encoding = "UTF-8"
@@ -131,14 +129,12 @@ configurations {
 dependencies {
     exportedProjects.each { docsClasspath project(it.path) }
 }
-if (JavaVersion.current().isJava11Compatible()) {
-    /* The JavaFX plugin selects the platform jars (e.g. javafx-base-<version>-win.jar) only in projects it is applied to,
-       through a component metadata rule and OS/architecture attributes on the source set classpaths.
-       Applied here without modules, so the docs classpath can request the same platform. */
-    apply plugin: 'org.openjfx.javafxplugin'
-    [OperatingSystemFamily.OPERATING_SYSTEM_ATTRIBUTE, MachineArchitecture.ARCHITECTURE_ATTRIBUTE].each { attribute ->
-        configurations.docsClasspath.attributes.attribute(attribute, configurations.compileClasspath.attributes.getAttribute(attribute))
-    }
+/* The JavaFX plugin selects the platform jars (e.g. javafx-base-<version>-win.jar) only in projects it is applied to,
+   through a component metadata rule and OS/architecture attributes on the source set classpaths.
+   Applied here without modules, so the docs classpath can request the same platform. */
+apply plugin: 'org.openjfx.javafxplugin'
+[OperatingSystemFamily.OPERATING_SYSTEM_ATTRIBUTE, MachineArchitecture.ARCHITECTURE_ATTRIBUTE].each { attribute ->
+    configurations.docsClasspath.attributes.attribute(attribute, configurations.compileClasspath.attributes.getAttribute(attribute))
 }
 
 task docs(type: Javadoc) {
@@ -156,7 +152,7 @@ task docs(type: Javadoc) {
         bottom """<a href="http://www.glazedlists.com" target="_top">Glazed Lists</a>, Copyright &#169; 2003 publicobject.com, O&apos;Dell Engineering.<br>Documentation build by $user at $buildTime"""
 
         links(
-            "http://docs.oracle.com/javase/8/docs/api/",
+            "https://docs.oracle.com/en/java/javase/11/docs/api/",
             "http://help.eclipse.org/neon/topic/org.eclipse.platform.doc.isv/reference/api/",
             "http://doc.formdev.com/jgoodies-forms/",
             "http://nachocalendar.sourceforge.net/apidocs/",
