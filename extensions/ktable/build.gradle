@@ -1,4 +1,0 @@
-dependencies {
-    api project(':extensions:issuesbrowser')
-    api files('lib/ktable-2.1.2.jar')
-}

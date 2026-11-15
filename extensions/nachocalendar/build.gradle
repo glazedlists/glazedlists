@@ -1,3 +1,0 @@
-dependencies {
-    api files('lib/nachocalendar-0.23.jar')
-}

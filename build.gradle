@@ -154,8 +154,6 @@ task docs(type: Javadoc) {
         links(
             "https://docs.oracle.com/en/java/javase/11/docs/api/",
             "http://help.eclipse.org/neon/topic/org.eclipse.platform.doc.isv/reference/api/",
-            "http://doc.formdev.com/jgoodies-forms/",
-            "http://nachocalendar.sourceforge.net/apidocs/",
             "http://www.jfree.org/jfreechart/api/javadoc/",
 	    "https://static.javadoc.io/org.swinglabs.swingx/swingx-all/1.6.5-1/",
             "https://docs.jboss.org/hibernate/orm/current/javadocs/"
