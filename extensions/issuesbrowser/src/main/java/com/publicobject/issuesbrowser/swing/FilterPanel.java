@@ -12,7 +12,6 @@ import ca.odell.glazedlists.matchers.CompositeMatcherEditor;
 import ca.odell.glazedlists.matchers.MatcherEditor;
 import ca.odell.glazedlists.swing.DefaultEventComboBoxModel;
 import ca.odell.glazedlists.swing.GlazedListsSwing;
-import ca.odell.glazedlists.swing.JEventListPanel;
 
 import com.publicobject.issuesbrowser.Issue;
 import com.publicobject.issuesbrowser.IssueTrackingSystem;
@@ -31,6 +30,7 @@ import javax.swing.border.Border;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -74,9 +74,14 @@ class FilterPanel {
         this.matcherEditor = new CompositeMatcherEditor<>(matcherEditors);
 
         // create the filters panel
-        this.filtersPanel = new JEventListPanel<>(selectedFilterComponents, new CloseableFilterComponentPanelFormat<Issue>());
+        this.filtersPanel = new JPanel(new GridBagLayout());
         this.filtersPanel.setBackground(IssuesBrowser.GLAZED_LISTS_MEDIUM_LIGHT_BROWN);
         this.filtersPanel.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+        // and keep it in sync with the selected filters
+        final EventList<CloseableFilterComponent> selectedFilterComponentsProxyList =
+            GlazedListsSwing.swingThreadProxyList(selectedFilterComponents);
+        selectedFilterComponentsProxyList.addListEventListener(listChanges -> layoutFilters(selectedFilterComponentsProxyList));
+        layoutFilters(selectedFilterComponentsProxyList);
         // create a wrapped panel that adds the 'add' button
         this.filtersPanelPlusAddButton = new JPanel(new BorderLayout());
         this.filtersPanelPlusAddButton.add(filtersPanel, BorderLayout.NORTH);
@@ -91,6 +96,22 @@ class FilterPanel {
 
     public JComponent getComponent() {
         return filtersScrollPane;
+    }
+
+    /**
+     * Show the specified filters in the filters panel, one row per filter in
+     * list order. Rebuilding all rows is cheap for a handful of filters, and it
+     * handles inserts, deletes and updates alike.
+     */
+    private void layoutFilters(EventList<CloseableFilterComponent> filters) {
+        filtersPanel.removeAll();
+        for(int i = 0; i < filters.size(); i++) {
+            // 4px gap between two filters
+            Insets insets = new Insets(i == 0 ? 0 : 4, 0, 0, 0);
+            filtersPanel.add(filters.get(i).getWrapPanel(), new GridBagConstraints(0, i, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, insets, 0, 0));
+        }
+        filtersPanel.revalidate();
+        filtersPanel.repaint();
     }
 
     /**
@@ -123,14 +144,23 @@ class FilterPanel {
             this.headerPanel.add(headerLabel, BorderLayout.CENTER);
             this.headerPanel.add(closeButton, BorderLayout.EAST);
 
-            this.wrapPanel = new JPanel();
+            // the header on top of the filter component, 3px apart
+            this.wrapPanel = new JPanel(new BorderLayout(0, 3));
 //            Border border = BorderFactory.createCompoundBorder(
 //                    BorderFactory.createLineBorder(IssuesBrowser.GLAZED_LISTS_MEDIUM_LIGHT_BROWN, 1),
 //                    BorderFactory.createLineBorder(IssuesBrowser.GLAZED_LISTS_LIGHT_BROWN, 2)
 //            );
-            Border border = new RoundedBorder(IssuesBrowser.GLAZED_LISTS_MEDIUM_LIGHT_BROWN, IssuesBrowser.GLAZED_LISTS_MEDIUM_LIGHT_BROWN, IssuesBrowser.GLAZED_LISTS_LIGHT_BROWN, 5, 0);
+            // the rounded corners have a radius of 5px, but the content keeps a
+            // distance of only 4px from the edges (RoundedBorder's insets are its radius)
+            Border border = new RoundedBorder(IssuesBrowser.GLAZED_LISTS_MEDIUM_LIGHT_BROWN, IssuesBrowser.GLAZED_LISTS_MEDIUM_LIGHT_BROWN, IssuesBrowser.GLAZED_LISTS_LIGHT_BROWN, 5, 0) {
+                @Override
+                public Insets getBorderInsets(Component c) {
+                    return new Insets(4, 4, 4, 4);
+                }
+            };
             this.wrapPanel.setBorder(border);
             this.wrapPanel.setBackground(IssuesBrowser.GLAZED_LISTS_LIGHT_BROWN);
+            this.wrapPanel.add(headerPanel, BorderLayout.NORTH);
 
             setFilterComponent(filterComponent);
         }
@@ -149,17 +179,15 @@ class FilterPanel {
             return filterComponent;
         }
         public void setFilterComponent(FilterComponent filterComponent) {
+            if(this.filterComponent != null) {
+                this.wrapPanel.remove(this.filterComponent.getComponent());
+            }
             this.filterComponent = filterComponent;
             this.headerLabel.setText(filterComponent.toString());
+            this.wrapPanel.add(filterComponent.getComponent(), BorderLayout.CENTER);
         }
         public MatcherEditor getMatcherEditor() {
             return filterComponent.getMatcherEditor();
-        }
-        public JComponent getHeader() {
-            return headerPanel;
-        }
-        public JComponent getComponent() {
-            return filterComponent.getComponent();
         }
         public JPanel getWrapPanel() {
             return wrapPanel;
@@ -229,25 +257,6 @@ class FilterPanel {
             selectedFilterComponents.add(selectedFilterComponent);
             filterSelect.setSelectedItem(null);
             remainingFilterComponents.remove(selectedFilterComponent);
-        }
-    }
-
-    /**
-     * Provide layout for {@link CloseableFilterComponent}s.
-     */
-    private class CloseableFilterComponentPanelFormat<E> extends JEventListPanel.AbstractFormat<CloseableFilterComponent> {
-        protected CloseableFilterComponentPanelFormat() {
-            setElementCells("4px, min, 3px, pref, 4px", "4px, fill:pref:grow, 4px");
-            setGaps("4px", null);
-            setCellConstraints(new String[] { "2, 2", "2, 4", "1, 1, 3, 5" });
-        }
-
-        @Override
-        public JComponent getComponent(CloseableFilterComponent element, int component) {
-            if(component == 0) return element.getHeader();
-            else if(component == 1) return element.getComponent();
-            else if(component == 2) return element.getWrapPanel();
-            else throw new IllegalStateException();
         }
     }
 }
