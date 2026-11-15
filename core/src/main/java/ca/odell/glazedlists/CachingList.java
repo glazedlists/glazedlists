@@ -1,11 +1,9 @@
 /* Glazed Lists                                                 (c) 2003-2006 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-package ca.odell.glazedlists.io;
+package ca.odell.glazedlists;
 
 // the Glazed Lists' change objects
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.TransformedList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.impl.adt.AgedNode;
 import ca.odell.glazedlists.impl.adt.AgedNodeComparator;
@@ -44,12 +42,6 @@ import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
  *   <a href="https://glazedlists.dev.java.net/issues/show_bug.cgi?id=262">262</a>
  * </td></tr>
  * </table>
- *
- * NOTE: The io extension and its types are deprecated.
- *       This extension becomes unsupported and will be removed
- *       from the official distribution with the next major release.
- *       However, {@link CachingList} will then be moved to the core.
- *
  *
  * @author <a href="mailto:kevin@swank.ca">Kevin Maltby</a>
  */

@@ -1,7 +1,7 @@
 /* Glazed Lists                                                 (c) 2003-2006 */
 /* http://publicobject.com/glazedlists/                      publicobject.com,*/
 /*                                                     O'Dell Engineering Ltd.*/
-package ca.odell.glazedlists.nachocalendar;
+package com.publicobject.misc.swing;
 
 import ca.odell.glazedlists.Filterator;
 import ca.odell.glazedlists.matchers.RangeMatcherEditor;
@@ -25,14 +25,9 @@ import net.sf.nachocalendar.components.DateField;
  * <a href="http://nachocalendar.sourceforge.net/">NachoCalendar</a> DateField
  * objects to edit the endpoints of the date range.
  *
- * <p><table border="1" width="100%" cellpadding="3" cellspacing="0">
- * <tr class="TableHeadingColor"><td colspan="2"><font size="+2"><b>Extension: NachoCalendar</b></font></td></tr>
- * <tr><td  colspan="2">This Glazed Lists <i>extension</i> requires the third party library <b>NachoCalendar</b>.</td></tr>
- * <tr><td class="TableSubHeadingColor"><b>Tested Version:</b></td><td>0.23</td></tr>
- * <tr><td class="TableSubHeadingColor"><b>Home page:</b></td><td><a href="http://nachocalendar.sourceforge.net/">http://nachocalendar.sourceforge.net/</a></td></tr>
- * <tr><td class="TableSubHeadingColor"><b>License:</b></td><td><a href="http://www.gnu.org/copyleft/lesser.html">LGPL</a></td></tr>
- * </td></tr>
- * </table>
+ * <p>It requires the third party library NachoCalendar 0.23
+ * (<a href="http://www.gnu.org/copyleft/lesser.html">LGPL</a>, home page
+ * <a href="http://nachocalendar.sourceforge.net/">http://nachocalendar.sourceforge.net/</a>).
  *
  * <p>It provides a single hook for customizing the layout and/or look of the
  * DateFields in the form of a local factory method which produces the entire
@@ -41,12 +36,7 @@ import net.sf.nachocalendar.components.DateField;
  * needed.
  *
  * @author James Lemieux
- *
- * @deprecated The nachocalendar extension and its types are deprecated.
- *             This extension becomes unsupported and {@link NachoDateRangeMatcherEditor}
- *             will be moved to the Issues Browser demo with the next major release.
  */
-@Deprecated
 public class NachoDateRangeMatcherEditor<E> extends RangeMatcherEditor<Date,E> {
 
     /** The UI components which capture the start and end of the date range */

@@ -39,7 +39,7 @@ jobs:
       run: ./gradlew build
       if: matrix.os == 'ubuntu-latest'
     - name: Build with Gradle (Windows)
-      run: ./gradlew build -PexcludeTests=**/CTPConnectionTest*
+      run: ./gradlew build
       shell: bash
       if: matrix.os == 'windows-latest'
     - name: Build with Gradle (MacOS)

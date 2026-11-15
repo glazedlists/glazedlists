@@ -53,14 +53,12 @@ jobs:
       name: Windows
       pool:
         vmImage: 'windows-2025'
-      tasks: 'build -PexcludeTests=**/CTPConnectionTest*'
 
   - template: build-job.yml
     parameters:
       name: Windows_JDK17
       pool:
         vmImage: 'windows-2025'
-      tasks: 'build -PexcludeTests=**/CTPConnectionTest*'
       jdkVersion: '1.17'
 
   - template: build-job.yml
@@ -68,5 +66,4 @@ jobs:
       name: Windows_JDK21
       pool:
         vmImage: 'windows-2025'
-      tasks: 'build -PexcludeTests=**/CTPConnectionTest*'
       jdkVersion: '1.21'
