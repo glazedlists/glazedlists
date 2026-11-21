@@ -15,7 +15,8 @@ jobs:
         set -e
         set -x
         ./gradlew --version
-        sudo apt install metacity        
+        sudo apt-get update
+        sudo apt install -y metacity        
         Xvfb :1 &
         sleep 5
         metacity --sm-disable --replace 2> metacity.err &
