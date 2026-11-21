@@ -64,6 +64,13 @@ subprojects {
         options.encoding = "UTF-8"
         // compile against the API of javaTargetVersion, also on a newer JDK (javac --release)
         options.release = javaTargetVersion as int
+        // report the individual warnings instead of the "Recompile with -Xlint" summaries (report only, no -Werror).
+        // Explicit list of keys that javac 11 knows, so every JDK reports the same categories; not enabled:
+        // options, path/classfile (Class-Path entries of third-party jars), processing (JMH annotation processor),
+        // this-escape (JDK 21+, comes from the constructor design of TransformedList)
+        options.compilerArgs += ['-Xlint:auxiliaryclass,cast,deprecation,dep-ann,divzero,empty,fallthrough,finally,' +
+                                 'overloads,overrides,rawtypes,removal,serial,static,try,unchecked,varargs',
+                                 '-Xmaxwarns', '10000']
     }
     tasks.withType(Javadoc) {
         options.encoding = "UTF-8"
