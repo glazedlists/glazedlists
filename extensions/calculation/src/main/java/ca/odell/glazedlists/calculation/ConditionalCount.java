@@ -26,7 +26,7 @@ final class ConditionalCount<E> extends AbstractCalculation<Integer> implements 
      *      in the value reported by this Calculation
      */
     public ConditionalCount(EventList<E> source, Matcher<E> matcher) {
-        super(new Integer(0));
+        super(Integer.valueOf(0));
 
         // the user should ideally know nothing about this FilterList, so we
         // lock the pipeline during its construction so the calling code need
@@ -36,7 +36,7 @@ final class ConditionalCount<E> extends AbstractCalculation<Integer> implements 
             filtered = new FilterList<>(source, matcher);
             filtered.addListEventListener(this);
 
-            setValue(new Integer(filtered.size()));
+            setValue(Integer.valueOf(filtered.size()));
         } finally {
             source.getReadWriteLock().readLock().unlock();
         }
@@ -53,7 +53,7 @@ final class ConditionalCount<E> extends AbstractCalculation<Integer> implements 
     @Override
     public void listChanged(ListEvent<E> listChanges) {
         final Integer oldValue = getValue();
-        setValue(new Integer(listChanges.getSourceList().size()));
+        setValue(Integer.valueOf(listChanges.getSourceList().size()));
         final Integer newValue = getValue();
         fireValueChange(oldValue, newValue);
     }

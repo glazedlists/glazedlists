@@ -149,10 +149,10 @@ public class ListConsistencyListener<E> {
                 List<E> newExpectedValues = new ArrayList<>(expected.size());
                 for(int i = 0; i < reorderMap.length; i++) {
                     newExpectedValues.add(i, expected.get(reorderMap[i]));
-                    changedIndices.add(new Integer(i));
+                    changedIndices.add(Integer.valueOf(i));
                 }
                 expected = newExpectedValues;
-                changeCounts.add(new Integer(2 * reorderMap.length));
+                changeCounts.add(Integer.valueOf(2 * reorderMap.length));
                 reorderings.add(Boolean.TRUE);
 
             // handle regular events
@@ -168,7 +168,7 @@ public class ListConsistencyListener<E> {
                     int changeType = listChanges.getType();
 
                     // save this index for validation later
-                    changedIndices.add(new Integer(changeIndex));
+                    changedIndices.add(Integer.valueOf(changeIndex));
 
                     // make sure the change indices are positive and not descreasing
                     assertTrue(changeIndex >= 0);
@@ -201,7 +201,7 @@ public class ListConsistencyListener<E> {
                     }
                 }
 
-                changeCounts.add(new Integer(changesForEvent));
+                changeCounts.add(Integer.valueOf(changesForEvent));
                 reorderings.add(Boolean.FALSE);
             }
 

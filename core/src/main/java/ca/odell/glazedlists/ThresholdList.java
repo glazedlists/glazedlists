@@ -249,14 +249,14 @@ public final class ThresholdList<E> extends RangeList<E> {
     /** {@inheritDoc} */
     @Override
     public int getStartIndex() {
-        return sortedSource.sortIndex(new Integer(lowerThreshold));
+        return sortedSource.sortIndex(Integer.valueOf(lowerThreshold));
     }
 
     /** {@inheritDoc} */
     @Override
     public int getEndIndex() {
         // search for the upperThreshold value
-        int index = sortedSource.lastSortIndex(new Integer(upperThreshold));
+        int index = sortedSource.lastSortIndex(Integer.valueOf(upperThreshold));
 
         // if the upperThreshold exists in the sortedSource, convert the exclusive index to an inclusive index
         if (index < sortedSource.size() && evaluator.evaluate(sortedSource.get(index)) == upperThreshold)

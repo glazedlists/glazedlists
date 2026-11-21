@@ -175,7 +175,7 @@ public class TreeTableCellPanel extends JPanel {
      * Return a spacer component and update the spacer component cache as needed.
      */
     private Component getSpacer(int width) {
-        final Integer key = new Integer(width);
+        final Integer key = Integer.valueOf(width);
 
         Component spacer = spacerComponentsCache.get(key);
         if (spacer == null) {

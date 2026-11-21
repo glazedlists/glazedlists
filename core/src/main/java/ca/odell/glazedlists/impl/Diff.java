@@ -122,8 +122,8 @@ public final class Diff {
                 // either of these may be null. The terms 'below left' and 'above
                 // right' refer to the diagonals that the points are on and may
                 // not be representative of the point positions
-                Point belowLeft = furthestReachingPoints.get(new Integer(k - 1));
-                Point aboveRight = furthestReachingPoints.get(new Integer(k + 1));
+                Point belowLeft = furthestReachingPoints.get(Integer.valueOf(k - 1));
+                Point aboveRight = furthestReachingPoints.get(Integer.valueOf(k + 1));
 
                 // the new furthest reaching point to create
                 Point point;
@@ -150,7 +150,7 @@ public final class Diff {
                 }
 
                 // save this furthest reaching path
-                furthestReachingPoints.put(new Integer(k), point);
+                furthestReachingPoints.put(Integer.valueOf(k), point);
 
                 // if we're past the end, we have a solution!
                 if(point.isEqualToOrGreaterThan(maxPoint)) {

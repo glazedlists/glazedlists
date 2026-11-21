@@ -15,53 +15,53 @@ final class Sum {
 
     static final class SumFloat<N extends Number> extends AbstractEventListCalculation<Float, N> {
         public SumFloat(EventList<N> source) {
-            super(new Float(0), source);
+            super(Float.valueOf(0), source);
         }
 
         @Override
-        protected void inserted(Number element) { setValue(new Float(getValue().floatValue() + element.floatValue())); }
+        protected void inserted(Number element) { setValue(Float.valueOf(getValue().floatValue() + element.floatValue())); }
         @Override
-        protected void deleted(Number element) { setValue(new Float(getValue().floatValue() - element.floatValue())); }
+        protected void deleted(Number element) { setValue(Float.valueOf(getValue().floatValue() - element.floatValue())); }
         @Override
-        protected void updated(Number oldElement, Number newElement) { setValue(new Float(getValue().floatValue() - oldElement.floatValue() + newElement.floatValue())); }
+        protected void updated(Number oldElement, Number newElement) { setValue(Float.valueOf(getValue().floatValue() - oldElement.floatValue() + newElement.floatValue())); }
     }
 
     static final class SumDouble<N extends Number> extends AbstractEventListCalculation<Double, N> {
         public SumDouble(EventList<N> source) {
-            super(new Double(0), source);
+            super(Double.valueOf(0), source);
         }
 
         @Override
-        protected void inserted(Number element) { setValue(new Double(getValue().doubleValue() + element.doubleValue())); }
+        protected void inserted(Number element) { setValue(Double.valueOf(getValue().doubleValue() + element.doubleValue())); }
         @Override
-        protected void deleted(Number element) { setValue(new Double(getValue().doubleValue() - element.doubleValue())); }
+        protected void deleted(Number element) { setValue(Double.valueOf(getValue().doubleValue() - element.doubleValue())); }
         @Override
-        protected void updated(Number oldElement, Number newElement) { setValue(new Double(getValue().doubleValue() - oldElement.doubleValue() + newElement.doubleValue())); }
+        protected void updated(Number oldElement, Number newElement) { setValue(Double.valueOf(getValue().doubleValue() - oldElement.doubleValue() + newElement.doubleValue())); }
     }
 
     static final class SumInteger<N extends Number> extends AbstractEventListCalculation<Integer, N> {
         public SumInteger(EventList<N> source) {
-            super(new Integer(0), source);
+            super(Integer.valueOf(0), source);
         }
 
         @Override
-        protected void inserted(Number element) { setValue(new Integer(getValue().intValue() + element.intValue())); }
+        protected void inserted(Number element) { setValue(Integer.valueOf(getValue().intValue() + element.intValue())); }
         @Override
-        protected void deleted(Number element) { setValue(new Integer(getValue().intValue() - element.intValue())); }
+        protected void deleted(Number element) { setValue(Integer.valueOf(getValue().intValue() - element.intValue())); }
         @Override
-        protected void updated(Number oldElement, Number newElement) { setValue(new Integer(getValue().intValue() - oldElement.intValue() + newElement.intValue())); }
+        protected void updated(Number oldElement, Number newElement) { setValue(Integer.valueOf(getValue().intValue() - oldElement.intValue() + newElement.intValue())); }
     }
 
     static final class SumLong<N extends Number> extends AbstractEventListCalculation<Long, N> {
         public SumLong(EventList<N> source) {
-            super(new Long(0), source);
+            super(Long.valueOf(0), source);
         }
 
         @Override
-        protected void inserted(Number element) { setValue(new Long(getValue().longValue() + element.longValue())); }
+        protected void inserted(Number element) { setValue(Long.valueOf(getValue().longValue() + element.longValue())); }
         @Override
-        protected void deleted(Number element) { setValue(new Long(getValue().longValue() - element.longValue())); }
+        protected void deleted(Number element) { setValue(Long.valueOf(getValue().longValue() - element.longValue())); }
         @Override
-        protected void updated(Number oldElement, Number newElement) { setValue(new Long(getValue().longValue() - oldElement.longValue() + newElement.longValue())); }
+        protected void updated(Number oldElement, Number newElement) { setValue(Long.valueOf(getValue().longValue() - oldElement.longValue() + newElement.longValue())); }
     }
 }

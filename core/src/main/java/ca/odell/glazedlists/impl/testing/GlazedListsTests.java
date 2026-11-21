@@ -90,7 +90,10 @@ public class GlazedListsTests {
 
     /**
      * Convert the specified int[] array to a List of Integers.
+     * Each element is a distinct Integer instance, also for equal values.
      */
+    // distinct instances on purpose: ListConsistencyListener.setPreviousElementTracked(true) checks old values by identity
+    @SuppressWarnings("deprecation")
     public static List<Integer> intArrayToIntegerCollection(int[] values) {
         List<Integer> result = new ArrayList<>();
         for (int i = 0; i < values.length; i++)
