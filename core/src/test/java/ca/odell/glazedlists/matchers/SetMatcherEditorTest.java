@@ -8,6 +8,7 @@ import ca.odell.glazedlists.FunctionList.Function;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.matchers.SetMatcherEditor.Mode;
 
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -26,9 +27,9 @@ public class SetMatcherEditorTest {
 	@Before
 	public void setup() {
 		source = GlazedLists.eventListOf(july2007, july2008, july2009);
-		assertEquals(2007, july2007.getYear() + 1900);
-		assertEquals(2008, july2008.getYear() + 1900);
-		assertEquals(2009, july2009.getYear() + 1900);
+		assertEquals(2007, yearOf(july2007));
+		assertEquals(2008, yearOf(july2008));
+		assertEquals(2009, yearOf(july2009));
 	}
 
     @Test
@@ -36,7 +37,7 @@ public class SetMatcherEditorTest {
         final SetMatcherEditor<Date, Integer> matcherEditor = SetMatcherEditor.create(Mode.WHITELIST_EMPTY_MATCH_NONE, new Function<Date, Integer>() {
             @Override
             public Integer evaluate(Date date) {
-                return date.getYear() + 1900;
+                return yearOf(date);
             }
         });
         EventList<Date> filterList = new FilterList<>(source, matcherEditor);
@@ -86,7 +87,7 @@ public class SetMatcherEditorTest {
         final SetMatcherEditor<Date, Integer> matcherEditor = SetMatcherEditor.create(Mode.WHITELIST_EMPTY_MATCH_ALL, new Function<Date, Integer>() {
             @Override
             public Integer evaluate(Date date) {
-                return date.getYear() + 1900;
+                return yearOf(date);
             }
         });
         EventList<Date> filterList = new FilterList<>(source, matcherEditor);
@@ -136,7 +137,7 @@ public class SetMatcherEditorTest {
         final SetMatcherEditor<Date, Integer> matcherEditor = SetMatcherEditor.create(Mode.BLACKLIST, new Function<Date, Integer>() {
             @Override
             public Integer evaluate(Date date) {
-                return date.getYear() + 1900;
+                return yearOf(date);
             }
         });
         EventList<Date> filterList = new FilterList<>(source, matcherEditor);
@@ -179,5 +180,13 @@ public class SetMatcherEditorTest {
         matcherEditor.setMatchSet(new HashSet<>(Arrays.asList(2007, 2008)));
         counter.assertCounterState(1, 0, 3, 1, 1);
         assertEquals(Arrays.asList(july2009), filterList);
+    }
+
+    /**
+     * Returns the year of the date in the default time zone, like the deprecated
+     * <code>date.getYear() + 1900</code>.
+     */
+    private static int yearOf(Date date) {
+        return date.toInstant().atZone(ZoneId.systemDefault()).getYear();
     }
 }

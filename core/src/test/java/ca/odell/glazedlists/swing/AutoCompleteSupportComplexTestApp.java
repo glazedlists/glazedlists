@@ -342,7 +342,7 @@ public class AutoCompleteSupportComplexTestApp {
 
     private boolean isAvailableLookAndFeel(String laf) {
         try {
-            LookAndFeel newLAF = (LookAndFeel) (Class.forName(laf).newInstance());
+            LookAndFeel newLAF = (LookAndFeel) (Class.forName(laf).getDeclaredConstructor().newInstance());
             return newLAF.isSupportedLookAndFeel();
         } catch (Exception e) {
             return false;
