@@ -92,14 +92,24 @@ public class GlazedListsTests {
      * Convert the specified int[] array to a List of Integers.
      * Each element is a distinct Integer instance, also for equal values.
      */
-    // distinct instances on purpose: ListConsistencyListener.setPreviousElementTracked(true) checks old values by identity
-    @SuppressWarnings("deprecation")
     public static List<Integer> intArrayToIntegerCollection(int[] values) {
         List<Integer> result = new ArrayList<>();
         for (int i = 0; i < values.length; i++)
-            result.add(new Integer(values[i]));
+            result.add(distinctInteger(values[i]));
 
         return result;
+    }
+
+    /**
+     * Returns a new Integer instance, distinct from every other Integer with the same value.
+     * Unlike {@link Integer#valueOf(int)}, which caches small values, this lets tests tell
+     * equal elements apart by identity, as {@link ListConsistencyListener} does for the
+     * reported old values.
+     */
+    // the deprecated constructor is the only way to get a distinct instance
+    @SuppressWarnings("deprecation")
+    public static Integer distinctInteger(int value) {
+        return new Integer(value);
     }
 
     /**

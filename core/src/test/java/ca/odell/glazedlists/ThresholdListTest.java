@@ -14,6 +14,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import static ca.odell.glazedlists.impl.testing.GlazedListsTests.distinctInteger;
 import static org.junit.Assert.*;
 
 /**
@@ -135,7 +136,7 @@ public class ThresholdListTest {
         // Fill the source list with test data such that
         // every element is equal to its index
         for(int i = 0; i < 1000; i ++) {
-            source.add(i, new Integer(i));
+            source.add(i, distinctInteger(i));
         }
 
         // Test setting the threshold to different values randomly
@@ -145,8 +146,8 @@ public class ThresholdListTest {
             upperThresholdList.setUpperThreshold(num);
             assertEquals(source.size() - num, lowerThresholdList.size());
             assertEquals(num + 1, upperThresholdList.size());
-            assertEquals(new Integer(num), lowerThresholdList.get(0));
-            assertEquals(new Integer(num), upperThresholdList.get(upperThresholdList.size()-1));
+            assertEquals(Integer.valueOf(num), lowerThresholdList.get(0));
+            assertEquals(Integer.valueOf(num), upperThresholdList.get(upperThresholdList.size()-1));
         }
     }
 
@@ -164,9 +165,9 @@ public class ThresholdListTest {
         // every fifth element is equal to every fourth element
         for(int i = 0; i < 1000; i ++) {
             if(i % 5 == 0) {
-                source.add(i, new Integer(i-1));
+                source.add(i, distinctInteger(i-1));
             } else {
-                source.add(i, new Integer(i));
+                source.add(i, distinctInteger(i));
             }
         }
 
@@ -182,8 +183,8 @@ public class ThresholdListTest {
             upperThresholdList.setUpperThreshold(num);
             assertEquals(source.size() - num - 1, lowerThresholdList.size());
             assertEquals(num + 1, upperThresholdList.size());
-            assertEquals(new Integer(num + 1), lowerThresholdList.get(0));
-            assertEquals(new Integer(num - 1), upperThresholdList.get(upperThresholdList.size()-1));
+            assertEquals(Integer.valueOf(num + 1), lowerThresholdList.get(0));
+            assertEquals(Integer.valueOf(num - 1), upperThresholdList.get(upperThresholdList.size()-1));
         }
     }
 
@@ -195,10 +196,10 @@ public class ThresholdListTest {
     public void testAddingValuesBeyondLowerThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
-        source.add(0, new Integer(1));
+        source.add(0, distinctInteger(1));
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(0));
-            source.add(i, new Integer(2));
+            source.add(i, distinctInteger(0));
+            source.add(i, distinctInteger(2));
         }
 
         // set the threshold to be the middle value
@@ -206,7 +207,7 @@ public class ThresholdListTest {
         int originalSize = thresholdList.size();
         // add 5 more 0's which are beyond the threshold for this list
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(0));
+            source.add(i, distinctInteger(0));
         }
         // validate size and all elements
         assertEquals(originalSize, thresholdList.size());
@@ -225,10 +226,10 @@ public class ThresholdListTest {
     public void testAddingValuesBeyondUpperThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
-        source.add(0, new Integer(1));
+        source.add(0, distinctInteger(1));
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(0));
-            source.add(i, new Integer(2));
+            source.add(i, distinctInteger(0));
+            source.add(i, distinctInteger(2));
         }
 
         // First focus on the increasing list
@@ -237,7 +238,7 @@ public class ThresholdListTest {
         int originalSize = thresholdList.size();
         // add 5 more 2's which are beyond the threshold for this list
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(2));
+            source.add(i, distinctInteger(2));
         }
         // validate size and all elements
         assertEquals(originalSize, thresholdList.size());
@@ -255,10 +256,10 @@ public class ThresholdListTest {
     public void testAddingValuesWithinLowerThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
-        source.add(0, new Integer(1));
+        source.add(0, distinctInteger(1));
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(0));
-            source.add(i, new Integer(2));
+            source.add(i, distinctInteger(0));
+            source.add(i, distinctInteger(2));
         }
 
         // set the threshold to be the middle value
@@ -266,7 +267,7 @@ public class ThresholdListTest {
         int originalSize = thresholdList.size();
         // add 5 more 2's which are within the threshold for this list
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(2));
+            source.add(i, distinctInteger(2));
         }
         // validate size and all elements
         assertEquals(originalSize + 5, thresholdList.size());
@@ -285,10 +286,10 @@ public class ThresholdListTest {
     public void testAddingValuesWithinUpperThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
-        source.add(0, new Integer(1));
+        source.add(0, distinctInteger(1));
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(0));
-            source.add(i, new Integer(2));
+            source.add(i, distinctInteger(0));
+            source.add(i, distinctInteger(2));
         }
 
         // First focus on the increasing list
@@ -297,7 +298,7 @@ public class ThresholdListTest {
         int originalSize = thresholdList.size();
         // add 5 more 0's which are within the threshold for this list
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(0));
+            source.add(i, distinctInteger(0));
         }
         // validate size and all elements
         assertEquals(originalSize + 5, thresholdList.size());
@@ -315,10 +316,10 @@ public class ThresholdListTest {
     public void testAddingValuesAtLowerThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
-        source.add(0, new Integer(1));
+        source.add(0, distinctInteger(1));
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(0));
-            source.add(i, new Integer(2));
+            source.add(i, distinctInteger(0));
+            source.add(i, distinctInteger(2));
         }
 
         // set the threshold to be the middle value
@@ -326,7 +327,7 @@ public class ThresholdListTest {
         int originalSize = thresholdList.size();
         // add 5 more 1's which are at the threshold for this list
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(1));
+            source.add(i, distinctInteger(1));
         }
         // validate size and all elements
         assertEquals(originalSize + 5, thresholdList.size());
@@ -345,10 +346,10 @@ public class ThresholdListTest {
     public void testAddingValuesAtUpperThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
-        source.add(0, new Integer(1));
+        source.add(0, distinctInteger(1));
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(0));
-            source.add(i, new Integer(2));
+            source.add(i, distinctInteger(0));
+            source.add(i, distinctInteger(2));
         }
 
         // First focus on the increasing list
@@ -358,7 +359,7 @@ public class ThresholdListTest {
 
         // add 5 more 1's which are at the threshold for this list
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(1));
+            source.add(i, distinctInteger(1));
         }
         // validate size and all elements
         assertEquals(originalSize + 5, thresholdList.size());
@@ -376,10 +377,10 @@ public class ThresholdListTest {
     public void testAddingAtLowerThresholdWithNoValuesAtThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
-        source.add(0, new Integer(0));
+        source.add(0, distinctInteger(0));
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(5));
-            source.add(i, new Integer(10));
+            source.add(i, distinctInteger(5));
+            source.add(i, distinctInteger(10));
         }
 
         // set the threshold to be a value between the middle value and the lower value
@@ -387,15 +388,15 @@ public class ThresholdListTest {
         int originalSize = thresholdList.size();
 
         // add a value within the threshold but not at it first
-        source.add(0, new Integer(4));
+        source.add(0, distinctInteger(4));
         assertEquals(originalSize + 1, thresholdList.size());
-        assertEquals(new Integer(4), thresholdList.get(0));
+        assertEquals(Integer.valueOf(4), thresholdList.get(0));
 
         // now add a value at the threshold
         originalSize = thresholdList.size();
-        source.add(0, new Integer(3));
+        source.add(0, distinctInteger(3));
         assertEquals(originalSize + 1, thresholdList.size());
-        assertEquals(new Integer(3), thresholdList.get(0));
+        assertEquals(Integer.valueOf(3), thresholdList.get(0));
     }
 
     /**
@@ -406,10 +407,10 @@ public class ThresholdListTest {
     public void testAddingAtUpperThresholdWithNoValuesAtThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
-        source.add(0, new Integer(5));
+        source.add(0, distinctInteger(5));
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(0));
-            source.add(i, new Integer(10));
+            source.add(i, distinctInteger(0));
+            source.add(i, distinctInteger(10));
         }
 
         // set the threshold to be a value between the middle value and the upper value
@@ -417,15 +418,15 @@ public class ThresholdListTest {
         int originalSize = thresholdList.size();
 
         // add a value within the threshold but not at it first
-        source.add(0, new Integer(6));
+        source.add(0, distinctInteger(6));
         assertEquals(originalSize + 1, thresholdList.size());
-        assertEquals(new Integer(6), thresholdList.get(thresholdList.size() - 1));
+        assertEquals(Integer.valueOf(6), thresholdList.get(thresholdList.size() - 1));
 
         // now add a value at the threshold
         originalSize = thresholdList.size();
-        source.add(0, new Integer(7));
+        source.add(0, distinctInteger(7));
         assertEquals(originalSize + 1, thresholdList.size());
-        assertEquals(new Integer(7), thresholdList.get(thresholdList.size() - 1));
+        assertEquals(Integer.valueOf(7), thresholdList.get(thresholdList.size() - 1));
     }
 
     /**
@@ -436,10 +437,10 @@ public class ThresholdListTest {
     public void testRemovingValuesBeyondLowerThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
-        source.add(0, new Integer(1));
+        source.add(0, distinctInteger(1));
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(0));
-            source.add(i, new Integer(2));
+            source.add(i, distinctInteger(0));
+            source.add(i, distinctInteger(2));
         }
 
         // set the threshold to be the middle value
@@ -447,7 +448,7 @@ public class ThresholdListTest {
         int originalSize = thresholdList.size();
         // remove 4 0's which are beyond the threshold for this list
         for(int i = 0; i < 4; i ++) {
-            source.add(i, new Integer(0));
+            source.add(i, distinctInteger(0));
         }
         // validate size and all elements
         assertEquals(originalSize, thresholdList.size());
@@ -466,10 +467,10 @@ public class ThresholdListTest {
     public void testRemovingValuesBeyondUpperThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
-        source.add(0, new Integer(1));
+        source.add(0, distinctInteger(1));
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(0));
-            source.add(i, new Integer(2));
+            source.add(i, distinctInteger(0));
+            source.add(i, distinctInteger(2));
         }
 
         // First focus on the increasing list
@@ -478,7 +479,7 @@ public class ThresholdListTest {
         int originalSize = thresholdList.size();
         // remove 4 2's which are beyond the threshold for this list
         for(int i = 0; i < 4; i ++) {
-            source.remove(new Integer(2));
+            source.remove(Integer.valueOf(2));
         }
         // validate size and all elements
         assertEquals(originalSize, thresholdList.size());
@@ -496,10 +497,10 @@ public class ThresholdListTest {
     public void testRemovingValuesWithinLowerThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
-        source.add(0, new Integer(1));
+        source.add(0, distinctInteger(1));
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(0));
-            source.add(i, new Integer(2));
+            source.add(i, distinctInteger(0));
+            source.add(i, distinctInteger(2));
         }
 
         // set the threshold to be the middle value
@@ -507,7 +508,7 @@ public class ThresholdListTest {
         int originalSize = thresholdList.size();
         // remove 4 2's which are within the threshold for this list
         for(int i = 0; i < 4; i ++) {
-           source.remove(new Integer(2));
+           source.remove(Integer.valueOf(2));
         }
         // validate size and all elements
         assertEquals(originalSize - 4, thresholdList.size());
@@ -526,10 +527,10 @@ public class ThresholdListTest {
     public void testRemovingValuesWithinUpperThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
-        source.add(0, new Integer(1));
+        source.add(0, distinctInteger(1));
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(0));
-            source.add(i, new Integer(2));
+            source.add(i, distinctInteger(0));
+            source.add(i, distinctInteger(2));
         }
 
         // First focus on the increasing list
@@ -538,7 +539,7 @@ public class ThresholdListTest {
         int originalSize = thresholdList.size();
         // remove 4 0's which are within the threshold for this list
         for(int i = 0; i < 4; i ++) {
-            source.remove(new Integer(0));
+            source.remove(Integer.valueOf(0));
         }
         // validate size and all elements
         assertEquals(originalSize - 4, thresholdList.size());
@@ -556,17 +557,17 @@ public class ThresholdListTest {
     public void testRemovingValuesAtLowerThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
-        source.add(0, new Integer(1));
+        source.add(0, distinctInteger(1));
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(0));
-            source.add(i, new Integer(2));
+            source.add(i, distinctInteger(0));
+            source.add(i, distinctInteger(2));
         }
 
         // set the threshold to be the middle value
         thresholdList.setLowerThreshold(1);
         int originalSize = thresholdList.size();
         // remove a 1 which is at the threshold for this list
-        source.remove(new Integer(1));
+        source.remove(Integer.valueOf(1));
 
         // validate size and all elements
         assertEquals(originalSize - 1, thresholdList.size());
@@ -585,17 +586,17 @@ public class ThresholdListTest {
     public void testRemovingValuesAtUpperThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
-        source.add(0, new Integer(1));
+        source.add(0, distinctInteger(1));
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(0));
-            source.add(i, new Integer(2));
+            source.add(i, distinctInteger(0));
+            source.add(i, distinctInteger(2));
         }
 
         // set the threshold to be the middle value
         thresholdList.setUpperThreshold(1);
         int originalSize = thresholdList.size();
         // remove a 1 which is at the threshold for this list
-        source.remove(new Integer(1));
+        source.remove(Integer.valueOf(1));
 
         // validate size and all elements
         assertEquals(originalSize - 1, thresholdList.size());
@@ -613,10 +614,10 @@ public class ThresholdListTest {
     public void testUpdatingValuesBeyondLowerThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
-        source.add(0, new Integer(1));
+        source.add(0, distinctInteger(1));
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(2));
-            source.add(0, new Integer(0));
+            source.add(i, distinctInteger(2));
+            source.add(0, distinctInteger(0));
         }
 
         // set the threshold to be the middle value
@@ -625,7 +626,7 @@ public class ThresholdListTest {
 
         // set the 5 0's to other values which are beyond the threshold for this list
         for(int i = 0; i < 5; i ++) {
-            source.set(i, new Integer(-1 - i));
+            source.set(i, distinctInteger(-1 - i));
         }
         // validate size and all elements
         assertEquals(originalSize, thresholdList.size());
@@ -644,10 +645,10 @@ public class ThresholdListTest {
     public void testUpdatingValuesBeyondUpperThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
-        source.add(0, new Integer(1));
+        source.add(0, distinctInteger(1));
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(0));
-            source.add(0, new Integer(2));
+            source.add(i, distinctInteger(0));
+            source.add(0, distinctInteger(2));
         }
 
         // First focus on the increasing list
@@ -657,7 +658,7 @@ public class ThresholdListTest {
 
         // set the 5 2's to other values which are beyond the threshold for this list
         for(int i = 0; i < 5; i ++) {
-            source.set(i, new Integer(3));
+            source.set(i, distinctInteger(3));
         }
         // validate size and all elements
         assertEquals(originalSize, thresholdList.size());
@@ -675,10 +676,10 @@ public class ThresholdListTest {
     public void testUpdatingValuesWithinLowerThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
-        source.add(0, new Integer(1));
+        source.add(0, distinctInteger(1));
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(0));
-            source.add(0, new Integer(2));
+            source.add(i, distinctInteger(0));
+            source.add(0, distinctInteger(2));
         }
 
         // set the threshold to be the middle value
@@ -687,7 +688,7 @@ public class ThresholdListTest {
 
         // set the 5 2's to other values which are within the threshold for this list
         for(int i = 0; i < 5; i ++) {
-            source.set(i, new Integer(i + 3));
+            source.set(i, distinctInteger(i + 3));
         }
         // validate size and all elements
         assertEquals(originalSize, thresholdList.size());
@@ -706,10 +707,10 @@ public class ThresholdListTest {
     public void testUpdatingValuesWithinUpperThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
-        source.add(0, new Integer(1));
+        source.add(0, distinctInteger(1));
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(2));
-            source.add(0, new Integer(0));
+            source.add(i, distinctInteger(2));
+            source.add(0, distinctInteger(0));
         }
 
         // First focus on the increasing list
@@ -719,7 +720,7 @@ public class ThresholdListTest {
 
         // set the 5 0's to other values which are within the threshold for this list
         for(int i = 0; i < 5; i ++) {
-            source.set(i, new Integer(-1 - i));
+            source.set(i, distinctInteger(-1 - i));
         }
         // validate size and all elements
         assertEquals(originalSize, thresholdList.size());
@@ -738,35 +739,35 @@ public class ThresholdListTest {
         // Fill the source list with test data such that
         // the list contains only 3 values
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(0));
-            source.add(i, new Integer(10));
+            source.add(i, distinctInteger(0));
+            source.add(i, distinctInteger(10));
         }
-        source.add(0, new Integer(5));
+        source.add(0, distinctInteger(5));
 
         // set the threshold to be the middle value
         thresholdList.setLowerThreshold(5);
         int originalSize = thresholdList.size();
 
         // update the value to itself
-        source.set(0, new Integer(5));
+        source.set(0, distinctInteger(5));
         assertEquals(originalSize, thresholdList.size());
-        assertEquals(new Integer(5), thresholdList.get(0));
+        assertEquals(Integer.valueOf(5), thresholdList.get(0));
 
         // update the value to a value below the threshold
-        source.set(0, new Integer(6));
+        source.set(0, distinctInteger(6));
         assertEquals(originalSize, thresholdList.size());
-        assertEquals(new Integer(6), thresholdList.get(0));
+        assertEquals(Integer.valueOf(6), thresholdList.get(0));
 
         // update the value to a value beyond the threshold
-        source.set(0, new Integer(5));
-        source.set(0, new Integer(4));
+        source.set(0, distinctInteger(5));
+        source.set(0, distinctInteger(4));
         assertEquals(originalSize - 1, thresholdList.size());
-        assertEquals(new Integer(10), thresholdList.get(0));
+        assertEquals(Integer.valueOf(10), thresholdList.get(0));
 
         // update the value back to itself
-        source.set(0, new Integer(5));
+        source.set(0, distinctInteger(5));
         assertEquals(originalSize, thresholdList.size());
-        assertEquals(new Integer(5), thresholdList.get(0));
+        assertEquals(Integer.valueOf(5), thresholdList.get(0));
     }
 
     /**
@@ -778,10 +779,10 @@ public class ThresholdListTest {
         // Fill the source list with test data such that
         // the list contains only 3 values
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(0));
-            source.add(i, new Integer(10));
+            source.add(i, distinctInteger(0));
+            source.add(i, distinctInteger(10));
         }
-        source.add(0, new Integer(5));
+        source.add(0, distinctInteger(5));
 
         // First focus on the increasing list
         // set the threshold to be the middle value
@@ -789,25 +790,25 @@ public class ThresholdListTest {
         int originalSize = thresholdList.size();
 
         // update the value to itself
-        source.set(0, new Integer(5));
+        source.set(0, distinctInteger(5));
         assertEquals(originalSize, thresholdList.size());
-        assertEquals(new Integer(5), thresholdList.get(thresholdList.size() - 1));
+        assertEquals(Integer.valueOf(5), thresholdList.get(thresholdList.size() - 1));
 
         // update the value to a value below the threshold
-        source.set(0, new Integer(4));
+        source.set(0, distinctInteger(4));
         assertEquals(originalSize, thresholdList.size());
-        assertEquals(new Integer(4), thresholdList.get(thresholdList.size() - 1));
+        assertEquals(Integer.valueOf(4), thresholdList.get(thresholdList.size() - 1));
 
         // update the value to a value beyond the threshold
-        source.set(0, new Integer(5));
-        source.set(0, new Integer(6));
+        source.set(0, distinctInteger(5));
+        source.set(0, distinctInteger(6));
         assertEquals(originalSize - 1, thresholdList.size());
-        assertEquals(new Integer(0), thresholdList.get(thresholdList.size() - 1));
+        assertEquals(Integer.valueOf(0), thresholdList.get(thresholdList.size() - 1));
 
         // update the value back to itself
-        source.set(0, new Integer(5));
+        source.set(0, distinctInteger(5));
         assertEquals(originalSize, thresholdList.size());
-        assertEquals(new Integer(5), thresholdList.get(thresholdList.size() - 1));
+        assertEquals(Integer.valueOf(5), thresholdList.get(thresholdList.size() - 1));
     }
 
     /**
@@ -818,10 +819,10 @@ public class ThresholdListTest {
     public void testUpdatingAtLowerThresholdWithNoValuesAtThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 distinct values
-        source.add(0, new Integer(5));
+        source.add(0, distinctInteger(5));
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(0));
-            source.add(i, new Integer(10));
+            source.add(i, distinctInteger(0));
+            source.add(i, distinctInteger(10));
         }
 
         // set the threshold to be a value between the middle value and the upper value
@@ -829,26 +830,26 @@ public class ThresholdListTest {
         int originalSize = thresholdList.size();
 
         // add a value beyond the threshold
-        source.add(0, new Integer(2));
+        source.add(0, distinctInteger(2));
         int secondSize = thresholdList.size();
         assertEquals(originalSize, secondSize);
 
         // update the value to be within the threshold
-        source.set(0, new Integer(4));
+        source.set(0, distinctInteger(4));
         assertEquals(originalSize + 1, thresholdList.size());
-        assertEquals(new Integer(4), thresholdList.get(0));
+        assertEquals(Integer.valueOf(4), thresholdList.get(0));
 
         // now update the value to be beyond the threshold
         originalSize = thresholdList.size();
-        source.set(0, new Integer(1));
+        source.set(0, distinctInteger(1));
         assertEquals(originalSize - 1, thresholdList.size());
-        assertEquals(new Integer(5), thresholdList.get(0));
+        assertEquals(Integer.valueOf(5), thresholdList.get(0));
 
         // update the value to be at the threshold
         originalSize = thresholdList.size();
-        source.set(0, new Integer(3));
+        source.set(0, distinctInteger(3));
         assertEquals(originalSize + 1, thresholdList.size());
-        assertEquals(new Integer(3), thresholdList.get(0));
+        assertEquals(Integer.valueOf(3), thresholdList.get(0));
     }
 
     /**
@@ -859,10 +860,10 @@ public class ThresholdListTest {
     public void testUpdatingAtUpperThresholdWithNoValuesAtThreshold() {
         // Fill the source list with test data such that
         // the list contains only 3 values
-        source.add(0, new Integer(5));
+        source.add(0, distinctInteger(5));
         for(int i = 0; i < 5; i ++) {
-            source.add(i, new Integer(0));
-            source.add(i, new Integer(10));
+            source.add(i, distinctInteger(0));
+            source.add(i, distinctInteger(10));
         }
 
         // set the threshold to be a value between the middle value and the upper value
@@ -870,24 +871,24 @@ public class ThresholdListTest {
         int originalSize = thresholdList.size();
 
         // add a value beyond the threshold
-        source.add(0, new Integer(8));
+        source.add(0, distinctInteger(8));
 
         // update the value to be within the threshold
-        source.set(0, new Integer(6));
+        source.set(0, distinctInteger(6));
         assertEquals(originalSize + 1, thresholdList.size());
-        assertEquals(new Integer(6), thresholdList.get(thresholdList.size() - 1));
+        assertEquals(Integer.valueOf(6), thresholdList.get(thresholdList.size() - 1));
 
         // now update the value to be beyond the threshold
         originalSize = thresholdList.size();
-        source.set(0, new Integer(9));
+        source.set(0, distinctInteger(9));
         assertEquals(originalSize - 1, thresholdList.size());
-        assertEquals(new Integer(5), thresholdList.get(thresholdList.size() - 1));
+        assertEquals(Integer.valueOf(5), thresholdList.get(thresholdList.size() - 1));
 
         // update the value to be at the threshold
         originalSize = thresholdList.size();
-        source.set(0, new Integer(7));
+        source.set(0, distinctInteger(7));
         assertEquals(originalSize + 1, thresholdList.size());
-        assertEquals(new Integer(7), thresholdList.get(thresholdList.size() - 1));
+        assertEquals(Integer.valueOf(7), thresholdList.get(thresholdList.size() - 1));
     }
 
     /**
@@ -905,7 +906,7 @@ public class ThresholdListTest {
 
         // Fill the source list with test data
         for(int i = 0; i < 10; i ++) {
-            source.add(i, new Integer(i));
+            source.add(i, distinctInteger(i));
         }
 
         // Set the thresholds so that the lists should appear empty
@@ -936,7 +937,7 @@ public class ThresholdListTest {
         // Fill the source list with test data such that
         // every element is equal to its index
         for(int i = 0; i < 1000; i ++) {
-            source.add(i, new Integer(i));
+            source.add(i, distinctInteger(i));
         }
 
         // Wrap the lists in SortedLists whose internal data representation will break if the events are in error
@@ -969,7 +970,7 @@ public class ThresholdListTest {
 
         // Populate the source list with values that lie beyond the thresholds
         for(int i = 0; i < 1000; i ++) {
-            source.add(i, new Integer(-2 + random.nextInt(1004)));
+            source.add(i, distinctInteger(-2 + random.nextInt(1004)));
         }
 
         // Make sure that everything DOES lie beyond the thresholds
@@ -985,7 +986,7 @@ public class ThresholdListTest {
         // Prime a sorted source list with data
         SortedList<Integer> sortedBase = new SortedList<>(source, new ThresholdList.ThresholdComparator<>(new IntegerEvaluator()));
         for(int i = 0; i < 500; i++) {
-            sortedBase.add(i, new Integer(i));
+            sortedBase.add(i, distinctInteger(i));
         }
 
         // Wrap that preconstructed list with a ThresholdList but do not change the default thresholds
@@ -1011,7 +1012,7 @@ public class ThresholdListTest {
 
         // Now add values before a threshold is set and validate sortedBase equals sortedCover
         for(int i = 0; i < 500; i++) {
-            source.add(i, new Integer(i));
+            source.add(i, distinctInteger(i));
         }
         validateListsEquals(sortedBase, sortedCover);
     }
@@ -1025,18 +1026,18 @@ public class ThresholdListTest {
         thresholdList.setUpperThreshold(-1931);
         thresholdList.setLowerThreshold(-13931);
         thresholdList.setUpperThreshold(-931);
-        source.add(new Integer(1401));
+        source.add(distinctInteger(1401));
         thresholdList.setLowerThreshold(-12926);
         thresholdList.setUpperThreshold(74);
-        source.add(new Integer(2168));
-        source.add(new Integer(2996));
+        source.add(distinctInteger(2168));
+        source.add(distinctInteger(2996));
         thresholdList.setLowerThreshold(-11930);
         thresholdList.setUpperThreshold(1070);
-        source.add(new Integer(3895));
+        source.add(distinctInteger(3895));
         thresholdList.setLowerThreshold(-10931);
         thresholdList.setUpperThreshold(2069);
-        source.add(new Integer(4235));
-        source.add(new Integer(4507));
+        source.add(distinctInteger(4235));
+        source.add(distinctInteger(4507));
         thresholdList.setLowerThreshold(-9931);
         thresholdList.setUpperThreshold(3069);
     }
@@ -1057,7 +1058,7 @@ public class ThresholdListTest {
         assertEquals(0, counter.getEventCount());
 
         // add an element that is not in range
-        source.add(new Integer(1139));
+        source.add(distinctInteger(1139));
         assertEquals(0, counter.getEventCount());
         thresholdList.setLowerThreshold(-12923);
         thresholdList.setUpperThreshold(77);
@@ -1115,16 +1116,16 @@ public class ThresholdListTest {
 
         thresholdList.setLowerThreshold(-14938);
         thresholdList.setUpperThreshold(-1938);
-        source.add(new Integer(995));
+        source.add(distinctInteger(995));
         thresholdList.setLowerThreshold(-13937);
         thresholdList.setUpperThreshold(-937);
-        source.add(new Integer(1155));
+        source.add(distinctInteger(1155));
         thresholdList.setLowerThreshold(4062);
         thresholdList.setUpperThreshold(17062);
-        source.add(new Integer(19970));
+        source.add(distinctInteger(19970));
         thresholdList.setLowerThreshold(5063);
         thresholdList.setUpperThreshold(18063);
-        source.add(new Integer(20279));
+        source.add(distinctInteger(20279));
         thresholdList.setLowerThreshold(7063);
         thresholdList.setUpperThreshold(20063);
     }
@@ -1140,18 +1141,18 @@ public class ThresholdListTest {
 
         thresholdList.setUpperThreshold(20063);
         thresholdList.setLowerThreshold(7063);
-        source.add(new Integer(7000));
+        source.add(distinctInteger(7000));
         thresholdList.setUpperThreshold(6000);
         thresholdList.setLowerThreshold(0);
     }
 
     @Test
     public void testBoundaryConditions() {
-        source.add(new Integer(0));
-        source.add(new Integer(25));
-        source.add(new Integer(50));
-        source.add(new Integer(75));
-        source.add(new Integer(100));
+        source.add(distinctInteger(0));
+        source.add(distinctInteger(25));
+        source.add(distinctInteger(50));
+        source.add(distinctInteger(75));
+        source.add(distinctInteger(100));
 
         thresholdList.setLowerThreshold(0);
         thresholdList.setUpperThreshold(100);

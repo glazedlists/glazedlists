@@ -100,9 +100,9 @@ public class BeanPropertyTest {
         // deeply navigated get
         BeanProperty<SupportsTrailerHitch> red = new BeanProperty<>(SupportsTrailerHitch.class, "towedVehicle.color.red", true, false);
         rainbowCar.setColor(Color.blue);
-        assertEquals(new Integer(0), red.get(towTruck));
+        assertEquals(Integer.valueOf(0), red.get(towTruck));
         rainbowCar.setColor(Color.red);
-        assertEquals(new Integer(255), red.get(towTruck));
+        assertEquals(Integer.valueOf(255), red.get(towTruck));
         assertEquals(int.class, red.getValueClass());
     }
 

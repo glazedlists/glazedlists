@@ -63,7 +63,7 @@ public class Tree1Test {
         for(int i = 0; i < 30; i++) {
             int operation = random.nextInt(4);
             int index = controlList.isEmpty() ? 0 : random.nextInt(controlList.size());
-            Object value = new Integer(random.nextInt(10));
+            Object value = Integer.valueOf(random.nextInt(10));
 
             if(operation <= 1 || controlList.isEmpty()) {
                 indexedTree.add(index, value, 1);

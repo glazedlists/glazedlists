@@ -35,7 +35,7 @@ public class CalculationCategoryDatasetTest {
         assertEquals(1, counter.getCountAndReset());
 
         // changing a calculation produces an event
-        numbers.add(new Integer(2));
+        numbers.add(Integer.valueOf(2));
         assertEquals(1, dataset.getRowCount());
         assertNull(dataset.getRowKey(0));
         assertEquals(2, dataset.getValue(0, 0).intValue());

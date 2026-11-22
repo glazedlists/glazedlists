@@ -35,8 +35,8 @@ public class SubListTest {
         BasicEventList<Integer> eventList = new BasicEventList<>();
         List<Integer> controlList = new ArrayList<>();
         for(int i = 0; i < 26; i++) {
-            eventList.add(new Integer(i));
-            controlList.add(new Integer(i));
+            eventList.add(Integer.valueOf(i));
+            controlList.add(Integer.valueOf(i));
         }
 
         // ensure all sublists are equal
@@ -56,10 +56,10 @@ public class SubListTest {
         // create a source list of values, from 0,1,2...49,100,101..149
         BasicEventList eventList = new BasicEventList();
         for(int i = 0; i < 50; i++) {
-            eventList.add(new Integer(i));
+            eventList.add(Integer.valueOf(i));
         }
         for(int i = 0; i < 50; i++) {
-            eventList.add(new Integer(i + 100));
+            eventList.add(Integer.valueOf(i + 100));
         }
 
         // get the sublist
@@ -68,7 +68,7 @@ public class SubListTest {
 
         // change the source list to be 0,1,2,3,...49,50,51,..99,100,101...149
         for(int i = 0; i < 50; i++) {
-            eventList.add(50+i, new Integer(50+i));
+            eventList.add(50+i, Integer.valueOf(50+i));
         }
 
         // ensure the sublist took the change

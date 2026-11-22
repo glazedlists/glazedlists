@@ -24,6 +24,7 @@ import java.util.Set;
 import org.junit.Assume;
 import org.junit.Test;
 
+import static ca.odell.glazedlists.impl.testing.GlazedListsTests.distinctInteger;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -517,11 +518,11 @@ public class EventListTest {
         ListEventListener<Object> typeSafetyListener = GlazedLists.typeSafetyListener(source, acceptedTypes);
 
         source.add(null);
-        source.add(new Integer(0));
+        source.add(Integer.valueOf(0));
         source.add("Testing");
 
         try {
-            source.add(new Long(23));
+            source.add(Long.valueOf(23));
             fail("Expected an IllegalArgumentException for disallowed type");
         } catch (IllegalArgumentException e) {
             // expected
@@ -533,7 +534,7 @@ public class EventListTest {
         source.add(null);
 
         try {
-            source.set(0, new Long(23));
+            source.set(0, Long.valueOf(23));
             fail("Expected an IllegalArgumentException for disallowed type");
         } catch (IllegalArgumentException e) {
             // expected
@@ -545,8 +546,8 @@ public class EventListTest {
         source.removeListEventListener(typeSafetyListener);
 
         // these should now succeed now that we're not using the type safety checker any longer
-        source.add(new Long(23));
-        source.set(0, new Long(23));
+        source.add(Long.valueOf(23));
+        source.set(0, Long.valueOf(23));
     }
 
     @Test
@@ -649,7 +650,7 @@ public class EventListTest {
     public void testCombineEvents() {
         TransactionList<Object> list = new TransactionList<>(new BasicEventList<>(), true);
         for (int i = 0; i < 16; i++) {
-            list.add(new Integer(0));
+            list.add(distinctInteger(0));
         }
 
         ListConsistencyListener.install(list);
@@ -699,7 +700,7 @@ public class EventListTest {
         list.remove(42);
         list.remove(32);
         list.remove(19);
-        list.add(32, new Integer(92));
+        list.add(32, Integer.valueOf(92));
         list.remove(44);
         list.remove(19);
         list.remove(45);
@@ -715,47 +716,47 @@ public class EventListTest {
         list.remove(15);
         list.remove(25);
         list.remove(8);
-        list.add(40, new Integer(95));
+        list.add(40, Integer.valueOf(95));
         list.remove(32);
         list.remove(3);
         list.remove(26);
         list.remove(14);
         list.remove(36);
-        list.add(39, new Integer(96));
+        list.add(39, Integer.valueOf(96));
         list.remove(34);
         list.remove(21);
         list.remove(13);
         list.remove(32);
         list.remove(30);
-        list.add(36, new Integer(97));
+        list.add(36, Integer.valueOf(97));
         list.remove(43);
         list.remove(2);
         list.remove(34);
         list.remove(35);
         list.remove(17);
-        list.add(39, new Integer(98));
+        list.add(39, Integer.valueOf(98));
         for(int i = 0; i < 5; i++) {
             list.remove(list.size() - 1);
         }
-        list.add(29, new Integer(99));
+        list.add(29, Integer.valueOf(99));
         for(int i = 0; i < 5; i++) {
             list.remove(list.size() - 1);
         }
-        list.add(22, new Integer(100));
+        list.add(22, Integer.valueOf(100));
         for(int i = 0; i < 5; i++) {
             list.remove(list.size() - 1);
         }
-        list.set(25, new Integer(101)); // critical
+        list.set(25, Integer.valueOf(101)); // critical
         for(int j = 0; j < 4; j++) {
             for(int i = 0; i < 5; i++) {
                 list.remove(0);
             }
-            list.add(0, new Integer(102));
+            list.add(0, Integer.valueOf(102));
         }
         for(int i = 0; i < 10; i++) {
             list.remove(0);
         }
-        list.add(0, new Integer(107));
+        list.add(0, Integer.valueOf(107));
         for(int i = 0; i < 2; i++) {
             list.remove(0);
         }

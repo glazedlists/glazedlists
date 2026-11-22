@@ -21,13 +21,13 @@ public final class SubtractionTest {
         final Calculation<Integer> b = Calculations.count(bList);
         final Calculation<Float> diff = Calculations.subtractFloats(a, b);
 
-        assertEquals(new Float(0), diff.getValue());
+        assertEquals(Float.valueOf(0), diff.getValue());
 
         aList.add(null);
-        assertEquals(new Float(1), diff.getValue());
+        assertEquals(Float.valueOf(1), diff.getValue());
 
         bList.add(null);
-        assertEquals(new Float(0), diff.getValue());
+        assertEquals(Float.valueOf(0), diff.getValue());
     }
 
     @Test
@@ -39,13 +39,13 @@ public final class SubtractionTest {
         final Calculation<Integer> b = Calculations.count(bList);
         final Calculation<Double> diff = Calculations.subtractDoubles(a, b);
 
-        assertEquals(new Double(0), diff.getValue());
+        assertEquals(Double.valueOf(0), diff.getValue());
 
         aList.add(null);
-        assertEquals(new Double(1), diff.getValue());
+        assertEquals(Double.valueOf(1), diff.getValue());
 
         bList.add(null);
-        assertEquals(new Double(0), diff.getValue());
+        assertEquals(Double.valueOf(0), diff.getValue());
     }
 
     @Test
@@ -57,13 +57,13 @@ public final class SubtractionTest {
         final Calculation<Integer> b = Calculations.count(bList);
         final Calculation<Integer> diff = Calculations.subtractIntegers(a, b);
 
-        assertEquals(new Integer(0), diff.getValue());
+        assertEquals(Integer.valueOf(0), diff.getValue());
 
         aList.add(null);
-        assertEquals(new Integer(1), diff.getValue());
+        assertEquals(Integer.valueOf(1), diff.getValue());
 
         bList.add(null);
-        assertEquals(new Integer(0), diff.getValue());
+        assertEquals(Integer.valueOf(0), diff.getValue());
     }
 
     @Test
@@ -75,12 +75,12 @@ public final class SubtractionTest {
         final Calculation<Integer> b = Calculations.count(bList);
         final Calculation<Long> diff = Calculations.subtractLongs(a, b);
 
-        assertEquals(new Long(0), diff.getValue());
+        assertEquals(Long.valueOf(0), diff.getValue());
 
         aList.add(null);
-        assertEquals(new Long(1), diff.getValue());
+        assertEquals(Long.valueOf(1), diff.getValue());
 
         bList.add(null);
-        assertEquals(new Long(0), diff.getValue());
+        assertEquals(Long.valueOf(0), diff.getValue());
     }
 }

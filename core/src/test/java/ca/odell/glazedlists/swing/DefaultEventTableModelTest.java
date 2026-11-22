@@ -136,9 +136,9 @@ public class DefaultEventTableModelTest extends SwingTestCase {
         TableFormat<Color> colorTableFormat = GlazedLists.tableFormat(new String[] { "red", "green", "blue" }, new String[] { "Red", "Green", "Blue" });
         DefaultEventTableModel<Color> tableModel = new DefaultEventTableModel<>(colors, colorTableFormat);
 
-        assertEquals(new Integer(Color.RED.getRed()), tableModel.getValueAt(0, 0));
-        assertEquals(new Integer(Color.GREEN.getGreen()), tableModel.getValueAt(1, 1));
-        assertEquals(new Integer(Color.BLUE.getBlue()), tableModel.getValueAt(2, 2));
+        assertEquals(Integer.valueOf(Color.RED.getRed()), tableModel.getValueAt(0, 0));
+        assertEquals(Integer.valueOf(Color.GREEN.getGreen()), tableModel.getValueAt(1, 1));
+        assertEquals(Integer.valueOf(Color.BLUE.getBlue()), tableModel.getValueAt(2, 2));
 
         try {
             tableModel.getValueAt(100, 0);

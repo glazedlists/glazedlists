@@ -248,7 +248,7 @@ public class SortedListTest {
     public void testSortBeforeAndAfter() {
         // populate a list with strings
         for(int i = 0; i < 4000; i++) {
-            unsortedList.add(new Integer(random.nextInt()));
+            unsortedList.add(Integer.valueOf(random.nextInt()));
         }
 
         // build a control list of the desired results
@@ -278,11 +278,11 @@ public class SortedListTest {
             int index = unsortedList.isEmpty() ? 0 : random.nextInt(unsortedList.size());
 
             if(operation <= 1 || unsortedList.isEmpty()) {
-                unsortedList.add(index, new Integer(random.nextInt()));
+                unsortedList.add(index, Integer.valueOf(random.nextInt()));
             } else if(operation == 2) {
                 unsortedList.remove(index);
             } else if(operation == 3) {
-                unsortedList.set(index, new Integer(random.nextInt()));
+                unsortedList.set(index, Integer.valueOf(random.nextInt()));
             }
         }
 
@@ -316,11 +316,11 @@ public class SortedListTest {
             int index = list.isEmpty() ? 0 : random.nextInt(list.size());
 
             if(operation <= 1 || list.isEmpty()) {
-                list.add(index, new Integer(random.nextInt()));
+                list.add(index, Integer.valueOf(random.nextInt()));
             } else if(operation == 2) {
                 list.remove(index);
             } else if(operation == 3) {
-                list.set(index, new Integer(random.nextInt()));
+                list.set(index, Integer.valueOf(random.nextInt()));
             }
         }
 
@@ -379,24 +379,24 @@ public class SortedListTest {
 //        SortedList sorted = new SortedList<Integer>(source);
         SortedList sorted= SortedList.create(source);
         // Test containment of a 10 on an empty list
-        Integer ten = new Integer(10);
+        Integer ten = Integer.valueOf(10);
         int emptyTest = sorted.indexOf(ten);
         assertEquals(-1, emptyTest);
 
         // Add 12 leading 1's
-        Integer one = new Integer(1);
+        Integer one = Integer.valueOf(1);
         for(int i = 0; i < 12; i++) {
             source.add(one);
         }
 
         // Add 13 5's in the middle
-        Integer five = new Integer(5);
+        Integer five = Integer.valueOf(5);
         for(int i = 0; i < 13; i++) {
             source.add(five);
         }
 
         // Add 10 trailing 9's
-        Integer nine = new Integer(9);
+        Integer nine = Integer.valueOf(9);
         for(int i = 0; i < 10; i++) {
             source.add(nine);
         }
@@ -456,24 +456,24 @@ public class SortedListTest {
         SortedList<Integer> sorted = SortedList.create(source);
 
         // Test containment of a 10 on an empty list
-        Integer ten = new Integer(10);
+        Integer ten = Integer.valueOf(10);
         int emptyTest = sorted.lastIndexOf(ten);
         assertEquals(-1, emptyTest);
 
         // Add 12 leading 1's
-        Integer one = new Integer(1);
+        Integer one = Integer.valueOf(1);
         for(int i = 0; i < 12; i++) {
             source.add(one);
         }
 
         // Add 13 5's in the middle
-        Integer five = new Integer(5);
+        Integer five = Integer.valueOf(5);
         for(int i = 0; i < 13; i++) {
             source.add(five);
         }
 
         // Add 10 trailing 9's
-        Integer nine = new Integer(9);
+        Integer nine = Integer.valueOf(9);
         for(int i = 0; i < 10; i++) {
             source.add(nine);
         }
@@ -541,24 +541,24 @@ public class SortedListTest {
         SortedList<Comparable> sorted = SortedList.create(source);
 
         // Test containment of a 10 on an empty list
-        Integer ten = new Integer(10);
+        Integer ten = Integer.valueOf(10);
         boolean emptyTest = sorted.contains(ten);
         assertEquals(false, emptyTest);
 
         // Add 12 leading 1's
-        Integer one = new Integer(1);
+        Integer one = Integer.valueOf(1);
         for(int i = 0; i < 12; i++) {
             source.add(one);
         }
 
         // Add 13 5's in the middle
-        Integer five = new Integer(5);
+        Integer five = Integer.valueOf(5);
         for(int i = 0; i < 13; i++) {
             source.add(five);
         }
 
         // Add 10 trailing 9's
-        Integer nine = new Integer(9);
+        Integer nine = Integer.valueOf(9);
         for(int i = 0; i < 10; i++) {
             source.add(nine);
         }
@@ -934,15 +934,15 @@ public class SortedListTest {
     public void testAlwaysEqualComparator() {
         Comparator alwaysEqualComparator = new AlwaysEqualComparator();
         sortedList.dispose();
-        unsortedList.add(new Integer(4));
-        unsortedList.add(new Integer(3));
-        unsortedList.add(new Integer(1));
+        unsortedList.add(Integer.valueOf(4));
+        unsortedList.add(Integer.valueOf(3));
+        unsortedList.add(Integer.valueOf(1));
 
         sortedList = new SortedList(unsortedList, alwaysEqualComparator);
-        unsortedList.add(new Integer(5));
-        unsortedList.add(new Integer(3));
-        unsortedList.add(new Integer(0));
-        unsortedList.add(new Integer(9));
+        unsortedList.add(Integer.valueOf(5));
+        unsortedList.add(Integer.valueOf(3));
+        unsortedList.add(Integer.valueOf(0));
+        unsortedList.add(Integer.valueOf(9));
         assertEquals(unsortedList, sortedList);
     }
 

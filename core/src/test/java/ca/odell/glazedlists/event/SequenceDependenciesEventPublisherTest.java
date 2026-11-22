@@ -298,7 +298,7 @@ public class SequenceDependenciesEventPublisherTest {
         }
         public void increment(int amount) {
             this.latestRevision += amount;
-            this.publisher.fireEvent(this, new Integer(this.latestRevision), DependentSubjectListenerEventFormat.INSTANCE);
+            this.publisher.fireEvent(this, Integer.valueOf(this.latestRevision), DependentSubjectListenerEventFormat.INSTANCE);
         }
         /**
          * Register the listener as dependent on the subject.
@@ -561,7 +561,7 @@ public class SequenceDependenciesEventPublisherTest {
         }
         public void increment(int amount) {
             this.latestRevision += amount;
-            publisher.fireEvent(this, new Integer(this.latestRevision), DetachedSubjectAndListenerEventFormat.INSTANCE);
+            publisher.fireEvent(this, Integer.valueOf(this.latestRevision), DetachedSubjectAndListenerEventFormat.INSTANCE);
         }
         /**
          * Dependencies are satisfied if the latestRevision is at least the

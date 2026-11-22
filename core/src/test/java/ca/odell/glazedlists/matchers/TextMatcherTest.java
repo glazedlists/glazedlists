@@ -147,21 +147,21 @@ public class TextMatcherTest {
         final TextMatcherEditor<Integer> textMatcherEditor = new TextMatcherEditor<>(new IntegerTextFilterator());
         FilterList<Integer> list = new FilterList<>(new BasicEventList<Integer>(), textMatcherEditor);
 
-        list.add(new Integer(10));
-        list.add(new Integer(3));
-        list.add(new Integer(11));
-        list.add(new Integer(2));
-        list.add(new Integer(12));
-        list.add(new Integer(9));
-        list.add(new Integer(103));
-        list.add(new Integer(7));
+        list.add(Integer.valueOf(10));
+        list.add(Integer.valueOf(3));
+        list.add(Integer.valueOf(11));
+        list.add(Integer.valueOf(2));
+        list.add(Integer.valueOf(12));
+        list.add(Integer.valueOf(9));
+        list.add(Integer.valueOf(103));
+        list.add(Integer.valueOf(7));
 
         textMatcherEditor.setFilterText(new String[] {"1"});
         assertEquals(4, list.size());
-        assertEquals(list.get(0), new Integer(10));
-        assertEquals(list.get(1), new Integer(11));
-        assertEquals(list.get(2), new Integer(12));
-        assertEquals(list.get(3), new Integer(103));
+        assertEquals(list.get(0), Integer.valueOf(10));
+        assertEquals(list.get(1), Integer.valueOf(11));
+        assertEquals(list.get(2), Integer.valueOf(12));
+        assertEquals(list.get(3), Integer.valueOf(103));
     }
 
     @Test

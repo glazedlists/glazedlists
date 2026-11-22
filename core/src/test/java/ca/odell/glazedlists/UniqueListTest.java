@@ -20,6 +20,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import static ca.odell.glazedlists.impl.testing.GlazedListsTests.distinctInteger;
 import static org.junit.Assert.*;
 
 /**
@@ -777,7 +778,7 @@ public class UniqueListTest {
 
         // populate the source
         for(int i = 0; i < 1000; i++) {
-            sourceList.add(new Integer(random.nextInt(100)));
+            sourceList.add(distinctInteger(random.nextInt(100)));
         }
 
         // build a control list
@@ -1025,12 +1026,12 @@ public class UniqueListTest {
     @Test
     public void testReplaceAllRigorous() {
         for(int i = 0; i < 100; i++) {
-            unique.add(new Integer(random.nextInt(100)));
+            unique.add(distinctInteger(random.nextInt(100)));
         }
 
         SortedSet<Object> replacementSet = new TreeSet<>();
         for(int i = 0; i < 100; i++) {
-            replacementSet.add(new Integer(random.nextInt(100)));
+            replacementSet.add(distinctInteger(random.nextInt(100)));
         }
 
         // listen to changes on the unique list
@@ -1108,19 +1109,19 @@ public class UniqueListTest {
         UniqueList<Object> unique = new UniqueList<>(source);
 
         // Add 12 leading 1's
-        Integer one = new Integer(1);
+        Integer one = Integer.valueOf(1);
         for(int i = 0; i < 12; i++) {
             source.add(one);
         }
 
         // Add 13 5's in the middle
-        Integer five = new Integer(5);
+        Integer five = Integer.valueOf(5);
         for(int i = 0; i < 13; i++) {
             source.add(five);
         }
 
         // Add 10 trailing 9's
-        Integer nine = new Integer(9);
+        Integer nine = Integer.valueOf(9);
         for(int i = 0; i < 10; i++) {
             source.add(nine);
         }
@@ -1138,7 +1139,7 @@ public class UniqueListTest {
         assertEquals(2, thirdTestIndex);
 
         // Test containment of a 10
-        Integer ten = new Integer(10);
+        Integer ten = Integer.valueOf(10);
         int fourthTest = unique.indexOf(ten);
         assertEquals(-1, fourthTest);
     }
@@ -1152,19 +1153,19 @@ public class UniqueListTest {
         UniqueList<Object> unique = new UniqueList<>(source);
 
         // Add 12 leading 1's
-        Integer one = new Integer(1);
+        Integer one = Integer.valueOf(1);
         for(int i = 0; i < 12; i++) {
             source.add(one);
         }
 
         // Add 13 5's in the middle
-        Integer five = new Integer(5);
+        Integer five = Integer.valueOf(5);
         for(int i = 0; i < 13; i++) {
             source.add(five);
         }
 
         // Add 10 trailing 9's
-        Integer nine = new Integer(9);
+        Integer nine = Integer.valueOf(9);
         for(int i = 0; i < 10; i++) {
             source.add(nine);
         }
@@ -1182,7 +1183,7 @@ public class UniqueListTest {
         assertEquals(2, thirdTestIndex);
 
         // Test containment of a 10
-        Integer ten = new Integer(10);
+        Integer ten = Integer.valueOf(10);
         int fourthTest = unique.lastIndexOf(ten);
         assertEquals(-1, fourthTest);
     }
@@ -1196,19 +1197,19 @@ public class UniqueListTest {
         UniqueList<Object> unique = new UniqueList<>(source);
 
         // Add 12 leading 1's
-        Integer one = new Integer(1);
+        Integer one = Integer.valueOf(1);
         for(int i = 0; i < 12; i++) {
             source.add(one);
         }
 
         // Add 13 5's in the middle
-        Integer five = new Integer(5);
+        Integer five = Integer.valueOf(5);
         for(int i = 0; i < 13; i++) {
             source.add(five);
         }
 
         // Add 10 trailing 9's
-        Integer nine = new Integer(9);
+        Integer nine = Integer.valueOf(9);
         for(int i = 0; i < 10; i++) {
             source.add(nine);
         }
@@ -1226,7 +1227,7 @@ public class UniqueListTest {
         assertEquals(true, thirdTest);
 
         // Test containment of a 10
-        Integer ten = new Integer(10);
+        Integer ten = Integer.valueOf(10);
         boolean fourthTest = unique.contains(ten);
         assertEquals(false, fourthTest);
     }

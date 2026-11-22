@@ -251,7 +251,7 @@ public class ThreadContentionPerformance {
 //				long time = System.nanoTime();
 				list.getReadWriteLock().writeLock().lock();
 				try {
-					list.add(new Long(System.currentTimeMillis()));
+					list.add(Long.valueOf(System.currentTimeMillis()));
 				}
 				finally {
 					list.getReadWriteLock().writeLock().unlock();

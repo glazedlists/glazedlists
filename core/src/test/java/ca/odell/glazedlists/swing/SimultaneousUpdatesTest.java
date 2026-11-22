@@ -91,7 +91,7 @@ public class SimultaneousUpdatesTest {
                         int i = j;
                         j += dice.nextInt(3);
                         for(; i < j; i++) {
-                            list.add(new Integer(i));
+                            list.add(Integer.valueOf(i));
                         }
                     } finally {
                         list.getReadWriteLock().writeLock().unlock();
