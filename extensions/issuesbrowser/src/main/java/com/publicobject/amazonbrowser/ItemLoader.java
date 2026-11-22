@@ -11,7 +11,6 @@ import javax.swing.*;
 import java.io.IOException;
 import java.net.NoRouteToHostException;
 import java.net.UnknownHostException;
-import java.security.AccessControlException;
 
 /**
  *
@@ -72,7 +71,7 @@ public class ItemLoader implements Runnable {
             } catch (NoRouteToHostException e) {
                 Exceptions.getInstance().handle(e);
 
-            } catch (AccessControlException e) {
+            } catch (SecurityException e) {
                 Exceptions.getInstance().handle(e);
 
             } catch (IOException e) {

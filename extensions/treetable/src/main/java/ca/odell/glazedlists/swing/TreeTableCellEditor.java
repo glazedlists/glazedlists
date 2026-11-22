@@ -179,7 +179,7 @@ public class TreeTableCellEditor extends AbstractCellEditor implements TableCell
             if (renderedPanel != null && renderedPanel.isPointOverNodeComponent(clickPoint)) {
                 // create a new MouseEvent that is translated over the node component
                 final Rectangle delegateRendererBounds = renderedPanel.getNodeComponent().getBounds();
-                final MouseEvent translatedMouseEvent = new MouseEvent(me.getComponent(), me.getID(), me.getWhen(), me.getModifiers(), me.getX() - delegateRendererBounds.x, me.getY() - delegateRendererBounds.y, me.getClickCount(), me.isPopupTrigger(), me.getButton());
+                final MouseEvent translatedMouseEvent = new MouseEvent(me.getComponent(), me.getID(), me.getWhen(), me.getModifiersEx(), me.getX() - delegateRendererBounds.x, me.getY() - delegateRendererBounds.y, me.getClickCount(), me.isPopupTrigger(), me.getButton());
 
                 // allow the actual node editor to decide
                 return delegate.isCellEditable(translatedMouseEvent);

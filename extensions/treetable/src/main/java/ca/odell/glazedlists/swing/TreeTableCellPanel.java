@@ -226,6 +226,8 @@ public class TreeTableCellPanel extends JPanel {
      * cell edit is complete, focus is returned to the JTable in that case as
      * well.
      */
+    // overrides and forwards the deprecated JComponent method, which Swing still calls for cell editors
+    @SuppressWarnings("deprecation")
     @Override
     public void setNextFocusableComponent(Component aComponent) {
         super.setNextFocusableComponent(aComponent);

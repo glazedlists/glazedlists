@@ -10,6 +10,7 @@ import ca.odell.glazedlists.GlazedLists;
 
 import javax.swing.event.SwingPropertyChangeSupport;
 import java.beans.PropertyChangeListener;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.Map;
 import java.util.HashMap;
@@ -203,7 +204,8 @@ public abstract class TreeCriterion {
                 return getOrCreateItem("Unknown");
             } else {
                 // normalize the release year to the decade of the release
-                int releaseYear = 1900 + releaseDate.getYear();
+                // the year in the default time zone, as the deprecated Date.getYear() reports it
+                int releaseYear = releaseDate.toInstant().atZone(ZoneId.systemDefault()).getYear();
                 releaseYear /= 10;
                 releaseYear *= 10;
 

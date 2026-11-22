@@ -2737,6 +2737,8 @@ public final class AutoCompleteSupport<E> {
          * as the editor of the JComboBox has focus when the cell edit is
          * complete, focus is returned to the JTable in that case as well.
          */
+        // overrides and forwards the deprecated JComponent method, which Swing still calls for cell editors
+        @SuppressWarnings("deprecation")
         @Override
         public void setNextFocusableComponent(Component aComponent) {
             super.setNextFocusableComponent(aComponent);

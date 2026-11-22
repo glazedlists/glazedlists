@@ -10,6 +10,7 @@ import com.publicobject.misc.xml.*;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -161,7 +162,7 @@ public class IssuezillaXMLParser {
 
             // prepare a stream
             final String urlAsString = baseQueryUrl + "?include_attachments=false&id=" + idArg;
-            URL issuesUrl = new URL(urlAsString);
+            URL issuesUrl = URI.create(urlAsString).toURL();
             InputStream issuesInStream = issuesUrl.openStream();
 
             // parse
