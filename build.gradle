@@ -111,6 +111,60 @@ configure(subprojects.findAll { it.name != 'core' }) {
 }
 
 /**
+ * Code coverage (JaCoCo, report only): "gradlew coverageReport" runs the tests of the published modules with the
+ * JaCoCo agent and writes one report over all of them (extension tests also exercise core classes).
+ * A build without a JaCoCo report task runs the tests without the agent.
+ */
+configurations {
+    /* the JaCoCo Ant tasks for coverageReport (the jacoco plugin would also give the root project
+       its own, empty jacocoTestReport/jacocoTestCoverageVerification tasks) */
+    coverageAnt {
+        canBeConsumed = false
+    }
+}
+dependencies {
+    coverageAnt "org.jacoco:org.jacoco.ant:$jacocoVersion"
+}
+configure(exportedProjects) {
+    apply plugin: 'jacoco'
+    jacoco {
+        toolVersion = jacocoVersion
+    }
+    tasks.withType(Test).configureEach {
+        jacoco {
+            enabled = false                         // switched on below, only when a coverage report is requested
+            includes = ['ca.odell.glazedlists.*']   // don't instrument Hibernate, SWT, JFreeChart, JUnit, ...
+        }
+    }
+}
+tasks.register('coverageReport', JacocoReport) {
+    group = 'verification'
+    description = 'Runs the tests of the published modules with JaCoCo and writes an aggregated report to target/reports/coverage.'
+    jacocoClasspath = configurations.coverageAnt
+    def testTasks = exportedProjects.collect { it.tasks.withType(Test) }
+    // executionData(...) only adds mustRunAfter
+    dependsOn testTasks
+    testTasks.each { executionData(it) }
+    sourceDirectories.from(exportedProjects.collect { it.sourceSets.main.allJava.srcDirs })
+    classDirectories.from(files(exportedProjects.collect { it.sourceSets.main.output.classesDirs }).asFileTree.matching {
+        // test helpers in the main sources (ListConsistencyListener, GlazedListsTests), run by the tests themselves
+        exclude 'ca/odell/glazedlists/impl/testing/**'
+    })
+    reports {
+        html.required = true
+        xml.required = true
+        csv.required = false
+        html.outputLocation = file("$targetDir/reports/coverage/html")
+        xml.outputLocation = file("$targetDir/reports/coverage/coverage.xml")
+    }
+}
+gradle.taskGraph.whenReady { graph ->
+    if (graph.allTasks.any { it instanceof JacocoReport }) {
+        exportedProjects.each { p -> p.tasks.withType(Test).each { it.jacoco.enabled = true } }
+    }
+}
+
+/**
  * add directories to clean of root-project
  */
 clean.doLast {
