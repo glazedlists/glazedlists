@@ -86,7 +86,7 @@ public class OpenIssuesByMonthCategoryDataset extends EventListCategoryDataset<S
         final Date start = (Date) columnKey;
         final Date end = this.monthSequencer.next(start);
 
-        return new Integer(this.getCount((String) rowKey, start, end));
+        return Integer.valueOf(this.getCount((String) rowKey, start, end));
     }
 
     /**

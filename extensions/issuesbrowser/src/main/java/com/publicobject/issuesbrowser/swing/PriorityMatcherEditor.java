@@ -24,8 +24,8 @@ import com.publicobject.issuesbrowser.Issue;
  */
 public class PriorityMatcherEditor implements FilterComponent<Issue>, ChangeListener {
 
-    private static final Integer MIN_PRIORITY = new Integer(0);
-    private static final Integer MAX_PRIORITY = new Integer(100);
+    private static final Integer MIN_PRIORITY = Integer.valueOf(0);
+    private static final Integer MAX_PRIORITY = Integer.valueOf(100);
 
     private final RangeMatcherEditor<Integer,Issue> rangeMatcherEditor;
     private final JSlider slider;
@@ -68,6 +68,6 @@ public class PriorityMatcherEditor implements FilterComponent<Issue>, ChangeList
 
     @Override
     public void stateChanged(ChangeEvent changeEvent) {
-        rangeMatcherEditor.setRange(new Integer(slider.getValue()), null);
+        rangeMatcherEditor.setRange(Integer.valueOf(slider.getValue()), null);
     }
 }

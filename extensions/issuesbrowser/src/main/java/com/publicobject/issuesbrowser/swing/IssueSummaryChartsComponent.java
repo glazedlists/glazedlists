@@ -114,7 +114,7 @@ class IssueSummaryChartsComponent {
     private static class ListSizeFunction implements FunctionList.Function<List<Issue>, Number> {
         @Override
         public Number evaluate(List<Issue> sourceValue) {
-            return new Integer(sourceValue.size());
+            return Integer.valueOf(sourceValue.size());
         }
     }
 

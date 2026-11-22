@@ -365,7 +365,7 @@ public class IssuesBrowser implements Runnable {
         public void setIssueCount(int issueCount) {
             if (this.issueCount == issueCount) return;
             this.issueCount = issueCount;
-            this.setText(issueCountFormat.format(new Object[] {new Integer(issueCount)}));
+            this.setText(issueCountFormat.format(new Object[] {Integer.valueOf(issueCount)}));
         }
         @Override
         public void listChanged(ListEvent<Issue> listChanges) {
@@ -429,7 +429,7 @@ public class IssuesBrowser implements Runnable {
             Issue issue = separator.first();
             if(issue == null) return; // handle 'late' rendering calls after this separator is invalid
             expandButton.setIcon(separator.getLimit() == 0 ? EXPANDED_ICON : COLLAPSED_ICON);
-            nameLabel.setText(nameFormat.format(new Object[] {issue.getSubcomponent(), new Integer(separator.size())}));
+            nameLabel.setText(nameFormat.format(new Object[] {issue.getSubcomponent(), Integer.valueOf(separator.size())}));
         }
 
         @Override

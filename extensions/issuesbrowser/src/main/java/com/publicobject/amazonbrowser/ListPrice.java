@@ -3,8 +3,6 @@
 /*                                                     O'Dell Engineering Ltd.*/
 package com.publicobject.amazonbrowser;
 
-import ca.odell.glazedlists.GlazedLists;
-
 /**
  * Models a price on Amazon.
  *
@@ -39,7 +37,7 @@ public class ListPrice implements Comparable<ListPrice> {
      */
     @Override
     public int compareTo(ListPrice o) {
-        return GlazedLists.comparableComparator().compare(new Integer(getAmount()), new Integer(o.getAmount()));
+        return Integer.compare(getAmount(), o.getAmount());
     }
 
     /** inheritDoc */

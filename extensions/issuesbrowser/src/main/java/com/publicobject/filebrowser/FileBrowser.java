@@ -112,7 +112,7 @@ public class FileBrowser implements Runnable {
                 case 0: return baseObject.getName();
                 case 1: return baseObject.getDateModified();
                 case 2: return baseObject.getDateCreated();
-                case 3: return new Long(baseObject.getSize());
+                case 3: return Long.valueOf(baseObject.getSize());
                 case 4: return baseObject.getKind();
             }
             throw new IllegalStateException();
