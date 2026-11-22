@@ -8,6 +8,7 @@ import ca.odell.glazedlists.jfreechart.ValueSegment;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -184,7 +185,7 @@ public class Issue implements Comparable {
      */
     public URL getURL() {
         try {
-            return new URL(getProject().getIssueDetailUri(this));
+            return URI.create(getProject().getIssueDetailUri(this)).toURL();
         } catch(MalformedURLException e) {
             throw new RuntimeException(e);
         }

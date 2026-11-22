@@ -45,7 +45,7 @@ public class SortedListBenchmark {
 
        base = new BasicEventList<>();
        for(int i = 0; i < baseSize; i++) {
-           base.add(new Integer(dice.nextInt(Integer.MAX_VALUE)));
+           base.add(Integer.valueOf(dice.nextInt(Integer.MAX_VALUE)));
        }
    }
 
@@ -73,7 +73,7 @@ public class SortedListBenchmark {
 
    private void doTest(EventList<Integer> baseCopy, EventList<Integer> sortedBase) {
        for(int i = 0; i < changeSize; i++) {
-           baseCopy.add(new Integer(Integer.MAX_VALUE));
+           baseCopy.add(Integer.valueOf(Integer.MAX_VALUE));
        }
        // get all values
        for(int i = 0; i < sortedBase.size(); i++) {

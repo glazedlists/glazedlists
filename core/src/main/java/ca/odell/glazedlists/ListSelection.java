@@ -671,7 +671,7 @@ public class ListSelection<E> implements ListEventListener<E> {
             E value = v.next();
             int index = source.indexOf(value);
             if(index == -1) continue;
-            indicesToSelect.add(new Integer(index));
+            indicesToSelect.add(Integer.valueOf(index));
         }
         if(indicesToSelect.isEmpty()) return false;
 

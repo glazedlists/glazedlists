@@ -105,7 +105,7 @@ public class DiffTest {
         }
         @Override
         public Object get(int index) {
-            return new Integer(index);
+            return Integer.valueOf(index);
         }
 
         @Override
@@ -115,7 +115,7 @@ public class DiffTest {
         @Override
         public Object remove(int index) {
             size--;
-            return new Integer(index);
+            return Integer.valueOf(index);
         }
         @Override
         public void add(int index, Object value) {
@@ -134,7 +134,7 @@ public class DiffTest {
         }
         @Override
         public Object get(int index) {
-            Object mapValue = values.get(new Integer(index));
+            Object mapValue = values.get(Integer.valueOf(index));
             if(mapValue != null) return mapValue;
 
             return delegate.get(index);
@@ -146,7 +146,7 @@ public class DiffTest {
 
         @Override
         public Object set(int index, Object value) {
-            return values.put(new Integer(index), value);
+            return values.put(Integer.valueOf(index), value);
         }
         @Override
         public void add(int index, Object element) {
@@ -171,13 +171,13 @@ public class DiffTest {
         String alpha = args[ 0 ];
         EventList alphaList = new BasicEventList();
         for (int c = 0; c < alpha.length(); c++) {
-            alphaList.add(new Character(alpha.charAt(c)));
+            alphaList.add(Character.valueOf(alpha.charAt(c)));
         }
 
         String beta = args[ 1 ];
         List betaList = new ArrayList();
         for (int c = 0; c < beta.length(); c++) {
-            betaList.add(new Character(beta.charAt(c)));
+            betaList.add(Character.valueOf(beta.charAt(c)));
         }
 
         drawGrid(new Diff.ListDiffMatcher(alphaList, betaList, null));
@@ -279,7 +279,7 @@ public class DiffTest {
             while(listChanges.next()) {
                 changesForEvent++;
             }
-            changeCounts.add(new Integer(changesForEvent));
+            changeCounts.add(Integer.valueOf(changesForEvent));
         }
 
         /**

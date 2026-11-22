@@ -40,7 +40,7 @@ public class MultipleListenersTest {
 
         // add 1000 elements to start
         for(int i = 0; i < 1000; i++) {
-            Integer value = new Integer(random.nextInt(100));
+            Integer value = Integer.valueOf(random.nextInt(100));
             root.add(value);
             control.add(value);
         }
@@ -55,7 +55,7 @@ public class MultipleListenersTest {
         for(int i = 0; i < 30; i++) {
             // add 100 elements
             for(int j = 0; j < 100; j++) {
-                Integer value = new Integer(random.nextInt(100));
+                Integer value = Integer.valueOf(random.nextInt(100));
                 root.add(value);
                 control.add(value);
             }

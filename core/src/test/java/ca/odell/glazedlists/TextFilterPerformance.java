@@ -49,7 +49,7 @@ public class TextFilterPerformance {
         List<Integer> testHitCounts = new ArrayList<>();
         while(!(line = in.readLine()).equals("")) {
             testFilters.add(line);
-            testHitCounts.add(new Integer(in.readLine()));
+            testHitCounts.add(Integer.valueOf(in.readLine()));
         }
 
         // read the input texts

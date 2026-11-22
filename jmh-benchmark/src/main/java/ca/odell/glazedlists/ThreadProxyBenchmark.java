@@ -43,7 +43,7 @@ public class ThreadProxyBenchmark {
         matcherEditor = new AtLeastMatcherEditor();
         base = new BasicEventList<>();
         for (int i = 0; i < baseSize; i++) {
-            base.add(new Integer(dice.nextInt(1000)));
+            base.add(Integer.valueOf(dice.nextInt(1000)));
         }
         filtered = new FilterList<>(base, matcherEditor);
     }

@@ -9,6 +9,7 @@ import com.publicobject.misc.xml.*;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -161,7 +162,7 @@ public class JiraXMLParser {
      * @throws IOException if a parsing error occurs
      */
     public static void loadIssues(EventList<Issue> target, Project owner) throws IOException {
-        final URL issuesUrl = new URL(owner.getIssueQueryUri());
+        final URL issuesUrl = URI.create(owner.getIssueQueryUri()).toURL();
         final InputStream issuesInStream = issuesUrl.openStream();
         // parse
         loadIssues(target, issuesInStream, owner);

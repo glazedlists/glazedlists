@@ -79,7 +79,7 @@ public class PopularityListTest {
 
         // add 1000
         for(int i = 0; i < 1000; i++) {
-            source.add(new Integer(dice.nextInt(50)));
+            source.add(Integer.valueOf(dice.nextInt(50)));
         }
 
         // remove 900
@@ -91,7 +91,7 @@ public class PopularityListTest {
         // set 800
         for(int i = 0; i < 800; i++) {
             int updateIndex = dice.nextInt(source.size());
-            Integer updateValue = new Integer(dice.nextInt(50));
+            Integer updateValue = Integer.valueOf(dice.nextInt(50));
             source.set(updateIndex, updateValue);
         }
     }
@@ -271,7 +271,7 @@ public class PopularityListTest {
             this.popularityList = popularityList;
             this.sortedSource = sortedSource;
             for(int i = 0; i < popularityList.size(); i++) {
-                elementCounts.add(new Integer(count(popularityList.get(i))));
+                elementCounts.add(Integer.valueOf(count(popularityList.get(i))));
             }
 
             popularityList.addListEventListener(this);
@@ -288,14 +288,14 @@ public class PopularityListTest {
             while(listEvent.next()) {
                 int changeIndex = listEvent.getIndex();
                 int changeType = listEvent.getType();
-                changedIndices.add(new Integer(changeIndex));
+                changedIndices.add(Integer.valueOf(changeIndex));
 
                 if(changeType == ListEvent.DELETE) {
                     elementCounts.remove(changeIndex);
                 } else if(changeType == ListEvent.INSERT) {
-                    elementCounts.add(changeIndex, new Integer(count(popularityList.get(changeIndex))));
+                    elementCounts.add(changeIndex, Integer.valueOf(count(popularityList.get(changeIndex))));
                 } else if(changeType == ListEvent.UPDATE) {
-                    elementCounts.set(changeIndex, new Integer(count(popularityList.get(changeIndex))));
+                    elementCounts.set(changeIndex, Integer.valueOf(count(popularityList.get(changeIndex))));
                 }
             }
 
@@ -304,7 +304,7 @@ public class PopularityListTest {
             for(Iterator<Integer> c = changedIndices.iterator(); c.hasNext(); ) {
                 int changeIndex = c.next().intValue();
                 for(int i = Math.max(changeIndex - 1, 0); i < Math.min(changeIndex+2, popularityList.size()); i++) {
-                    assertEquals("Test index " + i + ", value: " + popularityList.get(i), elementCounts.get(i), new Integer(count(popularityList.get(i))));
+                    assertEquals("Test index " + i + ", value: " + popularityList.get(i), elementCounts.get(i), Integer.valueOf(count(popularityList.get(i))));
                 }
             }
         }

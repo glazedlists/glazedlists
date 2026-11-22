@@ -45,6 +45,7 @@ import javax.swing.text.Segment;
 import org.junit.Assume;
 import org.junit.Test;
 
+import static ca.odell.glazedlists.impl.testing.GlazedListsTests.distinctInteger;
 import static org.junit.Assert.*;
 
 public class AutoCompleteSupportTest extends SwingTestCase {
@@ -801,12 +802,12 @@ public class AutoCompleteSupportTest extends SwingTestCase {
 	@Test
     public void testCreateTableCellEditor() {
         final EventList<Integer> ints = new BasicEventList<>();
-        ints.add(new Integer(0));
-        ints.add(new Integer(10));
-        ints.add(new Integer(199));
-        ints.add(new Integer(199)); // should be removed by createTableCellEditor(...)
-        ints.add(new Integer(10));  // should be removed by createTableCellEditor(...)
-        ints.add(new Integer(0));   // should be removed by createTableCellEditor(...)
+        ints.add(distinctInteger(0));
+        ints.add(distinctInteger(10));
+        ints.add(distinctInteger(199));
+        ints.add(distinctInteger(199)); // should be removed by createTableCellEditor(...)
+        ints.add(distinctInteger(10));  // should be removed by createTableCellEditor(...)
+        ints.add(distinctInteger(0));   // should be removed by createTableCellEditor(...)
 
         AutoCompleteSupport.AutoCompleteCellEditor<Integer> editor = AutoCompleteSupport.createTableCellEditor(new IntegerTableFormat(), ints, 0);
         JComboBox<Integer> comboBox = (JComboBox<Integer>) editor.getComponent();

@@ -13,7 +13,7 @@ public class BeanPropertyMatcherTest {
 
     @Test
     public void testConstructor() {
-        new BeanPropertyMatcher<>(Dog.class, "legs", new Integer(4));
+        new BeanPropertyMatcher<>(Dog.class, "legs", Integer.valueOf(4));
         new BeanPropertyMatcher<>(Dog.class, "name", null);
 
         try {

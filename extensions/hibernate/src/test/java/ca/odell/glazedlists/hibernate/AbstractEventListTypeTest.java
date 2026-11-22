@@ -9,7 +9,6 @@ import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 import ca.odell.glazedlists.impl.testing.GlazedListsTests;
 
-import org.hibernate.FetchMode;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -157,7 +156,7 @@ public abstract class AbstractEventListTypeTest extends HibernateTestCase {
         Transaction t = s.beginTransaction();
 
         // test that emails are saved in DB
-        List emails = s.createCriteria(Email.class).list();
+        List emails = s.createQuery("from Email", Email.class).list();
         assertEquals(emails.size(), 2);
 
         // load saved user again
@@ -208,7 +207,7 @@ public abstract class AbstractEventListTypeTest extends HibernateTestCase {
         assertEquals(1, u.getEmailAddresses().size());
         assertEquals(new Email("admin@web.de"), u.getEmailAddresses().get(0));
         assertTrue(Hibernate.isInitialized(u.getEmailAddresses()));
-        emails = s.createCriteria(Email.class).list();
+        emails = s.createQuery("from Email", Email.class).list();
         assertEquals(1, emails.size());
         assertEquals(new Email("admin@web.de"), emails.get(0));
 
@@ -224,7 +223,7 @@ public abstract class AbstractEventListTypeTest extends HibernateTestCase {
         assertNull(u);
 
         // no emails should be found
-        emails = s.createCriteria(Email.class).list();
+        emails = s.createQuery("from Email", Email.class).list();
         assertEquals(0, emails.size());
 
         t.commit();
@@ -260,7 +259,7 @@ public abstract class AbstractEventListTypeTest extends HibernateTestCase {
         Transaction t = s.beginTransaction();
 
         // test that roles are saved in DB
-        List roles = s.createCriteria(Role.class).list();
+        List roles = s.createQuery("from Role", Role.class).list();
         assertEquals(2, roles.size());
 
         // load saved user again
@@ -326,7 +325,7 @@ public abstract class AbstractEventListTypeTest extends HibernateTestCase {
         assertEquals(1, listener.getCountAndReset());
         assertEquals(0, u.getRoles().size());
         assertTrue(Hibernate.isInitialized(u.getRoles()));
-        roles = s.createCriteria(Role.class).list();
+        roles = s.createQuery("from Role", Role.class).list();
         assertEquals(3, roles.size());
         assertEquals("Developer", ((Role) roles.get(2)).getName());
 
@@ -349,7 +348,7 @@ public abstract class AbstractEventListTypeTest extends HibernateTestCase {
         assertEquals(u, null);
 
         // no roles should be found
-        roles = s.createCriteria(Role.class).list();
+        roles = s.createQuery("from Role", Role.class).list();
         assertEquals(0, roles.size());
 
         t.commit();
@@ -445,13 +444,10 @@ public abstract class AbstractEventListTypeTest extends HibernateTestCase {
      */
     private User loadUser(Session s, boolean lazy) {
         if (lazy) {
-            return (User) s.createCriteria(User.class).uniqueResult();
+            return s.createQuery("from User", User.class).uniqueResult();
         } else {
-            return (User) s.createCriteria(User.class)
-            	.setFetchMode("emailAddresses", FetchMode.JOIN)
-                .setFetchMode("nickNames", FetchMode.JOIN)
-                .setFetchMode("roles", FetchMode.JOIN)
-            	.uniqueResult();
+            return s.createQuery("select u from User u left join fetch u.nickNames"
+                    + " left join fetch u.emailAddresses left join fetch u.roles", User.class).uniqueResult();
         }
     }
 

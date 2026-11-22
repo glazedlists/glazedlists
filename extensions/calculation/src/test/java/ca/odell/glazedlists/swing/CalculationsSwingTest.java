@@ -23,7 +23,7 @@ public class CalculationsSwingTest {
     @Test
     public void testCalculationLabel() {
         final EventList<Float> source = new BasicEventList<>();
-        source.add(new Float(1));
+        source.add(Float.valueOf(1));
 
         final Calculation<Float> mean = Calculations.meanFloats(source);
 
@@ -40,7 +40,7 @@ public class CalculationsSwingTest {
         assertEquals("1.00", formattedLabel.getText());
 
         // alter the value
-        source.add(new Float(12));
+        source.add(Float.valueOf(12));
         assertEquals("6.5", label.getText());
         assertEquals("6.50", formattedLabel.getText());
 

@@ -5,7 +5,7 @@ package ca.odell.glazedlists.impl;
 
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -70,7 +70,7 @@ public class HttpClient {
 
         for(int i = 0; i < MAX_REDIRECTS; i++) {
             // prepare the connection
-            HttpURLConnection urlConnection = (HttpURLConnection)new URL(url).openConnection();
+            HttpURLConnection urlConnection = (HttpURLConnection)URI.create(url).toURL().openConnection();
             urlConnection.setInstanceFollowRedirects(false);
             writeCookies(cookies, urlConnection);
             urlConnection.connect();

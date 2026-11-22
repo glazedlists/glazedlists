@@ -297,7 +297,7 @@ public final class IndexedTree<V> {
                 int operation = random.nextInt(3);
 
                 if(operation <= 1 || tree.size() == 0) {
-                    Integer value = new Integer((int)(random.nextDouble() * Integer.MAX_VALUE));
+                    Integer value = Integer.valueOf((int)(random.nextDouble() * Integer.MAX_VALUE));
                     tree.addByNode(value);
                 } else {
                     int index = random.nextInt(tree.size());

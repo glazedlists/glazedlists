@@ -144,7 +144,7 @@ class StatusMatcherEditor extends AbstractMatcherEditor<Issue> implements ListEv
 
             final JCheckBox checkBox = statusCheckBoxes.get(status);
             // update the text of the checkbox to reflect the new bug count for that status
-            checkBox.setText(checkboxFormat.format(new Object[] { checkBox.getName(), new Integer(count)}));
+            checkBox.setText(checkboxFormat.format(new Object[] { checkBox.getName(), Integer.valueOf(count)}));
         }
     }
 

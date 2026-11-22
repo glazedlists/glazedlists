@@ -207,11 +207,25 @@ public class HibernateClassRule implements TestRule {
             throw new IllegalStateException("Found ServiceRegistry at test start");
         }
 
-        setDialect(Dialect.getDialect());
+        setDialect(createDialect());
         setCfg(createConfiguration(files));
 
         serviceRegistry = createServiceRegistry(getCfg());
         setSessions(getCfg().buildSessionFactory(serviceRegistry));
+    }
+
+    /**
+     * Creates the dialect named by the property <code>hibernate.dialect</code>
+     * (see hibernate.properties), as the deprecated <code>Dialect.getDialect()</code> did.
+     *
+     * @return the configured dialect
+     */
+    private static Dialect createDialect() throws Exception {
+        final String dialectClassName = Environment.getProperties().getProperty(AvailableSettings.DIALECT);
+        if (dialectClassName == null) {
+            throw new IllegalStateException("The dialect was not set. Set the property " + AvailableSettings.DIALECT + ".");
+        }
+        return (Dialect) Class.forName(dialectClassName).getDeclaredConstructor().newInstance();
     }
 
     /**
@@ -246,7 +260,6 @@ public class HibernateClassRule implements TestRule {
     private static StandardServiceRegistry createServiceRegistry(Configuration configuration) {
         Properties properties = new Properties();
         properties.putAll(configuration.getProperties());
-        Environment.verifyProperties(properties);
         ConfigurationHelper.resolvePlaceHolders(properties);
 
         StandardServiceRegistryBuilder cfgRegistryBuilder = configuration.getStandardServiceRegistryBuilder();

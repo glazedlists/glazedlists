@@ -36,13 +36,13 @@ public class ListToByteCoderTest {
 
         // make sure all values are distinct
         Set<Byte> distinctValues = new HashSet<>();
-        assertTrue(distinctValues.add(new Byte(a)));
-        assertTrue(distinctValues.add(new Byte(b)));
-        assertTrue(distinctValues.add(new Byte(c)));
-        assertTrue(distinctValues.add(new Byte(d)));
-        assertTrue(distinctValues.add(new Byte(e)));
-        assertTrue(distinctValues.add(new Byte(f)));
-        assertTrue(distinctValues.add(new Byte(g)));
+        assertTrue(distinctValues.add(Byte.valueOf(a)));
+        assertTrue(distinctValues.add(Byte.valueOf(b)));
+        assertTrue(distinctValues.add(Byte.valueOf(c)));
+        assertTrue(distinctValues.add(Byte.valueOf(d)));
+        assertTrue(distinctValues.add(Byte.valueOf(e)));
+        assertTrue(distinctValues.add(Byte.valueOf(f)));
+        assertTrue(distinctValues.add(Byte.valueOf(g)));
         assertEquals(7, distinctValues.size());
 
         // byte to color
@@ -62,11 +62,11 @@ public class ListToByteCoderTest {
         byte fg = coder.colorsToByte(GlazedListsTests.stringToList("FG"));
 
         // make sure all values are still distinct
-        assertTrue(distinctValues.add(new Byte(abd)));
-        assertTrue(distinctValues.add(new Byte(abe)));
-        assertTrue(distinctValues.add(new Byte(abcde)));
-        assertTrue(distinctValues.add(new Byte(ae)));
-        assertTrue(distinctValues.add(new Byte(fg)));
+        assertTrue(distinctValues.add(Byte.valueOf(abd)));
+        assertTrue(distinctValues.add(Byte.valueOf(abe)));
+        assertTrue(distinctValues.add(Byte.valueOf(abcde)));
+        assertTrue(distinctValues.add(Byte.valueOf(ae)));
+        assertTrue(distinctValues.add(Byte.valueOf(fg)));
 
         // bytes to colors
         assertEquals(GlazedListsTests.stringToList("ABD"), coder.byteToColors(abd));

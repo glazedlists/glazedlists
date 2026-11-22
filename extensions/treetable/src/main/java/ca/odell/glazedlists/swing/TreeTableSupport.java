@@ -10,6 +10,7 @@ import ca.odell.glazedlists.event.ListEventListener;
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -141,6 +142,16 @@ public final class TreeTableSupport {
      * an {@link IllegalStateException} is thrown to indicate the error.
      */
     private static final ListEventListener SWING_THREAD_CHECKER = new EventDispathThreadChecker();
+
+    /**
+     * The extended modifiers that the deprecated KeyEvent.getModifiers()
+     * reports for a key event: the modifier keys and the left mouse button
+     * (getModifiersEx() also reports the other mouse buttons). A key press
+     * with any of them does not toggle the expansion.
+     */
+    private static final int KEY_EVENT_MODIFIERS_DOWN_MASK = InputEvent.SHIFT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK
+            | InputEvent.META_DOWN_MASK | InputEvent.ALT_DOWN_MASK | InputEvent.ALT_GRAPH_DOWN_MASK
+            | InputEvent.BUTTON1_DOWN_MASK;
 
     /** The table to decorate with tree table behaviour. */
     private final JTable table;
@@ -690,7 +701,7 @@ public final class TreeTableSupport {
             }
 
             // if the key pressed is not the space bar, break early
-            if (e.getKeyCode() != KeyEvent.VK_SPACE || e.getModifiers() != 0) {
+            if (e.getKeyCode() != KeyEvent.VK_SPACE || (e.getModifiersEx() & KEY_EVENT_MODIFIERS_DOWN_MASK) != 0) {
                 return;
             }
 
@@ -761,7 +772,7 @@ public final class TreeTableSupport {
             final int c = e.getKeyCode();
             final boolean isLeftArrowKey = c == KeyEvent.VK_LEFT;
             final boolean isRightArrowKey = c == KeyEvent.VK_RIGHT;
-            if (!(isLeftArrowKey || isRightArrowKey) || e.getModifiers() != 0) {
+            if (!(isLeftArrowKey || isRightArrowKey) || (e.getModifiersEx() & KEY_EVENT_MODIFIERS_DOWN_MASK) != 0) {
                 return;
             }
 

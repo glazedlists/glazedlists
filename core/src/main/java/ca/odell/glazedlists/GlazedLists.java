@@ -687,6 +687,8 @@ public final class GlazedLists {
      *
      * @return an ObservableElementList.Connector for objects that extend {@link Observable}
      */
+    // java.util.Observable is deprecated since Java 9 (not for removal); this connector exists for it
+    @SuppressWarnings("deprecation")
     public static <E extends Observable> ObservableElementList.Connector<E> observableConnector() {
         return new ObservableConnector<>();
     }

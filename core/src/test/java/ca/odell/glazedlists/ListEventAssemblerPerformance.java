@@ -25,7 +25,7 @@ public class ListEventAssemblerPerformance {
                 list.clear();
                 reportMemory(i/10000);
             } else {
-                list.add(new Long(i));
+                list.add(Long.valueOf(i));
                 if(i % 1000 == 0) {
                     sorted.setComparator(GlazedLists.reverseComparator());
                 } else if(i % 1000 == 1) {

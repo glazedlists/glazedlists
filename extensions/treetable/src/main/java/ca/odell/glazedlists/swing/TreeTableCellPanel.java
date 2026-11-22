@@ -175,7 +175,7 @@ public class TreeTableCellPanel extends JPanel {
      * Return a spacer component and update the spacer component cache as needed.
      */
     private Component getSpacer(int width) {
-        final Integer key = new Integer(width);
+        final Integer key = Integer.valueOf(width);
 
         Component spacer = spacerComponentsCache.get(key);
         if (spacer == null) {
@@ -226,6 +226,8 @@ public class TreeTableCellPanel extends JPanel {
      * cell edit is complete, focus is returned to the JTable in that case as
      * well.
      */
+    // overrides and forwards the deprecated JComponent method, which Swing still calls for cell editors
+    @SuppressWarnings("deprecation")
     @Override
     public void setNextFocusableComponent(Component aComponent) {
         super.setNextFocusableComponent(aComponent);

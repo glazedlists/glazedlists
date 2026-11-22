@@ -20,7 +20,7 @@ final class Subtraction {
         protected Float recompute(Number[] inputs) {
             final float a = inputs[0].floatValue();
             final float b = inputs[1].floatValue();
-            return new Float(a - b);
+            return Float.valueOf(a - b);
         }
     }
 
@@ -33,7 +33,7 @@ final class Subtraction {
         protected Double recompute(Number[] inputs) {
             final double a = inputs[0].doubleValue();
             final double b = inputs[1].doubleValue();
-            return new Double(a - b);
+            return Double.valueOf(a - b);
         }
     }
 
@@ -46,7 +46,7 @@ final class Subtraction {
         protected Integer recompute(Number[] inputs) {
             final int a = inputs[0].intValue();
             final int b = inputs[1].intValue();
-            return new Integer(a - b);
+            return Integer.valueOf(a - b);
         }
     }
 
@@ -59,7 +59,7 @@ final class Subtraction {
         protected Long recompute(Number[] inputs) {
             final long a = inputs[0].longValue();
             final long b = inputs[1].longValue();
-            return new Long(a - b);
+            return Long.valueOf(a - b);
         }
     }
 }

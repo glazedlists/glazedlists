@@ -27,7 +27,7 @@ final class SizeInRange extends AbstractCalculation<Boolean> implements ListEven
      * @param max the maximum end of the range, inclusive
      */
     public SizeInRange(EventList source, int min, int max) {
-        super(new Boolean(source.size() >= min && source.size() <= max));
+        super(Boolean.valueOf(source.size() >= min && source.size() <= max));
 
         if (min > max)
             throw new IllegalArgumentException("min must be less than max");
@@ -50,7 +50,7 @@ final class SizeInRange extends AbstractCalculation<Boolean> implements ListEven
     public void listChanged(ListEvent listChanges) {
         final Boolean oldValue = getValue();
         final int size = listChanges.getSourceList().size();
-        setValue(new Boolean(size >= min && size <= max));
+        setValue(Boolean.valueOf(size >= min && size <= max));
         final Boolean newValue = getValue();
         fireValueChange(oldValue, newValue);
     }

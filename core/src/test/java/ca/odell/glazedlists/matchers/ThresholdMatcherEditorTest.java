@@ -26,25 +26,25 @@ import static org.junit.Assert.*;
  */
 public class ThresholdMatcherEditorTest {
 
-    private static final Integer MINUS_ONE = new Integer(-1);
-    private static final Integer ZERO = new Integer(0);
-    private static final Integer ONE = new Integer(1);
-    private static final Integer TWO = new Integer(2);
-    private static final Integer THREE = new Integer(3);
-    private static final Integer FOUR = new Integer(4);
-    private static final Integer FIVE = new Integer(5);
-    private static final Integer SIX = new Integer(6);
-    private static final Integer SEVEN = new Integer(7);
-    private static final Integer EIGHT = new Integer(8);
-    private static final Integer NINE = new Integer(9);
-    private static final Integer TEN = new Integer(10);
-    private static final Integer ELEVEN = new Integer(11);
-    private static final Integer TWELVE = new Integer(12);
+    private static final Integer MINUS_ONE = Integer.valueOf(-1);
+    private static final Integer ZERO = Integer.valueOf(0);
+    private static final Integer ONE = Integer.valueOf(1);
+    private static final Integer TWO = Integer.valueOf(2);
+    private static final Integer THREE = Integer.valueOf(3);
+    private static final Integer FOUR = Integer.valueOf(4);
+    private static final Integer FIVE = Integer.valueOf(5);
+    private static final Integer SIX = Integer.valueOf(6);
+    private static final Integer SEVEN = Integer.valueOf(7);
+    private static final Integer EIGHT = Integer.valueOf(8);
+    private static final Integer NINE = Integer.valueOf(9);
+    private static final Integer TEN = Integer.valueOf(10);
+    private static final Integer ELEVEN = Integer.valueOf(11);
+    private static final Integer TWELVE = Integer.valueOf(12);
 
     private static final List<Integer> INITIAL_LIST = new ArrayList<>(10);
     static {
         for (int i = 0; i < 11; i++) {
-            INITIAL_LIST.add(new Integer(i));
+            INITIAL_LIST.add(Integer.valueOf(i));
         }
     }
 
@@ -172,14 +172,14 @@ public class ThresholdMatcherEditorTest {
 
 		assertEquals(filterList.toString(), 5, filterList.size()); // 6 7 8 9 10
 		for (int i = 0; i < 5; i++) {
-			assertEquals(new Integer(6 + i), filterList.get(i));
+			assertEquals(Integer.valueOf(6 + i), filterList.get(i));
 		}
 
 		thresholdMatcherEditor.setThreshold(SEVEN);
 
 		assertEquals(filterList.toString(), 3, filterList.size()); // 8 9 10
 		for (int i = 0; i < 3; i++) {
-			assertEquals(new Integer(8 + i), filterList.get(i));
+			assertEquals(Integer.valueOf(8 + i), filterList.get(i));
 		}
 	}
 
@@ -191,7 +191,7 @@ public class ThresholdMatcherEditorTest {
 		thresholdMatcherEditor.setThreshold(FIVE);
 		assertEquals(filterList.toString(), 5, filterList.size()); // 6 7 8 9 10
 		for (int i = 0; i < 5; i++) {
-			assertEquals(new Integer(6 + i), filterList.get(i));
+			assertEquals(Integer.valueOf(6 + i), filterList.get(i));
 		}
 
 		// At min value
@@ -225,7 +225,7 @@ public class ThresholdMatcherEditorTest {
 		thresholdMatcherEditor.setThreshold(FIVE);
 		assertEquals(6, filterList.size()); // 5 6 7 8 9 10
 		for (int i = 0; i < 6; i++) {
-			assertEquals(new Integer(5 + i), filterList.get(i));
+			assertEquals(Integer.valueOf(5 + i), filterList.get(i));
 		}
 
 		// At min value
@@ -260,7 +260,7 @@ public class ThresholdMatcherEditorTest {
 		thresholdMatcherEditor.setThreshold(FIVE);
 		assertEquals(filterList.toString(), 5, filterList.size()); // 0 1 2 3 4
 		for (int i = 0; i < 5; i++) {
-			assertEquals(new Integer(i), filterList.get(i));
+			assertEquals(Integer.valueOf(i), filterList.get(i));
 		}
 
 		// At min value
@@ -294,7 +294,7 @@ public class ThresholdMatcherEditorTest {
 		thresholdMatcherEditor.setThreshold(FIVE);
 		assertEquals(6, filterList.size()); // 0 1 2 3 4 5
 		for (int i = 0; i < 6; i++) {
-			assertEquals(new Integer(i), filterList.get(i));
+			assertEquals(Integer.valueOf(i), filterList.get(i));
 		}
 
 		// At min value
@@ -455,7 +455,7 @@ public class ThresholdMatcherEditorTest {
                 return null;
             }
 
-            return new Integer(String.valueOf(sourceValue.intValue()).substring(0, 1));
+            return Integer.valueOf(String.valueOf(sourceValue.intValue()).substring(0, 1));
         }
     }
 

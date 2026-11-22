@@ -13,7 +13,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.NoRouteToHostException;
 import java.net.UnknownHostException;
-import java.security.AccessControlException;
 
 /**
  * This loads issues by project as they are requested. When a new project is
@@ -99,7 +98,7 @@ public class IssueLoader implements Runnable {
             } catch (NoRouteToHostException e) {
                 Exceptions.getInstance().handle(e);
 
-            } catch (AccessControlException e) {
+            } catch (SecurityException e) {
                 Exceptions.getInstance().handle(e);
 
             } catch (IOException e) {

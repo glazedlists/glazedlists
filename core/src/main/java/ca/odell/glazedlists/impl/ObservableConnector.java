@@ -18,6 +18,8 @@ import java.util.Observer;
  *
  * @author James Lemieux
  */
+// java.util.Observable/Observer are deprecated since Java 9 (not for removal); this connector exists for them
+@SuppressWarnings("deprecation")
 public class ObservableConnector<E extends Observable> implements ObservableElementList.Connector<E>, Observer, EventListener {
 
     /** The list which contains the elements being observed via this {@link ObservableElementList.Connector}. */

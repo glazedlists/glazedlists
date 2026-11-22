@@ -98,7 +98,7 @@ public class SortingState {
         final List<SortingState.SortingColumn> recentlyClickedColumns = getRecentlyClickedColumns();
         for(int c = 0; c < recentlyClickedColumns.size(); c++) {
             SortingState.SortingColumn clickedColumn = recentlyClickedColumns.get(c);
-            sortingColumns.add(new Integer(clickedColumn.getColumn()));
+            sortingColumns.add(Integer.valueOf(clickedColumn.getColumn()));
         }
         return sortingColumns;
     }

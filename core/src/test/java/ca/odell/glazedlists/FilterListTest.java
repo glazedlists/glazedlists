@@ -194,11 +194,11 @@ public class FilterListTest {
 	@Test
 	public void testMatchAllOrNothing() {
 		EventList<Integer> baseList = new BasicEventList<>();
-		baseList.add(new Integer(1));
-		baseList.add(new Integer(2));
-		baseList.add(new Integer(3));
-		baseList.add(new Integer(4));
-		baseList.add(new Integer(5));
+		baseList.add(Integer.valueOf(1));
+		baseList.add(Integer.valueOf(2));
+		baseList.add(Integer.valueOf(3));
+		baseList.add(Integer.valueOf(4));
+		baseList.add(Integer.valueOf(5));
 
 		AllOrNothingMatcherEditor matcher = new AllOrNothingMatcherEditor();
 		FilterList<Integer> filterList = new FilterList<>(baseList,matcher);

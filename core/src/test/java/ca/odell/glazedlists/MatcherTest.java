@@ -50,56 +50,56 @@ public class MatcherTest {
     @Test
     public void testGenerics() {
         NumberMatcherEditor numMatcherEditor = new NumberMatcherEditor();
-        assertTrue(numMatcherEditor.getMatcher().matches(new Integer(5)));
-        numMatcherEditor.setNumber(new Integer(10));
-        assertFalse(numMatcherEditor.getMatcher().matches(new Integer(5)));
-        assertTrue(numMatcherEditor.getMatcher().matches(new Integer(10)));
+        assertTrue(numMatcherEditor.getMatcher().matches(Integer.valueOf(5)));
+        numMatcherEditor.setNumber(Integer.valueOf(10));
+        assertFalse(numMatcherEditor.getMatcher().matches(Integer.valueOf(5)));
+        assertTrue(numMatcherEditor.getMatcher().matches(Integer.valueOf(10)));
 
-        numMatcherEditor.setNumber(new Float(3.14f));
-        assertFalse(numMatcherEditor.getMatcher().matches(new Integer(10)));
-        assertTrue(numMatcherEditor.getMatcher().matches(new Float(3.14f)));
+        numMatcherEditor.setNumber(Float.valueOf(3.14f));
+        assertFalse(numMatcherEditor.getMatcher().matches(Integer.valueOf(10)));
+        assertTrue(numMatcherEditor.getMatcher().matches(Float.valueOf(3.14f)));
 
         MatcherEditor<Number> typedMatcherEditor = numMatcherEditor;
-        assertFalse(typedMatcherEditor.getMatcher().matches(new Integer(10)));
-        assertTrue(typedMatcherEditor.getMatcher().matches(new Float(3.14f)));
+        assertFalse(typedMatcherEditor.getMatcher().matches(Integer.valueOf(10)));
+        assertTrue(typedMatcherEditor.getMatcher().matches(Float.valueOf(3.14f)));
 
         typedMatcherEditor = new TextMatcherEditor<>(GlazedLists.toStringTextFilterator());
-        assertTrue(typedMatcherEditor.getMatcher().matches(new Integer(10)));
-        assertTrue(typedMatcherEditor.getMatcher().matches(new Float(3.14f)));
+        assertTrue(typedMatcherEditor.getMatcher().matches(Integer.valueOf(10)));
+        assertTrue(typedMatcherEditor.getMatcher().matches(Float.valueOf(3.14f)));
 
         ((TextMatcherEditor)typedMatcherEditor).setFilterText(new String[] { "3" });
-        assertFalse(typedMatcherEditor.getMatcher().matches(new Integer(10)));
-        assertTrue(typedMatcherEditor.getMatcher().matches(new Float(3.14f)));
+        assertFalse(typedMatcherEditor.getMatcher().matches(Integer.valueOf(10)));
+        assertTrue(typedMatcherEditor.getMatcher().matches(Float.valueOf(3.14f)));
     }
 
     @Test
     public void testFilter() {
         List<Integer> elements = new ArrayList<>();
-        elements.add(new Integer(45));
-        elements.add(new Integer(22));
-        elements.add(new Integer(15));
-        elements.add(new Integer(22));
-        elements.add(new Integer(13));
-        elements.add(new Integer(53));
-        elements.add(new Integer(22));
-        elements.add(new Integer(23));
-        elements.add(new Integer(22));
+        elements.add(Integer.valueOf(45));
+        elements.add(Integer.valueOf(22));
+        elements.add(Integer.valueOf(15));
+        elements.add(Integer.valueOf(22));
+        elements.add(Integer.valueOf(13));
+        elements.add(Integer.valueOf(53));
+        elements.add(Integer.valueOf(22));
+        elements.add(Integer.valueOf(23));
+        elements.add(Integer.valueOf(22));
 
         boolean result;
 
-        result = Matchers.filter(elements, new NumberMatcher(new Integer(22)));
+        result = Matchers.filter(elements, new NumberMatcher(Integer.valueOf(22)));
         assertEquals(true, result);
         assertEquals(4, elements.size());
 
-        result = Matchers.filter(elements, new NumberMatcher(new Integer(22)));
+        result = Matchers.filter(elements, new NumberMatcher(Integer.valueOf(22)));
         assertEquals(false, result);
         assertEquals(4, elements.size());
 
-        result = Matchers.filter(elements, new NumberMatcher(new Integer(33)));
+        result = Matchers.filter(elements, new NumberMatcher(Integer.valueOf(33)));
         assertEquals(true, result);
         assertEquals(0, elements.size());
 
-        result = Matchers.filter(elements, new NumberMatcher(new Integer(35)));
+        result = Matchers.filter(elements, new NumberMatcher(Integer.valueOf(35)));
         assertEquals(false, result);
         assertEquals(0, elements.size());
     }
@@ -107,47 +107,47 @@ public class MatcherTest {
     @Test
     public void testSelect() {
         List<Integer> elements = new ArrayList<>();
-        elements.add(new Integer(45));
-        elements.add(new Integer(22));
-        elements.add(new Integer(15));
-        elements.add(new Integer(22));
-        elements.add(new Integer(13));
-        elements.add(new Integer(53));
-        elements.add(new Integer(22));
-        elements.add(new Integer(23));
-        elements.add(new Integer(22));
+        elements.add(Integer.valueOf(45));
+        elements.add(Integer.valueOf(22));
+        elements.add(Integer.valueOf(15));
+        elements.add(Integer.valueOf(22));
+        elements.add(Integer.valueOf(13));
+        elements.add(Integer.valueOf(53));
+        elements.add(Integer.valueOf(22));
+        elements.add(Integer.valueOf(23));
+        elements.add(Integer.valueOf(22));
 
-        Collection<? super Integer> results = Matchers.select(elements, new NumberMatcher(new Integer(22)));
+        Collection<? super Integer> results = Matchers.select(elements, new NumberMatcher(Integer.valueOf(22)));
         assertEquals(4, results.size());
 
-        results = Matchers.select(elements, new NumberMatcher(new Integer(22)), results);
+        results = Matchers.select(elements, new NumberMatcher(Integer.valueOf(22)), results);
         assertEquals(8, results.size());
 
-        results = Matchers.select(elements, new NumberMatcher(new Integer(45)), results);
+        results = Matchers.select(elements, new NumberMatcher(Integer.valueOf(45)), results);
         assertEquals(9, results.size());
 
-        results = Matchers.select(elements, new NumberMatcher(new Integer(99)), results);
+        results = Matchers.select(elements, new NumberMatcher(Integer.valueOf(99)), results);
         assertEquals(9, results.size());
     }
 
     @Test
     public void testIndexOf() {
         List<Integer> elements = new ArrayList<>();
-        elements.add(new Integer(45));
-        elements.add(new Integer(22));
-        elements.add(new Integer(15));
-        elements.add(new Integer(22));
-        elements.add(new Integer(13));
-        elements.add(new Integer(53));
-        elements.add(new Integer(22));
-        elements.add(new Integer(23));
-        elements.add(new Integer(22));
+        elements.add(Integer.valueOf(45));
+        elements.add(Integer.valueOf(22));
+        elements.add(Integer.valueOf(15));
+        elements.add(Integer.valueOf(22));
+        elements.add(Integer.valueOf(13));
+        elements.add(Integer.valueOf(53));
+        elements.add(Integer.valueOf(22));
+        elements.add(Integer.valueOf(23));
+        elements.add(Integer.valueOf(22));
 
-        assertEquals(0, Matchers.indexOf(elements, new NumberMatcher(new Integer(45))));
-        assertEquals(1, Matchers.indexOf(elements, new NumberMatcher(new Integer(22))));
-        assertEquals(2, Matchers.indexOf(elements, new NumberMatcher(new Integer(15))));
-        assertEquals(4, Matchers.indexOf(elements, new NumberMatcher(new Integer(13))));
-        assertEquals(-1, Matchers.indexOf(elements, new NumberMatcher(new Integer(99))));
+        assertEquals(0, Matchers.indexOf(elements, new NumberMatcher(Integer.valueOf(45))));
+        assertEquals(1, Matchers.indexOf(elements, new NumberMatcher(Integer.valueOf(22))));
+        assertEquals(2, Matchers.indexOf(elements, new NumberMatcher(Integer.valueOf(15))));
+        assertEquals(4, Matchers.indexOf(elements, new NumberMatcher(Integer.valueOf(13))));
+        assertEquals(-1, Matchers.indexOf(elements, new NumberMatcher(Integer.valueOf(99))));
     }
 
     @Test
@@ -256,21 +256,21 @@ public class MatcherTest {
     @Test
     public void testTypeMatcher() {
         final List<Number> numbers = new ArrayList<>();
-        numbers.add(new Float(0));
-        numbers.add(new Double(1));
-        numbers.add(new Short((short) 2));
-        numbers.add(new Integer(3));
-        numbers.add(new Long(4));
+        numbers.add(Float.valueOf(0));
+        numbers.add(Double.valueOf(1));
+        numbers.add(Short.valueOf((short) 2));
+        numbers.add(Integer.valueOf(3));
+        numbers.add(Long.valueOf(4));
 
         Collection<? super Number> selected;
 
         final Matcher<Number> intAndLongMatcher = Matchers.types(Long.class, Integer.class);
         selected = Matchers.select(numbers, intAndLongMatcher);
-        assertEquals(Arrays.asList(new Integer(3), new Long(4)), selected);
+        assertEquals(Arrays.asList(Integer.valueOf(3), Long.valueOf(4)), selected);
 
         final Matcher<Number> numberMatcher = Matchers.types(Number.class);
         selected = Matchers.select(numbers, numberMatcher);
-        assertEquals(Arrays.asList(new Float(0), new Double(1), new Short((short) 2), new Integer(3), new Long(4)), selected);
+        assertEquals(Arrays.asList(Float.valueOf(0), Double.valueOf(1), Short.valueOf((short) 2), Integer.valueOf(3), Long.valueOf(4)), selected);
 
         final Matcher<Number> stringMatcher = Matchers.types(String.class);
         selected = Matchers.select(numbers, stringMatcher);

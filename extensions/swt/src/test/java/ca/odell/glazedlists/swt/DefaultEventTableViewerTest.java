@@ -544,13 +544,13 @@ public class DefaultEventTableViewerTest {
                 return null;
             }
             if (column == 0) {
-                return new Integer(baseObject.getRed());
+                return Integer.valueOf(baseObject.getRed());
             }
             if (column == 1) {
-                return new Integer(baseObject.getGreen());
+                return Integer.valueOf(baseObject.getGreen());
             }
             if (column == 2) {
-                return new Integer(baseObject.getBlue());
+                return Integer.valueOf(baseObject.getBlue());
             }
             return null;
         }

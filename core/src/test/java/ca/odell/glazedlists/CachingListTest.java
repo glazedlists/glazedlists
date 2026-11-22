@@ -51,13 +51,13 @@ public class CachingListTest {
     public void testNonRepetitiveLookups() {
         // Load the source with data
         for(int i = 0;i < 25;i++) {
-            source.add(new Integer(i));
+            source.add(Integer.valueOf(i));
         }
 
         // Lookup each value in the source
         for(int i = 0;i < 25;i++) {
             Object result = cache.get(i);
-            assertEquals(new Integer(i), result);
+            assertEquals(Integer.valueOf(i), result);
         }
 
         // Verify that there have been no cache hits
@@ -75,11 +75,11 @@ public class CachingListTest {
     public void testRepetitiveLookup() {
         // Load the source with some data
         for(int i = 0;i < 3;i++) {
-            source.add(new Integer(i));
+            source.add(Integer.valueOf(i));
         }
 
         // Lookup the middle value in the source
-        Integer ONE = new Integer(1);
+        Integer ONE = Integer.valueOf(1);
         for(int i = 0;i < 25;i++) {
             Object result = cache.get(1);
             assertEquals(ONE, result);
@@ -102,13 +102,13 @@ public class CachingListTest {
     public void testCacheOverflowBehaviour() {
         // Load the source with data
         for(int i = 0;i < 25;i++) {
-            source.add(new Integer(i));
+            source.add(Integer.valueOf(i));
         }
 
         // Lookup enough values to fill the cache
         for(int i = 0;i < 15;i++) {
             Object result = cache.get(i);
-            assertEquals(new Integer(i), result);
+            assertEquals(Integer.valueOf(i), result);
         }
 
         int cacheHitBaseline = cache.getCacheHits();
@@ -116,14 +116,14 @@ public class CachingListTest {
 
         // Lookup one uncached object
         Object result = cache.get(20);
-        assertEquals(new Integer(20), result);
+        assertEquals(Integer.valueOf(20), result);
 
         assertEquals(cacheHitBaseline, cache.getCacheHits());
         assertEquals(cacheMissBaseline + 1, cache.getCacheMisses());
 
         // Look for the first request value which should not be in the cache
         result = cache.get(0);
-        assertEquals(new Integer(0), result);
+        assertEquals(Integer.valueOf(0), result);
 
         assertEquals(cacheHitBaseline, cache.getCacheHits());
         assertEquals(cacheMissBaseline + 2, cache.getCacheMisses());
@@ -139,13 +139,13 @@ public class CachingListTest {
     public void testCacheEntryAccessReorderingForOverflow() {
         // Load the source with data
         for(int i = 0;i < 25;i++) {
-            source.add(new Integer(i));
+            source.add(Integer.valueOf(i));
         }
 
         // Lookup enough values to fill the cache
         for(int i = 0;i < 15;i++) {
             Object result = cache.get(i);
-            assertEquals(new Integer(i), result);
+            assertEquals(Integer.valueOf(i), result);
         }
 
         // Randomly lookup cached data to randomize cache entry ordering
@@ -161,7 +161,7 @@ public class CachingListTest {
         // Lookup the cached values in reverse order to re-order entries in reverse
         for(int i = 14;i >= 0;i--) {
             Object result = cache.get(i);
-            assertEquals(new Integer(i), result);
+            assertEquals(Integer.valueOf(i), result);
         }
 
         assertEquals(cacheHitBaseline += 15, cache.getCacheHits());
@@ -169,7 +169,7 @@ public class CachingListTest {
 
         // Lookup one uncached object
         Object result = cache.get(20);
-        assertEquals(new Integer(20), result);
+        assertEquals(Integer.valueOf(20), result);
 
         assertEquals(cacheHitBaseline, cache.getCacheHits());
         assertEquals(cacheMissBaseline + 1, cache.getCacheMisses());
@@ -177,7 +177,7 @@ public class CachingListTest {
         // Look for the previously cached values in reverse order
         for(int i = 14;i >= 0;i--) {
             result = cache.get(i);
-            assertEquals(new Integer(i), result);
+            assertEquals(Integer.valueOf(i), result);
             assertEquals(cacheHitBaseline, cache.getCacheHits());
             assertEquals(cacheMissBaseline + 1 + (15 - i), cache.getCacheMisses());
         }
@@ -192,7 +192,7 @@ public class CachingListTest {
     public void testRemovingCachedValueWithCachedFollower() {
         // Load the source with some data
         for(int i = 0;i < 10;i++) {
-            source.add(new Integer(i));
+            source.add(Integer.valueOf(i));
         }
 
         // Load some of the source data into the cache
@@ -223,7 +223,7 @@ public class CachingListTest {
     public void testRemovingCachedValueAtCacheEdge() {
         // Load the source with some data
         for(int i = 0;i < 10;i++) {
-            source.add(new Integer(i));
+            source.add(Integer.valueOf(i));
         }
 
         // Load some of the source data into the cache
@@ -253,13 +253,13 @@ public class CachingListTest {
     public void testRemoveCorrectsCacheSize() {
         // Load the source with data
         for(int i = 0;i < 25;i++) {
-            source.add(new Integer(i));
+            source.add(Integer.valueOf(i));
         }
 
         // Lookup enough values to fill the cache
         for(int i = 0;i < 15;i++) {
             Object result = cache.get(i);
-            assertEquals(new Integer(i), result);
+            assertEquals(Integer.valueOf(i), result);
         }
 
         // Remove 10 values leaving the first value
@@ -304,7 +304,7 @@ public class CachingListTest {
 
         // Load the source with data
         for(int i = 0;i < 25;i++) {
-            source.add(new Integer(i));
+            source.add(Integer.valueOf(i));
         }
 
         // request beyond bounds with non-empty source and an empty cache
@@ -322,7 +322,7 @@ public class CachingListTest {
         // Lookup some values to paritally fill the cache
         for(int i = 9;i < 15;i++) {
              Object result = cache.get(i);
-             assertEquals(new Integer(i), result);
+             assertEquals(Integer.valueOf(i), result);
         }
 
         // request beyond bounds with non-empty source and a partially filled cache
@@ -340,7 +340,7 @@ public class CachingListTest {
         // Lookup enough values to fill the cache
         for(int i = 9;i < 15;i++) {
             Object result = cache.get(i);
-            assertEquals(new Integer(i), result);
+            assertEquals(Integer.valueOf(i), result);
         }
 
         // request beyond bounds with non-empty source and a full cache
@@ -512,7 +512,7 @@ class CacheTestHelper {
         // Set up the source list
         sourceList = new WaitEventList(requestWaitTime);
         for(int i = 0; i < sourceListSize; i++) {
-            sourceList.add(new Integer(i));
+            sourceList.add(Integer.valueOf(i));
         }
         long startTime = System.currentTimeMillis();
         testRetrievalFromCache();
@@ -578,7 +578,7 @@ class CacheTestHelper {
         long startTime = System.currentTimeMillis();
         for(int i = 0; i < cacheSize; i++) {
             int index = random.nextInt(cacheSize);
-            sourceList.add(index, new Integer(index));
+            sourceList.add(index, Integer.valueOf(index));
         }
         long endTime = System.currentTimeMillis();
         long timeTaken = endTime - startTime;

@@ -1003,7 +1003,7 @@ public class GroupingListMultiMapTest {
 
         @Override
         public int compareTo(final AFirstLetterComparable o) {
-            return new Character(contained.getName().charAt(0)).compareTo(new Character(o.contained.getName().charAt(0)));
+            return Character.compare(contained.getName().charAt(0), o.contained.getName().charAt(0));
         }
 
         @Override
@@ -1022,7 +1022,7 @@ public class GroupingListMultiMapTest {
 
         @Override
         public int hashCode() {
-            return new Character(contained.getName().charAt(0)).hashCode();
+            return Character.hashCode(contained.getName().charAt(0));
         }
     }
 

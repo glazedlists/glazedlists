@@ -39,7 +39,7 @@ public class IteratorTest {
         // create a list of values
         final EventList<Integer> originalList = new BasicEventList<>();
         for (int i = 0; i < 26; i++)
-            originalList.add(new Integer(i));
+            originalList.add(Integer.valueOf(i));
 
         // iterate through that list forwards and add the results to a new list
         final List<Integer> forwardsControlList = new ArrayList<>();
@@ -70,7 +70,7 @@ public class IteratorTest {
         final EventList<Integer> deleteFromList = new BasicEventList<>();
         final List<Integer> originalList = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
-            final Integer value = new Integer(i);
+            final Integer value = Integer.valueOf(i);
             deleteFromList.add(value);
             originalList.add(value);
         }
@@ -107,7 +107,7 @@ public class IteratorTest {
         final EventList<Integer> iterateBackwardList = new BasicEventList<>();
         final List<Integer> originalList = new ArrayList<>();
         for (int i = 0; i < 20; i++) {
-            final Integer value = new Integer(random.nextInt(100));
+            final Integer value = Integer.valueOf(random.nextInt(100));
             iterateForwardList.add(value);
             iterateBackwardList.add(value);
             originalList.add(value);
@@ -143,7 +143,7 @@ public class IteratorTest {
         // create a list of values
         final EventList<Integer> iterationList = new BasicEventList<>();
         for (int i = 0; i < 20; i++)
-            iterationList.add(new Integer(random.nextInt(100)));
+            iterationList.add(Integer.valueOf(random.nextInt(100)));
 
         final ListIterator<Integer> i = iterationList.listIterator();
 

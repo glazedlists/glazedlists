@@ -13,8 +13,8 @@ import java.text.Format;
 import javax.swing.JLabel;
 
 public final class CalculationsSwing {
-    private static final Float FLOAT_NAN = new Float(Float.NaN);
-    private static final Double DOUBLE_NAN = new Double(Double.NaN);
+    private static final Float FLOAT_NAN = Float.valueOf(Float.NaN);
+    private static final Double DOUBLE_NAN = Double.valueOf(Double.NaN);
 
     private CalculationsSwing() {}
 

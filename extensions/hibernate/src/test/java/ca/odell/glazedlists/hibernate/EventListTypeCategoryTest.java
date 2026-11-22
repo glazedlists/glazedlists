@@ -13,7 +13,6 @@ import ca.odell.glazedlists.util.concurrent.ReadWriteLock;
 
 import java.io.IOException;
 
-import org.hibernate.FetchMode;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -224,13 +223,10 @@ public class EventListTypeCategoryTest extends HibernateTestCase {
      */
     private User loadUser(Session s, boolean lazy) {
         if (lazy) {
-            return (User) s.createCriteria(User.class).uniqueResult();
+            return s.createQuery("from User", User.class).uniqueResult();
         } else {
-            return (User) s.createCriteria(User.class)
-            	.setFetchMode("emailAddresses", FetchMode.JOIN)
-                .setFetchMode("nickNames", FetchMode.JOIN)
-                .setFetchMode("roles", FetchMode.JOIN)
-            	.uniqueResult();
+            return s.createQuery("select u from User u left join fetch u.nickNames"
+                    + " left join fetch u.emailAddresses left join fetch u.roles", User.class).uniqueResult();
         }
     }
 

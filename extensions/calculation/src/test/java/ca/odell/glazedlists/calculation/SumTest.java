@@ -19,75 +19,75 @@ public final class SumTest {
     @Test
     public void testSumFloat() {
         final EventList<Float> source = new BasicEventList<>();
-        source.add(new Float(1));
+        source.add(Float.valueOf(1));
 
         final PropertyChangeCounter counter = new PropertyChangeCounter();
         final Calculation<Float> sum = Calculations.sumFloats(source);
         sum.addPropertyChangeListener(counter);
 
         // check the initial Sum state
-        assertEquals(new Float(1), sum.getValue());
+        assertEquals(Float.valueOf(1), sum.getValue());
         assertEquals(0, counter.getCountAndReset());
 
         // test add
-        source.add(new Float(2));
-        assertEquals(new Float(3), sum.getValue());
+        source.add(Float.valueOf(2));
+        assertEquals(Float.valueOf(3), sum.getValue());
         assertEquals(1, counter.getCountAndReset());
 
         // test update with sum change
-        source.set(1, new Float(3));
-        assertEquals(new Float(4), sum.getValue());
+        source.set(1, Float.valueOf(3));
+        assertEquals(Float.valueOf(4), sum.getValue());
         assertEquals(1, counter.getCountAndReset());
 
         // test update without sum change
         source.set(1, source.get(1));
-        assertEquals(new Float(4), sum.getValue());
+        assertEquals(Float.valueOf(4), sum.getValue());
         assertEquals(0, counter.getCountAndReset());
 
         // test remove
         source.remove(1);
-        assertEquals(new Float(1), sum.getValue());
+        assertEquals(Float.valueOf(1), sum.getValue());
         assertEquals(1, counter.getCountAndReset());
     }
 
     @Test
     public void testSumDouble() {
         final EventList<Double> source = new BasicEventList<>();
-        source.add(new Double(1));
+        source.add(Double.valueOf(1));
 
         final PropertyChangeCounter counter = new PropertyChangeCounter();
         final Calculation<Double> sum = Calculations.sumDoubles(source);
         sum.addPropertyChangeListener(counter);
 
         // check the initial Sum state
-        assertEquals(new Double(1), sum.getValue());
+        assertEquals(Double.valueOf(1), sum.getValue());
         assertEquals(0, counter.getCountAndReset());
 
         // test add
-        source.add(new Double(2));
-        assertEquals(new Double(3), sum.getValue());
+        source.add(Double.valueOf(2));
+        assertEquals(Double.valueOf(3), sum.getValue());
         assertEquals(1, counter.getCountAndReset());
 
         // test update with sum change
-        source.set(1, new Double(3));
-        assertEquals(new Double(4), sum.getValue());
+        source.set(1, Double.valueOf(3));
+        assertEquals(Double.valueOf(4), sum.getValue());
         assertEquals(1, counter.getCountAndReset());
 
         // test update without sum change
         source.set(1, source.get(1));
-        assertEquals(new Double(4), sum.getValue());
+        assertEquals(Double.valueOf(4), sum.getValue());
         assertEquals(0, counter.getCountAndReset());
 
         // test remove
         source.remove(1);
-        assertEquals(new Double(1), sum.getValue());
+        assertEquals(Double.valueOf(1), sum.getValue());
         assertEquals(1, counter.getCountAndReset());
     }
 
     @Test
     public void testSumInteger() {
         final EventList<Integer> source = new BasicEventList<>();
-        source.add(new Integer(1));
+        source.add(Integer.valueOf(1));
 
         final PropertyChangeCounter counter = new PropertyChangeCounter();
         final Calculation<Integer> sum = Calculations.sumIntegers(source);
@@ -98,12 +98,12 @@ public final class SumTest {
         assertEquals(0, counter.getCountAndReset());
 
         // test add
-        source.add(new Integer(2));
+        source.add(Integer.valueOf(2));
         assertEquals(3, sum.getValue().intValue());
         assertEquals(1, counter.getCountAndReset());
 
         // test update with sum change
-        source.set(1, new Integer(3));
+        source.set(1, Integer.valueOf(3));
         assertEquals(4, sum.getValue().intValue());
         assertEquals(1, counter.getCountAndReset());
 
@@ -121,7 +121,7 @@ public final class SumTest {
     @Test
     public void testSumLong() {
         final EventList<Long> source = new BasicEventList<>();
-        source.add(new Long(1));
+        source.add(Long.valueOf(1));
 
         final PropertyChangeCounter counter = new PropertyChangeCounter();
         final Calculation<Long> sum = Calculations.sumLongs(source);
@@ -132,12 +132,12 @@ public final class SumTest {
         assertEquals(0, counter.getCountAndReset());
 
         // test add
-        source.add(new Long(2));
+        source.add(Long.valueOf(2));
         assertEquals(3L, sum.getValue().longValue());
         assertEquals(1, counter.getCountAndReset());
 
         // test update with sum change
-        source.set(1, new Long(3));
+        source.set(1, Long.valueOf(3));
         assertEquals(4L, sum.getValue().longValue());
         assertEquals(1, counter.getCountAndReset());
 
@@ -156,34 +156,34 @@ public final class SumTest {
     public void testReorderEvents() {
         final EventList<Long> source = new BasicEventList<>();
         final SortedList<Long> sortedSource = new SortedList<>(source);
-        source.add(new Long(1));
-        source.add(new Long(2));
-        source.add(new Long(3));
+        source.add(Long.valueOf(1));
+        source.add(Long.valueOf(2));
+        source.add(Long.valueOf(3));
 
         final PropertyChangeCounter counter = new PropertyChangeCounter();
         final Calculation<Long> sum = Calculations.sumLongs(sortedSource);
         sum.addPropertyChangeListener(counter);
 
         // check the initial Sum state
-        assertEquals(Arrays.asList(new Long(1), new Long(2), new Long(3)), sortedSource);
+        assertEquals(Arrays.asList(Long.valueOf(1), Long.valueOf(2), Long.valueOf(3)), sortedSource);
         assertEquals(6L, sum.getValue().longValue());
         assertEquals(0, counter.getCountAndReset());
 
         // resort the source
         sortedSource.setComparator(GlazedLists.reverseComparator());
-        assertEquals(Arrays.asList(new Long(3), new Long(2), new Long(1)), sortedSource);
+        assertEquals(Arrays.asList(Long.valueOf(3), Long.valueOf(2), Long.valueOf(1)), sortedSource);
         assertEquals(6L, sum.getValue().longValue());
         assertEquals(0, counter.getCountAndReset());
 
         // deleted the first sorted element
         sortedSource.remove(0);
-        assertEquals(Arrays.asList(new Long(2), new Long(1)), sortedSource);
+        assertEquals(Arrays.asList(Long.valueOf(2), Long.valueOf(1)), sortedSource);
         assertEquals(3L, sum.getValue().longValue());
         assertEquals(1, counter.getCountAndReset());
 
         // add a new the first sorted element
-        sortedSource.add(new Long(10));
-        assertEquals(Arrays.asList(new Long(10), new Long(2), new Long(1)), sortedSource);
+        sortedSource.add(Long.valueOf(10));
+        assertEquals(Arrays.asList(Long.valueOf(10), Long.valueOf(2), Long.valueOf(1)), sortedSource);
         assertEquals(13L, sum.getValue().longValue());
         assertEquals(1, counter.getCountAndReset());
     }

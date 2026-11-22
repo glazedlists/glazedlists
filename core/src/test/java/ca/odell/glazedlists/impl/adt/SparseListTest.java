@@ -201,12 +201,12 @@ public class SparseListTest {
     @Test
     public void testAddUntilAVLRotate() {
         for(int i = 0; i < 5; i ++) {
-            sparseTree.add(0, new Integer(i));
+            sparseTree.add(0, Integer.valueOf(i));
         }
 
         assertEquals(5, sparseTree.size());
         for(int i = 0;i < 5;i++) {
-            assertEquals(new Integer(4 - i), sparseTree.get(i));
+            assertEquals(Integer.valueOf(4 - i), sparseTree.get(i));
         }
     }
 
@@ -221,7 +221,7 @@ public class SparseListTest {
 
             // Add a random value at index
             if(random.nextBoolean()) {
-                sparseTree.add(index, new Integer(random.nextInt()));
+                sparseTree.add(index, Integer.valueOf(random.nextInt()));
             } else {
                 sparseTree.add(index, null);
             }
@@ -242,9 +242,9 @@ public class SparseListTest {
     @Test
     public void testSetNullToNullInTree() {
         // Add three values
-        sparseTree.add(0, new Integer(0));
-        sparseTree.add(0, new Integer(1));
-        sparseTree.add(0, new Integer(2));
+        sparseTree.add(0, Integer.valueOf(0));
+        sparseTree.add(0, Integer.valueOf(1));
+        sparseTree.add(0, Integer.valueOf(2));
         assertEquals(3, sparseTree.size());
 
         // Add trailing nulls to the tree
@@ -268,9 +268,9 @@ public class SparseListTest {
     @Test
     public void testSetNullToValueInTree() {
         // Add three values
-        sparseTree.add(0, new Integer(0));
-        sparseTree.add(0, new Integer(1));
-        sparseTree.add(0, new Integer(2));
+        sparseTree.add(0, Integer.valueOf(0));
+        sparseTree.add(0, Integer.valueOf(1));
+        sparseTree.add(0, Integer.valueOf(2));
 
         // Add trailing nulls to the tree
         sparseTree.addNulls(3, 5);
@@ -282,8 +282,8 @@ public class SparseListTest {
 
         assertEquals(null, sparseTree.get(2));
         assertEquals(20, sparseTree.size());
-        sparseTree.set(2, new Integer(3));
-        assertEquals(new Integer(3), sparseTree.get(2));
+        sparseTree.set(2, Integer.valueOf(3));
+        assertEquals(Integer.valueOf(3), sparseTree.get(2));
         assertEquals(20, sparseTree.size());
     }
 
@@ -293,9 +293,9 @@ public class SparseListTest {
     @Test
     public void testSetValueToValueInTree() {
         // Add three values
-        sparseTree.add(0, new Integer(0));
-        sparseTree.add(0, new Integer(1));
-        sparseTree.add(0, new Integer(2));
+        sparseTree.add(0, Integer.valueOf(0));
+        sparseTree.add(0, Integer.valueOf(1));
+        sparseTree.add(0, Integer.valueOf(2));
 
         // Add trailing nulls to the tree
         sparseTree.addNulls(3, 5);
@@ -305,10 +305,10 @@ public class SparseListTest {
         sparseTree.addNulls(1, 4);
         sparseTree.addNulls(0, 4);
 
-        assertEquals(new Integer(1), sparseTree.get(9));
+        assertEquals(Integer.valueOf(1), sparseTree.get(9));
         assertEquals(20, sparseTree.size());
-        sparseTree.set(9, new Integer(9));
-        assertEquals(new Integer(9), sparseTree.get(9));
+        sparseTree.set(9, Integer.valueOf(9));
+        assertEquals(Integer.valueOf(9), sparseTree.get(9));
         assertEquals(20, sparseTree.size());
     }
 
@@ -318,9 +318,9 @@ public class SparseListTest {
     @Test
     public void testSetValueToNullInTree() {
         // Add three values
-        sparseTree.add(0, new Integer(0));
-        sparseTree.add(0, new Integer(1));
-        sparseTree.add(0, new Integer(2));
+        sparseTree.add(0, Integer.valueOf(0));
+        sparseTree.add(0, Integer.valueOf(1));
+        sparseTree.add(0, Integer.valueOf(2));
 
         // Add trailing nulls to the tree
         sparseTree.addNulls(3, 5);
@@ -330,7 +330,7 @@ public class SparseListTest {
         sparseTree.addNulls(1, 4);
         sparseTree.addNulls(0, 4);
 
-        assertEquals(new Integer(1), sparseTree.get(9));
+        assertEquals(Integer.valueOf(1), sparseTree.get(9));
         assertEquals(20, sparseTree.size());
         sparseTree.set(9, null);
         assertEquals(null, sparseTree.get(9));
@@ -343,9 +343,9 @@ public class SparseListTest {
     @Test
     public void testSetValueAtEndOfTreeToNull() {
         // Add three values
-        sparseTree.add(0, new Integer(0));
-        sparseTree.add(0, new Integer(1));
-        sparseTree.add(0, new Integer(2));
+        sparseTree.add(0, Integer.valueOf(0));
+        sparseTree.add(0, Integer.valueOf(1));
+        sparseTree.add(0, Integer.valueOf(2));
 
         // Add trailing nulls to the tree
         sparseTree.addNulls(3, 5);
@@ -355,7 +355,7 @@ public class SparseListTest {
         sparseTree.addNulls(1, 4);
         sparseTree.addNulls(0, 4);
 
-        assertEquals(new Integer(0), sparseTree.get(14));
+        assertEquals(Integer.valueOf(0), sparseTree.get(14));
         assertEquals(20, sparseTree.size());
         sparseTree.set(14, null);
         assertEquals(null, sparseTree.get(14));
@@ -368,9 +368,9 @@ public class SparseListTest {
     @Test
     public void testSetNullToNullInTrailingNulls() {
         // Add three values
-        sparseTree.add(0, new Integer(0));
-        sparseTree.add(0, new Integer(1));
-        sparseTree.add(0, new Integer(2));
+        sparseTree.add(0, Integer.valueOf(0));
+        sparseTree.add(0, Integer.valueOf(1));
+        sparseTree.add(0, Integer.valueOf(2));
 
         // Add trailing nulls to the tree
         sparseTree.addNulls(3, 5);
@@ -393,9 +393,9 @@ public class SparseListTest {
     @Test
     public void testSetNullToValueInTrailingNulls() {
         // Add three values
-        sparseTree.add(0, new Integer(0));
-        sparseTree.add(0, new Integer(1));
-        sparseTree.add(0, new Integer(2));
+        sparseTree.add(0, Integer.valueOf(0));
+        sparseTree.add(0, Integer.valueOf(1));
+        sparseTree.add(0, Integer.valueOf(2));
 
         // Add trailing nulls to the tree
         sparseTree.addNulls(3, 5);
@@ -407,8 +407,8 @@ public class SparseListTest {
 
         assertEquals(null, sparseTree.get(17));
         assertEquals(20, sparseTree.size());
-        sparseTree.set(17, new Integer(17));
-        assertEquals(new Integer(17), sparseTree.get(17));
+        sparseTree.set(17, Integer.valueOf(17));
+        assertEquals(Integer.valueOf(17), sparseTree.get(17));
         assertEquals(20, sparseTree.size());
     }
 
@@ -417,7 +417,7 @@ public class SparseListTest {
      */
     @Test
     public void testSimpleRemove() {
-        sparseTree.add(0, new Integer(1));
+        sparseTree.add(0, Integer.valueOf(1));
         sparseTree.remove(0);
 
         assertEquals(0, sparseTree.size());
@@ -428,20 +428,20 @@ public class SparseListTest {
      */
     @Test
     public void testRemoveTrailingNull() {
-        sparseTree.add(0, new Integer(4));
-        sparseTree.add(0, new Integer(3));
-        sparseTree.add(0, new Integer(2));
-        sparseTree.add(0, new Integer(1));
+        sparseTree.add(0, Integer.valueOf(4));
+        sparseTree.add(0, Integer.valueOf(3));
+        sparseTree.add(0, Integer.valueOf(2));
+        sparseTree.add(0, Integer.valueOf(1));
         sparseTree.add(4, null);
         assertEquals(5, sparseTree.size());
 
         sparseTree.remove(4);
 
         assertEquals(4, sparseTree.size());
-        assertEquals(new Integer(1), sparseTree.get(0));
-        assertEquals(new Integer(2), sparseTree.get(1));
-        assertEquals(new Integer(3), sparseTree.get(2));
-        assertEquals(new Integer(4), sparseTree.get(3));
+        assertEquals(Integer.valueOf(1), sparseTree.get(0));
+        assertEquals(Integer.valueOf(2), sparseTree.get(1));
+        assertEquals(Integer.valueOf(3), sparseTree.get(2));
+        assertEquals(Integer.valueOf(4), sparseTree.get(3));
     }
 
     /**
@@ -449,20 +449,20 @@ public class SparseListTest {
      */
     @Test
     public void testRemoveLeadingNull() {
-        sparseTree.add(0, new Integer(4));
-        sparseTree.add(0, new Integer(3));
-        sparseTree.add(0, new Integer(2));
-        sparseTree.add(0, new Integer(1));
+        sparseTree.add(0, Integer.valueOf(4));
+        sparseTree.add(0, Integer.valueOf(3));
+        sparseTree.add(0, Integer.valueOf(2));
+        sparseTree.add(0, Integer.valueOf(1));
         sparseTree.add(2, null);
         assertEquals(5, sparseTree.size());
 
         sparseTree.remove(2);
 
         assertEquals(4, sparseTree.size());
-        assertEquals(new Integer(1), sparseTree.get(0));
-        assertEquals(new Integer(2), sparseTree.get(1));
-        assertEquals(new Integer(3), sparseTree.get(2));
-        assertEquals(new Integer(4), sparseTree.get(3));
+        assertEquals(Integer.valueOf(1), sparseTree.get(0));
+        assertEquals(Integer.valueOf(2), sparseTree.get(1));
+        assertEquals(Integer.valueOf(3), sparseTree.get(2));
+        assertEquals(Integer.valueOf(4), sparseTree.get(3));
     }
 
     /**
@@ -471,10 +471,10 @@ public class SparseListTest {
      */
     @Test
     public void testRemovingValueWithLeadingNulls() {
-        sparseTree.add(0, new Integer(4));
-        sparseTree.add(0, new Integer(3));
-        sparseTree.add(0, new Integer(2));
-        sparseTree.add(0, new Integer(1));
+        sparseTree.add(0, Integer.valueOf(4));
+        sparseTree.add(0, Integer.valueOf(3));
+        sparseTree.add(0, Integer.valueOf(2));
+        sparseTree.add(0, Integer.valueOf(1));
         sparseTree.add(2, null);
         sparseTree.add(2, null);
         sparseTree.add(2, null);
@@ -484,13 +484,13 @@ public class SparseListTest {
         sparseTree.remove(6);
 
         assertEquals(7, sparseTree.size());
-        assertEquals(new Integer(1), sparseTree.get(0));
-        assertEquals(new Integer(2), sparseTree.get(1));
+        assertEquals(Integer.valueOf(1), sparseTree.get(0));
+        assertEquals(Integer.valueOf(2), sparseTree.get(1));
         assertEquals(null, sparseTree.get(2));
         assertEquals(null, sparseTree.get(3));
         assertEquals(null, sparseTree.get(4));
         assertEquals(null, sparseTree.get(5));
-        assertEquals(new Integer(4), sparseTree.get(6));
+        assertEquals(Integer.valueOf(4), sparseTree.get(6));
     }
 
     /**
@@ -499,17 +499,17 @@ public class SparseListTest {
      */
     @Test
     public void testAVLRotateOnRemove() {
-        sparseTree.add(0, new Integer(3));
-        sparseTree.add(0, new Integer(2));
-        sparseTree.add(0, new Integer(1));
-        sparseTree.add(3, new Integer(4));
+        sparseTree.add(0, Integer.valueOf(3));
+        sparseTree.add(0, Integer.valueOf(2));
+        sparseTree.add(0, Integer.valueOf(1));
+        sparseTree.add(3, Integer.valueOf(4));
 
         sparseTree.remove(0);
 
         assertEquals(3, sparseTree.size());
-        assertEquals(new Integer(2), sparseTree.get(0));
-        assertEquals(new Integer(3), sparseTree.get(1));
-        assertEquals(new Integer(4), sparseTree.get(2));
+        assertEquals(Integer.valueOf(2), sparseTree.get(0));
+        assertEquals(Integer.valueOf(3), sparseTree.get(1));
+        assertEquals(Integer.valueOf(4), sparseTree.get(2));
     }
 
 
@@ -550,33 +550,33 @@ public class SparseListTest {
     @Test
     public void testDisappearingRightChildOnUnlink() {
         sparseTree.add(0, Boolean.TRUE);
-        sparseTree.add(1, new Integer(11));
+        sparseTree.add(1, Integer.valueOf(11));
         sparseTree.add(0, null);
-        sparseTree.add(0, new Integer(2));
-        sparseTree.add(3, new Integer(8));
-        sparseTree.add(1, new Integer(3));
+        sparseTree.add(0, Integer.valueOf(2));
+        sparseTree.add(3, Integer.valueOf(8));
+        sparseTree.add(1, Integer.valueOf(3));
         sparseTree.add(4, null);
-        sparseTree.add(6, new Integer(10));
-        sparseTree.add(6, new Integer(9));
+        sparseTree.add(6, Integer.valueOf(10));
+        sparseTree.add(6, Integer.valueOf(9));
         sparseTree.add(5, null);
-        sparseTree.add(6, new Integer(7));
-        sparseTree.add(0, new Integer(1));
+        sparseTree.add(6, Integer.valueOf(7));
+        sparseTree.add(0, Integer.valueOf(1));
         sparseTree.add(5, Boolean.TRUE);
         sparseTree.remove(4);
         sparseTree.remove(4);
 
         //assertEquals(11, sparseTree.size());
-        assertEquals(new Integer(1), sparseTree.get(0));
-        assertEquals(new Integer(2), sparseTree.get(1));
-        assertEquals(new Integer(3), sparseTree.get(2));
+        assertEquals(Integer.valueOf(1), sparseTree.get(0));
+        assertEquals(Integer.valueOf(2), sparseTree.get(1));
+        assertEquals(Integer.valueOf(3), sparseTree.get(2));
         assertEquals(null, sparseTree.get(3));
         assertEquals(null, sparseTree.get(4));
         assertEquals(null, sparseTree.get(5));
-        assertEquals(new Integer(7), sparseTree.get(6));
-        assertEquals(new Integer(8), sparseTree.get(7));
-        assertEquals(new Integer(9), sparseTree.get(8));
-        assertEquals(new Integer(10), sparseTree.get(9));
-        assertEquals(new Integer(11), sparseTree.get(10));
+        assertEquals(Integer.valueOf(7), sparseTree.get(6));
+        assertEquals(Integer.valueOf(8), sparseTree.get(7));
+        assertEquals(Integer.valueOf(9), sparseTree.get(8));
+        assertEquals(Integer.valueOf(10), sparseTree.get(9));
+        assertEquals(Integer.valueOf(11), sparseTree.get(10));
     }
 
     /**
@@ -584,87 +584,87 @@ public class SparseListTest {
      */
     @Test
     public void testForNewBug() {
-        sparseTree.add(0, new Integer(0));
+        sparseTree.add(0, Integer.valueOf(0));
         sparseTree.add(0, null);
-        sparseTree.set(1, new Integer(30));
+        sparseTree.set(1, Integer.valueOf(30));
         sparseTree.add(0, null);
-        sparseTree.set(1, new Integer(31));
-        sparseTree.add(0, new Integer(23));
-        sparseTree.set(2, new Integer(5));
+        sparseTree.set(1, Integer.valueOf(31));
+        sparseTree.add(0, Integer.valueOf(23));
+        sparseTree.set(2, Integer.valueOf(5));
         sparseTree.set(2, null);
         sparseTree.remove(0);
         sparseTree.set(2, null);
-        sparseTree.set(0, new Integer(6));
+        sparseTree.set(0, Integer.valueOf(6));
         sparseTree.remove(1);
         sparseTree.remove(1);
-        sparseTree.set(0, new Integer(7));
+        sparseTree.set(0, Integer.valueOf(7));
         sparseTree.add(0, null);
         sparseTree.remove(0);
         sparseTree.remove(0);
-        sparseTree.add(0, new Integer(19));
-        sparseTree.add(0, new Integer(36));
+        sparseTree.add(0, Integer.valueOf(19));
+        sparseTree.add(0, Integer.valueOf(36));
         sparseTree.add(1, null);
         sparseTree.add(0, null);
-        sparseTree.add(0, new Integer(28));
-        sparseTree.set(3, new Integer(37));
-        sparseTree.set(1, new Integer(32));
-        sparseTree.add(2, new Integer(13));
-        sparseTree.set(0, new Integer(14));
+        sparseTree.add(0, Integer.valueOf(28));
+        sparseTree.set(3, Integer.valueOf(37));
+        sparseTree.set(1, Integer.valueOf(32));
+        sparseTree.add(2, Integer.valueOf(13));
+        sparseTree.set(0, Integer.valueOf(14));
         sparseTree.remove(4);
         sparseTree.remove(3);
         sparseTree.add(3, null);
         sparseTree.remove(1);
-        sparseTree.set(0, new Integer(15));
+        sparseTree.set(0, Integer.valueOf(15));
         sparseTree.remove(0);
-        sparseTree.add(2, new Integer(16));
+        sparseTree.add(2, Integer.valueOf(16));
         sparseTree.remove(3);
         sparseTree.add(0, null);
-        sparseTree.set(3, new Integer(17));
-        sparseTree.set(1, new Integer(18));
+        sparseTree.set(3, Integer.valueOf(17));
+        sparseTree.set(1, Integer.valueOf(18));
         sparseTree.add(1, null);
         sparseTree.set(1, null);
         sparseTree.remove(2);
-        sparseTree.set(2, new Integer(8));
+        sparseTree.set(2, Integer.valueOf(8));
         sparseTree.add(1, null);
-        sparseTree.add(0, new Integer(20));
+        sparseTree.add(0, Integer.valueOf(20));
         sparseTree.add(5, null);
         sparseTree.add(0, null);
         sparseTree.set(2, null);
         sparseTree.set(2, null);
-        sparseTree.add(1, new Integer(21));
+        sparseTree.add(1, Integer.valueOf(21));
         sparseTree.set(1, null);
-        sparseTree.add(4, new Integer(22));
-        sparseTree.set(3, new Integer(4));
-        sparseTree.set(2, new Integer(24));
+        sparseTree.add(4, Integer.valueOf(22));
+        sparseTree.set(3, Integer.valueOf(4));
+        sparseTree.set(2, Integer.valueOf(24));
         sparseTree.set(9, null);
         sparseTree.add(4, null);
         sparseTree.add(10, null);
-        sparseTree.set(5, new Integer(25));
-        sparseTree.set(7, new Integer(26));
-        sparseTree.add(4, new Integer(27));
-        sparseTree.add(10, new Integer(10));
-        sparseTree.set(8, new Integer(29));
-        sparseTree.set(2, new Integer(2));
+        sparseTree.set(5, Integer.valueOf(25));
+        sparseTree.set(7, Integer.valueOf(26));
+        sparseTree.add(4, Integer.valueOf(27));
+        sparseTree.add(10, Integer.valueOf(10));
+        sparseTree.set(8, Integer.valueOf(29));
+        sparseTree.set(2, Integer.valueOf(2));
         sparseTree.set(0, null);
         sparseTree.set(4, null);
         sparseTree.add(0, null);
-        sparseTree.add(4, new Integer(3));
+        sparseTree.add(4, Integer.valueOf(3));
         sparseTree.remove(1);
         sparseTree.set(14, null);
-        sparseTree.add(12, new Integer(12));
-        sparseTree.set(9, new Integer(33));
-        sparseTree.add(11, new Integer(34));
-        sparseTree.set(9, new Integer(35));
-        sparseTree.set(11, new Integer(9));
+        sparseTree.add(12, Integer.valueOf(12));
+        sparseTree.set(9, Integer.valueOf(33));
+        sparseTree.add(11, Integer.valueOf(34));
+        sparseTree.set(9, Integer.valueOf(35));
+        sparseTree.set(11, Integer.valueOf(9));
         sparseTree.remove(9);
         sparseTree.remove(5);
-        sparseTree.add(11, new Integer(11));
+        sparseTree.add(11, Integer.valueOf(11));
         sparseTree.remove(13);
         sparseTree.remove(5);
         sparseTree.add(13, null);
         sparseTree.set(5, null);
         sparseTree.set(6, null);
-        sparseTree.add(2, new Integer(38));
+        sparseTree.add(2, Integer.valueOf(38));
         sparseTree.add(8, null);
         sparseTree.set(2, null);
         sparseTree.remove(2);
@@ -673,17 +673,17 @@ public class SparseListTest {
         assertEquals(16, sparseTree.size());
         assertEquals(null, sparseTree.get(0));
         assertEquals(null, sparseTree.get(1));
-        assertEquals(new Integer(2), sparseTree.get(2));
-        assertEquals(new Integer(3), sparseTree.get(3));
-        assertEquals(new Integer(4), sparseTree.get(4));
+        assertEquals(Integer.valueOf(2), sparseTree.get(2));
+        assertEquals(Integer.valueOf(3), sparseTree.get(3));
+        assertEquals(Integer.valueOf(4), sparseTree.get(4));
         assertEquals(null, sparseTree.get(5));
         assertEquals(null, sparseTree.get(6));
         assertEquals(null, sparseTree.get(7));
         assertEquals(null, sparseTree.get(8));
-        assertEquals(new Integer(9), sparseTree.get(9));
-        assertEquals(new Integer(10), sparseTree.get(10));
-        assertEquals(new Integer(11), sparseTree.get(11));
-        assertEquals(new Integer(12), sparseTree.get(12));
+        assertEquals(Integer.valueOf(9), sparseTree.get(9));
+        assertEquals(Integer.valueOf(10), sparseTree.get(10));
+        assertEquals(Integer.valueOf(11), sparseTree.get(11));
+        assertEquals(Integer.valueOf(12), sparseTree.get(12));
         assertEquals(null, sparseTree.get(13));
         assertEquals(null, sparseTree.get(14));
         assertEquals(null, sparseTree.get(15));
@@ -700,7 +700,7 @@ public class SparseListTest {
 
 			// Add a value
 			if(addInteger) {
-				sparseTree.add(index, new Integer(i));
+				sparseTree.add(index, Integer.valueOf(i));
 
 			// Add a null
 			} else {
@@ -738,7 +738,7 @@ public class SparseListTest {
 
 			// Add a value
 			if(addInteger) {
-				sparseTree.add(index, new Integer(i));
+				sparseTree.add(index, Integer.valueOf(i));
 
 			// Add a null
 			} else {
@@ -748,7 +748,7 @@ public class SparseListTest {
 
 		// pad the end of the SparseList to guarantee no trailing nulls
 		for(int i = 0;i < 5;i++) {
-			sparseTree.add(sparseTree.size(), new Integer(i));
+			sparseTree.add(sparseTree.size(), Integer.valueOf(i));
 		}
 
 		// Get the SparseList's provided Iterator
@@ -831,7 +831,7 @@ public class SparseListTest {
             //System.out.print("\n" + i + ". ");
             int operation = random.nextInt(5);
             int index = controlList.isEmpty() ? 0 : random.nextInt(controlList.size());
-            Object value = new Integer(random.nextInt());
+            Object value = Integer.valueOf(random.nextInt());
 
             if(operation == 0 || controlList.isEmpty()) {
                 //System.out.println("Adding " + value + " at " + index + ".");
@@ -918,7 +918,7 @@ public class SparseListTest {
                     nulls++;
 
                 } else {
-                    values[i] = new Integer(mainRandom.nextInt());
+                    values[i] = Integer.valueOf(mainRandom.nextInt());
                 }
             }
 
@@ -992,7 +992,7 @@ public class SparseListTest {
                     nulls++;
 
                 } else {
-                    values[i] = new Integer(mainRandom.nextInt());
+                    values[i] = Integer.valueOf(mainRandom.nextInt());
                 }
             }
 

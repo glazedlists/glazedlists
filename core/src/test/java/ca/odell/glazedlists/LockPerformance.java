@@ -35,7 +35,7 @@ public class LockPerformance {
      * Execute a performance test that is specified on the command line.
      */
     public static void main(String[] args) throws Exception {
-        final Integer element = new Integer(1);
+        final Integer element = Integer.valueOf(1);
         for (int i = 0; i < 100; i++)
             sharedList.add(element);
 
@@ -107,7 +107,7 @@ public class LockPerformance {
                 totalWriteDelay += (diff < 0 ? 0 : diff);
                 try {
                     final int index = dice.nextInt(sharedList.size());
-                    sharedList.set(index, new Integer(2));
+                    sharedList.set(index, Integer.valueOf(2));
                 } finally {
                     sharedList.getReadWriteLock().writeLock().unlock();
                 }

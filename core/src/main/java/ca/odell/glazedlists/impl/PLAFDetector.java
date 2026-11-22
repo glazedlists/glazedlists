@@ -8,7 +8,6 @@ import javax.swing.*;
 import javax.swing.plaf.metal.MetalLookAndFeel;
 import javax.swing.plaf.metal.MetalTheme;
 import java.lang.reflect.Method;
-import java.security.AccessControlException;
 
 /**
  * A PLAFDetector provides a means to discover which versions of themes
@@ -63,7 +62,7 @@ public final class PLAFDetector {
         String noXPProperty = "swing.noxp";
         try {
             if(System.getProperty(noXPProperty) != null) return classic;
-        } catch (AccessControlException e) {
+        } catch (SecurityException e) {
             // in WebStart, it is possible to receive this exception when
             // querying for the swing.noxp property - in which case we don't
             // want to acknowledge the security violation
@@ -83,7 +82,7 @@ public final class PLAFDetector {
             if(osVersion >= 5.1) return xp;
             return classic;
 
-        } catch (AccessControlException e) {
+        } catch (SecurityException e) {
             // return a reasonable default if we're not allowed access to the OS version
             return xp;
         } catch (NumberFormatException e) {

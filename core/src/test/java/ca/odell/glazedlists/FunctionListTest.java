@@ -14,10 +14,10 @@ import static org.junit.Assert.*;
 
 public class FunctionListTest {
 
-    private static final Integer ZERO = new Integer(0);
-    private static final Integer ONE = new Integer(1);
-    private static final Integer TWO = new Integer(2);
-    private static final Integer NINE = new Integer(9);
+    private static final Integer ZERO = Integer.valueOf(0);
+    private static final Integer ONE = Integer.valueOf(1);
+    private static final Integer TWO = Integer.valueOf(2);
+    private static final Integer NINE = Integer.valueOf(9);
 
     @Test
     public void testConstructor() {
@@ -182,7 +182,7 @@ public class FunctionListTest {
     private static class StringToInteger implements FunctionList.Function<String,Integer> {
         @Override
         public Integer evaluate(String value) {
-            return new Integer(value);
+            return Integer.valueOf(value);
         }
     }
 

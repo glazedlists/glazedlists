@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.NoRouteToHostException;
 import java.net.UnknownHostException;
-import java.security.AccessControlException;
 import java.text.MessageFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -158,7 +157,8 @@ public final class ExceptionHandlerFactory {
 
         @Override
         public boolean recognize(Exception e) {
-            return e instanceof AccessControlException && messageMatcher.reset(e.getMessage()).matches();
+            // the message comes from an AccessControlException; check its superclass, AccessControlException is deprecated for removal
+            return e instanceof SecurityException && messageMatcher.reset(e.getMessage()).matches();
         }
 
         @Override

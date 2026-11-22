@@ -6,6 +6,7 @@ package ca.odell.glazedlists.impl;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.util.Map;
 import java.util.jar.Attributes;
@@ -38,12 +39,12 @@ public class Main {
             int jarDelimiterCharacter = pathToThisClass.lastIndexOf("!");
             if(jarDelimiterCharacter == -1) return;
             String manifestPath = pathToThisClass.substring(0, jarDelimiterCharacter + 1) + "/META-INF/MANIFEST.MF";
-            URL manifestUrl = new URL(manifestPath);
+            URL manifestUrl = URI.create(manifestPath).toURL();
 
             // load the manifest and save the attributes of interest
             Manifest manifest = new Manifest(manifestUrl.openStream());
             attributes = manifest.getMainAttributes();
-        } catch(IOException e) {
+        } catch(IOException | IllegalArgumentException e) {
             return;
         }
 
@@ -52,7 +53,7 @@ public class Main {
         String titleHtml = "<font size=\"6\">" + title + "</font>";
 
         // the url
-        String urlHtml = (String)attributes.get(Attributes.Name.IMPLEMENTATION_URL);
+        String urlHtml = (String)attributes.get(new Attributes.Name("Implementation-URL"));
 
         // the version
         String versionHtml = (String)attributes.get(Attributes.Name.IMPLEMENTATION_VERSION);
